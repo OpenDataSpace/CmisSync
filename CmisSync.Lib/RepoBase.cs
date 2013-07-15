@@ -50,11 +50,6 @@ namespace CmisSync.Lib
          */
         public Action<SyncStatus> SyncStatusChanged { get; set; }
 
-        /**
-         * <param>percentage</param>
-         * <param>speed</param>
-         */
-        public Action<double, string> ProgressChanged { get; set; }
 
         /**
          * <param><c>ChangeSet</c> value</param>
@@ -136,7 +131,6 @@ namespace CmisSync.Lib
                 SyncInBackground();
             };
 
-            ProgressChanged += delegate { };
             NewChangeSet += delegate { };
             ConflictResolved += delegate { };
             ChangesDetected += delegate { };
