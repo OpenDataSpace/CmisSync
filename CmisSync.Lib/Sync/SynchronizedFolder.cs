@@ -10,6 +10,7 @@ using DotCMIS.Exceptions;
 using DotCMIS.Enums;
 using System.ComponentModel;
 using System.Collections;
+using System.Threading;
 using DotCMIS.Data.Impl;
 
 using System.Net;
@@ -54,13 +55,6 @@ namespace CmisSync.Lib.Sync
              * Example: "/User Homes/nicolas.raoul/demos"
              */
             private string remoteFolderPath;
-
-            /**
-             * Syncing lock.
-             * true if syncing is being performed right now.
-             * TODO use is_syncing variable in parent
-             */
-            private bool syncing;
 
             /**
              * Parameters to use for all CMIS requests.
@@ -178,40 +172,40 @@ namespace CmisSync.Lib.Sync
              */
             public void SyncInBackground()
             {
-                if (this.syncing)
+                if(!Monitor.TryEnter(this.session))
                 {
                     //Logger.Debug("Sync already running in background: " + repoinfo.TargetDirectory);
                     return;
-                }
-                this.syncing = true;
+                }else{
 
-                using (BackgroundWorker bw = new BackgroundWorker())
-                {
-                    bw.DoWork += new DoWorkEventHandler(
-                        delegate(Object o, DoWorkEventArgs args)
-                        {
-                            Logger.Info("Launching sync: " + repoinfo.TargetDirectory);
+                    using (BackgroundWorker bw = new BackgroundWorker())
+                    {
+                        bw.DoWork += new DoWorkEventHandler(
+                            delegate(Object o, DoWorkEventArgs args)
+                            {
+                                Logger.Info("Launching sync: " + repoinfo.TargetDirectory);
 #if !DEBUG
-                        try
-                        {
+                            try
+                            {
 #endif
-                            Sync();
+                                Sync();
 #if !DEBUG
-                        }
-                        catch (CmisBaseException e)
-                        {
-                            Logger.Error("CMIS exception while syncing:", e);
-                        }
+                            }
+                            catch (CmisBaseException e)
+                            {
+                                Logger.Error("CMIS exception while syncing:", e);
+                            }
 #endif
-                        }
-                    );
-                    bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(
-                        delegate(object o, RunWorkerCompletedEventArgs args)
-                        {
-                            this.syncing = false;
-                        }
-                    );
-                    bw.RunWorkerAsync();
+                            }
+                        );
+						bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(
+                            delegate(object o, RunWorkerCompletedEventArgs args)
+                            {
+                                Monitor.Exit(this.session);
+                            }
+                        );
+                        bw.RunWorkerAsync();
+                    }
                 }
             }
 
@@ -554,7 +548,7 @@ namespace CmisSync.Lib.Sync
 
                 activityListener.ActivityStopped();
 
-                this.syncing = false;
+				// this.syncing = false;
                 Logger.Info("# Updated " + filePath);
             }
 
