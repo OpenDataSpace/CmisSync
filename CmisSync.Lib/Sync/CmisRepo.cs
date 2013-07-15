@@ -37,19 +37,6 @@ namespace CmisSync.Lib.Sync
         }
 
         /// <summary>
-        /// Sync for the first time.
-        /// This will create a database and download all files.
-        /// </summary>
-        public void DoFirstSync()
-        {
-            Logger.Info("First sync of " + this.Name);
-            if (synchronizedFolder != null)
-            {
-                synchronizedFolder.Sync();
-            }
-        }
-
-        /// <summary>
         /// Synchronize.
         /// The synchronization is performed in the background, so that the UI stays usable.
         /// </summary>

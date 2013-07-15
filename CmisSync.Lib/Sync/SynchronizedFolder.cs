@@ -179,9 +179,9 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             public void SyncInBackground()
             {
-                if(!Monitor.TryEnter(this.session))
+                if(!Monitor.TryEnter(this.remoteFolderPath))
                 {
-                    //Logger.Debug("Sync already running in background: " + repoinfo.TargetDirectory);
+                    Logger.Debug("Sync already running in background: " + repoinfo.TargetDirectory + "  "+ this.remoteFolderPath);
                     return;
                 }else{
 
@@ -208,7 +208,8 @@ namespace CmisSync.Lib.Sync
 						bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(
                             delegate(object o, RunWorkerCompletedEventArgs args)
                             {
-                                Monitor.Exit(this.session);
+                                Logger.Debug("Sync in background is done: " + this.remoteFolderPath);
+                                Monitor.Exit(this.remoteFolderPath);
                             }
                         );
                         bw.RunWorkerAsync();
