@@ -117,6 +117,7 @@ namespace CmisSync.Lib.Sync
                 cmisParameters[SessionParameter.Password] = Crypto.Deobfuscate(repoInfo.Password); // Deobfuscate password.
                 cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepoID;
                 cmisParameters[SessionParameter.ConnectTimeout] = "-1";
+                Logger.Info("Synchronized Folder initialized for: "+remoteFolderPath);
             }
 
 
@@ -169,7 +170,9 @@ namespace CmisSync.Lib.Sync
                 //            {
                 // No ChangeLog capability, so we have to crawl remote and local folders.
                 // CrawlSync(remoteFolder, localRootFolder);
+				Logger.Info("Start crawling whole repo: " + cmisParameters[SessionParameter.AtomPubUrl]);
                 CrawlSync(remoteFolder, repoinfo.TargetDirectory);
+				Logger.Info("Finished crawling repo: " + cmisParameters[SessionParameter.AtomPubUrl]);
                 //            }
             }
 

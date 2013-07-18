@@ -354,6 +354,7 @@ namespace CmisSync
                     }
                     else
                     {
+                        Logger.Info("Repo folder added to sync list: '" + folder_name + "' from config");
                         AddRepository(folder_path);
                     }
                 }

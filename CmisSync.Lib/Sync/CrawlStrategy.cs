@@ -75,16 +75,19 @@ namespace CmisSync.Lib.Sync
                 IList remoteSubfolders = new ArrayList();
 
                 // Crawl remote children.
-                // Logger.LogInfo("Sync", String.Format("Crawl remote folder {0}", this.remoteFolderPath));
+                Logger.Info("Sync: "+ String.Format("Crawl remote folder {0}", this.remoteFolderPath));
                 CrawlRemote(remoteFolder, localFolder, remoteFiles, remoteSubfolders);
+                Logger.Info("Finished remote crawling: "+remoteFolderPath);
 
                 // Crawl local files.
-                // Logger.LogInfo("Sync", String.Format("Crawl local files in the local folder {0}", localFolder));
+                Logger.Info("Sync: "+ String.Format("Crawl local files in the local folder {0}", localFolder));
                 CrawlLocalFiles(localFolder, remoteFolder, remoteFiles);
+                Logger.Info("Finished local file crawling: "+ localFolder);
 
                 // Crawl local folders.
-                // Logger.LogInfo("Sync", String.Format("Crawl local folder {0}", localFolder));
+                Logger.Info("Sync: "+ String.Format("Crawl local folder {0}", localFolder));
                 CrawlLocalFolders(localFolder, remoteFolder, remoteSubfolders);
+                Logger.Info("Finished local folder crawling: "+ localFolder);
             }
 
 
@@ -109,7 +112,7 @@ namespace CmisSync.Lib.Sync
                         IFolder remoteSubFolder = (IFolder)cmisObject;
                         if (Utils.WorthSyncing(remoteSubFolder.Name))
                         {
-                            //Logger.Debug("CrawlRemote dir: " + localFolder + Path.DirectorySeparatorChar.ToString() + remoteSubFolder.Name);
+                            Logger.Debug("CrawlRemote dir: " + localFolder + Path.DirectorySeparatorChar.ToString() + remoteSubFolder.Name);
                             remoteFolders.Add(remoteSubFolder.Name);
                             string localSubFolder = localFolder + Path.DirectorySeparatorChar.ToString() + remoteSubFolder.Name;
 
@@ -179,7 +182,7 @@ namespace CmisSync.Lib.Sync
                             // For instance in FileNet it is not usual to have a document where
                             // document.Name is "foo" and document.ContentStreamFileName is "foo.jpg".
                             string remoteDocumentFileName = remoteDocument.ContentStreamFileName;
-                            //Logger.Debug("CrawlRemote doc: " + localFolder + Path.DirectorySeparatorChar.ToString() + remoteDocumentFileName);
+                            Logger.Debug("CrawlRemote doc: " + localFolder + Path.DirectorySeparatorChar.ToString() + remoteDocumentFileName);
 
                             // Check if file extension is allowed
 
