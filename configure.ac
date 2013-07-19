@@ -36,7 +36,7 @@ SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
 ])]
 )
 
-PKG_CHECK_MODULES(NUNIT, nunit >= 2.5.10, have_nunit=yes, have_nunit=no)
+PKG_CHECK_MODULES(NUNIT, nunit >= 2.6.0, have_nunit=yes, have_nunit=no)
 if test "x$have_nunit" = "xno" ; then
     dnl On som distro's the package is named mono-nunit
     PKG_CHECK_MODULES(NUNIT, mono-nunit >= 2.6.0, have_nunit=yes, have_nunit=no)
