@@ -13,6 +13,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using log4net;
+using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Cmis
 {
@@ -801,6 +802,36 @@ namespace CmisSync.Lib.Cmis
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("token", token);
             ExecuteSQLAction(command, parameters);
+        }
+
+        public void AddRecentChange(List<RecentChangedEvent> changes)
+        {
+            //TODO
+            string command = "UPDATE";
+        }
+
+        public void SetRecentChangesLimit(int limit)
+        {
+            //TODO
+            string command = "UPDATE";
+        }
+
+        public int GetRecentChangesLimit()
+        {
+            //TODO
+            string command = "SELECT COUNT(*) FROM recentchanges";
+            return 0;
+        }
+
+        /// <summary>
+        /// Returns the List of recent changes
+        /// </summary>
+        /// <returns></returns>
+        public List<RecentChangedEvent> GetRecentChanges(int limit = 5)
+        {
+            //TODO
+            string command = "SELECT * FROM recentchanges ORDER BY datetime DESC LIMIT " + limit.ToString();
+            return new List<RecentChangedEvent>();
         }
 
         /// <summary>

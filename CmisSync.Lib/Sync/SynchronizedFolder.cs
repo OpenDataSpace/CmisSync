@@ -583,6 +583,7 @@ namespace CmisSync.Lib.Sync
                     {
                         Logger.Warn("Local file \"" + localSubFolder + "\" has been renamed to \"" + localSubFolder + ".conflict\"");
                         File.Move(localSubFolder, localSubFolder + ".conflict");
+                        this.Queue.AddEvent(new FileConflictEvent(FileConflictType.REMOTE_ADDED_PATH_CONFLICTS_LOCAL_FILE, localFolder, localSubFolder + ".conflict"));
                     }
 
                     // Skip if invalid folder name. See https://github.com/nicolas-raoul/CmisSync/issues/196
@@ -947,9 +948,11 @@ namespace CmisSync.Lib.Sync
                                     String newFilePath = Path.Combine(dir, newFileName);
                                     Logger.Debug(String.Format("Moving local file {0} file to new file {1}", filepath, newFilePath));
                                     File.Move(filepath, newFilePath);
+                                    Queue.AddEvent(new FileConflictEvent(FileConflictType.CONTENT_MODIFIED,dir,newFilePath));
                                     Logger.Debug(String.Format("Moving temporary local download file {0} to target file {1}", tmpfilepath, filepath));
                                     File.Move(tmpfilepath, filepath);
                                     SetLastModifiedDate(remoteDocument, filepath, metadata);
+                                    Queue.AddEvent(new RecentChangedEvent(filepath));
                                     repo.OnConflictResolved();
                                     // TODO move to OS-dependant layer
                                     //System.Windows.Forms.MessageBox.Show("Someone modified a file at the same time as you: " + filePath
@@ -963,7 +966,6 @@ namespace CmisSync.Lib.Sync
                                     Logger.Debug(String.Format("Moving temporary local download file {0} to target file {1}", tmpfilepath, filepath));
                                     File.Move(tmpfilepath, filepath);
                                     SetLastModifiedDate(remoteDocument, filepath, metadata);
-                                    
                                 }
                             }
                             else
@@ -975,6 +977,7 @@ namespace CmisSync.Lib.Sync
 
                             // Create database entry for this file.
                             database.AddFile(filepath, remoteDocument.Id, remoteDocument.LastModificationDate, metadata, filehash);
+                            Queue.AddEvent(new RecentChangedEvent(filepath, remoteDocument.LastModificationDate));
 
                             Logger.Debug("Added to database: " + fileName);
                         }
@@ -1199,6 +1202,7 @@ namespace CmisSync.Lib.Sync
                             // Create database entry for this file.
                             database.AddFile(filePath, remoteDocument.Id, remoteDocument.LastModificationDate, metadata, filehash);
                             SetLastModifiedDate(remoteDocument, filePath, metadata);
+                            Queue.AddEvent(new RecentChangedEvent(filePath));
                         }
                         return success;
                     }
@@ -1244,6 +1248,7 @@ namespace CmisSync.Lib.Sync
                     if (folder == null)
                     {
                         Logger.Warn("Remote file conflict with local folder " + Path.GetFileName(localFolder));
+//                        Queue.AddEvent(new FileConflictEvent(FileConflictType.ALREADY_EXISTS_REMOTELY, ));
                         return false;
                     }
                 }

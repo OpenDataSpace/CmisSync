@@ -8,6 +8,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using log4net;
+using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Cmis
 {
@@ -146,5 +147,26 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         void SetChangeLogToken(string token);
 
+        /// <summary>
+        /// Sets the limit of saved recent changes
+        /// </summary>
+        /// <param name="limit"></param>
+        void SetRecentChangesLimit(int limit);
+
+        /// <summary>
+        /// Gets the limit of saved recent changes
+        /// </summary>
+        int GetRecentChangesLimit();
+
+        /// <summary>
+        /// Gets the list of stored change events.
+        /// </summary>
+        List<RecentChangedEvent> GetRecentChanges( int limit = 5);
+
+        /// <summary>
+        /// Sets the list of stored change events.
+        /// </summary>
+        /// <param name="change">The new change event</param>
+        void AddRecentChange(RecentChangedEvent change);
     }
 }

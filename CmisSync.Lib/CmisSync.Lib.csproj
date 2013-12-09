@@ -62,6 +62,7 @@
     <Compile Include="Sync\ChangeLogStrategy.cs" />
     <Compile Include="ConfigMigration.cs" />
     <Compile Include="Defines.cs" />
+    <Compile Include="Events\RecentChangedEvent.cs" />
     <Compile Include="Sync\SynchronizedFolder.cs" />
     <Compile Include="Sync\CrawlStrategy.cs" />
     <Compile Include="Cmis\CmisPermissionDeniedException.cs" />

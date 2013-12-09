@@ -61,6 +61,7 @@
     <Compile Include="CmisDatabaseTest.cs" />
     <Compile Include="CmisSyncTests.cs" />
     <Compile Include="ConfigurationTest.cs" />
+    <Compile Include="GenericSyncEventHandlerTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="LocalFilesystemActivityGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
