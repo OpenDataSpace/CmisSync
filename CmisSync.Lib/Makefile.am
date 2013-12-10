@@ -29,6 +29,7 @@ SOURCES =  \
 	Events/FSEvent.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/ISyncEvent.cs \
+	Events/RecentChangedEvent.cs \
 	Events/SyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \

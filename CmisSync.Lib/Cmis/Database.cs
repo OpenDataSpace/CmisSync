@@ -804,7 +804,7 @@ namespace CmisSync.Lib.Cmis
             ExecuteSQLAction(command, parameters);
         }
 
-        public void AddRecentChange(List<RecentChangedEvent> changes)
+        public void AddRecentChange(RecentChangedEvent change)
         {
             //TODO
             string command = "UPDATE";
