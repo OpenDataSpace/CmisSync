@@ -216,15 +216,6 @@ namespace CmisSync
                     };
                     openLocalFolderItem.Click += OpenLocalFolderDelegate(folderName);
 
-                    // Sub-item: open remotely.
-                    /*ToolStripMenuItem openRemoteFolderItem = new ToolStripMenuItem()
-                    {
-                        Text = CmisSync.Properties_Resources.BrowseRemoteFolder,
-                        Image = UIHelpers.GetBitmap("classic_folder_web")
-                    };
-                    openRemoteFolderItem.Click += OpenRemoteFolderDelegate(folderName);
-                    */
-
                     // Sub-item: edit ignore folder.
                     ToolStripMenuItem editFolderItem = new ToolStripMenuItem()
                     {
