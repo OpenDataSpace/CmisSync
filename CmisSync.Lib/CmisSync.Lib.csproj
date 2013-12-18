@@ -55,6 +55,8 @@
     <Compile Include="Cmis\Database.cs" />
     <Compile Include="Cmis\IDatabase.cs" />
     <Compile Include="Credentials.cs" />
+    <Compile Include="Events\ActiveActivitiesManager.cs" />
+    <Compile Include="Events\BubbledEvent.cs" />
     <Compile Include="Events\ConfigChangedEvent.cs" />
     <Compile Include="Events\GenericSyncEventHandler.cs" />
     <Compile Include="Events\SyncEventQueue.cs" />

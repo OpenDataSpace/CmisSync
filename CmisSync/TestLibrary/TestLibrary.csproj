@@ -58,10 +58,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="CmisDatabaseTest.cs" />
     <Compile Include="CmisSyncLibUtilsTest.cs" />
     <Compile Include="CmisSyncTests.cs" />
     <Compile Include="ConfigurationTest.cs" />
+    <Compile Include="FileTransmissionEventTest.cs" />
     <Compile Include="GenericSyncEventHandlerTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="LocalFilesystemActivityGenerator.cs" />
