@@ -8,7 +8,7 @@ namespace CmisSync.Lib.Events
 
     public class ActiveActivitiesManager
     {
-        private object Lock;
+        private object Lock = new object();
         private HashSet<FileTransmissionEvent> Transmissions = new HashSet<FileTransmissionEvent>();
 
         /// <summary>

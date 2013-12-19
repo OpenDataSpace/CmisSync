@@ -57,6 +57,27 @@ namespace CmisSync.Lib.Events
             Resumed = null;
             Aborted = null;
         }
+
+        public  override bool Equals(System.Object obj) {
+			// If parameter is null return false.
+			if (obj == null)
+			{
+				return false;
+			}
+			TransmissionProgressEventArgs e = obj as TransmissionProgressEventArgs;
+			if ((System.Object)e == null)
+			{
+				return false;
+			}
+
+			// Return true if the fields match:
+			return (Length == e.Length) &&
+				(BitsPerSecond == e.BitsPerSecond) &&
+					(ActualPosition == e.ActualPosition) &&
+					(Paused == e.Paused) &&
+					(Resumed == e.Resumed) &&
+					(Aborted == e.Aborted);
+		}
     }
 
     public enum FileTransmissionType
