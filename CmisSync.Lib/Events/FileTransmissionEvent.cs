@@ -39,18 +39,32 @@ namespace CmisSync.Lib.Events
     public class TransmissionProgressEventArgs
     {
         public long? BitsPerSecond { get; set; }
-        public double? Percent { get; set; }
-        public double? Length { get; set; }
-        public double? ActualPosition { get; set; }
+        public double? Percent { get{
+                if(Length==null || ActualPosition == null || ActualPosition < 0 || Length < 0)
+                    return null;
+                if(Length == 0)
+                    return 100;
+                return (ActualPosition*100)/Length;
+            } }
+        public long? Length { get; set; }
+        public long? ActualPosition { get; set; }
         public bool? Paused { get; set; }
         public bool? Resumed { get; set; }
         public bool? Aborted{ get; set; }
         public bool? Completed { get; set; }
+        public static long? CalcBitsPerSecond(DateTime start, DateTime end, long bytes){
+            if(end < start)
+                throw new ArgumentException("The end of a transmission must be higher than the start");
+            if(start == end){
+                return null;
+            }
+            TimeSpan difference = end - start;
+            return (bytes*8) / (difference.Seconds);
+        }
 
         public TransmissionProgressEventArgs()
         {
             BitsPerSecond = null;
-            Percent = null;
             Length = null;
             ActualPosition = null;
             Paused = null;
@@ -59,25 +73,25 @@ namespace CmisSync.Lib.Events
         }
 
         public  override bool Equals(System.Object obj) {
-			// If parameter is null return false.
-			if (obj == null)
-			{
-				return false;
-			}
-			TransmissionProgressEventArgs e = obj as TransmissionProgressEventArgs;
-			if ((System.Object)e == null)
-			{
-				return false;
-			}
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+            TransmissionProgressEventArgs e = obj as TransmissionProgressEventArgs;
+            if ((System.Object)e == null)
+            {
+                return false;
+            }
 
-			// Return true if the fields match:
-			return (Length == e.Length) &&
-				(BitsPerSecond == e.BitsPerSecond) &&
-					(ActualPosition == e.ActualPosition) &&
-					(Paused == e.Paused) &&
-					(Resumed == e.Resumed) &&
-					(Aborted == e.Aborted);
-		}
+            // Return true if the fields match:
+            return (Length == e.Length) &&
+                (BitsPerSecond == e.BitsPerSecond) &&
+                    (ActualPosition == e.ActualPosition) &&
+                    (Paused == e.Paused) &&
+                    (Resumed == e.Resumed) &&
+                    (Aborted == e.Aborted);
+        }
     }
 
     public enum FileTransmissionType

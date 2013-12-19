@@ -51,5 +51,21 @@ namespace TestLibrary
         {
             Assert.AreEqual(expectedArgs, e, "The reported transmission events doesn't fit to the expected ones");
         }
+
+        [Test, Category("Fast")]
+        public void CalcBitsPerSecondTest(){
+            DateTime start = DateTime.Now;
+            DateTime end = start.AddSeconds(1);
+            long? BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, end, 1);
+            Assert.AreEqual(8, BitsPerSecond);
+            BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, start, 100);
+            Assert.Null(BitsPerSecond);
+            BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, end, 100);
+            Assert.AreEqual(8*100, BitsPerSecond);
+            try{
+                TransmissionProgressEventArgs.CalcBitsPerSecond(end, start, 100);
+                Assert.Fail();
+            }catch(ArgumentException){}
+        }
     }
 }
