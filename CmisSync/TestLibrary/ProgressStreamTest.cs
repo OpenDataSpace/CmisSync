@@ -16,7 +16,7 @@ namespace TestLibrary
         private int LengthCalls;
         private int PositionCalls;
         private long Length;
-        private readonly string Filename = "/bla/blubb/Filename.txt";
+        private readonly string Filename = "filename";
         private readonly FileTransmissionType TransmissionType = FileTransmissionType.DOWNLOAD_NEW_FILE;
         private long Position;
         private double Percent;
