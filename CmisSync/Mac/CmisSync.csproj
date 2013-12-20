@@ -115,6 +115,11 @@
     <Compile Include="CmisTree\CmisOutline.designer.cs">
       <DependentUpon>CmisOutline.cs</DependentUpon>
     </Compile>
+    <Compile Include="SetupWizard.cs" />
+    <Compile Include="SetupWizardController.cs" />
+    <Compile Include="SetupWizard.designer.cs">
+      <DependentUpon>SetupWizard.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -235,6 +240,7 @@
   <ItemGroup>
     <InterfaceDefinition Include="MainMenu.xib" />
     <InterfaceDefinition Include="CmisTree\CmisOutline.xib" />
+    <InterfaceDefinition Include="SetupWizard.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />

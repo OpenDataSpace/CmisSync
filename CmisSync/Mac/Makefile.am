@@ -34,6 +34,9 @@ SOURCES =  \
 	OutlineViewDelegate.cs \
 	Setup.cs \
 	SetupWindow.cs \
+	SetupWizard.cs \
+	SetupWizard.designer.cs \
+	SetupWizardController.cs \
 	StatusIcon.cs \
 	TextFieldDelegate.cs \
 	UI.cs
