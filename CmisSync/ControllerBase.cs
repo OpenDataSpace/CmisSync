@@ -168,6 +168,9 @@ namespace CmisSync
         private IActivityListener activityListenerAggregator;
 
 
+        private ActiveActivitiesManager activitiesManager;
+
+
         /// <summary>
         /// Component to create new CmisSync synchronized folders.
         /// </summary>
@@ -193,6 +196,7 @@ namespace CmisSync
         {
             activityListenerAggregator = new ActivityListenerAggregator(this);
             FoldersPath = ConfigManager.CurrentConfig.FoldersPath;
+            activitiesManager = new ActiveActivitiesManager();
         }
 
 
@@ -266,6 +270,11 @@ namespace CmisSync
                 UpdateState();
             };
 
+            repo.EventManager.AddEventHandler(
+                new GenericSyncEventHandler<FileTransmissionEvent>( 50, delegate(ISyncEvent e){
+                this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
+                return false;
+            }));
             this.repositories.Add(repo);
             repo.Initialize();
         }
