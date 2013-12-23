@@ -95,6 +95,7 @@
     <Compile Include="Tasks\FileUploader.cs" />
     <Compile Include="Tasks\FileDownloader.cs" />
     <Compile Include="Streams\ProgressStream.cs" />
+    <Compile Include="Tasks\SimpleFileDownloader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
