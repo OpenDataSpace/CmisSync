@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace CmisSync.Lib.Events
@@ -15,6 +14,9 @@ namespace CmisSync.Lib.Events
 
         public event TransmissionEventHandler TransmissionStatus = delegate { };
 
+        private TransmissionProgressEventArgs status;
+        public TransmissionProgressEventArgs Status { get {return this.status;} private set { this.status = value; } }
+
         public FileTransmissionEvent(FileTransmissionType type, string path)
         {
             if(path == null) {
@@ -22,6 +24,7 @@ namespace CmisSync.Lib.Events
             }
             Type = type;
             Path = path;
+            status = new TransmissionProgressEventArgs();
         }
 
         public override string ToString()
@@ -31,8 +34,13 @@ namespace CmisSync.Lib.Events
 
         public void ReportProgress(TransmissionProgressEventArgs status)
         {
+                Status.Aborted = (status.Aborted != null) ? status.Aborted :     Status.Aborted;
+                Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition :     Status.ActualPosition;
+                Status.Length = (status.Length != null) ? status.Length :     Status.Length;
+                Status.Completed = (status.Completed != null) ? status.Completed :     Status.Completed;
+                Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond :     Status.BitsPerSecond;
             if (TransmissionStatus != null)
-                TransmissionStatus(this, status);
+                TransmissionStatus(this,     Status);
         }
     }
 
@@ -43,8 +51,8 @@ namespace CmisSync.Lib.Events
                 if(Length==null || ActualPosition == null || ActualPosition < 0 || Length < 0)
                     return null;
                 if(Length == 0)
-                    return 100;
-                return (ActualPosition*100)/Length;
+                    return 100d;
+                return ((double)ActualPosition*100d)/(double)Length;
             } }
         public long? Length { get; set; }
         public long? ActualPosition { get; set; }
@@ -91,6 +99,11 @@ namespace CmisSync.Lib.Events
                     (Paused == e.Paused) &&
                     (Resumed == e.Resumed) &&
                     (Aborted == e.Aborted);
+        }
+
+        public override int GetHashCode ()
+        {
+            return base.GetHashCode ();
         }
     }
 

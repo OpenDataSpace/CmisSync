@@ -53,7 +53,8 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        public void CalcBitsPerSecondTest(){
+        public void CalcBitsPerSecondTest()
+        {
             DateTime start = DateTime.Now;
             DateTime end = start.AddSeconds(1);
             long? BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, end, 1);
@@ -66,6 +67,34 @@ namespace TestLibrary
                 TransmissionProgressEventArgs.CalcBitsPerSecond(end, start, 100);
                 Assert.Fail();
             }catch(ArgumentException){}
+        }
+
+        [Test, Category("Fast")]
+        public void PercentTest()
+        {
+            string filename = "test.txt";
+            FileTransmissionEvent transmission = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, filename);
+            double? percent = null;
+            transmission.TransmissionStatus += delegate (object sender, TransmissionProgressEventArgs e) {
+                percent = e.Percent;
+            };
+            transmission.ReportProgress( new TransmissionProgressEventArgs(){});
+            Assert.Null(percent);
+
+            this.expectedArgs = new TransmissionProgressEventArgs() {
+                Length = 100,
+                ActualPosition = 0
+            };
+            transmission.ReportProgress(this.expectedArgs);
+            Assert.AreEqual(0, percent);
+            transmission.ReportProgress(new TransmissionProgressEventArgs(){ActualPosition=10});
+            Assert.AreEqual(10, percent);
+            transmission.ReportProgress(new TransmissionProgressEventArgs(){ActualPosition=100});
+            Assert.AreEqual(100, percent);
+            transmission.ReportProgress(new TransmissionProgressEventArgs(){Length=1000});
+            Assert.AreEqual(10, percent);
+            transmission.ReportProgress(new TransmissionProgressEventArgs(){ActualPosition=1000, Length = 2000});
+            Assert.AreEqual(50, percent);
         }
     }
 }
