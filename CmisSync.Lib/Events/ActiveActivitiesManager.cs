@@ -1,15 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using System.Text;
+using System.Collections.ObjectModel;
+using log4net;
 
 namespace CmisSync.Lib.Events
 {
 
     public class ActiveActivitiesManager
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ActiveActivitiesManager));
+
         private object Lock = new object();
         private HashSet<FileTransmissionEvent> Transmissions = new HashSet<FileTransmissionEvent>();
+        private ObservableCollection<FileTransmissionEvent> activeTransmissions = new ObservableCollection<FileTransmissionEvent>();
+        public ObservableCollection<FileTransmissionEvent> ActiveTransmissions { get { return activeTransmissions; } }
 
         /// <summary>
         /// Add a new Transmission to the active transmission manager
@@ -20,18 +26,23 @@ namespace CmisSync.Lib.Events
             lock (Lock)
             {
                 added = this.Transmissions.Add(transmission);
-                transmission.TransmissionStatus += TransmissionFinished;
+                if(added) {
+                    transmission.TransmissionStatus += TransmissionFinished;
+                    activeTransmissions.Add(transmission);
+                }
             }
             return added;
         }
 
         private void TransmissionFinished(object sender, TransmissionProgressEventArgs e)
         {
-            if ((e.Aborted == true || e.Completed == true))
+            if ((e.Aborted == true || e.Completed == true || e.FailedException != null))
             {
                 lock (Lock)
                 {
                     this.Transmissions.Remove(sender as FileTransmissionEvent);
+                    activeTransmissions.Remove(sender as FileTransmissionEvent);
+                    Logger.Debug("Transmission removed");
                 }
             }
         }
