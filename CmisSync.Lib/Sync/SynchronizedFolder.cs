@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System;
 using log4net;
+using CmisSync.Lib.Streams;
 
 namespace CmisSync.Lib.Sync
 {
@@ -772,6 +773,7 @@ namespace CmisSync.Lib.Sync
                 using (new ActivityListenerResource(activityListener))
                 {
                     string fileName = remoteDocument.Name;
+                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, fileName);
 
                     // Skip if invalid file name. See https://github.com/nicolas-raoul/CmisSync/issues/196
                     if (Utils.IsInvalidFileName(fileName))
@@ -844,6 +846,8 @@ namespace CmisSync.Lib.Sync
                             }
                             else
                             {
+                                this.Queue.AddEvent(transmissionEvent);
+
                                 Logger.Debug("Creating local download file: " + tmpfilepath);
                                 using (Stream file = new FileStream(tmpfilepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                                 using (SHA1 hashAlg = new SHA1Managed())
@@ -851,7 +855,7 @@ namespace CmisSync.Lib.Sync
                                     if (repoinfo.DownloadChunkSize <= 0 )
                                     {
                                         using (CryptoStream hashstream = new CryptoStream(file, hashAlg, CryptoStreamMode.Write))
-                                        using (LoggingStream logstream = new LoggingStream(hashstream, "Download progress", fileName, (long) fileLength))
+                                        using (ProgressStream progressStream = new ProgressStream(hashstream, transmissionEvent))
                                         {
                                             contentStream = remoteDocument.GetContentStream();
                                             // If this file does not have a content stream, ignore it.
@@ -860,6 +864,7 @@ namespace CmisSync.Lib.Sync
                                             if (contentStream == null)
                                             {
                                                 Logger.Warn("Skipping download of file with null content stream: " + fileName);
+                                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
                                                 return true;
                                             }
 
@@ -869,9 +874,10 @@ namespace CmisSync.Lib.Sync
                                                 int len;
                                                 while ((len = contentStream.Stream.Read(buffer, 0, buffer.Length)) > 0)
                                                 {
-                                                    logstream.Write(buffer, 0, len);
+                                                    progressStream.Write(buffer, 0, len);
                                                 }
                                                 success = true;
+                                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
                                             }
                                         }
                                     }
@@ -896,6 +902,7 @@ namespace CmisSync.Lib.Sync
                         catch (ObjectDisposedException ex)
                         {
                             Logger.Error(String.Format("Download aborted: {0}", fileName), ex);
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true, FailedException = ex});
                             return false;
                         }
                         catch (System.IO.DirectoryNotFoundException ex)
@@ -933,6 +940,7 @@ namespace CmisSync.Lib.Sync
                                 // Remove temporary local document to avoid it being considered a new document.
                                 Logger.Debug("Removing local temp file: " + tmpfilepath);
                                 File.Delete(tmpfilepath);
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true, FailedException = e});
                                 return false;
                             }
 
@@ -984,12 +992,13 @@ namespace CmisSync.Lib.Sync
 
                             Logger.Debug("Added to database: " + fileName);
                         }
-
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
                         return success;
                     }
                     catch (IOException e)
                     {
                         Logger.Warn("Exception while file operation: " + Utils.ToLogString(e));
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true, FailedException = e});
                         return false;
                     }
                 }
@@ -1087,6 +1096,7 @@ namespace CmisSync.Lib.Sync
                         Logger.Info(String.Format("Skipping uploading file absent on repository, because of too many failed retries({0}): {1}", retries, filePath));
                         return true;
                     }
+                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, filePath);
                     try{
                         IDocument remoteDocument = null;
                         Boolean success = false;
@@ -1094,7 +1104,7 @@ namespace CmisSync.Lib.Sync
                         try
                         {
                             Logger.Info("Uploading: " + filePath);
-
+                            Queue.AddEvent(transmissionEvent);
                             // Prepare properties
                             string fileName = Path.GetFileName(filePath);
                             Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -1110,12 +1120,12 @@ namespace CmisSync.Lib.Sync
                                 //{
                                     using (SHA1 hashAlg = new SHA1Managed())
                                     using (CryptoStream hashstream = new CryptoStream(file, hashAlg, CryptoStreamMode.Read))
-                                    using(LoggingStream logstream = new LoggingStream(hashstream, "Upload progress", fileName, file.Length))
+                                    using (ProgressStream progressstream = new ProgressStream(hashstream, transmissionEvent))
                                     {
                                         ContentStream contentStream = new ContentStream();
                                         contentStream.FileName = fileName;
                                         contentStream.MimeType = MimeType.GetMIMEType(fileName);
-                                        contentStream.Stream = logstream;
+                                        contentStream.Stream = progressstream;
 
                                         // Upload
                                         try
@@ -1206,6 +1216,9 @@ namespace CmisSync.Lib.Sync
                             database.AddFile(filePath, remoteDocument.Id, remoteDocument.LastModificationDate, metadata, filehash);
                             SetLastModifiedDate(remoteDocument, filePath, metadata);
                             Queue.AddEvent(new RecentChangedEvent(filePath));
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
+                        } else {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true});
                         }
                         return success;
                     }
@@ -1214,6 +1227,7 @@ namespace CmisSync.Lib.Sync
                         retries++;
                         database.SetOperationRetryCounter(filePath, retries, Database.OperationType.UPLOAD);
                         Logger.Warn(String.Format("Uploading of {0} failed {1} times: ", filePath, retries), e);
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){ Aborted=true, FailedException = e});
                         return false;
                     }
                 }
@@ -1322,7 +1336,7 @@ namespace CmisSync.Lib.Sync
                     Logger.Info(String.Format("Skipping updating file content on repository, because of too many failed retries({0}): {1}", retries, filePath));
                     return true;
                 }
-
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, filePath);
                 try
                 {
                     bool success = false;
@@ -1335,14 +1349,14 @@ namespace CmisSync.Lib.Sync
                             Logger.Info("Skipping update of file with null or empty content stream: " + filePath);
                             return true;
                         }
-
+                        this.Queue.AddEvent(transmissionEvent);
                         if (repoinfo.ChunkSize <= 0)
                         {
-                            using(LoggingStream logstream = new LoggingStream(localfile, "Updating ContentStream", filePath, localfile.Length)) {
+                            using(ProgressStream progressstream = new ProgressStream(localfile, transmissionEvent)) {
                                 ContentStream contentStream = new ContentStream();
                                 contentStream.FileName = remoteFile.Name;
                                 contentStream.MimeType = MimeType.GetMIMEType(contentStream.FileName);
-                                contentStream.Stream = logstream;
+                                contentStream.Stream = progressstream;
                                 Logger.Debug(String.Format("before SetContentStream to remote object ({0})", remoteFile.Id));
 
                                 remoteFile.SetContentStream(contentStream, true, true);
@@ -1400,8 +1414,11 @@ namespace CmisSync.Lib.Sync
 
                         // Update checksum
                         database.RecalculateChecksum(filePath);
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
 
                         // TODO Update metadata?
+                    } else {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true});
                     }
 
                     return success;
