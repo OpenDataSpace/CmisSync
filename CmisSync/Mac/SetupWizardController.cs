@@ -39,6 +39,39 @@ namespace CmisSync
                     Window.OrderFrontRegardless();
                 });
             };
+
+            Controller.ChangePageEvent += delegate (PageType type) {
+                using (var a = new NSAutoreleasePool ())
+                {
+                    LoadWindow();
+                    InvokeOnMainThread (delegate {
+                        switch (type)
+                        {
+                        case PageType.Setup:
+//                            ShowWelcomePage();
+                            break;
+                        case PageType.Tutorial:
+//                            ShowTutorialPage();
+                            break;
+                        case PageType.Add1:
+                            ShowLoginPage();
+                            break;
+                        case PageType.Add2:
+//                            ShowFolderSeletionPage();
+                            break;
+                        case PageType.Customize:
+//                            ShowCustomizePage();
+                            break;
+                        case PageType.Syncing:
+//                            ShowSyncingPage();
+                            break;
+                        case PageType.Finished:
+//                            ShowFinishedPage();
+                            break;
+                        }
+                    });
+                }
+            };
         }
 
         public override void AwakeFromNib ()
@@ -60,11 +93,14 @@ namespace CmisSync
         }
 
         private SetupController Controller;
+        private NSViewController SubController;
 
         void ShowLoginPage()
         {
             Header.StringValue = CmisSync.Properties_Resources.Where;
             Description.StringValue = "";
+            SubController = new SetupSubLoginController ();
+            Content.ContentView = SubController.View;
         }
 
     }

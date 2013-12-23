@@ -120,6 +120,11 @@
     <Compile Include="SetupWizard.designer.cs">
       <DependentUpon>SetupWizard.cs</DependentUpon>
     </Compile>
+    <Compile Include="SetupSubLogin.cs" />
+    <Compile Include="SetupSubLoginController.cs" />
+    <Compile Include="SetupSubLogin.designer.cs">
+      <DependentUpon>SetupSubLogin.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -241,6 +246,7 @@
     <InterfaceDefinition Include="MainMenu.xib" />
     <InterfaceDefinition Include="CmisTree\CmisOutline.xib" />
     <InterfaceDefinition Include="SetupWizard.xib" />
+    <InterfaceDefinition Include="SetupSubLogin.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />

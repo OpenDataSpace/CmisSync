@@ -33,6 +33,9 @@ SOURCES =  \
 	MacWatcher.cs \
 	OutlineViewDelegate.cs \
 	Setup.cs \
+	SetupSubLogin.cs \
+	SetupSubLogin.designer.cs \
+	SetupSubLoginController.cs \
 	SetupWindow.cs \
 	SetupWizard.cs \
 	SetupWizard.designer.cs \

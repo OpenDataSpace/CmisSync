@@ -13,7 +13,7 @@ namespace CmisSync
 	partial class SetupWizardController
 	{
 		[Outlet]
-		MonoMac.AppKit.NSView Content { get; set; }
+		MonoMac.AppKit.NSBox Content { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSTextField Description { get; set; }
@@ -26,14 +26,9 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (SideSplashView != null) {
-				SideSplashView.Dispose ();
-				SideSplashView = null;
-			}
-
-			if (Header != null) {
-				Header.Dispose ();
-				Header = null;
+			if (Content != null) {
+				Content.Dispose ();
+				Content = null;
 			}
 
 			if (Description != null) {
@@ -41,9 +36,14 @@ namespace CmisSync
 				Description = null;
 			}
 
-			if (Content != null) {
-				Content.Dispose ();
-				Content = null;
+			if (Header != null) {
+				Header.Dispose ();
+				Header = null;
+			}
+
+			if (SideSplashView != null) {
+				SideSplashView.Dispose ();
+				SideSplashView = null;
 			}
 		}
 	}

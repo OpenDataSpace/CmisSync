@@ -6,7 +6,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SetupWizardController">
             <connections>
-                <outlet property="Content" destination="xQD-ME-kLL" id="Vfa-rW-lYG"/>
+                <outlet property="Content" destination="htm-3Y-Aaq" id="1Jp-f4-wlH"/>
                 <outlet property="Description" destination="gfa-6Y-7EW" id="r30-fq-r8Z"/>
                 <outlet property="Header" destination="c57-6U-Ben" id="Oub-Tk-igo"/>
                 <outlet property="SideSplashView" destination="rTm-9V-B2u" id="3Mm-LZ-aeF"/>
@@ -26,32 +26,38 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="rTm-9V-B2u">
-                        <rect key="frame" x="3" y="3" width="144" height="394"/>
+                        <rect key="frame" x="0.0" y="0.0" width="150" height="400"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageAlignment="bottomLeft" id="Gq8-gk-ccO"/>
                     </imageView>
                     <textField verticalHuggingPriority="750" id="c57-6U-Ben">
-                        <rect key="frame" x="190" y="350" width="440" height="30"/>
+                        <rect key="frame" x="190" y="350" width="400" height="30"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="BOf-MB-iRP">
-                            <font key="font" metaFont="system"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="BOf-MB-iRP">
+                            <font key="font" size="15" name="LucidaGrande-Bold"/>
                             <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                     <textField verticalHuggingPriority="750" id="gfa-6Y-7EW">
-                        <rect key="frame" x="190" y="315" width="440" height="25"/>
+                        <rect key="frame" x="190" y="315" width="400" height="25"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" drawsBackground="YES" id="7zW-6d-Qfh">
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" id="7zW-6d-Qfh">
                             <font key="font" size="13" name="LucidaGrande"/>
                             <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <customView id="xQD-ME-kLL">
-                        <rect key="frame" x="190" y="7" width="440" height="300"/>
+                    <box autoresizesSubviews="NO" title="Box" borderType="none" titlePosition="noTitle" id="htm-3Y-Aaq">
+                        <rect key="frame" x="190" y="9" width="400" height="300"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    </customView>
+                        <view key="contentView">
+                            <rect key="frame" x="0.0" y="0.0" width="400" height="300"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        </view>
+                        <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                        <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    </box>
                 </subviews>
             </view>
         </window>
