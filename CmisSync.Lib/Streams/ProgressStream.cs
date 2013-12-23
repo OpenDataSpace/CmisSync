@@ -10,7 +10,8 @@ namespace CmisSync.Lib
         {
             private FileTransmissionEvent TransmissionEvent;
             private Stream Stream;
-
+            private long readpos = 0;
+            private long writepos = 0;
             public ProgressStream (Stream stream, FileTransmissionEvent e)
             {
                 if (stream == null)
@@ -82,8 +83,9 @@ namespace CmisSync.Lib
             public override int Read (byte[] buffer, int offset, int count)
             {
                 int result = this.Stream.Read (buffer, offset, count);
+                readpos+=result;
                 if(count > 0)
-                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = this.Stream.Position});
+                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = readpos});
                 return result;
             }
 
@@ -97,8 +99,9 @@ namespace CmisSync.Lib
             public override void Write (byte[] buffer, int offset, int count)
             {
                 this.Stream.Write (buffer, offset, count);
+                writepos += offset + count;
                 if(count > 0)
-                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = this.Stream.Position});
+                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = this.writepos});
             }
 
             protected override void Dispose (bool disposing)
