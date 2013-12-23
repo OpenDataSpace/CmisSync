@@ -54,6 +54,10 @@ namespace CmisSync
 
             this.ContinueButton.Title = Properties_Resources.Continue;
             this.CancelButton.Title = Properties_Resources.Cancel;
+
+            this.AddressText.StringValue = (Controller.PreviousAddress == null || String.IsNullOrEmpty (Controller.PreviousAddress.ToString ())) ? "https://" : Controller.PreviousAddress.ToString ();
+            this.UserText.StringValue = String.IsNullOrEmpty (Controller.saved_user) ? Environment.UserName : Controller.saved_user;
+            this.PasswordText.StringValue = String.IsNullOrEmpty (Controller.saved_password) ? "" : Controller.saved_password;
         }
 
         void CheckAddressTextField()

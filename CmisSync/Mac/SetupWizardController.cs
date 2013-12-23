@@ -72,7 +72,7 @@ namespace CmisSync
                             ShowRepoSelectPage();
                             break;
                         case PageType.Customize:
-//                            ShowCustomizePage();
+                            ShowCustomizePage();
                             break;
                         case PageType.Syncing:
 //                            ShowSyncingPage();
@@ -120,6 +120,14 @@ namespace CmisSync
             Header.StringValue = Properties_Resources.Which;
             Description.StringValue = "";
             SubController = new SetupSubRepoSelectController (Controller);
+            Content.ContentView = SubController.View;
+        }
+
+        void ShowCustomizePage()
+        {
+            Header.StringValue = Properties_Resources.Customize;
+            Description.StringValue = "";
+            SubController = new SetupSubCustomizeController (Controller);
             Content.ContentView = SubController.View;
         }
     }

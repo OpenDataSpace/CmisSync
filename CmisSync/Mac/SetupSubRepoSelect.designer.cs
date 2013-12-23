@@ -35,11 +35,6 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (Outline != null) {
-				Outline.Dispose ();
-				Outline = null;
-			}
-
 			if (BackButton != null) {
 				BackButton.Dispose ();
 				BackButton = null;
@@ -53,6 +48,11 @@ namespace CmisSync
 			if (ContinueButton != null) {
 				ContinueButton.Dispose ();
 				ContinueButton = null;
+			}
+
+			if (Outline != null) {
+				Outline.Dispose ();
+				Outline = null;
 			}
 		}
 	}

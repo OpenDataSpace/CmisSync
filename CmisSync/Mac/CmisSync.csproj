@@ -130,6 +130,11 @@
     <Compile Include="SetupSubRepoSelect.designer.cs">
       <DependentUpon>SetupSubRepoSelect.cs</DependentUpon>
     </Compile>
+    <Compile Include="SetupSubCustomize.cs" />
+    <Compile Include="SetupSubCustomizeController.cs" />
+    <Compile Include="SetupSubCustomize.designer.cs">
+      <DependentUpon>SetupSubCustomize.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -253,6 +258,7 @@
     <InterfaceDefinition Include="SetupWizard.xib" />
     <InterfaceDefinition Include="SetupSubLogin.xib" />
     <InterfaceDefinition Include="SetupSubRepoSelect.xib" />
+    <InterfaceDefinition Include="SetupSubCustomize.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />
