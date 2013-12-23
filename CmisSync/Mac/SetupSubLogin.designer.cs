@@ -38,6 +38,12 @@ namespace CmisSync
 
 		[Outlet]
 		MonoMac.AppKit.NSTextField UserText { get; set; }
+
+		[Action ("OnCancel:")]
+		partial void OnCancel (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnContinue:")]
+		partial void OnContinue (MonoMac.Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{

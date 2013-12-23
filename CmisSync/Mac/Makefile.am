@@ -36,6 +36,9 @@ SOURCES =  \
 	SetupSubLogin.cs \
 	SetupSubLogin.designer.cs \
 	SetupSubLoginController.cs \
+	SetupSubRepoSelect.cs \
+	SetupSubRepoSelect.designer.cs \
+	SetupSubRepoSelectController.cs \
 	SetupWindow.cs \
 	SetupWizard.cs \
 	SetupWizard.designer.cs \

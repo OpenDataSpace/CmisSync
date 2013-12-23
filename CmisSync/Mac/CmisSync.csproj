@@ -125,6 +125,11 @@
     <Compile Include="SetupSubLogin.designer.cs">
       <DependentUpon>SetupSubLogin.cs</DependentUpon>
     </Compile>
+    <Compile Include="SetupSubRepoSelect.cs" />
+    <Compile Include="SetupSubRepoSelectController.cs" />
+    <Compile Include="SetupSubRepoSelect.designer.cs">
+      <DependentUpon>SetupSubRepoSelect.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -247,6 +252,7 @@
     <InterfaceDefinition Include="CmisTree\CmisOutline.xib" />
     <InterfaceDefinition Include="SetupWizard.xib" />
     <InterfaceDefinition Include="SetupSubLogin.xib" />
+    <InterfaceDefinition Include="SetupSubRepoSelect.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />

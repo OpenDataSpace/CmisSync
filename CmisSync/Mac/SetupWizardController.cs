@@ -40,9 +40,21 @@ namespace CmisSync
                 });
             };
 
+            Controller.HideWindowEvent += delegate {
+                InvokeOnMainThread (delegate {
+                    Window.PerformClose (this);
+                });
+            };
+
             Controller.ChangePageEvent += delegate (PageType type) {
                 using (var a = new NSAutoreleasePool ())
                 {
+                    if (SubController != null)
+                    {
+                        SubController.Dispose ();
+                        SubController = null;
+                    }
+
                     LoadWindow();
                     InvokeOnMainThread (delegate {
                         switch (type)
@@ -57,7 +69,7 @@ namespace CmisSync
                             ShowLoginPage();
                             break;
                         case PageType.Add2:
-//                            ShowFolderSeletionPage();
+                            ShowRepoSelectPage();
                             break;
                         case PageType.Customize:
 //                            ShowCustomizePage();
@@ -97,12 +109,19 @@ namespace CmisSync
 
         void ShowLoginPage()
         {
-            Header.StringValue = CmisSync.Properties_Resources.Where;
+            Header.StringValue = Properties_Resources.Where;
             Description.StringValue = "";
-            SubController = new SetupSubLoginController ();
+            SubController = new SetupSubLoginController (Controller);
             Content.ContentView = SubController.View;
         }
 
+        void ShowRepoSelectPage()
+        {
+            Header.StringValue = Properties_Resources.Which;
+            Description.StringValue = "";
+            SubController = new SetupSubRepoSelectController (Controller);
+            Content.ContentView = SubController.View;
+        }
     }
 }
 
