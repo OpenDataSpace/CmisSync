@@ -48,6 +48,7 @@ SOURCES =  \
 	Sync/WatcherStrategy.cs \
 	Tasks/FileDownloader.cs \
 	Tasks/FileUploader.cs \
+	Tasks/SimpleFileDownloader.cs \
 	Utils.cs \
 	Watcher.cs
 
