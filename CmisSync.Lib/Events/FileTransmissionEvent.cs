@@ -34,13 +34,13 @@ namespace CmisSync.Lib.Events
 
         public void ReportProgress(TransmissionProgressEventArgs status)
         {
-                Status.Aborted = (status.Aborted != null) ? status.Aborted :     Status.Aborted;
-                Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition :     Status.ActualPosition;
-                Status.Length = (status.Length != null) ? status.Length :     Status.Length;
-                Status.Completed = (status.Completed != null) ? status.Completed :     Status.Completed;
-                Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond :     Status.BitsPerSecond;
+                Status.Aborted = (status.Aborted != null) ? status.Aborted : Status.Aborted;
+                Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
+                Status.Length = (status.Length != null) ? status.Length : Status.Length;
+                Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
+                Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
             if (TransmissionStatus != null)
-                TransmissionStatus(this,     Status);
+                TransmissionStatus(this, Status);
         }
     }
 
@@ -60,6 +60,7 @@ namespace CmisSync.Lib.Events
         public bool? Resumed { get; set; }
         public bool? Aborted{ get; set; }
         public bool? Completed { get; set; }
+        public Exception FailedException { get; set;}
         public static long? CalcBitsPerSecond(DateTime start, DateTime end, long bytes){
             if(end < start)
                 throw new ArgumentException("The end of a transmission must be higher than the start");
@@ -78,6 +79,7 @@ namespace CmisSync.Lib.Events
             Paused = null;
             Resumed = null;
             Aborted = null;
+            FailedException = null;
         }
 
         public  override bool Equals(System.Object obj) {
@@ -98,7 +100,8 @@ namespace CmisSync.Lib.Events
                     (ActualPosition == e.ActualPosition) &&
                     (Paused == e.Paused) &&
                     (Resumed == e.Resumed) &&
-                    (Aborted == e.Aborted);
+                    (Aborted == e.Aborted) &&
+                    (FailedException == e.FailedException);
         }
 
         public override int GetHashCode ()
