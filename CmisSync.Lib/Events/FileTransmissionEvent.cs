@@ -68,6 +68,8 @@ namespace CmisSync.Lib.Events
                 return null;
             }
             TimeSpan difference = end - start;
+            if(difference.Seconds == 0)
+                return null;
             return (bytes*8) / (difference.Seconds);
         }
 
