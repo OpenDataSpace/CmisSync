@@ -55,8 +55,8 @@ namespace CmisSync
                         SubController = null;
                     }
 
-                    LoadWindow();
                     InvokeOnMainThread (delegate {
+                        LoadWindow();
                         switch (type)
                         {
                         case PageType.Setup:
@@ -75,10 +75,10 @@ namespace CmisSync
                             ShowCustomizePage();
                             break;
                         case PageType.Syncing:
-//                            ShowSyncingPage();
+                            ShowSyncingPage();
                             break;
                         case PageType.Finished:
-//                            ShowFinishedPage();
+                            ShowFinishedPage();
                             break;
                         }
                     });
@@ -130,6 +130,31 @@ namespace CmisSync
             SubController = new SetupSubCustomizeController (Controller);
             Content.ContentView = SubController.View;
         }
+
+        void ShowSyncingPage()
+        {
+            Header.StringValue = Properties_Resources.AddingFolder + " ‘" + Controller.SyncingReponame + "’…";
+            Description.StringValue = Properties_Resources.MayTakeTime;
+            NSProgressIndicator progress = new NSProgressIndicator() {
+                Frame = new RectangleF(0, 140, 300, 20),
+                Style = NSProgressIndicatorStyle.Bar,
+                MinValue = 0.0,
+                MaxValue = 100.0,
+                Indeterminate = false,
+                DoubleValue = Controller.ProgressBarPercentage
+            };
+            progress.StartAnimation(this);
+            Content.ContentView = progress;
+        }
+
+        void ShowFinishedPage()
+        {
+            Header.StringValue = Properties_Resources.Ready;
+            Description.StringValue = Properties_Resources.YouCanFind;
+            SubController = new SetupSubFinishedController (Controller);
+            Content.ContentView = SubController.View;
+        }
+
     }
 }
 

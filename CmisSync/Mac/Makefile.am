@@ -36,6 +36,9 @@ SOURCES =  \
 	SetupSubCustomize.cs \
 	SetupSubCustomize.designer.cs \
 	SetupSubCustomizeController.cs \
+	SetupSubFinished.cs \
+	SetupSubFinished.designer.cs \
+	SetupSubFinishedController.cs \
 	SetupSubLogin.cs \
 	SetupSubLogin.designer.cs \
 	SetupSubLoginController.cs \

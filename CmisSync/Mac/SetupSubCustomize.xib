@@ -12,8 +12,9 @@
                 <outlet property="LocalPathButton" destination="2qe-ts-bvw" id="wt0-eD-8Ma"/>
                 <outlet property="LocalPathLabel" destination="kbD-3U-uqH" id="f34-FV-XTU"/>
                 <outlet property="LocalPathText" destination="NQo-Hx-3iU" id="XmF-ZA-DUQ"/>
-                <outlet property="RepoPathLabel" destination="3lW-jh-acS" id="7Th-xy-9nF"/>
-                <outlet property="RepoPathText" destination="Jqt-ly-m1D" id="9N2-CW-tn9"/>
+                <outlet property="RepoNameLabel" destination="3lW-jh-acS" id="hzl-mP-CE5"/>
+                <outlet property="RepoNameText" destination="Jqt-ly-m1D" id="suL-eV-45T"/>
+                <outlet property="WarnText" destination="WNZ-aM-bLn" id="uBO-UK-ioq"/>
                 <outlet property="view" destination="4" id="17"/>
             </connections>
         </customObject>
@@ -57,6 +58,15 @@
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" id="WNZ-aM-bLn">
+                    <rect key="frame" x="0.0" y="29" width="400" height="149"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Multiline Label" id="VwJ-nV-JOk">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" id="2qe-ts-bvw">

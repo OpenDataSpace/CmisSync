@@ -135,6 +135,11 @@
     <Compile Include="SetupSubCustomize.designer.cs">
       <DependentUpon>SetupSubCustomize.cs</DependentUpon>
     </Compile>
+    <Compile Include="SetupSubFinished.cs" />
+    <Compile Include="SetupSubFinishedController.cs" />
+    <Compile Include="SetupSubFinished.designer.cs">
+      <DependentUpon>SetupSubFinished.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -259,6 +264,7 @@
     <InterfaceDefinition Include="SetupSubLogin.xib" />
     <InterfaceDefinition Include="SetupSubRepoSelect.xib" />
     <InterfaceDefinition Include="SetupSubCustomize.xib" />
+    <InterfaceDefinition Include="SetupSubFinished.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />

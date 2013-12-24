@@ -31,10 +31,13 @@ namespace CmisSync
 		MonoMac.AppKit.NSTextField LocalPathText { get; set; }
 
 		[Outlet]
-		MonoMac.AppKit.NSTextField RepoPathLabel { get; set; }
+		MonoMac.AppKit.NSTextField RepoNameLabel { get; set; }
 
 		[Outlet]
-		MonoMac.AppKit.NSTextField RepoPathText { get; set; }
+		MonoMac.AppKit.NSTextField RepoNameText { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField WarnText { get; set; }
 
 		[Action ("OnAdd:")]
 		partial void OnAdd (MonoMac.Foundation.NSObject sender);
@@ -50,29 +53,9 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (RepoPathLabel != null) {
-				RepoPathLabel.Dispose ();
-				RepoPathLabel = null;
-			}
-
-			if (RepoPathText != null) {
-				RepoPathText.Dispose ();
-				RepoPathText = null;
-			}
-
-			if (LocalPathLabel != null) {
-				LocalPathLabel.Dispose ();
-				LocalPathLabel = null;
-			}
-
-			if (LocalPathText != null) {
-				LocalPathText.Dispose ();
-				LocalPathText = null;
-			}
-
-			if (LocalPathButton != null) {
-				LocalPathButton.Dispose ();
-				LocalPathButton = null;
+			if (AddButton != null) {
+				AddButton.Dispose ();
+				AddButton = null;
 			}
 
 			if (BackButton != null) {
@@ -85,9 +68,34 @@ namespace CmisSync
 				CancelButton = null;
 			}
 
-			if (AddButton != null) {
-				AddButton.Dispose ();
-				AddButton = null;
+			if (LocalPathButton != null) {
+				LocalPathButton.Dispose ();
+				LocalPathButton = null;
+			}
+
+			if (LocalPathLabel != null) {
+				LocalPathLabel.Dispose ();
+				LocalPathLabel = null;
+			}
+
+			if (LocalPathText != null) {
+				LocalPathText.Dispose ();
+				LocalPathText = null;
+			}
+
+			if (RepoNameLabel != null) {
+				RepoNameLabel.Dispose ();
+				RepoNameLabel = null;
+			}
+
+			if (RepoNameText != null) {
+				RepoNameText.Dispose ();
+				RepoNameText = null;
+			}
+
+			if (WarnText != null) {
+				WarnText.Dispose ();
+				WarnText = null;
 			}
 		}
 	}

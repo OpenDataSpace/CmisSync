@@ -49,7 +49,6 @@ namespace CmisSync
             this.PasswordLabel.StringValue = Properties_Resources.Password;
 
             this.AddressDelegate = new TextFieldDelegate ();
-            this.AddressDelegate.StringValueChanged += CheckAddressTextField;
             this.AddressText.Delegate = this.AddressDelegate;
 
             this.ContinueButton.Title = Properties_Resources.Continue;
@@ -58,20 +57,45 @@ namespace CmisSync
             this.AddressText.StringValue = (Controller.PreviousAddress == null || String.IsNullOrEmpty (Controller.PreviousAddress.ToString ())) ? "https://" : Controller.PreviousAddress.ToString ();
             this.UserText.StringValue = String.IsNullOrEmpty (Controller.saved_user) ? Environment.UserName : Controller.saved_user;
             this.PasswordText.StringValue = String.IsNullOrEmpty (Controller.saved_password) ? "" : Controller.saved_password;
+
+            InsertEvent ();
+
+            //  Must be called after InsertEvent()
+            Controller.CheckAddPage(AddressText.StringValue);
+        }
+
+        void InsertEvent()
+        {
+            this.AddressDelegate.StringValueChanged += CheckAddressTextField;
+            Controller.UpdateSetupContinueButtonEvent += SetContinueButton;
+            Controller.UpdateAddProjectButtonEvent += SetContinueButton;
+        }
+
+        void RemoveEvent()
+        {
+            this.AddressDelegate.StringValueChanged -= CheckAddressTextField;
+            Controller.UpdateSetupContinueButtonEvent -= SetContinueButton;
+            Controller.UpdateAddProjectButtonEvent -= SetContinueButton;
+        }
+
+        void SetContinueButton(bool enabled)
+        {
+            InvokeOnMainThread (delegate
+            {
+                ContinueButton.Enabled = enabled;
+            });
         }
 
         void CheckAddressTextField()
         {
-            string error = Controller.CheckAddPage (AddressText.StringValue);
-            if (String.IsNullOrEmpty (error))
-                AddressHelp.StringValue = "";
-            else
-                AddressHelp.StringValue = Properties_Resources.ResourceManager.GetString (error, CultureInfo.CurrentCulture);
-        }
-
-        ~SetupSubLoginController()
-        {
-            this.AddressDelegate.StringValueChanged -= CheckAddressTextField;
+            InvokeOnMainThread (delegate
+            {
+                string error = Controller.CheckAddPage (AddressText.StringValue);
+                if (String.IsNullOrEmpty (error))
+                    AddressHelp.StringValue = "";
+                else
+                    AddressHelp.StringValue = Properties_Resources.ResourceManager.GetString (error, CultureInfo.CurrentCulture);
+            });
         }
 
         SetupController Controller;
@@ -79,6 +103,7 @@ namespace CmisSync
 
         partial void OnCancel (MonoMac.Foundation.NSObject sender)
         {
+            RemoveEvent();
             Controller.PageCancelled();
         }
 
@@ -112,6 +137,7 @@ namespace CmisSync
                     }
                     else
                     {
+                        RemoveEvent();
                         Controller.Add1PageCompleted(cmisServer.Url, credentials.UserName, credentials.Password.ToString());
                     }
                 });
