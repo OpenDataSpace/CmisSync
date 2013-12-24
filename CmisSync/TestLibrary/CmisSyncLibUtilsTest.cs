@@ -67,11 +67,11 @@ namespace TestLibrary
             Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
             Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
             bitPerSecond = 1100;
-            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1.1 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Replace(',','.').Contains("1.1 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
             bitPerSecond = 1499;
-            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1.5 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Replace(',','.').Contains("1.5 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
             bitPerSecond = 1500;
-            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1.5 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Replace(',','.').Contains("1.5 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
             bitPerSecond = 1000*1000;
             bitPerSecondDouble = bitPerSecond;
             Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
@@ -83,7 +83,7 @@ namespace TestLibrary
             bitPerSecond = 1000*1000*1000+100*1000*1000;
             bitPerSecondDouble = bitPerSecond;
             Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
-            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1.1 GBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Replace(',','.').Contains("1.1 GBit/s"),Utils.FormatBandwidth(bitPerSecond));
         }
     }
 }
