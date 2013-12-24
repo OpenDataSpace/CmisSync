@@ -42,7 +42,6 @@ namespace CmisSync {
         private Menu menu;
         private MenuItem quit_item;
         private MenuItem state_item;
-        private MenuItem transmission_item;
         private bool IsHandleCreated = false;
 
 #if HAVE_APP_INDICATOR
@@ -145,19 +144,19 @@ namespace CmisSync {
                 Application.Invoke( delegate {
                     List<FileTransmissionEvent> transmissionEvents = Program.Controller.ActiveTransmissions();
                     if(transmissionEvents.Count != 0) {
-                        this.transmission_item.Sensitive = true;
+                        this.state_item.Sensitive = true;
 
                         Menu submenu = new Menu();
-                        this.transmission_item.Submenu = submenu;
+                        this.state_item.Submenu = submenu;
 
                         foreach(FileTransmissionEvent e in transmissionEvents) {
                             ImageMenuItem transmission_sub_menu_item = new TransmissionMenuItem(e);
                             submenu.Add(transmission_sub_menu_item);
-                            transmission_item.ShowAll();
+                            state_item.ShowAll();
                         }
                     } else {
-                        this.transmission_item.Submenu = null;
-                        this.transmission_item.Sensitive = false;
+                        this.state_item.Submenu = null;
+                        this.state_item.Sensitive = false;
                     }
                 });
             };
@@ -188,11 +187,6 @@ namespace CmisSync {
             };
             this.menu.Add (this.state_item);
             this.menu.Add (new SeparatorMenuItem());
-            this.transmission_item = new MenuItem("Actual Transmissions") {
-                Sensitive = false
-            };
-            this.menu.Add (transmission_item);
-            this.menu.Add (new SeparatorMenuItem ());
 
             // Folders Menu
             if (Controller.Folders.Length > 0) {
@@ -381,7 +375,6 @@ namespace CmisSync {
     }
 
     public class TransmissionMenuItem : ImageMenuItem {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(TransmissionMenuItem));
 
         public FileTransmissionType Type { get; private set; }
         public string Path { get; private set; }
@@ -410,15 +403,17 @@ namespace CmisSync {
                 text.Text = String.Format("{0}: {1} ({2}%)", TypeString, System.IO.Path.GetFileName(Path), percent);
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
                 percent = (status.Percent != null)? (double) status.Percent: 0;
-                Application.Invoke(delegate {
-                    if( status.Percent != null && text != null) {
+                long? bitsPerSecond = status.BitsPerSecond;
+                if( status.Percent != null && bitsPerSecond != null && text != null) {
+                    Application.Invoke(delegate {
                         text.Text = String.Format("{0}: {1} ({2:###.#}% {3})",
                                                   TypeString,
                                                   System.IO.Path.GetFileName(Path),
                                                   Math.Round(percent,1),
-                                                  CmisSync.Lib.Utils.FormatBandwidth((long)status.BitsPerSecond));
-                    }
-                });
+                                                  CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
+                    
+                    });
+                }
             };
             this.Activated += delegate(object sender, EventArgs args) {
                 Utils.OpenFolder(System.IO.Directory.GetParent(Path).FullName);

@@ -38,7 +38,7 @@ namespace CmisSync.Lib.Events
                 Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
                 Status.Length = (status.Length != null) ? status.Length : Status.Length;
                 Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
-                Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
+                Status.BitsPerSecond = (status.BitsPerSecond != null && Status.BitsPerSecond!=status.BitsPerSecond) ? status.BitsPerSecond : null;
             if (TransmissionStatus != null)
                 TransmissionStatus(this, Status);
         }
@@ -98,7 +98,7 @@ namespace CmisSync.Lib.Events
 
             // Return true if the fields match:
             return (Length == e.Length) &&
-                (BitsPerSecond == e.BitsPerSecond) &&
+                (BitsPerSecond == e.BitsPerSecond || BitsPerSecond==null || e.BitsPerSecond==null) &&
                     (ActualPosition == e.ActualPosition) &&
                     (Paused == e.Paused) &&
                     (Resumed == e.Resumed) &&

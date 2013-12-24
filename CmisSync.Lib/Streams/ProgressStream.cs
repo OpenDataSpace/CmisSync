@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using CmisSync.Lib.Events;
+using System.Timers;
 
 namespace CmisSync.Lib
 {
@@ -14,6 +15,7 @@ namespace CmisSync.Lib
             private long writepos = 0;
             private DateTime start = DateTime.Now;
             private long bytesTransmittedSinceLastSecond = 0;
+            private Timer blockingDetectionTimer;
 
             public ProgressStream (Stream stream, FileTransmissionEvent e)
             {
@@ -24,6 +26,10 @@ namespace CmisSync.Lib
                 Stream = stream;
                 TransmissionEvent = e;
                 e.Status.Length = stream.Length;
+                blockingDetectionTimer = new Timer(2000);
+                blockingDetectionTimer.Elapsed += delegate(object sender, ElapsedEventArgs args) {
+                    this.TransmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = 0 });
+               };
             }
 
             public override bool CanRead {
@@ -119,6 +125,10 @@ namespace CmisSync.Lib
                     this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos, BitsPerSecond = result});
                     this.bytesTransmittedSinceLastSecond = 0;
                     start = start + diff;
+                    blockingDetectionTimer.Stop();
+                    blockingDetectionTimer.Start();
+                }else{
+                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos});
                 }
             }
         }
