@@ -22,6 +22,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Collections.ObjectModel;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
@@ -92,6 +93,7 @@ namespace CmisSync
 
         public event Action FolderListChanged = delegate { };
 
+        public event Action OnTransmissionListChanged = delegate { };
 
         public event Action OnIdle = delegate { };
         public event Action OnSyncing = delegate { };
@@ -197,6 +199,13 @@ namespace CmisSync
             activityListenerAggregator = new ActivityListenerAggregator(this);
             FoldersPath = ConfigManager.CurrentConfig.FoldersPath;
             activitiesManager = new ActiveActivitiesManager();
+            this.activitiesManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+                OnTransmissionListChanged();
+            };
+        }
+
+        public List<FileTransmissionEvent> ActiveTransmissions() {
+            return this.activitiesManager.ActiveTransmissions.ToList<FileTransmissionEvent>();
         }
 
 

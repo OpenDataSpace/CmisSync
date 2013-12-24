@@ -12,6 +12,9 @@ namespace CmisSync.Lib
             private Stream Stream;
             private long readpos = 0;
             private long writepos = 0;
+            private DateTime start = DateTime.Now;
+            private long bytesTransmittedSinceLastSecond = 0;
+
             public ProgressStream (Stream stream, FileTransmissionEvent e)
             {
                 if (stream == null)
@@ -20,6 +23,7 @@ namespace CmisSync.Lib
                     throw new ArgumentNullException ("The event, where to publish the prgress cannot be null");
                 Stream = stream;
                 TransmissionEvent = e;
+                e.Status.Length = stream.Length;
             }
 
             public override bool CanRead {
@@ -43,7 +47,7 @@ namespace CmisSync.Lib
             public override long Length {
                 get {
                     long length = this.Stream.Length;
-                    if (length != this.TransmissionEvent.Status.Length)
+                    if (length > this.TransmissionEvent.Status.Length)
                         this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {Length = length});
                     return length;
                 }
@@ -84,15 +88,14 @@ namespace CmisSync.Lib
             {
                 int result = this.Stream.Read (buffer, offset, count);
                 readpos+=result;
-                if(count > 0)
-                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = readpos});
+                CalculateBandwidth(result, readpos);
                 return result;
             }
 
             public override void SetLength (long value)
             {
                 this.Stream.SetLength (value);
-                if (this.TransmissionEvent.Status.Length == null || value != (long) this.TransmissionEvent.Status.Length)
+                if (this.TransmissionEvent.Status.Length == null || value > (long) this.TransmissionEvent.Status.Length)
                     this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {Length = value});
             }
 
@@ -100,13 +103,23 @@ namespace CmisSync.Lib
             {
                 this.Stream.Write (buffer, offset, count);
                 writepos += offset + count;
-                if(count > 0)
-                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = this.writepos});
+                CalculateBandwidth(count, writepos);
             }
 
             protected override void Dispose (bool disposing)
             {
                 base.Dispose (disposing);
+            }
+
+            private void CalculateBandwidth(int transmittedBytes, long pos) {
+                this.bytesTransmittedSinceLastSecond+=transmittedBytes;
+                TimeSpan diff = DateTime.Now - start ;
+                if(diff.Seconds >= 1) {
+                    long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(start,DateTime.Now, bytesTransmittedSinceLastSecond);
+                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos, BitsPerSecond = result});
+                    this.bytesTransmittedSinceLastSecond = 0;
+                    start = start + diff;
+                }
             }
         }
     }

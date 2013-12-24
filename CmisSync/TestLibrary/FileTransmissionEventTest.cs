@@ -96,5 +96,23 @@ namespace TestLibrary
             transmission.ReportProgress(new TransmissionProgressEventArgs(){ActualPosition=1000, Length = 2000});
             Assert.AreEqual(50, percent);
         }
+
+        [Test, Category("Fast")]
+        public void ConstructorAndPropertiesTest()
+        {
+            string path = "file";
+            FileTransmissionEvent e = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, path);
+            Assert.AreEqual (path, e.Path);
+            Assert.AreEqual(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, e.Type);
+            e = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, path);
+            Assert.AreEqual (path, e.Path);
+            Assert.AreEqual(FileTransmissionType.DOWNLOAD_NEW_FILE, e.Type);
+            e = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, path);
+            Assert.AreEqual (path, e.Path);
+            Assert.AreEqual(FileTransmissionType.UPLOAD_MODIFIED_FILE, e.Type);
+            e = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, path);
+            Assert.AreEqual (path, e.Path);
+            Assert.AreEqual(FileTransmissionType.UPLOAD_NEW_FILE, e.Type);
+        }
     }
 }

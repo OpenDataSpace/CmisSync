@@ -505,7 +505,7 @@ namespace CmisSync.Lib.Sync
             }
 
 
-            private bool DownloadStreamInChunks(string filePath, Stream fileStream, IDocument remoteDocument)
+            private bool DownloadStreamInChunks(string filePath, Stream fileStream, IDocument remoteDocument, FileTransmissionEvent transmissionEvent)
             {
                 if (repoinfo.DownloadChunkSize <= 0)
                 {
@@ -513,6 +513,7 @@ namespace CmisSync.Lib.Sync
                 }
                 Logger.Debug(String.Format("Start downloading a chunk (size={0}): {1} from remote document: {2}", repoinfo.DownloadChunkSize, filePath, remoteDocument.Name ));
                 long? fileLength = remoteDocument.ContentStreamLength;
+
                 FileInfo fileInfo = new FileInfo(filePath);
 
                 for (long offset = fileInfo.Length; offset < fileLength; offset += repoinfo.DownloadChunkSize)
@@ -524,6 +525,8 @@ namespace CmisSync.Lib.Sync
                             throw new ObjectDisposedException("Downloading");
                         }
                         IContentStream contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, repoinfo.DownloadChunkSize);
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Length=remoteDocument.ContentStreamLength, ActualPosition=offset});
+
                         using (contentStream.Stream)
                         {
                             byte[] buffer = new byte[8 * 1024];
@@ -823,7 +826,7 @@ namespace CmisSync.Lib.Sync
                         try
                         {
                             long? fileLength = remoteDocument.ContentStreamLength;
-
+                            transmissionEvent.Status.Length = fileLength;
                             if (null == fileLength)
                             {
                                 Logger.Warn("Skipping download of file with null content stream: " + fileName);
@@ -854,10 +857,12 @@ namespace CmisSync.Lib.Sync
                                 {
                                     if (repoinfo.DownloadChunkSize <= 0 )
                                     {
-                                        using (CryptoStream hashstream = new CryptoStream(file, hashAlg, CryptoStreamMode.Write))
-                                        using (ProgressStream progressStream = new ProgressStream(hashstream, transmissionEvent))
+                                        using (ProgressStream progressStream = new ProgressStream(file, transmissionEvent))
+                                        using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
                                         {
                                             contentStream = remoteDocument.GetContentStream();
+                                            transmissionEvent.Status.Length = remoteDocument.ContentStreamLength;
+
                                             // If this file does not have a content stream, ignore it.
                                             // Even 0 bytes files have a contentStream.
                                             // null contentStream sometimes happen on IBM P8 CMIS server, not sure why.
@@ -867,17 +872,15 @@ namespace CmisSync.Lib.Sync
                                                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
                                                 return true;
                                             }
-
                                             using (contentStream.Stream)
                                             {
                                                 byte[] buffer = new byte[8 * 1024];
                                                 int len;
                                                 while ((len = contentStream.Stream.Read(buffer, 0, buffer.Length)) > 0)
                                                 {
-                                                    progressStream.Write(buffer, 0, len);
+                                                    hashstream.Write(buffer, 0, len);
                                                 }
                                                 success = true;
-                                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
                                             }
                                         }
                                     }
@@ -890,9 +893,10 @@ namespace CmisSync.Lib.Sync
                                         {
                                             hashAlg.TransformBlock(buffer, 0, len, buffer, 0);
                                         }
-                                        using (CryptoStream hashstream = new CryptoStream(file, hashAlg, CryptoStreamMode.Write))
+                                        using (ProgressStream progessstream = new ProgressStream(file, transmissionEvent))
+                                        using (CryptoStream hashstream = new CryptoStream(progessstream, hashAlg, CryptoStreamMode.Write))
                                         {
-                                            success = DownloadStreamInChunks(tmpfilepath, hashstream, remoteDocument);
+                                            success = DownloadStreamInChunks(tmpfilepath, hashstream, remoteDocument, transmissionEvent);
                                         }
                                     }
                                     filehash = hashAlg.Hash;
@@ -1118,14 +1122,14 @@ namespace CmisSync.Lib.Sync
                                 //  disable the chunk upload
                                 //if (repoinfo.ChunkSize <= 0 || file.Length <= repoinfo.ChunkSize)
                                 //{
+                                    using (ProgressStream progressstream = new ProgressStream(file, transmissionEvent))
                                     using (SHA1 hashAlg = new SHA1Managed())
-                                    using (CryptoStream hashstream = new CryptoStream(file, hashAlg, CryptoStreamMode.Read))
-                                    using (ProgressStream progressstream = new ProgressStream(hashstream, transmissionEvent))
+                                    using (CryptoStream hashstream = new CryptoStream(progressstream, hashAlg, CryptoStreamMode.Read))
                                     {
                                         ContentStream contentStream = new ContentStream();
                                         contentStream.FileName = fileName;
                                         contentStream.MimeType = MimeType.GetMIMEType(fileName);
-                                        contentStream.Stream = progressstream;
+                                        contentStream.Stream = hashstream;
 
                                         // Upload
                                         try
