@@ -427,7 +427,6 @@ namespace CmisSync
     {
         private FileTransmissionType Type { get; set; }
         private string Path { get; set; }
-        private string TypeString;
         /// <summary>
         /// Creates a new menu item, which updates itself on transmission events
         /// </summary>
@@ -437,8 +436,7 @@ namespace CmisSync
         {
             Path = e.Path;
             Type = e.Type;
-            TypeString = Type.ToString();
-            /*switch (Type)
+            switch (Type)
             {
                 case FileTransmissionType.DOWNLOAD_NEW_FILE:
                     Image = UIHelpers.GetBitmap("Downloading");
@@ -451,21 +449,21 @@ namespace CmisSync
                 case FileTransmissionType.UPLOAD_MODIFIED_FILE:
                     Image = UIHelpers.GetBitmap("Updating");
                     break;
-            }*/
+            }
             double percent = (e.Status.Percent == null) ? 0 : (double)e.Status.Percent;
-            Text = String.Format("{0}: {1} ({2}%)", TypeString, System.IO.Path.GetFileName(Path), percent);
+            Text = String.Format("{0} ({1}%)", System.IO.Path.GetFileName(Path), percent);
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status)
             {
                 percent = (status.Percent != null) ? (double)status.Percent : 0;
-                if (status.Percent != null)
+                long? bitsPerSecond = status.BitsPerSecond;
+                if (status.Percent != null && bitsPerSecond != null)
                 {
                     parent.BeginInvoke((Action) delegate()
                     {
-                        Text = String.Format("{0}: {1} ({2:###.#}% {3})",
-                                  TypeString,
+                        Text = String.Format("{0} ({1:###.#}% {2})",
                                   System.IO.Path.GetFileName(Path),
                                   Math.Round(percent, 1),
-                                  CmisSync.Lib.Utils.FormatBandwidth((long)status.BitsPerSecond));
+                                  CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
                     });
                 }
             };
