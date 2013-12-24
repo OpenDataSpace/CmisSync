@@ -45,6 +45,12 @@ SOURCES =  \
 	SetupSubRepoSelect.cs \
 	SetupSubRepoSelect.designer.cs \
 	SetupSubRepoSelectController.cs \
+	SetupSubTutorial.cs \
+	SetupSubTutorial.designer.cs \
+	SetupSubTutorialController.cs \
+	SetupSubWelcome.cs \
+	SetupSubWelcome.designer.cs \
+	SetupSubWelcomeController.cs \
 	SetupWindow.cs \
 	SetupWizard.cs \
 	SetupWizard.designer.cs \

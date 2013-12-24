@@ -60,10 +60,10 @@ namespace CmisSync
                         switch (type)
                         {
                         case PageType.Setup:
-//                            ShowWelcomePage();
+                            ShowWelcomePage();
                             break;
                         case PageType.Tutorial:
-//                            ShowTutorialPage();
+                            ShowTutorialPage();
                             break;
                         case PageType.Add1:
                             ShowLoginPage();
@@ -153,6 +153,35 @@ namespace CmisSync
             Description.StringValue = Properties_Resources.YouCanFind;
             SubController = new SetupSubFinishedController (Controller);
             Content.ContentView = SubController.View;
+        }
+
+        void ShowWelcomePage()
+        {
+            Header.StringValue = Properties_Resources.Ready;
+            Description.StringValue = "";
+            SubController = new SetupSubWelcomeController (Controller);
+            Content.ContentView = SubController.View;
+        }
+
+        void ShowTutorialPage()
+        {
+            SubController = new SetupSubTutorialController (Controller);
+            Content.ContentView = SubController.View;
+            switch (Controller.TutorialCurrentPage) {
+            case 1:
+                Header.StringValue = Properties_Resources.WhatsNext;
+                break;
+            case 2:
+                Header.StringValue = Properties_Resources.Synchronization;
+                break;
+            case 3:
+                Header.StringValue = Properties_Resources.StatusIcon;
+                break;
+            case 4:
+                Header.StringValue = Properties_Resources.AddFolders;
+                break;
+            }
+            Description.StringValue = "";
         }
 
     }
