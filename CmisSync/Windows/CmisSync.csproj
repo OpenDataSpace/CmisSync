@@ -277,6 +277,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Pixmaps\Downloading.png" />
+    <EmbeddedResource Include="Pixmaps\Updating.png" />
+    <EmbeddedResource Include="Pixmaps\Uploading.png" />
     <EmbeddedResource Include="Pixmaps\media_playback_pause.png" />
     <EmbeddedResource Include="Pixmaps\media_playback_start.png" />
     <EmbeddedResource Include="Pixmaps\classic_folder_web.png" />
