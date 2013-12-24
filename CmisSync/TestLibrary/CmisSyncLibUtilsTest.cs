@@ -50,5 +50,40 @@ namespace TestLibrary
                 Assert.AreEqual(originalParent, conflictParent, "The conflict file must exists in the same directory like the orignial file");
             }
         }
+
+        [Test, Category("Fast")]
+        public void BandwidthTest()
+        {
+            long bitPerSecond = 1;
+            double bitPerSecondDouble = 1d;
+            Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1 Bit/s"));
+            bitPerSecond = 2;
+            bitPerSecondDouble = bitPerSecond;
+            Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("2 Bit/s"));
+            bitPerSecond = 1000;
+            bitPerSecondDouble = bitPerSecond;
+            Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            bitPerSecond = 1100;
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1.1 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            bitPerSecond = 1499;
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1.5 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            bitPerSecond = 1500;
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1.5 KBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            bitPerSecond = 1000*1000;
+            bitPerSecondDouble = bitPerSecond;
+            Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1 MBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            bitPerSecond = 1000*1000*1000;
+            bitPerSecondDouble = bitPerSecond;
+            Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1 GBit/s"),Utils.FormatBandwidth(bitPerSecond));
+            bitPerSecond = 1000*1000*1000+100*1000*1000;
+            bitPerSecondDouble = bitPerSecond;
+            Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
+            Assert.True(Utils.FormatBandwidth(bitPerSecond).Contains("1.1 GBit/s"),Utils.FormatBandwidth(bitPerSecond));
+        }
     }
 }
