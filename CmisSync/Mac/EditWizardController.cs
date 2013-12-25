@@ -43,9 +43,6 @@ namespace CmisSync
             {
                 InvokeOnMainThread (() =>
                 {
-                    if (!IsWindowLoaded) {
-                        LoadWindow ();
-                    }
                     this.Window.OrderFrontRegardless ();
                 });
             };
