@@ -29,7 +29,9 @@ SOURCES =  \
 	CmisTree/CmisOutlineController.cs \
 	CmisTree/CmisTreeDataSource.cs \
 	Controller.cs \
-	Edit.cs \
+	EditWizard.cs \
+	EditWizard.designer.cs \
+	EditWizardController.cs \
 	MacWatcher.cs \
 	OutlineViewDelegate.cs \
 	Setup.cs \

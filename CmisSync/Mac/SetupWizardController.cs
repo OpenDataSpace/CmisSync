@@ -82,8 +82,6 @@ namespace CmisSync
             };
         }
 
-        int debug = 0;
-
         public override void AwakeFromNib ()
         {
             base.AwakeFromNib ();

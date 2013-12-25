@@ -28,6 +28,10 @@ using CmisSync.Lib.Cmis;
 using log4net;
 using CmisSync.Lib.Events;
 
+#if __COCOA__
+using Edit = CmisSync.EditWizardController;
+#endif
+
 namespace CmisSync
 {
     /// <summary>
@@ -280,7 +284,7 @@ namespace CmisSync
                     Edit edit = null;
                     if (edits.TryGetValue(reponame, out edit))
                     {
-                        edit.Close();
+                        edit.Controller.CloseWindow();
                     }
                     RemoveRepository(f);
                     ConfigManager.CurrentConfig.Folder.Remove(f);
@@ -616,11 +620,8 @@ namespace CmisSync
             {
                 lock (this.repo_lock)
                 {
-                    foreach (Edit editView in this.edits.Values)
-                        if (editView.IsVisible)
-                            return true;
+                    return (this.edits.Count > 0);
                 }
-                return false;
             }
             private set { }
         }
