@@ -56,12 +56,13 @@ namespace CmisSync
 
             this.AddressText.StringValue = (Controller.PreviousAddress == null || String.IsNullOrEmpty (Controller.PreviousAddress.ToString ())) ? "https://" : Controller.PreviousAddress.ToString ();
             this.UserText.StringValue = String.IsNullOrEmpty (Controller.saved_user) ? Environment.UserName : Controller.saved_user;
-            this.PasswordText.StringValue = String.IsNullOrEmpty (Controller.saved_password) ? "" : Controller.saved_password;
+//            this.PasswordText.StringValue = String.IsNullOrEmpty (Controller.saved_password) ? "" : Controller.saved_password;
+            this.PasswordText.StringValue = "";
 
             InsertEvent ();
 
             //  Must be called after InsertEvent()
-            Controller.CheckAddPage(AddressText.StringValue);
+            CheckAddressTextField ();
         }
 
         void InsertEvent()
@@ -131,7 +132,7 @@ namespace CmisSync
                 InvokeOnMainThread(delegate {
                     if (Controller.repositories == null)
                     {
-                        AddressHelp.StringValue = Controller.getConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
+                        WarnText.StringValue = Controller.getConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
                         ContinueButton.Enabled = true;
                         CancelButton.Enabled = true;
                     }

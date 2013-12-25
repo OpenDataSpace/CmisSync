@@ -9,11 +9,14 @@ using System.CodeDom.Compiler;
 
 namespace CmisSync
 {
-	[Register ("SetupSubTutorialController")]
-	partial class SetupSubTutorialController
+	[Register ("SetupSubTutorialBeginController")]
+	partial class SetupSubTutorialBeginController
 	{
 		[Outlet]
 		MonoMac.AppKit.NSButton ContinueButton { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButton SkipButton { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSTextField TutorialText { get; set; }
@@ -23,14 +26,12 @@ namespace CmisSync
 
 		[Action ("OnContinue:")]
 		partial void OnContinue (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnSkip:")]
+		partial void OnSkip (MonoMac.Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (ContinueButton != null) {
-				ContinueButton.Dispose ();
-				ContinueButton = null;
-			}
-
 			if (TutorialText != null) {
 				TutorialText.Dispose ();
 				TutorialText = null;
@@ -40,11 +41,21 @@ namespace CmisSync
 				TutorialView.Dispose ();
 				TutorialView = null;
 			}
+
+			if (SkipButton != null) {
+				SkipButton.Dispose ();
+				SkipButton = null;
+			}
+
+			if (ContinueButton != null) {
+				ContinueButton.Dispose ();
+				ContinueButton = null;
+			}
 		}
 	}
 
-	[Register ("SetupSubTutorial")]
-	partial class SetupSubTutorial
+	[Register ("SetupSubTutorialBegin")]
+	partial class SetupSubTutorialBegin
 	{
 		
 		void ReleaseDesignerOutlets ()

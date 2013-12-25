@@ -150,6 +150,16 @@
     <Compile Include="SetupSubTutorial.designer.cs">
       <DependentUpon>SetupSubTutorial.cs</DependentUpon>
     </Compile>
+    <Compile Include="SetupSubTutorialBegin.cs" />
+    <Compile Include="SetupSubTutorialBeginController.cs" />
+    <Compile Include="SetupSubTutorialBegin.designer.cs">
+      <DependentUpon>SetupSubTutorialBegin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SetupSubTutorialEnd.cs" />
+    <Compile Include="SetupSubTutorialEndController.cs" />
+    <Compile Include="SetupSubTutorialEnd.designer.cs">
+      <DependentUpon>SetupSubTutorialEnd.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -277,6 +287,8 @@
     <InterfaceDefinition Include="SetupSubFinished.xib" />
     <InterfaceDefinition Include="SetupSubWelcome.xib" />
     <InterfaceDefinition Include="SetupSubTutorial.xib" />
+    <InterfaceDefinition Include="SetupSubTutorialBegin.xib" />
+    <InterfaceDefinition Include="SetupSubTutorialEnd.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />

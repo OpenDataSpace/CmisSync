@@ -49,14 +49,10 @@ namespace CmisSync
             Controller.ChangePageEvent += delegate (PageType type) {
                 using (var a = new NSAutoreleasePool ())
                 {
-                    if (SubController != null)
-                    {
-                        SubController.Dispose ();
-                        SubController = null;
-                    }
-
                     InvokeOnMainThread (delegate {
-                        LoadWindow();
+                        if (!IsWindowLoaded) {
+                            LoadWindow();
+                        }
                         switch (type)
                         {
                         case PageType.Setup:
@@ -86,6 +82,8 @@ namespace CmisSync
             };
         }
 
+        int debug = 0;
+
         public override void AwakeFromNib ()
         {
             base.AwakeFromNib ();
@@ -105,7 +103,18 @@ namespace CmisSync
         }
 
         private SetupController Controller;
-        private NSViewController SubController;
+
+        private NSViewController SubController_ = null;
+        private NSViewController SubController {
+            get { return SubController_; }
+            set {
+                if (SubController_ != null) {
+                    SubController_.Dispose ();
+                    SubController_ = null;
+                }
+                SubController_ = value;
+            }
+        }
 
         void ShowLoginPage()
         {
@@ -166,22 +175,26 @@ namespace CmisSync
         void ShowTutorialPage()
         {
             SubController = new SetupSubTutorialController (Controller);
-            Content.ContentView = SubController.View;
             switch (Controller.TutorialCurrentPage) {
             case 1:
                 Header.StringValue = Properties_Resources.WhatsNext;
+                SubController = new SetupSubTutorialBeginController (Controller);
                 break;
             case 2:
                 Header.StringValue = Properties_Resources.Synchronization;
+                SubController = new SetupSubTutorialController (Controller);
                 break;
             case 3:
                 Header.StringValue = Properties_Resources.StatusIcon;
+                SubController = new SetupSubTutorialController (Controller);
                 break;
             case 4:
                 Header.StringValue = Properties_Resources.AddFolders;
+                SubController = new SetupSubTutorialEndController (Controller);
                 break;
             }
             Description.StringValue = "";
+            Content.ContentView = SubController.View;
         }
 
     }

@@ -8,24 +8,24 @@ using MonoMac.AppKit;
 
 namespace CmisSync
 {
-    public partial class SetupSubTutorialController : MonoMac.AppKit.NSViewController
+    public partial class SetupSubTutorialEndController : MonoMac.AppKit.NSViewController
     {
 
         #region Constructors
 
         // Called when created from unmanaged code
-        public SetupSubTutorialController (IntPtr handle) : base (handle)
+        public SetupSubTutorialEndController (IntPtr handle) : base (handle)
         {
             Initialize ();
         }
         // Called when created directly from a XIB file
         [Export ("initWithCoder:")]
-        public SetupSubTutorialController (NSCoder coder) : base (coder)
+        public SetupSubTutorialEndController (NSCoder coder) : base (coder)
         {
             Initialize ();
         }
         // Call to load from the XIB/NIB file
-        public SetupSubTutorialController (SetupController controller) : base ("SetupSubTutorial", NSBundle.MainBundle)
+        public SetupSubTutorialEndController (SetupController controller) : base ("SetupSubTutorialEnd", NSBundle.MainBundle)
         {
             this.Controller = controller;
             Initialize ();
@@ -43,7 +43,8 @@ namespace CmisSync
         {
             base.AwakeFromNib ();
 
-            this.ContinueButton.Title = Properties_Resources.Continue;
+            this.StartCheck.Title = Properties_Resources.Startup;
+            this.FinishButton.Title = Properties_Resources.Finish;
 
             NSImage image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "tutorial-slide-" + Controller.TutorialCurrentPage + ".png")) {
                 Size = new SizeF (350, 200)
@@ -51,24 +52,27 @@ namespace CmisSync
             TutorialView.Image = image;
 
             switch (Controller.TutorialCurrentPage) {
-            case 2:
-                TutorialText.StringValue = Properties_Resources.DocumentsAre;
-                break;
-            case 3:
-                TutorialText.StringValue = Properties_Resources.StatusIconShows;
+            case 4:
+                TutorialText.StringValue = Properties_Resources.YouCan;
+                OnStart (this);
                 break;
             }
         }
 
-        partial void OnContinue (MonoMac.Foundation.NSObject sender)
+        partial void OnStart (MonoMac.Foundation.NSObject sender)
+        {
+            Controller.StartupItemChanged(StartCheck.State == NSCellStateValue.On);
+        }
+
+        partial void OnFinish (MonoMac.Foundation.NSObject sender)
         {
             Controller.TutorialPageCompleted();
         }
 
         //strongly typed view accessor
-        public new SetupSubTutorial View {
+        public new SetupSubTutorialEnd View {
             get {
-                return (SetupSubTutorial)base.View;
+                return (SetupSubTutorialEnd)base.View;
             }
         }
     }

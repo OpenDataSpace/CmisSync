@@ -39,6 +39,9 @@ namespace CmisSync
 		[Outlet]
 		MonoMac.AppKit.NSTextField UserText { get; set; }
 
+		[Outlet]
+		MonoMac.AppKit.NSTextField WarnText { get; set; }
+
 		[Action ("OnCancel:")]
 		partial void OnCancel (MonoMac.Foundation.NSObject sender);
 
@@ -90,6 +93,11 @@ namespace CmisSync
 			if (UserText != null) {
 				UserText.Dispose ();
 				UserText = null;
+			}
+
+			if (WarnText != null) {
+				WarnText.Dispose ();
+				WarnText = null;
 			}
 		}
 	}

@@ -55,6 +55,18 @@ namespace CmisSync
             InsertEvent ();
 
             //  Must be called after InsertEvent()
+            string name = Controller.saved_address.Host.ToString();
+            foreach (KeyValuePair<String, String> repository in Controller.repositories)
+            {
+                if (repository.Key == Controller.saved_repository)
+                {
+                    name += "/" + repository.Value;
+                    break;
+                }
+            }
+            this.RepoNameText.StringValue = name;
+            this.LocalPathText.StringValue = Path.Combine (Controller.DefaultRepoPath, name);
+
             CheckLocalPathText ();
         }
 

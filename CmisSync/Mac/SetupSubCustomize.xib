@@ -41,6 +41,9 @@
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <outlet property="nextKeyView" destination="NQo-Hx-3iU" id="fTB-JA-82P"/>
+                    </connections>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="kbD-3U-uqH">
                     <rect key="frame" x="0.0" y="219" width="400" height="20"/>
@@ -59,6 +62,9 @@
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <outlet property="nextKeyView" destination="2qe-ts-bvw" id="8iB-Pa-zVq"/>
+                    </connections>
                 </textField>
                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" id="WNZ-aM-bLn">
                     <rect key="frame" x="0.0" y="29" width="400" height="149"/>
@@ -78,6 +84,7 @@
                     </buttonCell>
                     <connections>
                         <action selector="OnLocalPath:" target="-2" id="Kn3-rn-VLU"/>
+                        <outlet property="nextKeyView" destination="Ql9-nT-Mdw" id="Xad-P6-fDq"/>
                     </connections>
                 </button>
                 <button verticalHuggingPriority="750" id="Ql9-nT-Mdw">
@@ -89,6 +96,7 @@
                     </buttonCell>
                     <connections>
                         <action selector="OnBack:" target="-2" id="Jvz-jv-8HP"/>
+                        <outlet property="nextKeyView" destination="gMY-dp-GGf" id="bip-gh-A4u"/>
                     </connections>
                 </button>
                 <button verticalHuggingPriority="750" id="gMY-dp-GGf">
@@ -100,6 +108,7 @@
                     </buttonCell>
                     <connections>
                         <action selector="OnCancel:" target="-2" id="pdt-2f-9jQ"/>
+                        <outlet property="nextKeyView" destination="6sn-TD-4m6" id="py3-GT-jeQ"/>
                     </connections>
                 </button>
                 <button verticalHuggingPriority="750" id="6sn-TD-4m6">
@@ -111,6 +120,7 @@
                     </buttonCell>
                     <connections>
                         <action selector="OnAdd:" target="-2" id="SVZ-Aj-Ztc"/>
+                        <outlet property="nextKeyView" destination="Jqt-ly-m1D" id="3th-uW-vqG"/>
                     </connections>
                 </button>
             </subviews>

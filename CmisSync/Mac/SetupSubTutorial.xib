@@ -7,7 +7,6 @@
         <customObject id="-2" userLabel="File's Owner" customClass="SetupSubTutorialController">
             <connections>
                 <outlet property="ContinueButton" destination="03g-sX-ViX" id="5hB-ad-fsN"/>
-                <outlet property="SkipButton" destination="PzZ-Bs-ykX" id="Da6-1R-nxM"/>
                 <outlet property="TutorialText" destination="jzO-uY-Q80" id="ebV-iv-xUk"/>
                 <outlet property="TutorialView" destination="eu9-BC-848" id="yk0-rO-mXs"/>
                 <outlet property="view" destination="4" id="17"/>
@@ -29,23 +28,12 @@
                     </textFieldCell>
                 </textField>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" id="eu9-BC-848">
-                    <rect key="frame" x="3" y="38" width="394" height="194"/>
+                    <rect key="frame" x="0.0" y="35" width="400" height="200"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="J6y-hK-BfC"/>
                 </imageView>
-                <button verticalHuggingPriority="750" id="PzZ-Bs-ykX">
-                    <rect key="frame" x="200" y="-7" width="100" height="32"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6LL-df-rFD">
-                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="system"/>
-                    </buttonCell>
-                    <connections>
-                        <action selector="OnSkip:" target="-2" id="h2l-Tb-eKE"/>
-                    </connections>
-                </button>
                 <button verticalHuggingPriority="750" id="03g-sX-ViX">
-                    <rect key="frame" x="300" y="-8" width="100" height="32"/>
+                    <rect key="frame" x="300" y="-7" width="100" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="cqA-QN-vKt">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>

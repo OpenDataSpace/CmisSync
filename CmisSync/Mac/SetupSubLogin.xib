@@ -15,6 +15,7 @@
                 <outlet property="PasswordText" destination="gqF-fE-Zp5" id="AB8-Ia-ddd"/>
                 <outlet property="UserLabel" destination="SI4-Te-Ojl" id="5Ac-Yj-zRs"/>
                 <outlet property="UserText" destination="lEz-EX-FcA" id="enm-AD-vwa"/>
+                <outlet property="WarnText" destination="8aS-k0-A4n" id="WlH-7x-gKQ"/>
                 <outlet property="view" destination="4" id="17"/>
             </connections>
         </customObject>
@@ -41,12 +42,15 @@
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <outlet property="nextKeyView" destination="lEz-EX-FcA" id="GdD-ki-8kL"/>
+                    </connections>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="YUc-sz-Q2h">
                     <rect key="frame" x="0.0" y="219" width="400" height="20"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="X13-MV-WP3">
-                        <font key="font" metaFont="system"/>
+                        <font key="font" size="11" name="LucidaGrande"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
@@ -70,13 +74,16 @@
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" id="lEz-EX-FcA">
-                    <rect key="frame" x="-8" y="152" width="190" height="25"/>
+                    <rect key="frame" x="0.0" y="152" width="190" height="25"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="5sO-et-MPY">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
+                    <connections>
+                        <outlet property="nextKeyView" destination="gqF-fE-Zp5" id="pM6-er-CbG"/>
+                    </connections>
                 </textField>
                 <secureTextField verticalHuggingPriority="750" id="gqF-fE-Zp5">
                     <rect key="frame" x="210" y="152" width="190" height="25"/>
@@ -89,7 +96,19 @@
                             <string>NSAllRomanInputSourcesLocaleIdentifier</string>
                         </allowedInputSourceLocales>
                     </secureTextFieldCell>
+                    <connections>
+                        <outlet property="nextKeyView" destination="xDS-QZ-e0t" id="fCt-DB-Pkm"/>
+                    </connections>
                 </secureTextField>
+                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" id="8aS-k0-A4n">
+                    <rect key="frame" x="0.0" y="29" width="400" height="115"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="2hI-kJ-AIe">
+                        <font key="font" size="11" name="LucidaGrande"/>
+                        <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
                 <button verticalHuggingPriority="750" id="xDS-QZ-e0t">
                     <rect key="frame" x="200" y="-7" width="100" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -99,6 +118,7 @@
                     </buttonCell>
                     <connections>
                         <action selector="OnCancel:" target="-2" id="5yt-a9-f0N"/>
+                        <outlet property="nextKeyView" destination="KKO-2W-Y1C" id="Knl-ti-GiL"/>
                     </connections>
                 </button>
                 <button verticalHuggingPriority="750" id="KKO-2W-Y1C">
@@ -110,6 +130,7 @@
                     </buttonCell>
                     <connections>
                         <action selector="OnContinue:" target="-2" id="3oy-Sc-utv"/>
+                        <outlet property="nextKeyView" destination="u4D-dp-f4x" id="dJ4-qB-0hd"/>
                     </connections>
                 </button>
             </subviews>

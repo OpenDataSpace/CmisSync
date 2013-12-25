@@ -47,7 +47,13 @@ SOURCES =  \
 	SetupSubRepoSelectController.cs \
 	SetupSubTutorial.cs \
 	SetupSubTutorial.designer.cs \
+	SetupSubTutorialBegin.cs \
+	SetupSubTutorialBegin.designer.cs \
+	SetupSubTutorialBeginController.cs \
 	SetupSubTutorialController.cs \
+	SetupSubTutorialEnd.cs \
+	SetupSubTutorialEnd.designer.cs \
+	SetupSubTutorialEndController.cs \
 	SetupSubWelcome.cs \
 	SetupSubWelcome.designer.cs \
 	SetupSubWelcomeController.cs \

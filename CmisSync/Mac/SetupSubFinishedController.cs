@@ -42,6 +42,7 @@ namespace CmisSync
             base.AwakeFromNib ();
 
             this.OpenButton.Title = Properties_Resources.OpenFolder;
+            this.OpenButton.SizeToFit ();
             this.FinishButton.Title = Properties_Resources.Finish;
 
             NSApplication.SharedApplication.RequestUserAttention(NSRequestUserAttentionType.CriticalRequest);

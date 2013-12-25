@@ -9,11 +9,14 @@ using System.CodeDom.Compiler;
 
 namespace CmisSync
 {
-	[Register ("SetupSubTutorialController")]
-	partial class SetupSubTutorialController
+	[Register ("SetupSubTutorialEndController")]
+	partial class SetupSubTutorialEndController
 	{
 		[Outlet]
-		MonoMac.AppKit.NSButton ContinueButton { get; set; }
+		MonoMac.AppKit.NSButton FinishButton { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButton StartCheck { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSTextField TutorialText { get; set; }
@@ -21,16 +24,14 @@ namespace CmisSync
 		[Outlet]
 		MonoMac.AppKit.NSImageView TutorialView { get; set; }
 
-		[Action ("OnContinue:")]
-		partial void OnContinue (MonoMac.Foundation.NSObject sender);
+		[Action ("OnFinish:")]
+		partial void OnFinish (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnStart:")]
+		partial void OnStart (MonoMac.Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (ContinueButton != null) {
-				ContinueButton.Dispose ();
-				ContinueButton = null;
-			}
-
 			if (TutorialText != null) {
 				TutorialText.Dispose ();
 				TutorialText = null;
@@ -40,11 +41,21 @@ namespace CmisSync
 				TutorialView.Dispose ();
 				TutorialView = null;
 			}
+
+			if (StartCheck != null) {
+				StartCheck.Dispose ();
+				StartCheck = null;
+			}
+
+			if (FinishButton != null) {
+				FinishButton.Dispose ();
+				FinishButton = null;
+			}
 		}
 	}
 
-	[Register ("SetupSubTutorial")]
-	partial class SetupSubTutorial
+	[Register ("SetupSubTutorialEnd")]
+	partial class SetupSubTutorialEnd
 	{
 		
 		void ReleaseDesignerOutlets ()

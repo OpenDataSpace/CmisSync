@@ -8,24 +8,24 @@ using MonoMac.AppKit;
 
 namespace CmisSync
 {
-    public partial class SetupSubTutorialController : MonoMac.AppKit.NSViewController
+    public partial class SetupSubTutorialBeginController : MonoMac.AppKit.NSViewController
     {
 
         #region Constructors
 
         // Called when created from unmanaged code
-        public SetupSubTutorialController (IntPtr handle) : base (handle)
+        public SetupSubTutorialBeginController (IntPtr handle) : base (handle)
         {
             Initialize ();
         }
         // Called when created directly from a XIB file
         [Export ("initWithCoder:")]
-        public SetupSubTutorialController (NSCoder coder) : base (coder)
+        public SetupSubTutorialBeginController (NSCoder coder) : base (coder)
         {
             Initialize ();
         }
         // Call to load from the XIB/NIB file
-        public SetupSubTutorialController (SetupController controller) : base ("SetupSubTutorial", NSBundle.MainBundle)
+        public SetupSubTutorialBeginController (SetupController controller) : base ("SetupSubTutorialBegin", NSBundle.MainBundle)
         {
             this.Controller = controller;
             Initialize ();
@@ -43,6 +43,7 @@ namespace CmisSync
         {
             base.AwakeFromNib ();
 
+            this.SkipButton.Title = Properties_Resources.SkipTutorial;
             this.ContinueButton.Title = Properties_Resources.Continue;
 
             NSImage image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "tutorial-slide-" + Controller.TutorialCurrentPage + ".png")) {
@@ -51,13 +52,17 @@ namespace CmisSync
             TutorialView.Image = image;
 
             switch (Controller.TutorialCurrentPage) {
-            case 2:
-                TutorialText.StringValue = Properties_Resources.DocumentsAre;
+            case 1:
+                TutorialText.StringValue = Properties_Resources.CmisSyncCreates;
                 break;
-            case 3:
-                TutorialText.StringValue = Properties_Resources.StatusIconShows;
+            default:
                 break;
             }
+        }
+
+        partial void OnSkip (MonoMac.Foundation.NSObject sender)
+        {
+            Controller.TutorialSkipped();
         }
 
         partial void OnContinue (MonoMac.Foundation.NSObject sender)
@@ -65,10 +70,11 @@ namespace CmisSync
             Controller.TutorialPageCompleted();
         }
 
+
         //strongly typed view accessor
-        public new SetupSubTutorial View {
+        public new SetupSubTutorialBegin View {
             get {
-                return (SetupSubTutorial)base.View;
+                return (SetupSubTutorialBegin)base.View;
             }
         }
     }
