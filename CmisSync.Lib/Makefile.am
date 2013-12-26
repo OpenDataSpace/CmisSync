@@ -21,6 +21,8 @@ SOURCES =  \
 	ConfigMigration.cs \
 	Credentials.cs \
 	Defines.cs \
+	Events/ActiveActivitiesManager.cs \
+	Events/BubbledEvent.cs \
 	Events/ConfigChangedEvent.cs \
 	Events/DebugLoggingHandler.cs \
 	Events/FileConflictEvent.cs \
@@ -38,11 +40,15 @@ SOURCES =  \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
+	Streams/ProgressStream.cs \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
 	Sync/CrawlStrategy.cs \
 	Sync/SynchronizedFolder.cs \
 	Sync/WatcherStrategy.cs \
+	Tasks/FileDownloader.cs \
+	Tasks/FileUploader.cs \
+	Tasks/SimpleFileDownloader.cs \
 	Utils.cs \
 	Watcher.cs
 

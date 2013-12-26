@@ -22,6 +22,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Collections.ObjectModel;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
@@ -92,6 +93,7 @@ namespace CmisSync
 
         public event Action FolderListChanged = delegate { };
 
+        public event Action OnTransmissionListChanged = delegate { };
 
         public event Action OnIdle = delegate { };
         public event Action OnSyncing = delegate { };
@@ -168,6 +170,9 @@ namespace CmisSync
         private IActivityListener activityListenerAggregator;
 
 
+        private ActiveActivitiesManager activitiesManager;
+
+
         /// <summary>
         /// Component to create new CmisSync synchronized folders.
         /// </summary>
@@ -193,6 +198,14 @@ namespace CmisSync
         {
             activityListenerAggregator = new ActivityListenerAggregator(this);
             FoldersPath = ConfigManager.CurrentConfig.FoldersPath;
+            activitiesManager = new ActiveActivitiesManager();
+            this.activitiesManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+                OnTransmissionListChanged();
+            };
+        }
+
+        public List<FileTransmissionEvent> ActiveTransmissions() {
+            return this.activitiesManager.ActiveTransmissions.ToList<FileTransmissionEvent>();
         }
 
 
@@ -266,6 +279,11 @@ namespace CmisSync
                 UpdateState();
             };
 
+            repo.EventManager.AddEventHandler(
+                new GenericSyncEventHandler<FileTransmissionEvent>( 50, delegate(ISyncEvent e){
+                this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
+                return false;
+            }));
             this.repositories.Add(repo);
             repo.Initialize();
         }
