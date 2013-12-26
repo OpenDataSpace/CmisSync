@@ -585,11 +585,11 @@ namespace CmisSync
 
                 FolderFetched(this.fetcher.RemoteUrl.ToString());
 
-                // Initialize in the UI.
-                AddRepository(repoInfo);
-
                 this.fetcher.Dispose();
                 this.fetcher = null;
+
+                // Initialize in the UI.
+                AddRepository(repoInfo);
             }
 
             // Update UI.

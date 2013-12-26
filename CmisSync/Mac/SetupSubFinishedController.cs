@@ -51,7 +51,8 @@ namespace CmisSync
             this.OpenButton.SizeToFit ();
             this.FinishButton.Title = Properties_Resources.Finish;
 
-            NSApplication.SharedApplication.RequestUserAttention(NSRequestUserAttentionType.CriticalRequest);
+            //  TODO: comment the blow line, since it may cause crash?
+//            NSApplication.SharedApplication.RequestUserAttention(NSRequestUserAttentionType.CriticalRequest);
         }
 
         partial void OnOpen (MonoMac.Foundation.NSObject sender)
