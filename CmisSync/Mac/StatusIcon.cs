@@ -76,7 +76,7 @@ namespace CmisSync {
             Controller.UpdateIconEvent += delegate (int icon_frame) {
                 using (var a = new NSAutoreleasePool ())
                 {
-                    InvokeOnMainThread (delegate {
+                    BeginInvokeOnMainThread (delegate {
                         if (icon_frame > -1) {
                             this.status_item.Image               = this.animation_frames [icon_frame];
                             this.status_item.Image.Size          = new SizeF (16, 16);
@@ -284,6 +284,7 @@ namespace CmisSync {
             {
                 NSAlert alert = NSAlert.WithMessage(Properties_Resources.RemoveSyncQuestion,"No, please continue syncing","Yes, stop syncing",null,"");
                 alert.Icon = this.caution_image;
+                alert.Window.OrderFrontRegardless();
                 int i = alert.RunModal();
                 if(i == 0)
                     Controller.RemoveFolderFromSyncClicked(name);
