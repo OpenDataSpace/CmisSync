@@ -36,6 +36,12 @@ namespace CmisSync
 
         #endregion
 
+        protected override void Dispose (bool disposing)
+        {
+            base.Dispose (disposing);
+            Console.WriteLine (this.GetType ().ToString () + " disposed " + disposing.ToString ());
+        }
+
         public override void AwakeFromNib ()
         {
             base.AwakeFromNib ();

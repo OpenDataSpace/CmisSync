@@ -58,6 +58,9 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\Extras\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppDelegate.cs">

@@ -54,6 +54,12 @@ namespace CmisSync
 
         #endregion
 
+        protected override void Dispose (bool disposing)
+        {
+            base.Dispose (disposing);
+            Console.WriteLine (this.GetType ().ToString () + " disposed " + disposing.ToString ());
+        }
+
         public EditController Controller = new EditController();
 
         public string FolderName;
@@ -90,68 +96,13 @@ namespace CmisSync
             List<RootFolder> repos = new List<RootFolder>();
             repos.Add(Repo);
 
-            DataDelegate = new OutlineViewDelegate ();
-            DataSource = new CmisTree.CmisTreeDataSource(repos);
-
             Loader = new AsyncNodeLoader(Repo, credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
-            Loader.UpdateNodeEvent += delegate {
-                InvokeOnMainThread(delegate {
-                    DataSource.UpdateCmisTree(Repo);
-                    for (int i = 0; i < Outline.RowCount; ++i) {
-                        Outline.ReloadItem(Outline.ItemAtRow(i));
-                    }
-                });
-            };
-            Loader.Load(Repo);
-
-            DataDelegate.ItemExpanded += delegate(NSNotification notification)
-            {
-                InvokeOnMainThread(delegate {
-                    NSCmisTree cmis = notification.UserInfo["NSObject"] as NSCmisTree;
-                    if (cmis == null) {
-                        Console.WriteLine("ItemExpanded Error");
-                        return;
-                    }
-
-                    NSCmisTree cmisRoot = cmis;
-                    while (cmisRoot.Parent != null) {
-                        cmisRoot = cmisRoot.Parent;
-                    }
-                    if (Repo.Name != cmisRoot.Name) {
-                        Console.WriteLine("ItemExpanded find root Error");
-                        return;
-                    }
-
-                    Node node = cmis.GetNode(Repo);
-                    if (node == null) {
-                        Console.WriteLine("ItemExpanded find node Error");
-                        return;
-                    }
-                    Loader.Load(node);
-                });
-            };
-            DataSource.SelectedEvent += delegate (NSCmisTree cmis, int selected) {
-                InvokeOnMainThread(delegate {
-                    Node node = cmis.GetNode(Repo);
-                    if (node == null) {
-                        Console.WriteLine("SelectedEvent find node Error");
-                    }
-                    node.Selected = (selected != 0);
-                    DataSource.UpdateCmisTree(Repo);
-
-                    for (int i = 0; i < Outline.RowCount; ++i) {
-                        try{
-                            Outline.ReloadItem(Outline.ItemAtRow(i));
-                        }catch(Exception e) {
-                            Console.WriteLine(e);
-                        }
-                    }
-                });
-            };
 
             CancelButton.Title = Properties_Resources.DiscardChanges;
             FinishButton.Title = Properties_Resources.SaveChanges;
 
+            DataDelegate = new OutlineViewDelegate ();
+            DataSource = new CmisTree.CmisTreeDataSource(repos);
             Outline.DataSource = DataSource;
             Outline.Delegate = DataDelegate;
 
@@ -161,19 +112,101 @@ namespace CmisSync
                 this.Window.PerformClose (this);
                 this.Dispose();
             };
+
+            InsertEvent ();
+
+            //  must be called after InsertEvent()
+            Loader.Load(Repo);
+        }
+
+        void InsertEvent ()
+        {
+            DataSource.SelectedEvent += OutlineSelected;
+            DataDelegate.ItemExpanded += OutlineItemExpanded;
+            Loader.UpdateNodeEvent += AsyncNodeUpdate;
+        }
+
+        void RemoveEvent ()
+        {
+            DataSource.SelectedEvent -= OutlineSelected;
+            DataDelegate.ItemExpanded -= OutlineItemExpanded;
+            Loader.UpdateNodeEvent -= AsyncNodeUpdate;
+        }
+
+        void AsyncNodeUpdate ()
+        {
+            InvokeOnMainThread (delegate
+            {
+                DataSource.UpdateCmisTree (Repo);
+                for (int i = 0; i < Outline.RowCount; ++i) {
+                    Outline.ReloadItem (Outline.ItemAtRow (i));
+                }
+            });
+        }
+
+        void OutlineItemExpanded (NSNotification notification)
+        {
+            InvokeOnMainThread (delegate
+            {
+                NSCmisTree cmis = notification.UserInfo ["NSObject"] as NSCmisTree;
+                if (cmis == null) {
+                    Console.WriteLine ("ItemExpanded Error");
+                    return;
+                }
+
+                NSCmisTree cmisRoot = cmis;
+                while (cmisRoot.Parent != null) {
+                    cmisRoot = cmisRoot.Parent;
+                }
+                if (Repo.Name != cmisRoot.Name) {
+                    Console.WriteLine ("ItemExpanded find root Error");
+                    return;
+                }
+
+                Node node = cmis.GetNode (Repo);
+                if (node == null) {
+                    Console.WriteLine ("ItemExpanded find node Error");
+                    return;
+                }
+                Loader.Load (node);
+            });
+        }
+
+        void OutlineSelected (NSCmisTree cmis, int selected)
+        {
+            InvokeOnMainThread (delegate
+            {
+                Node node = cmis.GetNode (Repo);
+                if (node == null) {
+                    Console.WriteLine ("SelectedEvent find node Error");
+                }
+                node.Selected = (selected != 0);
+                DataSource.UpdateCmisTree (Repo);
+
+                for (int i = 0; i < Outline.RowCount; ++i) {
+                    try {
+                        Outline.ReloadItem (Outline.ItemAtRow (i));
+                    } catch (Exception e) {
+                        Console.WriteLine (e);
+                    }
+                }
+            });
         }
 
         partial void OnCancel (MonoMac.Foundation.NSObject sender)
         {
-            Controller.CloseWindow();
+            Loader.Cancel ();
+            RemoveEvent ();
+            Controller.CloseWindow ();
         }
 
         partial void OnFinish (MonoMac.Foundation.NSObject sender)
         {
-            Loader.Cancel();
-            Ignores = NodeModelUtils.GetIgnoredFolder(Repo);
-            Controller.SaveFolder();
-            Controller.CloseWindow();
+            Loader.Cancel ();
+            RemoveEvent ();
+            Ignores = NodeModelUtils.GetIgnoredFolder (Repo);
+            Controller.SaveFolder ();
+            Controller.CloseWindow ();
         }
 
         //strongly typed window accessor

@@ -39,6 +39,12 @@ namespace CmisSync
 
         #endregion
 
+        protected override void Dispose (bool disposing)
+        {
+            base.Dispose (disposing);
+            Console.WriteLine (this.GetType ().ToString () + " disposed " + disposing.ToString ());
+        }
+
         private List<RootFolder> Repositories;
         private CmisTreeDataSource DataSource;
         private OutlineViewDelegate DataDelegate;
@@ -84,82 +90,106 @@ namespace CmisSync
                         }
                     });
                 };
-                asyncLoader.Load(repo);
                 Loader.Add(repo.Id, asyncLoader);
             }
-            DataSource = new CmisTree.CmisTreeDataSource(Repositories);
-            DataSource.SelectedEvent += delegate (NSCmisTree cmis, int selected) {
-                InvokeOnMainThread(delegate {
-                    RootFolder selectedRoot = null;
-                    foreach (RootFolder root in Repositories) {
-                        Node node = cmis.GetNode(root);
-                        if (node != null) {
-                            if (node.Parent == null && node.Selected == false) {
-                                selectedRoot = root;
-                            }
-                            node.Selected = (selected != 0);
-                            DataSource.UpdateCmisTree(root);
-                        }
-                    }
 
-                    if (selectedRoot != null) {
-                        foreach (RootFolder root in Repositories) {
-                            if (root != selectedRoot) {
-                                root.Selected = false;
-                                DataSource.UpdateCmisTree(root);
-                            }
-                        }
-                        Outline.ReloadData();
-                    } else {
-                        for (int i = 0; i < Outline.RowCount; ++i) {
-                            Outline.ReloadItem(Outline.ItemAtRow(i));
-                        }
-                    }
-                });
-            };
+            DataSource = new CmisTree.CmisTreeDataSource(Repositories);
             DataDelegate = new OutlineViewDelegate ();
             Outline.DataSource = DataSource;
             Outline.Delegate = DataDelegate;
 
             ContinueButton.Enabled = (Repositories.Count > 0);
 
-            DataDelegate.ItemExpanded += delegate(NSNotification notification)
-            {
-                InvokeOnMainThread(delegate {
-                    NSCmisTree cmis = notification.UserInfo["NSObject"] as NSCmisTree;
-                    if (cmis == null) {
-                        Console.WriteLine("ItemExpanded Error");
-                        return;
-                    }
-
-                    NSCmisTree cmisRoot = cmis;
-                    while (cmisRoot.Parent != null) {
-                        cmisRoot = cmisRoot.Parent;
-                    }
-                    RootFolder root = Repositories.Find(x=>x.Name.Equals(cmisRoot.Name));
-                    if (root == null) {
-                        Console.WriteLine("ItemExpanded find root Error");
-                        return;
-                    }
-
-                    Node node = cmis.GetNode(root);
-                    if (node == null) {
-                        Console.WriteLine("ItemExpanded find node Error");
-                        return;
-                    }
-                    Loader[root.Id].Load(node);
-                });
-            };
-
             this.BackButton.Title = Properties_Resources.Back;
             this.CancelButton.Title = Properties_Resources.Cancel;
             this.ContinueButton.Title = Properties_Resources.Continue;
+
+            InsertEvent ();
+
+            //  must be called after InsertEvent()
+            foreach (RootFolder repo in Repositories) {
+                Loader [repo.Id].Load (repo);
+            }
         }
 
         SetupController Controller;
 
+        void OutlineSelected (NSCmisTree cmis, int selected)
+        {
+            InvokeOnMainThread (delegate
+            {
+                RootFolder selectedRoot = null;
+                foreach (RootFolder root in Repositories) {
+                    Node node = cmis.GetNode (root);
+                    if (node != null) {
+                        if (node.Parent == null && node.Selected == false) {
+                            selectedRoot = root;
+                        }
+                        node.Selected = (selected != 0);
+                        DataSource.UpdateCmisTree (root);
+                    }
+                }
+
+                if (selectedRoot != null) {
+                    foreach (RootFolder root in Repositories) {
+                        if (root != selectedRoot) {
+                            root.Selected = false;
+                            DataSource.UpdateCmisTree (root);
+                        }
+                    }
+                    Outline.ReloadData ();
+                } else {
+                    for (int i = 0; i < Outline.RowCount; ++i) {
+                        Outline.ReloadItem (Outline.ItemAtRow (i));
+                    }
+                }
+            });
+        }
+
+        void OutlineItemExpanded (NSNotification notification)
+        {
+            InvokeOnMainThread (delegate
+            {
+                NSCmisTree cmis = notification.UserInfo ["NSObject"] as NSCmisTree;
+                if (cmis == null) {
+                    Console.WriteLine ("ItemExpanded Error");
+                    return;
+                }
+
+                NSCmisTree cmisRoot = cmis;
+                while (cmisRoot.Parent != null) {
+                    cmisRoot = cmisRoot.Parent;
+                }
+                RootFolder root = Repositories.Find (x => x.Name.Equals (cmisRoot.Name));
+                if (root == null) {
+                    Console.WriteLine ("ItemExpanded find root Error");
+                    return;
+                }
+
+                Node node = cmis.GetNode (root);
+                if (node == null) {
+                    Console.WriteLine ("ItemExpanded find node Error");
+                    return;
+                }
+                Loader [root.Id].Load (node);
+            });
+        }
+
+        void InsertEvent ()
+        {
+            DataSource.SelectedEvent += OutlineSelected;
+            DataDelegate.ItemExpanded += OutlineItemExpanded;
+        }
+
+        void RemoveEvent ()
+        {
+            DataSource.SelectedEvent -= OutlineSelected;
+            DataDelegate.ItemExpanded -= OutlineItemExpanded;
+        }
+
         partial void OnBack (MonoMac.Foundation.NSObject sender)
         {
+            RemoveEvent();
             foreach (AsyncNodeLoader task in Loader.Values)
                 task.Cancel();
             Controller.BackToPage1();
@@ -167,6 +197,7 @@ namespace CmisSync
 
         partial void OnCancel (MonoMac.Foundation.NSObject sender)
         {
+            RemoveEvent();
             foreach (AsyncNodeLoader task in Loader.Values)
                 task.Cancel();
             Controller.PageCancelled();
@@ -177,6 +208,7 @@ namespace CmisSync
             RootFolder root = Repositories.Find(x=>(x.Selected != false));
             if (root != null)
             {
+                RemoveEvent();
                 foreach (AsyncNodeLoader task in Loader.Values)
                     task.Cancel();
                 Controller.saved_repository = root.Id;
