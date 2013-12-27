@@ -796,9 +796,10 @@ namespace CmisSync.Lib.Sync
                         DotCMIS.Data.IContentStream contentStream = null;
                         string filepath = Path.Combine(localFolder, fileName);
                         string tmpfilepath = filepath + ".sync";
-                        if(database.GetOperationRetryCounter(filepath,Database.OperationType.DOWNLOAD) > repoinfo.MaxDownloadRetries)
+                        long failedCounter = database.GetOperationRetryCounter(filepath,Database.OperationType.DOWNLOAD);
+                        if( failedCounter > repoinfo.MaxDownloadRetries)
                         {
-                            Logger.Info(String.Format("Skipping download of file {0} because of too many failed ({1}) downloads",database.GetOperationRetryCounter(filepath,Database.OperationType.DOWNLOAD)));
+                            Logger.Info(String.Format("Skipping download of file {0} because of too many failed ({1}) downloads", filepath, failedCounter));
                             return true;
                         }
                         // Break and warn if download target exists as folder.
