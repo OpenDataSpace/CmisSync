@@ -97,6 +97,9 @@
     <Compile Include="Streams\ProgressStream.cs" />
     <Compile Include="Tasks\SimpleFileDownloader.cs" />
     <Compile Include="Streams\BandwidthLimitedStream.cs" />
+    <Compile Include="Tasks\ChunkedUploader.cs" />
+    <Compile Include="Tasks\ChunkedDownloader.cs" />
+    <Compile Include="Tasks\SimpleFileUploader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

@@ -2,10 +2,11 @@ using System;
 using System.IO;
 using DotCMIS.Client;
 using CmisSync.Lib.Events;
+using System.Security.Cryptography;
 
 namespace CmisSync.Lib.Tasks
 {
-    public interface FileDownloader
+    public interface FileDownloader : IDisposable
     {
         /// <summary>
         /// Downloads the file and returns the SHA1 hash of the content of the saved file
@@ -25,7 +26,7 @@ namespace CmisSync.Lib.Tasks
         /// <exception cref="IOException">On any disc or network io exception</exception>
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        byte[] DownloadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus);
+        void DownloadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg);
     }
 }
 

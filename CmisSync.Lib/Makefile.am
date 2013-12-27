@@ -47,9 +47,12 @@ SOURCES =  \
 	Sync/CrawlStrategy.cs \
 	Sync/SynchronizedFolder.cs \
 	Sync/WatcherStrategy.cs \
+	Tasks/ChunkedDownloader.cs \
+	Tasks/ChunkedUploader.cs \
 	Tasks/FileDownloader.cs \
 	Tasks/FileUploader.cs \
 	Tasks/SimpleFileDownloader.cs \
+	Tasks/SimpleFileUploader.cs \
 	Utils.cs \
 	Watcher.cs
 
