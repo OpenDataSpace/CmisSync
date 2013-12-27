@@ -167,6 +167,7 @@ namespace CmisSync.Lib.Sync
                     }
                 }
                 repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(10, RepoInfoChanged));
+                repoCmis.EventManager.AddEventHandler(new Events.Filter.FailedOperationsFilter(database, Queue));
             }
 
             /// <summary>
@@ -768,11 +769,16 @@ namespace CmisSync.Lib.Sync
                 }
             }
 
+            private void RequestFileDownload(IDocument remoteDocument, string localFolder) {
+                this.Queue.AddEvent(new FileDownloadRequest(remoteDocument, localFolder));
+            }
+
             /// <summary>
             /// Download a single file from the CMIS server.
             /// </summary>
             private bool DownloadFile(IDocument remoteDocument, string localFolder)
             {
+                RequestFileDownload(remoteDocument, localFolder);
                 using (new ActivityListenerResource(activityListener))
                 {
                     string fileName = remoteDocument.Name;
@@ -795,11 +801,16 @@ namespace CmisSync.Lib.Sync
                             Logger.Info(String.Format("Skipping download of file {0} because of too many failed ({1}) downloads",database.GetOperationRetryCounter(filepath,Database.OperationType.DOWNLOAD)));
                             return true;
                         }
-                        // If there was previously a directory with this name, delete it.
-                        // TODO warn if local changes inside the folder.
+                        // Break and warn if download target exists as folder.
                         if (Directory.Exists(filepath))
                         {
-                            Directory.Delete(filepath);
+                            throw new IOException(String.Format("Cannot download file \"{0}\", because a folder with this name exists locally", filepath));
+                        }
+
+                        // Break and warn if download target exists as folder.
+                        if (Directory.Exists(tmpfilepath))
+                        {
+                            throw new IOException(String.Format("Cannot download file \"{0}\", because a folder with this name exists locally", tmpfilepath));
                         }
 
                         if (File.Exists(tmpfilepath))
@@ -819,88 +830,26 @@ namespace CmisSync.Lib.Sync
                                 }
                             }
                         }
+                        database.SetDownloadServerSideModificationDate(filepath, remoteDocument.LastModificationDate);
+                        Tasks.FileDownloader downloader;
+                        if (repoinfo.DownloadChunkSize <= 0)
+                            downloader = new Tasks.SimpleFileDownloader();
+                        else 
+                            downloader = new Tasks.ChunkedDownloader(repoinfo.DownloadChunkSize);
 
                         // Download file.
                         Boolean success = false;
                         byte[] filehash = { };
-                        try
-                        {
-                            long? fileLength = remoteDocument.ContentStreamLength;
-                            transmissionEvent.Status.Length = fileLength;
-                            if (null == fileLength)
-                            {
-                                Logger.Warn("Skipping download of file with null content stream: " + fileName);
-                                return true;
-                            }
 
-                            // Skip downloading the content, just go on with an empty file
-                            if (0 == fileLength)
-                            {
-                                Logger.Info("Skipping download of file with content length zero: " + fileName);
-                                using (FileStream s = File.Open(tmpfilepath, FileMode.Create))
-                                {
-                                    s.Close();
-                                }
-                                using (SHA1 sha = new SHA1CryptoServiceProvider())
-                                {
-                                    filehash = sha.ComputeHash(new byte[0]);
-                                }
-                                success = true;
-                            }
-                            else
-                            {
+                        try{
+                            HashAlgorithm hashAlg = new SHA1Managed();
+                            Logger.Debug("Creating local download file: " + tmpfilepath);
+                            using (Stream file = new FileStream(tmpfilepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)){
                                 this.Queue.AddEvent(transmissionEvent);
-
-                                Logger.Debug("Creating local download file: " + tmpfilepath);
-                                using (Stream file = new FileStream(tmpfilepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                                using (SHA1 hashAlg = new SHA1Managed())
-                                {
-                                    if (repoinfo.DownloadChunkSize <= 0 )
-                                    {
-                                        using (ProgressStream progressStream = new ProgressStream(file, transmissionEvent))
-                                        using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
-                                        {
-                                            contentStream = remoteDocument.GetContentStream();
-                                            transmissionEvent.Status.Length = remoteDocument.ContentStreamLength;
-
-                                            // If this file does not have a content stream, ignore it.
-                                            // Even 0 bytes files have a contentStream.
-                                            // null contentStream sometimes happen on IBM P8 CMIS server, not sure why.
-                                            if (contentStream == null)
-                                            {
-                                                Logger.Warn("Skipping download of file with null content stream: " + fileName);
-                                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
-                                                return true;
-                                            }
-                                            using (contentStream.Stream)
-                                            {
-                                                byte[] buffer = new byte[8 * 1024];
-                                                int len;
-                                                while ((len = contentStream.Stream.Read(buffer, 0, buffer.Length)) > 0)
-                                                {
-                                                    hashstream.Write(buffer, 0, len);
-                                                }
-                                                success = true;
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        database.SetDownloadServerSideModificationDate(filepath, remoteDocument.LastModificationDate);
-                                        byte[] buffer = new byte[8 * 1024];
-                                        int len;
-                                        while ((len = file.Read(buffer, 0, buffer.Length)) > 0)
-                                        {
-                                            hashAlg.TransformBlock(buffer, 0, len, buffer, 0);
-                                        }
-                                        using (ProgressStream progessstream = new ProgressStream(file, transmissionEvent))
-                                        using (CryptoStream hashstream = new CryptoStream(progessstream, hashAlg, CryptoStreamMode.Write))
-                                        {
-                                            success = DownloadStreamInChunks(tmpfilepath, hashstream, remoteDocument, transmissionEvent);
-                                        }
-                                    }
-                                    filehash = hashAlg.Hash;
-                                }
+                                downloader.DownloadFile(remoteDocument, file, transmissionEvent, hashAlg);
+                                filehash = hashAlg.Hash;
+                                success = true;
+                                file.Close();
                             }
                         }
                         catch (ObjectDisposedException ex)
@@ -930,7 +879,6 @@ namespace CmisSync.Lib.Sync
                         if (success)
                         {
                             Logger.Info(String.Format("Downloaded remote object({0}): {1}", remoteDocument.Id, fileName));
-                            // TODO Control file integrity by using hash compare?
 
                             // Get metadata.
                             Dictionary<string, string[]> metadata = null;
@@ -969,10 +917,6 @@ namespace CmisSync.Lib.Sync
                                     SetLastModifiedDate(remoteDocument, filepath, metadata);
                                     Queue.AddEvent(new RecentChangedEvent(filepath));
                                     repo.OnConflictResolved();
-                                    // TODO move to OS-dependant layer
-                                    //System.Windows.Forms.MessageBox.Show("Someone modified a file at the same time as you: " + filePath
-                                    //    + "\n\nYour version has been saved with a '_your-version' suffix, please merge your important changes from it and then delete it.");
-                                    // TODO show CMIS property lastModifiedBy
                                 }
                                 else
                                 {

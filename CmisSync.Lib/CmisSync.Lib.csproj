@@ -100,6 +100,14 @@
     <Compile Include="Tasks\ChunkedUploader.cs" />
     <Compile Include="Tasks\ChunkedDownloader.cs" />
     <Compile Include="Tasks\SimpleFileUploader.cs" />
+    <Compile Include="Events\FileDownloadRequest.cs" />
+    <Compile Include="Events\EventFilter\IgnoredFilesFilter.cs" />
+    <Compile Include="Events\EventFilter\IgnoredFileNamesFilter.cs" />
+    <Compile Include="Events\EventFilter\AbstractFileFilter.cs" />
+    <Compile Include="Events\RequestIgnoredEvent.cs" />
+    <Compile Include="Events\EventFilter\InvalidFolderNameFilter.cs" />
+    <Compile Include="Events\EventFilter\FailedOperationsFilter.cs" />
+    <Compile Include="Events\EventFilter\IgnoredFoldersFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -134,5 +142,6 @@
   <ItemGroup>
     <Folder Include="Tasks\" />
     <Folder Include="Streams\" />
+    <Folder Include="Events\EventFilter\" />
   </ItemGroup>
 </Project>
