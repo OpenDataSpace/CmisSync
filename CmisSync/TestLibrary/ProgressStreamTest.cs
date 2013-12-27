@@ -221,6 +221,10 @@ namespace TestLibrary
                     progress.Seek (10, SeekOrigin.Current);
                     Assert.AreEqual (65, Position);
                     Assert.AreEqual (6.5, Percent);
+
+                    progress.Seek(0, SeekOrigin.End);
+                    Assert.AreEqual(100, Percent);
+                    Assert.AreEqual(1000, Position);
                 }
             }
         }
