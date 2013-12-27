@@ -20,9 +20,9 @@ using NUnit.Framework;
 namespace TestLibrary
 {
     [TestFixture]
-    public class SimpleFileDownloaderTest
+    public class SimpleFileDownloaderTest : IDisposable
     {
-
+        private bool disposed = false;
         private FileTransmissionEvent transmissionEvent;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
@@ -124,6 +124,37 @@ namespace TestLibrary
             } catch (ObjectDisposedException) {
             }
         }
+
+        #region boilerplate
+
+         // Implement IDisposable.
+        // Do not make this method virtual.
+        // A derived class should not be able to override this method.
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        // Dispose(bool disposing) executes in two distinct scenarios.
+        // If disposing equals true, the method has been called directly
+        // or indirectly by a user's code. Managed and unmanaged resources
+        // can be disposed.
+        // If disposing equals false, the method has been called by the
+        // runtime from inside the finalizer and you should not reference
+        // other objects. Only unmanaged resources can be disposed.
+        protected virtual void Dispose(bool disposing)
+        {
+            if(disposing) {
+                if(!disposed) {
+                    if(this.localFileStream != null)
+                        this.localFileStream.Dispose();
+                    if(this.remoteStream != null)
+                        this.remoteStream.Dispose();
+                    disposed = true;
+                }
+            }
+        }
+        #endregion
     }
 }
 
