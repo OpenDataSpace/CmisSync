@@ -59,7 +59,14 @@ namespace CmisSync.Lib.Tasks
                     hashAlg.TransformBlock (buffer, 0, len, buffer, 0);
                 }
             }
+
             long? fileLength = remoteDocument.ContentStreamLength;
+            // Skip downloading empty content, just go on with an empty file
+            if (null == fileLength || fileLength == 0 ) {
+                hashAlg.TransformFinalBlock(new byte[0], 0, 0);
+                return;
+            }
+
             long offset = localFileStream.Position;
             long remainingBytes = (fileLength != null) ? (long) fileLength - offset : chunkSize;
             using (ProgressStream progessstream = new ProgressStream(localFileStream, TransmissionStatus))
