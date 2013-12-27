@@ -40,6 +40,7 @@ SOURCES =  \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
+	Streams/BandwidthLimitedStream.cs \
 	Streams/ProgressStream.cs \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \

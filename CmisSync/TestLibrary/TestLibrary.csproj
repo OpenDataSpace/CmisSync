@@ -76,6 +76,7 @@
     <Compile Include="DebugLoggingHandlerTest.cs" />
     <Compile Include="FSDeletionHandlerTest.cs" />
     <Compile Include="ProgressStreamTest.cs" />
+    <Compile Include="BandwidthLimitedStreamTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
