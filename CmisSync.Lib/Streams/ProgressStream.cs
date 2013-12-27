@@ -25,7 +25,11 @@ namespace CmisSync.Lib
                     throw new ArgumentNullException ("The event, where to publish the prgress cannot be null");
                 Stream = stream;
                 TransmissionEvent = e;
-                e.Status.Length = stream.Length;
+                try{
+                    e.Status.Length = stream.Length;
+                }catch(NotSupportedException){
+                    e.Status.Length = null;
+                }
                 blockingDetectionTimer = new Timer(2000);
                 blockingDetectionTimer.Elapsed += delegate(object sender, ElapsedEventArgs args) {
                     this.TransmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = 0 });
