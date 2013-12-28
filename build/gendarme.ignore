@@ -64,7 +64,7 @@ R: Gendarme.Rules.Design.ImplementIComparableCorrectlyRule
 T: CmisSync.Lib.Events.SyncEventHandler
 
 #Ignore Dispose pattern for checked classes
-R: Gendarme.Rules.Correctness.TypesWithDisposableFieldsShouldBeDisposableRule
+R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: CmisSync.Lib.Events.Filter.AbstractFileFilter
 T: CmisSync.Lib.Events.Filter.FailedOperationsFilter
 
