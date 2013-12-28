@@ -36,8 +36,14 @@ namespace TestLibrary
         public void SetUp ()
         {
             transmissionEvent = new FileTransmissionEvent (FileTransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            if(localFileStream!=null)
+                localFileStream.Dispose();
             localFileStream = new MemoryStream ();
+            if(hashAlg!=null)
+                hashAlg.Dispose();
             hashAlg = new SHA1CryptoServiceProvider ();
+            if(random!=null)
+                random.Dispose();
             random = RandomNumberGenerator.Create();
             remoteLength = 1024 * 1024;
             remoteContent = new byte[remoteLength];
@@ -171,6 +177,10 @@ namespace TestLibrary
                 if(!disposed) {
                     if(this.localFileStream != null)
                         this.localFileStream.Dispose();
+                    if(random!=null)
+                        random.Dispose();
+                    if(hashAlg!=null)
+                        hashAlg.Dispose();
                     disposed = true;
                 }
             }
