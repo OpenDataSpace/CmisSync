@@ -833,10 +833,14 @@ namespace CmisSync.Lib.Sync
                         }
                         database.SetDownloadServerSideModificationDate(filepath, remoteDocument.LastModificationDate);
                         Tasks.FileDownloader downloader;
-                        if (repoinfo.DownloadChunkSize <= 0)
+                        if (repoinfo.DownloadChunkSize <= 0){
+                            Logger.Debug("Simple File Downloader");
                             downloader = new Tasks.SimpleFileDownloader();
-                        else 
+                        }else {
+                            Logger.Debug("Chunked File Downloader");
                             downloader = new Tasks.ChunkedDownloader(repoinfo.DownloadChunkSize);
+                        }
+                            
 
                         // Download file.
                         Boolean success = false;

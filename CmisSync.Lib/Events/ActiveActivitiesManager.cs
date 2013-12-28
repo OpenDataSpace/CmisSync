@@ -40,9 +40,12 @@ namespace CmisSync.Lib.Events
             {
                 lock (Lock)
                 {
-                    this.Transmissions.Remove(sender as FileTransmissionEvent);
-                    activeTransmissions.Remove(sender as FileTransmissionEvent);
-                    Logger.Debug("Transmission removed");
+                    FileTransmissionEvent transmission = sender as FileTransmissionEvent;
+                    if(transmission!=null && this.Transmissions.Remove(transmission)) {
+                        activeTransmissions.Remove(transmission);
+                        transmission.TransmissionStatus-=TransmissionFinished;
+                        Logger.Debug("Transmission removed");
+                    }
                 }
             }
         }
