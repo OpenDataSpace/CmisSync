@@ -49,6 +49,7 @@ SOURCES =  \
 	RepoBase.cs \
 	RepoInfo.cs \
 	Streams/BandwidthLimitedStream.cs \
+	Streams/OffsetStream.cs \
 	Streams/ProgressStream.cs \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
