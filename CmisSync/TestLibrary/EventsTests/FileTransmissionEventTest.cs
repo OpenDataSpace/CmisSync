@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using CmisSync.Lib.Events;
 
-namespace TestLibrary
+namespace TestLibrary.EventsTests
 {
     using NUnit.Framework;
 

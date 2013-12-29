@@ -110,6 +110,21 @@ namespace CmisSync.Lib.Events
         {
             return base.GetHashCode ();
         }
+
+        public override string ToString()
+        {
+            string status = "";
+            if(Paused == true)
+                status += "Paused";
+            if(Resumed == true)
+                status += "Resumed";
+            if(Aborted == true)
+                status += "Aborted";
+            if(Completed == true)
+                status += "Completed";
+            return String.Format("[TransmissionProgressEventArgs: [Length: {0}] [ActualPosition: {1}] [Percent: {2}] [Status: {3}]] [Exception: {4}]",
+                                 Length, ActualPosition, Percent, status, FailedException);
+        }
     }
 
     public enum FileTransmissionType

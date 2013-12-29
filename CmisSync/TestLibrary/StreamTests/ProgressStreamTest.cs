@@ -7,7 +7,7 @@ using CmisSync.Lib.Streams;
 
 using NUnit.Framework;
 
-namespace TestLibrary
+namespace TestLibrary.StreamTests
 {
     using Moq;
     [TestFixture]
@@ -225,6 +225,43 @@ namespace TestLibrary
                     progress.Seek(0, SeekOrigin.End);
                     Assert.AreEqual(100, Percent);
                     Assert.AreEqual(1000, Position);
+                }
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void ResumeTest()
+        {
+            byte[] inputContent = new byte[100];
+            long offset = 100;
+            using (Stream stream = new MemoryStream(inputContent)) 
+                using(OffsetStream offsetstream = new OffsetStream(stream, offset))
+            {
+                FileTransmissionEvent TransmissionEvent = new FileTransmissionEvent (TransmissionType, Filename);
+                TransmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
+                    if (args.ActualPosition != null && args.Percent != null) {
+                        Position = (long)args.ActualPosition;
+                        Percent = (double)args.Percent;
+                    }
+                };
+                using (ProgressStream progress = new ProgressStream(offsetstream, TransmissionEvent)) {
+                    progress.Seek(0, SeekOrigin.Begin);
+                    Assert.AreEqual (offset, Position);
+                    Assert.AreEqual (50, Percent);
+                    progress.Seek (10, SeekOrigin.Current);
+                    Assert.AreEqual (offset + 10, Position);
+                    progress.Seek(0, SeekOrigin.End);
+                    Assert.AreEqual(100, Percent);
+                    Assert.AreEqual(offset + inputContent.Length, Position);
+                    progress.Seek(0, SeekOrigin.Begin);
+                    progress.WriteByte(0);
+                    Assert.AreEqual (offset + 1, Position);
+                    Assert.AreEqual (50.5, Percent);
+                    progress.WriteByte(0);
+                    Assert.AreEqual (offset + 2, Position);
+                    Assert.AreEqual (51, Percent);
+                    progress.Write(new byte[10],0,10);
+                    Assert.AreEqual (56, Percent);
                 }
             }
         }

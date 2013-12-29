@@ -41,7 +41,7 @@ using System.Net;
     ]
 ]
  */
-namespace TestLibrary
+namespace TestLibrary.IntegrationTests
 {
     using NUnit.Framework;
     using CmisSync.Lib.Cmis;

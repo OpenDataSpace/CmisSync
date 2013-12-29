@@ -7,7 +7,7 @@ using CmisSync.Lib.Streams;
 
 using NUnit.Framework;
 
-namespace TestLibrary
+namespace TestLibrary.StreamTests
 {
     [TestFixture]
     public class BandwidthLimitedStreamTest

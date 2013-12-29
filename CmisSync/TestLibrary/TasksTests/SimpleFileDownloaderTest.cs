@@ -17,7 +17,7 @@ using Moq;
 
 using NUnit.Framework;
 
-namespace TestLibrary
+namespace TestLibrary.TasksTests
 {
     [TestFixture]
     public class SimpleFileDownloaderTest : IDisposable

@@ -17,7 +17,7 @@ using Moq;
 
 using NUnit.Framework;
 
-namespace TestLibrary
+namespace TestLibrary.TasksTests
 {
     [TestFixture]
     public class ChunkedDownloaderTest : IDisposable
@@ -103,7 +103,8 @@ namespace TestLibrary
             for(int i=0; i < remoteChunk.Length; i++)
                 remoteChunk[i] = remoteContent[i+startPos];
             localFileStream.Write(remoteContent, 0, (int) startPos);
-            localFileStream.Seek(0,SeekOrigin.Begin);
+            localFileStream.Seek(0, SeekOrigin.Begin);
+            Assert.AreEqual(remoteChunk.Length, localFileStream.Length);
             var mock = new Mock<IDocument> ();
             var mockedStream = new Mock<IContentStream> ();
             mockedStream.Setup (stream => stream.Length).Returns (remoteChunk.Length);
@@ -115,6 +116,22 @@ namespace TestLibrary
                 It.Is<long?> ((long? l) => (l == startPos )),
                 It.Is<long?> ((long? l) => l == remoteChunk.Length)))
                 .Returns (mockedStream.Object);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                Console.WriteLine(e.ToString());
+                if(e.ActualPosition!=null) {
+                    Assert.GreaterOrEqual((long)e.ActualPosition, startPos);
+                    Assert.LessOrEqual((long)e.ActualPosition, remoteLength);
+                }
+                if(e.Percent!=null) {
+                    Assert.GreaterOrEqual( e.Percent, 50);
+                    Assert.LessOrEqual( e.Percent, 100);
+                }
+                if(e.Length!=null) {
+                    Assert.GreaterOrEqual( e.Length, startPos);
+                    Assert.LessOrEqual(e.Length, remoteLength);
+                }
+
+            };
             using (FileDownloader downloader = new ChunkedDownloader(chunksize)) {
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);

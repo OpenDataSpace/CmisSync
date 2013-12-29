@@ -51,6 +51,7 @@ SOURCES =  \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/OffsetStream.cs \
 	Streams/ProgressStream.cs \
+	Streams/StreamWrapper.cs \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
 	Sync/CrawlStrategy.cs \

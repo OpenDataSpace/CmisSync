@@ -3,7 +3,7 @@ using log4net.Config;
 
 using System;
 using System.IO;
-namespace TestLibrary
+namespace TestLibrary.EventsTests
 {
     using NUnit.Framework;
     using Moq;

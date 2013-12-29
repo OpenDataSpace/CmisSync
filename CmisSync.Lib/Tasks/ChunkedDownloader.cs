@@ -15,7 +15,6 @@ namespace CmisSync.Lib.Tasks
         private object DisposeLock = new object ();
         private long chunkSize;
 
-
         public long ChunkSize { get { return this.chunkSize; } }
 
         public ChunkedDownloader (long ChunkSize = 1024 * 1024)
@@ -25,24 +24,30 @@ namespace CmisSync.Lib.Tasks
             this.chunkSize = ChunkSize;
         }
 
-        private int DownloadNextChunk (IDocument remoteDocument, long offset, long remainingBytes, FileTransmissionEvent TransmissionStatus, Stream outputstream)
+        private int DownloadNextChunk (IDocument remoteDocument, long offset, long remainingBytes, FileTransmissionEvent TransmissionStatus, Stream outputstream, HashAlgorithm hashAlg)
         {
             lock (DisposeLock) {
                 if (disposed) {
                     throw new ObjectDisposedException ("Downloading");
                 }
+
                 IContentStream contentStream = remoteDocument.GetContentStream (remoteDocument.ContentStreamId, offset, remainingBytes);
                 TransmissionStatus.ReportProgress (new TransmissionProgressEventArgs () {
                     Length = remoteDocument.ContentStreamLength,
-                    ActualPosition = offset
+                    ActualPosition = offset,
+                    Resumed = offset > 0
                 }
                 );
-                using (Stream remoteStream = contentStream.Stream) {
+
+                using (Stream remoteStream = contentStream.Stream)
+                using (OffsetStream offsetstream = new OffsetStream(remoteStream, offset))
+                using (ProgressStream progress = new ProgressStream(offsetstream, TransmissionStatus)) {
                     byte[] buffer = new byte[8 * 1024];
                     int result = 0;
                     int len;
-                    while ((len = remoteStream.Read (buffer, 0, buffer.Length)) > 0) {
+                    while ((len = progress.Read (buffer, 0, buffer.Length)) > 0) {
                         outputstream.Write (buffer, 0, len);
+                        hashAlg.TransformBlock (buffer, 0, len, buffer, 0);
                         result += len;
                     }
                     return result;
@@ -62,22 +67,19 @@ namespace CmisSync.Lib.Tasks
 
             long? fileLength = remoteDocument.ContentStreamLength;
             // Skip downloading empty content, just go on with an empty file
-            if (null == fileLength || fileLength == 0 ) {
-                hashAlg.TransformFinalBlock(new byte[0], 0, 0);
+            if (null == fileLength || fileLength == 0) {
+                hashAlg.TransformFinalBlock (new byte[0], 0, 0);
                 return;
             }
-
             long offset = localFileStream.Position;
-            long remainingBytes = (fileLength != null) ? (long) fileLength - offset : chunkSize;
-            using (ProgressStream progessstream = new ProgressStream(localFileStream, TransmissionStatus))
-            using (CryptoStream hashstream = new CryptoStream(progessstream, hashAlg, CryptoStreamMode.Write)) {
-                try {
-                    do {
-                        offset += DownloadNextChunk (remoteDocument, offset, remainingBytes, TransmissionStatus, hashstream);
-                    } while(fileLength == null);
-                } catch (DotCMIS.Exceptions.CmisConstraintException) {
-                }
+            long remainingBytes = (fileLength != null) ? (long)fileLength - offset : chunkSize;
+            try {
+                do {
+                    offset += DownloadNextChunk (remoteDocument, offset, remainingBytes, TransmissionStatus, localFileStream, hashAlg);
+                } while(fileLength == null);
+            } catch (DotCMIS.Exceptions.CmisConstraintException) {
             }
+            hashAlg.TransformFinalBlock (new byte[0], 0, 0);
         }
 
         // Implement IDisposable.

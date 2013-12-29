@@ -7,53 +7,31 @@ namespace CmisSync.Lib
 {
     namespace Streams
     {
-        public class ProgressStream : Stream
+        public class ProgressStream : StreamWrapper
         {
             private FileTransmissionEvent TransmissionEvent;
-            private Stream Stream;
-            private long readpos = 0;
-            private long writepos = 0;
             private DateTime start = DateTime.Now;
             private long bytesTransmittedSinceLastSecond = 0;
             private Timer blockingDetectionTimer;
 
-            public ProgressStream (Stream stream, FileTransmissionEvent e)
+            public ProgressStream (Stream stream, FileTransmissionEvent e) : base (stream)
             {
-                if (stream == null)
-                    throw new ArgumentNullException ("The stream which progress should be reported cannot be null");
                 if (e == null)
                     throw new ArgumentNullException ("The event, where to publish the prgress cannot be null");
-                Stream = stream;
-                TransmissionEvent = e;
                 try{
                     e.Status.Length = stream.Length;
                 }catch(NotSupportedException){
                     e.Status.Length = null;
                 }
+                TransmissionEvent = e;
                 blockingDetectionTimer = new Timer(2000);
                 blockingDetectionTimer.Elapsed += delegate(object sender, ElapsedEventArgs args) {
-                    this.TransmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = 0 });
+                    this.TransmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = (long) (bytesTransmittedSinceLastSecond/blockingDetectionTimer.Interval) });
+                    bytesTransmittedSinceLastSecond = 0;
                };
             }
 
-            public override bool CanRead {
-                get {
-                    return this.Stream.CanRead;
-                }
-            }
-
-            public override bool CanSeek {
-                get {
-                    return this.Stream.CanSeek;
-                }
-            }
-
-            public override bool CanWrite {
-                get {
-                    return this.Stream.CanWrite;
-                }
-            }
-
+            #region overrideCode
             public override long Length {
                 get {
                     long length = this.Stream.Length;
@@ -77,16 +55,6 @@ namespace CmisSync.Lib
                 }
             }
 
-            public override void Flush ()
-            {
-                this.Stream.Flush ();
-            }
-
-            public override IAsyncResult BeginRead (byte[] buffer, int offset, int count, AsyncCallback callback, object state)
-            {
-                return this.Stream.BeginRead (buffer, offset, count, callback, state);
-            }
-
             public override long Seek (long offset, SeekOrigin origin)
             {
                 long result = this.Stream.Seek (offset, origin);
@@ -97,8 +65,7 @@ namespace CmisSync.Lib
             public override int Read (byte[] buffer, int offset, int count)
             {
                 int result = this.Stream.Read (buffer, offset, count);
-                readpos+=result;
-                CalculateBandwidth(result, readpos);
+                CalculateBandwidth(result);
                 return result;
             }
 
@@ -112,27 +79,22 @@ namespace CmisSync.Lib
             public override void Write (byte[] buffer, int offset, int count)
             {
                 this.Stream.Write (buffer, offset, count);
-                writepos += offset + count;
-                CalculateBandwidth(count, writepos);
+                CalculateBandwidth(count);
             }
+            #endregion
 
-            protected override void Dispose (bool disposing)
-            {
-                base.Dispose (disposing);
-            }
-
-            private void CalculateBandwidth(int transmittedBytes, long pos) {
+            private void CalculateBandwidth(int transmittedBytes) {
                 this.bytesTransmittedSinceLastSecond+=transmittedBytes;
                 TimeSpan diff = DateTime.Now - start ;
                 if(diff.Seconds >= 1) {
                     long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(start,DateTime.Now, bytesTransmittedSinceLastSecond);
-                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos, BitsPerSecond = result});
+                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = Stream.Position, BitsPerSecond = result});
                     this.bytesTransmittedSinceLastSecond = 0;
                     start = start + diff;
                     blockingDetectionTimer.Stop();
                     blockingDetectionTimer.Start();
                 }else{
-                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos});
+                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = Stream.Position});
                 }
             }
         }

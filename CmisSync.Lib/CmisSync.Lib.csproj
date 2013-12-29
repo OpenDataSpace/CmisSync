@@ -109,6 +109,7 @@
     <Compile Include="Events\EventFilter\FailedOperationsFilter.cs" />
     <Compile Include="Events\EventFilter\IgnoredFoldersFilter.cs" />
     <Compile Include="Streams\OffsetStream.cs" />
+    <Compile Include="Streams\StreamWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
