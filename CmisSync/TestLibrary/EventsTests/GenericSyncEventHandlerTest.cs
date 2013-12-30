@@ -43,7 +43,7 @@ namespace TestLibrary.EventsTests
         public void IgnoresExpectedEvents() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
             bool handled = handler.Handle(new Mock<ISyncEvent>().Object);
-            Assert.False(handled);            
+            Assert.False(handled);
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace TestLibrary.EventsTests
         public void IgnoresNonDeleteEvent() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
             bool handled = handler.Handle(new Mock<FSEvent>(WatcherChangeTypes.Created, "").Object);
-            Assert.False(handled);            
+            Assert.False(handled);
         }
 
         private bool EventThrown(ISyncEvent e)
