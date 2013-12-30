@@ -8,7 +8,6 @@ using DotCMIS.Enums;
 using DotCMIS.Exceptions;
 using DotCMIS;
 using System.Collections.Generic;
-using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
