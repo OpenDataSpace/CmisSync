@@ -8,9 +8,10 @@ namespace CmisSync.Lib
 {
     namespace Tasks
     {
-        public interface IFileUploader
+        public interface IFileUploader : IDisposable
         {
-            void UploadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg);
+            IDocument UploadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg, bool overwrite = true);
+            IDocument AppendFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg);
         }
     }
 }
