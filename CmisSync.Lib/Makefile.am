@@ -49,6 +49,7 @@ SOURCES =  \
 	RepoBase.cs \
 	RepoInfo.cs \
 	Streams/BandwidthLimitedStream.cs \
+	Streams/NonClosingHashStream.cs \
 	Streams/OffsetStream.cs \
 	Streams/ProgressStream.cs \
 	Streams/StreamWrapper.cs \
