@@ -12,19 +12,22 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 	   -r:$(srcdir)/lib/xunit.extensions.dll
 
 SOURCES =  \
-  EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
-  EventsTests/EventTypesTest.cs \
-  EventsTests/FileTransmissionEventTest.cs \
-  EventsTests/SyncEventManagerTest.cs \
-  EventsTests/SyncEventQueueTest.cs \
-  EventsTests/GenericSyncEventHandlerTest.cs \
+	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
+	EventsTests/EventTypesTest.cs \
+	EventsTests/FileTransmissionEventTest.cs \
+	EventsTests/SyncEventManagerTest.cs \
+	EventsTests/SyncEventQueueTest.cs \
+	EventsTests/GenericSyncEventHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
-  StreamTests/ChunkedStreamTest.cs \
-  StreamTests/OffsetStreamTest.cs \
-  StreamTests/ProgressStreamTest.cs \
-  TasksTests/ChunkedDownloaderTest.cs \
-  TasksTests/SimpleFileDownloaderTest.cs \
+	StreamTests/ChunkedStreamTest.cs \
+	StreamTests/OffsetStreamTest.cs \
+	StreamTests/ProgressStreamTest.cs \
+	StreamTests/NonClosingHashStreamTest.cs \
+	TasksTests/ChunkedDownloaderTest.cs \
+	TasksTests/SimpleFileDownloaderTest.cs \
+	TasksTests/SimpleFileUploaderTest.cs \
+	TasksTests/ChunkedFileUploaderTest.cs \
 	ActiveActivitiesManagerTest.cs \
 	CmisDatabaseTest.cs \
 	CmisSyncLibUtilsTest.cs \

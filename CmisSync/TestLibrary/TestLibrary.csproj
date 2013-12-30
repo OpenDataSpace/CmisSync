@@ -81,6 +81,9 @@
     <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\InvalidFolderNameFilterTest.cs" />
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
+    <Compile Include="TasksTests\SimpleFileUploaderTest.cs" />
+    <Compile Include="TasksTests\ChunkedFileUploaderTest.cs" />
+    <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
