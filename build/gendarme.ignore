@@ -70,5 +70,5 @@ T: CmisSync.Lib.Events.Filter.FailedOperationsFilter
 
 #Ignore dispose pattern for MemoryStream used in Testcases
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
-M: System.Void TestLibrary.ChunkedDownloaderTest::FullDownloadTest()
-M: System.Void TestLibrary.ChunkedDownloaderTest::ResumeDownloadTest()
+M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::FullDownloadTest()
+M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::ResumeDownloadTest()
