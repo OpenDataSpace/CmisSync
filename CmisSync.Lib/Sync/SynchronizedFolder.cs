@@ -831,7 +831,7 @@ namespace CmisSync.Lib.Sync
                             }
                         }
                         database.SetDownloadServerSideModificationDate(filepath, remoteDocument.LastModificationDate);
-                        Tasks.FileDownloader downloader;
+                        Tasks.IFileDownloader downloader;
                         if (repoinfo.DownloadChunkSize <= 0){
                             Logger.Debug("Simple File Downloader");
                             downloader = new Tasks.SimpleFileDownloader();
