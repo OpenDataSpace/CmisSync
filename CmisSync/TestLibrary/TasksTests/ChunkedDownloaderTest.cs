@@ -117,7 +117,7 @@ namespace TestLibrary.TasksTests
                 It.Is<long?> ((long? l) => l == remoteChunk.Length)))
                 .Returns (mockedStream.Object);
             transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-                Console.WriteLine(e.ToString());
+//                Console.WriteLine(e.ToString());
                 if(e.ActualPosition!=null) {
                     Assert.GreaterOrEqual((long)e.ActualPosition, startPos);
                     Assert.LessOrEqual((long)e.ActualPosition, remoteLength);
