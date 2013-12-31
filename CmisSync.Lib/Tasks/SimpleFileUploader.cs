@@ -9,12 +9,37 @@ using System.Security.Cryptography;
 
 namespace CmisSync.Lib.Tasks
 {
+    /// <summary>
+    /// Simple file uploader. Takes a given stream and uploads it to the server.
+    /// Resuming an Upload is not supported.
+    /// </summary>
     public class SimpleFileUploader : IFileUploader
     {
         private bool disposed = false;
 
         private object DisposeLock = new object();
 
+        /// <summary>
+        ///  Uploads the localFileStream to remoteDocument.
+        /// </summary>
+        /// <returns>
+        ///  The new CMIS document.
+        /// </returns>
+        /// <param name='remoteDocument'>
+        ///  Remote document where the local content should be uploaded to.
+        /// </param>
+        /// <param name='localFileStream'>
+        ///  Local file stream.
+        /// </param>
+        /// <param name='TransmissionStatus'>
+        ///  Transmission status where the uploader should report its uploading status.
+        /// </param>
+        /// <param name='hashAlg'>
+        ///  Hash alg which should be used to calculate a checksum over the uploaded content.
+        /// </param>
+        /// <param name='overwrite'>
+        ///  If true, the local content will overwrite the existing content.
+        /// </param>
         public virtual IDocument UploadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg, bool overwrite = true)
         {
             using(ProgressStream progressstream = new ProgressStream(localFileStream, TransmissionStatus))
@@ -27,6 +52,24 @@ namespace CmisSync.Lib.Tasks
             }
         }
 
+        /// <summary>
+        ///  Appends the localFileStream to the remoteDocument.
+        /// </summary>
+        /// <returns>
+        ///  The new CMIS document.
+        /// </returns>
+        /// <param name='remoteDocument'>
+        ///  Remote document where the local content should be appended to.
+        /// </param>
+        /// <param name='localFileStream'>
+        ///  Local file stream.
+        /// </param>
+        /// <param name='TransmissionStatus'>
+        ///  Transmission status where the uploader should report its appending status.
+        /// </param>
+        /// <param name='hashAlg'>
+        ///  Hash alg which should be used to calculate a checksum over the appended content.
+        /// </param>
         public virtual IDocument AppendFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg)
         {
             using(ProgressStream progressstream = new ProgressStream(localFileStream, TransmissionStatus))

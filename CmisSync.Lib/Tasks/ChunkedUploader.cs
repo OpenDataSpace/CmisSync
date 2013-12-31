@@ -9,12 +9,22 @@ using System.Security.Cryptography;
 
 namespace CmisSync.Lib.Tasks
 {
+    /// <summary>
+    /// Chunked uploader takes a file and splits the upload into chunks.
+    /// Resuming a failed upload is possible.
+    /// </summary>
     public class ChunkedUploader : SimpleFileUploader
     {
         private long chunkSize;
 
         public long ChunkSize { get { return this.chunkSize; } }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Tasks.ChunkedUploader"/> class.
+        /// </summary>
+        /// <param name='ChunkSize'>
+        /// Chunk size.
+        /// </param>
         public ChunkedUploader (long ChunkSize = 1024 * 1024)
         {
             if (ChunkSize <= 0)
@@ -23,22 +33,26 @@ namespace CmisSync.Lib.Tasks
         }
 
         /// <summary>
-        /// Uploads the file. Resumes an upload if the given localFileStream.Position is larger than zero
+        ///  Uploads the file.
+        ///  Resumes an upload if the given localFileStream.Position is larger than zero.
         /// </summary>
         /// <returns>
-        /// The file.
+        ///  The new CMIS document.
         /// </returns>
         /// <param name='remoteDocument'>
-        /// Remote document.
+        ///  Remote document where the local content should be uploaded to.
         /// </param>
         /// <param name='localFileStream'>
-        /// Local file stream.
+        ///  Local file stream.
         /// </param>
         /// <param name='TransmissionStatus'>
-        /// Transmission status.
+        ///  Transmission status where the uploader should report its uploading status.
         /// </param>
         /// <param name='hashAlg'>
-        /// Hash alg.
+        ///  Hash alg which should be used to calculate a checksum over the uploaded content.
+        /// </param>
+        /// <param name='overwrite'>
+        ///  If true, the local content will overwrite the existing content.
         /// </param>
         public override IDocument UploadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg, bool overwrite = true)
         {
@@ -62,18 +76,25 @@ namespace CmisSync.Lib.Tasks
                     else
                         contentStream.Length = ChunkSize;
                     contentStream.Stream = chunkstream;
-                    if(isFirstChunk && result.ContentStreamId != null && overwrite)
-                        result.DeleteContentStream();
-                    result = result.AppendContentStream(contentStream, isLastChunk);
+                    try{
+                        if(isFirstChunk && result.ContentStreamId != null && overwrite)
+                            result.DeleteContentStream();
+                        result = result.AppendContentStream(contentStream, isLastChunk);
+                    }catch(Exception e) {
+                        throw new UploadFailedException(e, result);
+                    }
                 }
             }
             hashAlg.TransformFinalBlock(new byte[0], 0, 0);
             return result;
         }
 
+
+        // TODO implementation
         public override IDocument AppendFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg)
         {
             throw new NotImplementedException();
+            /*
             IDocument result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += ChunkSize)
             {
@@ -100,7 +121,7 @@ namespace CmisSync.Lib.Tasks
                 }
             }
             hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-            return result;
+            return result;*/
         }
     }
 }
