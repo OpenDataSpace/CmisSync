@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading;
@@ -407,8 +407,8 @@ namespace TestLibrary
                 {
                     Assert.Contains(names[i], changeList);
                     Assert.AreEqual(
-                        watcher.GetChangeType(names[i]),
-                        Watcher.ChangeTypes.Deleted);
+                        Watcher.ChangeTypes.Deleted,
+                        watcher.GetChangeType(names[i]));
                 }
             }
         }
