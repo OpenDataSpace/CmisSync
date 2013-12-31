@@ -93,7 +93,6 @@
     <Compile Include="Events\FileTransmissionEvent.cs" />
     <Compile Include="Events\FileConflictEvent.cs" />
     <Compile Include="Tasks\FileUploader.cs" />
-    <Compile Include="Tasks\FileDownloader.cs" />
     <Compile Include="Streams\ProgressStream.cs" />
     <Compile Include="Tasks\SimpleFileDownloader.cs" />
     <Compile Include="Streams\BandwidthLimitedStream.cs" />
@@ -111,6 +110,7 @@
     <Compile Include="Streams\OffsetStream.cs" />
     <Compile Include="Streams\StreamWrapper.cs" />
     <Compile Include="Streams\NonClosingHashStream.cs" />
+    <Compile Include="Tasks\FileDownloader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

@@ -85,7 +85,7 @@ namespace TestLibrary.TasksTests
                 It.Is<long?> ((long? l) => (l == null|| l == 0 )),
                 It.Is<long?> ((long? l) => l != null)))
                 .Returns (mockedStream.Object);
-            using (FileDownloader downloader = new ChunkedDownloader(chunksize)) {
+            using (IFileDownloader downloader = new ChunkedDownloader(chunksize)) {
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);
 //                Assert.AreEqual (remoteContent, localFileStream.ToArray());
@@ -132,7 +132,7 @@ namespace TestLibrary.TasksTests
                 }
 
             };
-            using (FileDownloader downloader = new ChunkedDownloader(chunksize)) {
+            using (IFileDownloader downloader = new ChunkedDownloader(chunksize)) {
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);
 //                Assert.AreEqual (remoteContent, localFileStream.ToArray());
@@ -163,7 +163,7 @@ namespace TestLibrary.TasksTests
                 It.Is<long?> ((long? offset) => (offset != null )),
                 It.Is<long?> ((long? l) => (l != null ))
                 )).Returns (mockedStream.Object);
-            using (FileDownloader downloader = new ChunkedDownloader(chunksize)) {
+            using (IFileDownloader downloader = new ChunkedDownloader(chunksize)) {
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);
                 Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteContent), hashAlg.Hash);

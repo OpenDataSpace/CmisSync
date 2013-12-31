@@ -59,7 +59,7 @@ namespace TestLibrary.TasksTests
             mockedStream.Setup (stream => stream.Stream).Returns (remoteStream);
             mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
             mock.Setup (doc => doc.GetContentStream ()).Returns (mockedStream.Object);
-            using (FileDownloader downloader = new SimpleFileDownloader()) {
+            using (IFileDownloader downloader = new SimpleFileDownloader()) {
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);
                 Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteContent), hashAlg.Hash);
@@ -78,7 +78,7 @@ namespace TestLibrary.TasksTests
             mockedStream.Setup (stream => stream.Stream).Returns (mockedMemStream.Object);
             mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
             mock.Setup (doc => doc.GetContentStream ()).Returns (mockedStream.Object);
-            using (FileDownloader downloader = new SimpleFileDownloader()) {
+            using (IFileDownloader downloader = new SimpleFileDownloader()) {
                 try {
                     downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                     Assert.Fail ();
@@ -97,7 +97,7 @@ namespace TestLibrary.TasksTests
             mockedStream.Setup (stream => stream.Stream).Returns (mockedMemStream.Object);
             mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
             mock.Setup (doc => doc.GetContentStream ()).Returns (mockedStream.Object);
-            using (FileDownloader downloader = new SimpleFileDownloader()) {
+            using (IFileDownloader downloader = new SimpleFileDownloader()) {
                 try {
                     downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                     Assert.Fail ();
@@ -120,7 +120,7 @@ namespace TestLibrary.TasksTests
             mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
             mock.Setup (doc => doc.GetContentStream ()).Returns (mockedStream.Object);
             try {
-                using (FileDownloader downloader = new SimpleFileDownloader()) {
+                using (IFileDownloader downloader = new SimpleFileDownloader()) {
                     Action download = delegate{
                         downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                     };

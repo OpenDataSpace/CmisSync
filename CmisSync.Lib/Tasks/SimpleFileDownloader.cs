@@ -7,7 +7,7 @@ using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Tasks
 {
-    public class SimpleFileDownloader : FileDownloader
+    public class SimpleFileDownloader : IFileDownloader
     {
         private bool disposed = false;
 

@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 
 namespace CmisSync.Lib.Tasks
 {
-    public interface FileDownloader : IDisposable
+    public interface IFileDownloader : IDisposable
     {
         /// <summary>
         /// Downloads the file and returns the SHA1 hash of the content of the saved file

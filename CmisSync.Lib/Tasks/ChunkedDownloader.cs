@@ -9,7 +9,7 @@ using log4net;
 
 namespace CmisSync.Lib.Tasks
 {
-    public class ChunkedDownloader : FileDownloader
+    public class ChunkedDownloader : IFileDownloader
     {
         private bool disposed = false;
         private object DisposeLock = new object ();
