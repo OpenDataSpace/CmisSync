@@ -87,7 +87,7 @@ namespace TestLibrary.TasksTests
             mockedStream.Setup (stream => stream.Stream)
                 .Returns (remoteStream);
             mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()))
-                .Callback<IContentStream, bool>((s, b) => (s.Stream.CopyTo(remoteStream)))
+                .Callback<IContentStream, bool>((s, b) => s.Stream.CopyTo(remoteStream))
                 .Returns (returnedAppendCotentStreamDocument.Object);
             mock.Setup (doc => doc.Name)
                 .Returns ("test.txt");
@@ -140,7 +140,7 @@ namespace TestLibrary.TasksTests
             mockedStream.Setup (stream => stream.Stream)
                 .Returns (remoteStream);
             mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()))
-                .Callback<IContentStream, bool>((s, b) => (s.Stream.CopyTo(remoteStream)))
+                .Callback<IContentStream, bool>((s, b) => s.Stream.CopyTo(remoteStream))
                 .Returns (returnedAppendCotentStreamDocument.Object);
             mock.Setup (doc => doc.Name)
                 .Returns ("test.txt");
