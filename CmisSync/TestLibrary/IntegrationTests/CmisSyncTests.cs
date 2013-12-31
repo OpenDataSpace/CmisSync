@@ -76,7 +76,7 @@ namespace TestLibrary.IntegrationTests
             Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "enabled");
 #endif
             ServicePointManager.CertificatePolicy = new TrustAlways();
-            File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
+//            File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
 
