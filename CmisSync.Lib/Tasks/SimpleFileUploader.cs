@@ -40,6 +40,7 @@ namespace CmisSync.Lib.Tasks
         /// <param name='overwrite'>
         ///  If true, the local content will overwrite the existing content.
         /// </param>
+        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException"></exception>
         public virtual IDocument UploadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg, bool overwrite = true)
         {
             using(ProgressStream progressstream = new ProgressStream(localFileStream, TransmissionStatus))
@@ -48,7 +49,11 @@ namespace CmisSync.Lib.Tasks
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = hashstream;
-                return remoteDocument.SetContentStream(contentStream, overwrite);
+                try{
+                    return remoteDocument.SetContentStream(contentStream, overwrite);
+                }catch(Exception e) {
+                    throw new UploadFailedException(e, remoteDocument);
+                }
             }
         }
 
@@ -70,6 +75,7 @@ namespace CmisSync.Lib.Tasks
         /// <param name='hashAlg'>
         ///  Hash alg which should be used to calculate a checksum over the appended content.
         /// </param>
+        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException"></exception>
         public virtual IDocument AppendFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg)
         {
             using(ProgressStream progressstream = new ProgressStream(localFileStream, TransmissionStatus))
@@ -78,7 +84,11 @@ namespace CmisSync.Lib.Tasks
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = hashstream;
-                return remoteDocument.AppendContentStream(contentStream, true);
+                try{
+                    return remoteDocument.AppendContentStream(contentStream, true);
+                }catch(Exception e) {
+                    throw new UploadFailedException(e, remoteDocument);
+                }
             }
         }
 

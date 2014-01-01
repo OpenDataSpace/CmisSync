@@ -54,6 +54,9 @@ namespace CmisSync.Lib.Tasks
         /// <param name='overwrite'>
         ///  If true, the local content will overwrite the existing content.
         /// </param>
+        /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">
+        /// Contains the last successful remote document state. This is needed for continue a failed upload.
+        /// </exception>
         public override IDocument UploadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg, bool overwrite = true)
         {
             IDocument result = remoteDocument;
