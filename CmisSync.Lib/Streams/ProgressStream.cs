@@ -86,15 +86,21 @@ namespace CmisSync.Lib
             private void CalculateBandwidth(int transmittedBytes) {
                 this.bytesTransmittedSinceLastSecond+=transmittedBytes;
                 TimeSpan diff = DateTime.Now - start ;
+                long? pos;
+                try{
+                    pos = Stream.Position;
+                }catch (NotSupportedException) {
+                    pos = null;
+                }
                 if(diff.Seconds >= 1) {
                     long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(start,DateTime.Now, bytesTransmittedSinceLastSecond);
-                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = Stream.Position, BitsPerSecond = result});
+                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos, BitsPerSecond = result});
                     this.bytesTransmittedSinceLastSecond = 0;
                     start = start + diff;
                     blockingDetectionTimer.Stop();
                     blockingDetectionTimer.Start();
                 }else{
-                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = Stream.Position});
+                    this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos});
                 }
             }
         }

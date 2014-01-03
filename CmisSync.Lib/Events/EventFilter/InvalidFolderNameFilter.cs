@@ -8,15 +8,27 @@ namespace CmisSync.Lib.Events.Filter
         {
         }
 
+        private bool checkPath (ISyncEvent e, string path)
+        {
+            if (Utils.IsInvalidFolderName (path.Replace ("/", "").Replace ("\"", ""))) {
+                Queue.AddEvent (new RequestIgnoredEvent (e, source: this));
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public override bool Handle (ISyncEvent e)
         {
             FileDownloadRequest request = e as FileDownloadRequest;
-            if(e!=null) {
-                if(Utils.IsInvalidFolderName(request.LocalPath.Replace("/", "").Replace("\"",""))) {
-                    Queue.AddEvent(new RequestIgnoredEvent(e, source : this));
-                    return true;
-                }
+            if(request != null) {
+                return checkPath (request, request.LocalPath);
             }
+            FSEvent fsevent = e as FSEvent;
+            if( fsevent != null) 
+                return checkPath (fsevent, fsevent.Path);
             return false;
         }
     }

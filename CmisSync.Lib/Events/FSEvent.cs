@@ -20,6 +20,11 @@ namespace CmisSync.Lib.Events
         public override string ToString() {
             return string.Format("FSEvent with type \"{0}\" on path \"{1}\"", Type, Path);
         }
+
+        public bool IsDirectory () {
+            //detect whether its a directory or file
+            return (File.GetAttributes(Path) & FileAttributes.Directory) == FileAttributes.Directory;
+        }
     }
 }
 
