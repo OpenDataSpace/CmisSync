@@ -3,11 +3,31 @@ using System.IO;
 
 namespace CmisSync.Lib.Events.Filter
 {
+    /// <summary>
+    /// Ignored file names filter.
+    /// </summary>
     public class IgnoredFileNamesFilter : AbstractFileFilter
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoredFileNamesFilter"/> class.
+        /// </summary>
+        /// <param name='queue'>
+        /// Queue.
+        /// </param>
         public IgnoredFileNamesFilter(SyncEventQueue queue) : base(queue) { }
 
-
+        /// <summary>
+        /// Checks the filename for valid regex.
+        /// </summary>
+        /// <returns>
+        /// The file.
+        /// </returns>
+        /// <param name='e'>
+        /// If set to <c>true</c> e.
+        /// </param>
+        /// <param name='fileName'>
+        /// If set to <c>true</c> file name.
+        /// </param>
         private bool checkFile(ISyncEvent e, string fileName) {
             if(!Utils.WorthSyncing(fileName)) {
                 Queue.AddEvent(new RequestIgnoredEvent(e));
@@ -16,6 +36,12 @@ namespace CmisSync.Lib.Events.Filter
             return false;
         }
 
+        /// <summary>
+        /// Handles FSEvents and FileDownloadRequest events.
+        /// </summary>
+        /// <param name='e'>
+        /// If a filename contains invalid patterns, <c>true</c> is returned and the filtering is reported to the queue. Otherwise <c>false</c> is returned.
+        /// </param>
         public override bool Handle (ISyncEvent e)
         {
             FileDownloadRequest request = e as FileDownloadRequest;
