@@ -7,14 +7,23 @@ using log4net;
 
 namespace CmisSync.Lib.Events
 {
-
+    /// <summary>
+    /// Active activities manager.
+    /// </summary>
     public class ActiveActivitiesManager
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ActiveActivitiesManager));
 
         private object Lock = new object();
-        private HashSet<FileTransmissionEvent> Transmissions = new HashSet<FileTransmissionEvent>();
+
         private ObservableCollection<FileTransmissionEvent> activeTransmissions = new ObservableCollection<FileTransmissionEvent>();
+
+        /// <summary>
+        /// Gets the active transmissions. This Collection can be obsered for changes.
+        /// </summary>
+        /// <value>
+        /// The active transmissions.
+        /// </value>
         public ObservableCollection<FileTransmissionEvent> ActiveTransmissions { get { return activeTransmissions; } }
 
         /// <summary>
@@ -22,18 +31,26 @@ namespace CmisSync.Lib.Events
         /// </summary>
         /// <param name="transmission"></param>
         public bool AddTransmission(FileTransmissionEvent transmission) {
-            bool added = false;
             lock (Lock)
             {
-                added = this.Transmissions.Add(transmission);
-                if(added) {
+                if(!activeTransmissions.Contains(transmission)) {
                     transmission.TransmissionStatus += TransmissionFinished;
                     activeTransmissions.Add(transmission);
+                    return true;
                 }
             }
-            return added;
+            return false;
         }
 
+        /// <summary>
+        /// If a transmission is reported as finished/aborted/failed, the transmission is removed from the collection
+        /// </summary>
+        /// <param name='sender'>
+        /// The transmission event.
+        /// </param>
+        /// <param name='e'>
+        /// The progress parameters of the transmission.
+        /// </param>
         private void TransmissionFinished(object sender, TransmissionProgressEventArgs e)
         {
             if ((e.Aborted == true || e.Completed == true || e.FailedException != null))
@@ -41,7 +58,7 @@ namespace CmisSync.Lib.Events
                 lock (Lock)
                 {
                     FileTransmissionEvent transmission = sender as FileTransmissionEvent;
-                    if(transmission!=null && this.Transmissions.Remove(transmission)) {
+                    if(transmission!=null && activeTransmissions.Contains(transmission)) {
                         activeTransmissions.Remove(transmission);
                         transmission.TransmissionStatus-=TransmissionFinished;
                         Logger.Debug("Transmission removed");
