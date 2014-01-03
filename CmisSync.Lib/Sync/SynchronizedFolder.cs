@@ -508,45 +508,6 @@ namespace CmisSync.Lib.Sync
                 }
             }
 
-
-            private bool DownloadStreamInChunks(string filePath, Stream fileStream, IDocument remoteDocument, FileTransmissionEvent transmissionEvent)
-            {
-                if (repoinfo.DownloadChunkSize <= 0)
-                {
-                    return false;
-                }
-                Logger.Debug(String.Format("Start downloading a chunk (size={0}): {1} from remote document: {2}", repoinfo.DownloadChunkSize, filePath, remoteDocument.Name ));
-                long? fileLength = remoteDocument.ContentStreamLength;
-
-                FileInfo fileInfo = new FileInfo(filePath);
-
-                for (long offset = fileInfo.Length; offset < fileLength; offset += repoinfo.DownloadChunkSize)
-                {
-                    lock (disposeLock)
-                    {
-                        if (disposed)
-                        {
-                            throw new ObjectDisposedException("Downloading");
-                        }
-                        IContentStream contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, repoinfo.DownloadChunkSize);
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Length=remoteDocument.ContentStreamLength, ActualPosition=offset});
-
-                        using (contentStream.Stream)
-                        {
-                            byte[] buffer = new byte[8 * 1024];
-                            int len;
-                            while ((len = contentStream.Stream.Read(buffer, 0, buffer.Length)) > 0)
-                            {
-                                fileStream.Write(buffer, 0, len);
-                            }
-                        }
-                    }
-                }
-
-                return true;
-            }
-
-
             /// <summary>
             /// Download a single folder from the CMIS server for sync.
             /// </summary>
