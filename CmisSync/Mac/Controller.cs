@@ -18,18 +18,22 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
 
 using MonoMac.Foundation;
 using MonoMac.AppKit;
 using MonoMac.ObjCRuntime;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Events;
 
 using log4net;
 
 namespace CmisSync {
 
 	public class Controller : ControllerBase {
+
+        private NSUserNotificationCenter notificationCenter;
         
 		public Controller () : base ()
         {
@@ -37,7 +41,113 @@ namespace CmisSync {
             {
                 NSApplication.Init ();
             }
+
+            // We get the Default notification Center
+            notificationCenter = NSUserNotificationCenter.DefaultUserNotificationCenter;
+
+            notificationCenter.DidDeliverNotification += (s, e) => 
+            {
+                Console.WriteLine("Notification Delivered");
+            };
+
+            notificationCenter.DidActivateNotification += (s, e) => 
+            {
+                Console.WriteLine("Notification Touched");
+            };
+
+            // If we return true here, Notification will show up even if your app is TopMost.
+            notificationCenter.ShouldPresentNotification = (c, n) => { return true; };
+
+            OnTransmissionListChanged += delegate {
+
+                using (var a = new NSAutoreleasePool()) {
+                    notificationCenter.InvokeOnMainThread(delegate {
+                        List<FileTransmissionEvent> transmissions = ActiveTransmissions();
+                        NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
+                        foreach (NSUserNotification notification in notifications) {
+                            FileTransmissionEvent transmission = transmissions.Find( (FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
+                            if (transmission == null) {
+                                notificationCenter.RemoveDeliveredNotification(notification);
+                            } else {
+                                transmissions.Remove(transmission);
+                            }
+                        }
+                        foreach (FileTransmissionEvent transmission in transmissions) {
+                            NSUserNotification notification = new NSUserNotification();
+                            notification.Title = Path.GetFileName (transmission.Path);
+                            string type = "Unknown";
+                            switch (transmission.Type) {
+                            case FileTransmissionType.UPLOAD_NEW_FILE:
+                                type = "Upload new file";
+                                break;
+                            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
+                                type = "Update remote file";
+                                break;
+                            case FileTransmissionType.DOWNLOAD_NEW_FILE:
+                                type = "Download new file";
+                                break;
+                            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
+                                type = "Update local file";
+                                break;
+                            }
+                            notification.Subtitle = TransmissionStatus(transmission);
+                            notification.InformativeText = transmission.Path;
+                            notification.SoundName = NSUserNotification.NSUserNotificationDefaultSoundName;
+                            transmission.TransmissionStatus += TransmissionReport;
+                            notification.DeliveryDate = NSDate.Now;
+                            notificationCenter.DeliverNotification (notification);
+                        }
+                    });
+                }
+            };
 		}
+
+        private string TransmissionStatus(FileTransmissionEvent transmission)
+        {
+            string type = "Unknown";
+            switch (transmission.Type) {
+            case FileTransmissionType.UPLOAD_NEW_FILE:
+                type = "Upload new file";
+                break;
+            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
+                type = "Update remote file";
+                break;
+            case FileTransmissionType.DOWNLOAD_NEW_FILE:
+                type = "Download new file";
+                break;
+            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
+                type = "Update local file";
+                break;
+            }
+            return String.Format("{0} ({1:###.#}% {2})",
+                type,
+                Math.Round (transmission.Status.Percent.GetValueOrDefault(), 1),
+                CmisSync.Lib.Utils.FormatBandwidth ((long)transmission.Status.BitsPerSecond.GetValueOrDefault()));
+        }
+
+        private void TransmissionReport(object sender, TransmissionProgressEventArgs e)
+        {
+            FileTransmissionEvent transmission = sender as FileTransmissionEvent;
+            if (transmission != null) {
+                if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
+                    transmission.TransmissionStatus -= TransmissionReport;
+                }
+                NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
+                foreach (NSUserNotification notification in notifications) {
+                    if (notification.InformativeText == transmission.Path) {
+                        TimeSpan diff = NSDate.Now - (DateTime)notification.DeliveryDate;
+                        if (diff.Seconds < 1) {
+                            return;
+                        }
+                        notificationCenter.RemoveDeliveredNotification (notification);
+                        notification.DeliveryDate = NSDate.Now;
+                        notification.Subtitle = TransmissionStatus (transmission);
+                        notificationCenter.DeliverNotification (notification);
+                        return;
+                    }
+                }
+            }
+        }
 
 		public override void CreateStartupItem ()
 		{
