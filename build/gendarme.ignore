@@ -63,3 +63,12 @@ M: System.Void CmisSync.Lib.Cmis.CmisUtils/FolderTree::.ctor(System.Collections.
 R: Gendarme.Rules.Design.ImplementIComparableCorrectlyRule
 T: CmisSync.Lib.Events.SyncEventHandler
 
+#Ignore Dispose pattern for checked classes
+R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
+T: CmisSync.Lib.Events.Filter.AbstractFileFilter
+T: CmisSync.Lib.Events.Filter.FailedOperationsFilter
+
+#Ignore dispose pattern for MemoryStream used in Testcases
+R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
+M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::FullDownloadTest()
+M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::ResumeDownloadTest()

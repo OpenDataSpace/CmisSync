@@ -49,7 +49,7 @@ namespace CmisSync.Lib.Events
         }
 
         /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
-        public void AddEvent(ISyncEvent newEvent) {
+        public virtual void AddEvent(ISyncEvent newEvent) {
             if(alreadyDisposed) {
                 throw new ObjectDisposedException("SyncEventQueue", "Called AddEvent on Disposed object");
             }

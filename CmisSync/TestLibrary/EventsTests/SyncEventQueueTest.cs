@@ -4,7 +4,7 @@ using log4net.Config;
 using System;
 using System.Threading.Tasks;
 using System.Threading;
-namespace TestLibrary
+namespace TestLibrary.EventsTests
 {
     using NUnit.Framework;
     using Moq;

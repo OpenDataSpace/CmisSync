@@ -7,7 +7,7 @@ using CmisSync.Lib.Cmis;
 using NUnit.Framework;
 
 
-namespace TestLibrary
+namespace TestLibrary.StreamTests
 {
     [TestFixture]
     class ChunkedStreamTest

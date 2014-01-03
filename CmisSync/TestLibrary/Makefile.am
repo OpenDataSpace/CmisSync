@@ -12,18 +12,32 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 	   -r:$(srcdir)/lib/xunit.extensions.dll
 
 SOURCES =  \
-	CmisSyncTests.cs \
-	WatcherTest.cs \
+	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
+	EventsTests/EventTypesTest.cs \
+	EventsTests/FileTransmissionEventTest.cs \
+	EventsTests/SyncEventManagerTest.cs \
+	EventsTests/SyncEventQueueTest.cs \
+	EventsTests/GenericSyncEventHandlerTest.cs \
+	IntegrationTests/CmisSyncTests.cs \
+	StreamTests/BandwidthLimitedStreamTest.cs \
+	StreamTests/ChunkedStreamTest.cs \
+	StreamTests/OffsetStreamTest.cs \
+	StreamTests/ProgressStreamTest.cs \
+	StreamTests/NonClosingHashStreamTest.cs \
+	TasksTests/ChunkedDownloaderTest.cs \
+	TasksTests/SimpleFileDownloaderTest.cs \
+	TasksTests/SimpleFileUploaderTest.cs \
+	TasksTests/ChunkedFileUploaderTest.cs \
+	ActiveActivitiesManagerTest.cs \
 	CmisDatabaseTest.cs \
-	ChunkedStreamTest.cs \
-	SyncEventQueueTest.cs \
-	SyncEventManagerTest.cs \
-	EventTypesTest.cs \
-	FSDeletionHandlerTest.cs \
-	DebugLoggingHandlerTest.cs \
-	LocalFilesystemActivityGenerator.cs \
+	CmisSyncLibUtilsTest.cs \
 	ConfigurationTest.cs \
-	EncodingTest.cs
+	DebugLoggingHandlerTest.cs \
+	EncodingTest.cs \
+	FSDeletionHandlerTest.cs \
+	LocalFilesystemActivityGenerator.cs \
+	WatcherTest.cs
+	
 
 EXTRA_DIST = TestLibrary.csproj \
 	lib/Moq.dll \

@@ -21,14 +21,25 @@ SOURCES =  \
 	ConfigMigration.cs \
 	Credentials.cs \
 	Defines.cs \
+	Events/ActiveActivitiesManager.cs \
+	Events/BubbledEvent.cs \
 	Events/ConfigChangedEvent.cs \
 	Events/DebugLoggingHandler.cs \
+	Events/EventFilter/AbstractFileFilter.cs \
+	Events/EventFilter/FailedOperationsFilter.cs \
+	Events/EventFilter/IgnoredFileNamesFilter.cs \
+	Events/EventFilter/IgnoredFilesFilter.cs \
+	Events/EventFilter/IgnoredFoldersFilter.cs \
+	Events/EventFilter/InvalidFolderNameFilter.cs \
 	Events/FileConflictEvent.cs \
+	Events/FileDownloadRequest.cs \
 	Events/FileTransmissionEvent.cs \
 	Events/FSDeletionHandler.cs \
 	Events/FSEvent.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/ISyncEvent.cs \
+	Events/RecentChangedEvent.cs \
+	Events/RequestIgnoredEvent.cs \
 	Events/SyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \
@@ -37,11 +48,22 @@ SOURCES =  \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
+	Streams/BandwidthLimitedStream.cs \
+	Streams/NonClosingHashStream.cs \
+	Streams/OffsetStream.cs \
+	Streams/ProgressStream.cs \
+	Streams/StreamWrapper.cs \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
 	Sync/CrawlStrategy.cs \
 	Sync/SynchronizedFolder.cs \
 	Sync/WatcherStrategy.cs \
+	Tasks/ChunkedDownloader.cs \
+	Tasks/ChunkedUploader.cs \
+	Tasks/FileDownloader.cs \
+	Tasks/FileUploader.cs \
+	Tasks/SimpleFileDownloader.cs \
+	Tasks/SimpleFileUploader.cs \
 	Utils.cs \
 	Watcher.cs
 

@@ -399,7 +399,7 @@ namespace CmisSync.Lib
                     }
                 }
 
-                [XmlElement("features", IsNullable=true)]
+                [XmlElement("features")]
                 public Feature SupportedFeatures { get; set;}
 
                 [XmlElement("ignoreFolder", IsNullable=true)]
@@ -473,6 +473,8 @@ namespace CmisSync.Lib
             public string Name { get; set; }
             [XmlElement("email")]
             public string EMail { get; set; }
+            [XmlElement("deviceId")]
+            public Guid DeviceID { get; set;}
         }
 
         public class Feature {

@@ -133,6 +133,8 @@ namespace CmisSync.Lib
         /// </summary>
         //private DateTime last_poll = DateTime.Now;
 
+        private Events.Filter.IgnoredFoldersFilter ignoredFoldersFilter;
+
 
         /// <summary>
         /// Timer for watching the local and remote filesystems.
@@ -163,12 +165,15 @@ namespace CmisSync.Lib
         {
             EventManager = new SyncEventManager();
             EventManager.AddEventHandler(new DebugLoggingHandler());
-            EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
             Queue = new SyncEventQueue(EventManager);
             RepoInfo = repoInfo;
             LocalPath = repoInfo.TargetDirectory;
             Name = repoInfo.Name;
             RemoteUrl = repoInfo.Address;
+            EventManager.AddEventHandler(new Events.Filter.IgnoredFileNamesFilter(Queue));
+            ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths=new List<string>(repoInfo.getIgnoredPaths())};
+            EventManager.AddEventHandler(ignoredFoldersFilter);
+            EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
 
             Logger.Info("Repo " + repoInfo.Name + " - Set poll interval to " + repoInfo.PollInterval + "ms");
             this.remote_timer.Interval = repoInfo.PollInterval;
@@ -193,6 +198,7 @@ namespace CmisSync.Lib
             if (e is RepoConfigChangedEvent)
             {
                 this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
+                this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.getIgnoredPaths());
                 return true;
             }
             else
