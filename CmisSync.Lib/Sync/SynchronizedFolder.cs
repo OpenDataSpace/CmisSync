@@ -97,6 +97,11 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private Dictionary<string, string> cmisParameters;
 
+            /// <summary>
+            /// A storage to temporary save aborted uploads and its last successful state informations.
+            /// </summary>
+            private Dictionary<string, IDocument> uploadProgresses = new Dictionary<string, IDocument>();
+
 
             /// <summary>
             /// Track whether <c>Dispose</c> has been called.
@@ -641,7 +646,7 @@ namespace CmisSync.Lib.Sync
                                 FileInfo fileInfo = new FileInfo(filePath);
                                 if (remoteDocument.ContentStreamLength < fileInfo.Length)
                                 {
-                                    success = ResumeUploadFile(filePath, remoteDocument);
+                                    success = UpdateFile(filePath, remoteDocument);
                                 }
                             }
                         }
@@ -873,32 +878,6 @@ namespace CmisSync.Lib.Sync
                 }
             }
 
-
-            private bool ResumeUploadFile(string filePath, IDocument remoteDocument)
-            {
-                Logger.Debug("Resuming Upload: "+ filePath + " to remote document: " + remoteDocument.Name);
-                if (repoinfo.ChunkSize <= 0)
-                {
-                    return UpdateFile(filePath, remoteDocument);
-                }
-
-                //  disable the chunk upload
-                return UpdateFile(filePath, remoteDocument);
-
-                //if (database.LocalFileHasChanged(filePath))
-                //{
-                //    return UpdateFile(filePath, remoteDocument);
-                //}
-
-                //using (Stream file = File.OpenRead(filePath))
-                //{
-                //    file.Position = (long)remoteDocument.ContentStreamLength;
-                //    return UploadStreamInTrunk(filePath, file, remoteDocument);
-                //}
-
-                ////return false;
-            }
-
             /// <summary>
             /// Upload a single file to the CMIS server.
             /// </summary>
@@ -952,8 +931,24 @@ namespace CmisSync.Lib.Sync
                                         throw;
                                     }
                                     // Upload
-
-                                    uploader.UploadFile(remoteDocument,file,transmissionEvent,hashAlg);
+                                    try{
+                                        IDocument lastState;
+                                        if(uploadProgresses.TryGetValue(filePath, out lastState)){
+                                            if(lastState.ChangeToken == remoteDocument.ChangeToken && lastState.ContentStreamLength != null) {
+                                                file.Seek((long) lastState.ContentStreamLength, SeekOrigin.Begin);
+                                            } else {
+                                                uploadProgresses.Remove(filePath);
+                                            }
+                                        }
+                                        uploader.UploadFile(remoteDocument, file, transmissionEvent, hashAlg);
+                                    }catch(UploadFailedException uploadException) {
+                                        // Check if upload was partly successful and save this state
+                                        if(!uploadException.LastSuccessfulDocument.Equals(remoteDocument)) {
+                                            uploadProgresses.Add(filePath, uploadException.LastSuccessfulDocument);
+                                        }
+                                        throw;
+                                    }
+                                    uploadProgresses.Remove(filePath);
                                     filehash = hashAlg.Hash;
                                     success = true;
                                 }catch (Exception ex) {
@@ -1133,9 +1128,23 @@ namespace CmisSync.Lib.Sync
                         else
                             uploader = new ChunkedUploader(repoinfo.ChunkSize);
                         using (var hashAlg = new SHA1Managed()) {
-                            uploader.UploadFile(remoteFile,localfile,transmissionEvent, hashAlg);
-
-                            //TODO Exception Handling in case of upload failure and store the progress to continue later
+                            IDocument lastState;
+                            if(uploadProgresses.TryGetValue(filePath, out lastState)){
+                                if(lastState.ChangeToken == remoteFile.ChangeToken && lastState.ContentStreamLength != null) {
+                                    localfile.Seek((long) lastState.ContentStreamLength, SeekOrigin.Begin);
+                                } else {
+                                    uploadProgresses.Remove(filePath);
+                                }
+                            }
+                            try{
+                                uploader.UploadFile(remoteFile,localfile,transmissionEvent, hashAlg);
+                                uploadProgresses.Remove(filePath);
+                            }catch(UploadFailedException uploadException){
+                                if(!uploadException.LastSuccessfulDocument.Equals(remoteFile)) {
+                                    uploadProgresses.Add(filePath, uploadException.LastSuccessfulDocument);
+                                }
+                                throw;
+                            }
                         }
                         // Update timestamp in database.
                         database.SetFileServerSideModificationDate(filePath, ((DateTime)remoteFile.LastModificationDate).ToUniversalTime());
