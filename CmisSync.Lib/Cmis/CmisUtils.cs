@@ -2,13 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web;
+using System.IO;
+
+using DotCMIS;
+using DotCMIS.Data;
+using DotCMIS.Enums;
+using DotCMIS.Exceptions;
 using DotCMIS.Client;
 using DotCMIS.Client.Impl;
-using DotCMIS;
-using DotCMIS.Exceptions;
+
 using log4net;
-using System.Web;
-using DotCMIS.Data;
 
 namespace CmisSync.Lib.Cmis
 {
@@ -387,6 +391,114 @@ namespace CmisSync.Lib.Cmis
                     return session.RepositoryInfo.ThinClientUri;
                 else
                     return repo.Address.AbsoluteUri + repo.RemotePath;
+            }
+        }
+
+        /// <summary>
+        /// Retrieve the CMIS metadata of a document.
+        /// </summary>
+        /// <returns>a dictionary in which each key is a type id and each value is a couple indicating the mode ("readonly" or "ReadWrite") and the value itself.</returns>
+        public static Dictionary<string, string[]> FetchMetadata(ICmisObject o, IObjectType typeDef)
+        {
+            Dictionary<string, string[]> metadata = new Dictionary<string, string[]>();
+
+            IList<IPropertyDefinition> propertyDefs = typeDef.PropertyDefinitions;
+
+            // Get metadata.
+            foreach (IProperty property in o.Properties)
+            {
+                // Mode
+                string mode = "readonly";
+                foreach (IPropertyDefinition propertyDef in propertyDefs)
+                {
+                    if (propertyDef.Id.Equals("cmis:name"))
+                    {
+                        Updatability updatability = propertyDef.Updatability;
+                        mode = updatability.ToString();
+                    }
+                }
+
+                // Value
+                if (property.IsMultiValued)
+                {
+                    metadata.Add(property.Id, new string[] { property.DisplayName, mode, property.ValuesAsString });
+                }
+                else
+                {
+                    metadata.Add(property.Id, new string[] { property.DisplayName, mode, property.ValueAsString });
+                }
+            }
+            return metadata;
+        }
+
+        /// <summary>
+        /// Tries to set the last modified date of the given file to the last modified date of the remote document.
+        /// </summary>
+        /// <param name='remoteDocument'>
+        /// Remote document.
+        /// </param>
+        /// <param name='filepath'>
+        /// Filepath.
+        /// </param>
+        /// <param name='metadata'>
+        /// Metadata of the remote file.
+        /// </param>
+        public static void SetLastModifiedDate(IDocument remoteDocument, string filepath, Dictionary<string, string[]> metadata)
+        {
+            try
+            {
+                if (remoteDocument.LastModificationDate != null)
+                {
+                    File.SetLastWriteTimeUtc(filepath, (DateTime)remoteDocument.LastModificationDate);
+                }
+                else
+                {
+                    string[] cmisModDate;
+                    if (metadata.TryGetValue("cmis:lastModificationDate", out cmisModDate) && cmisModDate.Length == 3)
+                    {
+                        DateTime modDate = DateTime.Parse(cmisModDate[2]);
+                        File.SetLastWriteTimeUtc(filepath, modDate);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Debug(String.Format("Failed to set last modified date for the local file: {0}", filepath), e);
+            }
+        }
+
+        /// <summary>
+        /// Tries to set the last modified date of the given folder to the last modified date of the remote folder.
+        /// </summary>
+        /// <param name='remoteFolder'>
+        /// Remote folder.
+        /// </param>
+        /// <param name='folderpath'>
+        /// Folderpath.
+        /// </param>
+        /// <param name='metadata'>
+        /// Metadata ot the remote folder.
+        /// </param>
+        public static void SetLastModifiedDate(IFolder remoteFolder, string folderpath, Dictionary<string, string[]> metadata)
+        {
+            try{
+                if (remoteFolder.LastModificationDate != null)
+                {
+                    File.SetLastWriteTimeUtc(folderpath, (DateTime)remoteFolder.LastModificationDate);
+                }
+                else
+                {
+                    string[] cmisModDate;
+                    if (metadata.TryGetValue("cmis:lastModificationDate", out cmisModDate) && cmisModDate.Length == 3)
+                    {
+                        DateTime modDate = DateTime.Parse(cmisModDate[2]);
+                        File.SetLastWriteTimeUtc(folderpath, modDate);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                Logger.Debug(String.Format("Failed to set last modified date for the local folder: {0}", folderpath), e);
             }
         }
     }

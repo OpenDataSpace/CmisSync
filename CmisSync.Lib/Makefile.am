@@ -25,6 +25,7 @@ SOURCES =  \
 	Events/BubbledEvent.cs \
 	Events/ConfigChangedEvent.cs \
 	Events/DebugLoggingHandler.cs \
+	Events/EncapsuledEvent.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
 	Events/EventFilter/FailedOperationsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
@@ -36,25 +37,31 @@ SOURCES =  \
 	Events/FileTransmissionEvent.cs \
 	Events/FSDeletionHandler.cs \
 	Events/FSEvent.cs \
+	Events/FullSyncCompletedEvent.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/ISyncEvent.cs \
 	Events/RecentChangedEvent.cs \
+	Events/RemoteEvent.cs \
 	Events/RequestIgnoredEvent.cs \
+	Events/StartNextSyncEvent.cs \
 	Events/SyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \
+	Events/SyncScheduler.cs \
 	Fetcher.cs \
 	IActivityListener.cs \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
 	Streams/BandwidthLimitedStream.cs \
+	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \
 	Streams/OffsetStream.cs \
 	Streams/ProgressStream.cs \
 	Streams/StreamWrapper.cs \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
+	Sync/ContentChangeEventStrategy.cs \
 	Sync/CrawlStrategy.cs \
 	Sync/SynchronizedFolder.cs \
 	Sync/WatcherStrategy.cs \

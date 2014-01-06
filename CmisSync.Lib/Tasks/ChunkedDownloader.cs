@@ -40,7 +40,8 @@ namespace CmisSync.Lib.Tasks
                 );
 
                 using (Stream remoteStream = contentStream.Stream)
-                using (OffsetStream offsetstream = new OffsetStream(remoteStream, offset))
+                using (ForwardReadingStream forwardstream = new ForwardReadingStream(remoteStream))
+                using (OffsetStream offsetstream = new OffsetStream(forwardstream, offset))
                 using (ProgressStream progress = new ProgressStream(offsetstream, TransmissionStatus)) {
                     byte[] buffer = new byte[8 * 1024];
                     int result = 0;
