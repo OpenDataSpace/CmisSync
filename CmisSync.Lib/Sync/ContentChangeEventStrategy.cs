@@ -8,7 +8,7 @@ using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib
 {
-    public class ChangeLogStrategy : SyncEventHandler 
+    public class ChangeLogStrategy : SyncEventHandler, IDisposable
     {
         private ISession session;
         private IDatabase db;
@@ -95,7 +95,7 @@ namespace CmisSync.Lib
 
                 if(lastTokenOnClient != lastTokenOnServer)
                 {
-                    new Task((Action) delegate() {
+                    using(var syncTask = new Task((Action) delegate() {
                         if(Monitor.TryEnter(syncLock)) {
                             try{
                                 Sync();
@@ -103,7 +103,9 @@ namespace CmisSync.Lib
                                 Monitor.Exit(syncLock);
                             }
                         }
-                    }).Start();
+                    })) {
+                        syncTask.Start();
+                    }
                 }
                 // No changes or background process started
                 return true;
@@ -114,6 +116,9 @@ namespace CmisSync.Lib
         }
 
 
+        public void Dispose() {
+
+        }
 
         private void Sync()
         {
