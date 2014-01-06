@@ -137,6 +137,8 @@ namespace CmisSync.Lib.Sync
             /// Link to parent object.
             /// </summary>
             private RepoBase repo;
+
+            //private WatcherSync watcherStrategy;
             
             /// <summary>
             /// EventQueue
@@ -174,6 +176,8 @@ namespace CmisSync.Lib.Sync
                         Logger.Info("The folder \"" + ignoredFolder + "\" will be ignored");
                     }
                 }
+                //this.watcherStrategy = new WatcherSync(repoinfo, session);
+                //repoCmis.EventManager.AddEventHandler(this.watcherStrategy);
                 repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(10, RepoInfoChanged));
                 repoCmis.EventManager.AddEventHandler(new Events.Filter.FailedOperationsFilter(database, Queue));
             }
@@ -188,6 +192,9 @@ namespace CmisSync.Lib.Sync
                 if (e is RepoConfigChangedEvent)
                 {
                     repoinfo = (e as RepoConfigChangedEvent).RepoInfo;
+                    //this.repo.EventManager.RemoveEventHandler(this.watcherStrategy);
+                    //this.watcherStrategy = new WatcherSync(repoinfo, session);
+                    //this.repo.EventManager.AddEventHandler(this.watcherStrategy);
                     UpdateCmisParameters();
                     ForceFullSyncAtNextSync();
                 }
