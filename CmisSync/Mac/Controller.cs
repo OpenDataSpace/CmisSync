@@ -34,7 +34,21 @@ namespace CmisSync {
 	public class Controller : ControllerBase {
 
         private NSUserNotificationCenter notificationCenter;
-        
+        private Dictionary<string,DateTime> transmissionFiles = new Dictionary<string, DateTime> ();
+        private Object transmissionLock = new object ();
+        private int notificationInterval = 5;
+        private int notificationKeep = 5;
+
+        private class ComparerNSUserNotification : IComparer<NSUserNotification>
+        {
+            public int Compare (NSUserNotification x, NSUserNotification y)
+            {
+                DateTime xDate = x.DeliveryDate;
+                DateTime yDate = y.DeliveryDate;
+                return yDate.CompareTo (xDate);
+            }
+        }
+
 		public Controller () : base ()
         {
             using (var a = new NSAutoreleasePool ())
@@ -61,43 +75,36 @@ namespace CmisSync {
             OnTransmissionListChanged += delegate {
 
                 using (var a = new NSAutoreleasePool()) {
-                    notificationCenter.InvokeOnMainThread(delegate {
-                        List<FileTransmissionEvent> transmissions = ActiveTransmissions();
-                        NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
-                        foreach (NSUserNotification notification in notifications) {
-                            FileTransmissionEvent transmission = transmissions.Find( (FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
-                            if (transmission == null) {
-                                notificationCenter.RemoveDeliveredNotification(notification);
-                            } else {
-                                transmissions.Remove(transmission);
+                    lock (transmissionLock) {
+                        notificationCenter.InvokeOnMainThread(delegate {
+                            List<FileTransmissionEvent> transmissions = ActiveTransmissions();
+                            NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
+                            List<NSUserNotification> finishedNotifications = new List<NSUserNotification> ();
+                            foreach (NSUserNotification notification in notifications) {
+                                FileTransmissionEvent transmission = transmissions.Find( (FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
+                                if (transmission == null) {
+                                    finishedNotifications.Add (notification);
+                                } else {
+                                    transmissions.Remove(transmission);
+                                }
                             }
-                        }
-                        foreach (FileTransmissionEvent transmission in transmissions) {
-                            NSUserNotification notification = new NSUserNotification();
-                            notification.Title = Path.GetFileName (transmission.Path);
-                            string type = "Unknown";
-                            switch (transmission.Type) {
-                            case FileTransmissionType.UPLOAD_NEW_FILE:
-                                type = "Upload new file";
-                                break;
-                            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
-                                type = "Update remote file";
-                                break;
-                            case FileTransmissionType.DOWNLOAD_NEW_FILE:
-                                type = "Download new file";
-                                break;
-                            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
-                                type = "Update local file";
-                                break;
+                            finishedNotifications.Sort (new ComparerNSUserNotification ());
+                            for (int i=5; i<finishedNotifications.Count; ++i) {
+                                notificationCenter.RemoveDeliveredNotification (finishedNotifications[i]);
                             }
-                            notification.Subtitle = TransmissionStatus(transmission);
-                            notification.InformativeText = transmission.Path;
-                            notification.SoundName = NSUserNotification.NSUserNotificationDefaultSoundName;
-                            transmission.TransmissionStatus += TransmissionReport;
-                            notification.DeliveryDate = NSDate.Now;
-                            notificationCenter.DeliverNotification (notification);
-                        }
-                    });
+                            foreach (FileTransmissionEvent transmission in transmissions) {
+                                NSUserNotification notification = new NSUserNotification();
+                                notification.Title = Path.GetFileName (transmission.Path);
+                                notification.Subtitle = TransmissionStatus(transmission);
+                                notification.InformativeText = transmission.Path;
+                                notification.SoundName = NSUserNotification.NSUserNotificationDefaultSoundName;
+                                transmission.TransmissionStatus += TransmissionReport;
+                                notification.DeliveryDate = NSDate.Now;
+                                notificationCenter.DeliverNotification (notification);
+                                transmissionFiles.Add (transmission.Path, notification.DeliveryDate);
+                            }
+                        });
+                    }
                 }
             };
 		}
@@ -119,6 +126,14 @@ namespace CmisSync {
                 type = "Update local file";
                 break;
             }
+            if (transmission.Status.Aborted == true) {
+                type += " aborted";
+            } else if (transmission.Status.Completed == true) {
+                type += " completed";
+            } else if (transmission.Status.FailedException != null) {
+                type += " failed";
+            }
+
             return String.Format("{0} ({1:###.#}% {2})",
                 type,
                 Math.Round (transmission.Status.Percent.GetValueOrDefault(), 1),
@@ -127,23 +142,28 @@ namespace CmisSync {
 
         private void TransmissionReport(object sender, TransmissionProgressEventArgs e)
         {
-            FileTransmissionEvent transmission = sender as FileTransmissionEvent;
-            if (transmission != null) {
-                if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
-                    transmission.TransmissionStatus -= TransmissionReport;
-                }
-                NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
-                foreach (NSUserNotification notification in notifications) {
-                    if (notification.InformativeText == transmission.Path) {
-                        TimeSpan diff = NSDate.Now - (DateTime)notification.DeliveryDate;
-                        if (diff.Seconds < 1) {
+            lock (transmissionLock) {
+                FileTransmissionEvent transmission = sender as FileTransmissionEvent;
+                if (transmission != null) {
+                    if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
+                        transmission.TransmissionStatus -= TransmissionReport;
+                        transmissionFiles.Remove (transmission.Path);
+                    } else {
+                        TimeSpan diff = NSDate.Now - transmissionFiles [transmission.Path];
+                        if (diff.Seconds < notificationInterval) {
                             return;
                         }
-                        notificationCenter.RemoveDeliveredNotification (notification);
-                        notification.DeliveryDate = NSDate.Now;
-                        notification.Subtitle = TransmissionStatus (transmission);
-                        notificationCenter.DeliverNotification (notification);
-                        return;
+                        transmissionFiles [transmission.Path] = NSDate.Now;
+                    }
+                    NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
+                    foreach (NSUserNotification notification in notifications) {
+                        if (notification.InformativeText == transmission.Path) {
+                            notificationCenter.RemoveDeliveredNotification (notification);
+                            notification.DeliveryDate = NSDate.Now;
+                            notification.Subtitle = TransmissionStatus (transmission);
+                            notificationCenter.DeliverNotification (notification);
+                            return;
+                        }
                     }
                 }
             }
