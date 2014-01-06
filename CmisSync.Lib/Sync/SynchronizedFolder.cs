@@ -312,6 +312,7 @@ namespace CmisSync.Lib.Sync
                     filters.Add("cmis:contentStreamLength");
                     filters.Add("cmis:lastModificationDate");
                     filters.Add("cmis:path");
+                    filters.Add("cmis:changeToken");
                     session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);
                 }
                 //TODO Implement error handling -> informing user about connection problems by showing status
