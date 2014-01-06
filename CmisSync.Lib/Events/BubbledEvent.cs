@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System;
 
 namespace CmisSync.Lib.Events
 {
-    /// <summary>
-    /// Takes an ISyncEvent and combines it together with the source object.
-    /// This could be used to take one event of an event queue and put it into
-    /// another queue without loosing context informations which are implicit given
-    /// on the source queue.
-    /// </summary>
-    public class BubbledEvent : ISyncEvent
+    public class BubbledEvent : EncapsuledEvent
     {
         /// <summary>
         /// Source Informations
@@ -19,22 +10,14 @@ namespace CmisSync.Lib.Events
         public object Source { get; private set; }
 
         /// <summary>
-        /// Original Event
-        /// </summary>
-        public ISyncEvent Event { get; private set; }
-
-        /// <summary>
         /// Creates a new BubbleEvent with an embedded event and context
         /// informations of the given event.
         /// </summary>
         /// <param name="source">Context Informations of the given event</param>
         /// <param name="e">An Event from another context. Must not be null</param>
-        public BubbledEvent(object source, ISyncEvent e)
+        public BubbledEvent (object source, ISyncEvent e) : base(e)
         {
-            if(e == null)
-                throw new ArgumentNullException("A BubbledEvent needs a ISyncEvent as parameter, but null was given");
             this.Source = source;
-            this.Event = e;
         }
 
         /// <summary>
@@ -47,3 +30,4 @@ namespace CmisSync.Lib.Events
         }
     }
 }
+

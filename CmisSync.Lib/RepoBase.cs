@@ -174,7 +174,10 @@ namespace CmisSync.Lib
             ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths=new List<string>(repoInfo.getIgnoredPaths())};
             EventManager.AddEventHandler(ignoredFoldersFilter);
             EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
-
+            // start scheduler
+            EventManager.AddEventHandler(new SyncScheduler(Queue, repoInfo.PollInterval));
+            // start full crawl sync on beginning
+            Queue.AddEvent(new StartNextSyncEvent(true));
             Logger.Info("Repo " + repoInfo.Name + " - Set poll interval to " + repoInfo.PollInterval + "ms");
             this.remote_timer.Interval = repoInfo.PollInterval;
 
@@ -240,6 +243,7 @@ namespace CmisSync.Lib
                     this.remote_timer.Stop();
                     this.remote_timer.Dispose();
                     this.Watcher.Dispose();
+                    this.Queue.StopListener();
                     this.Queue.Dispose();
                 }
                 this.disposed = true;

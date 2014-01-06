@@ -54,7 +54,6 @@
     <Compile Include="Cmis\IDatabase.cs" />
     <Compile Include="Credentials.cs" />
     <Compile Include="Events\ActiveActivitiesManager.cs" />
-    <Compile Include="Events\BubbledEvent.cs" />
     <Compile Include="Events\ConfigChangedEvent.cs" />
     <Compile Include="Events\GenericSyncEventHandler.cs" />
     <Compile Include="Events\SyncEventQueue.cs" />
@@ -111,6 +110,14 @@
     <Compile Include="Streams\StreamWrapper.cs" />
     <Compile Include="Streams\NonClosingHashStream.cs" />
     <Compile Include="Tasks\FileDownloader.cs" />
+    <Compile Include="Events\RemoteEvent.cs" />
+    <Compile Include="Events\StartNextSyncEvent.cs" />
+    <Compile Include="Sync\ContentChangeEventStrategy.cs" />
+    <Compile Include="Events\SyncScheduler.cs" />
+    <Compile Include="Streams\ForwardReadingStream.cs" />
+    <Compile Include="Events\FullSyncCompletedEvent.cs" />
+    <Compile Include="Events\EncapsuledEvent.cs" />
+    <Compile Include="Events\BubbledEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
