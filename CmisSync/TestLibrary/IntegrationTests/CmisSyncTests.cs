@@ -407,6 +407,48 @@ namespace TestLibrary.IntegrationTests
             Assert.NotNull(repos);
         }
 
+        [Ignore]
+        [Test, TestCaseSource("TestServers"), Category("Slow")]
+        public void AppendContentStreamTest(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId)
+        {
+            RepoInfo repoInfo = new RepoInfo(
+                canonical_name,
+                CMISSYNCDIR,
+                remoteFolderPath,
+                url,
+                user,
+                password,
+                repositoryId,
+                5000);
+            ISession session = CreateSession(repoInfo);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string filename = "testfile.txt";
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            try{
+                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc!=null) {
+                    doc.Delete(true);
+                    Console.WriteLine("Old file deleted");
+                }
+            }catch(Exception){}
+            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            string content = "test";
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = filename;
+            contentStream.MimeType = MimeType.GetMIMEType(filename);
+            contentStream.Length = content.Length;
+            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+            Console.WriteLine("Empty file created");
+            emptyDoc.AppendContentStream(contentStream, false, true);
+            emptyDoc.AppendContentStream(contentStream, true, true);
+            Assert.AreEqual(content.Length * 2, emptyDoc.ContentStreamLength);
+            emptyDoc.AppendContentStream(contentStream, true, true);
+            Assert.AreEqual(content.Length * 3, emptyDoc.ContentStreamLength);
+        }
+
 
         [Test, TestCaseSource("TestServers"), Category("Slow")]
         public void Sync(string canonical_name, string localPath, string remoteFolderPath,
