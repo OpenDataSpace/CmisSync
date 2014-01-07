@@ -93,6 +93,13 @@ namespace CmisSync {
                                 notificationCenter.RemoveDeliveredNotification (finishedNotifications[i]);
                             }
                             foreach (FileTransmissionEvent transmission in transmissions) {
+                                if (transmission.Status.Aborted == true) {
+                                    continue;
+                                } else if (transmission.Status.Completed == true) {
+                                    continue;
+                                } else if (transmission.Status.FailedException != null) {
+                                    continue;
+                                }
                                 NSUserNotification notification = new NSUserNotification();
                                 notification.Title = Path.GetFileName (transmission.Path);
                                 notification.Subtitle = TransmissionStatus(transmission);
