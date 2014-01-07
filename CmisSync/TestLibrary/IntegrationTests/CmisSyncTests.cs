@@ -434,16 +434,20 @@ namespace TestLibrary.IntegrationTests
                     Console.WriteLine("Old file deleted");
                 }
             }catch(Exception){}
-            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             string content = "test";
+            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            Assert.AreEqual(0, emptyDoc.ContentStreamLength);
+            Console.WriteLine("Empty file created");
             ContentStream contentStream = new ContentStream();
             contentStream.FileName = filename;
             contentStream.MimeType = MimeType.GetMIMEType(filename);
             contentStream.Length = content.Length;
             contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
-            Console.WriteLine("Empty file created");
             emptyDoc.AppendContentStream(contentStream, false, true);
-            emptyDoc.AppendContentStream(contentStream, true, true);
+            Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength);
+            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+            emptyDoc.AppendContentStream(contentStream, false, true);
+            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
             Assert.AreEqual(content.Length * 2, emptyDoc.ContentStreamLength);
             emptyDoc.AppendContentStream(contentStream, true, true);
             Assert.AreEqual(content.Length * 3, emptyDoc.ContentStreamLength);
