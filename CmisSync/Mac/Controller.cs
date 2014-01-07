@@ -45,7 +45,7 @@ namespace CmisSync {
             {
                 DateTime xDate = x.DeliveryDate;
                 DateTime yDate = y.DeliveryDate;
-                return yDate.CompareTo (xDate);
+                return xDate.CompareTo (yDate);
             }
         }
 
@@ -75,8 +75,8 @@ namespace CmisSync {
             OnTransmissionListChanged += delegate {
 
                 using (var a = new NSAutoreleasePool()) {
-                    lock (transmissionLock) {
-                        notificationCenter.InvokeOnMainThread(delegate {
+                    notificationCenter.BeginInvokeOnMainThread(delegate {
+                        lock (transmissionLock) {
                             List<FileTransmissionEvent> transmissions = ActiveTransmissions();
                             NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
                             List<NSUserNotification> finishedNotifications = new List<NSUserNotification> ();
@@ -89,7 +89,7 @@ namespace CmisSync {
                                 }
                             }
                             finishedNotifications.Sort (new ComparerNSUserNotification ());
-                            for (int i=5; i<finishedNotifications.Count; ++i) {
+                            for (int i = 0; i<(notifications.Length - notificationKeep) && i<finishedNotifications.Count; ++i) {
                                 notificationCenter.RemoveDeliveredNotification (finishedNotifications[i]);
                             }
                             foreach (FileTransmissionEvent transmission in transmissions) {
@@ -101,10 +101,10 @@ namespace CmisSync {
                                 transmission.TransmissionStatus += TransmissionReport;
                                 notification.DeliveryDate = NSDate.Now;
                                 notificationCenter.DeliverNotification (notification);
-                                transmissionFiles.Add (transmission.Path, notification.DeliveryDate);
+                                transmissionFiles[transmission.Path] = notification.DeliveryDate;
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             };
 		}
@@ -142,30 +142,35 @@ namespace CmisSync {
 
         private void TransmissionReport(object sender, TransmissionProgressEventArgs e)
         {
-            lock (transmissionLock) {
-                FileTransmissionEvent transmission = sender as FileTransmissionEvent;
-                if (transmission != null) {
-                    if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
-                        transmission.TransmissionStatus -= TransmissionReport;
-                        transmissionFiles.Remove (transmission.Path);
-                    } else {
-                        TimeSpan diff = NSDate.Now - transmissionFiles [transmission.Path];
-                        if (diff.Seconds < notificationInterval) {
-                            return;
+            using (var a = new NSAutoreleasePool()) {
+                notificationCenter.BeginInvokeOnMainThread (delegate
+                {
+                    lock (transmissionLock) {
+                        FileTransmissionEvent transmission = sender as FileTransmissionEvent;
+                        if (transmission != null) {
+                            if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
+                                transmission.TransmissionStatus -= TransmissionReport;
+                                transmissionFiles.Remove (transmission.Path);
+                            } else {
+                                TimeSpan diff = NSDate.Now - transmissionFiles [transmission.Path];
+                                if (diff.Seconds < notificationInterval) {
+                                    return;
+                                }
+                                transmissionFiles [transmission.Path] = NSDate.Now;
+                            }
+                            NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
+                            foreach (NSUserNotification notification in notifications) {
+                                if (notification.InformativeText == transmission.Path) {
+                                    notificationCenter.RemoveDeliveredNotification (notification);
+                                    notification.DeliveryDate = NSDate.Now;
+                                    notification.Subtitle = TransmissionStatus (transmission);
+                                    notificationCenter.DeliverNotification (notification);
+                                    return;
+                                }
+                            }
                         }
-                        transmissionFiles [transmission.Path] = NSDate.Now;
                     }
-                    NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
-                    foreach (NSUserNotification notification in notifications) {
-                        if (notification.InformativeText == transmission.Path) {
-                            notificationCenter.RemoveDeliveredNotification (notification);
-                            notification.DeliveryDate = NSDate.Now;
-                            notification.Subtitle = TransmissionStatus (transmission);
-                            notificationCenter.DeliverNotification (notification);
-                            return;
-                        }
-                    }
-                }
+                });
             }
         }
 
