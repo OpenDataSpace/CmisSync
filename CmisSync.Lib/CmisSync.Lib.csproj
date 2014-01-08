@@ -118,6 +118,19 @@
     <Compile Include="Events\FullSyncCompletedEvent.cs" />
     <Compile Include="Events\EncapsuledEvent.cs" />
     <Compile Include="Events\BubbledEvent.cs" />
+    <Compile Include="Sync\Strategy\FileSynchronizer.cs" />
+    <Compile Include="Storage\PersistentStorage.cs" />
+    <Compile Include="Storage\GeneralRepoStorage.cs" />
+    <Compile Include="Storage\FailedOperationsStorage.cs" />
+    <Compile Include="Storage\EventStorage.cs" />
+    <Compile Include="Events\AbstractEventProducer.cs" />
+    <Compile Include="Storage\MetaDataStorage.cs" />
+    <Compile Include="Events\FileEvent.cs" />
+    <Compile Include="Events\FolderEvent.cs" />
+    <Compile Include="Events\Enums.cs" />
+    <Compile Include="Sync\Strategy\FolderSynchronizer.cs" />
+    <Compile Include="Sync\Strategy\Crawler.cs" />
+    <Compile Include="Events\CrawlRequestEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -153,5 +166,7 @@
     <Folder Include="Tasks\" />
     <Folder Include="Streams\" />
     <Folder Include="Events\EventFilter\" />
+    <Folder Include="Sync\Strategy\" />
+    <Folder Include="Storage\" />
   </ItemGroup>
 </Project>

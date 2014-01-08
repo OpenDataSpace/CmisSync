@@ -27,6 +27,8 @@ namespace CmisSync.Lib.Events
         /// </value>
         public string Path { get; private set; }
 
+        public string CachePath { get; private set; }
+
         public delegate void TransmissionEventHandler(object sender, TransmissionProgressEventArgs e);
 
         /// <summary>
@@ -53,7 +55,7 @@ namespace CmisSync.Lib.Events
         /// <param name='path'>
         /// Path to the file of the transmission.
         /// </param>
-        public FileTransmissionEvent(FileTransmissionType type, string path)
+        public FileTransmissionEvent(FileTransmissionType type, string path, string cachePath = null)
         {
             if(path == null) {
                 throw new ArgumentNullException("Argument null in FSEvent Constructor","path");
@@ -61,6 +63,7 @@ namespace CmisSync.Lib.Events
             Type = type;
             Path = path;
             status = new TransmissionProgressEventArgs();
+            CachePath = cachePath;
         }
 
         /// <summary>

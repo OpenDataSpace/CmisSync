@@ -19,11 +19,13 @@ SOURCES =  \
 	EventsTests/SyncEventQueueTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
+	IntegrationTests/DotCMISTests.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \
 	StreamTests/OffsetStreamTest.cs \
 	StreamTests/ProgressStreamTest.cs \
 	StreamTests/NonClosingHashStreamTest.cs \
+	SyncStrategiesTests/FileSynchronizerTest.cs \
 	TasksTests/ChunkedDownloaderTest.cs \
 	TasksTests/SimpleFileDownloaderTest.cs \
 	TasksTests/SimpleFileUploaderTest.cs \

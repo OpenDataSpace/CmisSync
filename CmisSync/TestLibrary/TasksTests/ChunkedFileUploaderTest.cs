@@ -81,27 +81,25 @@ namespace TestLibrary.TasksTests
         {
             var mock = new Mock<IDocument> ();
             var mockedStream = new Mock<IContentStream> ();
-            var returnedAppendCotentStreamDocument = new Mock<IDocument>();
+            var returnedObjectId = new Mock<IObjectId>();
             mockedStream.Setup (stream => stream.Length)
                 .Returns (fileLength);
             mockedStream.Setup (stream => stream.Stream)
                 .Returns (remoteStream);
-            mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()))
-                .Callback<IContentStream, bool>((s, b) => s.Stream.CopyTo(remoteStream))
-                .Returns (returnedAppendCotentStreamDocument.Object);
+            mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.Is<bool>(b => b == true)))
+                .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(remoteStream))
+                .Returns (returnedObjectId.Object);
             mock.Setup (doc => doc.Name)
                 .Returns ("test.txt");
             mock.Setup (doc => doc.ContentStreamId)
                 .Returns((string) null);
-            returnedAppendCotentStreamDocument
-                .Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == true)))
-                .Callback<IContentStream, bool>((s, b) => s.Stream.CopyTo(remoteStream))
-                .Returns (returnedAppendCotentStreamDocument.Object)
+            mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == true), It.Is<bool>(b => b == true)))
+                .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(remoteStream))
+                .Returns (returnedObjectId.Object)
                     .Callback(()=>lastChunk++);
-            returnedAppendCotentStreamDocument
-                .Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == false)))
-                .Callback<IContentStream, bool>((s, b) => s.Stream.CopyTo(remoteStream))
-                .Returns (returnedAppendCotentStreamDocument.Object);
+            mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == false), It.Is<bool>(b => b == true)))
+                .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(remoteStream))
+                .Returns (returnedObjectId.Object);
 
             using (IFileUploader uploader = new ChunkedUploader(ChunkSize)) {
                 transmissionEvent.TransmissionStatus+= delegate(object sender, TransmissionProgressEventArgs e) {
@@ -134,34 +132,32 @@ namespace TestLibrary.TasksTests
         {
             var mock = new Mock<IDocument> ();
             var mockedStream = new Mock<IContentStream> ();
-            var returnedAppendCotentStreamDocument = new Mock<IDocument>();
+            var returnedObjectId = new Mock<IObjectId>();
             mockedStream.Setup (stream => stream.Length)
                 .Returns (fileLength);
             mockedStream.Setup (stream => stream.Stream)
                 .Returns (remoteStream);
-            mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()))
-                .Callback<IContentStream, bool>((s, b) => s.Stream.CopyTo(remoteStream))
-                .Returns (returnedAppendCotentStreamDocument.Object);
+            mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.Is<bool>(b => b == true)))
+                .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(remoteStream))
+                .Returns (returnedObjectId.Object);
             mock.Setup (doc => doc.Name)
                 .Returns ("test.txt");
             mock.Setup (doc => doc.ContentStreamId)
                 .Returns("test");
-            returnedAppendCotentStreamDocument
-                .Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == true)))
-                .Callback<IContentStream, bool>((s, b) => s.Stream.CopyTo(remoteStream))
-                .Returns (returnedAppendCotentStreamDocument.Object)
+            mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == true), It.Is<bool>(b => b == true)))
+                .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(remoteStream))
+                .Returns (returnedObjectId.Object)
                     .Callback(()=>lastChunk++);
-            returnedAppendCotentStreamDocument
-                .Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == false)))
-                .Callback<IContentStream, bool>((s, b) => s.Stream.CopyTo(remoteStream))
-                .Returns (returnedAppendCotentStreamDocument.Object);
+            mock.Setup (doc => doc.AppendContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == false), It.Is<bool>(b => b == true)))
+                .Callback<IContentStream, bool, bool>((s, b, r) => s.Stream.CopyTo(remoteStream))
+                .Returns (returnedObjectId.Object);
 
             using (IFileUploader uploader = new ChunkedUploader(ChunkSize)) {
                 int pos = localContent.Length/2;
                 transmissionEvent.TransmissionStatus+= delegate(object sender, TransmissionProgressEventArgs e) {
                     if(e.Length!=null){
                         Assert.GreaterOrEqual(e.Length, pos);
-                        Assert.LessOrEqual(e.Length, localContent.Length - pos);
+                        Assert.LessOrEqual(e.Length, localContent.Length);
                     }
                     if(e.Percent != null) {
                         Assert.GreaterOrEqual(e.Percent, 50);

@@ -78,17 +78,11 @@ namespace CmisSync.Lib.Tasks
                         contentStream.Length = localFileStream.Length - offset;
                     else
                         contentStream.Length = ChunkSize;
-                    contentStream.Stream = chunkstream;
+                    contentStream.Stream = progressstream;
                     try{
                         if(isFirstChunk && result.ContentStreamId != null && overwrite)
                             result.DeleteContentStream();
-                        IDocument newState = result.AppendContentStream(contentStream, isLastChunk);
-                        if(newState != null) {
-                            result = newState;
-                        } else {
-                            result.Refresh();
-                        }
-
+                        result.AppendContentStream(contentStream, isLastChunk, true);
                     }catch(Exception e) {
                         throw new UploadFailedException(e, result);
                     }
