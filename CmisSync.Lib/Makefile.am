@@ -21,11 +21,14 @@ SOURCES =  \
 	ConfigMigration.cs \
 	Credentials.cs \
 	Defines.cs \
+	Events/AbstractEventProducer.cs \
 	Events/ActiveActivitiesManager.cs \
 	Events/BubbledEvent.cs \
 	Events/ConfigChangedEvent.cs \
+	Events/CrawlRequestEvent.cs \
 	Events/DebugLoggingHandler.cs \
 	Events/EncapsuledEvent.cs \
+	Events/Enums.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
 	Events/EventFilter/FailedOperationsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
@@ -34,7 +37,9 @@ SOURCES =  \
 	Events/EventFilter/InvalidFolderNameFilter.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileDownloadRequest.cs \
+	Events/FileEvent.cs \
 	Events/FileTransmissionEvent.cs \
+	Events/FolderEvent.cs \
 	Events/FSDeletionHandler.cs \
 	Events/FSEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
@@ -53,6 +58,11 @@ SOURCES =  \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
+	Storage/EventStorage.cs \
+	Storage/FailedOperationsStorage.cs \
+	Storage/GeneralRepoStorage.cs \
+	Storage/MetaDataStorage.cs \
+	Storage/PersistentStorage.cs \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \
@@ -63,6 +73,9 @@ SOURCES =  \
 	Sync/CmisRepo.cs \
 	Sync/ContentChangeEventStrategy.cs \
 	Sync/CrawlStrategy.cs \
+	Sync/Strategy/Crawler.cs \
+	Sync/Strategy/FileSynchronizer.cs \
+	Sync/Strategy/FolderSynchronizer.cs \
 	Sync/SynchronizedFolder.cs \
 	Sync/WatcherStrategy.cs \
 	Tasks/ChunkedDownloader.cs \

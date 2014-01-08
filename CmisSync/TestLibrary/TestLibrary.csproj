@@ -84,6 +84,9 @@
     <Compile Include="TasksTests\SimpleFileUploaderTest.cs" />
     <Compile Include="TasksTests\ChunkedFileUploaderTest.cs" />
     <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
+    <Compile Include="StorageTests\PersistentStorageTest.cs" />
+    <Compile Include="IntegrationTests\DotCMISTests.cs" />
+    <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -125,6 +128,8 @@
     <Folder Include="IntegrationTests\" />
     <Folder Include="EventsTests\" />
     <Folder Include="EventsTests\EventsFilterTests\" />
+    <Folder Include="StorageTests\" />
+    <Folder Include="SyncStrategiesTests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

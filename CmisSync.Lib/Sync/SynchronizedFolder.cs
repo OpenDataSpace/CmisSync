@@ -712,7 +712,9 @@ namespace CmisSync.Lib.Sync
                 using (new ActivityListenerResource(activityListener))
                 {
                     string fileName = remoteDocument.Name;
-                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, fileName);
+                    string filepath = Path.Combine(localFolder, fileName);
+                    string tmpfilepath = filepath + ".sync";
+                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, filepath, tmpfilepath);
 
                     // Skip if invalid file name. See https://github.com/nicolas-raoul/CmisSync/issues/196
                     if (Utils.IsInvalidFileName(fileName))
@@ -723,8 +725,6 @@ namespace CmisSync.Lib.Sync
 
                     try
                     {
-                        string filepath = Path.Combine(localFolder, fileName);
-                        string tmpfilepath = filepath + ".sync";
                         long failedCounter = database.GetOperationRetryCounter(filepath,Database.OperationType.DOWNLOAD);
                         if( failedCounter > repoinfo.MaxDownloadRetries)
                         {

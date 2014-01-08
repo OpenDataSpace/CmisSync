@@ -13,7 +13,7 @@ namespace CmisSync.Lib.Events
 
         public string ObjectId { get { return this.change.ObjectId; } }
 
-        public ChangeType? Type { get { return this.change.ChangeType; } }
+        public DotCMIS.Enums.ChangeType? Type { get { return this.change.ChangeType; } }
 
         public RemoteEvent (IChangeEvent change)
         {
