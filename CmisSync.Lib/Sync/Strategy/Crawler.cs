@@ -19,7 +19,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </summary>
         public static readonly int CRAWLER_PRIORITY = 0;
         private IFolder RemoteFolder;
-        private string LocalFolder;
+        private DirectoryInfo LocalFolder;
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.Crawler"/> class.
         /// </summary>
@@ -32,10 +32,10 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='localFolder'>
         /// Local folder, which is the root of the crawl strategy.
         /// </param>
-        public Crawler (SyncEventQueue queue, IFolder remoteFolder, string localFolder) : base(queue)
+        public Crawler (SyncEventQueue queue, IFolder remoteFolder, DirectoryInfo localFolder) : base(queue)
         {
-            if(String.IsNullOrEmpty(localFolder))
-                throw new ArgumentNullException("Given local folder is null or empty");
+            if(localFolder == null)
+                throw new ArgumentNullException("Given local folder is null");
             if(remoteFolder == null)
                 throw new ArgumentNullException("Given remote folder is null");
             this.RemoteFolder = remoteFolder;
@@ -70,13 +70,14 @@ namespace CmisSync.Lib.Sync.Strategy
             }
             if(e is StartNextSyncEvent)
             {
-                StartAsync(RemoteFolder, LocalFolder);
+                CrawlSync(RemoteFolder, LocalFolder);
+                //StartAsync(RemoteFolder, LocalFolder);
                 return true;
             }
             return false;
         }
 
-        private void StartAsync(IFolder remoteFolder, string localFolder) {
+        private void StartAsync(IFolder remoteFolder, DirectoryInfo localFolder) {
             using (var task = new Task(() => CrawlSync(remoteFolder, localFolder))) {
                 task.Start();
             }
@@ -86,19 +87,18 @@ namespace CmisSync.Lib.Sync.Strategy
         /// Synchronize by checking all folders/files one-by-one.
         /// This strategy is used if the CMIS server does not support the ChangeLog feature or as fallback if other methods failed.
         /// </summary>
-        private void CrawlSync (IFolder remoteFolder, string localFolder)
+        private void CrawlSync (IFolder remoteFolder, DirectoryInfo localFolder)
         {
             // Sets of local files/folders.
             ISet<string> localFileNames = new HashSet<string> ();
             ISet<string> localDirNames = new HashSet<string> ();
 
             // Collect all local folder and file names existing in local folder
-            DirectoryInfo localdirinfo = new DirectoryInfo(localFolder);
-            foreach(DirectoryInfo subdir in localdirinfo.GetDirectories())
+            foreach(DirectoryInfo subdir in localFolder.GetDirectories())
             {
                 localDirNames.Add(subdir.Name);
             }
-            foreach(FileInfo file in localdirinfo.GetFiles())
+            foreach(FileInfo file in localFolder.GetFiles())
             {
                 localFileNames.Add(file.Name);
             }
@@ -112,11 +112,11 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Both sides do have got the same folder name
                         // Synchronize metadata if different
                         Queue.AddEvent(new FolderEvent(
-                            localFolder : new DirectoryInfo(Path.Combine(localFolder, folder.Name)),
+                            localFolder : new DirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
                             remoteFolder: folder){Recursive = false});
                         // Recursive crawl the content of the folder
                         Queue.AddEvent(new CrawlRequestEvent(
-                            localFolder : Path.Combine(localFolder, folder.Name),
+                            localFolder : new DirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
                             remoteFolder: folder));
                         // Remove handled folder from set to get only the local only folders back from set if done
                         localDirNames.Remove(folder.Name);
@@ -124,7 +124,7 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Remote folder detected, which is not available locally
                         // Figure out, what to do with it
                         Queue.AddEvent(new FolderEvent(
-                            localFolder : new DirectoryInfo(localFolder),
+                            localFolder : localFolder,
                             remoteFolder: folder) {Recursive = true});
                     }
                 }else if(cmisObject is IDocument) {
@@ -132,16 +132,16 @@ namespace CmisSync.Lib.Sync.Strategy
                     if(localFileNames.Contains(doc.Name)) {
                         // Both sides do have got the file, synchronize them if different
                         Queue.AddEvent( new FileEvent(
-                            localFile : new FileInfo(Path.Combine(localFolder, doc.Name)),
-                            localParentDirectory : new DirectoryInfo(localFolder),
+                            localFile : new FileInfo(Path.Combine(localFolder.FullName, doc.Name)),
+                            localParentDirectory : localFolder,
                             remoteFile : doc));
                         // Remove handled file from set
                         localFileNames.Remove(doc.Name);
                     } else {
                         // Only remote has got a file, figure out what to do
                         Queue.AddEvent(new FileEvent(
-                            localFile : new FileInfo(Path.Combine(localFolder, doc.Name)),
-                            localParentDirectory : new DirectoryInfo(localFolder),
+                            localFile : new FileInfo(Path.Combine(localFolder.FullName, doc.Name)),
+                            localParentDirectory : localFolder,
                             remoteFile: doc){Remote = ChangeType.CREATED});
                     }
                 }
@@ -149,14 +149,14 @@ namespace CmisSync.Lib.Sync.Strategy
             // Only local folders are available, inform synchronizer about them
             foreach(string folder in localDirNames) {
                 Queue.AddEvent(new FolderEvent(
-                    localFolder : new DirectoryInfo(Path.Combine(localFolder, folder)),
+                    localFolder : new DirectoryInfo(Path.Combine(localFolder.FullName, folder)),
                     remoteFolder: remoteFolder));
             }
             // Only local files are available, inform synchronizer about them
             foreach(string file in localFileNames) {
                 Queue.AddEvent(new FileEvent(
-                    localFile : new FileInfo(Path.Combine(localFolder, file)),
-                    localParentDirectory : new DirectoryInfo(localFolder)));
+                    localFile : new FileInfo(Path.Combine(localFolder.FullName, file)),
+                    localParentDirectory : localFolder));
             }
         }
     }

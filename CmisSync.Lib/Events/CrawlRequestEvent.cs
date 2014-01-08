@@ -1,5 +1,5 @@
 using System;
-
+using System.IO;
 using DotCMIS.Client;
 
 namespace CmisSync.Lib.Events
@@ -8,11 +8,11 @@ namespace CmisSync.Lib.Events
     {
         public IFolder RemoteFolder { get; private set; }
 
-        public string LocalFolder { get; private set; }
+        public DirectoryInfo LocalFolder { get; private set; }
 
-        public CrawlRequestEvent (string localFolder, IFolder remoteFolder)
+        public CrawlRequestEvent (DirectoryInfo localFolder, IFolder remoteFolder)
         {
-            if(String.IsNullOrEmpty(localFolder))
+            if(localFolder == null)
                 throw new ArgumentNullException("Given path is null");
             if(remoteFolder == null)
                 throw new ArgumentNullException("Given remote folder is null");
