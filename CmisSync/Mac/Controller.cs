@@ -19,10 +19,13 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
+using System.Text;
 
 using MonoMac.Foundation;
 using MonoMac.AppKit;
 using MonoMac.ObjCRuntime;
+
+using Mono.Unix.Native;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
@@ -95,9 +98,11 @@ namespace CmisSync {
                             foreach (FileTransmissionEvent transmission in transmissions) {
                                 if (transmission.Status.Aborted == true) {
                                     continue;
-                                } else if (transmission.Status.Completed == true) {
+                                }
+                                if (transmission.Status.Completed == true) {
                                     continue;
-                                } else if (transmission.Status.FailedException != null) {
+                                }
+                                if (transmission.Status.FailedException != null) {
                                     continue;
                                 }
                                 NSUserNotification notification = new NSUserNotification();
@@ -150,30 +155,47 @@ namespace CmisSync {
         private void TransmissionReport(object sender, TransmissionProgressEventArgs e)
         {
             using (var a = new NSAutoreleasePool()) {
+                FileTransmissionEvent transmission = sender as FileTransmissionEvent;
+                if (transmission == null) {
+                    return;
+                }
+                string extendAttrKey = "com.apple.progress.fractionCompleted";
+                string filePath = transmission.CachePath;
+                if (filePath == null || !File.Exists (filePath)) {
+                    filePath = transmission.Path;
+                }
+                if (!File.Exists (filePath)) {
+                    Logger.Error (String.Format ("None exist {0} for transmission report", filePath));
+                    return;
+                }
+                lock (transmissionLock) {
+                    if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
+                        transmission.TransmissionStatus -= TransmissionReport;
+                        transmissionFiles.Remove (transmission.Path);
+                        Syscall.removexattr (filePath, extendAttrKey);
+                    } else {
+                        TimeSpan diff = NSDate.Now - transmissionFiles [transmission.Path];
+                        if (diff.Seconds < notificationInterval) {
+                            return;
+                        }
+                        transmissionFiles [transmission.Path] = NSDate.Now;
+                        string percent = (transmission.Status.Percent.GetValueOrDefault() / 100).ToString ();
+                        byte[] buffer = Encoding.ASCII.GetBytes (percent);
+                        Syscall.setxattr (filePath, extendAttrKey, buffer);
+                        (new FileInfo (filePath)).CreationTimeUtc = new DateTime (1984, 1, 24, 8, 0, 0, DateTimeKind.Utc);
+                    }
+                }
                 notificationCenter.BeginInvokeOnMainThread (delegate
                 {
                     lock (transmissionLock) {
-                        FileTransmissionEvent transmission = sender as FileTransmissionEvent;
-                        if (transmission != null) {
-                            if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
-                                transmission.TransmissionStatus -= TransmissionReport;
-                                transmissionFiles.Remove (transmission.Path);
-                            } else {
-                                TimeSpan diff = NSDate.Now - transmissionFiles [transmission.Path];
-                                if (diff.Seconds < notificationInterval) {
-                                    return;
-                                }
-                                transmissionFiles [transmission.Path] = NSDate.Now;
-                            }
-                            NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
-                            foreach (NSUserNotification notification in notifications) {
-                                if (notification.InformativeText == transmission.Path) {
-                                    notificationCenter.RemoveDeliveredNotification (notification);
-                                    notification.DeliveryDate = NSDate.Now;
-                                    notification.Subtitle = TransmissionStatus (transmission);
-                                    notificationCenter.DeliverNotification (notification);
-                                    return;
-                                }
+                        NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
+                        foreach (NSUserNotification notification in notifications) {
+                            if (notification.InformativeText == transmission.Path) {
+                                notificationCenter.RemoveDeliveredNotification (notification);
+                                notification.DeliveryDate = NSDate.Now;
+                                notification.Subtitle = TransmissionStatus (transmission);
+                                notificationCenter.DeliverNotification (notification);
+                                return;
                             }
                         }
                     }
