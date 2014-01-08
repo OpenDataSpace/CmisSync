@@ -436,6 +436,7 @@ namespace TestLibrary.IntegrationTests
             }catch(Exception){}
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             Console.WriteLine("Empty file created");
+            Assert.AreEqual(0, emptyDoc.ContentStreamLength);
             string content = "test";
             for(int i = 0; i < 10; i++) {
                 ContentStream contentStream = new ContentStream();
