@@ -82,7 +82,13 @@ namespace CmisSync.Lib.Tasks
                     try{
                         if(isFirstChunk && result.ContentStreamId != null && overwrite)
                             result.DeleteContentStream();
-                        result = result.AppendContentStream(contentStream, isLastChunk);
+                        IDocument newState = result.AppendContentStream(contentStream, isLastChunk);
+                        if(newState != null) {
+                            result = newState;
+                        } else {
+                            result.Refresh();
+                        }
+
                     }catch(Exception e) {
                         throw new UploadFailedException(e, result);
                     }

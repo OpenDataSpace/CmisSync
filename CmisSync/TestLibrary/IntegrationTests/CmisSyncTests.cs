@@ -407,6 +407,52 @@ namespace TestLibrary.IntegrationTests
             Assert.NotNull(repos);
         }
 
+        [Ignore]
+        [Test, TestCaseSource("TestServers"), Category("Slow")]
+        public void AppendContentStreamTest(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId)
+        {
+            RepoInfo repoInfo = new RepoInfo(
+                canonical_name,
+                CMISSYNCDIR,
+                remoteFolderPath,
+                url,
+                user,
+                password,
+                repositoryId,
+                5000);
+            ISession session = CreateSession(repoInfo);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string filename = "testfile.txt";
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            try{
+                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc!=null) {
+                    doc.Delete(true);
+                    Console.WriteLine("Old file deleted");
+                }
+            }catch(Exception){}
+            string content = "test";
+            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            Assert.AreEqual(0, emptyDoc.ContentStreamLength);
+            Console.WriteLine("Empty file created");
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = filename;
+            contentStream.MimeType = MimeType.GetMIMEType(filename);
+            contentStream.Length = content.Length;
+            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+            emptyDoc.AppendContentStream(contentStream, false, true);
+            Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength);
+            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+            emptyDoc.AppendContentStream(contentStream, false, true);
+            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+            Assert.AreEqual(content.Length * 2, emptyDoc.ContentStreamLength);
+            emptyDoc.AppendContentStream(contentStream, true, true);
+            Assert.AreEqual(content.Length * 3, emptyDoc.ContentStreamLength);
+        }
+
 
         [Test, TestCaseSource("TestServers"), Category("Slow")]
         public void Sync(string canonical_name, string localPath, string remoteFolderPath,
@@ -578,6 +624,20 @@ namespace TestLibrary.IntegrationTests
         public void ResumeBigFile(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
         {
+            SyncBigFileSub(canonical_name, localPath, remoteFolderPath, url, user, password, repositoryId, true, 1024, 1048576, 1000);
+        }
+
+        [Test, TestCaseSource("TestServers"), Category("Slow")]
+        [Ignore]
+        public void ChunkedBigFile(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId)
+        {
+            SyncBigFileSub(canonical_name, localPath, remoteFolderPath, url, user, password, repositoryId, false, 1024, 1048576, 1000);
+        }
+
+        private void SyncBigFileSub(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId, bool testResume, int chunkSize, long fileSize, int sleepInterval)
+        {
             // Prepare checkout directory.
             string localDirectory = Path.Combine(CMISSYNCDIR, canonical_name);
             string canonical_name2 = canonical_name + ".BigFile";
@@ -586,15 +646,14 @@ namespace TestLibrary.IntegrationTests
             CleanDirectory(localDirectory2);
             Console.WriteLine("Synced to clean state.");
 
-            string filename = "ResumeBigFile.File";
-            int fileSizeInMB = 10;
+            string filename = "BigFile.File";
             string file = Path.Combine(localDirectory, filename);
             string file2 = Path.Combine(localDirectory2, filename);
 
             // Mock.
             IActivityListener activityListener = new Mock<IActivityListener>().Object;
             // Sync.
-            RepoInfo repoInfo = new RepoInfo(
+            RepoInfo repoUpload = new RepoInfo(
                     canonical_name,
                     CMISSYNCDIR,
                     remoteFolderPath,
@@ -603,8 +662,8 @@ namespace TestLibrary.IntegrationTests
                     password,
                     repositoryId,
                     5000);
-            repoInfo.ChunkSize = 1024 * 1024;
-            RepoInfo repoInfo2 = new RepoInfo(
+            repoUpload.ChunkSize = chunkSize;
+            RepoInfo repoDownload = new RepoInfo(
                     canonical_name2,
                     CMISSYNCDIR,
                     remoteFolderPath,
@@ -613,11 +672,11 @@ namespace TestLibrary.IntegrationTests
                     password,
                     repositoryId,
                     5000);
-            repoInfo2.ChunkSize = 1024 * 1024;
+            repoDownload.DownloadChunkSize = chunkSize;
 
-            using (CmisRepo cmis = new CmisRepo(repoInfo, activityListener))
+            using (CmisRepo cmis = new CmisRepo(repoUpload, activityListener))
             using (CmisRepo.SynchronizedFolder synchronizedFolder = new CmisRepo.SynchronizedFolder(
-                repoInfo,
+                repoUpload,
                 activityListener,
                 cmis))
             {
@@ -630,56 +689,74 @@ namespace TestLibrary.IntegrationTests
             }
 
             //  create file
-            byte[] data = new byte[1024 * 1024];
+            byte[] data = new byte[chunkSize];
             new Random().NextBytes(data);
             using (FileStream stream = File.OpenWrite(file))
             {
-                for (int i = 0; i < fileSizeInMB; i++)
+                for (int i = 0; i < fileSize; i+=chunkSize)
                 {
                     stream.Write(data, 0, data.Length);
                 }
             }
             string remoteFilePath = (remoteFolderPath + "/" + filename).Replace("//", "/");
 
-            Console.WriteLine(String.Format("Upload big file size: {0}MB", fileSizeInMB));
-            for (int currentFileSizeInMB = 0, retry = 0; currentFileSizeInMB < fileSizeInMB && retry < 100; ++retry)
+            Console.WriteLine(String.Format("Upload big file size: {0}", fileSize));
+            for (long currentFileSize = 0, retry = 0; retry < 100; ++retry)
             {
-                using (CmisRepo cmis = new CmisRepo(repoInfo, activityListener))
+                using (CmisRepo cmis = new CmisRepo(repoUpload, activityListener))
                 using (CmisRepo.SynchronizedFolder synchronizedFolder = new CmisRepo.SynchronizedFolder(
-                    repoInfo,
+                    repoUpload,
                     activityListener,
                     cmis))
                 {
-                    //  disable the chunk upload
-                    //synchronizedFolder.SyncInBackground();
-                    //System.Threading.Thread.Sleep(1000);
-                    synchronizedFolder.Sync();
+                    //  disable resume upload
+                    //if (testResume)
+                    //{
+                    //    synchronizedFolder.SyncInBackground();
+                    //    System.Threading.Thread.Sleep(sleepInterval);
+                    //}
+                    //else
+                    {
+                        synchronizedFolder.Sync();
+                    }
                 }
 
                 try
                 {
-                    IDocument doc = (IDocument)CreateSession(repoInfo).GetObjectByPath(remoteFilePath);
-                    long fileSize = doc.ContentStreamLength ?? 0;
-                    Assert.IsTrue(0 == fileSize % (1024 * 1024));
-                    currentFileSizeInMB = (int)(fileSize / 1024 / 1024);
+                    IDocument doc = (IDocument)CreateSession(repoUpload).GetObjectByPath(remoteFilePath);
+                    currentFileSize = doc.ContentStreamLength ?? 0;
+                    Assert.IsTrue((0 == currentFileSize % chunkSize) || (currentFileSize == fileSize));
+                    Assert.IsTrue(currentFileSize <= fileSize);
+                    Console.WriteLine("Upload big file, current size: {0}", currentFileSize);
                 }
                 catch (Exception)
                 {
+                    break;
                 }
-                Console.WriteLine("Upload big file, current size: {0}MB", currentFileSizeInMB);
+                if (currentFileSize == fileSize)
+                {
+                    break;
+                }
             }
 
-            Console.WriteLine(String.Format("Download big file size: {0}MB", fileSizeInMB));
-            for (int currentFileSizeInMB = 0, retry = 0; currentFileSizeInMB < fileSizeInMB && retry < 100; ++retry)
+            Console.WriteLine(String.Format("Download big file size: {0}", fileSize));
+            for (long currentFileSize = 0, retry = 0; retry < 100; ++retry)
             {
-                using (CmisRepo cmis2 = new CmisRepo(repoInfo2, activityListener))
+                using (CmisRepo cmis2 = new CmisRepo(repoDownload, activityListener))
                 using (CmisRepo.SynchronizedFolder synchronizedFolder2 = new CmisRepo.SynchronizedFolder(
-                    repoInfo2,
+                    repoDownload,
                     activityListener,
                     cmis2))
                 {
-                    synchronizedFolder2.SyncInBackground();
-                    System.Threading.Thread.Sleep(1000);
+                    if (testResume)
+                    {
+                        synchronizedFolder2.SyncInBackground();
+                        System.Threading.Thread.Sleep(sleepInterval);
+                    }
+                    else
+                    {
+                        synchronizedFolder2.Sync();
+                    }
                 }
 
                 string file2Tmp = file2 + ".sync";
@@ -687,22 +764,27 @@ namespace TestLibrary.IntegrationTests
                 FileInfo infoTmp = new FileInfo(file2Tmp);
                 if (infoTmp.Exists)
                 {
-                    currentFileSizeInMB = (int)(infoTmp.Length / 1024 / 1024);
+                    currentFileSize = infoTmp.Length;
                 }
                 else if (info.Exists)
                 {
-                    currentFileSizeInMB = (int)(info.Length / 1024 / 1024);
+                    currentFileSize = info.Length;
                 }
-                Console.WriteLine("Download big file, current size: {0}MB", currentFileSizeInMB);
+                Assert.IsTrue(fileSize >= currentFileSize, String.Format("Current download file size {0}", currentFileSize));
+                Console.WriteLine("Download big file, current size: {0}", currentFileSize);
+                if (currentFileSize == fileSize && (!infoTmp.Exists))
+                {
+                    break;
+                }
             }
 
             string checksum1 = Database.Checksum(file);
             string checksum2 = Database.Checksum(file2);
             Assert.IsTrue(checksum1 == checksum2);
 
-            using (CmisRepo cmis2 = new CmisRepo(repoInfo2, activityListener))
+            using (CmisRepo cmis2 = new CmisRepo(repoUpload, activityListener))
             using (CmisRepo.SynchronizedFolder synchronizedFolder2 = new CmisRepo.SynchronizedFolder(
-                repoInfo2,
+                repoUpload,
                 activityListener,
                 cmis2))
             {

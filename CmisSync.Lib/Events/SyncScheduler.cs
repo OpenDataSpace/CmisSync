@@ -3,7 +3,7 @@ using System.Timers;
 
 namespace CmisSync.Lib.Events
 {
-    public class SyncScheduler : SyncEventHandler
+    public class SyncScheduler : SyncEventHandler, IDisposable
     {
         public static readonly int POLLSCHEDULERPRIORITY = 1000;
         private double interval;
@@ -61,6 +61,11 @@ namespace CmisSync.Lib.Events
             get {
                 return POLLSCHEDULERPRIORITY;
             }
+        }
+
+        public void Dispose() {
+            timer.Stop();
+            timer.Dispose();
         }
     }
 }
