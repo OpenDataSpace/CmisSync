@@ -15,7 +15,7 @@ namespace CmisSync.Lib.Sync
         /// <value>
         /// The path.
         /// </value>
-        public string Path { get; private set; }
+        public FileInfo Path { get; private set; }
         /// <summary>
         /// Gets the session.
         /// </summary>
@@ -35,10 +35,10 @@ namespace CmisSync.Lib.Sync
         /// <param name='queue'>
         /// Queue where the status/failures should be reported to.
         /// </param>
-        public AbstractFileSynchronizer (string path, ISession session, SyncEventQueue queue) : base(queue)
+        public AbstractFileSynchronizer (FileInfo path, ISession session, SyncEventQueue queue) : base(queue)
         {
-            if (String.IsNullOrEmpty (path))
-                throw new ArgumentException ("Given path cannot be null or empty");
+            if (path == null)
+                throw new ArgumentException ("Given path cannot be null");
             if (session == null)
                 throw new ArgumentNullException ("The given session must not be null");
             Path = path;
