@@ -778,7 +778,7 @@ namespace CmisSync.Lib.Sync
                         try{
                             HashAlgorithm hashAlg = new SHA1Managed();
                             Logger.Debug("Creating local download file: " + tmpfilepath);
-                            using (Stream file = new FileStream(tmpfilepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)){
+                            using (Stream file = new FileStream(tmpfilepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read)){
                                 this.Queue.AddEvent(transmissionEvent);
                                 downloader.DownloadFile(remoteDocument, file, transmissionEvent, hashAlg);
                                 filehash = hashAlg.Hash;

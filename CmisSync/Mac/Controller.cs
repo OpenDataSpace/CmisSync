@@ -88,7 +88,11 @@ namespace CmisSync {
                                 if (transmission == null) {
                                     finishedNotifications.Add (notification);
                                 } else {
-                                    transmissions.Remove(transmission);
+                                    if (transmissionFiles.ContainsKey (transmission.Path)) {
+                                        transmissions.Remove(transmission);
+                                    } else {
+                                        notificationCenter.RemoveDeliveredNotification (notification);
+                                    }
                                 }
                             }
                             finishedNotifications.Sort (new ComparerNSUserNotification ());
@@ -113,7 +117,7 @@ namespace CmisSync {
                                 transmission.TransmissionStatus += TransmissionReport;
                                 notification.DeliveryDate = NSDate.Now;
                                 notificationCenter.DeliverNotification (notification);
-                                transmissionFiles[transmission.Path] = notification.DeliveryDate;
+                                transmissionFiles.Add (transmission.Path, notification.DeliveryDate);
                             }
                         }
                     });
@@ -179,10 +183,26 @@ namespace CmisSync {
                             return;
                         }
                         transmissionFiles [transmission.Path] = NSDate.Now;
-                        string percent = (transmission.Status.Percent.GetValueOrDefault() / 100).ToString ();
-                        byte[] buffer = Encoding.ASCII.GetBytes (percent);
-                        Syscall.setxattr (filePath, extendAttrKey, buffer);
-                        (new FileInfo (filePath)).CreationTimeUtc = new DateTime (1984, 1, 24, 8, 0, 0, DateTimeKind.Utc);
+                        double percent = transmission.Status.Percent.GetValueOrDefault() / 100;
+                        if (percent < 1) {
+                            Syscall.setxattr (filePath, extendAttrKey, Encoding.ASCII.GetBytes (percent.ToString ()));
+                            try {
+                                NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
+                                attr.CreationDate = new DateTime (1984, 1, 24, 8, 0, 0, DateTimeKind.Utc);
+                                NSFileManager.DefaultManager.SetAttributes (attr, filePath);
+                            } catch (Exception ex) {
+                                Logger.Error (String.Format ("Exception to set {0} creation time for transmission report: {1}", filePath, ex));
+                            }
+                        } else {
+                            Syscall.removexattr (filePath, extendAttrKey);
+                            try {
+                                NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
+                                attr.CreationDate = (new FileInfo(filePath)).CreationTime;
+                                NSFileManager.DefaultManager.SetAttributes (attr, filePath);
+                            } catch (Exception ex) {
+                                Logger.Error (String.Format ("Exception to set {0} creation time for transmission report: {1}", filePath, ex));
+                            }
+                        }
                     }
                 }
                 notificationCenter.BeginInvokeOnMainThread (delegate
