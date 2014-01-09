@@ -32,6 +32,18 @@ namespace CmisSync.Lib.Events
         }
     }
 
+    public class FolderMovedEvent : FolderEvent
+    {
+        public DirectoryInfo OldLocalFolder { get; private set; }
+        public string OldRemoteFolderPath { get; private set; }
+        public FolderMovedEvent(
+            DirectoryInfo oldLocalFolder,
+            DirectoryInfo newLocalFolder,
+            string oldRemoteFolderPath,
+            IFolder newRemoteFolder) : base ( newLocalFolder, newRemoteFolder) {
+        }
+    }
+
     public abstract class AbstractFolderEvent : ISyncEvent
     {
         public MetaDataChangeType Local { get; set; }

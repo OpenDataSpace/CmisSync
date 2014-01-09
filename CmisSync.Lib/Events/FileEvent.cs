@@ -37,10 +37,22 @@ namespace CmisSync.Lib.Events
                                   RemoteContent);
         }
     }
-    /*
+
     public class FileMovedEvent : FileEvent
     {
-        public FileMovedEvent( FileInfo oldLocalFile = null, DirectoryInfo oldLocalFolder = null) : base()
-    }*/
+        public FileInfo OldLocalFile{ get; protected set; }
+        public DirectoryInfo OldParentFolder { get; protected set; }
+        public string OldRemoteFilePath { get; protected set; }
+        public FileMovedEvent(
+            FileInfo oldLocalFile = null,
+            FileInfo newLocalFile = null,
+            DirectoryInfo oldParentFolder = null,
+            DirectoryInfo newParentFolder = null,
+            string oldRemoteFilePath = null,
+            IDocument newRemoteFile = null
+        ) : base(newLocalFile, newParentFolder, newRemoteFile) {
+
+        }
+    }
 }
 
