@@ -55,10 +55,29 @@ namespace TestLibrary.TasksTests
         {
             var mock = new Mock<IDocument> ();
             var mockedStream = new Mock<IContentStream> ();
+            double lastPercent = 0;
             mockedStream.Setup (stream => stream.Length).Returns (remoteLength);
             mockedStream.Setup (stream => stream.Stream).Returns (remoteStream);
             mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
             mock.Setup (doc => doc.GetContentStream ()).Returns (mockedStream.Object);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                //Console.WriteLine(e);
+                if(e.ActualPosition!=null) {
+                    Assert.GreaterOrEqual((long)e.ActualPosition, 0);
+                    Assert.LessOrEqual((long)e.ActualPosition, remoteLength);
+                }
+                if(e.Percent!=null) {
+                    Assert.GreaterOrEqual( e.Percent, 0);
+                    Assert.LessOrEqual( e.Percent, 100);
+                    Assert.GreaterOrEqual(e.Percent, lastPercent);
+                    lastPercent = (double) e.Percent;
+                }
+                if(e.Length!=null) {
+                    Assert.GreaterOrEqual( e.Length, 0);
+                    Assert.LessOrEqual(e.Length, remoteLength);
+                }
+
+            };
             using (IFileDownloader downloader = new SimpleFileDownloader()) {
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);

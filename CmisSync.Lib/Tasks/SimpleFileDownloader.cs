@@ -23,10 +23,14 @@ namespace CmisSync.Lib.Tasks
                 hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 return;
             }
-
             using (ProgressStream progressStream = new ProgressStream(localFileStream, TransmissionStatus))
             using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
             using (Stream remoteStream = contentStream.Stream) {
+                TransmissionStatus.ReportProgress (new TransmissionProgressEventArgs () {
+                    Length = remoteDocument.ContentStreamLength,
+                    ActualPosition = 0
+                }
+                );
                 byte[] buffer = new byte[8 * 1024];
                 int len;
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
