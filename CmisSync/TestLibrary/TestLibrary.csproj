@@ -87,6 +87,7 @@
     <Compile Include="StorageTests\PersistentStorageTest.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
+    <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

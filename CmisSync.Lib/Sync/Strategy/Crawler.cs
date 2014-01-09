@@ -144,7 +144,7 @@ namespace CmisSync.Lib.Sync.Strategy
                         Queue.AddEvent(new FileEvent(
                             localFile : new FileInfo(Path.Combine(localFolder.FullName, doc.Name)),
                             localParentDirectory : localFolder,
-                            remoteFile: doc){Remote = ChangeType.CREATED});
+                            remoteFile: doc){Remote = MetaDataChangeType.CREATED});
                     }
                 }
             }

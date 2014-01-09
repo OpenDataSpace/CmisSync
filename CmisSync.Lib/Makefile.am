@@ -24,11 +24,11 @@ SOURCES =  \
 	Events/AbstractEventProducer.cs \
 	Events/ActiveActivitiesManager.cs \
 	Events/BubbledEvent.cs \
+	Events/ChangeEnums.cs \
 	Events/ConfigChangedEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/DebugLoggingHandler.cs \
 	Events/EncapsuledEvent.cs \
-	Events/Enums.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
 	Events/EventFilter/FailedOperationsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
@@ -76,8 +76,8 @@ SOURCES =  \
 	Sync/Strategy/Crawler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/FolderSynchronizer.cs \
+	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \
-	Sync/WatcherStrategy.cs \
 	Tasks/ChunkedDownloader.cs \
 	Tasks/ChunkedUploader.cs \
 	Tasks/FileDownloader.cs \

@@ -13,31 +13,41 @@ using CmisSync.Lib.Events;
 
 using log4net;
 
-namespace CmisSync.Lib.Sync
+namespace CmisSync.Lib.Sync.Strategy
 {
     /// <summary>
     /// Watcher sync.
     /// </summary>
-    public class WatcherSync : SyncEventHandler
+    public class Watcher : ReportingSyncEventHandler
     {
 
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(WatcherSync));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(Watcher));
 
         private static readonly int DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY = 1;
 
-        private string remotePath;
+        private DirectoryInfo LocalFolder;
 
-        private string localPath;
+        private ISession Session;
 
-        private ISession session;
+        private FileSystemWatcher FsWatcher;
 
-        public WatcherSync(RepoInfo info, ISession session)
+        /// <summary>
+        /// Enables the FSEvent report
+        /// </summary>
+        public bool EnableEvent { get; set; }
+
+        public Watcher(DirectoryInfo localFolder, ISession session, SyncEventQueue queue) : base(queue)
         {
             if(session == null)
                 throw new ArgumentNullException("The given session must not be null");
-            this.session = session;
-            this.remotePath = info.RemotePath;
-            this.localPath = info.TargetDirectory;
+            if(localFolder == null)
+                throw new ArgumentNullException("The given local folder must not be null");
+            localFolder.Refresh();
+            if(!localFolder.Exists)
+                throw new ArgumentException("The given folder does not exist");
+            Session = session;
+            LocalFolder = localFolder;
+            FsWatcher = new FileSystemWatcher();
         }
 
         /// <summary>

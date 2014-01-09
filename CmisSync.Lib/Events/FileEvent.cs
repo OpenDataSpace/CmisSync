@@ -7,15 +7,15 @@ namespace CmisSync.Lib.Events
 {
     public class FileEvent : AbstractFolderEvent
     {
-        public ChangeType LocalContent { get; set; }
+        public ContentChangeType LocalContent { get; set; }
 
-        public ChangeType RemoteContent { get; set; }
+        public ContentChangeType RemoteContent { get; set; }
 
-        public FileInfo LocalFile { get; private set; }
+        public FileInfo LocalFile { get; protected set; }
 
-        public DirectoryInfo LocalParentDirectory { get; private set; }
+        public DirectoryInfo LocalParentDirectory { get; protected set; }
 
-        public IDocument RemoteFile { get; private set; }
+        public IDocument RemoteFile { get; protected set; }
 
         public FileEvent (FileInfo localFile = null, DirectoryInfo localParentDirectory = null, IDocument remoteFile = null)
         {
@@ -24,8 +24,8 @@ namespace CmisSync.Lib.Events
             this.LocalFile = localFile;
             this.LocalParentDirectory = localParentDirectory;
             this.RemoteFile = remoteFile;
-            this.LocalContent = ChangeType.NONE;
-            this.RemoteContent = ChangeType.NONE;
+            this.LocalContent = ContentChangeType.NONE;
+            this.RemoteContent = ContentChangeType.NONE;
         }
 
         public override string ToString ()
@@ -37,5 +37,10 @@ namespace CmisSync.Lib.Events
                                   RemoteContent);
         }
     }
+    /*
+    public class FileMovedEvent : FileEvent
+    {
+        public FileMovedEvent( FileInfo oldLocalFile = null, DirectoryInfo oldLocalFolder = null) : base()
+    }*/
 }
 

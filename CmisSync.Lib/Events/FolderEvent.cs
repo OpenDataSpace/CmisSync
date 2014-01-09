@@ -34,14 +34,14 @@ namespace CmisSync.Lib.Events
 
     public abstract class AbstractFolderEvent : ISyncEvent
     {
-        public ChangeType Local { get; set; }
+        public MetaDataChangeType Local { get; set; }
 
-        public ChangeType Remote { get; set; }
+        public MetaDataChangeType Remote { get; set; }
 
         public AbstractFolderEvent ()
         {
-            this.Local = ChangeType.NONE;
-            this.Remote = ChangeType.NONE;
+            this.Local = MetaDataChangeType.NONE;
+            this.Remote = MetaDataChangeType.NONE;
         }
     }
 }

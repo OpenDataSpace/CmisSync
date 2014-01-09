@@ -161,13 +161,13 @@ namespace CmisSync.Lib.Sync.Strategy
                                 switch(change.ChangeType)
                                 {
                                 case DotCMIS.Enums.ChangeType.Created:
-                                    folderEvent.Remote = ChangeType.CREATED;
+                                    folderEvent.Remote = MetaDataChangeType.CREATED;
                                     break;
                                 case DotCMIS.Enums.ChangeType.Updated:
-                                    folderEvent.Remote = ChangeType.CHANGED;
+                                    folderEvent.Remote = MetaDataChangeType.CHANGED;
                                     break;
                                 case DotCMIS.Enums.ChangeType.Security:
-                                    folderEvent.Remote = ChangeType.CHANGED;
+                                    folderEvent.Remote = MetaDataChangeType.CHANGED;
                                     break;
                                 default:
                                     // Skip all other event types but shouldn't happen, because of the if statement at the beginning
@@ -183,8 +183,8 @@ namespace CmisSync.Lib.Sync.Strategy
                                 {
                                 case DotCMIS.Enums.ChangeType.Created:
                                 {
-                                    var fileEvent = new FileEvent(null, null, doc) {Remote = ChangeType.CREATED};
-                                    fileEvent.RemoteContent = doc.ContentStreamId == null ? ChangeType.NONE : ChangeType.CREATED;
+                                    var fileEvent = new FileEvent(null, null, doc) {Remote = MetaDataChangeType.CREATED};
+                                    fileEvent.RemoteContent = doc.ContentStreamId == null ? ContentChangeType.NONE : ContentChangeType.CREATED;
                                     Queue.AddEvent(fileEvent);
                                     break;
                                 }
@@ -195,10 +195,10 @@ namespace CmisSync.Lib.Sync.Strategy
                                     var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                                     if( fileInfo != null )
                                     {
-                                        fileEvent.Remote = ChangeType.CHANGED;
+                                        fileEvent.Remote = MetaDataChangeType.CHANGED;
                                     } else {
-                                        fileEvent.Remote = ChangeType.CREATED;
-                                        fileEvent.RemoteContent = ChangeType.CREATED;
+                                        fileEvent.Remote = MetaDataChangeType.CREATED;
+                                        fileEvent.RemoteContent = ContentChangeType.CREATED;
                                     }
                                     Queue.AddEvent(fileEvent);
                                     break;
@@ -210,11 +210,11 @@ namespace CmisSync.Lib.Sync.Strategy
                                     var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                                     if(fileInfo != null)
                                     {
-                                        fileEvent.Remote = ChangeType.CHANGED;
-                                        fileEvent.RemoteContent = ChangeType.CHANGED;
+                                        fileEvent.Remote = MetaDataChangeType.CHANGED;
+                                        fileEvent.RemoteContent = ContentChangeType.CHANGED;
                                     } else {
-                                        fileEvent.Remote = ChangeType.CREATED;
-                                        fileEvent.RemoteContent = ChangeType.CREATED;
+                                        fileEvent.Remote = MetaDataChangeType.CREATED;
+                                        fileEvent.RemoteContent = ContentChangeType.CREATED;
                                     }
                                     Queue.AddEvent(fileEvent);
                                     break;
@@ -242,14 +242,14 @@ namespace CmisSync.Lib.Sync.Strategy
                         if(path != null)
                         {
                             var fileInfo = new FileInfo(path);
-                            Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = ChangeType.DELETED});
+                            Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
                             continue;
                         }
                         path = db.GetFolderPath(change.ObjectId);
                         if(path != null)
                         {
                             var dirInfo = new DirectoryInfo(path);
-                            Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = ChangeType.DELETED});
+                            Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = MetaDataChangeType.DELETED});
                             continue;
                         }
                     }
