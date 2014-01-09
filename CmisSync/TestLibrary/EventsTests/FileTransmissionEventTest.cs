@@ -104,15 +104,24 @@ namespace TestLibrary.EventsTests
             FileTransmissionEvent e = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, path);
             Assert.AreEqual (path, e.Path);
             Assert.AreEqual(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, e.Type);
+            Assert.IsNull (e.CachePath);
             e = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, path);
             Assert.AreEqual (path, e.Path);
             Assert.AreEqual(FileTransmissionType.DOWNLOAD_NEW_FILE, e.Type);
+            Assert.IsNull (e.CachePath);
             e = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, path);
             Assert.AreEqual (path, e.Path);
             Assert.AreEqual(FileTransmissionType.UPLOAD_MODIFIED_FILE, e.Type);
+            Assert.IsNull (e.CachePath);
             e = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, path);
             Assert.AreEqual (path, e.Path);
             Assert.AreEqual(FileTransmissionType.UPLOAD_NEW_FILE, e.Type);
+            Assert.IsNull (e.CachePath);
+            string cachepath = "file.sync";
+            e = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, path, cachepath);
+            Assert.AreEqual (path, e.Path);
+            Assert.AreEqual(FileTransmissionType.DOWNLOAD_NEW_FILE, e.Type);
+            Assert.AreEqual (cachepath, e.CachePath);
         }
     }
 }

@@ -27,6 +27,12 @@ namespace CmisSync.Lib.Events
         /// </value>
         public string Path { get; private set; }
 
+        /// <summary>
+        /// If a download happens, a cache file could be used. If the cache is used, this should be the path.
+        /// </summary>
+        /// <value>
+        /// The cache path.
+        /// </value>
         public string CachePath { get; private set; }
 
         public delegate void TransmissionEventHandler(object sender, TransmissionProgressEventArgs e);
@@ -54,6 +60,9 @@ namespace CmisSync.Lib.Events
         /// </param>
         /// <param name='path'>
         /// Path to the file of the transmission.
+        /// </param>
+        /// <param name='cachePath'>
+        /// If a download runs and a cache file is used, this should be the path to the cache file
         /// </param>
         public FileTransmissionEvent(FileTransmissionType type, string path, string cachePath = null)
         {

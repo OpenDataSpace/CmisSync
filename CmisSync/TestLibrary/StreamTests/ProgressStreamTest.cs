@@ -35,7 +35,7 @@ namespace TestLibrary.StreamTests
         public void ConstructorTest ()
         {
             var mockedStream = new Mock<Stream> ();
-            var mockedEvent = new Mock<FileTransmissionEvent> (TransmissionType, Filename);
+            var mockedEvent = new Mock<FileTransmissionEvent> (TransmissionType, Filename, null);
             using (new ProgressStream(mockedStream.Object, mockedEvent.Object)) {
             }
             try {
