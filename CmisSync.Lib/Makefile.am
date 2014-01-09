@@ -71,8 +71,8 @@ SOURCES =  \
 	Streams/StreamWrapper.cs \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
-	Sync/ContentChangeEventStrategy.cs \
 	Sync/CrawlStrategy.cs \
+	Sync/Strategy/ContentChanges.cs \
 	Sync/Strategy/Crawler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/FolderSynchronizer.cs \
