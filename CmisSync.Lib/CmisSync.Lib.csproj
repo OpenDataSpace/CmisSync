@@ -112,7 +112,6 @@
     <Compile Include="Tasks\FileDownloader.cs" />
     <Compile Include="Events\RemoteEvent.cs" />
     <Compile Include="Events\StartNextSyncEvent.cs" />
-    <Compile Include="Sync\ContentChangeEventStrategy.cs" />
     <Compile Include="Events\SyncScheduler.cs" />
     <Compile Include="Streams\ForwardReadingStream.cs" />
     <Compile Include="Events\FullSyncCompletedEvent.cs" />
@@ -131,6 +130,7 @@
     <Compile Include="Sync\Strategy\FolderSynchronizer.cs" />
     <Compile Include="Sync\Strategy\Crawler.cs" />
     <Compile Include="Events\CrawlRequestEvent.cs" />
+    <Compile Include="Sync\Strategy\ContentChanges.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
