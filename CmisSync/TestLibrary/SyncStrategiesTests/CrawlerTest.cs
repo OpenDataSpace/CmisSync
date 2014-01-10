@@ -54,7 +54,7 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
-        public void NotHandlingWrongEventsTest() {
+        public void IgnoreWrongEventsTest() {
             var queuemanager = new Mock<SyncEventManager>().Object;
             var queue = new Mock<SyncEventQueue>(queuemanager).Object;
             var remoteFolder = new Mock<IFolder>().Object;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -439,6 +440,46 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
             Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
             Assert.AreEqual(WatcherChangeTypes.Renamed, returnedFSEvent.Type);
+            localSubFolder = new DirectoryInfo(newpath);
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFolderMovedEventTest () {
+            var anotherSubFolder = new DirectoryInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));
+            anotherSubFolder.Create();
+            var fswatcher = new FileSystemWatcher(localFolder.FullName);
+            var manager = new Mock<SyncEventManager>().Object;
+            var queue = new Mock<SyncEventQueue>(manager);
+            string oldpath = localSubFolder.FullName;
+            string newpath = Path.Combine(anotherSubFolder.FullName, Path.GetRandomFileName());
+            List<FSEvent> returnedFSEvents = new List<FSEvent>();
+            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+                .Callback((ISyncEvent f) => returnedFSEvents.Add(f as FSEvent));
+            var watcher = new Watcher(fswatcher, queue.Object);
+            watcher.EnableEvents = true;
+            var t = Task.Factory.StartNew(() => {
+                int count = 0;
+                while(returnedFSEvents.Count < 2 && count < RETRIES) {
+                    fswatcher.WaitForChanged(WatcherChangeTypes.Renamed, MILISECONDSWAIT);
+                    count ++;
+                }
+            });
+            localSubFolder.MoveTo(newpath);
+            t.Wait();
+            Assert.Greater(returnedFSEvents.Count, 0);
+            bool oldpathfound = false;
+            bool newpathfound = false;
+            foreach(FSEvent fsEvent in returnedFSEvents) {
+                if(fsEvent.Path.Equals(oldpath))
+                    oldpathfound = true;
+                if(fsEvent is FSMovedEvent && (fsEvent as FSMovedEvent).OldPath.Equals(oldpath))
+                    oldpathfound = true;
+                if(fsEvent.Path.Equals(newpath))
+                    newpathfound = true;
+                Console.WriteLine(fsEvent);
+            }
+            Assert.IsTrue(oldpathfound);
+            Assert.IsTrue(newpathfound);
             localSubFolder = new DirectoryInfo(newpath);
         }
     }
