@@ -382,7 +382,7 @@ namespace TestLibrary.SyncStrategiesTests
                     count ++;
                 }
             });
-            localSubFolder.CreationTime = DateTime.Now;
+            localSubFolder.CreationTime = localSubFolder.CreationTime.AddDays(1);
             t.Wait();
             Assert.NotNull(returnedFSEvent);
             Assert.IsTrue(returnedFSEvent.IsDirectory());

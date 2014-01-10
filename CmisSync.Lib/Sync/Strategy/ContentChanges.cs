@@ -18,7 +18,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private object syncLock = new object();
 
-        private static readonly string FULL_SYNC_PARAM_NAME = "lastTokenOnServer";
+        public static readonly string FULL_SYNC_PARAM_NAME = "lastTokenOnServer";
         public static readonly int DEFAULT_PRIORITY = 1000;
 
         public override int Priority {
@@ -110,11 +110,6 @@ namespace CmisSync.Lib.Sync.Strategy
                 // Use fallback sync algorithm
                 return false;
             }
-        }
-
-
-        public void Dispose() {
-
         }
 
         private void Sync()

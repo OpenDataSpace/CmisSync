@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
             this.parameters.Add(key, value);
         }
 
-        public bool TryGetParam(string key, out string value) {
+        public virtual bool TryGetParam(string key, out string value) {
             return this.parameters.TryGetValue(key, out value);
         }
 
