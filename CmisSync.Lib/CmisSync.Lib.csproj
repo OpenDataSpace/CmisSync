@@ -69,7 +69,6 @@
     <Compile Include="Cmis\CmisUtils.cs" />
     <Compile Include="Cmis\MimeType.cs" />
     <Compile Include="Sync\CmisRepo.cs" />
-    <Compile Include="Sync\WatcherStrategy.cs" />
     <Compile Include="ConfigManager.cs" />
     <Compile Include="Fetcher.cs" />
     <Compile Include="RepoBase.cs" />
@@ -112,7 +111,6 @@
     <Compile Include="Tasks\FileDownloader.cs" />
     <Compile Include="Events\RemoteEvent.cs" />
     <Compile Include="Events\StartNextSyncEvent.cs" />
-    <Compile Include="Sync\ContentChangeEventStrategy.cs" />
     <Compile Include="Events\SyncScheduler.cs" />
     <Compile Include="Streams\ForwardReadingStream.cs" />
     <Compile Include="Events\FullSyncCompletedEvent.cs" />
@@ -127,10 +125,12 @@
     <Compile Include="Storage\MetaDataStorage.cs" />
     <Compile Include="Events\FileEvent.cs" />
     <Compile Include="Events\FolderEvent.cs" />
-    <Compile Include="Events\Enums.cs" />
     <Compile Include="Sync\Strategy\FolderSynchronizer.cs" />
     <Compile Include="Sync\Strategy\Crawler.cs" />
     <Compile Include="Events\CrawlRequestEvent.cs" />
+    <Compile Include="Sync\Strategy\ContentChanges.cs" />
+    <Compile Include="Events\ChangeEnums.cs" />
+    <Compile Include="Sync\Strategy\Watcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

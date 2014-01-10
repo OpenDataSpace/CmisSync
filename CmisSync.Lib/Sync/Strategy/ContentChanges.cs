@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DotCMIS.Client;
@@ -6,18 +7,14 @@ using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Events;
 
 
-namespace CmisSync.Lib
+namespace CmisSync.Lib.Sync.Strategy
 {
-    public class ChangeLogStrategy : SyncEventHandler, IDisposable
+    public class ContentChanges : ReportingSyncEventHandler
     {
         private ISession session;
         private IDatabase db;
-        private RepoInfo info;
-        private SyncEventQueue queue;
         private int MaxNumberOfContentChanges;
         private bool IsPropertyChangesSupported;
-
-        private string lastRemoteChangeLogTokenBeforeFullCrawlSync = null;
 
         private object syncLock = new object();
 
@@ -30,21 +27,17 @@ namespace CmisSync.Lib
             }
         }
 
-        public ChangeLogStrategy(ISession session, IDatabase db, RepoInfo repoInfo, SyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) {
+        public ContentChanges(ISession session, IDatabase db, SyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base (queue) {
             if(session == null)
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
             if(db == null)
                 throw new ArgumentNullException("Database instance is needed for the ChangeLogStrategy, but was null");
-            if(repoInfo == null)
-                throw new ArgumentNullException("RepoInfo instance is needed for the ChangeLogStrategy, but was null");
             if(queue == null)
                 throw new ArgumentNullException("SyncEventQueue instance is needed for the ChangeLogStrategy, but was null");
             if(maxNumberOfContentChanges <= 0)
                 throw new ArgumentException("MaxNumberOfContentChanges must be greater then zero");
             this.session = session;
             this.db = db;
-            this.info = repoInfo;
-            this.queue = queue;
             this.MaxNumberOfContentChanges = maxNumberOfContentChanges;
             this.IsPropertyChangesSupported = isPropertyChangesSupported;
         }
@@ -58,7 +51,10 @@ namespace CmisSync.Lib
                 {
                     // Get last change log token on server side.
                     session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
-                    lastRemoteChangeLogTokenBeforeFullCrawlSync = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
+                    string lastRemoteChangeLogTokenBeforeFullCrawlSync = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
+                    if(db.GetChangeLogToken() == null) {
+                        syncEvent.SetParam(FULL_SYNC_PARAM_NAME, lastRemoteChangeLogTokenBeforeFullCrawlSync);
+                    }
                     // Use fallback sync algorithm
                     return false;
                 }
@@ -79,6 +75,7 @@ namespace CmisSync.Lib
 
             return false;
         }
+
         /// <summary>
         /// Tries to start sync algorithm, if connection was successful, this routine returns with true and starts syncing in background, otherwise a fallback mechanism is used
         /// </summary>
@@ -122,7 +119,6 @@ namespace CmisSync.Lib
 
         private void Sync()
         {
-/*            IFolder remoteFolder = session.GetObjectByPath(info.RemotePath) as IFolder;
             // Get last change log token on server side.
             session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
             string lastTokenOnServer = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
@@ -136,7 +132,7 @@ namespace CmisSync.Lib
                 // Force full sync with lastTokenOnServer as param
                 var fullsyncevent = new StartNextSyncEvent(true);
                 fullsyncevent.SetParam(FULL_SYNC_PARAM_NAME, lastTokenOnServer);
-                queue.AddEvent(fullsyncevent);
+                Queue.AddEvent(fullsyncevent);
                 return;
             }
 
@@ -149,14 +145,112 @@ namespace CmisSync.Lib
                 {
                     ICmisObject remoteObject = null;
                     if(change.ChangeType == DotCMIS.Enums.ChangeType.Created ||
-                       change.ChangeType == DotCMIS.Enums.ChangeType.Updated) {
+                       change.ChangeType == DotCMIS.Enums.ChangeType.Updated ||
+                       change.ChangeType == DotCMIS.Enums.ChangeType.Security)
+                    {
                         try{
+                            // Request the remote object, which has been the source of the change event
                             remoteObject = session.GetObject(change.ObjectId);
                             IFolder folder = remoteObject as IFolder;
                             if(folder != null)
-
-                        } catch(Exception) {
+                            {
+                                // Publish the informations of the changed folder
+                                string path = db.GetFolderPath(folder.Id);
+                                DirectoryInfo dirInfo = (path != null) ? new DirectoryInfo(path) : null;
+                                var folderEvent = new FolderEvent(dirInfo, folder);
+                                switch(change.ChangeType)
+                                {
+                                case DotCMIS.Enums.ChangeType.Created:
+                                    folderEvent.Remote = MetaDataChangeType.CREATED;
+                                    break;
+                                case DotCMIS.Enums.ChangeType.Updated:
+                                    folderEvent.Remote = MetaDataChangeType.CHANGED;
+                                    break;
+                                case DotCMIS.Enums.ChangeType.Security:
+                                    folderEvent.Remote = MetaDataChangeType.CHANGED;
+                                    break;
+                                default:
+                                    // Skip all other event types but shouldn't happen, because of the if statement at the beginning
+                                    continue;
+                                }
+                                Queue.AddEvent(folderEvent);
+                                continue;
+                            }
+                            IDocument doc = remoteObject as IDocument;
+                            if(doc != null) {
+                                // Publish the informations of the changed file
+                                switch(change.ChangeType)
+                                {
+                                case DotCMIS.Enums.ChangeType.Created:
+                                {
+                                    var fileEvent = new FileEvent(null, null, doc) {Remote = MetaDataChangeType.CREATED};
+                                    fileEvent.RemoteContent = doc.ContentStreamId == null ? ContentChangeType.NONE : ContentChangeType.CREATED;
+                                    Queue.AddEvent(fileEvent);
+                                    break;
+                                }
+                                case DotCMIS.Enums.ChangeType.Security:
+                                {
+                                    string path = db.GetFilePath(doc.Id);
+                                    var fileInfo = (path == null) ? null : new FileInfo(path);
+                                    var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
+                                    if( fileInfo != null )
+                                    {
+                                        fileEvent.Remote = MetaDataChangeType.CHANGED;
+                                    } else {
+                                        fileEvent.Remote = MetaDataChangeType.CREATED;
+                                        fileEvent.RemoteContent = ContentChangeType.CREATED;
+                                    }
+                                    Queue.AddEvent(fileEvent);
+                                    break;
+                                }
+                                case DotCMIS.Enums.ChangeType.Updated:
+                                {
+                                    string path = db.GetFilePath(doc.Id);
+                                    var fileInfo = (path == null) ? null : new FileInfo(path);
+                                    var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
+                                    if(fileInfo != null)
+                                    {
+                                        fileEvent.Remote = MetaDataChangeType.CHANGED;
+                                        fileEvent.RemoteContent = ContentChangeType.CHANGED;
+                                    } else {
+                                        fileEvent.Remote = MetaDataChangeType.CREATED;
+                                        fileEvent.RemoteContent = ContentChangeType.CREATED;
+                                    }
+                                    Queue.AddEvent(fileEvent);
+                                    break;
+                                }
+                                }
+                            }
+                            // All other object types are ignored at the moment, perhaps there could be support for others in the future
+                        } catch (DotCMIS.Exceptions.CmisObjectNotFoundException) {
+                            // Event seems to reference an object, which is not available anymore
+                            // So a delete event should follow later and this item can be skipped
+                            continue;
+                        } catch (DotCMIS.Exceptions.CmisPermissionDeniedException) {
+                            // Object ACL's seems to be changed so access is denied
+                            // skip it
+                            continue;
+                        } catch (Exception) {
+                            // Abort this execution on any other failure
                             return;
+                        }
+                    }
+                    else if(change.ChangeType == DotCMIS.Enums.ChangeType.Deleted)
+                    {
+                        // Figure out, which local files or folders should be deleted
+                        string path = db.GetFilePath(change.ObjectId);
+                        if(path != null)
+                        {
+                            var fileInfo = new FileInfo(path);
+                            Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
+                            continue;
+                        }
+                        path = db.GetFolderPath(change.ObjectId);
+                        if(path != null)
+                        {
+                            var dirInfo = new DirectoryInfo(path);
+                            Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = MetaDataChangeType.DELETED});
+                            continue;
                         }
                     }
                 }
@@ -177,7 +271,7 @@ namespace CmisSync.Lib
             while (!lastTokenOnServer.Equals(lastTokenOnClient));
         }
 
-
+        /*
             /// <summary>
             /// Apply a remote change for Created or Updated.
             /// </summary>
@@ -416,9 +510,9 @@ namespace CmisSync.Lib
                         return false;
                     }
                 }
-                return SyncDownloadFolder(remoteFolder, Path.GetDirectoryName(localFolder));*/
+                return SyncDownloadFolder(remoteFolder, Path.GetDirectoryName(localFolder));
             }
-
+*/
     }
 }
 

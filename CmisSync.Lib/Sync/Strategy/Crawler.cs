@@ -65,13 +65,15 @@ namespace CmisSync.Lib.Sync.Strategy
             if(e is CrawlRequestEvent)
             {
                 var request = e as CrawlRequestEvent;
-                StartAsync(request.RemoteFolder, request.LocalFolder);
+                CrawlSync(request.RemoteFolder, request.LocalFolder);
+                //StartAsync(request.RemoteFolder, request.LocalFolder);
                 return true;
             }
             if(e is StartNextSyncEvent)
             {
                 CrawlSync(RemoteFolder, LocalFolder);
                 //StartAsync(RemoteFolder, LocalFolder);
+                Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
                 return true;
             }
             return false;
@@ -142,7 +144,7 @@ namespace CmisSync.Lib.Sync.Strategy
                         Queue.AddEvent(new FileEvent(
                             localFile : new FileInfo(Path.Combine(localFolder.FullName, doc.Name)),
                             localParentDirectory : localFolder,
-                            remoteFile: doc){Remote = ChangeType.CREATED});
+                            remoteFile: doc){Remote = MetaDataChangeType.CREATED});
                     }
                 }
             }
