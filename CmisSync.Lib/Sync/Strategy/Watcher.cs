@@ -47,7 +47,7 @@ namespace CmisSync.Lib.Sync.Strategy
             FsWatcher.IncludeSubdirectories = true;
             FsWatcher.Filter = "*";
             FsWatcher.InternalBufferSize = 4 * 1024 * 16;
-            FsWatcher.NotifyFilter = NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite;
+            FsWatcher.NotifyFilter = NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.Security;
             //FsWatcher.Error += new ErrorEventHandler (OnError);
             FsWatcher.Created += new FileSystemEventHandler (OnCreatedChangedDeleted);
             FsWatcher.Deleted += new FileSystemEventHandler (OnCreatedChangedDeleted);
