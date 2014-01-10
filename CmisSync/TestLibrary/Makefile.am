@@ -26,6 +26,8 @@ SOURCES =  \
 	StreamTests/ProgressStreamTest.cs \
 	StreamTests/NonClosingHashStreamTest.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
+	SyncStrategiesTests/CrawlerTest.cs \
+	SyncStrategiesTests/WatcherTest.cs \
 	TasksTests/ChunkedDownloaderTest.cs \
 	TasksTests/SimpleFileDownloaderTest.cs \
 	TasksTests/SimpleFileUploaderTest.cs \

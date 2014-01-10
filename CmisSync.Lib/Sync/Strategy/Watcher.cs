@@ -41,8 +41,8 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             if (watcher == null)
                 throw new ArgumentNullException ("The given fs watcher must not be null");
-            if (String.IsNullOrEmpty(watcher.Path))
-                throw new ArgumentException("The given watcher must contain a path, where it is listening");
+            if (String.IsNullOrEmpty (watcher.Path))
+                throw new ArgumentException ("The given watcher must contain a path, where it is listening");
             FsWatcher = watcher;
             FsWatcher.IncludeSubdirectories = true;
             FsWatcher.Filter = "*";
@@ -67,10 +67,10 @@ namespace CmisSync.Lib.Sync.Strategy
             if (fsevent == null)
                 return false;
 
-            if(fsevent.IsDirectory()) {
-                handleFolderEvents(fsevent);
+            if (fsevent.IsDirectory ()) {
+                handleFolderEvents (fsevent);
             } else {
-                handleFileEvents(fsevent);
+                handleFileEvents (fsevent);
             }
             return true;
         }
@@ -81,17 +81,18 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='e'>
         /// FSEvent.
         /// </param>
-        private void handleFolderEvents(FSEvent e) {
+        private void handleFolderEvents (FSEvent e)
+        {
             var movedEvent = e as FSMovedEvent;
             FolderEvent folderEvent;
-            if(movedEvent != null) {
-                folderEvent = new FolderMovedEvent(
-                    new DirectoryInfo(movedEvent.OldPath),
-                    new DirectoryInfo(movedEvent.Path),
+            if (movedEvent != null) {
+                folderEvent = new FolderMovedEvent (
+                    new DirectoryInfo (movedEvent.OldPath),
+                    new DirectoryInfo (movedEvent.Path),
                     null, null) {Local = MetaDataChangeType.MOVED};
             } else {
-                folderEvent = new FolderEvent(new DirectoryInfo(e.Path), null);
-                switch ( e.Type ) {
+                folderEvent = new FolderEvent (new DirectoryInfo (e.Path), null);
+                switch (e.Type) {
                 case WatcherChangeTypes.Created:
                     folderEvent.Local = MetaDataChangeType.CREATED;
                     break;
@@ -106,7 +107,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     return;
                 }
             }
-            Queue.AddEvent(folderEvent);
+            Queue.AddEvent (folderEvent);
         }
 
         /// <summary>
@@ -115,21 +116,35 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='e'>
         /// FSEvent.
         /// </param>
-        private void handleFileEvents(FSEvent e) {
+        private void handleFileEvents (FSEvent e)
+        {
             var movedEvent = e as FSMovedEvent;
-            if(movedEvent != null) {
-                var oldfile = new FileInfo(movedEvent.OldPath);
-                var newfile = new FileInfo(movedEvent.Path);
-                var newEvent = new FileMovedEvent(
+            if (movedEvent != null) {
+                var oldfile = new FileInfo (movedEvent.OldPath);
+                var newfile = new FileInfo (movedEvent.Path);
+                var newEvent = new FileMovedEvent (
                     oldfile,
                     newfile,
                     null, newfile.Directory,
                     null, null);
-                    Queue.AddEvent(newEvent);
+                Queue.AddEvent (newEvent);
             } else {
-                var file = new FileInfo(e.Path);
-                var newEvent = new FileEvent(file, file.Directory, null);
-                Queue.AddEvent(newEvent);
+                var file = new FileInfo (e.Path);
+                var newEvent = new FileEvent (file, file.Directory, null);
+                switch (e.Type) {
+                case WatcherChangeTypes.Created:
+                    newEvent.Local = MetaDataChangeType.CREATED;
+                    newEvent.LocalContent = ContentChangeType.CREATED;
+                    break;
+                case WatcherChangeTypes.Changed:
+                    newEvent.LocalContent = ContentChangeType.CHANGED;
+                    break;
+                case WatcherChangeTypes.Deleted:
+                    newEvent.Local = MetaDataChangeType.DELETED;
+                    newEvent.LocalContent = ContentChangeType.DELETED;
+                    break;
+                }
+                Queue.AddEvent (newEvent);
             }
 
         }
@@ -155,9 +170,9 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='e'>
         /// Reported changes.
         /// </param>
-        private void OnCreatedChangedDeleted(object source, FileSystemEventArgs e)
+        private void OnCreatedChangedDeleted (object source, FileSystemEventArgs e)
         {
-            Queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath));
+            Queue.AddEvent (new FSEvent (e.ChangeType, e.FullPath));
         }
 
         /// <summary>
@@ -169,17 +184,16 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='e'>
         /// Reported renaming.
         /// </param>
-        private void OnRenamed(object source, RenamedEventArgs e)
+        private void OnRenamed (object source, RenamedEventArgs e)
         {
             string oldname = e.OldFullPath;
             string newname = e.FullPath;
-            if (oldname.StartsWith(FsWatcher.Path) && newname.StartsWith(FsWatcher.Path))
-            {
-                Queue.AddEvent(new FSMovedEvent(oldname, newname));
-            } else if(oldname.StartsWith(FsWatcher.Path)) {
-                Queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname));
-            } else if(newname.StartsWith(FsWatcher.Path)) {
-                Queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname));
+            if (oldname.StartsWith (FsWatcher.Path) && newname.StartsWith (FsWatcher.Path)) {
+                Queue.AddEvent (new FSMovedEvent (oldname, newname));
+            } else if (oldname.StartsWith (FsWatcher.Path)) {
+                Queue.AddEvent (new FSEvent (WatcherChangeTypes.Deleted, oldname));
+            } else if (newname.StartsWith (FsWatcher.Path)) {
+                Queue.AddEvent (new FSEvent (WatcherChangeTypes.Created, newname));
             }
         }
 
