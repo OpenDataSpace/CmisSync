@@ -82,14 +82,6 @@ namespace CmisSync
                     RepoId = repository.Key
                 };
                 AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
-                asyncLoader.UpdateNodeEvent += delegate {
-                    InvokeOnMainThread(delegate {
-                        DataSource.UpdateCmisTree(repo);
-                        for (int i = 0; i < Outline.RowCount; ++i) {
-                            Outline.ReloadItem(Outline.ItemAtRow(i));
-                        }
-                    });
-                };
                 Loader.Add(repo.Id, asyncLoader);
             }
 
@@ -113,6 +105,19 @@ namespace CmisSync
         }
 
         SetupController Controller;
+
+        void OutlineUpdate()
+        {
+            InvokeOnMainThread (delegate
+            {
+                foreach (RootFolder root in Repositories) {
+                    DataSource.UpdateCmisTree (root);
+                }
+                for (int i = 0; i < Outline.RowCount; ++i) {
+                    Outline.ReloadItem (Outline.ItemAtRow (i));
+                }
+            });
+        }
 
         void OutlineSelected (NSCmisTree cmis, int selected)
         {
@@ -179,12 +184,16 @@ namespace CmisSync
         {
             DataSource.SelectedEvent += OutlineSelected;
             DataDelegate.ItemExpanded += OutlineItemExpanded;
+            foreach (AsyncNodeLoader task in Loader.Values)
+                task.UpdateNodeEvent += OutlineUpdate;
         }
 
         void RemoveEvent ()
         {
             DataSource.SelectedEvent -= OutlineSelected;
             DataDelegate.ItemExpanded -= OutlineItemExpanded;
+            foreach (AsyncNodeLoader task in Loader.Values)
+                task.UpdateNodeEvent -= OutlineUpdate;
         }
 
         partial void OnBack (MonoMac.Foundation.NSObject sender)

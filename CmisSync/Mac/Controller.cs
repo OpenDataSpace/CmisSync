@@ -177,6 +177,13 @@ namespace CmisSync {
                         transmission.TransmissionStatus -= TransmissionReport;
                         transmissionFiles.Remove (transmission.Path);
                         Syscall.removexattr (filePath, extendAttrKey);
+                        try {
+                            NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
+                            attr.CreationDate = (new FileInfo(filePath)).CreationTime;
+                            NSFileManager.DefaultManager.SetAttributes (attr, filePath);
+                        } catch (Exception ex) {
+                            Logger.Error (String.Format ("Exception to set {0} creation time for transmission report: {1}", filePath, ex));
+                        }
                     } else {
                         TimeSpan diff = NSDate.Now - transmissionFiles [transmission.Path];
                         if (diff.Seconds < notificationInterval) {
