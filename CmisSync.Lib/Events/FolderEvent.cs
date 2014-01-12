@@ -9,9 +9,9 @@ namespace CmisSync.Lib.Events
     {
         public bool Recursive { get; set; }
 
-        public DirectoryInfo LocalFolder { get; private set; }
+        public DirectoryInfo LocalFolder { get; set; }
 
-        public IFolder RemoteFolder { get; private set; }
+        public IFolder RemoteFolder { get; set; }
 
         public FolderEvent (DirectoryInfo localFolder = null, IFolder remoteFolder = null)
         {

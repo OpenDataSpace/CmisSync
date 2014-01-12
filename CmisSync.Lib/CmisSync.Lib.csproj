@@ -131,6 +131,10 @@
     <Compile Include="Sync\Strategy\ContentChanges.cs" />
     <Compile Include="Events\ChangeEnums.cs" />
     <Compile Include="Sync\Strategy\Watcher.cs" />
+    <Compile Include="Sync\Strategy\SimpleFileSynchronizer.cs" />
+    <Compile Include="Sync\Strategy\LocalCrawler.cs" />
+    <Compile Include="Sync\Strategy\FileEventHandler.cs" />
+    <Compile Include="Data\SyncObjects.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -168,5 +172,6 @@
     <Folder Include="Events\EventFilter\" />
     <Folder Include="Sync\Strategy\" />
     <Folder Include="Storage\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 </Project>

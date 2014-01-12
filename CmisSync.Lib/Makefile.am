@@ -20,6 +20,7 @@ SOURCES =  \
 	ConfigManager.cs \
 	ConfigMigration.cs \
 	Credentials.cs \
+	Data/SyncObjects.cs \
 	Defines.cs \
 	Events/AbstractEventProducer.cs \
 	Events/ActiveActivitiesManager.cs \
@@ -74,8 +75,11 @@ SOURCES =  \
 	Sync/CrawlStrategy.cs \
 	Sync/Strategy/ContentChanges.cs \
 	Sync/Strategy/Crawler.cs \
+	Sync/Strategy/FileEventHandler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/FolderSynchronizer.cs \
+	Sync/Strategy/LocalCrawler.cs \
+	Sync/Strategy/SimpleFileSynchronizer.cs \
 	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \
 	Tasks/ChunkedDownloader.cs \
