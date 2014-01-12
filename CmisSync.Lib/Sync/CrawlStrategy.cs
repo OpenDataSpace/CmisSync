@@ -329,9 +329,22 @@ namespace CmisSync.Lib.Sync
                             {
                                 // This local folder is not on the CMIS server now, so
                                 // check whether it used to exist on server or not.
-                                if (database.ContainsFolder(localSubFolder))
+                                string oldObjectId;
+                                if (database.ContainsFolder(localSubFolder, out oldObjectId))
                                 {
-                                    success = RemoveFolderLocally(localSubFolder) && success;
+                                    try{
+                                        IFolder remoteFoundFolder = session.GetObject(oldObjectId) as IFolder;
+                                        String remoteFoundPath = remoteFoundFolder.Path;
+                                        if(remoteFoundPath.StartsWith(repoinfo.RemotePath)) {
+                                            // It is in synced environment, we should move it to the new folder
+                                            remoteFoundPath = Path.Combine(repoinfo.TargetDirectory, remoteFoundPath.Substring(repoinfo.RemotePath.Length));
+                                            MoveFolderLocally(localSubFolder, remoteFoundPath);
+                                        } else {
+                                            success = RemoveFolderLocally(localSubFolder) && success;
+                                        }
+                                    }catch(CmisObjectNotFoundException) {
+                                        success = RemoveFolderLocally(localSubFolder) && success;
+                                    }
                                 }
                                 else
                                 {
