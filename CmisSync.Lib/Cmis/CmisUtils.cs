@@ -501,5 +501,22 @@ namespace CmisSync.Lib.Cmis
                 Logger.Debug(String.Format("Failed to set last modified date for the local folder: {0}", folderpath), e);
             }
         }
+
+
+        public static List<string> GetLocalPaths(IDocument remoteDococument, string remoteTargetFolder, string localTargetFolder) {
+            List<string> results = new List<string>();
+            foreach (string remotePath in remoteDococument.Paths) {
+                if(remotePath.Length <= remoteTargetFolder.Length)
+                    continue;
+                string relativePath = remotePath.Substring(remoteTargetFolder.Length);
+                if (relativePath[0] == '/')
+                {
+                    relativePath = relativePath.Substring(1);
+                }
+                string localPath = Path.Combine(remoteTargetFolder, relativePath).Replace('/', Path.DirectorySeparatorChar);
+                results.Add(localPath);
+            }
+            return results;
+        }
     }
 }
