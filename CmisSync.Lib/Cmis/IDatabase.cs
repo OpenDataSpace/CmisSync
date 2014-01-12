@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using log4net;
 using CmisSync.Lib.Events;
 
-namespace CmisSync.Lib.Cmis
+namespace CmisSync.Lib
 {
 
     /// <summary>

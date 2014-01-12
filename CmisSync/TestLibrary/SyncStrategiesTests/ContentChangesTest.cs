@@ -1,7 +1,7 @@
 using System;
 
+using CmisSync.Lib;
 using CmisSync.Lib.Events;
-using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Sync.Strategy;
 
 using DotCMIS.Client;
@@ -71,6 +71,42 @@ namespace TestLibrary.SyncStrategiesTests
             var queue = new Mock<SyncEventQueue>(manager).Object;
             var changes = new ContentChanges(session, database.Object, queue);
             Assert.IsFalse(changes.Handle(completedEvent));
+        }
+
+        [Test, Category("Fast")]
+        public void HandleStartSyncEventTest() {
+            Assert.Fail("TODO");
+        }
+
+        [Test, Category("Fast")]
+        public void IgnoreCrawlSyncEventTest() {
+            var start = new StartNextSyncEvent(true);
+            var database = new Mock<IDatabase>();
+            var session = new Mock<ISession>().Object;
+            var manager = new Mock<SyncEventManager>().Object;
+            var queue = new Mock<SyncEventQueue>(manager).Object;
+            database.Setup( db => db.GetChangeLogToken()).Returns("token");
+            var changes = new ContentChanges(session, database.Object, queue);
+            Assert.IsFalse(changes.Handle(start));
+            string result;
+            Assert.IsFalse(start.TryGetParam(ContentChanges.FULL_SYNC_PARAM_NAME, out result));
+            Assert.IsNull(result);
+        }
+
+        [Test, Category("Fast")]
+        public void ExtendCrawlSyncEventTest() {
+            string serverSideChangeLogToken = "token";
+            var start = new StartNextSyncEvent(true);
+            var database = new Mock<IDatabase>();
+            var session = new Mock<ISession>().Object;
+            var manager = new Mock<SyncEventManager>().Object;
+            var queue = new Mock<SyncEventQueue>(manager).Object;
+            database.Setup( db => db.GetChangeLogToken()).Returns((string) null);
+            var changes = new ContentChanges(session, database.Object, queue);
+            Assert.IsFalse(changes.Handle(start));
+            string result;
+            Assert.IsTrue(start.TryGetParam(ContentChanges.FULL_SYNC_PARAM_NAME, out result));
+            Assert.AreEqual(serverSideChangeLogToken, result);
         }
     }
 }
