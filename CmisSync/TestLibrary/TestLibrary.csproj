@@ -93,6 +93,7 @@
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
     <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
+    <Compile Include="DataTests\PathMatcherTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -136,6 +137,7 @@
     <Folder Include="EventsTests\EventsFilterTests\" />
     <Folder Include="StorageTests\" />
     <Folder Include="SyncStrategiesTests\" />
+    <Folder Include="DataTests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
