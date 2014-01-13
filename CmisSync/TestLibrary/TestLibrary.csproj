@@ -94,6 +94,7 @@
     <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="DataTests\PathMatcherTest.cs" />
+    <Compile Include="DataTests\SyncObjectsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
