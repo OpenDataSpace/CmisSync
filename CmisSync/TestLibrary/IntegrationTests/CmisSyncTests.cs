@@ -1,19 +1,24 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 
 using DotCMIS;
-using DotCMIS.Client.Impl;
 using DotCMIS.Client;
-using System.IO;
-using Moq;
-using Newtonsoft.Json;
+using DotCMIS.Client.Impl;
 using DotCMIS.Data.Impl;
-using System.ComponentModel;
+
+using Newtonsoft.Json;
+
 using NUnit.Framework;
-using System.Security.Cryptography.X509Certificates;
-using System.Net;
+
+using Moq;
 
 /**
  * Unit Tests for CmisSync.
@@ -72,9 +77,6 @@ namespace TestLibrary.IntegrationTests
         [TestFixtureSetUp]
         public void ClassInit()
         {
-#if __MonoCS__
-            Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "enabled");
-#endif
             ServicePointManager.CertificatePolicy = new TrustAlways();
             try{
                 File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
@@ -90,7 +92,6 @@ namespace TestLibrary.IntegrationTests
                 {
                     File.Delete(file);
                 }
-                    
             }
         }
 
@@ -1507,6 +1508,129 @@ namespace TestLibrary.IntegrationTests
                 Clean(localDirectory2, synchronizedFolder2);
             }
         }
+
+        [Ignore]
+        [Test, TestCaseSource("TestServers"), Category("Slow")]
+        public void SyncEqualityWhileMovingFolder(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId)
+        {
+            // Prepare checkout directory.
+            string localDirectory = Path.Combine(CMISSYNCDIR, canonical_name);
+            string canonical_name2 = canonical_name + ".equality";
+            string localDirectory2 = Path.Combine(CMISSYNCDIR, canonical_name2);
+            CleanDirectory(localDirectory);
+            CleanDirectory(localDirectory2);
+            Console.WriteLine("Synced to clean state.");
+
+            // Mock.
+            IActivityListener activityListener = new Mock<IActivityListener>().Object;
+            // Sync.
+            RepoInfo repoInfo = new RepoInfo(
+                    canonical_name,
+                    CMISSYNCDIR,
+                    remoteFolderPath,
+                    url,
+                    user,
+                    password,
+                    repositoryId,
+                    5000);
+            RepoInfo repoInfo2 = new RepoInfo(
+                    canonical_name2,
+                    CMISSYNCDIR,
+                    remoteFolderPath,
+                    url,
+                    user,
+                    password,
+                    repositoryId,
+                    5000);
+            using (CmisRepo cmis = new CmisRepo(repoInfo, activityListener))
+            using (CmisRepo.SynchronizedFolder synchronizedFolder = new CmisRepo.SynchronizedFolder(
+                repoInfo,
+                activityListener,
+                cmis))
+            using (CmisRepo cmis2 = new CmisRepo(repoInfo2, activityListener))
+            using (CmisRepo.SynchronizedFolder synchronizedFolder2 = new CmisRepo.SynchronizedFolder(
+                repoInfo2,
+                activityListener,
+                cmis2))
+            using (Watcher watcher = new Watcher(localDirectory))
+            using (Watcher watcher2 = new Watcher(localDirectory2))
+            {
+                synchronizedFolder.resetFailedOperationsCounter();
+                synchronizedFolder2.resetFailedOperationsCounter();
+                synchronizedFolder.Sync();
+                synchronizedFolder2.Sync();
+                CleanAll(localDirectory);
+                CleanAll(localDirectory2);
+                WatcherTest.WaitWatcher();
+                synchronizedFolder.Sync();
+                synchronizedFolder2.Sync();
+                Console.WriteLine("Synced to clean state.");
+                //  create large local folder structure on client A with containing files
+                int fileSize = 1024 * 1024;
+                Console.WriteLine("create local folder structure on A");
+                for (int i = 0; i < 3; i++) {
+                    DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(localDirectory, "dir"+i));
+                    for (int j = 0; j < 10; j++) {
+                        DirectoryInfo subDir = Directory.CreateDirectory(Path.Combine(dir.FullName, "subdir"+j));
+                        using (var stream = File.OpenWrite(Path.Combine(subDir.FullName, "file")))
+                        {
+                            byte[] content = new byte[fileSize];
+                            stream.Write(content, 0, content.Length);
+                        }
+                    }
+                }
+                var ts = new CancellationTokenSource();
+                CancellationToken ct = ts.Token;
+                var moveFolderRemotely = Task.Factory.StartNew(()=>{
+                    ISession session = CreateSession(repoInfo);
+                    IFolder root = session.GetObjectByPath(repoInfo.RemotePath) as IFolder;
+                    Assert.NotNull(root);
+                    // Request until the new local folder is uploaded
+                    IFolder folder = null;
+                    while(folder == null) {
+                        try{
+                            folder = session.GetObjectByPath(repoInfo.RemotePath + "dir0") as IFolder;
+                        }catch(DotCMIS.Exceptions.CmisObjectNotFoundException) {
+                            folder = null;
+                        }
+                        if (ct.IsCancellationRequested)
+                        {
+                            // the main thread decided to cancel
+                            return;
+                        }
+                    }
+                    IFolder newFolder = CreateFolder(root, "newDir");
+                    // Move folder into subfolder
+                    folder.Move(root, newFolder);
+                }, ct);
+
+
+                bool success = WaitUntilSyncIsDone(synchronizedFolder, delegate {
+                    if(!Directory.Exists(Path.Combine(localDirectory,"newDir")))
+                        return false;
+                    if(!Directory.Exists(Path.Combine(localDirectory, "newDir", "dir0")))
+                        return false;
+                    if(Directory.Exists(Path.Combine(localDirectory, "dir0")))
+                        return false;
+                    return true;
+
+                    }, 20);
+                if(!success) {
+                    ts.Cancel();
+                    moveFolderRemotely.Wait();
+                }
+                Assert.IsTrue(success);
+                moveFolderRemotely.Wait();
+
+                // Clean.
+                Console.WriteLine("Clean all.");
+                Clean(localDirectory, synchronizedFolder);
+                Clean(localDirectory2, synchronizedFolder2);
+            }
+        }
+
+
 
         // Goal: Make sure that CmisSync works for empty files without creating conflict files.
         [Test, TestCaseSource("TestServers"), Category("Slow")]
