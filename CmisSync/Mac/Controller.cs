@@ -69,7 +69,7 @@ namespace CmisSync {
 
             notificationCenter.DidActivateNotification += (s, e) => 
             {
-                Console.WriteLine("Notification Touched");
+                LocalFolderClicked (Path.GetDirectoryName (e.Notification.InformativeText));
             };
 
             // If we return true here, Notification will show up even if your app is TopMost.
@@ -118,12 +118,64 @@ namespace CmisSync {
                                 notification.DeliveryDate = NSDate.Now;
                                 notificationCenter.DeliverNotification (notification);
                                 transmissionFiles.Add (transmission.Path, notification.DeliveryDate);
+                                UpdateFileStatus (transmission, null);
                             }
                         }
                     });
                 }
             };
 		}
+
+        private void UpdateFileStatus(FileTransmissionEvent transmission, TransmissionProgressEventArgs e)
+        {
+            if (e == null) {
+                e = transmission.Status;
+            }
+
+            string filePath = transmission.CachePath;
+            if (filePath == null || !File.Exists (filePath)) {
+                filePath = transmission.Path;
+            }
+            if (!File.Exists (filePath)) {
+                Logger.Error (String.Format ("None exist {0} for file status update", filePath));
+                return;
+            }
+
+            string extendAttrKey = "com.apple.progress.fractionCompleted";
+
+            if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
+                Syscall.removexattr (filePath, extendAttrKey);
+                try {
+                    NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
+                    attr.CreationDate = (new FileInfo(filePath)).CreationTime;
+                    NSFileManager.DefaultManager.SetAttributes (attr, filePath);
+                } catch (Exception ex) {
+                    Logger.Error (String.Format ("Exception to set {0} creation time for file status update: {1}", filePath, ex));
+                }
+            } else {
+                double percent = transmission.Status.Percent.GetValueOrDefault() / 100;
+                if (percent < 1) {
+                    Syscall.setxattr (filePath, extendAttrKey, Encoding.ASCII.GetBytes (percent.ToString ()));
+                    try {
+                        NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
+                        attr.CreationDate = new DateTime (1984, 1, 24, 8, 0, 0, DateTimeKind.Utc);
+                        NSFileManager.DefaultManager.SetAttributes (attr, filePath);
+                    } catch (Exception ex) {
+                        Logger.Error (String.Format ("Exception to set {0} creation time for file status update: {1}", filePath, ex));
+                    }
+                } else {
+                    Syscall.removexattr (filePath, extendAttrKey);
+                    try {
+                        NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
+                        attr.CreationDate = (new FileInfo(filePath)).CreationTime;
+                        NSFileManager.DefaultManager.SetAttributes (attr, filePath);
+                    } catch (Exception ex) {
+                        Logger.Error (String.Format ("Exception to set {0} creation time for file status update: {1}", filePath, ex));
+                    }
+                }
+            }
+
+        }
 
         private string TransmissionStatus(FileTransmissionEvent transmission)
         {
@@ -163,54 +215,18 @@ namespace CmisSync {
                 if (transmission == null) {
                     return;
                 }
-                string extendAttrKey = "com.apple.progress.fractionCompleted";
-                string filePath = transmission.CachePath;
-                if (filePath == null || !File.Exists (filePath)) {
-                    filePath = transmission.Path;
-                }
-                if (!File.Exists (filePath)) {
-                    Logger.Error (String.Format ("None exist {0} for transmission report", filePath));
-                    return;
-                }
                 lock (transmissionLock) {
                     if ((e.Aborted == true || e.Completed == true || e.FailedException != null)) {
                         transmission.TransmissionStatus -= TransmissionReport;
                         transmissionFiles.Remove (transmission.Path);
-                        Syscall.removexattr (filePath, extendAttrKey);
-                        try {
-                            NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
-                            attr.CreationDate = (new FileInfo(filePath)).CreationTime;
-                            NSFileManager.DefaultManager.SetAttributes (attr, filePath);
-                        } catch (Exception ex) {
-                            Logger.Error (String.Format ("Exception to set {0} creation time for transmission report: {1}", filePath, ex));
-                        }
                     } else {
                         TimeSpan diff = NSDate.Now - transmissionFiles [transmission.Path];
                         if (diff.Seconds < notificationInterval) {
                             return;
                         }
                         transmissionFiles [transmission.Path] = NSDate.Now;
-                        double percent = transmission.Status.Percent.GetValueOrDefault() / 100;
-                        if (percent < 1) {
-                            Syscall.setxattr (filePath, extendAttrKey, Encoding.ASCII.GetBytes (percent.ToString ()));
-                            try {
-                                NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
-                                attr.CreationDate = new DateTime (1984, 1, 24, 8, 0, 0, DateTimeKind.Utc);
-                                NSFileManager.DefaultManager.SetAttributes (attr, filePath);
-                            } catch (Exception ex) {
-                                Logger.Error (String.Format ("Exception to set {0} creation time for transmission report: {1}", filePath, ex));
-                            }
-                        } else {
-                            Syscall.removexattr (filePath, extendAttrKey);
-                            try {
-                                NSFileAttributes attr = NSFileManager.DefaultManager.GetAttributes (filePath);
-                                attr.CreationDate = (new FileInfo(filePath)).CreationTime;
-                                NSFileManager.DefaultManager.SetAttributes (attr, filePath);
-                            } catch (Exception ex) {
-                                Logger.Error (String.Format ("Exception to set {0} creation time for transmission report: {1}", filePath, ex));
-                            }
-                        }
                     }
+                    UpdateFileStatus (transmission, e);
                 }
                 notificationCenter.BeginInvokeOnMainThread (delegate
                 {
@@ -332,14 +348,20 @@ namespace CmisSync {
 
 		public void LocalFolderClicked (string path)
 		{
-			NSWorkspace.SharedWorkspace.OpenFile (path);
+            notificationCenter.BeginInvokeOnMainThread (delegate
+            {
+                NSWorkspace.SharedWorkspace.OpenFile (path);
+            });
 		}
 		
 
         public void OpenFile (string path)
         {
             path = Uri.UnescapeDataString (path);
-            NSWorkspace.SharedWorkspace.OpenFile (path);
+            notificationCenter.BeginInvokeOnMainThread (delegate
+            {
+                NSWorkspace.SharedWorkspace.OpenFile (path);
+            });
         }
 	}
 }
