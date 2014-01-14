@@ -95,6 +95,9 @@
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="DataTests\PathMatcherTest.cs" />
     <Compile Include="DataTests\SyncObjectsTest.cs" />
+    <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

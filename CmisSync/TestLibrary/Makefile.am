@@ -15,6 +15,8 @@ SOURCES =  \
 	DataTests/PathMatcherTest.cs \
 	DataTests/SyncObjectsTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventTypesTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
 	EventsTests/SyncEventManagerTest.cs \

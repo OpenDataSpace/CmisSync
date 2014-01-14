@@ -14,7 +14,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='queue'>
         /// Queue.
         /// </param>
-        public IgnoredFileNamesFilter(SyncEventQueue queue) : base(queue) { }
+        public IgnoredFileNamesFilter(ISyncEventQueue queue) : base(queue) { }
 
         /// <summary>
         /// Checks the filename for valid regex.
@@ -47,7 +47,6 @@ namespace CmisSync.Lib.Events.Filter
             FileDownloadRequest request = e as FileDownloadRequest;
             if( request != null)
                 return checkFile(request, request.Document.Name);
-
             FSEvent fsevent = e as FSEvent;
             if(fsevent!=null)
             {

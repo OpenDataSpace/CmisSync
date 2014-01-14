@@ -17,6 +17,10 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         public void ConstructorTest() {
             var queuemock = new Mock<ISyncEventQueue>();
             new InvalidFolderNameFilter(queuemock.Object);
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorExceptionOnNullQueueTest() {
             try{
                 new InvalidFolderNameFilter(null);
                 Assert.Fail();

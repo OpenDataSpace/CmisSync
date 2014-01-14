@@ -3,6 +3,7 @@ using log4net.Config;
 
 using System;
 using System.IO;
+
 namespace TestLibrary.EventsTests
 {
     using NUnit.Framework;
@@ -15,48 +16,52 @@ namespace TestLibrary.EventsTests
     [TestFixture]
     public class GenericSyncEventHandlerTest
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(GenericSyncEventHandlerTest));
 
-        [TestFixtureSetUp]
-        public void ClassInit()
+        private int priority = 666;
+
+        [Test, Category("Fast")]
+        [Ignore]
+        public void ToStringTest ()
         {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-        }
-
-
-        [Test, Category("Fast")]
-        [Ignore]
-        public void ToStringTest() {
-            
-        }
-        
-        [Test, Category("Fast")]
-        [Ignore]
-        public void PriorityTest() {
-            var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
-            Assert.AreEqual(100, handler.Priority);
-            
-        }
-        
-        [Test, Category("Fast")]
-        [Ignore]
-        public void IgnoresExpectedEvents() {
-            var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
-            bool handled = handler.Handle(new Mock<ISyncEvent>().Object);
-            Assert.False(handled);
+            Assert.Fail ("TODO");
         }
 
         [Test, Category("Fast")]
-        [Ignore]
-        public void IgnoresNonDeleteEvent() {
-            var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
-            bool handled = handler.Handle(new Mock<FSEvent>(WatcherChangeTypes.Created, "").Object);
-            Assert.False(handled);
-        }
-
-        private bool EventThrown(ISyncEvent e)
+        public void PriorityTest ()
         {
-            return false;
+            var handler = new GenericSyncEventHandler<ISyncEvent> (priority, delegate (ISyncEvent e) {
+                return false;
+            }
+            );
+            Assert.AreEqual (priority, handler.Priority);
+        }
+
+        [Test, Category("Fast")]
+        public void IgnoresUnexpectedEvents ()
+        {
+            bool eventPassed = false;
+            var handler = new GenericSyncEventHandler<FSEvent> (priority, delegate (ISyncEvent e) {
+                eventPassed = true;
+                return true;
+            }
+            );
+            var wrongEvent = new Mock<ISyncEvent> (MockBehavior.Strict);
+            Assert.IsFalse (handler.Handle (wrongEvent.Object));
+            Assert.IsFalse (eventPassed);
+        }
+
+        [Test, Category("Fast")]
+        public void HandleExpectedEvents ()
+        {
+            bool eventPassed = false;
+            var handler = new GenericSyncEventHandler<ConfigChangedEvent> (priority, delegate (ISyncEvent e) {
+                eventPassed = true;
+                return true;
+            }
+            );
+            var correctEvent = new Mock<ConfigChangedEvent> ();
+            Assert.IsTrue (handler.Handle (correctEvent.Object));
+            Assert.IsTrue (eventPassed);
         }
     }
 }
