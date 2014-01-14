@@ -127,7 +127,9 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Figure out, what to do with it
                         Queue.AddEvent(new FolderEvent(
                             localFolder : localFolder,
-                            remoteFolder: folder) {Recursive = true});
+                            remoteFolder: folder) {
+                            Recursive = true,
+                            Remote = MetaDataChangeType.CREATED});
                     }
                 }else if(cmisObject is IDocument) {
                     IDocument doc = cmisObject as IDocument;

@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Events.Filter
         /// </param>
         private bool checkFile(ISyncEvent e, string fileName) {
             if(!Utils.WorthSyncing(fileName)) {
-                Queue.AddEvent(new RequestIgnoredEvent(e));
+                Queue.AddEvent(new RequestIgnoredEvent(e, source: this));
                 return true;
             }
             return false;

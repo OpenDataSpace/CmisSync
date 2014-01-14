@@ -12,6 +12,8 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 	   -r:$(srcdir)/lib/xunit.extensions.dll
 
 SOURCES =  \
+	DataTests/PathMatcherTest.cs \
+	DataTests/SyncObjectsTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/EventTypesTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \

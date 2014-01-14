@@ -35,16 +35,5 @@ namespace CmisSync.Lib.Events
         }
     }
 
-    public abstract class ReportingSyncEventHandler : SyncEventHandler
-    {
-
-        protected readonly SyncEventQueue Queue;
-        public ReportingSyncEventHandler(SyncEventQueue queue) : base() {
-            if( queue == null )
-                throw new ArgumentNullException("Given SyncEventQueue was null");
-            this.Queue = queue;
-        }
-
-    }
 }
 

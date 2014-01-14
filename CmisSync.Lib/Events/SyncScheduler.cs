@@ -7,9 +7,9 @@ namespace CmisSync.Lib.Events
     {
         public static readonly int POLLSCHEDULERPRIORITY = 1000;
         private double interval;
-        private SyncEventQueue queue;
+        private ISyncEventQueue queue;
         private Timer timer;
-        public SyncScheduler (SyncEventQueue queue, double pollInterval = 5000)
+        public SyncScheduler (ISyncEventQueue queue, double pollInterval = 5000)
         {
             if(queue == null)
                 throw new ArgumentNullException("Given queue must not be null");

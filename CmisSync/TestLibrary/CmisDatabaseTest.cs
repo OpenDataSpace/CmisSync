@@ -41,6 +41,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Database")]
+        [Category("Medium")]
         public void TestSpecialCharacter()
         {
             string oldPath = Path.Combine(RootPath, "a'b'c");
@@ -75,6 +76,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Database")]
+        [Category("Medium")]
         public void TestMoveFile()
         {
             using (Database database = new Database(DatabasePath))
@@ -93,6 +95,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Database")]
+        [Category("Medium")]
         public void TestMoveFolder()
         {
             using (Database database = new Database(DatabasePath))
@@ -123,6 +126,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Database")]
+        [Category("Medium")]
         public void TestFailedOperationCounter()
         {
             using (Database database = new Database(DatabasePath))

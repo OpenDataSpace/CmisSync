@@ -20,6 +20,8 @@ SOURCES =  \
 	ConfigManager.cs \
 	ConfigMigration.cs \
 	Credentials.cs \
+	Data/PathMatcher.cs \
+	Data/SyncObjects.cs \
 	Defines.cs \
 	Events/AbstractEventProducer.cs \
 	Events/ActiveActivitiesManager.cs \
@@ -45,11 +47,13 @@ SOURCES =  \
 	Events/FullSyncCompletedEvent.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/ISyncEvent.cs \
+	Events/ISyncEventQueue.cs \
 	Events/RecentChangedEvent.cs \
 	Events/RemoteEvent.cs \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
 	Events/SyncEventHandler.cs \
+	Events/ReportingSyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \
 	Events/SyncScheduler.cs \
@@ -74,8 +78,11 @@ SOURCES =  \
 	Sync/CrawlStrategy.cs \
 	Sync/Strategy/ContentChanges.cs \
 	Sync/Strategy/Crawler.cs \
+	Sync/Strategy/FileEventHandler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/FolderSynchronizer.cs \
+	Sync/Strategy/LocalCrawler.cs \
+	Sync/Strategy/SimpleFileSynchronizer.cs \
 	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \
 	Tasks/ChunkedDownloader.cs \

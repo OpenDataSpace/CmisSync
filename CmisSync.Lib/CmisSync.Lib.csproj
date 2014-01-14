@@ -83,9 +83,11 @@
     <Compile Include="IActivityListener.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />
     <Compile Include="Events\ISyncEvent.cs" />
+    <Compile Include="Events\ISyncEventQueue.cs" />
     <Compile Include="Events\FSEvent.cs" />
     <Compile Include="Events\SyncEventManager.cs" />
     <Compile Include="Events\SyncEventHandler.cs" />
+    <Compile Include="Events\ReportingSyncEventHandler.cs" />
     <Compile Include="Events\DebugLoggingHandler.cs" />
     <Compile Include="Events\FSDeletionHandler.cs" />
     <Compile Include="Events\FileTransmissionEvent.cs" />
@@ -131,6 +133,11 @@
     <Compile Include="Sync\Strategy\ContentChanges.cs" />
     <Compile Include="Events\ChangeEnums.cs" />
     <Compile Include="Sync\Strategy\Watcher.cs" />
+    <Compile Include="Sync\Strategy\SimpleFileSynchronizer.cs" />
+    <Compile Include="Sync\Strategy\LocalCrawler.cs" />
+    <Compile Include="Sync\Strategy\FileEventHandler.cs" />
+    <Compile Include="Data\SyncObjects.cs" />
+    <Compile Include="Data\PathMatcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -168,5 +175,6 @@
     <Folder Include="Events\EventFilter\" />
     <Folder Include="Sync\Strategy\" />
     <Folder Include="Storage\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 </Project>

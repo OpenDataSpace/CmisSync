@@ -21,13 +21,13 @@ namespace TestLibrary.EventsTests
         }
 
 
-        [Test]
+        [Test, Category("Fast")]
         public void FSEventTest() {
             ISyncEvent e = new FSEvent(WatcherChangeTypes.Created, "test");
             Assert.AreEqual("FSEvent with type \"Created\" on path \"test\"",e.ToString());
         }
 
-        [Test]
+        [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void FSEventPreventNullTest() {
             ISyncEvent e = new FSEvent(WatcherChangeTypes.Created,null);

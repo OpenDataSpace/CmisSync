@@ -24,13 +24,13 @@ namespace TestLibrary.EventsTests
         }
 
 
-        [Test]
+        [Test, Category("Fast")]
         [Ignore]
         public void ToStringTest() {
             
         }
         
-        [Test]
+        [Test, Category("Fast")]
         [Ignore]
         public void PriorityTest() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
@@ -38,7 +38,7 @@ namespace TestLibrary.EventsTests
             
         }
         
-        [Test]
+        [Test, Category("Fast")]
         [Ignore]
         public void IgnoresExpectedEvents() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
@@ -46,7 +46,7 @@ namespace TestLibrary.EventsTests
             Assert.False(handled);
         }
 
-        [Test]
+        [Test, Category("Fast")]
         [Ignore]
         public void IgnoresNonDeleteEvent() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
