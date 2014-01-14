@@ -20,7 +20,7 @@ namespace CmisSync.Lib.Sync.Strategy
     public class Watcher : ReportingSyncEventHandler
     {
 
-        private static readonly int DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY = 1;
+        public static readonly int DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY = 1;
         private FileSystemWatcher FsWatcher;
 
         /// <summary>

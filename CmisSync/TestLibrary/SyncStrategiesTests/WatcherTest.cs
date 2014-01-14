@@ -48,24 +48,37 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTest() {
-            var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
+        public void ConstructorSuccessTest() {
+            var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
             var manager = new Mock<SyncEventManager>().Object;
             var queue = new Mock<SyncEventQueue>(manager).Object;
+            var watcher = new Watcher(fswatcher, queue);
+            Assert.False(watcher.EnableEvents);
+            Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException( typeof( ArgumentNullException ) )]
+        public void ConstructorFailsWithNullWatcher() {
+            var manager = new Mock<SyncEventManager>().Object;
+            var queue = new Mock<SyncEventQueue>(manager).Object;
+            new Watcher(null, queue);
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException( typeof( ArgumentNullException ) )]
+        public void ConstructorFailsWithNullQueue() {
+            var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
+            new Watcher(fswatcher, null);
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException( typeof( ArgumentException ) )]
+        public void ConstructorFailsWithWatcherOnNullPath() {
+            var manager = new Mock<SyncEventManager>().Object;
+            var queue = new Mock<SyncEventQueue>(manager).Object;
+            var fswatcher = new Mock<FileSystemWatcher>().Object;
             new Watcher(fswatcher, queue);
-            try{
-                new Watcher(null, queue);
-                Assert.Fail();
-            }catch (ArgumentNullException) {}
-            try {
-                new Watcher(fswatcher, null);
-                Assert.Fail ();
-            }catch(ArgumentNullException) {}
-            try{
-                fswatcher = new Mock<FileSystemWatcher>() {CallBase = true}.Object;
-                new Watcher(fswatcher, queue);
-                Assert.Fail();
-            }catch (ArgumentException) {}
         }
 
         [Test, Category("Fast")]
