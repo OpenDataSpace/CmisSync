@@ -15,8 +15,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
     {
         [Test, Category("Fast")]
         public void ConstructorTest() {
-            var managermock = new Mock<SyncEventManager>();
-            var queuemock = new Mock<SyncEventQueue>(managermock.Object);
+            var queuemock = new Mock<ISyncEventQueue>();
             new InvalidFolderNameFilter(queuemock.Object);
             try{
                 new InvalidFolderNameFilter(null);
@@ -27,8 +26,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         [Test, Category("Fast")]
         public void HandleAndReportTest()
         {
-            var managermock = new Mock<SyncEventManager>();
-            var queuemock = new Mock<SyncEventQueue>(managermock.Object);
+            var queuemock = new Mock<ISyncEventQueue>();
             var documentmock = new Mock<IDocument>();
             int called = 0;
             queuemock.Setup( q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback( () => called++);

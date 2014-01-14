@@ -50,10 +50,10 @@ SOURCES =  \
 	Events/ISyncEventQueue.cs \
 	Events/RecentChangedEvent.cs \
 	Events/RemoteEvent.cs \
+	Events/ReportingSyncEventHandler.cs \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
 	Events/SyncEventHandler.cs \
-	Events/ReportingSyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \
 	Events/SyncScheduler.cs \
