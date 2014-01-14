@@ -6,7 +6,7 @@ using log4net;
 
 namespace CmisSync.Lib.Events
 {
-    public class SyncEventQueue : IDisposable {
+    public class SyncEventQueue : ISyncEventQueue, IDisposable {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
 
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();

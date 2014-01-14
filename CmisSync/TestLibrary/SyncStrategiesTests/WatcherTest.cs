@@ -50,8 +50,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager).Object;
+            var queue = new Mock<ISyncEventQueue>().Object;
             var watcher = new Watcher(fswatcher, queue);
             Assert.False(watcher.EnableEvents);
             Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
@@ -60,8 +59,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullWatcher() {
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager).Object;
+            var queue = new Mock<ISyncEventQueue>().Object;
             new Watcher(null, queue);
         }
 
@@ -75,9 +73,8 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentException ) )]
         public void ConstructorFailsWithWatcherOnNullPath() {
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager).Object;
             var fswatcher = new Mock<FileSystemWatcher>().Object;
+            var queue = new Mock<ISyncEventQueue>().Object;
             new Watcher(fswatcher, queue);
         }
 

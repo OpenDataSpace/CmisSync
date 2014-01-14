@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='queue'>
         /// Queue where the FSEvents and also the FileEvents and FolderEvents are reported.
         /// </param>
-        public Watcher (FileSystemWatcher watcher, SyncEventQueue queue) : base(queue)
+        public Watcher (FileSystemWatcher watcher, ISyncEventQueue queue) : base(queue)
         {
             if (watcher == null)
                 throw new ArgumentNullException ("The given fs watcher must not be null");
