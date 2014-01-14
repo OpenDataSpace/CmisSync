@@ -22,7 +22,7 @@ namespace TestLibrary.EventsTests
         }
 
 
-        [Test]
+        [Test, Category("Fast")]
         public void AddHandlerTest() {
             var handlerMock = new Mock<SyncEventHandler>();
             var eventMock = new Mock<ISyncEvent>();
@@ -34,7 +34,7 @@ namespace TestLibrary.EventsTests
             handlerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
         }
 
-        [Test]
+        [Test, Category("Fast")]
         public void BreaksIfHandlerSucceedsTest() {
             var handlerMock1 = new Mock<SyncEventHandler>();
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(true);
@@ -54,7 +54,7 @@ namespace TestLibrary.EventsTests
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Never());
         }
 
-        [Test]
+        [Test, Category("Fast")]
         public void ContinueIfHandlerNotSucceedsTest() {
             var handlerMock1 = new Mock<SyncEventHandler>();
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(false);
@@ -74,7 +74,7 @@ namespace TestLibrary.EventsTests
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Once());
         }
 
-        [Test]
+        [Test, Category("Fast")]
         public void FirstInsertedHandlerWithSamePrioWinsTest() {
             var handlerMock1 = new Mock<SyncEventHandler>();
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(true);
@@ -95,7 +95,7 @@ namespace TestLibrary.EventsTests
             handlerMock2.Verify(foo => foo.Handle(eventMock.Object), Times.Never());
         }
 
-        [Test]
+        [Test, Category("Fast")]
         public void DeleteWorksCorrectlyTest() {
             var handlerMock1 = new Mock<SyncEventHandler>();
             handlerMock1.Setup(foo => foo.Handle(It.IsAny<ISyncEvent>())).Returns(false);

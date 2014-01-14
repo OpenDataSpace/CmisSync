@@ -32,7 +32,7 @@ namespace TestLibrary.EventsTests
             Logger.Error("Timeout exceeded!");
         }
 
-        [Test]
+        [Test, Category("Fast")]
         public void EventlessStartStop() {
             using(SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>().Object)){
                 WaitFor(queue, (q) => { return !q.IsStopped; } );
@@ -43,7 +43,7 @@ namespace TestLibrary.EventsTests
             }
         }
 
-        [Test]
+        [Test, Category("Fast")]
         public void AddEvent() {
             var managerMock = new Mock<SyncEventManager>();
             var eventMock = new Mock<ISyncEvent>();
@@ -57,7 +57,7 @@ namespace TestLibrary.EventsTests
             managerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Exactly(2));
         }
 
-        [Test]
+        [Test, Category("Fast")]
         [ExpectedException( typeof( InvalidOperationException ) )]
         public void AddEventToStoppedQueue() {
             using(SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>().Object)){
