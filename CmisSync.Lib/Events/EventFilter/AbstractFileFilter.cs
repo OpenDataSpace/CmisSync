@@ -11,7 +11,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <summary>
         /// The queue where the ignores should be reported to.
         /// </summary>
-        protected readonly SyncEventQueue Queue;
+        protected readonly ISyncEventQueue Queue;
         /// <summary>
         /// Default filter priority is set to 9999. May not be changed during runtime.
         /// </summary>
@@ -26,7 +26,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='queue'>
         /// Queue where all filtered events should be reported to.
         /// </param>
-        public AbstractFileFilter(SyncEventQueue queue) {
+        public AbstractFileFilter(ISyncEventQueue queue) {
             if( queue == null)
                 throw new ArgumentNullException("The given queue must not be null, bacause the Filters are reporting their filtered events to this queue");
             this.Queue = queue;

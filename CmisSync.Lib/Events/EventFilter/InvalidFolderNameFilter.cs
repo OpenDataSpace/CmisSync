@@ -13,7 +13,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='queue'>
         /// Queue where filtered events will be reported to.
         /// </param>
-        public InvalidFolderNameFilter (SyncEventQueue queue) : base (queue)
+        public InvalidFolderNameFilter (ISyncEventQueue queue) : base (queue)
         {
         }
 
@@ -56,7 +56,7 @@ namespace CmisSync.Lib.Events.Filter
                 return checkPath (request, request.LocalPath);
             }
             FSEvent fsevent = e as FSEvent;
-            if( fsevent != null) 
+            if( fsevent != null)
                 return checkPath (fsevent, fsevent.Path);
             return false;
         }

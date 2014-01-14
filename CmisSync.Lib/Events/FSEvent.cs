@@ -3,6 +3,7 @@ using System.IO;
 
 namespace CmisSync.Lib.Events
 {
+
     public class FSEvent : ISyncEvent
     {
         public WatcherChangeTypes Type { get; private set; }

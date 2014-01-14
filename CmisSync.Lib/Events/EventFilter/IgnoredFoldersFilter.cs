@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='queue'>
         /// Queue.
         /// </param>
-        public IgnoredFoldersFilter (SyncEventQueue queue) : base(queue) { }
+        public IgnoredFoldersFilter (ISyncEventQueue queue) : base(queue) { }
 
         /// <summary>
         /// Checks the path if it begins with any path, which is ignored. Reports ignores to the queue.
