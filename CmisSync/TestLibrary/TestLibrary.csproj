@@ -88,6 +88,11 @@
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
     <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
+    <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
+    <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
+    <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
+    <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
+    <Compile Include="EventsTests\EncapsuledEventTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

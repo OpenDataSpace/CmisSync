@@ -51,7 +51,10 @@ namespace CmisSync.Lib.Events
             string oldRemoteFilePath = null,
             IDocument newRemoteFile = null
         ) : base(newLocalFile, newParentFolder, newRemoteFile) {
-
+            Local = MetaDataChangeType.MOVED;
+            OldLocalFile = oldLocalFile;
+            OldParentFolder = oldParentFolder;
+            OldRemoteFilePath = oldRemoteFilePath;
         }
     }
 }

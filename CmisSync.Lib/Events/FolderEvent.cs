@@ -41,6 +41,8 @@ namespace CmisSync.Lib.Events
             DirectoryInfo newLocalFolder,
             string oldRemoteFolderPath,
             IFolder newRemoteFolder) : base ( newLocalFolder, newRemoteFolder) {
+            OldLocalFolder = oldLocalFolder;
+            OldRemoteFolderPath = oldRemoteFolderPath;
         }
     }
 

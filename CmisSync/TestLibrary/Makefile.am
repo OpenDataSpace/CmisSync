@@ -18,6 +18,9 @@ SOURCES =  \
 	EventsTests/SyncEventManagerTest.cs \
 	EventsTests/SyncEventQueueTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
+	EventsTests/FullSyncCompletedEventTest.cs \
+	EventsTests/StartNextSyncEventTest.cs \
+	EventsTests/EncapsuledEventTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
@@ -26,6 +29,9 @@ SOURCES =  \
 	StreamTests/ProgressStreamTest.cs \
 	StreamTests/NonClosingHashStreamTest.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
+	SyncStrategiesTests/CrawlerTest.cs \
+	SyncStrategiesTests/WatcherTest.cs \
+	SyncStrategiesTests/ContentChangesTest.cs \
 	TasksTests/ChunkedDownloaderTest.cs \
 	TasksTests/SimpleFileDownloaderTest.cs \
 	TasksTests/SimpleFileUploaderTest.cs \
