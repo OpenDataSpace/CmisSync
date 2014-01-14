@@ -113,7 +113,7 @@ namespace CmisSync {
                                 notification.Title = Path.GetFileName (transmission.Path);
                                 notification.Subtitle = TransmissionStatus(transmission);
                                 notification.InformativeText = transmission.Path;
-                                notification.SoundName = NSUserNotification.NSUserNotificationDefaultSoundName;
+//                                notification.SoundName = NSUserNotification.NSUserNotificationDefaultSoundName;
                                 transmission.TransmissionStatus += TransmissionReport;
                                 notification.DeliveryDate = NSDate.Now;
                                 notificationCenter.DeliverNotification (notification);
