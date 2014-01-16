@@ -76,6 +76,18 @@ SOURCES =  \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
 	Sync/CrawlStrategy.cs \
+	Sync/Solver/AbstractSolver.cs \
+	Sync/Solver/ISolver.cs \
+	Sync/Solver/LocalObjectAdded.cs \
+	Sync/Solver/LocalObjectChanged.cs \
+	Sync/Solver/LocalObjectDeleted.cs \
+	Sync/Solver/LocalObjectMoved.cs \
+	Sync/Solver/LocalObjectRenamed.cs \
+	Sync/Solver/RemoteObjectAdded.cs \
+	Sync/Solver/RemoteObjectChanged.cs \
+	Sync/Solver/RemoteObjectDeleted.cs \
+	Sync/Solver/RemoteObjectMoved.cs \
+	Sync/Solver/RemoteObjectRenamed.cs \
 	Sync/Strategy/ContentChanges.cs \
 	Sync/Strategy/Crawler.cs \
 	Sync/Strategy/FileEventHandler.cs \
