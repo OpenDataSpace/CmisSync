@@ -95,6 +95,7 @@ SOURCES =  \
 	Sync/Strategy/FolderSynchronizer.cs \
 	Sync/Strategy/LocalCrawler.cs \
 	Sync/Strategy/SimpleFileSynchronizer.cs \
+	Sync/Strategy/SituationDetection.cs \
 	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \
 	Tasks/ChunkedDownloader.cs \
