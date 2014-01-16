@@ -139,7 +139,6 @@
     <Compile Include="Data\SyncObjects.cs" />
     <Compile Include="Data\PathMatcher.cs" />
     <Compile Include="Sync\Solver\ISolver.cs" />
-    <Compile Include="Sync\Solver\AbstractSolver.cs" />
     <Compile Include="Sync\Solver\LocalObjectRenamed.cs" />
     <Compile Include="Sync\Solver\LocalObjectAdded.cs" />
     <Compile Include="Sync\Solver\LocalObjectDeleted.cs" />

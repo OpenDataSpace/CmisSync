@@ -8,11 +8,9 @@ using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Solver
 {
-    public class LocalObjectAdded : AbstractSolver
+    public class LocalObjectAdded : ISolver
     {
-
-        public LocalObjectAdded(ISyncEventQueue queue) : base (queue) {}
-        public override void Solve(ISession session, MetaDataStorage storage, FileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, MetaDataStorage storage, FileSystemInfo localFile, string remoteId){
             // Upload new file
             if((localFile.Attributes & FileAttributes.Directory) == FileAttributes.Directory) {
                 // Create remote folder

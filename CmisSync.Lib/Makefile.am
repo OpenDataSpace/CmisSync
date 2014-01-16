@@ -76,7 +76,6 @@ SOURCES =  \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
 	Sync/CrawlStrategy.cs \
-	Sync/Solver/AbstractSolver.cs \
 	Sync/Solver/ISolver.cs \
 	Sync/Solver/LocalObjectAdded.cs \
 	Sync/Solver/LocalObjectChanged.cs \

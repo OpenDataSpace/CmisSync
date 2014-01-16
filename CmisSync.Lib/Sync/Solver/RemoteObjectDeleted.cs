@@ -8,11 +8,9 @@ using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Solver
 {
-    public class RemoteObjectDeleted : AbstractSolver
+    public class RemoteObjectDeleted : ISolver
     {
-        public RemoteObjectDeleted(ISyncEventQueue queue) : base (queue) {}
-
-        public override void Solve(ISession session, MetaDataStorage storage, FileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, MetaDataStorage storage, FileSystemInfo localFile, string remoteId){
             // Delete local object
             throw new NotImplementedException();
         }

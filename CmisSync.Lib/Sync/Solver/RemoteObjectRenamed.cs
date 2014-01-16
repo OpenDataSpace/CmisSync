@@ -8,11 +8,9 @@ using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Solver
 {
-    public class RemoteObjectRenamed : AbstractSolver
+    public class RemoteObjectRenamed : ISolver
     {
-        public RemoteObjectRenamed(ISyncEventQueue queue) : base (queue) {}
-
-        public override void Solve(ISession session, MetaDataStorage storage, FileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, MetaDataStorage storage, FileSystemInfo localFile, string remoteId){
             // Rename local object
             throw new NotImplementedException();
         }

@@ -8,11 +8,9 @@ using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Solver
 {
-    public class LocalObjectDeleted : AbstractSolver
+    public class LocalObjectDeleted : ISolver
     {
-        public LocalObjectDeleted(ISyncEventQueue queue) : base (queue) {}
-
-        public override void Solve(ISession session, MetaDataStorage storage, FileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, MetaDataStorage storage, FileSystemInfo localFile, string remoteId){
             // Upload new file
             throw new NotImplementedException();
         }
