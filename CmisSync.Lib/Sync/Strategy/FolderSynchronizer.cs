@@ -8,20 +8,20 @@ using CmisSync.Lib.Storage;
 using DotCMIS.Client;
 using DotCMIS.Exceptions;
 
-namespace CmisSync.Lib.Sync
+namespace CmisSync.Lib.Sync.Strategy
 {
     public class FolderSynchronizer : ReportingSyncEventHandler
     {
         public static readonly int FOLDER_SYNCHRONIZER_PRIORITY = 0;
-
         private MetaDataStorage MetaData;
         private ISession Session;
+
         public FolderSynchronizer (SyncEventQueue queue, MetaDataStorage metadata, ISession session) : base (queue)
         {
-            if(metadata == null)
-                throw new ArgumentNullException("Given Metadata is null");
-            if(session == null)
-                throw new ArgumentNullException("Given Session is null");
+            if (metadata == null)
+                throw new ArgumentNullException ("Given Metadata is null");
+            if (session == null)
+                throw new ArgumentNullException ("Given Session is null");
             this.MetaData = metadata;
             this.Session = session;
         }
@@ -35,8 +35,8 @@ namespace CmisSync.Lib.Sync
         public override bool Handle (ISyncEvent e)
         {
             FolderEvent folderEvent = e as FolderEvent;
-            if(folderEvent != null) {
-                SyncFolder(folderEvent);
+            if (folderEvent != null) {
+                SyncFolder (folderEvent);
                 return true;
             }
             return false;
@@ -45,77 +45,90 @@ namespace CmisSync.Lib.Sync
         /// <summary>
         /// Download a single folder from the CMIS server for sync.
         /// </summary>
-        private void SyncFolder(FolderEvent folder)
+        private void SyncFolder (FolderEvent folder)
         {
-            if(folder.LocalFolder == null && folder.RemoteFolder == null)
-                throw new ArgumentNullException("Local and remote folder are null");
+            if (folder.LocalFolder == null && folder.RemoteFolder == null)
+                throw new ArgumentNullException ("Local and remote folder are null");
 
 
             bool? isLocallyAvailable = null;
             bool? isRemotelyAvailable = null;
             bool? wasAvailable = null;
 
-            if(folder.LocalFolder!= null) {
-                folder.LocalFolder.Refresh();
+            if(folder.LocalFolder != null && folder.RemoteFolder != null)
+
+
+            if (folder.RemoteFolder == null) {
+                // Could happen, if the local fs throws an event, or the IFolder has been removed on server.
+                folder.LocalFolder.Refresh ();
                 isLocallyAvailable = folder.LocalFolder.Exists;
+                SyncFolder savedFolder;
+                if( MetaData.TryGetFolder(folder.LocalFolder, out savedFolder) ) {
+                    wasAvailable = true;
+                    try{
+                        folder.RemoteFolder = Session.GetObject(savedFolder.RemoteObjectId) as IFolder;
+                        isRemotelyAvailable = true;
+                    }catch(CmisObjectNotFoundException) {
+                        isRemotelyAvailable = false;
+                    }
+                } else {
+                    wasAvailable = false;
+                }
             }
 
-            if(folder.RemoteFolder != null) {
-                try{
+            if (folder.LocalFolder == null) {
+                try {
                     // Refresh object or figure out, if it is available at the moment
-                    folder.RemoteFolder = Session.GetObject(folder.RemoteFolder.Id) as IFolder;
+                    folder.RemoteFolder = Session.GetObject (folder.RemoteFolder.Id) as IFolder;
                     isRemotelyAvailable = true;
 
                     // Check, if the remote object has been synced in the past
-                    wasAvailable = MetaData.GetFolderPath(folder.RemoteFolder.Id) != null;
-                }catch(CmisObjectNotFoundException) {
+                    wasAvailable = MetaData.GetFolderPath (folder.RemoteFolder.Id) != null;
+                } catch (CmisObjectNotFoundException) {
                     isRemotelyAvailable = false;
                 }
             }
 
 
-            if(folder.LocalFolder == null) {
+            if (folder.LocalFolder == null) {
                 // Try to figure out, if remoteFolder does exists remotely
                 bool remoteHasBeenDeleted = false;
-                try{
+                try {
                     // Refresh object or figure out, if it is available any more
-                    folder.RemoteFolder = Session.GetObject(folder.RemoteFolder.Id) as IFolder;
-                }catch(CmisObjectNotFoundException) {
+                    folder.RemoteFolder = Session.GetObject (folder.RemoteFolder.Id) as IFolder;
+                } catch (CmisObjectNotFoundException) {
                     remoteHasBeenDeleted = true;
                 }
 
                 // Try to figure out the local folder path
-                string lastLocalSavedPath = MetaData.GetFolderPath(folder.RemoteFolder.Id);
-                if(lastLocalSavedPath == null) {
+                string lastLocalSavedPath = MetaData.GetFolderPath (folder.RemoteFolder.Id);
+                if (lastLocalSavedPath == null) {
                     // There hasn't been any folder saved with the given remote folder id
-                    if(remoteHasBeenDeleted)
+                    if (remoteHasBeenDeleted)
                         // Nothing to do, because remote folder Id is not available locally and remotely
                         return;
                     // Try to figure out, if the correct path is available
-                    string newLocalPath = MetaData.CreatePathFromRemoteFolder(folder.RemoteFolder);
-                    if(MetaData.ContainsFolder(newLocalPath))
-                    {
-                        if( Directory.Exists(newLocalPath)) {
+                    string newLocalPath = MetaData.CreatePathFromRemoteFolder (folder.RemoteFolder);
+                    if (MetaData.ContainsFolder (newLocalPath)) {
+                        if (Directory.Exists (newLocalPath)) {
                             // Merge / Update the path
-                            throw new NotImplementedException();
+                            throw new NotImplementedException ();
                         } else {
                             // 
                         }
-                    }
-                    else
-                    {
-                        var dirInfo = Directory.CreateDirectory(newLocalPath);
-                        MetaData.AddFolder(dirInfo, folder.RemoteFolder);
+                    } else {
+                        var dirInfo = Directory.CreateDirectory (newLocalPath);
+                        MetaData.AddFolder (dirInfo, folder.RemoteFolder);
                     }
                 } else {
                     // Do the path matches ? If not, a movement has been done, otherwise, do nothing
-                    throw new NotImplementedException();
+                    throw new NotImplementedException ();
                 }
-                throw new NotImplementedException();
-            } else if(folder.RemoteFolder == null) {
-                throw new NotImplementedException();
+                throw new NotImplementedException ();
+            } else if (folder.RemoteFolder == null) {
+                throw new NotImplementedException ();
             } else {
-                throw new NotImplementedException();
+                throw new NotImplementedException ();
             }
 
 /*
@@ -186,7 +199,7 @@ namespace CmisSync.Lib.Sync
                 }
 
                 return true;*/
-            }
+        }
 
     }
 }

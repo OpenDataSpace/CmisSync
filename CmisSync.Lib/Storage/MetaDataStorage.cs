@@ -13,30 +13,40 @@ namespace CmisSync.Lib.Storage
 
         public SyncFolder RootFolder { get; set; }
 
+        // Key is the remote object id, the value is the saved SyncFolder containing the id
         private Dictionary<string, SyncFolder> AllFolder = new Dictionary<string, SyncFolder>();
+        // Key is the remote object id, the value is the saved SyncFile containing this id
         private Dictionary<string, SyncFile> AllFiles = new Dictionary<string, SyncFile>();
 
         private string RemoteSyncTargetPath { get; set; }
         private string LocalSyncTargetPath { get; set; }
 
-        public MetaDataStorage (string remoteSyncTargetPath, string localSyncTargetPath)
-        {
+        public IPathMatcher Matcher { get; private set;}
 
+        public MetaDataStorage (IPathMatcher matcher)
+        {
+            if(matcher == null)
+                throw new ArgumentNullException("Given Path matcher is null");
+            Matcher = matcher;
         }
 
         /// <summary>
         /// Add a file to the storage.
-        /// If checksum is not null, it will be used for the storage entry
         /// </summary>
         public void AddFile(FileInfo localFile, IDocument remoteFile) {
-
+/*            if(!Matcher.Matches(localFile, remoteFile))
+                throw new ArgumentException(String.Format("Given file paths are not matching each other: local=\"{0}\" remote=\"{1}\"", localFile.FullName, remoteFile.Paths));
+*/
         }
 
         /// <summary>
         /// Add a folder to the storage.
         /// </summary>
         public void AddFolder(DirectoryInfo localFolder, IFolder remoteFolder) {
-
+            if(!Matcher.Matches(localFolder, remoteFolder))
+                throw new ArgumentException(String.Format("Given folder paths are not matching each other: local=\"{0}\" remote=\"{1}\"", localFolder.FullName, remoteFolder.Path));
+            if(!ContainsFolder(localFolder.Parent.FullName))
+                throw new ArgumentException();
         }
 
         /// <summary>
@@ -120,6 +130,13 @@ namespace CmisSync.Lib.Storage
         }
 
         /// <summary>
+        /// Checks whether the storage contains a given folder.
+        /// </summary>
+        public bool ContainsFolder(DirectoryInfo folder) {
+            return ContainsFolder(folder.FullName);
+        }
+
+        /// <summary>
         /// <returns>path field in folders table for <paramref name="id"/></returns>
         /// </summary>
         public string GetFolderPath(string id) {
@@ -131,6 +148,10 @@ namespace CmisSync.Lib.Storage
             }
         }
 
+        public bool TryGetFolder (DirectoryInfo localFolder, out SyncFolder savedFolder)
+        {
+            throw new NotImplementedException ();
+        }
         /// <summary>
         /// Check whether a file's content has changed locally since it was last synchronized.
         /// This happens when the user edits a file on the local computer.
