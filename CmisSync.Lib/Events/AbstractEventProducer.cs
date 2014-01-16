@@ -13,8 +13,8 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The queue.
         /// </value>
-        protected SyncEventQueue Queue { get; private set; }
-        public AbstractEventProducer (SyncEventQueue queue)
+        protected ISyncEventQueue Queue { get; private set; }
+        public AbstractEventProducer (ISyncEventQueue queue)
         {
             if(queue == null)
                 throw new ArgumentNullException("The given event queue must no be null");
