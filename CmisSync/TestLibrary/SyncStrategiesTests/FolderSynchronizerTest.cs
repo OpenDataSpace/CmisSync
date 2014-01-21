@@ -28,10 +28,9 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void IgnoreWrongEvents () {
             var session = new Mock<ISession>().Object;
-            var matcher = new Mock<PathMatcher>("/","s").Object;
+            var matcher = new Mock<IPathMatcher>().Object;
             var storage = new Mock<MetaDataStorage>(matcher).Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager).Object;
+            var queue = new Mock<ISyncEventQueue>().Object;
             var syncer = new FolderSynchronizer(queue, storage, session);
             var wrongEvent = new Mock<ISyncEvent>().Object;
             Assert.False(syncer.Handle(wrongEvent));

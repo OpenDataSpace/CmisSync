@@ -16,7 +16,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private MetaDataStorage MetaData;
         private ISession Session;
 
-        public FolderSynchronizer (SyncEventQueue queue, MetaDataStorage metadata, ISession session) : base (queue)
+        public FolderSynchronizer (ISyncEventQueue queue, MetaDataStorage metadata, ISession session) : base (queue)
         {
             if (metadata == null)
                 throw new ArgumentNullException ("Given Metadata is null");
