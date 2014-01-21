@@ -36,6 +36,8 @@ SOURCES =  \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/ContentChangesTest.cs \
+	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
+	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	TasksTests/ChunkedDownloaderTest.cs \
 	TasksTests/SimpleFileDownloaderTest.cs \
 	TasksTests/SimpleFileUploaderTest.cs \

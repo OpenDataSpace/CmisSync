@@ -92,9 +92,11 @@ SOURCES =  \
 	Sync/Strategy/FileEventHandler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/FolderSynchronizer.cs \
+	Sync/Strategy/ISituationDetection.cs \
 	Sync/Strategy/LocalCrawler.cs \
+	Sync/Strategy/LocalSituationDetection.cs \
+	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SimpleFileSynchronizer.cs \
-	Sync/Strategy/SituationDetection.cs \
 	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \
 	Tasks/ChunkedDownloader.cs \

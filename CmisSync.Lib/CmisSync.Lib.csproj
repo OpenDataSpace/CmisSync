@@ -149,7 +149,9 @@
     <Compile Include="Sync\Solver\RemoteObjectRenamed.cs" />
     <Compile Include="Sync\Solver\LocalObjectMoved.cs" />
     <Compile Include="Sync\Solver\RemoteObjectChanged.cs" />
-    <Compile Include="Sync\Strategy\SituationDetection.cs" />
+    <Compile Include="Sync\Strategy\LocalSituationDetection.cs" />
+    <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
+    <Compile Include="Sync\Strategy\ISituationDetection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

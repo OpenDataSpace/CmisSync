@@ -98,6 +98,8 @@
     <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
+    <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />
+    <Compile Include="SyncStrategiesTests\SituationDetectionTests\RemoteSituationDetectionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -142,6 +144,7 @@
     <Folder Include="StorageTests\" />
     <Folder Include="SyncStrategiesTests\" />
     <Folder Include="DataTests\" />
+    <Folder Include="SyncStrategiesTests\SituationDetectionTests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
