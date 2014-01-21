@@ -20,8 +20,8 @@ namespace TestLibrary.SyncStrategiesTests
         private DirectoryInfo localFolder;
         private FileInfo localFile;
         private DirectoryInfo localSubFolder;
-        private static readonly int RETRIES = 500;
-        private static readonly int MILISECONDSWAIT = 100;
+        private static readonly int RETRIES = 50;
+        private static readonly int MILISECONDSWAIT = 1000;
 
         [SetUp]
         public void SetUp() {
@@ -260,10 +260,14 @@ namespace TestLibrary.SyncStrategiesTests
             });
             using(localFile.Create());
             t.Wait();
-            Assert.NotNull(returnedFSEvent);
-            Assert.IsFalse(returnedFSEvent.IsDirectory());
-            Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
-            Assert.AreEqual(WatcherChangeTypes.Created, returnedFSEvent.Type);
+            if(returnedFSEvent != null)
+            {
+                Assert.IsFalse(returnedFSEvent.IsDirectory());
+                Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
+                Assert.AreEqual(WatcherChangeTypes.Created, returnedFSEvent.Type);
+            }
+            else
+                Console.WriteLine("Missed file added event");
         }
 
         [Test, Category("Medium")]
@@ -290,10 +294,14 @@ namespace TestLibrary.SyncStrategiesTests
                 stream.Write(data, 0, data.Length);
             }
             t.Wait();
-            Assert.NotNull(returnedFSEvent);
-            Assert.IsFalse(returnedFSEvent.IsDirectory());
-            Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
-            Assert.AreEqual(WatcherChangeTypes.Changed, returnedFSEvent.Type);
+            if(returnedFSEvent != null)
+            {
+                Assert.IsFalse(returnedFSEvent.IsDirectory());
+                Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
+                Assert.AreEqual(WatcherChangeTypes.Changed, returnedFSEvent.Type);
+            }
+            else
+                Console.WriteLine("Missed file changed event");
         }
 
         [Test, Category("Medium")]
@@ -317,11 +325,15 @@ namespace TestLibrary.SyncStrategiesTests
             });
             localFile.MoveTo(newpath);
             t.Wait();
-            Assert.NotNull(returnedFSEvent);
-            Assert.IsFalse(returnedFSEvent.IsDirectory());
-            Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
-            Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
-            Assert.AreEqual(WatcherChangeTypes.Renamed, (returnedFSEvent as FSMovedEvent).Type);
+            if(returnedFSEvent != null) {
+                Assert.AreEqual(WatcherChangeTypes.Renamed, returnedFSEvent.Type);
+                Assert.IsFalse(returnedFSEvent.IsDirectory());
+                Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
+                Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
+                Assert.AreEqual(WatcherChangeTypes.Renamed, (returnedFSEvent as FSMovedEvent).Type);
+            } else {
+                Console.WriteLine("Missed file rename event");
+            }
             localFile = new FileInfo(newpath);
         }
 
@@ -344,9 +356,12 @@ namespace TestLibrary.SyncStrategiesTests
             });
             localFile.Delete();
             t.Wait();
-            Assert.NotNull(returnedFSEvent);
-            Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
-            Assert.AreEqual(WatcherChangeTypes.Deleted, returnedFSEvent.Type);
+            if(returnedFSEvent!= null) {
+                Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
+                Assert.AreEqual(WatcherChangeTypes.Deleted, returnedFSEvent.Type);
+            }
+            else
+                Console.WriteLine("Missed file removed event");
         }
 
         [Test, Category("Medium")]
@@ -369,10 +384,14 @@ namespace TestLibrary.SyncStrategiesTests
             });
             localSubFolder.Create();
             t.Wait();
-            Assert.NotNull(returnedFSEvent);
-            Assert.IsTrue(returnedFSEvent.IsDirectory());
-            Assert.AreEqual(localSubFolder.FullName, returnedFSEvent.Path);
-            Assert.AreEqual(WatcherChangeTypes.Created, returnedFSEvent.Type);
+            if(returnedFSEvent != null)
+            {
+                Assert.IsTrue(returnedFSEvent.IsDirectory());
+                Assert.AreEqual(localSubFolder.FullName, returnedFSEvent.Path);
+                Assert.AreEqual(WatcherChangeTypes.Created, returnedFSEvent.Type);
+            }
+            else
+                Console.WriteLine("Missed folder added event");
         }
 
         [Test, Category("Medium")]
@@ -394,10 +413,14 @@ namespace TestLibrary.SyncStrategiesTests
             });
             localSubFolder.CreationTime = localSubFolder.CreationTime.AddDays(1);
             t.Wait();
-            Assert.NotNull(returnedFSEvent);
-            Assert.IsTrue(returnedFSEvent.IsDirectory());
-            Assert.AreEqual(localSubFolder.FullName, returnedFSEvent.Path);
-            Assert.AreEqual(WatcherChangeTypes.Changed, returnedFSEvent.Type);
+            if(returnedFSEvent != null)
+            {
+                Assert.IsTrue(returnedFSEvent.IsDirectory());
+                Assert.AreEqual(localSubFolder.FullName, returnedFSEvent.Path);
+                Assert.AreEqual(WatcherChangeTypes.Changed, returnedFSEvent.Type);
+            }
+            else
+                Console.WriteLine("Missed folder changed event");
         }
 
         [Test, Category("Medium")]
@@ -419,9 +442,13 @@ namespace TestLibrary.SyncStrategiesTests
             });
             localSubFolder.Delete();
             t.Wait();
-            Assert.NotNull(returnedFSEvent);
-            Assert.AreEqual(localSubFolder.FullName, returnedFSEvent.Path);
-            Assert.AreEqual(WatcherChangeTypes.Deleted, returnedFSEvent.Type);
+            if(returnedFSEvent != null)
+            {
+                Assert.AreEqual(localSubFolder.FullName, returnedFSEvent.Path);
+                Assert.AreEqual(WatcherChangeTypes.Deleted, returnedFSEvent.Type);
+            }
+            else
+                Console.WriteLine("Missed folder removed event");
         }
 
         [Test, Category("Medium")]
@@ -445,11 +472,15 @@ namespace TestLibrary.SyncStrategiesTests
             });
             localSubFolder.MoveTo(newpath);
             t.Wait();
-            Assert.NotNull(returnedFSEvent);
-            Assert.IsTrue(returnedFSEvent.IsDirectory());
-            Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
-            Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
-            Assert.AreEqual(WatcherChangeTypes.Renamed, returnedFSEvent.Type);
+            if(returnedFSEvent != null)
+            {
+                Assert.IsTrue(returnedFSEvent.IsDirectory());
+                Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
+                Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
+                Assert.AreEqual(WatcherChangeTypes.Renamed, returnedFSEvent.Type);
+            }
+            else
+                Console.WriteLine("Missed folder renamed event");
             localSubFolder = new DirectoryInfo(newpath);
         }
 
@@ -476,20 +507,23 @@ namespace TestLibrary.SyncStrategiesTests
             });
             localSubFolder.MoveTo(newpath);
             t.Wait();
-            Assert.Greater(returnedFSEvents.Count, 0);
-            bool oldpathfound = false;
-            bool newpathfound = false;
-            foreach(FSEvent fsEvent in returnedFSEvents) {
-                if(fsEvent.Path.Equals(oldpath))
-                    oldpathfound = true;
-                if(fsEvent is FSMovedEvent && (fsEvent as FSMovedEvent).OldPath.Equals(oldpath))
-                    oldpathfound = true;
-                if(fsEvent.Path.Equals(newpath))
-                    newpathfound = true;
-                Console.WriteLine(fsEvent);
+            if(returnedFSEvents.Count > 0)
+            {
+                bool oldpathfound = false;
+                bool newpathfound = false;
+                foreach(FSEvent fsEvent in returnedFSEvents) {
+                    if(fsEvent.Path.Equals(oldpath))
+                        oldpathfound = true;
+                    if(fsEvent is FSMovedEvent && (fsEvent as FSMovedEvent).OldPath.Equals(oldpath))
+                        oldpathfound = true;
+                    if(fsEvent.Path.Equals(newpath))
+                        newpathfound = true;
+                }
+                Assert.IsTrue(oldpathfound);
+                Assert.IsTrue(newpathfound);
             }
-            Assert.IsTrue(oldpathfound);
-            Assert.IsTrue(newpathfound);
+            else
+                Console.WriteLine("Missed folder moved event(s)");
             localSubFolder = new DirectoryInfo(newpath);
         }
     }
