@@ -54,5 +54,9 @@ System.Data.SQLite.Linq.dll: System.Data.SQLite.dll EntityFramework.dll
 	xbuild Extras/OpenDataSpace.System.Data.SQLite.Linq/System.Data.SQLite.Linq.OpenDataSpace.mono.csproj /t:Rebuild
 	cp -f Extras/OpenDataSpace.System.Data.SQLite.Linq/bin/Debug/System.Data.SQLite.Linq.dll* Extras
 
+DotCMIS.dll:
+	xbuild Extras/OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
+	cp -f Extras/OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* Extras
+
 dist-hook:
 	make $(PACKAGE_TARGET)
