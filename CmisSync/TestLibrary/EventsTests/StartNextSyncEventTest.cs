@@ -11,12 +11,20 @@ namespace TestLibrary.EventsTests
     public class StartNextSyncEventTest
     {
         [Test, Category("Fast")]
-        public void ContructorTest() {
+        public void ContructorWithoutParamTest() {
             var start = new StartNextSyncEvent();
             Assert.IsFalse(start.FullSyncRequested);
-            start = new StartNextSyncEvent(false);
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorWithFalseParamTest() {
+            var start = new StartNextSyncEvent(false);
             Assert.IsFalse(start.FullSyncRequested);
-            start = new StartNextSyncEvent(true);
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorWithTrueParamTest() {
+            var start = new StartNextSyncEvent(true);
             Assert.IsTrue(start.FullSyncRequested);
         }
 

@@ -15,6 +15,11 @@ namespace TestLibrary.EventsTests
             var start = new Mock<StartNextSyncEvent>(false).Object;
             var complete = new FullSyncCompletedEvent(start);
             Assert.AreEqual(start, complete.StartEvent);
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorFailsOnNullParameterTest()
+        {
             try{
                 new FullSyncCompletedEvent(null);
                 Assert.Fail();
