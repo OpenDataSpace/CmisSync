@@ -152,6 +152,7 @@
     <Compile Include="Sync\Strategy\LocalSituationDetection.cs" />
     <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
     <Compile Include="Sync\Strategy\ISituationDetection.cs" />
+    <Compile Include="Storage\IMetaDataStorage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

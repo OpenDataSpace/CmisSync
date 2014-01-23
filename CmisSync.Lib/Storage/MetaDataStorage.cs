@@ -8,7 +8,7 @@ using CmisSync.Lib.Data;
 
 namespace CmisSync.Lib.Storage
 {
-    public class MetaDataStorage
+    public class MetaDataStorage : IMetaDataStorage
     {
 
         public SyncFolder RootFolder { get; set; }
@@ -76,7 +76,7 @@ namespace CmisSync.Lib.Storage
         /// <summary>
         /// move a folder from the storage.
         /// </summary>
-        void MoveFolder(string oldPath, string newPath) {
+        public void MoveFolder(string oldPath, string newPath) {
             throw new NotImplementedException();
         }
 
