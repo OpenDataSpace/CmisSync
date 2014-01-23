@@ -724,6 +724,15 @@ namespace CmisSync.Lib.Cmis
             return Denormalize((string)ExecuteSQLFunction("SELECT path FROM files WHERE id=@id", parameters));
         }
 
+        public String GetRemoteFileObjectId(string path)
+        {
+            path = Normalize(path);
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("path", path);
+            return (string)ExecuteSQLFunction("SELECT id FROM files WHERE path=@path", parameters);
+        }
+
 
         /// <summary>
         /// Checks whether the database contains a given folder.
@@ -737,6 +746,19 @@ namespace CmisSync.Lib.Cmis
             return null != ExecuteSQLFunction("SELECT serverSideModificationDate FROM folders WHERE path=@path", parameters);
         }
 
+        /// <summary>
+        /// Checks whether the database contains a given folder. And if true, returns saved object Id.
+        /// </summary>
+        public bool ContainsFolder(string path, out string folderId)
+        {
+            path = Normalize(path);
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("path", path);
+            folderId = (string)ExecuteSQLFunction("SELECT id FROM folders WHERE path=@path", parameters);
+            return null != folderId;
+        }
+
 
         /// <summary>
         /// <returns>path field in folders table for <paramref name="id"/></returns>
@@ -746,6 +768,24 @@ namespace CmisSync.Lib.Cmis
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("id", id);
             return Denormalize((string)ExecuteSQLFunction("SELECT path FROM folders WHERE id=@id", parameters));
+        }
+
+        /// <summary>
+        /// Gets the remote folder object identifier or null if not available.
+        /// </summary>
+        /// <returns>
+        /// The remote folder object identifier.
+        /// </returns>
+        /// <param name='path'>
+        /// Path.
+        /// </param>
+        public string GetRemoteFolderObjectId(string path)
+        {
+            path = Normalize(path);
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("path", path);
+            return (string)ExecuteSQLFunction("SELECT id FROM folders WHERE path=@path", parameters);
         }
 
 

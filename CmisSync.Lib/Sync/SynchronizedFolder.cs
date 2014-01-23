@@ -1240,6 +1240,7 @@ namespace CmisSync.Lib.Sync
                     string newFilePath = Path.Combine(newFolderPath, file.Name);
                     if (File.Exists(newFilePath))
                     {
+                        // TODO Check file content before deleting anything!
                         File.Delete(oldFilePath);
                         database.RemoveFile(oldFilePath);
                     }
