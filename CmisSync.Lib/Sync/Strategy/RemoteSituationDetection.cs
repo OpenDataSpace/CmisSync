@@ -3,6 +3,7 @@ using System;
 using CmisSync.Lib.Storage;
 
 using DotCMIS.Client;
+using DotCMIS.Exceptions;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
@@ -16,9 +17,39 @@ namespace CmisSync.Lib.Sync.Strategy
             Session = session;
         }
 
-        public SituationType Analyse(MetaDataStorage storage, string objectId)
+        public SituationType Analyse(IMetaDataStorage storage, string objectId)
         {
-            throw new NotImplementedException();
+            try {
+                ICmisObject remoteObject = Session.GetObject(objectId);
+                if(storage.GetFilePath(objectId) == null && storage.GetFolderPath(objectId) == null)
+                    return SituationType.ADDED;
+                var document = remoteObject as IDocument;
+                if(document != null)
+                {
+                    var savedPath = storage.GetFilePath(objectId);
+                    if(savedPath == null)
+                        return SituationType.ADDED;
+                    throw new NotImplementedException();
+                }
+                var folder = remoteObject as IFolder;
+                if(folder != null)
+                {
+                    var savedPath = storage.GetFolderPath(objectId);
+                    if(savedPath == null)
+                        return SituationType.ADDED;
+                    throw new NotImplementedException();
+                }
+            }catch(CmisObjectNotFoundException) {
+                if(storage.GetFilePath(objectId) == null && storage.GetFolderPath(objectId) == null)
+                {
+                    return SituationType.NOCHANGE;
+                }
+                else
+                {
+                    return SituationType.REMOVED;
+                }
+            }
+            return SituationType.NOCHANGE;
         }
     }
 }

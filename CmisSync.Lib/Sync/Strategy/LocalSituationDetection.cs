@@ -7,7 +7,7 @@ namespace CmisSync.Lib.Sync.Strategy
 {
     public class LocalSituationDetection : ISituationDetection<FileSystemInfo>
     {
-        public SituationType Analyse(MetaDataStorage storage, FileSystemInfo actualObject)
+        public SituationType Analyse(IMetaDataStorage storage, FileSystemInfo actualObject)
         {
             throw new NotImplementedException();
         }
