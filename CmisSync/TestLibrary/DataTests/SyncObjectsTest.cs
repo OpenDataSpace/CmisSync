@@ -151,7 +151,7 @@ namespace TestLibrary.DataTests
             remoteDocument.Setup (r => r.Name).Returns(filename);
             Assert.IsFalse(file.HasBeenChangeRemotely(remoteDocument.Object));
             file.Name = "changed";
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object), file.Name.Equals(filename) + " " + filename);
+            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object), file.Name.Equals(filename).ToString() + " " + filename);
             file.Name = filename;
             file.LastRemoteWriteTimeUtc = DateTime.UtcNow.AddDays(1);
             Assert.IsFalse(file.HasBeenChangeRemotely(remoteDocument.Object));

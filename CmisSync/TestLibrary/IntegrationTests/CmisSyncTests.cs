@@ -1570,9 +1570,9 @@ namespace TestLibrary.IntegrationTests
                 int fileSize = 1024 * 1024;
                 Console.WriteLine("create local folder structure on A");
                 for (int i = 0; i < 3; i++) {
-                    DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(localDirectory, "dir"+i));
+                    DirectoryInfo dir = Directory.CreateDirectory(Path.Combine(localDirectory, "dir" + i.ToString()));
                     for (int j = 0; j < 10; j++) {
-                        DirectoryInfo subDir = Directory.CreateDirectory(Path.Combine(dir.FullName, "subdir"+j));
+                        DirectoryInfo subDir = Directory.CreateDirectory(Path.Combine(dir.FullName, "subdir" + j.ToString()));
                         using (var stream = File.OpenWrite(Path.Combine(subDir.FullName, "file")))
                         {
                             byte[] content = new byte[fileSize];
