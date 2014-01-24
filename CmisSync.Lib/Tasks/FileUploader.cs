@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using System.IO;
 using DotCMIS.Client;
 using CmisSync.Lib.Events;
@@ -59,6 +60,7 @@ namespace CmisSync.Lib
         /// <summary>
         /// Upload failed exception.
         /// </summary>
+        [Serializable]
         public class UploadFailedException : Exception
         {
             private IDocument doc;
@@ -80,6 +82,21 @@ namespace CmisSync.Lib
             /// </param>
             public UploadFailedException(Exception inner, IDocument lastSuccessfulDocumentState) : base("Upload Failed", inner) {
                 doc = lastSuccessfulDocumentState;
+            }
+
+            public UploadFailedException() : this("Upload Failed") {
+            }
+
+            public UploadFailedException(string message) : base(message) {
+                doc = null;
+            }
+
+            public UploadFailedException(string message, Exception innerException) : base(message, innerException) {
+                doc = null;
+            }
+
+            protected UploadFailedException(SerializationInfo info, StreamingContext context) : base (info, context) {
+                doc = null;
             }
         }
     }
