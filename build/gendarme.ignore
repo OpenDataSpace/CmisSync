@@ -30,8 +30,8 @@ M: System.Void CmisSync.CmisSyncMenuItem::.ctor(System.String)
 
 #Configure setting
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
-#Configure setting
 M: System.Void CmisSync.UI::.cctor()
+M: System.Void TestLibrary.DataTests.PathMatcherTest::SetUp()
 
 #Required to be type long for error code
 R: Gendarme.Rules.Design.EnumsShouldUseInt32Rule
