@@ -11,7 +11,7 @@ namespace CmisSync.Lib.Storage
     public interface IMetaDataStorage
     {
 
-        SyncFolder RootFolder { get; set; }
+        MappedFolder RootFolder { get; set; }
 
         IPathMatcher Matcher { get; }
 
@@ -87,7 +87,13 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         string GetFolderPath(string id);
 
-        bool TryGetFolder (DirectoryInfo localFolder, out SyncFolder savedFolder);
+        bool TryGetMappedFolder (DirectoryInfo localFolder, out MappedFolder savedFolder);
+
+        bool TryGetMappedObjectByRemoteId(string remoteId, out AbstractMappedObject savedObject);
+
+        bool TryGetMappedFileByRemoteId(string remoteId, out MappedFile savedFile);
+
+        bool TryGetMappedFolderByRemoteId(string remoteId, out MappedFolder savedFolder);
 
         /// <summary>
         /// Check whether a file's content has changed locally since it was last synchronized.

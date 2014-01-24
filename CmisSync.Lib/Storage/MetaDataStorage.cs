@@ -11,12 +11,10 @@ namespace CmisSync.Lib.Storage
     public class MetaDataStorage : IMetaDataStorage
     {
 
-        public SyncFolder RootFolder { get; set; }
+        public MappedFolder RootFolder { get; set; }
 
-        // Key is the remote object id, the value is the saved SyncFolder containing the id
-        private Dictionary<string, SyncFolder> AllFolder = new Dictionary<string, SyncFolder>();
-        // Key is the remote object id, the value is the saved SyncFile containing this id
-        private Dictionary<string, SyncFile> AllFiles = new Dictionary<string, SyncFile>();
+        // Key is the remote object id, the value is the saved MappedObject containing the id
+        private Dictionary<string, AbstractMappedObject> MappedObjects = new Dictionary<string, AbstractMappedObject>();
 
         private string RemoteSyncTargetPath { get; set; }
         private string LocalSyncTargetPath { get; set; }
@@ -95,8 +93,8 @@ namespace CmisSync.Lib.Storage
         /// This is the time on the CMIS server side, in UTC. Client-side time does not matter.
         /// </summary>
         public void SetFileServerSideModificationDate(IDocument remoteDocument) {
-            SyncFile file;
-            if(this.AllFiles.TryGetValue(remoteDocument.Id, out file)) {
+            MappedFile file;
+            if(TryGetMappedFileByRemoteId(remoteDocument.Id, out file)) {
                 file.LastRemoteWriteTimeUtc = ((DateTime)remoteDocument.LastModificationDate).ToUniversalTime();
             } else {
                 throw new ArgumentException();
@@ -114,8 +112,8 @@ namespace CmisSync.Lib.Storage
         /// <returns>path field in files table for <paramref name="id"/></returns>
         /// </summary>
         public string GetFilePath(string id) {
-            SyncFile file;
-            if( this.AllFiles.TryGetValue(id, out file) ) {
+            MappedFile file;
+            if( TryGetMappedFileByRemoteId(id, out file) ) {
                 return file.GetLocalPath();
             }else {
                 return null;
@@ -140,18 +138,50 @@ namespace CmisSync.Lib.Storage
         /// <returns>path field in folders table for <paramref name="id"/></returns>
         /// </summary>
         public string GetFolderPath(string id) {
-            SyncFolder folder;
-            if( this.AllFolder.TryGetValue(id, out folder)) {
+            MappedFolder folder;
+            if( TryGetMappedFolderByRemoteId(id, out folder)) {
                 return folder.GetLocalPath();
             } else {
                 return null;
             }
         }
 
-        public bool TryGetFolder (DirectoryInfo localFolder, out SyncFolder savedFolder)
+        public bool TryGetMappedFolder (DirectoryInfo localFolder, out MappedFolder savedFolder)
         {
             throw new NotImplementedException ();
         }
+
+        public bool TryGetMappedObjectByRemoteId(string remoteId, out AbstractMappedObject savedObject)
+        {
+            return MappedObjects.TryGetValue(remoteId, out savedObject);
+        }
+
+        public bool TryGetMappedFileByRemoteId(string remoteId, out MappedFile savedFile)
+        {
+            AbstractMappedObject value;
+            if(MappedObjects.TryGetValue(remoteId, out value)) {
+                if(value is MappedFile) {
+                    savedFile = value as MappedFile;
+                    return true;
+                }
+            }
+            savedFile = null;
+            return false;
+        }
+
+        public bool TryGetMappedFolderByRemoteId(string remoteId, out MappedFolder savedFolder)
+        {
+            AbstractMappedObject value;
+            if(MappedObjects.TryGetValue(remoteId, out value)) {
+                if(value is MappedFolder) {
+                    savedFolder = value as MappedFolder;
+                    return true;
+                }
+            }
+            savedFolder = null;
+            return false;
+        }
+
         /// <summary>
         /// Check whether a file's content has changed locally since it was last synchronized.
         /// This happens when the user edits a file on the local computer.

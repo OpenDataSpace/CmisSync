@@ -13,7 +13,7 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 
 SOURCES =  \
 	DataTests/PathMatcherTest.cs \
-	DataTests/SyncObjectsTest.cs \
+	DataTests/MappedObjectsTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \

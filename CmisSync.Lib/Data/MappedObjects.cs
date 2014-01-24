@@ -11,9 +11,9 @@ using DotCMIS.Client;
 namespace CmisSync.Lib.Data
 {
     [Serializable]
-    public abstract class AbstractSyncObject
+    public abstract class AbstractMappedObject
     {
-        public AbstractSyncObject( string localSyncTargetPath, string remoteSyncTargetPath) {
+        public AbstractMappedObject( string localSyncTargetPath, string remoteSyncTargetPath) {
             if (String.IsNullOrEmpty(localSyncTargetPath))
                 throw new ArgumentException("Given local sync target path is null or empty");
             if (String.IsNullOrEmpty(remoteSyncTargetPath))
@@ -47,14 +47,14 @@ namespace CmisSync.Lib.Data
     }
 
     [Serializable]
-    public class SyncFolder : AbstractSyncObject
+    public class MappedFolder : AbstractMappedObject
     {
 
-        public SyncFolder Parent { get; set; }
+        public MappedFolder Parent { get; set; }
 
-        private List<AbstractSyncObject> children = new List<AbstractSyncObject> ();
+        private List<AbstractMappedObject> children = new List<AbstractMappedObject> ();
 
-        public List<AbstractSyncObject> Children { get { return children; } set { this.children = value; } }
+        public List<AbstractMappedObject> Children { get { return children; } set { this.children = value; } }
 
         public override bool ExistsLocally ()
         {
@@ -67,7 +67,7 @@ namespace CmisSync.Lib.Data
                 return LocalSyncTargetPath;
             else {
                 string path = Name;
-                SyncFolder p = Parent;
+                MappedFolder p = Parent;
                 while (p.Parent != null) {
                     path = Path.Combine (p.Name, path);
                     p = p.Parent;
@@ -76,11 +76,11 @@ namespace CmisSync.Lib.Data
             }
         }
 
-        public SyncFolder( string localSyncTargetPath, string remoteSyncTargetPath) : base(localSyncTargetPath, remoteSyncTargetPath) {
+        public MappedFolder( string localSyncTargetPath, string remoteSyncTargetPath) : base(localSyncTargetPath, remoteSyncTargetPath) {
             Name = new DirectoryInfo(LocalSyncTargetPath).Name;
         }
 
-        public SyncFolder ( SyncFolder parent, string name ) : base(parent.LocalSyncTargetPath, parent.RemoteSyncTargetPath) {
+        public MappedFolder ( MappedFolder parent, string name ) : base(parent.LocalSyncTargetPath, parent.RemoteSyncTargetPath) {
             if(parent == null)
                 throw new ArgumentNullException("Given parent is null");
             if(String.IsNullOrEmpty(name))
@@ -91,16 +91,16 @@ namespace CmisSync.Lib.Data
     }
 
     [Serializable]
-    public class SyncFile : AbstractSyncObject
+    public class MappedFile : AbstractMappedObject
     {
-        public List<SyncFolder> Parents { get; set; }
+        public List<MappedFolder> Parents { get; set; }
 
         [DefaultValue(-1)]
         public long LastFileSize { get; set; }
 
-        public SyncFile (SyncFolder parent, params SyncFolder[] parents) : base(parent.LocalSyncTargetPath, parent.RemoteSyncTargetPath)
+        public MappedFile (MappedFolder parent, params MappedFolder[] parents) : base(parent.LocalSyncTargetPath, parent.RemoteSyncTargetPath)
         {
-            Parents = new List<SyncFolder>();
+            Parents = new List<MappedFolder>();
             Parents.Add (parent);
             if (parents != null)
                 Parents.AddRange (parents);
@@ -113,7 +113,7 @@ namespace CmisSync.Lib.Data
             return File.Exists (Path.Combine (Parents [0].GetLocalPath (), Name));
         }
 
-        public bool ExistsLocally (SyncFolder parent)
+        public bool ExistsLocally (MappedFolder parent)
         {
             if (this.Parents.Contains (parent))
                 return File.Exists (parent.GetLocalPath ());
@@ -121,7 +121,7 @@ namespace CmisSync.Lib.Data
                 return false;
         }
 
-        public string GetLocalPath (SyncFolder parent)
+        public string GetLocalPath (MappedFolder parent)
         {
             return Path.Combine (parent.GetLocalPath (), Name);
         }

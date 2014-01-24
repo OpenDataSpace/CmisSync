@@ -20,8 +20,8 @@ SOURCES =  \
 	ConfigManager.cs \
 	ConfigMigration.cs \
 	Credentials.cs \
+	Data/MappedObjects.cs \
 	Data/PathMatcher.cs \
-	Data/SyncObjects.cs \
 	Defines.cs \
 	Events/AbstractEventProducer.cs \
 	Events/ActiveActivitiesManager.cs \

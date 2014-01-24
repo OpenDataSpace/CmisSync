@@ -62,8 +62,8 @@ namespace CmisSync.Lib.Sync.Strategy
                 // Could happen, if the local fs throws an event, or the IFolder has been removed on server.
                 folder.LocalFolder.Refresh ();
                 isLocallyAvailable = folder.LocalFolder.Exists;
-                SyncFolder savedFolder;
-                if( MetaData.TryGetFolder(folder.LocalFolder, out savedFolder) ) {
+                MappedFolder savedFolder;
+                if( MetaData.TryGetMappedFolder(folder.LocalFolder, out savedFolder) ) {
                     wasAvailable = true;
                     try{
                         folder.RemoteFolder = Session.GetObject(savedFolder.RemoteObjectId) as IFolder;

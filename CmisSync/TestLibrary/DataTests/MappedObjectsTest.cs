@@ -12,7 +12,7 @@ using Moq;
 namespace TestLibrary.DataTests
 {
     [TestFixture]
-    public class SyncFolderTest
+    public class MappedFolderTest
     {
         private string localRootPath;
         private string remoteRootPath;
@@ -25,10 +25,10 @@ namespace TestLibrary.DataTests
 
         [Test, Category("Fast")]
         public void ConstructorTest () {
-            var rootFolder = new SyncFolder(this.localRootPath, this.remoteRootPath);
+            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
             Assert.IsNull(rootFolder.Parent);
             string child = "child";
-            var childFolder = new SyncFolder(rootFolder, child);
+            var childFolder = new MappedFolder(rootFolder, child);
             Assert.AreEqual(rootFolder, childFolder.Parent);
             Assert.AreEqual(new DirectoryInfo(this.localRootPath).Name, rootFolder.Name);
             Assert.AreEqual(child, childFolder.Name);
@@ -36,28 +36,28 @@ namespace TestLibrary.DataTests
 
         [Test, Category("Fast")]
         public void GetLocalPathTest() {
-            var rootFolder = new SyncFolder(this.localRootPath, this.remoteRootPath);
+            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
             Assert.AreEqual(this.localRootPath, rootFolder.GetLocalPath());
             string child = "child";
-            var childFolder = new SyncFolder(rootFolder, child);
+            var childFolder = new MappedFolder(rootFolder, child);
             Assert.AreEqual(Path.Combine(this.localRootPath, child), childFolder.GetLocalPath());
             string sub = "sub";
-            var subFolder = new SyncFolder(childFolder, sub);
+            var subFolder = new MappedFolder(childFolder, sub);
             Assert.AreEqual(Path.Combine(this.localRootPath, child, sub), subFolder.GetLocalPath());
         }
 
         [Test, Category("Fast")]
         public void ExistsLocallyTest() {
-            var rootFolder = new SyncFolder(this.localRootPath, this.remoteRootPath);
+            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
             string child = "child";
-            var childFolder = new SyncFolder(rootFolder, child);
+            var childFolder = new MappedFolder(rootFolder, child);
             Assert.IsTrue(rootFolder.ExistsLocally());
             Assert.IsFalse(childFolder.ExistsLocally());
         }
     }
 
     [TestFixture]
-    public class SyncFileTest
+    public class MappedFileTest
     {
         private string localRootPath;
         private string remoteRootPath;
@@ -70,14 +70,14 @@ namespace TestLibrary.DataTests
 
         [Test, Category("Fast")]
         public void ConstructorTest () {
-            var parent = new SyncFolder(this.localRootPath, this.remoteRootPath);
-            var file = new SyncFile(parent);
+            var parent = new MappedFolder(this.localRootPath, this.remoteRootPath);
+            var file = new MappedFile(parent);
             Assert.AreEqual(parent, file.Parents[0]);
-            file = new SyncFile(parent, null);
+            file = new MappedFile(parent, null);
             Assert.AreEqual(parent, file.Parents[0]);
             Assert.AreEqual (1, file.Parents.Count);
-            var secondParent = new SyncFolder(parent, "sub");
-            file = new SyncFile(parent, secondParent);
+            var secondParent = new MappedFolder(parent, "sub");
+            file = new MappedFile(parent, secondParent);
             Assert.AreEqual(2, file.Parents.Count);
             Assert.IsTrue(file.Parents.Contains(parent));
             Assert.IsTrue(file.Parents.Contains(secondParent));
@@ -97,16 +97,16 @@ namespace TestLibrary.DataTests
             Assert.AreEqual(this.localRootPath, file.LocalSyncTargetPath);
             Assert.AreEqual(this.remoteRootPath, file.RemoteSyncTargetPath);
             try{
-                new SyncFile(null);
+                new MappedFile(null);
                 Assert.Fail ();
             }catch(Exception){}
         }
 
         [Test, Category("Fast")]
         public void GetLocalPathTest () {
-            var rootFolder = new SyncFolder(this.localRootPath, this.remoteRootPath);
-            var subFolder = new SyncFolder(rootFolder, "sub");
-            var file = new SyncFile(rootFolder);
+            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
+            var subFolder = new MappedFolder(rootFolder, "sub");
+            var file = new MappedFile(rootFolder);
             string filename = "testfile";
             file.Name = filename;
             Assert.AreEqual(Path.Combine(this.localRootPath, filename), file.GetLocalPath());
@@ -117,8 +117,8 @@ namespace TestLibrary.DataTests
 
         [Test, Category("Fast")]
         public void ExistsLocallyTest() {
-            var rootFolder = new SyncFolder(this.localRootPath, this.remoteRootPath);
-            var file = new SyncFile(rootFolder);
+            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
+            var file = new MappedFile(rootFolder);
             string filename = Path.GetRandomFileName();
             file.Name = filename;
             Assert.IsFalse(file.ExistsLocally());
@@ -136,8 +136,8 @@ namespace TestLibrary.DataTests
             DateTime remoteDate = DateTime.Now;
             DateTime date = remoteDate.ToUniversalTime();
 
-            var rootFolder = new SyncFolder(this.localRootPath, this.remoteRootPath);
-            var file = new SyncFile(rootFolder);
+            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
+            var file = new MappedFile(rootFolder);
             string filename = Path.GetRandomFileName();
             file.RemoteObjectId = id;
             file.Name = filename;

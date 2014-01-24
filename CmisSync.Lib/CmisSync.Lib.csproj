@@ -136,7 +136,6 @@
     <Compile Include="Sync\Strategy\SimpleFileSynchronizer.cs" />
     <Compile Include="Sync\Strategy\LocalCrawler.cs" />
     <Compile Include="Sync\Strategy\FileEventHandler.cs" />
-    <Compile Include="Data\SyncObjects.cs" />
     <Compile Include="Data\PathMatcher.cs" />
     <Compile Include="Sync\Solver\ISolver.cs" />
     <Compile Include="Sync\Solver\LocalObjectRenamed.cs" />
@@ -153,6 +152,7 @@
     <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
     <Compile Include="Sync\Strategy\ISituationDetection.cs" />
     <Compile Include="Storage\IMetaDataStorage.cs" />
+    <Compile Include="Data\MappedObjects.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
