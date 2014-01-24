@@ -99,6 +99,14 @@ namespace CmisSync.Lib
         }
 
         /// <summary>
+        /// Gets the polling scheduler.
+        /// </summary>
+        /// <value>
+        /// The scheduler.
+        /// </value>
+        public SyncScheduler Scheduler { get; private set; }
+
+        /// <summary>
         /// Event Queue for this repository.
         /// Use this to notifiy events for this repository.
         /// </summary>
@@ -175,7 +183,8 @@ namespace CmisSync.Lib
             EventManager.AddEventHandler(ignoredFoldersFilter);
             EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
             // start scheduler
-            EventManager.AddEventHandler(new SyncScheduler(Queue, repoInfo.PollInterval));
+            Scheduler = new SyncScheduler(Queue, repoInfo.PollInterval);
+            EventManager.AddEventHandler(Scheduler);
             // start full crawl sync on beginning
             Queue.AddEvent(new StartNextSyncEvent(true));
             Logger.Info("Repo " + repoInfo.Name + " - Set poll interval to " + repoInfo.PollInterval + "ms");
@@ -240,6 +249,7 @@ namespace CmisSync.Lib
             {
                 if (disposing)
                 {
+                    this.Scheduler.Dispose();
                     this.remote_timer.Stop();
                     this.remote_timer.Dispose();
                     this.Watcher.Dispose();
