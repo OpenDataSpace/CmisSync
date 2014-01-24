@@ -460,7 +460,7 @@ namespace TestLibrary.SyncStrategiesTests
             string newpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
             FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
-                .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
+                .Callback((ISyncEvent folder) => returnedFSEvent = folder as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
@@ -475,9 +475,9 @@ namespace TestLibrary.SyncStrategiesTests
             if(returnedFSEvent != null)
             {
                 Assert.IsTrue(returnedFSEvent.IsDirectory());
+                Assert.AreEqual(WatcherChangeTypes.Renamed, returnedFSEvent.Type);
                 Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
                 Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
-                Assert.AreEqual(WatcherChangeTypes.Renamed, returnedFSEvent.Type);
             }
             else
                 Console.WriteLine("Missed folder renamed event");
