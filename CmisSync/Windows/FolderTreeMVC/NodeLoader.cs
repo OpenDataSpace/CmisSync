@@ -100,7 +100,8 @@ namespace CmisSync.CmisTree
         /// </summary>
         public void Cancel()
         {
-            this.worker.CancelAsync();
+            this.worker.CancelAsync ();
+            this.worker.Dispose ();
         }
 
         private void DoWork(object sender, DoWorkEventArgs e)

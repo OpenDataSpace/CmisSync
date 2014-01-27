@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Events
         private GenericSyncEventDelegate<TSyncEventType> Handler;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.GenericSyncEventHandler`1"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.GenericSyncEventHandler"/> class.
         /// </summary>
         /// <param name='priority'>
         /// The priority for the queue.
