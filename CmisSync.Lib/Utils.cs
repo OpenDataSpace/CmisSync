@@ -422,5 +422,14 @@ namespace CmisSync.Lib
         {
             return ((fsi.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint);
         }
+
+        public static string CreateUserAgent()
+        {
+            return String.Format("{0}/{1} ({2};hostname=\"{3}\")",
+                                 "DSS",
+                                 Backend.Version,
+                                 Environment.OSVersion.ToString(),
+                                 System.Environment.MachineName);
+        }
     }
 }
