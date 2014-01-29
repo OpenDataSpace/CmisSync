@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 //#if __MonoCS__
 //using Mono.Unix.Native;
 //#endif
+using System.Globalization;
 
 namespace CmisSync.Lib
 {
@@ -425,11 +426,12 @@ namespace CmisSync.Lib
 
         public static string CreateUserAgent()
         {
-            return String.Format("{0}/{1} ({2};hostname=\"{3}\")",
+            return String.Format("{0}/{1} ({2}; {4}; hostname=\"{3}\")",
                                  "DSS",
                                  Backend.Version,
                                  Environment.OSVersion.ToString(),
-                                 System.Environment.MachineName);
+                                 System.Environment.MachineName,
+                                 CultureInfo.CurrentCulture.Name);
         }
     }
 }
