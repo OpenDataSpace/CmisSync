@@ -16,6 +16,7 @@ SOURCES =  \
 	Cmis/Database.cs \
 	Cmis/IDatabase.cs \
 	Cmis/MimeType.cs \
+	Cmis/PersistentStandardAuthenticationProvider.cs \
 	Config.cs \
 	ConfigManager.cs \
 	ConfigMigration.cs \

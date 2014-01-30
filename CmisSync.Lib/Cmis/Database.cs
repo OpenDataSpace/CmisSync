@@ -3,6 +3,11 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net;
+using System.Xml.Serialization;
+using System.Web;
+
+
 #if __MonoCS__
 using Mono.Data.Sqlite;
 #else
@@ -837,6 +842,40 @@ namespace CmisSync.Lib.Cmis
             ExecuteSQLAction(command, parameters);
         }
 
+        public List<Cookie> GetSessionCookies ()
+        {
+/*            XmlSerializer deserializer = new XmlSerializer(typeof(HttpCookieCollection));
+            try{
+                var savedCookies = (string)ExecuteSQLFunction("SELECT value FROM general WHERE key=\"SessionCookies\"", null);
+                if(savedCookies!=null){
+                    using(var stream = new MemoryStream())
+                    using(var writer = new StreamWriter(stream)){
+                        writer.Write(savedCookies);
+                        writer.Flush();
+                        stream.Position = 0;
+                        var result = new List<Cookie>(); 
+						var collection = (CookieCollection)deserializer.Deserialize(stream);
+						foreach(Cookie cookie in collection)
+							result.Add(cookie);
+                    }
+                }
+            }catch(Exception){}*/
+            return new List<Cookie>();
+        }
+
+        public void SetSessionCookies (List<Cookie> cookies)
+        {
+/*			var collection = new CookieCollection();
+			foreach(var cookie in cookies)
+				collection.Add(cookie);
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(CookieCollection));
+            StringWriter textWriter = new StringWriter();
+            xmlSerializer.Serialize(textWriter, cookies);
+            string command = "INSERT OR REPLACE INTO general (key, value) VALUES (\"SessionCookies\", @cookies)";
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("cookies", textWriter.ToString());
+            ExecuteSQLAction(command, parameters);*/
+        }
 
         /// <summary>
         /// Helper method to execute an SQL command that does not return anything.

@@ -8,6 +8,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using log4net;
+using System.Net;
 
 namespace CmisSync.Lib.Cmis
 {
@@ -146,5 +147,20 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         void SetChangeLogToken(string token);
 
+		/// <summary>
+		/// Gets the stored session cookies.
+		/// </summary>
+		/// <returns>
+		/// The session cookies.
+		/// </returns>
+		List<Cookie> GetSessionCookies ();
+
+		/// <summary>
+		/// Save all session cookies.
+		/// </summary>
+		/// <param name='cookies'>
+		/// Cookies.
+		/// </param>
+		void SetSessionCookies (List<Cookie> cookies);
     }
 }
