@@ -15,70 +15,70 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
         [Test, Category("Medium")]
         public void NoChangeDetectionTest()
         {
-            Assert.Fail ();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FileAddedDetectionTest()
         {
-            Assert.Fail();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FolderAddedDetectionTest()
         {
-            Assert.Fail ();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FileChangedDetectionTest()
         {
-            Assert.Fail ();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FileRenamedDetectionTest()
         {
-            Assert.Fail();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FolderRenamedDetectionTest()
         {
-            Assert.Fail ();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FileMovedDetectionTest()
         {
-            Assert.Fail ();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FolderMovedDetectionTest()
         {
-            Assert.Fail ();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FileRemovedDetectionTest()
         {
-            Assert.Fail ();
+            Assert.Fail ("TODO");
         }
 
         [Ignore]
         [Test, Category("Medium")]
         public void FolderRemovedDetectionTest()
         {
-            Assert.Fail ();
+            Assert.Fail ("TODO");
         }
     }
 }
