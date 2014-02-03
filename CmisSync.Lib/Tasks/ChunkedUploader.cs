@@ -69,6 +69,8 @@ namespace CmisSync.Lib.Tasks
                 using (OffsetStream offsetstream = new OffsetStream(chunkstream, offset))
                 using (ProgressStream progressstream = new ProgressStream(offsetstream, TransmissionStatus))
                 {
+                    TransmissionStatus.Status.Length = localFileStream.Length;
+                    TransmissionStatus.Status.ActualPosition = offset;
                     chunkstream.ChunkPosition = offset;
 
                     ContentStream contentStream = new ContentStream();

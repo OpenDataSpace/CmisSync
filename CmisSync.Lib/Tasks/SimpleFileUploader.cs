@@ -43,18 +43,20 @@ namespace CmisSync.Lib.Tasks
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException"></exception>
         public virtual IDocument UploadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg, bool overwrite = true)
         {
-            using(ProgressStream progressstream = new ProgressStream(localFileStream, TransmissionStatus))
-            using(CryptoStream hashstream = new CryptoStream(progressstream, hashAlg, CryptoStreamMode.Read)) {
+            using(NonClosingHashStream hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
+            using(ProgressStream progressstream = new ProgressStream(hashstream, TransmissionStatus)) {
                 ContentStream contentStream = new ContentStream();
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
-                contentStream.Stream = hashstream;
+                contentStream.Stream = progressstream;
                 try{
-                    return (IDocument) remoteDocument.SetContentStream(contentStream, overwrite, true);
+                    remoteDocument.SetContentStream(contentStream, overwrite, true);
                 }catch(Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }
+            hashAlg.TransformFinalBlock(new byte[0], 0, 0);
+            return remoteDocument;
         }
 
         /// <summary>
