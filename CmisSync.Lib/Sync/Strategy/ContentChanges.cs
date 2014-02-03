@@ -27,15 +27,15 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
-        public ContentChanges(ISession session, IDatabase db, SyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base (queue) {
+        public ContentChanges(ISession session, IDatabase db, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base (queue) {
             if(session == null)
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
             if(db == null)
                 throw new ArgumentNullException("Database instance is needed for the ChangeLogStrategy, but was null");
             if(queue == null)
                 throw new ArgumentNullException("SyncEventQueue instance is needed for the ChangeLogStrategy, but was null");
-            if(maxNumberOfContentChanges <= 0)
-                throw new ArgumentException("MaxNumberOfContentChanges must be greater then zero");
+            if(maxNumberOfContentChanges <= 1)
+                throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
             this.session = session;
             this.db = db;
             this.MaxNumberOfContentChanges = maxNumberOfContentChanges;
@@ -92,17 +92,17 @@ namespace CmisSync.Lib.Sync.Strategy
 
                 if(lastTokenOnClient != lastTokenOnServer)
                 {
-                    using(var syncTask = new Task((Action) delegate() {
-                        if(Monitor.TryEnter(syncLock)) {
-                            try{
+//                    using(var syncTask = new Task((Action) delegate() {
+//                        if(Monitor.TryEnter(syncLock)) {
+//                            try{
                                 Sync();
-                            }finally {
-                                Monitor.Exit(syncLock);
-                            }
-                        }
-                    })) {
-                        syncTask.Start();
-                    }
+//                            }finally {
+//                                Monitor.Exit(syncLock);
+//                            }
+//                        }
+//                    })) {
+//                        syncTask.Start();
+//                    }
                 }
                 // No changes or background process started
                 return true;

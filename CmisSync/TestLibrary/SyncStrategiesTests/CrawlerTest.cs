@@ -32,21 +32,31 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTest () {
-            var queuemanager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(queuemanager).Object;
+        public void ConstructorWithValidInputTest () {
+            var queue = new Mock<ISyncEventQueue>().Object;
             var remoteFolder = new Mock<IFolder>().Object;
             var localFolder = new DirectoryInfo("test");
             var crawler = new Crawler(queue, remoteFolder, localFolder);
             Assert.AreEqual(Crawler.CRAWLER_PRIORITY, crawler.Priority);
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorFailsOnNullQueueTest ()
+        {
+            var remoteFolder = new Mock<IFolder>().Object;
+            var localFolder = new DirectoryInfo("test");
+
             try {
                 new Crawler(null, remoteFolder, localFolder);
                 Assert.Fail ();
             }catch(ArgumentNullException){}
-            try {
-                new Crawler(queue, null, localFolder);
-                Assert.Fail ();
-            }catch(ArgumentNullException){}
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorFailsOnNullLocalFolderTest ()
+        {
+            var queue = new Mock<ISyncEventQueue>().Object;
+            var remoteFolder = new Mock<IFolder>().Object;
             try {
                 new Crawler(queue, remoteFolder, null);
                 Assert.Fail ();
@@ -54,9 +64,18 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
+        public void ConstructorFailsOnNullRemoteFolderTest ()
+        {
+            var queue = new Mock<ISyncEventQueue>().Object;
+            try {
+                new Crawler(queue, null, localFolder);
+                Assert.Fail ();
+            }catch(ArgumentNullException){}
+        }
+
+        [Test, Category("Fast")]
         public void IgnoreWrongEventsTest() {
-            var queuemanager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(queuemanager).Object;
+            var queue = new Mock<ISyncEventQueue>().Object;
             var remoteFolder = new Mock<IFolder>().Object;
             var localFolder = new DirectoryInfo("test");
             var wrongEvent = new Mock<ISyncEvent>().Object;

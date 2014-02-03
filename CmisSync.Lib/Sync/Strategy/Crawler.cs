@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='localFolder'>
         /// Local folder, which is the root of the crawl strategy.
         /// </param>
-        public Crawler (SyncEventQueue queue, IFolder remoteFolder, DirectoryInfo localFolder) : base(queue)
+        public Crawler (ISyncEventQueue queue, IFolder remoteFolder, DirectoryInfo localFolder) : base(queue)
         {
             if(localFolder == null)
                 throw new ArgumentNullException("Given local folder is null");
