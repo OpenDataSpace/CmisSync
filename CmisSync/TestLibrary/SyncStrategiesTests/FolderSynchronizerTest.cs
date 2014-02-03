@@ -21,7 +21,7 @@ namespace TestLibrary.SyncStrategiesTests
     {
         [Ignore]
         [Test, Category("Fast")]
-        public void ContstructorTest() {
+        public void ConstructorTest() {
             Assert.Fail ("TODO");
         }
 
