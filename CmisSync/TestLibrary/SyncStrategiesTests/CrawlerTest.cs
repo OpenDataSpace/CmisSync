@@ -86,16 +86,13 @@ namespace TestLibrary.SyncStrategiesTests
         [Ignore]
         [Test, Category("Fast")]
         public void CrawlingSpecificFolderTest() {
-            var manager = new SyncEventManager();
-            using (var queue = new SyncEventQueue(manager)) {
-     //           manager.AddEventHandler(new Crawler());
-            }
+            Assert.Fail("TODO");
         }
 
         [Ignore]
         [Test, Category("Fast")]
         public void CrawlingBaseFolderTest() {
-
+            Assert.Fail("TODO");
         }
 
         [Ignore]
