@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Tasks
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = hashstream;
                 try{
-                    return remoteDocument.SetContentStream(contentStream, overwrite);
+                    return (IDocument) remoteDocument.SetContentStream(contentStream, overwrite, true);
                 }catch(Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
