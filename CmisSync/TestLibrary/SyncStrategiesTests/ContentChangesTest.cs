@@ -273,6 +273,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void IgnoreDuplicatedContentChangesEventTest ()
         {
+            /* Paging is fucked up in a way that the last event of page 1 can be also the first of page 2*/
             Assert.Fail ("TODO");
         }
 
@@ -315,6 +316,13 @@ namespace TestLibrary.SyncStrategiesTests
             string result;
             Assert.IsTrue (start.TryGetParam (ContentChanges.FULL_SYNC_PARAM_NAME, out result));
             Assert.AreEqual (latestChangeLogToken, result);
+        }
+
+        [Ignore]
+        [Test, Category("Fast")]
+        public void PagingTest ()
+        {
+            Assert.Fail ("TODO");
         }
     }
 }
