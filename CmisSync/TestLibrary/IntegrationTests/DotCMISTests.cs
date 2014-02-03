@@ -16,6 +16,7 @@ using DotCMIS.Client.Impl;
 using DotCMIS.Data;
 using DotCMIS.Data.Impl;
 
+using Newtonsoft.Json;
 
 using NUnit.Framework;
 
@@ -53,6 +54,24 @@ namespace TestLibrary.IntegrationTests
         public void ClassInit()
         {
             ServicePointManager.CertificatePolicy = new TrustAlways();
+        }
+
+
+        public static IEnumerable<object[]> TestServers
+        {
+            get
+            {
+                string path = "../../test-servers.json";
+                bool exists = File.Exists(path);
+
+                if (!exists)
+                {
+                    path = "../CmisSync/TestLibrary/test-servers.json";
+                }
+
+                return JsonConvert.DeserializeObject<List<object[]>>(
+                    File.ReadAllText(path));
+            }
         }
 
         [Test, TestCaseSource("TestServers"), Category("Slow")]
@@ -96,6 +115,43 @@ namespace TestLibrary.IntegrationTests
                 }
                 Assert.AreEqual(content.Length * (i+1), emptyDoc.ContentStreamLength);
             }
+            emptyDoc.DeleteAllVersions();
+        }
+
+        [Ignore]
+        [Test, TestCaseSource("TestServers"), Category("Slow")]
+        public void GetSyncPropertyFromFile(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId)
+        {
+            RepoInfo repoInfo = new RepoInfo(
+                canonical_name,
+                CMISSYNCDIR,
+                remoteFolderPath,
+                url,
+                user,
+                password,
+                repositoryId,
+                5000);
+            ISession session = CreateSession(repoInfo);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string filename = "testfile.txt";
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.BaseTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, "gds:sync");
+            properties.Add("cmis:secondaryObjectTypeIds", "*");
+            try{
+                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc!=null) {
+                    doc.Delete(true);
+                    Console.WriteLine("Old file deleted");
+                }
+            }catch(Exception){}
+            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            Console.WriteLine("Empty file created");
+            Assert.AreEqual(0, emptyDoc.ContentStreamLength);
+            var context = new OperationContext();
+            session.GetObject(emptyDoc, context);
             emptyDoc.DeleteAllVersions();
         }
     }

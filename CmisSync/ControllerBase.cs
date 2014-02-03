@@ -29,6 +29,10 @@ using CmisSync.Lib.Cmis;
 using log4net;
 using CmisSync.Lib.Events;
 
+#if __COCOA__
+using Edit = CmisSync.EditWizardController;
+#endif
+
 namespace CmisSync
 {
     /// <summary>
@@ -298,7 +302,7 @@ namespace CmisSync
                     Edit edit = null;
                     if (edits.TryGetValue(reponame, out edit))
                     {
-                        edit.Close();
+                        edit.Controller.CloseWindow();
                     }
                     RemoveRepository(f);
                     ConfigManager.CurrentConfig.Folder.Remove(f);
@@ -347,7 +351,9 @@ namespace CmisSync
                 List<string> oldIgnores = new List<string>();
                 foreach (Config.IgnoredFolder ignore in folder.IgnoredFolders)
                 {
-                    oldIgnores.Add(ignore.Path);
+                    if (!String.IsNullOrEmpty (ignore.Path)) {
+                        oldIgnores.Add(ignore.Path);
+                    }
                 }
                 edit = new Edit(credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
                 edits.Add(reponame, edit);
@@ -599,11 +605,11 @@ namespace CmisSync
 
                 FolderFetched(this.fetcher.RemoteUrl.ToString());
 
-                // Initialize in the UI.
-                AddRepository(repoInfo);
-
                 this.fetcher.Dispose();
                 this.fetcher = null;
+
+                // Initialize in the UI.
+                AddRepository(repoInfo);
             }
 
             // Update UI.
@@ -634,11 +640,8 @@ namespace CmisSync
             {
                 lock (this.repo_lock)
                 {
-                    foreach (Edit editView in this.edits.Values)
-                        if (editView.IsVisible)
-                            return true;
+                    return (this.edits.Count > 0);
                 }
-                return false;
             }
             private set { }
         }

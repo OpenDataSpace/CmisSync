@@ -34,5 +34,11 @@ namespace TestLibrary
             }
             File.Delete(configpath);
         }
+
+        [Ignore]
+        [Test, Category("Fast")]
+        public void IgnoreFoldersTest() {
+            Assert.Fail("TODO");
+        }
     }
 }
