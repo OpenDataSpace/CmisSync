@@ -72,8 +72,6 @@
     <Compile Include="StreamTests\ChunkedStreamTest.cs" />
     <Compile Include="StreamTests\BandwidthLimitedStreamTest.cs" />
     <Compile Include="StreamTests\ProgressStreamTest.cs" />
-    <Compile Include="TasksTests\ChunkedDownloaderTest.cs" />
-    <Compile Include="TasksTests\SimpleFileDownloaderTest.cs" />
     <Compile Include="IntegrationTests\CmisSyncTests.cs" />
     <Compile Include="EventsTests\EventTypesTest.cs" />
     <Compile Include="EventsTests\SyncEventManagerTest.cs" />
@@ -81,8 +79,6 @@
     <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\InvalidFolderNameFilterTest.cs" />
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
-    <Compile Include="TasksTests\SimpleFileUploaderTest.cs" />
-    <Compile Include="TasksTests\ChunkedFileUploaderTest.cs" />
     <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
     <Compile Include="StorageTests\PersistentStorageTest.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
@@ -100,6 +96,10 @@
     <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />
     <Compile Include="SyncStrategiesTests\SituationDetectionTests\RemoteSituationDetectionTest.cs" />
     <Compile Include="DataTests\MappedObjectsTest.cs" />
+    <Compile Include="ContentTasksTests\ChunkedDownloaderTest.cs" />
+    <Compile Include="ContentTasksTests\SimpleFileDownloaderTest.cs" />
+    <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
+    <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -133,7 +133,6 @@
   -->
   <ItemGroup>
     <Folder Include="StreamTests\" />
-    <Folder Include="TasksTests\" />
     <Folder Include="IntegrationTests\" />
     <Folder Include="EventsTests\" />
     <Folder Include="EventsTests\EventsFilterTests\" />
@@ -141,6 +140,7 @@
     <Folder Include="SyncStrategiesTests\" />
     <Folder Include="DataTests\" />
     <Folder Include="SyncStrategiesTests\SituationDetectionTests\" />
+    <Folder Include="ContentTasksTests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

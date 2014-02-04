@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Tasks;
+using CmisSync.Lib.ContentTasks;
 using CmisSync.Lib.Events;
 
 using DotCMIS.Client;
@@ -17,7 +17,7 @@ using Moq;
 
 using NUnit.Framework;
 
-namespace TestLibrary.TasksTests
+namespace TestLibrary.ContentTasksTests
 {
     [TestFixture]
     public class ChunkedFileUploaderTest : IDisposable

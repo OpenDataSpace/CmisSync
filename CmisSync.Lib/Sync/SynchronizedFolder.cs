@@ -11,7 +11,7 @@ using System.Text;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Streams;
-using CmisSync.Lib.Tasks;
+using CmisSync.Lib.ContentTasks;
 
 using DotCMIS;
 using DotCMIS.Client.Impl;
@@ -761,13 +761,13 @@ namespace CmisSync.Lib.Sync
                             }
                         }
                         database.SetDownloadServerSideModificationDate(filepath, remoteDocument.LastModificationDate);
-                        Tasks.IFileDownloader downloader;
+                        IFileDownloader downloader;
                         if (repoinfo.DownloadChunkSize <= 0){
                             Logger.Debug("Simple File Downloader");
-                            downloader = new Tasks.SimpleFileDownloader();
+                            downloader = new SimpleFileDownloader();
                         }else {
                             Logger.Debug("Chunked File Downloader");
-                            downloader = new Tasks.ChunkedDownloader(repoinfo.DownloadChunkSize);
+                            downloader = new ChunkedDownloader(repoinfo.DownloadChunkSize);
                         }
                             
 

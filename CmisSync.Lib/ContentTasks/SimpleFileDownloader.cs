@@ -5,7 +5,7 @@ using System.IO;
 using CmisSync.Lib.Streams;
 using CmisSync.Lib.Events;
 
-namespace CmisSync.Lib.Tasks
+namespace CmisSync.Lib.ContentTasks
 {
     public class SimpleFileDownloader : IFileDownloader
     {

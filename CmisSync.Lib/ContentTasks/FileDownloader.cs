@@ -4,7 +4,7 @@ using DotCMIS.Client;
 using CmisSync.Lib.Events;
 using System.Security.Cryptography;
 
-namespace CmisSync.Lib.Tasks
+namespace CmisSync.Lib.ContentTasks
 {
     public interface IFileDownloader : IDisposable
     {

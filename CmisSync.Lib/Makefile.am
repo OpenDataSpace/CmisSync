@@ -19,6 +19,12 @@ SOURCES =  \
 	Config.cs \
 	ConfigManager.cs \
 	ConfigMigration.cs \
+	ContentTasks/ChunkedDownloader.cs \
+	ContentTasks/ChunkedUploader.cs \
+	ContentTasks/FileDownloader.cs \
+	ContentTasks/FileUploader.cs \
+	ContentTasks/SimpleFileDownloader.cs \
+	ContentTasks/SimpleFileUploader.cs \
 	Credentials.cs \
 	Data/MappedObjects.cs \
 	Data/PathMatcher.cs \
@@ -100,12 +106,6 @@ SOURCES =  \
 	Sync/Strategy/SimpleFileSynchronizer.cs \
 	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \
-	Tasks/ChunkedDownloader.cs \
-	Tasks/ChunkedUploader.cs \
-	Tasks/FileDownloader.cs \
-	Tasks/FileUploader.cs \
-	Tasks/SimpleFileDownloader.cs \
-	Tasks/SimpleFileUploader.cs \
 	Utils.cs \
 	Watcher.cs
 

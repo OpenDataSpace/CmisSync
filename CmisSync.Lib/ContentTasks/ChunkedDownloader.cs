@@ -7,7 +7,7 @@ using CmisSync.Lib.Streams;
 using CmisSync.Lib.Events;
 using log4net;
 
-namespace CmisSync.Lib.Tasks
+namespace CmisSync.Lib.ContentTasks
 {
     public class ChunkedDownloader : IFileDownloader
     {

@@ -92,13 +92,8 @@
     <Compile Include="Events\FSDeletionHandler.cs" />
     <Compile Include="Events\FileTransmissionEvent.cs" />
     <Compile Include="Events\FileConflictEvent.cs" />
-    <Compile Include="Tasks\FileUploader.cs" />
     <Compile Include="Streams\ProgressStream.cs" />
-    <Compile Include="Tasks\SimpleFileDownloader.cs" />
     <Compile Include="Streams\BandwidthLimitedStream.cs" />
-    <Compile Include="Tasks\ChunkedUploader.cs" />
-    <Compile Include="Tasks\ChunkedDownloader.cs" />
-    <Compile Include="Tasks\SimpleFileUploader.cs" />
     <Compile Include="Events\FileDownloadRequest.cs" />
     <Compile Include="Events\EventFilter\IgnoredFilesFilter.cs" />
     <Compile Include="Events\EventFilter\IgnoredFileNamesFilter.cs" />
@@ -110,7 +105,6 @@
     <Compile Include="Streams\OffsetStream.cs" />
     <Compile Include="Streams\StreamWrapper.cs" />
     <Compile Include="Streams\NonClosingHashStream.cs" />
-    <Compile Include="Tasks\FileDownloader.cs" />
     <Compile Include="Events\RemoteEvent.cs" />
     <Compile Include="Events\StartNextSyncEvent.cs" />
     <Compile Include="Events\SyncScheduler.cs" />
@@ -153,6 +147,12 @@
     <Compile Include="Sync\Strategy\ISituationDetection.cs" />
     <Compile Include="Storage\IMetaDataStorage.cs" />
     <Compile Include="Data\MappedObjects.cs" />
+    <Compile Include="ContentTasks\FileUploader.cs" />
+    <Compile Include="ContentTasks\SimpleFileDownloader.cs" />
+    <Compile Include="ContentTasks\ChunkedUploader.cs" />
+    <Compile Include="ContentTasks\ChunkedDownloader.cs" />
+    <Compile Include="ContentTasks\SimpleFileUploader.cs" />
+    <Compile Include="ContentTasks\FileDownloader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -185,12 +185,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Tasks\" />
     <Folder Include="Streams\" />
     <Folder Include="Events\EventFilter\" />
     <Folder Include="Sync\Strategy\" />
     <Folder Include="Storage\" />
     <Folder Include="Data\" />
     <Folder Include="Sync\Solver\" />
+    <Folder Include="ContentTasks\" />
   </ItemGroup>
 </Project>

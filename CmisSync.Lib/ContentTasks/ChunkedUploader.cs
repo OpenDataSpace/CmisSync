@@ -7,7 +7,7 @@ using CmisSync.Lib.Streams;
 using CmisSync.Lib;
 using System.Security.Cryptography;
 
-namespace CmisSync.Lib.Tasks
+namespace CmisSync.Lib.ContentTasks
 {
     /// <summary>
     /// Chunked uploader takes a file and splits the upload into chunks.

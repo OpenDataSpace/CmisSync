@@ -7,7 +7,7 @@ using CmisSync.Lib.Streams;
 using CmisSync.Lib;
 using System.Security.Cryptography;
 
-namespace CmisSync.Lib.Tasks
+namespace CmisSync.Lib.ContentTasks
 {
     /// <summary>
     /// Simple file uploader. Takes a given stream and uploads it to the server.
