@@ -22,6 +22,11 @@ namespace TestLibrary.SyncStrategiesTests
         private DirectoryInfo localSubFolder;
         private static readonly int RETRIES = 50;
         private static readonly int MILISECONDSWAIT = 1000;
+        private Mock<ISyncEventQueue> queue;
+        private FSEvent returnedFSEvent;
+        private AbstractFolderEvent returnedFileEvent;
+        private AbstractFolderEvent returnedFolderEvent;
+
 
         [SetUp]
         public void SetUp() {
@@ -32,6 +37,10 @@ namespace TestLibrary.SyncStrategiesTests
             localSubFolder.Create();
             localFile = new FileInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));
             using(localFile.Create());
+            queue = new Mock<ISyncEventQueue>();
+            returnedFSEvent = null;
+            returnedFileEvent = null;
+            returnedFolderEvent = null;
         }
 
         [TearDown]
@@ -50,8 +59,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            var queue = new Mock<ISyncEventQueue>().Object;
-            var watcher = new Watcher(fswatcher, queue);
+            var watcher = new Watcher(fswatcher, queue.Object);
             Assert.False(watcher.EnableEvents);
             Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
         }
@@ -59,8 +67,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullWatcher() {
-            var queue = new Mock<ISyncEventQueue>().Object;
-            new Watcher(null, queue);
+            new Watcher(null, queue.Object);
         }
 
         [Test, Category("Fast")]
@@ -74,15 +81,12 @@ namespace TestLibrary.SyncStrategiesTests
         [ExpectedException( typeof( ArgumentException ) )]
         public void ConstructorFailsWithWatcherOnNullPath() {
             var fswatcher = new Mock<FileSystemWatcher>().Object;
-            var queue = new Mock<ISyncEventQueue>().Object;
-            new Watcher(fswatcher, queue);
+            new Watcher(fswatcher, queue.Object);
         }
 
         [Test, Category("Fast")]
         public void IgnoreWrongEventsTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var watcher = new Watcher(fswatcher, queue.Object);
             Assert.False(watcher.Handle(new Mock<ISyncEvent>().Object));
@@ -92,9 +96,6 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void HandleFSFileAddedEventsTest () {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -111,9 +112,6 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void HandleFSFileChangedEventsTest () {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -130,8 +128,6 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void HandleFSFileRemovedEventsTest () {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
             AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
@@ -150,9 +146,6 @@ namespace TestLibrary.SyncStrategiesTests
         public void HandleFSFileRenamedEventsTest () {
             string oldpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -170,72 +163,60 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void HandleFSFolderAddedEventsTest () {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
-                .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
+                .Callback((ISyncEvent f) => returnedFolderEvent = f as AbstractFolderEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
             var folderCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, localFolder.FullName);
             Assert.True(watcher.Handle(folderCreatedFSEvent));
-            Assert.AreEqual(MetaDataChangeType.CREATED, returnedFileEvent.Local);
-            Assert.AreEqual(localFolder.FullName, (returnedFileEvent as FolderEvent).LocalFolder.FullName);
-            Assert.IsNull((returnedFileEvent as FolderEvent).RemoteFolder);
-            Assert.AreEqual(MetaDataChangeType.NONE, (returnedFileEvent as FolderEvent).Remote);
+            Assert.AreEqual(MetaDataChangeType.CREATED, returnedFolderEvent.Local);
+            Assert.AreEqual(localFolder.FullName, (returnedFolderEvent as FolderEvent).LocalFolder.FullName);
+            Assert.IsNull((returnedFolderEvent as FolderEvent).RemoteFolder);
+            Assert.AreEqual(MetaDataChangeType.NONE, (returnedFolderEvent as FolderEvent).Remote);
         }
 
         [Test, Category("Fast")]
         public void HandleFSFolderChangedEventsTest () {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
-                .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
+                .Callback((ISyncEvent f) => returnedFolderEvent = f as AbstractFolderEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
             var folderChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, localFolder.FullName);
             Assert.True(watcher.Handle(folderChangedFSEvent));
-            Assert.AreEqual(MetaDataChangeType.CHANGED, returnedFileEvent.Local);
-            Assert.AreEqual(localFolder.FullName, (returnedFileEvent as FolderEvent).LocalFolder.FullName);
-            Assert.IsNull((returnedFileEvent as FolderEvent).RemoteFolder);
-            Assert.AreEqual(MetaDataChangeType.NONE, (returnedFileEvent as FolderEvent).Remote);
+            Assert.AreEqual(MetaDataChangeType.CHANGED, returnedFolderEvent.Local);
+            Assert.AreEqual(localFolder.FullName, (returnedFolderEvent as FolderEvent).LocalFolder.FullName);
+            Assert.IsNull((returnedFolderEvent as FolderEvent).RemoteFolder);
+            Assert.AreEqual(MetaDataChangeType.NONE, (returnedFolderEvent as FolderEvent).Remote);
         }
 
         [Test, Category("Fast")]
         public void HandleFSFolderRemovedEventsTest () {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
-                .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
+                .Callback((ISyncEvent f) => returnedFolderEvent = f as AbstractFolderEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
             var folderRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, localFolder.FullName);
             Assert.True(watcher.Handle(folderRemovedFSEvent));
-            Assert.AreEqual(MetaDataChangeType.DELETED, returnedFileEvent.Local);
-            Assert.AreEqual(localFolder.FullName, (returnedFileEvent as FolderEvent).LocalFolder.FullName);
-            Assert.IsNull((returnedFileEvent as FolderEvent).RemoteFolder);
-            Assert.AreEqual(MetaDataChangeType.NONE, (returnedFileEvent as FolderEvent).Remote);
+            Assert.AreEqual(MetaDataChangeType.DELETED, returnedFolderEvent.Local);
+            Assert.AreEqual(localFolder.FullName, (returnedFolderEvent as FolderEvent).LocalFolder.FullName);
+            Assert.IsNull((returnedFolderEvent as FolderEvent).RemoteFolder);
+            Assert.AreEqual(MetaDataChangeType.NONE, (returnedFolderEvent as FolderEvent).Remote);
         }
 
         [Test, Category("Fast")]
         public void HandleFSFolderRenamedEventsTest () {
             string oldpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
-                .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
+                .Callback((ISyncEvent f) => returnedFolderEvent = f as AbstractFolderEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
             var folderRenamedFSEvent = new FSMovedEvent(oldpath, localFolder.FullName);
             Assert.True(watcher.Handle(folderRenamedFSEvent));
-            Assert.AreEqual(MetaDataChangeType.MOVED, returnedFileEvent.Local);
-            Assert.AreEqual(localFolder.FullName, (returnedFileEvent as FolderEvent).LocalFolder.FullName);
-            Assert.AreEqual(oldpath, (returnedFileEvent as FolderMovedEvent).OldLocalFolder.FullName);
-            Assert.IsNull((returnedFileEvent as FolderMovedEvent).RemoteFolder);
-            Assert.IsNull((returnedFileEvent as FolderMovedEvent).OldRemoteFolderPath);
-            Assert.AreEqual(MetaDataChangeType.NONE, (returnedFileEvent as FolderEvent).Remote);
+            Assert.AreEqual(MetaDataChangeType.MOVED, returnedFolderEvent.Local);
+            Assert.AreEqual(localFolder.FullName, (returnedFolderEvent as FolderEvent).LocalFolder.FullName);
+            Assert.AreEqual(oldpath, (returnedFolderEvent as FolderMovedEvent).OldLocalFolder.FullName);
+            Assert.IsNull((returnedFolderEvent as FolderMovedEvent).RemoteFolder);
+            Assert.IsNull((returnedFolderEvent as FolderMovedEvent).OldRemoteFolderPath);
+            Assert.AreEqual(MetaDataChangeType.NONE, (returnedFolderEvent as FolderEvent).Remote);
         }
 
 
@@ -244,9 +225,6 @@ namespace TestLibrary.SyncStrategiesTests
             localFile.Delete();
             localFile = new FileInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -267,15 +245,12 @@ namespace TestLibrary.SyncStrategiesTests
                 Assert.AreEqual(WatcherChangeTypes.Created, returnedFSEvent.Type);
             }
             else
-                Console.WriteLine("Missed file added event");
+                Assert.Inconclusive("Missed file added event");
         }
 
         [Test, Category("Medium")]
         public void ReportFSFileChangedEventTest () {
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -301,17 +276,14 @@ namespace TestLibrary.SyncStrategiesTests
                 Assert.AreEqual(WatcherChangeTypes.Changed, returnedFSEvent.Type);
             }
             else
-                Console.WriteLine("Missed file changed event");
+                Assert.Inconclusive("Missed file changed event");
         }
 
         [Test, Category("Medium")]
         public void ReportFSFileRenamedEventTest () {
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
             string oldpath = localFile.FullName;
             string newpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
-            FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -326,13 +298,17 @@ namespace TestLibrary.SyncStrategiesTests
             localFile.MoveTo(newpath);
             t.Wait();
             if(returnedFSEvent != null) {
-                Assert.AreEqual(WatcherChangeTypes.Renamed, returnedFSEvent.Type);
-                Assert.IsFalse(returnedFSEvent.IsDirectory());
-                Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
-                Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
-                Assert.AreEqual(WatcherChangeTypes.Renamed, (returnedFSEvent as FSMovedEvent).Type);
+                if(returnedFSEvent.Type == WatcherChangeTypes.Renamed)
+                {
+                    Assert.IsFalse(returnedFSEvent.IsDirectory());
+                    Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
+                    Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
+                    Assert.AreEqual(WatcherChangeTypes.Renamed, (returnedFSEvent as FSMovedEvent).Type);
+                } else {
+                    Assert.Inconclusive(String.Format("File System Event: \"{0}\"", returnedFSEvent.ToString()));
+                }
             } else {
-                Console.WriteLine("Missed file rename event");
+                Assert.Inconclusive("Missed file rename event");
             }
             localFile = new FileInfo(newpath);
         }
@@ -340,9 +316,6 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Medium")]
         public void ReportFSFileRemovedEventTest () {
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -361,16 +334,13 @@ namespace TestLibrary.SyncStrategiesTests
                 Assert.AreEqual(WatcherChangeTypes.Deleted, returnedFSEvent.Type);
             }
             else
-                Console.WriteLine("Missed file removed event");
+                Assert.Inconclusive("Missed file removed event");
         }
 
         [Test, Category("Medium")]
         public void ReportFSFolderAddedEventTest () {
             localSubFolder.Delete();
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -391,15 +361,12 @@ namespace TestLibrary.SyncStrategiesTests
                 Assert.AreEqual(WatcherChangeTypes.Created, returnedFSEvent.Type);
             }
             else
-                Console.WriteLine("Missed folder added event");
+                Assert.Inconclusive("Missed folder added event");
         }
 
         [Test, Category("Medium")]
         public void ReportFSFolderChangedEventTest () {
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -420,15 +387,12 @@ namespace TestLibrary.SyncStrategiesTests
                 Assert.AreEqual(WatcherChangeTypes.Changed, returnedFSEvent.Type);
             }
             else
-                Console.WriteLine("Missed folder changed event");
+                Assert.Inconclusive("Missed folder changed event");
         }
 
         [Test, Category("Medium")]
         public void ReportFSFolderRemovedEventTest () {
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
-            FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -448,17 +412,14 @@ namespace TestLibrary.SyncStrategiesTests
                 Assert.AreEqual(WatcherChangeTypes.Deleted, returnedFSEvent.Type);
             }
             else
-                Console.WriteLine("Missed folder removed event");
+                Assert.Inconclusive("Missed folder removed event");
         }
 
         [Test, Category("Medium")]
         public void ReportFSFolderRenamedEventTest () {
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
             string oldpath = localSubFolder.FullName;
             string newpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
-            FSEvent returnedFSEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent folder) => returnedFSEvent = folder as FSEvent);
             var watcher = new Watcher(fswatcher, queue.Object);
@@ -475,12 +436,15 @@ namespace TestLibrary.SyncStrategiesTests
             if(returnedFSEvent != null)
             {
                 Assert.IsTrue(returnedFSEvent.IsDirectory());
-                Assert.AreEqual(WatcherChangeTypes.Renamed, returnedFSEvent.Type);
-                Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
-                Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
+                if(returnedFSEvent.Type == WatcherChangeTypes.Renamed) {
+                    Assert.AreEqual(oldpath, (returnedFSEvent as FSMovedEvent).OldPath);
+                    Assert.AreEqual(newpath, (returnedFSEvent as FSMovedEvent).Path);
+                } else {
+                    Assert.Inconclusive(String.Format("File System Event: \"{0}\"", returnedFSEvent.ToString()));
+                }
             }
             else
-                Console.WriteLine("Missed folder renamed event");
+                Assert.Inconclusive("Missed folder renamed event");
             localSubFolder = new DirectoryInfo(newpath);
         }
 
@@ -489,8 +453,6 @@ namespace TestLibrary.SyncStrategiesTests
             var anotherSubFolder = new DirectoryInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));
             anotherSubFolder.Create();
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
-            var manager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(manager);
             string oldpath = localSubFolder.FullName;
             string newpath = Path.Combine(anotherSubFolder.FullName, Path.GetRandomFileName());
             List<FSEvent> returnedFSEvents = new List<FSEvent>();
@@ -523,7 +485,7 @@ namespace TestLibrary.SyncStrategiesTests
                 Assert.IsTrue(newpathfound);
             }
             else
-                Console.WriteLine("Missed folder moved event(s)");
+                Assert.Inconclusive("Missed folder moved event(s)");
             localSubFolder = new DirectoryInfo(newpath);
         }
     }
