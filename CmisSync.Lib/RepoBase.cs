@@ -254,6 +254,9 @@ namespace CmisSync.Lib
                     this.remote_timer.Dispose();
                     this.Watcher.Dispose();
                     this.Queue.StopListener();
+                    int timeout = 500;
+                    if(!this.Queue.WaitForStopped(timeout))
+                        Logger.Debug(String.Format("Event Queue is of {0} has not been closed in {1} miliseconds", RemoteUrl.ToString(), timeout));
                     this.Queue.Dispose();
                 }
                 this.disposed = true;

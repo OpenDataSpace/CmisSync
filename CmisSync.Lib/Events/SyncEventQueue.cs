@@ -54,7 +54,7 @@ namespace CmisSync.Lib.Events
                 throw new ObjectDisposedException("SyncEventQueue", "Called AddEvent on Disposed object");
             }
             this.queue.Add(newEvent);
-        } 
+        }
 
         public SyncEventQueue(SyncEventManager manager) {
             if(manager == null) {
@@ -70,12 +70,24 @@ namespace CmisSync.Lib.Events
                 return;
             }
             this.queue.CompleteAdding();
-        }            
+        }
         
         public bool IsStopped {
-            get { 
+            get {
                 return this.consumer.IsCompleted; 
             }
+        }
+
+        public void WaitForStopped() {
+            this.consumer.Wait();
+        }
+
+        public bool WaitForStopped(TimeSpan timeout) {
+            return this.consumer.Wait(timeout);
+        }
+
+        public bool WaitForStopped(int milisecondsTimeout) {
+            return this.consumer.Wait(milisecondsTimeout);
         }
 
         public void Dispose() {
