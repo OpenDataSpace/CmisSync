@@ -38,10 +38,10 @@ SOURCES =  \
 	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
-	TasksTests/ChunkedDownloaderTest.cs \
-	TasksTests/SimpleFileDownloaderTest.cs \
-	TasksTests/SimpleFileUploaderTest.cs \
-	TasksTests/ChunkedFileUploaderTest.cs \
+	ContentTasksTests/ChunkedDownloaderTest.cs \
+	ContentTasksTests/SimpleFileDownloaderTest.cs \
+	ContentTasksTests/SimpleFileUploaderTest.cs \
+	ContentTasksTests/ChunkedFileUploaderTest.cs \
 	ActiveActivitiesManagerTest.cs \
 	CmisDatabaseTest.cs \
 	CmisSyncLibUtilsTest.cs \
