@@ -4,6 +4,7 @@ using CmisSync.Lib;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace TestLibrary
 {
@@ -84,6 +85,16 @@ namespace TestLibrary
             bitPerSecondDouble = bitPerSecond;
             Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
             Assert.True(Utils.FormatBandwidth(bitPerSecond).Replace(',','.').Contains("1.1 GBit/s"),Utils.FormatBandwidth(bitPerSecond));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateUserAgentTest()
+        {
+            var useragent = Utils.CreateUserAgent();
+            Assert.IsTrue(useragent.Contains(Backend.Version));
+            Assert.IsTrue(useragent.Contains("hostname="));
+            Assert.IsTrue(useragent.Contains(CultureInfo.CurrentCulture.Name));
+//            Console.WriteLine(useragent);
         }
     }
 }

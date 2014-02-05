@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 //#if __MonoCS__
 //using Mono.Unix.Native;
 //#endif
+using System.Globalization;
 
 namespace CmisSync.Lib
 {
@@ -421,6 +422,16 @@ namespace CmisSync.Lib
         public static bool IsSymlink(FileSystemInfo fsi)
         {
             return ((fsi.Attributes & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint);
+        }
+
+        public static string CreateUserAgent()
+        {
+            return String.Format("{0}/{1} ({2}; {4}; hostname=\"{3}\")",
+                                 "DSS",
+                                 Backend.Version,
+                                 Environment.OSVersion.ToString(),
+                                 System.Environment.MachineName,
+                                 CultureInfo.CurrentCulture.Name);
         }
     }
 }

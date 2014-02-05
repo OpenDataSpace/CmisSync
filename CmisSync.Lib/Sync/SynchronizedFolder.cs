@@ -215,6 +215,8 @@ namespace CmisSync.Lib.Sync
                 cmisParameters[SessionParameter.ConnectTimeout] = "-1";
                 // Sets the Read Timeout to infinite
                 cmisParameters[SessionParameter.ReadTimeout] = "-1";
+                cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
+                cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             }
 
 

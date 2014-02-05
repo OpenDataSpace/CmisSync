@@ -52,6 +52,20 @@ namespace CmisSync.Lib
 
         public bool Notifications { get { return configXml.Notifications; } set { configXml.Notifications = value; } }
 
+		public Guid DeviceId {
+			get {
+				if(this.configXml.DeviceId.Equals(Guid.Empty))
+				{
+					this.DeviceId = Guid.NewGuid();
+					Save();
+				}
+				return this.configXml.DeviceId;
+			}
+			private set {
+				this.configXml.DeviceId = value;
+			}
+		}
+
         public List<SyncConfig.Folder> Folder { get { return configXml.Folders; } }
 
         public SyncConfig.Folder getFolder(string name)
@@ -183,7 +197,8 @@ namespace CmisSync.Lib
                     Name = userName
                 },
                 Notifications = true,
-                Log4Net = createDefaultLog4NetElement()
+                Log4Net = createDefaultLog4NetElement(),
+                DeviceId = Guid.NewGuid()
             };
 
             // Save it as an XML file.
@@ -320,6 +335,8 @@ namespace CmisSync.Lib
             public List<SyncConfig.Folder> Folders { get; set; }
             [XmlElement("user", typeof(User))]
             public User User { get; set; }
+            [XmlElement("deviceId")]
+            public Guid DeviceId { get; set; }
 
             public class Folder {
             
