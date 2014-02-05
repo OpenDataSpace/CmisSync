@@ -372,6 +372,11 @@ namespace CmisSync.Lib
                 return bitsPerSecond.ToString() + " Bit/s";
         }
 
+        public static string FormatPercent (double p)
+        {
+            return String.Format("{0,3:P1}", Math.Truncate(p*10) / 1000);
+        }
+
         /// <summary>
         /// Format a file size nicely.
         /// Example: 1048576 becomes "1 MB"

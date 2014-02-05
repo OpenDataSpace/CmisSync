@@ -88,6 +88,22 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
+        public void FormatIntegerPercentTest()
+        {
+            int p = 5;
+            Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',','.'));
+        }
+
+        [Test, Category("Fast")]
+        public void FormatDoublePercentTest()
+        {
+            double p = 5.03;
+            Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',','.'));
+            p = 5.06;
+            Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',','.'));
+        }
+
+        [Test, Category("Fast")]
         public void CreateUserAgentTest()
         {
             var useragent = Utils.CreateUserAgent();
