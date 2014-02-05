@@ -147,20 +147,20 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         void SetChangeLogToken(string token);
 
-		/// <summary>
-		/// Gets the stored session cookies.
-		/// </summary>
-		/// <returns>
-		/// The session cookies.
-		/// </returns>
-		List<Cookie> GetSessionCookies ();
+        /// <summary>
+        /// Gets the stored session cookies.
+        /// </summary>
+        /// <returns>
+        /// The session cookies.
+        /// </returns>
+        CookieCollection GetSessionCookies ();
 
-		/// <summary>
-		/// Save all session cookies.
-		/// </summary>
-		/// <param name='cookies'>
-		/// Cookies.
-		/// </param>
-		void SetSessionCookies (List<Cookie> cookies);
+        /// <summary>
+        /// Save all session cookies.
+        /// </summary>
+        /// <param name='cookies'>
+        /// Cookies.
+        /// </param>
+        void SetSessionCookies (CookieCollection cookies);
     }
 }

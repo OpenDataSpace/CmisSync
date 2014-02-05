@@ -154,7 +154,7 @@ namespace CmisSync.Lib.Sync
                 Queue = repoCmis.Queue;
                 // Database is the user's AppData/Roaming
                 database = new Database(repoinfo.CmisDatabase);
-                authProvider = new PersistentStandardAuthenticationProvider(database);
+                authProvider = new PersistentStandardAuthenticationProvider(database, repoInfo.Address);
                 // Get path on remote repository.
                 remoteFolderPath = repoinfo.RemotePath;
 

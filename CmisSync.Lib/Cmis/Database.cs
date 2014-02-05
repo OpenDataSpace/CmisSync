@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net;
-using System.Xml.Serialization;
 using System.Web;
-
 
 #if __MonoCS__
 using Mono.Data.Sqlite;
@@ -842,39 +840,28 @@ namespace CmisSync.Lib.Cmis
             ExecuteSQLAction(command, parameters);
         }
 
-        public List<Cookie> GetSessionCookies ()
+        public CookieCollection GetSessionCookies ()
         {
-/*            XmlSerializer deserializer = new XmlSerializer(typeof(HttpCookieCollection));
-            try{
-                var savedCookies = (string)ExecuteSQLFunction("SELECT value FROM general WHERE key=\"SessionCookies\"", null);
-                if(savedCookies!=null){
-                    using(var stream = new MemoryStream())
-                    using(var writer = new StreamWriter(stream)){
-                        writer.Write(savedCookies);
-                        writer.Flush();
-                        stream.Position = 0;
-                        var result = new List<Cookie>(); 
-						var collection = (CookieCollection)deserializer.Deserialize(stream);
-						foreach(Cookie cookie in collection)
-							result.Add(cookie);
-                    }
+            CookieCollection collection = null;
+            var savedCookies = (string)ExecuteSQLFunction("SELECT value FROM general WHERE key=\"SessionCookies\"", null);
+            if(savedCookies!=null){
+                try{
+                    collection = (CookieCollection)JsonConvert.DeserializeObject<CookieCollection>(savedCookies);
+                }catch(Exception e)
+                {
+                    Logger.Debug("Failed to load cookies from db", e);
                 }
-            }catch(Exception){}*/
-            return new List<Cookie>();
+            }
+            return (collection!=null)?collection:new CookieCollection();
         }
 
-        public void SetSessionCookies (List<Cookie> cookies)
+        public void SetSessionCookies (CookieCollection cookies)
         {
-/*			var collection = new CookieCollection();
-			foreach(var cookie in cookies)
-				collection.Add(cookie);
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(CookieCollection));
-            StringWriter textWriter = new StringWriter();
-            xmlSerializer.Serialize(textWriter, cookies);
+            string json = JsonConvert.SerializeObject(cookies);
             string command = "INSERT OR REPLACE INTO general (key, value) VALUES (\"SessionCookies\", @cookies)";
             Dictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("cookies", textWriter.ToString());
-            ExecuteSQLAction(command, parameters);*/
+            parameters.Add("cookies", json);
+            ExecuteSQLAction(command, parameters);
         }
 
         /// <summary>
