@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net;
+using System.Web;
+
 #if __MonoCS__
 using Mono.Data.Sqlite;
 #else
@@ -908,6 +911,29 @@ namespace CmisSync.Lib.Cmis
             ExecuteSQLAction(command, parameters);
         }
 
+        public CookieCollection GetSessionCookies ()
+        {
+            CookieCollection collection = null;
+            var savedCookies = (string)ExecuteSQLFunction("SELECT value FROM general WHERE key=\"SessionCookies\"", null);
+            if(savedCookies!=null){
+                try{
+                    collection = (CookieCollection)JsonConvert.DeserializeObject<CookieCollection>(savedCookies);
+                }catch(Exception e)
+                {
+                    Logger.Debug("Failed to load cookies from db", e);
+                }
+            }
+            return (collection!=null)?collection:new CookieCollection();
+        }
+
+        public void SetSessionCookies (CookieCollection cookies)
+        {
+            string json = JsonConvert.SerializeObject(cookies);
+            string command = "INSERT OR REPLACE INTO general (key, value) VALUES (\"SessionCookies\", @cookies)";
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("cookies", json);
+            ExecuteSQLAction(command, parameters);
+        }
 
         /// <summary>
         /// Helper method to execute an SQL command that does not return anything.

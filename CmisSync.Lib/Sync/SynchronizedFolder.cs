@@ -139,7 +139,9 @@ namespace CmisSync.Lib.Sync
             private RepoBase repo;
 
             //private WatcherSync watcherStrategy;
-            
+
+            private PersistentStandardAuthenticationProvider authProvider;
+
             /// <summary>
             /// EventQueue
             /// </summary>
@@ -163,7 +165,7 @@ namespace CmisSync.Lib.Sync
                 Queue = repoCmis.Queue;
                 // Database is the user's AppData/Roaming
                 database = new Database(repoinfo.CmisDatabase);
-
+                authProvider = new PersistentStandardAuthenticationProvider(database, repoInfo.Address);
                 // Get path on remote repository.
                 remoteFolderPath = repoinfo.RemotePath;
 
@@ -250,6 +252,7 @@ namespace CmisSync.Lib.Sync
                     {
                         if (disposing)
                         {
+                            this.authProvider.Dispose();
                             this.database.Dispose();
                         }
                         this.disposed = true;
@@ -275,7 +278,7 @@ namespace CmisSync.Lib.Sync
                 {
                     // Create session factory.
                     SessionFactory factory = SessionFactory.NewInstance();
-                    session = factory.CreateSession(cmisParameters);
+                    session = factory.CreateSession(cmisParameters,null, authProvider, null);
                     // Detect whether the repository has the ChangeLog capability.
                     Logger.Debug("Created CMIS session: " + session.ToString());
                     ChangeLogCapability = session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All

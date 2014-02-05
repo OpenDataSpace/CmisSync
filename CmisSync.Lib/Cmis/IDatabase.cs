@@ -6,8 +6,12 @@ using System.Text;
 using System.Data.Common;
 using System.IO;
 using System.Security.Cryptography;
+using System.Net;
+
 using Newtonsoft.Json;
+
 using log4net;
+
 using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib
@@ -168,5 +172,20 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="change">The new change event</param>
         void AddRecentChange(RecentChangedEvent change);
+
+        /// Gets the stored session cookies.
+        /// </summary>
+        /// <returns>
+        /// The session cookies.
+        /// </returns>
+        CookieCollection GetSessionCookies ();
+
+        /// <summary>
+        /// Save all session cookies.
+        /// </summary>
+        /// <param name='cookies'>
+        /// Cookies.
+        /// </param>
+        void SetSessionCookies (CookieCollection cookies);
     }
 }
