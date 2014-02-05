@@ -100,6 +100,7 @@
     <Compile Include="ContentTasksTests\SimpleFileDownloaderTest.cs" />
     <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
+    <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -141,6 +142,7 @@
     <Folder Include="DataTests\" />
     <Folder Include="SyncStrategiesTests\SituationDetectionTests\" />
     <Folder Include="ContentTasksTests\" />
+    <Folder Include="AuthenticationProviderTests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

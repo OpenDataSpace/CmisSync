@@ -64,7 +64,6 @@
     <Compile Include="Events\RecentChangedEvent.cs" />
     <Compile Include="Sync\SynchronizedFolder.cs" />
     <Compile Include="Sync\CrawlStrategy.cs" />
-    <Compile Include="Sync\WatcherStrategy.cs" />
     <Compile Include="Cmis\CmisPermissionDeniedException.cs" />
     <Compile Include="Cmis\CmisServerNotFoundException.cs" />
     <Compile Include="Cmis\CmisUtils.cs" />
@@ -155,6 +154,7 @@
     <Compile Include="ContentTasks\ChunkedDownloader.cs" />
     <Compile Include="ContentTasks\SimpleFileUploader.cs" />
     <Compile Include="ContentTasks\FileDownloader.cs" />
+    <Compile Include="Storage\ICookieStorage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

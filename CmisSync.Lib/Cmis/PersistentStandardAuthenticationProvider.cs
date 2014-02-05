@@ -1,33 +1,34 @@
 using System;
-using DotCMIS.Binding;
-using CmisSync.Lib.Cmis;
 using System.Net;
 using System.Collections;
 using System.Reflection;
 using System.Collections.Generic;
 
+using DotCMIS.Binding;
+
 using log4net;
 
-namespace CmisSync.Lib
+using CmisSync.Lib.Storage;
+
+namespace CmisSync.Lib.Cmis
 {
     public class PersistentStandardAuthenticationProvider : StandardAuthenticationProvider, IDisposable
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(PersistentStandardAuthenticationProvider));
 
-        private IDatabase Db;
+        private ICookieStorage Storage;
         private bool disposed = false;
         private Uri Url;
 
-        public PersistentStandardAuthenticationProvider (IDatabase db, Uri url)
+        public PersistentStandardAuthenticationProvider (ICookieStorage storage, Uri url)
         {
-            if(db == null)
+            if(storage == null)
                 throw new ArgumentNullException("Given db is null");
             if(url == null)
                 throw new ArgumentNullException("Given URL is null");
-            Db = db;
+            Storage = storage;
             Url = url;
-            var cookies = Db.GetSessionCookies();
-            foreach(Cookie c in cookies)
+            foreach(Cookie c in Storage.Cookies)
                 this.Cookies.Add(c);
         }
 
@@ -55,7 +56,7 @@ namespace CmisSync.Lib
                 {
                     // Dispose managed resources.
                     try{
-                        Db.SetSessionCookies(Cookies.GetCookies(Url));
+                        Storage.Cookies = Cookies.GetCookies(Url);
                     }catch(Exception e) {
                         Logger.Debug(String.Format("Failed to save session cookies of \"{0}\" in db", Url.AbsolutePath), e);
                     }
