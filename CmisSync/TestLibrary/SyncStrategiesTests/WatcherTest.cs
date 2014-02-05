@@ -271,9 +271,11 @@ namespace TestLibrary.SyncStrategiesTests
             t.Wait();
             if(returnedFSEvent != null)
             {
-                Assert.IsFalse(returnedFSEvent.IsDirectory());
-                Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
-                Assert.AreEqual(WatcherChangeTypes.Changed, returnedFSEvent.Type);
+                if(returnedFSEvent.Type == WatcherChangeTypes.Changed) {
+                    Assert.IsFalse(returnedFSEvent.IsDirectory());
+                    Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
+                }else
+                    Assert.Inconclusive(String.Format("File System Event: \"{0}\"", returnedFSEvent.ToString()));
             }
             else
                 Assert.Inconclusive("Missed file changed event");
