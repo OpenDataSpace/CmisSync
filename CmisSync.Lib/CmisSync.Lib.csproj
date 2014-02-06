@@ -158,6 +158,7 @@
     <Compile Include="Events\PermissionDeniedEvent.cs" />
     <Compile Include="Events\ExceptionEvent.cs" />
     <Compile Include="Events\PermissionDeniedEventHandler.cs" />
+    <Compile Include="Events\SuccessfulLoginEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

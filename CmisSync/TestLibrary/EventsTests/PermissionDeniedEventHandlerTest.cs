@@ -77,6 +77,18 @@ namespace TestLibrary.EventsTests
             Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
             Assert.AreEqual(2, handled);
         }
+
+        [Test, Category("Fast")]
+        public void HandleNextEventAfterASuccessfulLogin()
+        {
+            int handled = 0;
+            var handler = new PermissionDeniedEventHandler(Repo, delegate(string name){ handled ++;});
+            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
+            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
+            Assert.IsFalse(handler.Handle(new SuccessfulLoginEvent()));
+            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
+            Assert.AreEqual(2, handled);
+        }
     }
 }
 

@@ -63,6 +63,7 @@ SOURCES =  \
 	Events/ReportingSyncEventHandler.cs \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
+	Events/SuccessfulLoginEvent.cs \
 	Events/SyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \
