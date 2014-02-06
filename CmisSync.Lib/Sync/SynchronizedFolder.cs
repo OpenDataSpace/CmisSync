@@ -323,6 +323,11 @@ namespace CmisSync.Lib.Sync
                     session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);
                 }
                 //TODO Implement error handling -> informing user about connection problems by showing status
+                catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
+                {
+                    Logger.Warn(String.Format("Failed to connect to server {0}", repoinfo.Address.AbsoluteUri), e);
+                    Queue.AddEvent(new PermissionDeniedEvent(e));
+                }
                 catch (CmisRuntimeException e)
                 {
                     Logger.Error("Connection to repository failed: ", e);

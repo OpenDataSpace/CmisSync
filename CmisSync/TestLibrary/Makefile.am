@@ -18,6 +18,7 @@ SOURCES =  \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
+	EventsTests/ExceptionEventTest.cs \
 	EventsTests/EventTypesTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
 	EventsTests/SyncEventManagerTest.cs \

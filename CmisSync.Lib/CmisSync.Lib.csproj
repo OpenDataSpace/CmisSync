@@ -155,6 +155,8 @@
     <Compile Include="ContentTasks\SimpleFileUploader.cs" />
     <Compile Include="ContentTasks\FileDownloader.cs" />
     <Compile Include="Storage\ICookieStorage.cs" />
+    <Compile Include="Events\PermissionDeniedEvent.cs" />
+    <Compile Include="Events\ExceptionEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
