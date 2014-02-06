@@ -157,6 +157,7 @@
     <Compile Include="Storage\ICookieStorage.cs" />
     <Compile Include="Events\PermissionDeniedEvent.cs" />
     <Compile Include="Events\ExceptionEvent.cs" />
+    <Compile Include="Events\PermissionDeniedEventHandler.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

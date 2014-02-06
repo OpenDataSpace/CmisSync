@@ -57,6 +57,7 @@ SOURCES =  \
 	Events/ISyncEvent.cs \
 	Events/ISyncEventQueue.cs \
 	Events/PermissionDeniedEvent.cs \
+	Events/PermissionDeniedEventHandler.cs \
 	Events/RecentChangedEvent.cs \
 	Events/RemoteEvent.cs \
 	Events/ReportingSyncEventHandler.cs \

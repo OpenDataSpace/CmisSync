@@ -107,6 +107,8 @@ namespace CmisSync
         public event AlertNotificationRaisedEventHandler AlertNotificationRaised = delegate { };
         public delegate void AlertNotificationRaisedEventHandler(string title, string message);
 
+        public event CmisSync.Lib.Events.ShowChangePasswordEventHandler ShowChangePassword = delegate { };
+
 
         /// <summary>
         /// Get the repositories configured in CmisSync.
@@ -229,20 +231,6 @@ namespace CmisSync
             {
                 ConfigManager.CurrentConfig.Notifications = true;
             }
-
-            // Watch the CmisSync folder
-            this.watcher = new FileSystemWatcher()
-            {
-                Filter = "*",
-                IncludeSubdirectories = false,
-                Path = FoldersPath
-            };
-
-            watcher.Deleted += OnFolderActivity;
-            watcher.Created += OnFolderActivity;
-            watcher.Renamed += OnFolderActivity;
-
-            watcher.EnableRaisingEvents = true;
         }
 
 
@@ -288,6 +276,7 @@ namespace CmisSync
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 return false;
             }));
+            repo.EventManager.AddEventHandler(new PermissionDeniedEventHandler(repositoryInfo.Name, ShowChangePassword));
             this.repositories.Add(repo);
             repo.Initialize();
         }
@@ -555,20 +544,6 @@ namespace CmisSync
                 if (!CmisSync.Lib.Utils.IsSymlink(file))
                     File.SetAttributes(file, FileAttributes.Normal);
         }
-
-        /// <summary>
-        /// Reacts when a local change occurs.
-        /// Not implemented yet, see https://github.com/nicolas-raoul/CmisSync/issues/122
-        /// </summary>
-        /// <param name="o">File that has changed</param>
-        /// <param name="args">Nature of the change</param>
-        public void OnFolderActivity(object o, FileSystemEventArgs args)
-        {
-            // TODO
-            if (Directory.Exists(args.FullPath) && args.ChangeType == WatcherChangeTypes.Created)
-                return;
-        }
-
 
         /// <summary>
         /// Create a new CmisSync synchronized folder.

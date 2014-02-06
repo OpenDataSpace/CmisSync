@@ -102,6 +102,7 @@
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
     <Compile Include="EventsTests\ExceptionEventTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
