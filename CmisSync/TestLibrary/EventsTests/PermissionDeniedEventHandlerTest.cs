@@ -16,78 +16,87 @@ namespace TestLibrary.EventsTests
         private DotCMIS.Exceptions.CmisPermissionDeniedException Exception;
         private PermissionDeniedEvent PermissionDeniedEvent;
 
-
         [SetUp]
-        public void SetUp()
+        public void SetUp ()
         {
             Repo = "repo";
-            Exception = new DotCMIS.Exceptions.CmisPermissionDeniedException();
-            PermissionDeniedEvent = new Mock<PermissionDeniedEvent>(Exception).Object;
+            Exception = new DotCMIS.Exceptions.CmisPermissionDeniedException ();
+            PermissionDeniedEvent = new Mock<PermissionDeniedEvent> (Exception).Object;
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullRepo ()
         {
-            new PermissionDeniedEventHandler(null, delegate(string name){ });
+            new PermissionDeniedEventHandler (null, delegate(string name) {
+            });
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullCallback ()
         {
-            new PermissionDeniedEventHandler(Repo, null);
+            new PermissionDeniedEventHandler (Repo, null);
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWithValidInput()
+        public void ConstructorWithValidInput ()
         {
-            var handler = new PermissionDeniedEventHandler(Repo, delegate(string name){ });
-            Assert.AreEqual(PermissionDeniedEventHandler.PERMISSIONDENIEDHANDLERPRIORITY, handler.Priority);
+            var handler = new PermissionDeniedEventHandler (Repo, delegate(string name) {
+            });
+            Assert.AreEqual (PermissionDeniedEventHandler.PERMISSIONDENIEDHANDLERPRIORITY, handler.Priority);
         }
 
         [Test, Category("Fast")]
-        public void HandleFirstEvent()
-        {
-            int handled = 0;
-            var handler = new PermissionDeniedEventHandler(Repo, delegate(string name){ handled ++;});
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            Assert.AreEqual(1, handled);
-        }
-
-        [Test, Category("Fast")]
-        public void IgnoreNextEventsIfPasswordWasNotChanged()
+        public void HandleFirstEvent ()
         {
             int handled = 0;
-            var handler = new PermissionDeniedEventHandler(Repo, delegate(string name){ handled ++;});
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            Assert.AreEqual(1, handled);
+            var handler = new PermissionDeniedEventHandler (Repo, delegate(string name) {
+                handled ++;
+            });
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            Assert.AreEqual (1, handled);
         }
 
         [Test, Category("Fast")]
-        public void HandleNextEventAfterConfigHasBeenChanged()
+        public void IgnoreNextEventsIfPasswordWasNotChanged ()
         {
             int handled = 0;
-            var handler = new PermissionDeniedEventHandler(Repo, delegate(string name){ handled ++;});
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            var changed = new Mock<RepoConfigChangedEvent>(new Mock<RepoInfo>(Repo, "").Object).Object;
-            Assert.IsFalse(handler.Handle(changed));
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            Assert.AreEqual(2, handled);
+            var handler = new PermissionDeniedEventHandler (Repo, delegate(string name) {
+                handled ++;
+            });
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            Assert.AreEqual (1, handled);
         }
 
         [Test, Category("Fast")]
-        public void HandleNextEventAfterASuccessfulLogin()
+        public void HandleNextEventAfterConfigHasBeenChanged ()
         {
             int handled = 0;
-            var handler = new PermissionDeniedEventHandler(Repo, delegate(string name){ handled ++;});
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            Assert.IsFalse(handler.Handle(new SuccessfulLoginEvent()));
-            Assert.IsTrue(handler.Handle(PermissionDeniedEvent));
-            Assert.AreEqual(2, handled);
+            var handler = new PermissionDeniedEventHandler (Repo, delegate(string name) {
+                handled ++;
+            });
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            var changed = new Mock<RepoConfigChangedEvent> (new Mock<RepoInfo> (Repo, "").Object).Object;
+            Assert.IsFalse (handler.Handle (changed));
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            Assert.AreEqual (2, handled);
+        }
+
+        [Test, Category("Fast")]
+        public void HandleNextEventAfterASuccessfulLogin ()
+        {
+            int handled = 0;
+            var handler = new PermissionDeniedEventHandler (Repo, delegate(string name) {
+                handled ++;
+            });
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            Assert.IsFalse (handler.Handle (new SuccessfulLoginEvent ()));
+            Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
+            Assert.AreEqual (2, handled);
         }
     }
 }
