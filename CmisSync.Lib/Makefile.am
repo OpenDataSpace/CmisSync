@@ -66,6 +66,7 @@ SOURCES =  \
 	Events/SyncEventQueue.cs \
 	Events/SyncScheduler.cs \
 	Fetcher.cs \
+	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	LoggingStream.cs \
 	RepoBase.cs \

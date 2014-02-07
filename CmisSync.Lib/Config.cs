@@ -278,6 +278,7 @@ namespace CmisSync.Lib
             {
                 serializer.Serialize(textWriter, this.configXml);
             }
+            HttpProxyUtils.SetDefaultProxy(this.configXml.Proxy);
         }
 
 
@@ -288,6 +289,7 @@ namespace CmisSync.Lib
             {
                 this.configXml = (SyncConfig)deserializer.Deserialize(textReader);
             }
+            HttpProxyUtils.SetDefaultProxy(this.configXml.Proxy);
         }
 
         private XmlElement createDefaultLog4NetElement()
@@ -340,6 +342,8 @@ namespace CmisSync.Lib
             public User User { get; set; }
             [XmlElement("deviceId")]
             public Guid DeviceId { get; set; }
+            [XmlElement("network")]
+            public ProxySettings Proxy{ get; set;}
 
             public class Folder {
             
@@ -524,6 +528,30 @@ namespace CmisSync.Lib
             SHIBBOLETH,
             X501,
             PGP
+        }
+
+        public class ProxySettings {
+            [XmlAttribute("selected")]
+            [DefaultValue(ProxySelection.SYSTEM)]
+            public ProxySelection Selection {get; set;}
+            [XmlAttribute("server")]
+            [DefaultValue(null)]
+            public XmlUri Server { get; set;}
+            [XmlAttribute("loginRequired")]
+            [DefaultValue(false)]
+            public bool LoginRequired { get; set; }
+            [XmlAttribute("username")]
+            [DefaultValue(null)]
+            public string Username {get;set;}
+            [XmlAttribute("password")]
+            [DefaultValue(null)]
+            public string ObfuscatedPassword { get; set; }
+        }
+        [Serializable]
+        public enum ProxySelection {
+            SYSTEM,
+            NOPROXY,
+            CUSTOM
         }
 
         public class XmlUri : IXmlSerializable

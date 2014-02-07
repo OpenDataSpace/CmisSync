@@ -156,6 +156,7 @@
     <Compile Include="ContentTasks\FileDownloader.cs" />
     <Compile Include="Storage\ICookieStorage.cs" />
     <Compile Include="Cmis\PersistentNtlmAuthenticationProvider.cs" />
+    <Compile Include="HttpProxyUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

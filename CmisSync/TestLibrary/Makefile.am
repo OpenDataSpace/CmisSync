@@ -44,6 +44,7 @@ SOURCES =  \
 	ContentTasksTests/SimpleFileDownloaderTest.cs \
 	ContentTasksTests/SimpleFileUploaderTest.cs \
 	ContentTasksTests/ChunkedFileUploaderTest.cs \
+	UtilsTests/HttpProxyUtilsTest.cs \
 	ActiveActivitiesManagerTest.cs \
 	CmisDatabaseTest.cs \
 	CmisSyncLibUtilsTest.cs \
