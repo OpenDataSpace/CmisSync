@@ -13,6 +13,7 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 
 SOURCES =  \
 	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
+	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
 	DataTests/PathMatcherTest.cs \
 	DataTests/MappedObjectsTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
