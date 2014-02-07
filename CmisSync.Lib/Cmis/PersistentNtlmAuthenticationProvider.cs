@@ -1,17 +1,18 @@
 using System;
 using System.Net;
-using System.Collections;
-using System.Collections.Generic;
+
+using CmisSync.Lib.Storage;
 
 using DotCMIS.Binding;
 
 using log4net;
 
-using CmisSync.Lib.Storage;
-
 namespace CmisSync.Lib.Cmis
 {
-    public class PersistentStandardAuthenticationProvider : StandardAuthenticationProvider, IDisposable
+
+    // TODO Refactore this class because it is a simple copy of PersistentStandardAuthenticationProvider
+    // => Extract methods and call them instead of the duplicated code
+    public class PersistentNtlmAuthenticationProvider : NtlmAuthenticationProvider, IDisposable
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(PersistentStandardAuthenticationProvider));
 
@@ -19,7 +20,7 @@ namespace CmisSync.Lib.Cmis
         private bool disposed = false;
         private Uri Url;
 
-        public PersistentStandardAuthenticationProvider (ICookieStorage storage, Uri url)
+        public PersistentNtlmAuthenticationProvider (ICookieStorage storage, Uri url)
         {
             if(storage == null)
                 throw new ArgumentNullException("Given db is null");
