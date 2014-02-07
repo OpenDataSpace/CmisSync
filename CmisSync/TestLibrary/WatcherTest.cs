@@ -43,7 +43,6 @@ namespace TestLibrary
             if (Directory.Exists(TestFolder))
             {
                 Directory.Delete(TestFolder, true);
-                Console.WriteLine("Deleted TestFolder");
             }
             File.Delete(oldnameOut);
             File.Delete(newnameOut);

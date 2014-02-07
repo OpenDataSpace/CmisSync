@@ -10,7 +10,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TestLibrary</RootNamespace>
     <AssemblyName>TestLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -31,16 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\Moq.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Extras\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Extras\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,18 +40,22 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\xunit.dll</HintPath>
-    </Reference>
     <Reference Include="xunit.extensions">
       <HintPath>lib\xunit.extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>lib\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\Extras\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit">
+      <HintPath>lib\xunit.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="CmisDatabaseTest.cs" />
-    <Compile Include="CmisSyncLibUtilsTest.cs" />
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="LocalFilesystemActivityGenerator.cs" />
@@ -101,8 +96,11 @@
     <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
+    <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
     <Compile Include="EventsTests\ExceptionEventTest.cs" />
     <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
+    <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
+    <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -114,7 +112,7 @@
       <Name>log4net.vs2010</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Extras\OpenDataSpaceDotCMIS\DotCMIS\DotCMIS.csproj">
-      <Project>{529ef90f-a34c-4426-a4f9-65113ac23841}</Project>
+      <Project>{529EF90F-A34C-4426-A4F9-65113AC23841}</Project>
       <Name>DotCMIS</Name>
     </ProjectReference>
   </ItemGroup>
@@ -145,6 +143,7 @@
     <Folder Include="SyncStrategiesTests\SituationDetectionTests\" />
     <Folder Include="ContentTasksTests\" />
     <Folder Include="AuthenticationProviderTests\" />
+    <Folder Include="UtilsTests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

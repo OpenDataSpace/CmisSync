@@ -33,6 +33,12 @@ namespace TestLibrary.AuthenticationProviderTests
         }
 
         [Test, Category("Fast")]
+        public void NtlmConstructorWithValidInput()
+        {
+            using(new PersistentNtlmAuthenticationProvider(storage, url));
+        }
+
+        [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullStorage()
         {
@@ -41,9 +47,23 @@ namespace TestLibrary.AuthenticationProviderTests
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
+        public void NtlmConstructorFailsOnNullStorage()
+        {
+            using(new PersistentNtlmAuthenticationProvider(null, url));
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullUrl()
         {
             using(new PersistentStandardAuthenticationProvider(storage, null));
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void NtlmConstructorFailsOnNullUrl()
+        {
+            using(new PersistentNtlmAuthenticationProvider(storage, null));
         }
 
         [Test, Category("Fast")]

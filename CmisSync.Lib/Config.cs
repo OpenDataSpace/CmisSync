@@ -20,6 +20,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.Xml;
+using System.ComponentModel;
 
 namespace CmisSync.Lib
 {
@@ -52,19 +53,21 @@ namespace CmisSync.Lib
 
         public bool Notifications { get { return configXml.Notifications; } set { configXml.Notifications = value; } }
 
-		public Guid DeviceId {
-			get {
-				if(this.configXml.DeviceId.Equals(Guid.Empty))
-				{
-					this.DeviceId = Guid.NewGuid();
-					Save();
-				}
-				return this.configXml.DeviceId;
-			}
-			private set {
-				this.configXml.DeviceId = value;
-			}
-		}
+        public ProxySettings Proxy { get { return configXml.Proxy; } set{configXml.Proxy = value;} }
+
+        public Guid DeviceId {
+            get {
+                if(this.configXml.DeviceId.Equals(Guid.Empty))
+                {
+                    this.DeviceId = Guid.NewGuid();
+                    Save();
+                }
+                return this.configXml.DeviceId;
+            }
+            private set {
+                this.configXml.DeviceId = value;
+            }
+        }
 
         public List<SyncConfig.Folder> Folder { get { return configXml.Folders; } }
 
@@ -275,6 +278,7 @@ namespace CmisSync.Lib
             {
                 serializer.Serialize(textWriter, this.configXml);
             }
+            HttpProxyUtils.SetDefaultProxy(this.configXml.Proxy);
         }
 
 
@@ -285,6 +289,7 @@ namespace CmisSync.Lib
             {
                 this.configXml = (SyncConfig)deserializer.Deserialize(textReader);
             }
+            HttpProxyUtils.SetDefaultProxy(this.configXml.Proxy);
         }
 
         private XmlElement createDefaultLog4NetElement()
@@ -337,6 +342,8 @@ namespace CmisSync.Lib
             public User User { get; set; }
             [XmlElement("deviceId")]
             public Guid DeviceId { get; set; }
+            [XmlElement("network")]
+            public ProxySettings Proxy{ get; set;}
 
             public class Folder {
             
@@ -360,6 +367,9 @@ namespace CmisSync.Lib
 
                 [XmlElement("password")]
                 public string ObfuscatedPassword { get; set; }
+
+                [XmlElement("authType")]
+                public AuthenticationType authType { get; set; }
 
                 private double pollInterval = DefaultPollInterval;
                 [XmlElement("pollinterval"), System.ComponentModel.DefaultValue(DefaultPollInterval)]
@@ -490,25 +500,58 @@ namespace CmisSync.Lib
             public string Name { get; set; }
             [XmlElement("email")]
             public string EMail { get; set; }
-            [XmlElement("deviceId")]
-            public Guid DeviceID { get; set;}
         }
 
         public class Feature {
-            [XmlElement("getFolderTree", IsNullable=true)]
+            [XmlElement("getFolderTree")]
             public bool? GetFolderTreeSupport {get; set;}
-            [XmlElement("getDescendants", IsNullable=true)]
+            [XmlElement("getDescendants")]
             public bool? GetDescendantsSupport {get; set;}
-            [XmlElement("getContentChanges", IsNullable=true)]
+            [XmlElement("getContentChanges")]
             public bool? GetContentChangesSupport {get; set;}
-            [XmlElement("fileSystemWatcher", IsNullable=true)]
+            [XmlElement("fileSystemWatcher")]
             public bool? FileSystemWatcherSupport {get; set;}
-            [XmlElement("maxContentChanges", IsNullable=true)]
+            [XmlElement("maxContentChanges")]
             public int? MaxNumberOfContentChanges {get; set;}
-            [XmlElement("chunkedSupport", IsNullable=true)]
+            [XmlElement("chunkedSupport")]
             public bool? ChunkedSupport {get;set;}
-            [XmlElement("chunkedDownloadSupport", IsNullable=true)]
+            [XmlElement("chunkedDownloadSupport")]
             public bool? ChunkedDownloadSupport {get;set;}
+        }
+
+        [Serializable]
+        public enum AuthenticationType {
+            BASIC,
+            NTLM,
+            KERBEROS,
+            OAUTH,
+            SHIBBOLETH,
+            X501,
+            PGP
+        }
+
+        public class ProxySettings {
+            [XmlAttribute("selected")]
+            [DefaultValue(ProxySelection.SYSTEM)]
+            public ProxySelection Selection {get; set;}
+            [XmlAttribute("server")]
+            [DefaultValue(null)]
+            public XmlUri Server { get; set;}
+            [XmlAttribute("loginRequired")]
+            [DefaultValue(false)]
+            public bool LoginRequired { get; set; }
+            [XmlAttribute("username")]
+            [DefaultValue(null)]
+            public string Username {get;set;}
+            [XmlAttribute("password")]
+            [DefaultValue(null)]
+            public string ObfuscatedPassword { get; set; }
+        }
+        [Serializable]
+        public enum ProxySelection {
+            SYSTEM,
+            NOPROXY,
+            CUSTOM
         }
 
         public class XmlUri : IXmlSerializable

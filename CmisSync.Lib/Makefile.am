@@ -16,6 +16,7 @@ SOURCES =  \
 	Cmis/Database.cs \
 	Cmis/IDatabase.cs \
 	Cmis/MimeType.cs \
+	Cmis/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/PersistentStandardAuthenticationProvider.cs \
 	Config.cs \
 	ConfigManager.cs \
@@ -69,6 +70,7 @@ SOURCES =  \
 	Events/SyncEventQueue.cs \
 	Events/SyncScheduler.cs \
 	Fetcher.cs \
+	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	LoggingStream.cs \
 	RepoBase.cs \

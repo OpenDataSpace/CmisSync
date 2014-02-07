@@ -13,6 +13,7 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 
 SOURCES =  \
 	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
+	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
 	DataTests/PathMatcherTest.cs \
 	DataTests/MappedObjectsTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
@@ -45,9 +46,10 @@ SOURCES =  \
 	ContentTasksTests/SimpleFileDownloaderTest.cs \
 	ContentTasksTests/SimpleFileUploaderTest.cs \
 	ContentTasksTests/ChunkedFileUploaderTest.cs \
+	UtilsTests/HttpProxyUtilsTest.cs \
+	UtilsTests/CmisSyncLibUtilsTest.cs \
 	ActiveActivitiesManagerTest.cs \
 	CmisDatabaseTest.cs \
-	CmisSyncLibUtilsTest.cs \
 	ConfigurationTest.cs \
 	DebugLoggingHandlerTest.cs \
 	EncodingTest.cs \
