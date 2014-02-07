@@ -451,7 +451,7 @@ namespace CmisSync
                     break;
             }
             double percent = (e.Status.Percent == null) ? 0 : (double)e.Status.Percent;
-            Text = String.Format("{0} ({1}%)", System.IO.Path.GetFileName(Path), percent);
+            Text = String.Format("{0} ({1})", System.IO.Path.GetFileName(Path), CmisSync.Lib.Utils.FormatPercent(percent));
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status)
             {
                 percent = (status.Percent != null) ? (double)status.Percent : 0;
@@ -460,9 +460,9 @@ namespace CmisSync
                 {
                     parent.BeginInvoke((Action) delegate()
                     {
-                        Text = String.Format("{0} ({1:###.#}% {2})",
+                        Text = String.Format("{0} ({1} {2})",
                                   System.IO.Path.GetFileName(Path),
-                                  Math.Round(percent, 1),
+                                  CmisSync.Lib.Utils.FormatPercent(percent),
                                   CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
                     });
                 }
