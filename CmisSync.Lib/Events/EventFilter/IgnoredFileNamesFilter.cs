@@ -50,12 +50,19 @@ namespace CmisSync.Lib.Events.Filter
             FSEvent fsevent = e as FSEvent;
             if(fsevent!=null)
             {
-                try{
-                    if(!fsevent.IsDirectory())
+                try
+                {
+                    if (!fsevent.IsDirectory())
                         return checkFile(fsevent, Path.GetFileName(fsevent.Path));
-                }catch(System.IO.FileNotFoundException) {
+                }
+                catch (System.IO.FileNotFoundException)
+                {
                     // Only happens, if the deleted file/folder does not exists anymore
                     // To be sure, this event is not misinterpreted, just let it pass
+                    return false;
+                }
+                catch (System.IO.DirectoryNotFoundException)
+                {
                     return false;
                 }
             }
