@@ -56,7 +56,6 @@
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="CmisDatabaseTest.cs" />
-    <Compile Include="CmisSyncLibUtilsTest.cs" />
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="LocalFilesystemActivityGenerator.cs" />
@@ -99,6 +98,7 @@
     <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
     <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
+    <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -372,9 +372,18 @@ namespace CmisSync.Lib
                 return bitsPerSecond.ToString() + " Bit/s";
         }
 
+        /// <summary>
+        /// Formats the given double with a leading and tailing zero and appends percent char
+        /// </summary>
+        /// <returns>
+        /// The percent.
+        /// </returns>
+        /// <param name='p'>
+        /// P.
+        /// </param>
         public static string FormatPercent (double p)
         {
-            return String.Format("{0,3:P1}", Math.Truncate(p*10) / 1000);
+            return String.Format("{0:0.0} %", Math.Truncate(p*10) / 10);
         }
 
         /// <summary>

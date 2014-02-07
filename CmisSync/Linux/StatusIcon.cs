@@ -402,16 +402,16 @@ namespace CmisSync {
             double percent = (e.Status.Percent==null)? 0:(double) e.Status.Percent;
             Label text = this.Child as Label;
             if(text != null)
-                text.Text = String.Format("{0}: {1} ({2}%)", TypeString, System.IO.Path.GetFileName(Path), percent);
+                text.Text = String.Format("{0}: {1} ({2})", TypeString, System.IO.Path.GetFileName(Path), CmisSync.Lib.Utils.FormatPercent(percent));
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
                 percent = (status.Percent != null)? (double) status.Percent: 0;
                 long? bitsPerSecond = status.BitsPerSecond;
                 if( status.Percent != null && bitsPerSecond != null && text != null) {
                     Application.Invoke(delegate {
-                        text.Text = String.Format("{0}: {1} ({2:###.#}% {3})",
+                        text.Text = String.Format("{0}: {1} ({2} {3})",
                                                   TypeString,
                                                   System.IO.Path.GetFileName(Path),
-                                                  Math.Round(percent,1),
+                                                  CmisSync.Lib.Utils.FormatPercent(percent),
                                                   CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
                     
                     });
