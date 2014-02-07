@@ -530,20 +530,21 @@ namespace CmisSync.Lib
             PGP
         }
 
+        [Serializable]
         public class ProxySettings {
             [XmlAttribute("selected")]
             [DefaultValue(ProxySelection.SYSTEM)]
             public ProxySelection Selection {get; set;}
-            [XmlAttribute("server")]
+            [XmlElement("server")]
             [DefaultValue(null)]
             public XmlUri Server { get; set;}
             [XmlAttribute("loginRequired")]
             [DefaultValue(false)]
             public bool LoginRequired { get; set; }
-            [XmlAttribute("username")]
+            [XmlElement("username")]
             [DefaultValue(null)]
             public string Username {get;set;}
-            [XmlAttribute("password")]
+            [XmlElement("password")]
             [DefaultValue(null)]
             public string ObfuscatedPassword { get; set; }
         }
