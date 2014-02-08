@@ -50,6 +50,7 @@ namespace CmisSync.Lib.ContentTasks
                         outputstream.Write (buffer, 0, len);
                         hashAlg.TransformBlock (buffer, 0, len, buffer, 0);
                         result += len;
+                        outputstream.Flush();
                     }
                     return result;
                 }
