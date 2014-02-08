@@ -40,6 +40,7 @@ namespace CmisSync.Lib.ContentTasks
                             throw new ObjectDisposedException("Disposed download task while downloading file: " + remoteDocument.Name);
                         }
                         hashstream.Write (buffer, 0, len);
+                        hashstream.Flush();
                     }
                 }
             }
