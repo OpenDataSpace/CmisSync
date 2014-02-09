@@ -99,6 +99,7 @@
     <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -142,6 +143,7 @@
     <Folder Include="ContentTasksTests\" />
     <Folder Include="AuthenticationProviderTests\" />
     <Folder Include="UtilsTests\" />
+    <Folder Include="SyncStrategiesTests\SolverTests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
