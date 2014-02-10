@@ -77,7 +77,7 @@ namespace TestLibrary.SyncStrategiesTests
             var newRemoteObject = new Mock<IDocument> ();
             newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
             newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId==null? 0 : 1);
-            session.Setup (s => s.GetObject (objectIds[0])).Returns (newRemoteObject.Object);
+            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
             database.Setup (db => db.GetChangeLogToken ()).Returns (lastChangeLogToken);
             var changes = new ContentChanges (session.Object, database.Object, queueMock.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
             return changes;
