@@ -161,6 +161,8 @@
     <Compile Include="Events\SuccessfulLoginEvent.cs" />
     <Compile Include="Cmis\PersistentNtlmAuthenticationProvider.cs" />
     <Compile Include="HttpProxyUtils.cs" />
+    <Compile Include="Sync\Strategy\SyncMechanism.cs" />
+    <Compile Include="Sync\Solver\NothingToDoSolver.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

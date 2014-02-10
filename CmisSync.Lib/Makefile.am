@@ -97,6 +97,7 @@ SOURCES =  \
 	Sync/Solver/LocalObjectDeleted.cs \
 	Sync/Solver/LocalObjectMoved.cs \
 	Sync/Solver/LocalObjectRenamed.cs \
+	Sync/Solver/NothingToDoSolver.cs \
 	Sync/Solver/RemoteObjectAdded.cs \
 	Sync/Solver/RemoteObjectChanged.cs \
 	Sync/Solver/RemoteObjectDeleted.cs \
@@ -112,6 +113,7 @@ SOURCES =  \
 	Sync/Strategy/LocalSituationDetection.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SimpleFileSynchronizer.cs \
+	Sync/Strategy/SyncMechanism.cs \
 	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \
 	Utils.cs \
