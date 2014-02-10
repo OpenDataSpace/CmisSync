@@ -63,6 +63,19 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.That(list[0].ChangeType, Is.EqualTo(DotCMIS.Enums.ChangeType.Deleted));
         }
 
+        private Mock<IDocument> createRemoteObjectMock(string documentContentStreamId){
+            var newRemoteObject = new Mock<IDocument> ();
+            newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
+            newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId==null? 0 : 1);
+            return newRemoteObject;
+        }
+
+        private void setupSessionDefaultValues(Mock<ISession> session) {
+            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
+            session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
+        }
+
+
         private ContentChanges fillContentChangesWithChanges(DotCMIS.Enums.ChangeType type, Mock<ISyncEventQueue> queueMock, string documentContentStreamId = null) {
             var changeEvents = new Mock<IChangeEvents> ();
             var changeList = generateChangeListMock(1, type); 
@@ -70,13 +83,10 @@ namespace TestLibrary.SyncStrategiesTests
             changeEvents.Setup (ce => ce.LatestChangeLogToken).Returns (latestChangeLogToken);
             changeEvents.Setup (ce => ce.TotalNumItems).Returns (1);
             changeEvents.Setup (ce => ce.ChangeEventList).Returns (changeList);
-            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
-            session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
+            setupSessionDefaultValues(session);
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             session.Setup (s => s.GetContentChanges (lastChangeLogToken, isPropertyChangesSupported, maxNumberOfContentChanges)).Returns (changeEvents.Object);
-            var newRemoteObject = new Mock<IDocument> ();
-            newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
-            newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId==null? 0 : 1);
+            var newRemoteObject =  createRemoteObjectMock(documentContentStreamId);
             session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
             database.Setup (db => db.GetChangeLogToken ()).Returns (lastChangeLogToken);
             var changes = new ContentChanges (session.Object, database.Object, queueMock.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
@@ -168,8 +178,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void HandleStartSyncEventOnNoRemoteChangeTest ()
         {
             var startSyncEvent = new StartNextSyncEvent (false);
-            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
-            session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
+            setupSessionDefaultValues(session);
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             database.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
@@ -273,8 +282,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             ISyncEvent queuedEvent = null;
             var startSyncEvent = new StartNextSyncEvent (false);
-            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
-            session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
+            setupSessionDefaultValues(session);
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             database.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
             queue.Setup (q => q.AddEvent (It.IsAny<ISyncEvent> ())).Callback<ISyncEvent> ((e) => {
