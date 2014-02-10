@@ -45,9 +45,9 @@ namespace TestLibrary.SyncStrategiesTests
 
         }
 
-        private List<IChangeEvent> generateChangeListMock (int number, DotCMIS.Enums.ChangeType type, int startObjectIdIndex = 0) {
+        private List<IChangeEvent> generateChangeListMock (int number, DotCMIS.Enums.ChangeType type) {
             var changeList = new List<IChangeEvent> ();
-            for (int i = startObjectIdIndex; i < number + startObjectIdIndex; i++) {
+            for (int i = 0; i < number; i++) {
                 var changeEvent = new Mock<IChangeEvent> ();
                 changeEvent.Setup (ce => ce.ObjectId).Returns (objectIds[i]);
                 changeEvent.Setup (ce => ce.ChangeType).Returns (type);
@@ -63,12 +63,12 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.That(list[0].ChangeType, Is.EqualTo(DotCMIS.Enums.ChangeType.Deleted));
         }
 
-        private ContentChanges fillContentChangesWithChanges(DotCMIS.Enums.ChangeType type, Mock<ISyncEventQueue> queueMock, string documentContentStreamId = null, int amount = 1, int startObjectIdIndex = 0, bool hasMoreItems = false) {
+        private ContentChanges fillContentChangesWithChanges(DotCMIS.Enums.ChangeType type, Mock<ISyncEventQueue> queueMock, string documentContentStreamId = null) {
             var changeEvents = new Mock<IChangeEvents> ();
-            var changeList = generateChangeListMock(amount, type, startObjectIdIndex); 
-            changeEvents.Setup (ce => ce.HasMoreItems).Returns ((bool?)hasMoreItems);
+            var changeList = generateChangeListMock(1, type); 
+            changeEvents.Setup (ce => ce.HasMoreItems).Returns ((bool?) false);
             changeEvents.Setup (ce => ce.LatestChangeLogToken).Returns (latestChangeLogToken);
-            changeEvents.Setup (ce => ce.TotalNumItems).Returns (amount);
+            changeEvents.Setup (ce => ce.TotalNumItems).Returns (1);
             changeEvents.Setup (ce => ce.ChangeEventList).Returns (changeList);
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
@@ -77,9 +77,7 @@ namespace TestLibrary.SyncStrategiesTests
             var newRemoteObject = new Mock<IDocument> ();
             newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
             newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId==null? 0 : 1);
-            for(int i = 0; i < amount; i++){
-                session.Setup (s => s.GetObject (objectIds[i])).Returns (newRemoteObject.Object);
-            }
+            session.Setup (s => s.GetObject (objectIds[0])).Returns (newRemoteObject.Object);
             database.Setup (db => db.GetChangeLogToken ()).Returns (lastChangeLogToken);
             var changes = new ContentChanges (session.Object, database.Object, queueMock.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
             return changes;
