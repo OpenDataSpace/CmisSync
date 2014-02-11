@@ -12,6 +12,7 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 	   -r:$(srcdir)/lib/xunit.extensions.dll
 
 SOURCES =  \
+    MoqExtensions/MoqExtensions.cs \
 	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
 	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
 	DataTests/PathMatcherTest.cs \
