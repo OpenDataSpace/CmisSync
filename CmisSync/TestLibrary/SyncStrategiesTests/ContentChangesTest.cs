@@ -19,14 +19,13 @@ namespace TestLibrary.SyncStrategiesTests
     [TestFixture]
     public class ContentChangesTest
     {
-        private int maxNumberOfContentChanges;
-        private bool isPropertyChangesSupported;
+        private readonly int maxNumberOfContentChanges = 1000;
+        private readonly bool isPropertyChangesSupported = false;
         private readonly string changeLogToken = "token";
         private readonly string lastChangeLogToken = "lastToken";
         private readonly string latestChangeLogToken = "latestChangeLogToken";
         private readonly string repoId = "repoId";
         private readonly string[] objectIds = new string[] {"objectId","objectId2","objectId3"};
-        private int handled = 0;
         private Mock<ISyncEventQueue> queue;
         private Mock<IDatabase> database;
         private Mock<ISession> session;
@@ -36,9 +35,6 @@ namespace TestLibrary.SyncStrategiesTests
         [SetUp]
         public void SetUp ()
         {
-            maxNumberOfContentChanges = 1000;
-            isPropertyChangesSupported = false;
-            handled = 0;
             queue = new Mock<ISyncEventQueue>();
             database = new Mock<IDatabase>();
             session = new Mock<ISession> ();
@@ -97,7 +93,6 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void ConstructorWithVaildEntriesTest ()
         {
-            int maxNumberOfContentChanges = 1000;
             bool isPropertyChangesSupported = true;
             new ContentChanges (session.Object, database.Object, queue.Object);
             new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges);
@@ -163,6 +158,7 @@ namespace TestLibrary.SyncStrategiesTests
             var startSyncEvent = new StartNextSyncEvent (false);
             startSyncEvent.SetParam (ContentChanges.FULL_SYNC_PARAM_NAME, changeLogToken);
             var completedEvent = new FullSyncCompletedEvent (startSyncEvent);
+            int handled = 0;
             database.Setup (db => db.SetChangeLogToken ("token")).Callback ((string s) => {
                 insertedToken = s;
                 handled ++;
@@ -285,6 +281,7 @@ namespace TestLibrary.SyncStrategiesTests
             setupSessionDefaultValues(session);
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             database.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
+            int handled = 0;
             queue.Setup (q => q.AddEvent (It.IsAny<ISyncEvent> ())).Callback<ISyncEvent> ((e) => {
                 handled ++;
                 queuedEvent = e;
