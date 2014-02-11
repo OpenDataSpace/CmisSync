@@ -111,41 +111,35 @@ namespace CmisSync
 
             TextBlock addressLabel = new TextBlock()
             {
-                Margin = new Thickness(0),
                 Text = Properties_Resources.EnterWebAddress,
                 FontWeight = FontWeights.Bold
             };
             TextBox addressBox = new TextBox()
             {
-                Margin = new Thickness(0),
                 Width = 410,
                 Text = this.Credentials.Address.ToString(),
                 IsEnabled = false
             };
             TextBlock userLabel = new TextBlock()
             {
-                Margin = new Thickness(0),
                 Width = 200,
                 Text = Properties_Resources.User + ":",
                 FontWeight = FontWeights.Bold
             };
             TextBox userBox = new TextBox()
             {
-                Margin = new Thickness(0),
                 Width = 200,
                 Text = this.Credentials.UserName,
                 IsEnabled = false
             };
             TextBlock passwordLabel = new TextBlock()
             {
-                Margin = new Thickness(0),
                 Width = 200,
                 Text = Properties_Resources.Password + ":",
                 FontWeight = FontWeights.Bold
             };
             PasswordBox passwordBox = new PasswordBox()
             {
-                Margin = new Thickness(0),
                 Width = 200,
                 Password = this.Credentials.Password.ToString()
             };
@@ -178,15 +172,14 @@ namespace CmisSync
             Canvas.SetLeft(passwordBox, 220);
 
             TabControl tab = new TabControl();
-            tab.Padding = new Thickness(0);
 
             TabItem tabItemSelection = new TabItem();
-            tabItemSelection.Header = "Folder Selection";
+            tabItemSelection.Header = Properties_Resources.AddingFolder;
             tabItemSelection.Content = canvasSelection;
             tab.Items.Add(tabItemSelection);
 
             TabItem tabItemCredentials = new TabItem();
-            tabItemCredentials.Header = "Credentials";
+            tabItemCredentials.Header = Properties_Resources.Credits;
             tabItemCredentials.Content = canvasCredentials;
             tab.Items.Add(tabItemCredentials);
 
