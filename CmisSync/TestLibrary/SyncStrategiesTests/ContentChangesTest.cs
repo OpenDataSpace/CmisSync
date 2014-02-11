@@ -24,16 +24,6 @@ namespace TestLibrary.SyncStrategiesTests
         private readonly string changeLogToken = "token";
         private readonly string latestChangeLogToken = "latestChangeLogToken";
         private readonly string repoId = "repoId";
-        private Mock<ISession> session;
-
-
-
-        [SetUp]
-        public void SetUp ()
-        {
-            session = new Mock<ISession> ();
-
-        }
 
         private List<IChangeEvent> generateChangeListMock (DotCMIS.Enums.ChangeType type, string objectId = "objId") {
             var changeList = new List<IChangeEvent> ();
@@ -69,6 +59,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var database = new Mock<IDatabase>();
             var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             bool isPropertyChangesSupported = true;
             new ContentChanges (session.Object, database.Object, queue.Object);
             new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges);
@@ -82,6 +73,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void ConstructorFailsOnNullDbTest ()
         {
             var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             new ContentChanges (session.Object, null, queue.Object);
         }
 
@@ -90,6 +82,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var database = new Mock<IDatabase>();
             var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             try {
                 new ContentChanges (session.Object, database.Object, queue.Object, -1);
                 Assert.Fail ();
@@ -130,6 +123,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var database = new Mock<IDatabase>();
             var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             var wrongEvent = new Mock<ISyncEvent> ().Object;
             Assert.IsFalse (changes.Handle (wrongEvent));
@@ -150,6 +144,7 @@ namespace TestLibrary.SyncStrategiesTests
             }
             );
             var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsFalse (changes.Handle (completedEvent));
             Assert.AreEqual (1, handled);
@@ -160,6 +155,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void HandleStartSyncEventOnNoRemoteChangeTest ()
         {
             var startSyncEvent = new StartNextSyncEvent (false);
+            var session = new Mock<ISession>();
             setupSessionDefaultValues(session);
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             var database = new Mock<IDatabase>();
@@ -337,6 +333,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             ISyncEvent queuedEvent = null;
             var startSyncEvent = new StartNextSyncEvent (false);
+            var session = new Mock<ISession>();
             setupSessionDefaultValues(session);
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             var database = new Mock<IDatabase>();
@@ -374,6 +371,7 @@ namespace TestLibrary.SyncStrategiesTests
             var repositoryService = new Mock<IRepositoryService> ();
             repositoryService.Setup (r => r.GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
             repositoryService.Setup (r => r.GetRepositoryInfo (It.IsAny<string> (), It.IsAny<IExtensionsData> ()).LatestChangeLogToken).Returns (latestChangeLogToken);
+            var session = new Mock<ISession>();
             session.Setup (s => s.Binding.GetRepositoryService ()).Returns (repositoryService.Object);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
             var database = new Mock<IDatabase>();
@@ -393,6 +391,7 @@ namespace TestLibrary.SyncStrategiesTests
             var repositoryService = new Mock<IRepositoryService> ();
             repositoryService.Setup (r => r.GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
             repositoryService.Setup (r => r.GetRepositoryInfo (It.IsAny<string> (), It.IsAny<IExtensionsData> ()).LatestChangeLogToken).Returns (latestChangeLogToken);
+            var session = new Mock<ISession>();
             session.Setup (s => s.Binding.GetRepositoryService ()).Returns (repositoryService.Object);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
             var manager = new Mock<SyncEventManager> ().Object;
