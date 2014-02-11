@@ -323,7 +323,6 @@ namespace TestLibrary.SyncStrategiesTests
             var queue = new Mock<ISyncEventQueue>();
 
             Mock<IDatabase> database = GetDbMockWithToken();
-            AddLocalFile(database);
 
             Mock<ISession> session = GetSessionMockReturningChange(DotCMIS.Enums.ChangeType.Deleted, null);
 
