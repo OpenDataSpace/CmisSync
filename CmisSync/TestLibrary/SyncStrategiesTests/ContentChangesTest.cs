@@ -204,9 +204,9 @@ namespace TestLibrary.SyncStrategiesTests
             changeEvents.Setup (ce => ce.HasMoreItems).ReturnsInOrder ((bool?) true, (bool?) false);
             changeEvents.Setup (ce => ce.LatestChangeLogToken).ReturnsInOrder ("A", "B");
             changeEvents.Setup (ce => ce.TotalNumItems).ReturnsInOrder (3,1);
-            var event1 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Created, "one");
-            var event2 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Created, "two");
-            var event3 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Created, "three");
+            var event1 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Updated, "one");
+            var event2 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Updated, "two");
+            var event3 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Updated, "three");
             List<IChangeEvent> changeList1 = new List<IChangeEvent>();
             changeList1.Add(event1.Object);
             changeList1.Add(event2.Object);
