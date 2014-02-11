@@ -785,6 +785,7 @@ namespace TestLibrary.IntegrationTests
                     CleanAll(localDirectory);
                     WatcherTest.WaitWatcher();
                     synchronizedFolder.Sync();
+                    Assert.AreEqual(0, Directory.GetFiles(localDirectory).Length);
                     // Create a list of file names
                     List<string> files = new List<string>();
                     for(int i = 1 ; i <= 10; i++) {
@@ -1995,7 +1996,7 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-
+        [Ignore]
         // Goal: Make sure that CmisSync does not crash when syncing while modifying locally.
         [Test, TestCaseSource("TestServers"), Category("Slow")]
         public void SyncWhileModifyingFiles(string canonical_name, string localPath, string remoteFolderPath,
@@ -2070,7 +2071,7 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-
+        [Ignore]
         // Goal: Make sure that CmisSync does not crash when syncing while adding/removing files/folders locally.
         [Test, TestCaseSource("TestServers"), Category("Slow")]
         public void SyncWhileModifyingFolders(string canonical_name, string localPath, string remoteFolderPath,
