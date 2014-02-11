@@ -24,7 +24,6 @@ namespace TestLibrary.SyncStrategiesTests
         private readonly string changeLogToken = "token";
         private readonly string latestChangeLogToken = "latestChangeLogToken";
         private readonly string repoId = "repoId";
-        private Mock<ISyncEventQueue> queue;
         private Mock<ISession> session;
 
 
@@ -32,7 +31,6 @@ namespace TestLibrary.SyncStrategiesTests
         [SetUp]
         public void SetUp ()
         {
-            queue = new Mock<ISyncEventQueue>();
             session = new Mock<ISession> ();
 
         }
@@ -70,6 +68,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void ConstructorWithVaildEntriesTest ()
         {
             var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
             bool isPropertyChangesSupported = true;
             new ContentChanges (session.Object, database.Object, queue.Object);
             new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges);
@@ -82,6 +81,7 @@ namespace TestLibrary.SyncStrategiesTests
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsOnNullDbTest ()
         {
+            var queue = new Mock<ISyncEventQueue>();
             new ContentChanges (session.Object, null, queue.Object);
         }
 
@@ -89,6 +89,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void ConstructorFailsOnInvalidMaxEventsLimitTest ()
         {
             var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
             try {
                 new ContentChanges (session.Object, database.Object, queue.Object, -1);
                 Assert.Fail ();
@@ -111,6 +112,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void ConstructorFailsOnNullSessionTest ()
         {
             var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
             new ContentChanges (null, database.Object, queue.Object);
         }
 
@@ -127,6 +129,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void IgnoreWrongEventTest ()
         {
             var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             var wrongEvent = new Mock<ISyncEvent> ().Object;
             Assert.IsFalse (changes.Handle (wrongEvent));
@@ -146,6 +149,7 @@ namespace TestLibrary.SyncStrategiesTests
                 handled ++;
             }
             );
+            var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsFalse (changes.Handle (completedEvent));
             Assert.AreEqual (1, handled);
@@ -160,6 +164,7 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
+            var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsTrue (changes.Handle (startSyncEvent));
         }
@@ -337,6 +342,7 @@ namespace TestLibrary.SyncStrategiesTests
             var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
             int handled = 0;
+            var queue = new Mock<ISyncEventQueue>();
             queue.Setup (q => q.AddEvent (It.IsAny<ISyncEvent> ())).Callback<ISyncEvent> ((e) => {
                 handled ++;
                 queuedEvent = e;
@@ -372,6 +378,7 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
             var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
+            var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
             string result;
@@ -391,6 +398,7 @@ namespace TestLibrary.SyncStrategiesTests
             var manager = new Mock<SyncEventManager> ().Object;
             var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
+            var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
             string result;
