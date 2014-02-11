@@ -21,6 +21,8 @@ namespace CmisSync.Lib.Sync.Strategy
         public static readonly string FULL_SYNC_PARAM_NAME = "lastTokenOnServer";
         public static readonly int DEFAULT_PRIORITY = 1000;
 
+        private IChangeEvent lastChange;
+
         public override int Priority {
             get {
                 return DEFAULT_PRIORITY;
@@ -106,7 +108,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 }
                 // No changes or background process started
                 return true;
-            }catch(Exception) {
+            }catch(Exception e) {
                 // Use fallback sync algorithm
                 return false;
             }
@@ -136,8 +138,22 @@ namespace CmisSync.Lib.Sync.Strategy
                 // Check which files/folders have changed.
                 IChangeEvents changes = session.GetContentChanges(lastTokenOnClient, IsPropertyChangesSupported, MaxNumberOfContentChanges);
                 // Replicate each change to the local side.
+                bool first = true;
                 foreach (IChangeEvent change in changes.ChangeEventList)
                 {
+                    // ignore first event when lists overlapp
+                    if(first) {
+                        first = false;
+                        if(lastChange != null && 
+                                (lastChange.ChangeType == DotCMIS.Enums.ChangeType.Created
+                                 || lastChange.ChangeType == DotCMIS.Enums.ChangeType.Deleted)
+                          ) {
+                            if (change != null && change.ChangeType == lastChange.ChangeType && change.ObjectId == lastChange.ObjectId) {
+                                continue;
+                            }
+                        }
+                    }
+                    lastChange = change;
                     ICmisObject remoteObject = null;
                     if(change.ChangeType == DotCMIS.Enums.ChangeType.Created ||
                        change.ChangeType == DotCMIS.Enums.ChangeType.Updated ||
