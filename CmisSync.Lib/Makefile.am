@@ -45,6 +45,7 @@ SOURCES =  \
 	Events/EventFilter/IgnoredFilesFilter.cs \
 	Events/EventFilter/IgnoredFoldersFilter.cs \
 	Events/EventFilter/InvalidFolderNameFilter.cs \
+	Events/ExceptionEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileDownloadRequest.cs \
 	Events/FileEvent.cs \
@@ -56,11 +57,14 @@ SOURCES =  \
 	Events/GenericSyncEventHandler.cs \
 	Events/ISyncEvent.cs \
 	Events/ISyncEventQueue.cs \
+	Events/PermissionDeniedEvent.cs \
+	Events/PermissionDeniedEventHandler.cs \
 	Events/RecentChangedEvent.cs \
 	Events/RemoteEvent.cs \
 	Events/ReportingSyncEventHandler.cs \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
+	Events/SuccessfulLoginEvent.cs \
 	Events/SyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \

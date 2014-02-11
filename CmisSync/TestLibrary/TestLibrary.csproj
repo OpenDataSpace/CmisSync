@@ -100,6 +100,8 @@
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
+    <Compile Include="EventsTests\ExceptionEventTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

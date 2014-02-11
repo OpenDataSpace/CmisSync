@@ -19,6 +19,7 @@ SOURCES =  \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
+	EventsTests/ExceptionEventTest.cs \
 	EventsTests/EventTypesTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
 	EventsTests/SyncEventManagerTest.cs \
@@ -27,6 +28,7 @@ SOURCES =  \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
+	EventsTests/PermissionDeniedEventHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
