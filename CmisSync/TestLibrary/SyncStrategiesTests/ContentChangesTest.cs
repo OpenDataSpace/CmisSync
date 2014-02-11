@@ -22,10 +22,8 @@ namespace TestLibrary.SyncStrategiesTests
         private readonly int maxNumberOfContentChanges = 1000;
         private readonly bool isPropertyChangesSupported = false;
         private readonly string changeLogToken = "token";
-        private readonly string lastChangeLogToken = "lastToken";
         private readonly string latestChangeLogToken = "latestChangeLogToken";
         private readonly string repoId = "repoId";
-        private readonly string[] objectIds = new string[] {"objectId","objectId2","objectId3"};
         private Mock<ISyncEventQueue> queue;
         private Mock<IDatabase> database;
         private Mock<ISession> session;
@@ -41,21 +39,19 @@ namespace TestLibrary.SyncStrategiesTests
 
         }
 
-        private List<IChangeEvent> generateChangeListMock (int number, DotCMIS.Enums.ChangeType type) {
+        private List<IChangeEvent> generateChangeListMock (DotCMIS.Enums.ChangeType type, string objectId = "objId") {
             var changeList = new List<IChangeEvent> ();
-            for (int i = 0; i < number; i++) {
-                var changeEvent = new Mock<IChangeEvent> ();
-                changeEvent.Setup (ce => ce.ObjectId).Returns (objectIds[i]);
-                changeEvent.Setup (ce => ce.ChangeType).Returns (type);
-                changeList.Add (changeEvent.Object);
-            }
+            var changeEvent = new Mock<IChangeEvent> ();
+            changeEvent.Setup (ce => ce.ObjectId).Returns (objectId);
+            changeEvent.Setup (ce => ce.ChangeType).Returns (type);
+            changeList.Add (changeEvent.Object);
             return changeList;
         }
 
         [Test, Category("Fast")]
         public void generateChangeListHelperWorksCorrectly () {
-            List<IChangeEvent> list = generateChangeListMock(3, DotCMIS.Enums.ChangeType.Deleted);
-            Assert.That(list.Count, Is.EqualTo(3));
+            List<IChangeEvent> list = generateChangeListMock(DotCMIS.Enums.ChangeType.Deleted);
+            Assert.That(list.Count, Is.EqualTo(1));
             Assert.That(list[0].ChangeType, Is.EqualTo(DotCMIS.Enums.ChangeType.Deleted));
         }
 
@@ -176,7 +172,7 @@ namespace TestLibrary.SyncStrategiesTests
         private Mock<ISession> GetSessionMockReturningChange(DotCMIS.Enums.ChangeType type, string documentContentStreamId = null) {
 
             var changeEvents = new Mock<IChangeEvents> ();
-            var changeList = generateChangeListMock(1, type); 
+            var changeList = generateChangeListMock(type); 
             changeEvents.Setup (ce => ce.HasMoreItems).Returns ((bool?) false);
             changeEvents.Setup (ce => ce.LatestChangeLogToken).Returns (latestChangeLogToken);
             changeEvents.Setup (ce => ce.TotalNumItems).Returns (1);
