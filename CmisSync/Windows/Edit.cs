@@ -31,7 +31,11 @@ namespace CmisSync
         /// </summary>
         public List<string> Ignores;
 
-        private CmisRepoCredentials credentials;
+        /// <summary>
+        /// Credentials
+        /// </summary>
+        public CmisRepoCredentials Credentials;
+
         private string remotePath;
         private string localPath;
 
@@ -42,7 +46,7 @@ namespace CmisSync
         public Edit(CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
         {
             FolderName = name;
-            this.credentials = credentials;
+            this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = new List<string>(ignores);
             this.localPath = localPath;
@@ -80,10 +84,10 @@ namespace CmisSync
             CmisSync.CmisTree.RootFolder repo = new CmisSync.CmisTree.RootFolder()
             {
                 Name = FolderName,
-                Id = credentials.RepoId,
-                Address = credentials.Address.ToString()
+                Id = Credentials.RepoId,
+                Address = Credentials.Address.ToString()
             };
-            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
             IgnoredFolderLoader.AddIgnoredFolderToRootNode(repo, Ignores);
             LocalFolderLoader.AddLocalFolderToRootNode(repo, localPath);
 
@@ -105,10 +109,90 @@ namespace CmisSync
                 }
             }));
 
+            TextBlock addressLabel = new TextBlock()
+            {
+                Margin = new Thickness(0),
+                Text = Properties_Resources.EnterWebAddress,
+                FontWeight = FontWeights.Bold
+            };
+            TextBox addressBox = new TextBox()
+            {
+                Margin = new Thickness(0),
+                Width = 410,
+                Text = this.Credentials.Address.ToString(),
+                IsEnabled = false
+            };
+            TextBlock userLabel = new TextBlock()
+            {
+                Margin = new Thickness(0),
+                Width = 200,
+                Text = Properties_Resources.User + ":",
+                FontWeight = FontWeights.Bold
+            };
+            TextBox userBox = new TextBox()
+            {
+                Margin = new Thickness(0),
+                Width = 200,
+                Text = this.Credentials.UserName,
+                IsEnabled = false
+            };
+            TextBlock passwordLabel = new TextBlock()
+            {
+                Margin = new Thickness(0),
+                Width = 200,
+                Text = Properties_Resources.Password + ":",
+                FontWeight = FontWeights.Bold
+            };
+            PasswordBox passwordBox = new PasswordBox()
+            {
+                Margin = new Thickness(0),
+                Width = 200,
+                Password = this.Credentials.Password.ToString()
+            };
 
-            ContentCanvas.Children.Add(treeView);
-            Canvas.SetTop(treeView, 70);
-            Canvas.SetLeft(treeView, 185);
+            Canvas canvasSelection = new Canvas();
+            canvasSelection.Width = 430;
+            canvasSelection.Height = 287;
+            canvasSelection.Children.Add(treeView);
+
+            Canvas canvasCredentials = new Canvas();
+            canvasCredentials.Width = 430;
+            canvasCredentials.Height = 287;
+            canvasCredentials.Children.Add(addressLabel);
+            Canvas.SetTop(addressLabel, 40);
+            Canvas.SetLeft(addressLabel, 10);
+            canvasCredentials.Children.Add(addressBox);
+            Canvas.SetTop(addressBox, 60);
+            Canvas.SetLeft(addressBox, 10);
+            canvasCredentials.Children.Add(userLabel);
+            Canvas.SetTop(userLabel, 100);
+            Canvas.SetLeft(userLabel, 10);
+            canvasCredentials.Children.Add(userBox);
+            Canvas.SetTop(userBox, 120);
+            Canvas.SetLeft(userBox, 10);
+            canvasCredentials.Children.Add(passwordLabel);
+            Canvas.SetTop(passwordLabel, 100);
+            Canvas.SetLeft(passwordLabel, 220);
+            canvasCredentials.Children.Add(passwordBox);
+            Canvas.SetTop(passwordBox, 120);
+            Canvas.SetLeft(passwordBox, 220);
+
+            TabControl tab = new TabControl();
+            tab.Padding = new Thickness(0);
+
+            TabItem tabItemSelection = new TabItem();
+            tabItemSelection.Header = "Folder Selection";
+            tabItemSelection.Content = canvasSelection;
+            tab.Items.Add(tabItemSelection);
+
+            TabItem tabItemCredentials = new TabItem();
+            tabItemCredentials.Header = "Credentials";
+            tabItemCredentials.Content = canvasCredentials;
+            tab.Items.Add(tabItemCredentials);
+
+            ContentCanvas.Children.Add(tab);
+            Canvas.SetTop(tab, 30);
+            Canvas.SetLeft(tab, 175);
 
             Controller.CloseWindowEvent += delegate
             {
@@ -136,6 +220,7 @@ namespace CmisSync
             finish_button.Click += delegate
             {
                 Ignores = NodeModelUtils.GetIgnoredFolder(repo);
+                Credentials.Password = passwordBox.Password;
                 Controller.SaveFolder();
                 Close();
             };

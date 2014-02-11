@@ -31,7 +31,11 @@ namespace CmisSync
         /// </summary>
         public List<string> Ignores;
 
-        private CmisRepoCredentials credentials;
+        /// <summary>
+        /// Credentials
+        /// </summary>
+        public CmisRepoCredentials Credentials;
+
         private string remotePath;
         private string localPath;
 
@@ -42,7 +46,7 @@ namespace CmisSync
         public Edit(CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
         {
             Name = name;
-            this.credentials = credentials;
+            this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = ignores;
             this.localPath = localPath;
@@ -74,13 +78,13 @@ namespace CmisSync
 
             RootFolder root = new RootFolder () {
                 Name = this.Name,
-                Id = credentials.RepoId,
-                Address = credentials.Address.ToString()
+                Id = Credentials.RepoId,
+                Address = Credentials.Address.ToString()
             };
             IgnoredFolderLoader.AddIgnoredFolderToRootNode(root, Ignores);
             LocalFolderLoader.AddLocalFolderToRootNode(root, localPath);
 
-            AsyncNodeLoader asyncLoader = new AsyncNodeLoader (root, credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            AsyncNodeLoader asyncLoader = new AsyncNodeLoader (root, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
             asyncLoader.UpdateNodeEvent += delegate {
                 cmisStore.UpdateCmisTree(root);
             };
