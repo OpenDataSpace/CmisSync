@@ -32,7 +32,7 @@ namespace CmisSync
         public EditWizardController (CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath) : base ("EditWizard")
         {
             FolderName = name;
-            this.credentials = credentials;
+            this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = new List<string>(ignores);
             this.localPath = localPath;
@@ -64,8 +64,8 @@ namespace CmisSync
 
         public string FolderName;
         public List<string> Ignores;
+        public CmisRepoCredentials Credentials;
 
-        private CmisRepoCredentials credentials;
         private string remotePath;
         private string localPath;
 
@@ -87,8 +87,8 @@ namespace CmisSync
             Repo = new RootFolder()
             {
                 Name = FolderName,
-                Id = credentials.RepoId,
-                Address = credentials.Address.ToString()
+                Id = Credentials.RepoId,
+                Address = Credentials.Address.ToString()
             };
             Repo.Selected = true;
             IgnoredFolderLoader.AddIgnoredFolderToRootNode(Repo, Ignores);
@@ -96,7 +96,7 @@ namespace CmisSync
             List<RootFolder> repos = new List<RootFolder>();
             repos.Add(Repo);
 
-            Loader = new AsyncNodeLoader(Repo, credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            Loader = new AsyncNodeLoader(Repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
 
             CancelButton.Title = Properties_Resources.DiscardChanges;
             FinishButton.Title = Properties_Resources.SaveChanges;
@@ -105,6 +105,19 @@ namespace CmisSync
             DataSource = new CmisTree.CmisTreeDataSource(repos);
             Outline.DataSource = DataSource;
             Outline.Delegate = DataDelegate;
+
+            this.AddressLabel.StringValue = Properties_Resources.EnterWebAddress;
+            this.UserLabel.StringValue = Properties_Resources.User;
+            this.PasswordLabel.StringValue = Properties_Resources.Password;
+
+            this.AddressText.StringValue = Credentials.Address.ToString ();
+            this.UserText.StringValue = Credentials.UserName;
+            this.PasswordText.StringValue = Credentials.Password.ToString ();
+            this.AddressText.Enabled = false;
+            this.UserText.Enabled = false;
+
+            this.FolderTab.Label = Properties_Resources.AddingFolder;
+            this.CredentialsTab.Label = Properties_Resources.Credits;
 
             Controller.CloseWindowEvent += delegate
             {
@@ -205,6 +218,7 @@ namespace CmisSync
             Loader.Cancel ();
             RemoveEvent ();
             Ignores = NodeModelUtils.GetIgnoredFolder (Repo);
+            Credentials.Password = PasswordText.StringValue;
             Controller.SaveFolder ();
             Controller.CloseWindow ();
         }

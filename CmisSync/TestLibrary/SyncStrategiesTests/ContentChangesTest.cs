@@ -287,7 +287,7 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CHANGED));
         }
         
-        [Test, Category("Fast")
+        [Test, Category("Fast")]
         public void HandleStartSyncEventOnOneRemoteDeletionChangeWithoutLocalFile ()
         {
             var queue = new Mock<ISyncEventQueue>();
@@ -304,7 +304,7 @@ namespace TestLibrary.SyncStrategiesTests
             queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast")
+        [Test, Category("Fast")]
         public void HandleStartSyncEventOnOneRemoteDeletionChangeTest ()
         {
             FileEvent fileEvent = null;
