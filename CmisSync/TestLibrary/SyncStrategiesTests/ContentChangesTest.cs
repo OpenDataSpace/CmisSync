@@ -24,19 +24,24 @@ namespace TestLibrary.SyncStrategiesTests
         private readonly string changeLogToken = "token";
         private readonly string latestChangeLogToken = "latestChangeLogToken";
         private readonly string repoId = "repoId";
-
-        private List<IChangeEvent> generateChangeListMock (DotCMIS.Enums.ChangeType type, string objectId = "objId") {
-            var changeList = new List<IChangeEvent> ();
+        
+        private Mock<IChangeEvent> GenerateChangeEvent(DotCMIS.Enums.ChangeType type, string objectId) {
             var changeEvent = new Mock<IChangeEvent> ();
             changeEvent.Setup (ce => ce.ObjectId).Returns (objectId);
             changeEvent.Setup (ce => ce.ChangeType).Returns (type);
-            changeList.Add (changeEvent.Object);
+
+            return changeEvent;
+        }
+
+        private List<IChangeEvent> generateSingleChangeListMock (DotCMIS.Enums.ChangeType type, string objectId = "objId") {
+            var changeList = new List<IChangeEvent> ();
+            changeList.Add (GenerateChangeEvent(type, objectId).Object);
             return changeList;
         }
 
         [Test, Category("Fast")]
         public void generateChangeListHelperWorksCorrectly () {
-            List<IChangeEvent> list = generateChangeListMock(DotCMIS.Enums.ChangeType.Deleted);
+            List<IChangeEvent> list = generateSingleChangeListMock(DotCMIS.Enums.ChangeType.Deleted);
             Assert.That(list.Count, Is.EqualTo(1));
             Assert.That(list[0].ChangeType, Is.EqualTo(DotCMIS.Enums.ChangeType.Deleted));
         }
@@ -178,7 +183,7 @@ namespace TestLibrary.SyncStrategiesTests
         private Mock<ISession> GetSessionMockReturningChange(DotCMIS.Enums.ChangeType type, string documentContentStreamId = null) {
 
             var changeEvents = new Mock<IChangeEvents> ();
-            var changeList = generateChangeListMock(type); 
+            var changeList = generateSingleChangeListMock(type); 
             changeEvents.Setup (ce => ce.HasMoreItems).Returns ((bool?) false);
             changeEvents.Setup (ce => ce.LatestChangeLogToken).Returns (latestChangeLogToken);
             changeEvents.Setup (ce => ce.TotalNumItems).Returns (1);
@@ -192,6 +197,14 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
          
             return session;
+        }
+
+        private Mock<ISession> GetSessionMockReturning3Changesin2Batches() {
+            var changeEvents = new Mock<IChangeEvents> ();
+            changeEvents.Setup (ce => ce.HasMoreItems).ReturnsInOrder ((bool?) true, (bool?) false);
+
+
+            return null;            
         }
 
         [Test, Category("Fast")]
@@ -356,12 +369,21 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual (changeLogToken, returnedChangeLogToken);
         }
 
-        [Ignore]
         [Test, Category("Fast")]
+        [Ignore]
         public void IgnoreDuplicatedContentChangesEventTest ()
         {
-            /* Paging is fucked up in a way that the last event of page 1 can be also the first of page 2*/
-            Assert.Fail ("TODO");
+            var queue = new Mock<ISyncEventQueue>();
+
+            Mock<IDatabase> database = GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturning3Changesin2Batches();
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Exactly(3));
         }
 
         [Test, Category("Fast")]
