@@ -98,12 +98,12 @@
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
     <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
-    <Compile Include="EventsTests\ExceptionEventTest.cs" />
-    <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
+    <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
+    <Compile Include="EventsTests\ExceptionEventTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

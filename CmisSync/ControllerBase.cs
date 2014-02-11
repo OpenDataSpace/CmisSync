@@ -356,6 +356,7 @@ namespace CmisSync
                         {
                             folder.IgnoredFolders.Add(new Config.IgnoredFolder() { Path = ignore });
                         }
+                        folder.ObfuscatedPassword = edit.Credentials.Password.ObfuscatedPassword;
                         ConfigManager.CurrentConfig.Save();
                         foreach (string oldIgnore in oldIgnores)
                         {

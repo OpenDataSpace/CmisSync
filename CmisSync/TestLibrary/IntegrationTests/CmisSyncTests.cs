@@ -801,7 +801,13 @@ namespace TestLibrary.IntegrationTests
                             createOrModifyBinaryFile(Path.Combine(localDirectory, filename), length);
                         }
                         // Ensure, all local files are available
-                        Assert.AreEqual(files.Count, Directory.GetFiles(localDirectory).Length);
+                        Assert.AreEqual(files.Count, Directory.GetFiles(localDirectory).Length,
+                                        String.Format("The following files do exist in the client: \"{0}\" but there should be \"{1}\" with a size of {2}",
+                                      Directory.GetFiles(localDirectory).ToString(),
+                                      files.ToString(),
+                                      length
+                                      )
+                                        );
                         // Sync until all remote files do have got the same content length like the local one
                         Assert.IsTrue(WaitUntilSyncIsDone(synchronizedFolder, delegate {
                             foreach(string filename in files)

@@ -84,7 +84,7 @@ namespace TestLibrary.EventsTests
             using(SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>().Object)) {
                 t = Task.Factory.StartNew(()=>{Thread.Sleep(100); queue.StopListener();});
                 Assert.False(queue.WaitForStopped(10));
-                Assert.True(queue.WaitForStopped(100));
+                Assert.True(queue.WaitForStopped(10000));
                 Assert.True(queue.IsStopped);
             }
             t.Wait();
