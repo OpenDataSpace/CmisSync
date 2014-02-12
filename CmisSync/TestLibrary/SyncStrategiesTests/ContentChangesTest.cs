@@ -199,18 +199,22 @@ namespace TestLibrary.SyncStrategiesTests
             return session;
         }
 
-        private Mock<ISession> GetSessionMockReturning3Changesin2Batches() {
+
+        private Mock<ISession> GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType type = DotCMIS.Enums.ChangeType.Updated, bool overlapping = false) {
             var changeEvents = new Mock<IChangeEvents> ();
             changeEvents.Setup (ce => ce.HasMoreItems).ReturnsInOrder ((bool?) true, (bool?) false);
             changeEvents.Setup (ce => ce.LatestChangeLogToken).ReturnsInOrder ("A", "B");
-            changeEvents.Setup (ce => ce.TotalNumItems).ReturnsInOrder (3,1);
-            var event1 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Updated, "one");
-            var event2 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Updated, "two");
-            var event3 = GenerateChangeEvent(DotCMIS.Enums.ChangeType.Updated, "three");
+            changeEvents.Setup (ce => ce.TotalNumItems).ReturnsInOrder (3, overlapping ? 2 : 1);
+            var event1 = GenerateChangeEvent(type, "one");
+            var event2 = GenerateChangeEvent(type, "two");
+            var event3 = GenerateChangeEvent(type, "three");
             List<IChangeEvent> changeList1 = new List<IChangeEvent>();
             changeList1.Add(event1.Object);
             changeList1.Add(event2.Object);
             List<IChangeEvent> changeList2 = new List<IChangeEvent>();
+            if(overlapping) {
+                changeList2.Add(event2.Object);
+            }
             changeList2.Add(event3.Object);
             changeEvents.Setup (ce => ce.ChangeEventList).ReturnsInOrder (changeList1, changeList2);
 
@@ -385,10 +389,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual (changeLogToken, returnedChangeLogToken);
         }
 
-        [Test, Category("Fast")]
-        public void IgnoreDuplicatedContentChangesEventTest ()
-        {
-        }
 
         [Test, Category("Fast")]
         public void IgnoreCrawlSyncEventTest ()
@@ -439,6 +439,22 @@ namespace TestLibrary.SyncStrategiesTests
             Mock<IDatabase> database = GetDbMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturning3Changesin2Batches();
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Exactly(3));
+        }
+
+        [Test, Category("Fast")]
+        public void IgnoreDuplicatedContentChangesEventTest ()
+        {
+            var queue = new Mock<ISyncEventQueue>();
+
+            Mock<IDatabase> database = GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType.Created, true);
 
             var startSyncEvent = new StartNextSyncEvent (false);
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
