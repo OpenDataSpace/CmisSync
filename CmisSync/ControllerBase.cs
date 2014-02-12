@@ -309,6 +309,16 @@ namespace CmisSync
 
         public void EditRepositoryFolder(string reponame)
         {
+            EditRepository (reponame, Edit.EditType.EditFolder);
+        }
+
+        public void EditRepositoryCredentials(string reponame)
+        {
+            EditRepository (reponame, Edit.EditType.EditCredentials);
+        }
+
+        private void EditRepository(string reponame,Edit.EditType type)
+        {
             Config.SyncConfig.Folder folder;
 
             lock (this.repo_lock)
@@ -344,7 +354,7 @@ namespace CmisSync
                         oldIgnores.Add(ignore.Path);
                     }
                 }
-                edit = new Edit(credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
+                edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
                 edits.Add(reponame, edit);
 
                 edit.Controller.SaveFolderEvent += delegate

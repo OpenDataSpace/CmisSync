@@ -29,13 +29,14 @@ namespace CmisSync
             Initialize ();
         }
         // Call to load from the XIB/NIB file
-        public EditWizardController (CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath) : base ("EditWizard")
+        public EditWizardController (EditType type, CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath) : base ("EditWizard")
         {
             FolderName = name;
             this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = new List<string>(ignores);
             this.localPath = localPath;
+            this.type = type;
 
             Initialize ();
 
@@ -54,6 +55,11 @@ namespace CmisSync
 
         #endregion
 
+        public enum EditType {
+            EditFolder,
+            EditCredentials
+        };
+
         protected override void Dispose (bool disposing)
         {
             base.Dispose (disposing);
@@ -68,6 +74,7 @@ namespace CmisSync
 
         private string remotePath;
         private string localPath;
+        private EditType type;
 
         RootFolder Repo;
         private CmisTreeDataSource DataSource;
@@ -118,6 +125,17 @@ namespace CmisSync
 
             this.FolderTab.Label = Properties_Resources.AddingFolder;
             this.CredentialsTab.Label = Properties_Resources.Credits;
+            switch (this.type) {
+            case EditType.EditFolder:
+                TabView.SelectAt (0);
+                break;
+            case EditType.EditCredentials:
+                TabView.SelectAt (1);
+                break;
+            default:
+                TabView.SelectAt (0);
+                break;
+            }
 
             Controller.CloseWindowEvent += delegate
             {

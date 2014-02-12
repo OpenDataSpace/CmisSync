@@ -100,7 +100,7 @@ namespace CmisSync {
             Controller.UpdateStatusItemEvent += delegate (string state_text) {
                 using (var a = new NSAutoreleasePool ())
                 {
-                    InvokeOnMainThread (delegate {
+                    BeginInvokeOnMainThread (delegate {
                         this.state_item.Title = state_text;
                     });
                 }
@@ -129,7 +129,7 @@ namespace CmisSync {
             Controller.UpdateTransmissionMenuEvent += delegate
             {
                 using (var a = new NSAutoreleasePool()) {
-                    InvokeOnMainThread(delegate {
+                    BeginInvokeOnMainThread(delegate {
                         List<FileTransmissionEvent> transmissions =    Program.Controller.ActiveTransmissions();
                         NSMenu transmissionmenu = new NSMenu();
                         foreach(FileTransmissionEvent transmission in transmissions) {

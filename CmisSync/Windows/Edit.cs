@@ -39,17 +39,24 @@ namespace CmisSync
         private string remotePath;
         private string localPath;
 
+        public enum EditType {
+            EditFolder,
+            EditCredentials
+        };
+
+        private EditType type;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Edit(CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
+        public Edit(EditType type, CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
         {
             FolderName = name;
             this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = new List<string>(ignores);
             this.localPath = localPath;
+            this.type = type;
 
             CreateEdit();
 

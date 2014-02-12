@@ -41,6 +41,10 @@ namespace CmisSync {
         private Object transmissionLock = new object ();
         private int notificationInterval = 5;
         private int notificationKeep = 5;
+        private readonly string notificationType = "Type";
+        private readonly string notificationTypeTransmission = "Transmission";
+        private readonly string notificationTypeCredentials = "Credentials";
+
 
         private class ComparerNSUserNotification : IComparer<NSUserNotification>
         {
@@ -49,6 +53,57 @@ namespace CmisSync {
                 DateTime xDate = x.DeliveryDate;
                 DateTime yDate = y.DeliveryDate;
                 return xDate.CompareTo (yDate);
+            }
+        }
+
+        private bool IsNotificationTransmission(NSUserNotification notification)
+        {
+            if (null != notification.UserInfo && notification.UserInfo.ContainsKey ((NSString)notificationType)) {
+                return notificationTypeTransmission == (string)(notification.UserInfo [notificationType] as NSString);
+            }
+            return false;
+        }
+
+        private bool IsNotificationCredentials(NSUserNotification notification)
+        {
+            if (null != notification.UserInfo && notification.UserInfo.ContainsKey ((NSString)notificationType)) {
+                return notificationTypeCredentials == (string)(notification.UserInfo [notificationType] as NSString);
+            }
+            return false;
+        }
+
+        private void RemoveNotificationCredentials(string reponame)
+        {
+            using (var a = new NSAutoreleasePool()) {
+                notificationCenter.BeginInvokeOnMainThread(delegate {
+                    NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
+                    foreach (NSUserNotification notification in notifications) {
+                        if (!IsNotificationCredentials(notification)) {
+                            continue;
+                        }
+                        if (notification.Title==reponame) {
+                            notificationCenter.RemoveDeliveredNotification (notification);
+                        }
+                    }
+                });
+            }
+        }
+
+        private void InsertNotificationCredentials(string reponame)
+        {
+            RemoveNotificationCredentials (reponame);
+            using (var a = new NSAutoreleasePool()) {
+                notificationCenter.BeginInvokeOnMainThread(delegate {
+                    NSUserNotification notification = new NSUserNotification();
+                    notification.Title = reponame;
+                    notification.Subtitle = "Credentials Error";
+                    notification.InformativeText = "Click to update the credentials";
+                    NSMutableDictionary userInfo = new NSMutableDictionary();
+                    userInfo.Add ((NSString)notificationType, (NSString)notificationTypeCredentials);
+                    notification.UserInfo = userInfo;
+                    notification.DeliveryDate = NSDate.Now;
+                    notificationCenter.DeliverNotification (notification);
+                });
             }
         }
 
@@ -69,11 +124,21 @@ namespace CmisSync {
 
             notificationCenter.DidActivateNotification += (s, e) => 
             {
-                LocalFolderClicked (Path.GetDirectoryName (e.Notification.InformativeText));
+                if (IsNotificationTransmission(e.Notification)) {
+                    LocalFolderClicked (Path.GetDirectoryName (e.Notification.InformativeText));
+                }
+                if (IsNotificationCredentials(e.Notification)) {
+                    RemoveNotificationCredentials(e.Notification.Title);
+                    EditRepositoryCredentials(e.Notification.Title);
+                }
             };
 
             // If we return true here, Notification will show up even if your app is TopMost.
             notificationCenter.ShouldPresentNotification = (c, n) => { return true; };
+
+            ShowChangePassword += delegate(string reponame) {
+                InsertNotificationCredentials(reponame);
+            };
 
             OnTransmissionListChanged += delegate {
 
@@ -84,6 +149,9 @@ namespace CmisSync {
                             NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
                             List<NSUserNotification> finishedNotifications = new List<NSUserNotification> ();
                             foreach (NSUserNotification notification in notifications) {
+                                if (!IsNotificationTransmission(notification)) {
+                                    continue;
+                                }
                                 FileTransmissionEvent transmission = transmissions.Find( (FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
                                 if (transmission == null) {
                                     finishedNotifications.Add (notification);
@@ -113,12 +181,14 @@ namespace CmisSync {
                                 notification.Title = Path.GetFileName (transmission.Path);
                                 notification.Subtitle = TransmissionStatus(transmission);
                                 notification.InformativeText = transmission.Path;
-//                                notification.SoundName = NSUserNotification.NSUserNotificationDefaultSoundName;
-                                transmission.TransmissionStatus += TransmissionReport;
+                                NSMutableDictionary userInfo = new NSMutableDictionary();
+                                userInfo.Add ((NSString)notificationType, (NSString)notificationTypeTransmission);
+                                notification.UserInfo = userInfo;
                                 notification.DeliveryDate = NSDate.Now;
                                 notificationCenter.DeliverNotification (notification);
                                 transmissionFiles.Add (transmission.Path, notification.DeliveryDate);
                                 UpdateFileStatus (transmission, null);
+                                transmission.TransmissionStatus += TransmissionReport;
                             }
                         }
                     });
@@ -233,6 +303,9 @@ namespace CmisSync {
                     lock (transmissionLock) {
                         NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
                         foreach (NSUserNotification notification in notifications) {
+                            if (!IsNotificationTransmission(notification)) {
+                                continue;
+                            }
                             if (notification.InformativeText == transmission.Path) {
                                 notificationCenter.RemoveDeliveredNotification (notification);
                                 notification.DeliveryDate = NSDate.Now;
