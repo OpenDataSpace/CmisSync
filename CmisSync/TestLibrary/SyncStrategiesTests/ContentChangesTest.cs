@@ -53,9 +53,25 @@ namespace TestLibrary.SyncStrategiesTests
             return newRemoteObject;
         }
 
+        private Mock<IFolder> createRemoteFolderMock(string folderId){
+            var newRemoteObject = new Mock<IFolder> ();
+            newRemoteObject.Setup(d => d.Id).Returns(folderId);
+            return newRemoteObject;
+        }
+
         private void setupSessionDefaultValues(Mock<ISession> session) {
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
+        }
+
+        [Test, Category("Fast")]
+        public void CorrectDefaultPriority ()
+        {
+            var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
+            var cc = new ContentChanges (session.Object, database.Object, queue.Object);
+            Assert.That(cc.Priority, Is.EqualTo(1000));
         }
 
 
@@ -130,6 +146,19 @@ namespace TestLibrary.SyncStrategiesTests
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var startSyncEvent = new StartNextSyncEvent (false);
+            Assert.IsFalse (changes.Handle (startSyncEvent));
+        }
+
+
+        [Test, Category("Fast")]
+        public void RetrunFalseOnError () {
+            //TODO: this might not be the best behavior, this test verifies the current implementation not the desired one
+            var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
+            session.Setup(x => x.Binding).Throws(new Exception("SOME EXCEPTION"));
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             var wrongEvent = new Mock<ISyncEvent> ().Object;
             Assert.IsFalse (changes.Handle (wrongEvent));
         }
@@ -179,9 +208,8 @@ namespace TestLibrary.SyncStrategiesTests
         private static void AddLocalFile(Mock<IDatabase> db, string path = "path"){
             db.Setup(foo => foo.GetFilePath(It.IsAny<string>())).Returns(path);
         }
-        
-        private Mock<ISession> GetSessionMockReturningChange(DotCMIS.Enums.ChangeType type, string documentContentStreamId = null) {
 
+        private Mock<ISession> PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType type) {
             var changeEvents = new Mock<IChangeEvents> ();
             var changeList = generateSingleChangeListMock(type); 
             changeEvents.Setup (ce => ce.HasMoreItems).Returns ((bool?) false);
@@ -193,7 +221,22 @@ namespace TestLibrary.SyncStrategiesTests
             setupSessionDefaultValues(session);
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (It.IsAny<string>(), null).LatestChangeLogToken).Returns (changeLogToken);
             session.Setup (s => s.GetContentChanges (It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<long>())).Returns (changeEvents.Object);
+            return session;
+
+        }
+        
+        private Mock<ISession> GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType type, string documentContentStreamId = null) {
+            var session = PrepareSessionMockForSingleChange(type);
+
             var newRemoteObject =  createRemoteObjectMock(documentContentStreamId);
+            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
+         
+            return session;
+        }
+
+        private Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type) {
+            var session = PrepareSessionMockForSingleChange(type);
+            var newRemoteObject =  createRemoteFolderMock("folderId");
             session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
          
             return session;
@@ -229,6 +272,53 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
+        public void HandleStartSyncEventOnOneRemoteSecurityChangeOfExistingFile ()
+        {
+            FileEvent fileEvent = null;
+            var queue = new Mock<ISyncEventQueue>();
+            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
+                fileEvent = f as FileEvent;
+            }
+            );
+
+            Mock<IDatabase> database = GetDbMockWithToken();
+            AddLocalFile(database);
+
+            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
+            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
+            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
+        }
+
+        [Test, Category("Fast")]
+        public void HandleStartSyncEventOnOneRemoteSecurityChangeOfNonExistingFile ()
+        {
+            FileEvent fileEvent = null;
+            var queue = new Mock<ISyncEventQueue>();
+            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
+                fileEvent = f as FileEvent;
+            }
+            );
+
+            Mock<IDatabase> database = GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
+            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
+            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
+        }
+
+        [Test, Category("Fast")]
         public void HandleStartSyncEventOnOneRemoteDocumentCreationWithContent ()
         {
             FileEvent fileEvent = null;
@@ -240,7 +330,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Mock<IDatabase> database = GetDbMockWithToken();
 
-            Mock<ISession> session = GetSessionMockReturningChange(DotCMIS.Enums.ChangeType.Created, "someStreamId");
+            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, "someStreamId");
 
             var startSyncEvent = new StartNextSyncEvent (false);
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
@@ -263,7 +353,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Mock<IDatabase> database = GetDbMockWithToken();
 
-            Mock<ISession> session = GetSessionMockReturningChange(DotCMIS.Enums.ChangeType.Created, null);
+            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, null);
 
             var startSyncEvent = new StartNextSyncEvent (false);
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
@@ -272,6 +362,28 @@ namespace TestLibrary.SyncStrategiesTests
             queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
+        }
+
+        [Test, Category("Fast")]
+        public void HandleStartSyncEventOnOneRemoteFolderCreation ()
+        {
+            FolderEvent folderEvent = null;
+            var queue = new Mock<ISyncEventQueue>();
+            queue.Setup(q => q.AddEvent (It.IsAny<FolderEvent>())).Callback ((ISyncEvent f) => {
+                folderEvent = f as FolderEvent;
+            }
+            );
+
+            Mock<IDatabase> database = GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created);
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
+            Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
         }
 
         [Test, Category("Fast")]
@@ -286,7 +398,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Mock<IDatabase> database = GetDbMockWithToken();
 
-            Mock<ISession> session = GetSessionMockReturningChange(DotCMIS.Enums.ChangeType.Updated, null);
+            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Updated, null);
 
             var startSyncEvent = new StartNextSyncEvent (false);
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
@@ -310,7 +422,7 @@ namespace TestLibrary.SyncStrategiesTests
             Mock<IDatabase> database = GetDbMockWithToken();
             AddLocalFile(database);
 
-            Mock<ISession> session = GetSessionMockReturningChange(DotCMIS.Enums.ChangeType.Updated, null);
+            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Updated, null);
 
             var startSyncEvent = new StartNextSyncEvent (false);
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
@@ -328,7 +440,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Mock<IDatabase> database = GetDbMockWithToken();
 
-            Mock<ISession> session = GetSessionMockReturningChange(DotCMIS.Enums.ChangeType.Deleted, null);
+            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
 
             var startSyncEvent = new StartNextSyncEvent (false);
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
@@ -350,7 +462,7 @@ namespace TestLibrary.SyncStrategiesTests
             Mock<IDatabase> database = GetDbMockWithToken();
             AddLocalFile(database);
 
-            Mock<ISession> session = GetSessionMockReturningChange(DotCMIS.Enums.ChangeType.Deleted, null);
+            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
 
             var startSyncEvent = new StartNextSyncEvent (false);
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
