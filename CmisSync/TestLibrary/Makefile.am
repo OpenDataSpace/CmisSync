@@ -32,6 +32,7 @@ SOURCES =  \
 	EventsTests/PermissionDeniedEventHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/ContentChangeIT.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \
 	StreamTests/OffsetStreamTest.cs \
@@ -59,7 +60,8 @@ SOURCES =  \
 	EncodingTest.cs \
 	FSDeletionHandlerTest.cs \
 	LocalFilesystemActivityGenerator.cs \
-	WatcherTest.cs
+	WatcherTest.cs \
+	TestUtils/MockUtil.cs
 	
 
 EXTRA_DIST = TestLibrary.csproj \
