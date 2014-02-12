@@ -44,6 +44,8 @@ SOURCES =  \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SyncMechanismTest.cs \
+	SyncStrategiesTests/SingleStepEventQueue.cs \
+	SyncStrategiesTests/SingleStepEventQueueTest.cs \
 	ContentTasksTests/ChunkedDownloaderTest.cs \
 	ContentTasksTests/SimpleFileDownloaderTest.cs \
 	ContentTasksTests/SimpleFileUploaderTest.cs \
