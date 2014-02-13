@@ -4,6 +4,9 @@ using System.IO;
 namespace CmisSync.Lib.Events
 {
 
+    ///
+    ///<summary>Events Created By ContentChange Eventhandler<summary>
+    ///
     public class ContentChangeEvent : ISyncEvent
     {
         public DotCMIS.Enums.ChangeType Type { get; private set; }
