@@ -96,8 +96,8 @@ namespace CmisSync {
                 notificationCenter.BeginInvokeOnMainThread(delegate {
                     NSUserNotification notification = new NSUserNotification();
                     notification.Title = reponame;
-                    notification.Subtitle = "Credentials Error";
-                    notification.InformativeText = "Click to update the credentials";
+                    notification.Subtitle = Properties_Resources.NotificationCreditsError;
+                    notification.InformativeText = Properties_Resources.NotificationCreditsChange;
                     NSMutableDictionary userInfo = new NSMutableDictionary();
                     userInfo.Add ((NSString)notificationType, (NSString)notificationTypeCredentials);
                     notification.UserInfo = userInfo;
@@ -252,28 +252,30 @@ namespace CmisSync {
             string type = "Unknown";
             switch (transmission.Type) {
             case FileTransmissionType.UPLOAD_NEW_FILE:
-                type = "Upload new file";
+                type = Properties_Resources.NotificationFileUpload;
                 break;
             case FileTransmissionType.UPLOAD_MODIFIED_FILE:
-                type = "Update remote file";
+                type = Properties_Resources.NotificationFileUpdateRemote;
                 break;
             case FileTransmissionType.DOWNLOAD_NEW_FILE:
-                type = "Download new file";
+                type = Properties_Resources.NotificationFileDownload;
                 break;
             case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
-                type = "Update local file";
+                type = Properties_Resources.NotificationFileUpdateLocal;
                 break;
             }
+
+            string status = "";
             if (transmission.Status.Aborted == true) {
-                type += " aborted";
+                status = Properties_Resources.NotificationFileStatusAborted;
             } else if (transmission.Status.Completed == true) {
-                type += " completed";
+                status = Properties_Resources.NotificationFileStatusCompleted;
             } else if (transmission.Status.FailedException != null) {
-                type += " failed";
+                status = Properties_Resources.NotificationFileStatusFailed;
             }
 
-            return String.Format("{0} ({1:###.#}% {2})",
-                type,
+            return String.Format("{0} {1} ({2:###.#}% {3})",
+                type, status,
                 Math.Round (transmission.Status.Percent.GetValueOrDefault(), 1),
                 CmisSync.Lib.Utils.FormatBandwidth ((long)transmission.Status.BitsPerSecond.GetValueOrDefault()));
         }
