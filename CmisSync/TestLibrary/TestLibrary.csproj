@@ -108,6 +108,8 @@
     <Compile Include="EventsTests\ExceptionEventTest.cs" />
     <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
     <Compile Include="TestUtils\MockUtil.cs" />
+    <Compile Include="TestUtils\ObservableHandler.cs" />
+    <Compile Include="TestUtils\ObservableHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

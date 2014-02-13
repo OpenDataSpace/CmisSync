@@ -61,7 +61,9 @@ SOURCES =  \
 	FSDeletionHandlerTest.cs \
 	LocalFilesystemActivityGenerator.cs \
 	WatcherTest.cs \
-	TestUtils/MockUtil.cs
+	TestUtils/MockUtil.cs \
+	TestUtils/ObservableHandler.cs \
+	TestUtils/ObservableHandlerTest.cs 
 	
 
 EXTRA_DIST = TestLibrary.csproj \
