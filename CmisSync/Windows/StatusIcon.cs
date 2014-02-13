@@ -7,6 +7,7 @@ using System.Windows;
 using System.Globalization;
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
+using System.Threading;
 
 namespace CmisSync
 {
@@ -67,6 +68,36 @@ namespace CmisSync
             this.trayicon.ContextMenuStrip = this.traymenu;
             this.trayicon.Visible = true;
             this.trayicon.MouseClick += NotifyIcon1_MouseClick;
+
+            Program.Controller.ShowChangePassword += delegate(string reponame)
+            {
+                lock (repoCreditsErrorListLock)
+                {
+                    if (string.IsNullOrEmpty(repoCreditsErrorList.Find((string name) => { return name == reponame; })))
+                    {
+                        repoCreditsErrorList.Add(reponame);
+                    }
+                }
+                this.trayicon.ShowBalloonTip(30000, Properties_Resources.NotificationCreditsError, Properties_Resources.NotificationCreditsChange, ToolTipIcon.Error);
+            };
+
+            this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
+        }
+
+        private List<string> repoCreditsErrorList = new List<string>();
+
+        private Object repoCreditsErrorListLock = new Object();
+
+        private void trayicon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            lock (repoCreditsErrorListLock)
+            {
+                foreach (string reponame in repoCreditsErrorList)
+                {
+                    Program.Controller.EditRepositoryCredentials(reponame);
+                }
+                repoCreditsErrorList.Clear();
+            }
         }
 
 
