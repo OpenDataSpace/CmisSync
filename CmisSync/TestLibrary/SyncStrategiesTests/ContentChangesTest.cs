@@ -255,10 +255,32 @@ namespace TestLibrary.SyncStrategiesTests
             session.SetupSessionDefaultValues();
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (It.IsAny<string>(), null).LatestChangeLogToken).Returns (changeLogToken);
             session.Setup (s => s.GetContentChanges (It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<long>())).Returns (changeEvents.Object);
-            var newRemoteObject =  MockUtil.CreateRemoteObjectMock(null);
-            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
 
             return session;            
+        }
+
+        [Test, Category("Fast")]
+        public void GivesCorrectContentChangeEvent ()
+        {
+            ContentChangeEvent csEvent = null;
+            var queue = new Mock<ISyncEventQueue>();
+            queue.Setup(q => q.AddEvent (It.IsAny<ContentChangeEvent>())).Callback ((ISyncEvent f) => {
+                    csEvent = f as ContentChangeEvent;
+                }
+            );
+            string id = "myId";
+
+            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            var session = MockUtil.PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType.Created,id);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Once());
+            Assert.That(csEvent.Type, Is.EqualTo(DotCMIS.Enums.ChangeType.Created));
+            Assert.That(csEvent.ObjectId, Is.EqualTo(id));
+
         }
 
         [Test, Category("Fast")]
@@ -274,7 +296,7 @@ namespace TestLibrary.SyncStrategiesTests
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
 
             Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Exactly(3));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
         }
 
         [Test, Category("Fast")]
@@ -290,7 +312,7 @@ namespace TestLibrary.SyncStrategiesTests
             var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
 
             Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Exactly(3));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
         }
     }
 }

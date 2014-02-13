@@ -39,6 +39,28 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId==null? 0 : 1);
             return newRemoteObject;
         }
+
+        public static Mock<ISession> PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType type, string objectId = "objectId", string changeLogToken = "token", string latestChangeLogToken = "latestChangeLogToken") {
+            var changeEvents = new Mock<IChangeEvents> ();
+            var changeList = GenerateSingleChangeListMock(type, objectId); 
+            changeEvents.Setup (ce => ce.HasMoreItems).Returns ((bool?) false);
+            changeEvents.Setup (ce => ce.LatestChangeLogToken).Returns (latestChangeLogToken);
+            changeEvents.Setup (ce => ce.TotalNumItems).Returns (1);
+            changeEvents.Setup (ce => ce.ChangeEventList).Returns (changeList);
+
+            var session = new Mock<ISession> ();
+            session.SetupSessionDefaultValues();
+            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (It.IsAny<string>(), null).LatestChangeLogToken).Returns (changeLogToken);
+            session.Setup (s => s.GetContentChanges (It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<long>())).Returns (changeEvents.Object);
+            return session;
+
+        }
+
+        private static List<IChangeEvent> GenerateSingleChangeListMock (DotCMIS.Enums.ChangeType type, string objectId = "objId") {
+            var changeList = new List<IChangeEvent> ();
+            changeList.Add (MockUtil.GenerateChangeEvent(type, objectId).Object);
+            return changeList;
+        }
     }
 
 }

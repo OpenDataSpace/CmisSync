@@ -13,7 +13,7 @@ namespace CmisSync.Lib.Events
 
         public string ObjectId { get; private set; }
 
-        public ContentChangeEvent (DotCMIS.Enums.ChangeType type, string objectId)
+        public ContentChangeEvent (DotCMIS.Enums.ChangeType? type, string objectId)
         {
             if (objectId == null) {
                 throw new ArgumentNullException ("Argument null in ContenChangeEvent Constructor", "path");
@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Events
             if (type == null) {
                 throw new ArgumentNullException ("Argument null in ContenChangeEvent Constructor", "type");
             }
-            Type = type;
+            Type = (DotCMIS.Enums.ChangeType) type;
             ObjectId = objectId;
         }
 
