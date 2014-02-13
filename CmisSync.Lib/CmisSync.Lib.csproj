@@ -148,12 +148,10 @@
     <Compile Include="Sync\Strategy\ISituationDetection.cs" />
     <Compile Include="Storage\IMetaDataStorage.cs" />
     <Compile Include="Data\MappedObjects.cs" />
-    <Compile Include="ContentTasks\FileUploader.cs" />
     <Compile Include="ContentTasks\SimpleFileDownloader.cs" />
     <Compile Include="ContentTasks\ChunkedUploader.cs" />
     <Compile Include="ContentTasks\ChunkedDownloader.cs" />
     <Compile Include="ContentTasks\SimpleFileUploader.cs" />
-    <Compile Include="ContentTasks\FileDownloader.cs" />
     <Compile Include="Storage\ICookieStorage.cs" />
     <Compile Include="Cmis\PersistentNtlmAuthenticationProvider.cs" />
     <Compile Include="HttpProxyUtils.cs" />
@@ -161,6 +159,9 @@
     <Compile Include="Events\ExceptionEvent.cs" />
     <Compile Include="Events\PermissionDeniedEventHandler.cs" />
     <Compile Include="Events\SuccessfulLoginEvent.cs" />
+    <Compile Include="ContentTasks\IFileDownloader.cs" />
+    <Compile Include="ContentTasks\IFileUploader.cs" />
+    <Compile Include="ContentTasks\Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

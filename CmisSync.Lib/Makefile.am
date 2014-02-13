@@ -23,10 +23,11 @@ SOURCES =  \
 	ConfigMigration.cs \
 	ContentTasks/ChunkedDownloader.cs \
 	ContentTasks/ChunkedUploader.cs \
-	ContentTasks/FileDownloader.cs \
-	ContentTasks/FileUploader.cs \
+	ContentTasks/IFileDownloader.cs \
+	ContentTasks/IFileUploader.cs \
 	ContentTasks/SimpleFileDownloader.cs \
 	ContentTasks/SimpleFileUploader.cs \
+	ContentTasks/Utils.cs \
 	Credentials.cs \
 	Data/MappedObjects.cs \
 	Data/PathMatcher.cs \

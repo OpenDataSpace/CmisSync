@@ -774,15 +774,7 @@ namespace CmisSync.Lib.Sync
                             }
                         }
                         database.SetDownloadServerSideModificationDate(filepath, remoteDocument.LastModificationDate);
-                        IFileDownloader downloader;
-                        if (repoinfo.DownloadChunkSize <= 0){
-                            Logger.Debug("Simple File Downloader");
-                            downloader = new SimpleFileDownloader();
-                        }else {
-                            Logger.Debug("Chunked File Downloader");
-                            downloader = new ChunkedDownloader(repoinfo.DownloadChunkSize);
-                        }
-                            
+                        IFileDownloader downloader = ContentTaskUtils.CreateDownloader(repoinfo.DownloadChunkSize);
 
                         // Download file.
                         Boolean success = false;
@@ -931,11 +923,7 @@ namespace CmisSync.Lib.Sync
                             using (SHA1 hashAlg = new SHA1Managed())
                             using (Stream file = File.OpenRead(filePath))
                             {
-                                IFileUploader uploader;
-                                if(repoinfo.ChunkSize <= 0)
-                                    uploader = new SimpleFileUploader();
-                                else
-                                    uploader = new ChunkedUploader(repoinfo.ChunkSize);
+                                IFileUploader uploader = ContentTaskUtils.CreateUploader(repoinfo.ChunkSize);
 
                                 try {
                                     try {
@@ -954,9 +942,11 @@ namespace CmisSync.Lib.Sync
                                     // Upload
                                     try{
                                         IDocument lastState;
-                                        if(uploadProgresses.TryGetValue(filePath, out lastState)){
-                                            if(lastState.ChangeToken == remoteDocument.ChangeToken && lastState.ContentStreamLength != null) {
-                                                file.Seek((long) lastState.ContentStreamLength, SeekOrigin.Begin);
+                                        if(uploadProgresses.TryGetValue(filePath, out lastState))
+                                        {
+                                            if(lastState.ChangeToken == remoteDocument.ChangeToken && lastState.ContentStreamLength != null)
+                                            {
+                                                ContentTaskUtils.PrepareResume((long)lastState.ContentStreamLength, file, hashAlg);
                                             } else {
                                                 uploadProgresses.Remove(filePath);
                                             }
@@ -1143,16 +1133,12 @@ namespace CmisSync.Lib.Sync
                             return true;
                         }
                         this.Queue.AddEvent(transmissionEvent);
-                        IFileUploader uploader;
-                        if (repoinfo.ChunkSize <= 0)
-                            uploader = new SimpleFileUploader();
-                        else
-                            uploader = new ChunkedUploader(repoinfo.ChunkSize);
+                        IFileUploader uploader = ContentTaskUtils.CreateUploader(repoinfo.ChunkSize);
                         using (var hashAlg = new SHA1Managed()) {
                             IDocument lastState;
                             if(uploadProgresses.TryGetValue(filePath, out lastState)){
                                 if(lastState.ChangeToken == remoteFile.ChangeToken && lastState.ContentStreamLength != null) {
-                                    localfile.Seek((long) lastState.ContentStreamLength, SeekOrigin.Begin);
+                                    ContentTaskUtils.PrepareResume((long) lastState.ContentStreamLength, localfile, hashAlg);
                                 } else {
                                     uploadProgresses.Remove(filePath);
                                 }
