@@ -53,6 +53,10 @@ namespace TestLibrary.IntegrationTests
             db.Setup(foo => foo.GetFilePath(It.IsAny<string>())).Returns(path);
         }
 
+        private static void AddLocalFolder(Mock<IDatabase> db, string path = "path"){
+            db.Setup(foo => foo.GetFolderPath(It.IsAny<string>())).Returns(path);
+        }
+
         private Mock<ISession> PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType type) {
             var changeEvents = new Mock<IChangeEvents> ();
             var changeList = generateSingleChangeListMock(type); 
@@ -87,171 +91,118 @@ namespace TestLibrary.IntegrationTests
         }
 
 
+        private ObservableHandler RunQueue(Mock<ISession> session, Mock<IDatabase> database) {
+            var manager = new SyncEventManager();
+
+            var observer = new ObservableHandler();
+            manager.AddEventHandler(observer);
+
+            SingleStepEventQueue queue = new SingleStepEventQueue(manager);
+
+            var changes = new ContentChanges (session.Object, database.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
+            manager.AddEventHandler(changes);
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            queue.AddEvent(startSyncEvent);
+            queue.Run();
+
+            return observer;
+        }
+
+        private void AssertHandlerGotSingleFolderEvent(ObservableHandler observer, MetaDataChangeType metaType) {
+            Assert.That(observer.list.Count, Is.EqualTo(1));
+            Assert.That(observer.list[0], Is.TypeOf(typeof(FolderEvent)));
+            var folderEvent = observer.list[0] as FolderEvent;
+            Assert.That(folderEvent.Remote, Is.EqualTo(metaType), "MetaDataChangeType incorrect");
+            
+        }
+
+        private void AssertHandlerGotSingleFileEvent(ObservableHandler observer, MetaDataChangeType metaType, ContentChangeType contentType) {
+            Assert.That(observer.list.Count, Is.EqualTo(1));
+            Assert.That(observer.list[0], Is.TypeOf(typeof(FileEvent)));
+            var fileEvent = observer.list[0] as FileEvent;
+
+            Assert.That(fileEvent.Remote, Is.EqualTo(metaType), "MetaDataChangeType incorrect");
+            Assert.That(fileEvent.RemoteContent, Is.EqualTo(contentType), "ContentChangeType incorrect");
+            
+        }
 
         [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteSecurityChangeOfExistingFile ()
+        public void RemoteSecurityChangeOfExistingFile ()
         {
-            FileEvent fileEvent = null;
-            var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                fileEvent = f as FileEvent;
-            }
-            );
-
             Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
             AddLocalFile(database);
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
+            ObservableHandler observer = RunQueue(session, database);
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CHANGED, ContentChangeType.NONE);
 
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
         [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteSecurityChangeOfNonExistingFile ()
+        public void RemoteSecurityChangeOfNonExistingFile ()
         {
-            FileEvent fileEvent = null;
-            var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                fileEvent = f as FileEvent;
-            }
-            );
-
             Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
+            ObservableHandler observer = RunQueue(session, database);
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
-
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
+            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
 
         [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteDocumentCreationWithContent ()
+        public void RemoteDocumentCreationWithContent ()
         {
-            FileEvent fileEvent = null;
-            var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                fileEvent = f as FileEvent;
-            }
-            );
-
             Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, "someStreamId");
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
-
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
+            ObservableHandler observer = RunQueue(session, database);
+            
+            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
 
         [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteDocumentCreationWithoutContent ()
+        public void RemoteDocumentCreationWithoutContent ()
         {
-            FileEvent fileEvent = null;
-            var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                fileEvent = f as FileEvent;
-            }
-            );
-
             Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, null);
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
-
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
+            ObservableHandler observer = RunQueue(session, database);
+            
+            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CREATED, ContentChangeType.NONE);
         }
 
-        [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteFolderCreation ()
-        {
-            FolderEvent folderEvent = null;
-            var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent (It.IsAny<FolderEvent>())).Callback ((ISyncEvent f) => {
-                folderEvent = f as FolderEvent;
-            }
-            );
-
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
-
-            Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created);
-
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
-
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
-            Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-        }
 
         [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneLocallyNotExistingRemoteDocumentUpdated ()
+        public void LocallyNotExistingRemoteDocumentUpdated ()
         {
-            FileEvent fileEvent = null;
-            var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                fileEvent = f as FileEvent;
-            }
-            );
-
             Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Updated, null);
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+            ObservableHandler observer = RunQueue(session, database);
 
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
+            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
 
         [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneLocallyExistingRemoteDocumentUpdated ()
+        public void LocallyExistingRemoteDocumentUpdated ()
         {
-            FileEvent fileEvent = null;
-            var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                fileEvent = f as FileEvent;
-            }
-            );
-
             Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
             AddLocalFile(database);
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Updated, null);
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+            ObservableHandler observer = RunQueue(session, database);
 
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CHANGED));
+            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CHANGED, ContentChangeType.CHANGED);
         }
         
         [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteDeletionChangeWithoutLocalFile ()
+        public void RemoteDeletionChangeWithoutLocalFile ()
         {
             var queue = new Mock<ISyncEventQueue>();
 
@@ -259,37 +210,55 @@ namespace TestLibrary.IntegrationTests
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
-
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Never());
+            ObservableHandler observer = RunQueue(session, database);
+            Assert.That(observer.list.Count, Is.EqualTo(0));
         }
 
         [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteDeletionChangeTest ()
+        public void RemoteDeletionChangeTest ()
         {
-            FileEvent fileEvent = null;
-            var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                fileEvent = f as FileEvent;
-            }
-            );
-
             Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
             AddLocalFile(database);
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
+            ObservableHandler observer = RunQueue(session, database);
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
-
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.DELETED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
+            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.DELETED, ContentChangeType.NONE);
         }
 
+        [Test, Category("Fast")]
+        public void RemoteFolderCreation ()
+        {
+            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created);
+            ObservableHandler observer = RunQueue(session, database);
+
+            AssertHandlerGotSingleFolderEvent(observer, MetaDataChangeType.CREATED);
+        }
+
+        [Test, Category("Fast")]
+        public void RemoteFolderDeletionWithoutLocalFolder ()
+        {
+            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted);
+            ObservableHandler observer = RunQueue(session, database);
+            Assert.That(observer.list.Count, Is.EqualTo(0));
+
+        }
+
+        [Test, Category("Fast")]
+        public void RemoteFolderDeletion ()
+        {
+            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            AddLocalFolder(database);
+
+            Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted);
+            ObservableHandler observer = RunQueue(session, database);
+            AssertHandlerGotSingleFolderEvent(observer, MetaDataChangeType.DELETED);
+
+        }
     }
 }
 
