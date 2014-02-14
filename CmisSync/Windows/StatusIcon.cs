@@ -7,7 +7,6 @@ using System.Windows;
 using System.Globalization;
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
-using System.Threading;
 
 namespace CmisSync
 {
@@ -128,10 +127,23 @@ namespace CmisSync
                 {
                     BeginInvoke((Action)delegate
                     {
-                        if (icon_frame > -1)
-                            this.trayicon.Icon = animationFrames[icon_frame];
-                        else
+                        if (icon_frame < 0)
+                        {
                             this.trayicon.Icon = SystemIcons.Error;
+                            return;
+                        }
+                        if (icon_frame > 0)
+                        {
+                            this.trayicon.Icon = animationFrames[icon_frame];
+                            return;
+                        }
+                        if (repoCreditsErrorList.Count > 0)
+                        {
+                            this.trayicon.Icon = SystemIcons.Warning;
+                            return;
+                        }
+                        this.trayicon.Icon = animationFrames[icon_frame];
+                        return;
                     });
                 }
             };
@@ -410,8 +422,11 @@ namespace CmisSync
         /// </summary>
         private void NotifyIcon1_MouseClick(Object sender, MouseEventArgs e)
         {
-            if(e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
+            {
+                trayicon_BalloonTipClicked(sender, e);
                 Controller.LocalFolderClicked("");
+            }
         }
 
         /// <summary>
