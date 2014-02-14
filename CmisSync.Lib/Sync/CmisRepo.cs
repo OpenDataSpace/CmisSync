@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Sync
             this.Watcher.ChangeEvent += OnFileActivity;
             this.Watcher.EnableEvent = true;
             Logger.Info(synchronizedFolder);
-            SyncInBackground();
+//            SyncInBackground();
         }
 
         public override void Resume()

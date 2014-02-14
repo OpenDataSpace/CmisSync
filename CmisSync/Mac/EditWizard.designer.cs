@@ -46,6 +46,9 @@ namespace CmisSync
 		MonoMac.AppKit.NSImageView SideSplashView { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSTabView TabView { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSTextField UserLabel { get; set; }
 
 		[Outlet]
@@ -59,16 +62,6 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (FolderTab != null) {
-				FolderTab.Dispose ();
-				FolderTab = null;
-			}
-
-			if (CredentialsTab != null) {
-				CredentialsTab.Dispose ();
-				CredentialsTab = null;
-			}
-
 			if (AddressLabel != null) {
 				AddressLabel.Dispose ();
 				AddressLabel = null;
@@ -84,9 +77,19 @@ namespace CmisSync
 				CancelButton = null;
 			}
 
+			if (CredentialsTab != null) {
+				CredentialsTab.Dispose ();
+				CredentialsTab = null;
+			}
+
 			if (FinishButton != null) {
 				FinishButton.Dispose ();
 				FinishButton = null;
+			}
+
+			if (FolderTab != null) {
+				FolderTab.Dispose ();
+				FolderTab = null;
 			}
 
 			if (Header != null) {
@@ -122,6 +125,11 @@ namespace CmisSync
 			if (UserText != null) {
 				UserText.Dispose ();
 				UserText = null;
+			}
+
+			if (TabView != null) {
+				TabView.Dispose ();
+				TabView = null;
 			}
 		}
 	}
