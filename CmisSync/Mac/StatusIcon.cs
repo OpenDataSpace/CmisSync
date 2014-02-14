@@ -363,6 +363,7 @@ namespace CmisSync {
                 if (IsNotificationTransmission(e.Notification)) {
                     NSWorkspace.SharedWorkspace.BeginInvokeOnMainThread (delegate {
                         NSWorkspace.SharedWorkspace.OpenFile (Path.GetDirectoryName (e.Notification.InformativeText));
+                        NSWorkspace.SharedWorkspace.SelectFile(e.Notification.InformativeText, "");
                     });
                 }
                 if (IsNotificationCredentials(e.Notification)) {
