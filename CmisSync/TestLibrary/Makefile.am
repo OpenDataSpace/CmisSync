@@ -31,6 +31,7 @@ SOURCES =  \
 	EventsTests/PermissionDeniedEventHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/IntegrationTestUtils.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \
 	StreamTests/OffsetStreamTest.cs \

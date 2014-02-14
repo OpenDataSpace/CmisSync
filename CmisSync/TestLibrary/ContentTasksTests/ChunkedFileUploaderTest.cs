@@ -173,6 +173,31 @@ namespace TestLibrary.ContentTasksTests
             }
         }
 
+        [Test, Category("Fast")]
+        public void NormalUploadReplacesRemoteStreamIfRemoteStreamExists()
+        {
+            mockedDocument.Setup( doc => doc.ContentStreamId).Returns("StreamId");
+            mockedDocument.Setup( doc => doc.DeleteContentStream(It.IsAny<bool>())).Callback(()=> {
+                if (remoteStream != null)
+                remoteStream.Dispose ();
+                remoteStream = new MemoryStream ();
+            }).Returns(mockedDocument.Object);
+
+            remoteStream.WriteByte(1);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                AssertThatProgressFitsMinimumLimits(e, 0, 0, 0);
+            };
+
+            using (IFileUploader uploader = new ChunkedUploader(ChunkSize)) {
+                uploader.UploadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
+            }
+
+            mockedDocument.Verify( doc => doc.DeleteContentStream(It.IsAny<bool>()), Times.Once());
+            AssertThatLocalAndRemoteContentAreEqualToHash();
+            Assert.AreEqual (1, lastChunk);
+
+        }
+
         private void InitRemoteChunkWithSize (int successfulUploaded)
         {
             byte[] buffer = new byte[successfulUploaded];

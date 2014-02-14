@@ -271,7 +271,7 @@ namespace CmisSync.Lib
         {
             // Sync up everything that changed
             // since we've been offline
-            SyncInBackground();
+//            SyncInBackground();
 
             this.remote_timer.Start();
         }

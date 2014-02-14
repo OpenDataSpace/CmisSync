@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Events
             for(int i = handler.Count-1; i >= 0; i--)
             {
                 var h = handler[i];
-                logger.Debug("Forwarding to Handler " + h);
+//                logger.Debug("Forwarding to Handler " + h);
                 if(handler[i].Handle(e)){
                     return;
                 }

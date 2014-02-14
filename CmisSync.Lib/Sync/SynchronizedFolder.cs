@@ -739,6 +739,7 @@ namespace CmisSync.Lib.Sync
                     try
                     {
                         long failedCounter = database.GetOperationRetryCounter(filepath,Database.OperationType.DOWNLOAD);
+                        bool truncate = false;
                         if( failedCounter > repoinfo.MaxDownloadRetries)
                         {
                             Logger.Info(String.Format("Skipping download of file {0} because of too many failed ({1}) downloads", filepath, failedCounter));
@@ -761,7 +762,7 @@ namespace CmisSync.Lib.Sync
                             DateTime? remoteDate = remoteDocument.LastModificationDate;
                             if (null == remoteDate)
                             {
-                                File.Delete(tmpfilepath);
+                                truncate = true;
                             }
                             else
                             {
@@ -769,7 +770,7 @@ namespace CmisSync.Lib.Sync
                                 DateTime? serverDate = database.GetDownloadServerSideModificationDate(filepath);
                                 if (remoteDate != serverDate)
                                 {
-                                    File.Delete(tmpfilepath);
+                                    truncate = true;
                                 }
                             }
                         }
@@ -783,13 +784,13 @@ namespace CmisSync.Lib.Sync
                         try{
                             HashAlgorithm hashAlg = new SHA1Managed();
                             Logger.Debug("Creating local download file: " + tmpfilepath);
-                            using (Stream file = new FileStream(tmpfilepath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read)){
+                            using (FileStream file = new FileStream(tmpfilepath, (truncate)? FileMode.Create : FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read)){
                                 this.Queue.AddEvent(transmissionEvent);
                                 downloader.DownloadFile(remoteDocument, file, transmissionEvent, hashAlg);
-                                filehash = hashAlg.Hash;
-                                success = true;
                                 file.Close();
                             }
+                            filehash = hashAlg.Hash;
+                            success = true;
                         }
                         catch (ObjectDisposedException ex)
                         {
