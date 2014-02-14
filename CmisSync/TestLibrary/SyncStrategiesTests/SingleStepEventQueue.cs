@@ -31,5 +31,11 @@ namespace TestLibrary
             ISyncEvent e = queue.Dequeue();
             manager.Handle(e);
         }
+
+        public void Run() {
+            while(!IsStopped) {
+                Step();
+            }
+        }
     }
 }

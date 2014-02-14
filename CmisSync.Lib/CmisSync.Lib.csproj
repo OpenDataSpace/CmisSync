@@ -57,6 +57,7 @@
     <Compile Include="Events\ConfigChangedEvent.cs" />
     <Compile Include="Events\GenericSyncEventHandler.cs" />
     <Compile Include="Events\SyncEventQueue.cs" />
+    <Compile Include="Events\ContentChangeEvent.cs" />
     <Compile Include="LoggingStream.cs" />
     <Compile Include="Sync\ChangeLogStrategy.cs" />
     <Compile Include="ConfigMigration.cs" />
