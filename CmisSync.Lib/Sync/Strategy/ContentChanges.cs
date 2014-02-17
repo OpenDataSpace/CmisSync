@@ -6,11 +6,13 @@ using DotCMIS.Client;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Events;
 
+using log4net;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
     public class ContentChanges : ReportingSyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChanges));
         private ISession session;
         private IDatabase db;
         private int MaxNumberOfContentChanges;
@@ -110,6 +112,8 @@ namespace CmisSync.Lib.Sync.Strategy
                 // No changes or background process started
                 return true;
             }catch(Exception e) {
+                Logger.Warn("ContentChangeSync not successfull, fallback to CrawlSync");
+                Logger.Debug(e.StackTrace);
                 // Use fallback sync algorithm
                 return false;
             }

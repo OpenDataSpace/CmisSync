@@ -1,13 +1,23 @@
+using System;
+
 using DotCMIS.Client;
+using DotCMIS.Exceptions;
+
 using CmisSync.Lib.Events;
+
+using log4net;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
     public class ContentChangeEventAccumulator : SyncEventHandler{
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChangeEventAccumulator));
+
         /// this has to run before ContentChangeEventTransformer
         public static readonly int DEFAULT_PRIORITY = 2000;
 
         private ISession session;
+
+        private ISyncEventQueue queue;
 
         public override int Priority {
             get {
@@ -22,13 +32,28 @@ namespace CmisSync.Lib.Sync.Strategy
 
             var contentChangeEvent = e as ContentChangeEvent;
             if(contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted) {
-                contentChangeEvent.UpdateObject(session);
+                try{
+                    contentChangeEvent.UpdateObject(session);
+                }catch(CmisObjectNotFoundException){
+                    Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " has been deleted - ignore"); 
+                    return true;
+                }catch(Exception ex){
+                    Logger.Warn("Unable to fetch object " + contentChangeEvent.ObjectId + " starting CrawlSync");
+                    Logger.Debug(ex.StackTrace);
+                    queue.AddEvent(new StartNextSyncEvent(true));
+                    return true;
+                }
             }
             return false;
         }
 
-        public ContentChangeEventAccumulator(ISession session) {
+        public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) {
+            if(session == null)
+                throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
+            if(queue == null)
+                throw new ArgumentNullException("SyncEventQueue instance is needed for the ChangeLogStrategy, but was null");
             this.session = session;
+            this.queue = queue;
         }
     }
 }
