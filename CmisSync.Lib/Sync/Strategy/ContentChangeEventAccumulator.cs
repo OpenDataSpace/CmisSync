@@ -9,15 +9,13 @@ using log4net;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
-    public class ContentChangeEventAccumulator : SyncEventHandler{
+    public class ContentChangeEventAccumulator : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChangeEventAccumulator));
 
         /// this has to run before ContentChangeEventTransformer
         public static readonly int DEFAULT_PRIORITY = 2000;
 
         private ISession session;
-
-        private ISyncEventQueue queue;
 
         public override int Priority {
             get {
@@ -40,20 +38,17 @@ namespace CmisSync.Lib.Sync.Strategy
                 }catch(Exception ex){
                     Logger.Warn("Unable to fetch object " + contentChangeEvent.ObjectId + " starting CrawlSync");
                     Logger.Debug(ex.StackTrace);
-                    queue.AddEvent(new StartNextSyncEvent(true));
+                    Queue.AddEvent(new StartNextSyncEvent(true));
                     return true;
                 }
             }
             return false;
         }
 
-        public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) {
+        public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) : base(queue) {
             if(session == null)
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
-            if(queue == null)
-                throw new ArgumentNullException("SyncEventQueue instance is needed for the ChangeLogStrategy, but was null");
             this.session = session;
-            this.queue = queue;
         }
     }
 }
