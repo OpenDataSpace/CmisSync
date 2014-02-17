@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 
+using DotCMIS.Client;
+
 namespace CmisSync.Lib.Events
 {
 
@@ -12,6 +14,8 @@ namespace CmisSync.Lib.Events
         public DotCMIS.Enums.ChangeType Type { get; private set; }
 
         public string ObjectId { get; private set; }
+
+        public ICmisObject CmisObject { get; private set; }
 
         public ContentChangeEvent (DotCMIS.Enums.ChangeType? type, string objectId)
         {
@@ -30,6 +34,9 @@ namespace CmisSync.Lib.Events
             return string.Format ("ContenChangeEvent with type \"{0}\" and ID \"{1}\"", Type, ObjectId);
         }
 
+        public void UpdateObject(ISession session){
+           CmisObject = session.GetObject(ObjectId);
+        }        
     }
 }
 

@@ -61,6 +61,14 @@ namespace TestLibrary.TestUtils
             changeList.Add (MockUtil.GenerateChangeEvent(type, objectId).Object);
             return changeList;
         }
+
+        public static void AddLocalFile(this Mock<IDatabase> db, string path = "path"){
+            db.Setup(foo => foo.GetFilePath(It.IsAny<string>())).Returns(path);
+        }
+
+        public static void AddLocalFolder(this Mock<IDatabase> db, string path = "path"){
+            db.Setup(foo => foo.GetFolderPath(It.IsAny<string>())).Returns(path);
+        }
     }
 
 }
