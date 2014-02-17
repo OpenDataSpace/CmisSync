@@ -181,7 +181,7 @@ namespace TestLibrary.IntegrationTests
     /// <summary>
     /// Dot CMIS session tests. Each log in process must be able to be executed in 10 seconds, otherwise the tests will fail
     /// </summary>
-    [TestFixture, Timeout(10000)]
+    [TestFixture, Timeout(60000)]
     public class DotCMISSessionTests {
         /// <summary>
         /// Accept every SSL Server if an invalid cert is returned
@@ -279,6 +279,24 @@ namespace TestLibrary.IntegrationTests
             cmisParameters[SessionParameter.ReadTimeout] = "10000";
             cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
+            SessionFactory.NewInstance().CreateSession(cmisParameters);
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void CreateSessionWithCompressionEnabled(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId)
+        {
+            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+            cmisParameters[SessionParameter.AtomPubUrl] = url.ToString();
+            cmisParameters[SessionParameter.User] = user;
+            cmisParameters[SessionParameter.Password] = password;
+            cmisParameters[SessionParameter.RepositoryId] = repositoryId;
+            cmisParameters[SessionParameter.Compression] = Boolean.TrueString;
+            // Sets the Connect Timeout to infinite
+            cmisParameters[SessionParameter.ConnectTimeout] = "10000";
+            // Sets the Read Timeout to infinite
+            cmisParameters[SessionParameter.ReadTimeout] = "10000";
             SessionFactory.NewInstance().CreateSession(cmisParameters);
         }
     }
