@@ -44,6 +44,7 @@ SOURCES =  \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/ContentChangeEventAccumulatorTest.cs \
+	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SyncMechanismTest.cs \
