@@ -221,6 +221,7 @@ namespace CmisSync.Lib.Sync
                 cmisParameters[SessionParameter.ReadTimeout] = "-1";
                 cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
                 cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
+                cmisParameters[SessionParameter.Compression] = Boolean.TrueString;
             }
 
 
