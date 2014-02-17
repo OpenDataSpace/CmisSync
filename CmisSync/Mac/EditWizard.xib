@@ -17,6 +17,7 @@
                 <outlet property="PasswordLabel" destination="K2z-Jt-HMc" id="Y1Y-MP-TOb"/>
                 <outlet property="PasswordText" destination="0Mr-H1-8Aw" id="fXK-Cl-bAQ"/>
                 <outlet property="SideSplashView" destination="48I-1H-zGP" id="nUF-1Y-oV2"/>
+                <outlet property="TabView" destination="Be1-yo-8J3" id="iu4-3a-sqI"/>
                 <outlet property="UserLabel" destination="VS5-Ru-tEP" id="pCO-O0-QhW"/>
                 <outlet property="UserText" destination="sTM-yd-sXN" id="nL6-Oj-rBh"/>
                 <outlet property="window" destination="2" id="6"/>

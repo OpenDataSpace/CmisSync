@@ -110,6 +110,8 @@
     <Compile Include="TestUtils\MockUtil.cs" />
     <Compile Include="TestUtils\ObservableHandler.cs" />
     <Compile Include="TestUtils\ObservableHandlerTest.cs" />
+    <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
+    <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

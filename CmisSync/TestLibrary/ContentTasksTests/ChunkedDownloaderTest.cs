@@ -26,11 +26,10 @@ namespace TestLibrary.ContentTasksTests
         private FileTransmissionEvent transmissionEvent;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
-        private long remoteLength;
+        private readonly long remoteLength = 1024 * 1024;
         private byte[] remoteContent;
         private string ContentStreamId = "dummyID";
-        private long chunksize = 1024;
-        private RandomNumberGenerator random;
+        private readonly long chunkSize = 1024;
         private Mock<IDocument> mock;
         private Mock<IContentStream> mockedStream;
 
@@ -44,12 +43,10 @@ namespace TestLibrary.ContentTasksTests
             if (hashAlg != null)
                 hashAlg.Dispose ();
             hashAlg = new SHA1CryptoServiceProvider ();
-            if (random != null)
-                random.Dispose ();
-            random = RandomNumberGenerator.Create ();
-            remoteLength = 1024 * 1024;
             remoteContent = new byte[remoteLength];
-            random.GetBytes (remoteContent);
+            using(var random = RandomNumberGenerator.Create()) {
+                random.GetBytes (remoteContent);
+            }
             mock = new Mock<IDocument> ();
             mockedStream = new Mock<IContentStream> ();
         }
@@ -57,8 +54,8 @@ namespace TestLibrary.ContentTasksTests
         [Test, Category("Fast")]
         public void ConstructorWithValidInputTest ()
         {
-            using (var downloader = new ChunkedDownloader(chunksize)) {
-                Assert.AreEqual (chunksize, downloader.ChunkSize);
+            using (var downloader = new ChunkedDownloader(chunkSize)) {
+                Assert.AreEqual (chunkSize, downloader.ChunkSize);
             }
             using (var downloader = new ChunkedDownloader()) {
                 Assert.Greater (downloader.ChunkSize, 0);
@@ -69,16 +66,14 @@ namespace TestLibrary.ContentTasksTests
         [ExpectedException (typeof(ArgumentException))]
         public void ConstructorFailsWithNegativeChunkSize ()
         {
-            using (new ChunkedDownloader(-1))
-                ;
+            using (new ChunkedDownloader(-1));
         }
 
         [Test, Category("Fast")]
         [ExpectedException (typeof(ArgumentException))]
         public void ConstructorFailsWithZeroChunkSize ()
         {
-            using (new ChunkedDownloader(0))
-                ;
+            using (new ChunkedDownloader(0));
         }
 
         [Test, Category("Fast")]
@@ -110,7 +105,7 @@ namespace TestLibrary.ContentTasksTests
                 }
 
             };
-            using (IFileDownloader downloader = new ChunkedDownloader(chunksize)) {
+            using (IFileDownloader downloader = new ChunkedDownloader(chunkSize)) {
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);
 //                Assert.AreEqual (remoteContent, localFileStream.ToArray());
@@ -155,7 +150,57 @@ namespace TestLibrary.ContentTasksTests
                 }
 
             };
-            using (IFileDownloader downloader = new ChunkedDownloader(chunksize)) {
+            using (IFileDownloader downloader = new ChunkedDownloader(chunkSize)) {
+                downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
+                Assert.AreEqual (remoteContent.Length, localFileStream.Length);
+//                Assert.AreEqual (remoteContent, localFileStream.ToArray());
+                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteContent), hashAlg.Hash);
+                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localFileStream.ToArray ()), hashAlg.Hash);
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void ResumeDownloadWithUtils()
+        {
+            long successfulLength = 1024;
+            localFileStream.Write (remoteContent, 0, (int)successfulLength);
+            localFileStream.Seek (0, SeekOrigin.Begin);
+
+
+            byte[] remoteChunk = new byte[remoteLength - successfulLength];
+            for (int i=0; i < remoteChunk.Length; i++)
+                remoteChunk [i] = remoteContent [i + successfulLength];
+
+            mockedStream.Setup (stream => stream.Length).Returns (remoteChunk.Length);
+            mockedStream.Setup (stream => stream.Stream).Returns (new MemoryStream (remoteChunk));
+            mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
+            mock.Setup (doc => doc.ContentStreamId).Returns (ContentStreamId);
+            mock.Setup (doc => doc.GetContentStream (
+                It.Is<string> ((string s) => s.Equals (ContentStreamId)),
+                It.Is<long?> ((long? l) => (l == successfulLength)),
+                It.Is<long?> ((long? l) => l == remoteChunk.Length))
+            )
+                .Returns (mockedStream.Object);
+
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+//                Console.WriteLine(e.ToString());
+                if (e.ActualPosition != null) {
+                    Assert.GreaterOrEqual ((long)e.ActualPosition, successfulLength);
+                    Assert.LessOrEqual ((long)e.ActualPosition, remoteLength);
+                }
+                if (e.Percent != null) {
+                    Assert.Greater (e.Percent, 0);
+                    Assert.LessOrEqual (e.Percent, 100);
+                }
+                if (e.Length != null) {
+                    Assert.GreaterOrEqual (e.Length, successfulLength);
+                    Assert.LessOrEqual (e.Length, remoteLength);
+                }
+            };
+
+            using (IFileDownloader downloader = new ChunkedDownloader(chunkSize))
+            {
+                ContentTaskUtils.PrepareResume(successfulLength, localFileStream, hashAlg);
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);
 //                Assert.AreEqual (remoteContent, localFileStream.ToArray());
@@ -192,7 +237,7 @@ namespace TestLibrary.ContentTasksTests
                     Assert.IsTrue (e.Length == 0 || e.Length == remoteContent.Length);
                 }
             };
-            using (IFileDownloader downloader = new ChunkedDownloader(chunksize)) {
+            using (IFileDownloader downloader = new ChunkedDownloader(chunkSize)) {
                 downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (remoteContent.Length, localFileStream.Length);
 //                Assert.AreEqual (remoteContent, localFileStream.ToArray());
@@ -224,8 +269,6 @@ namespace TestLibrary.ContentTasksTests
                 if (!disposed) {
                     if (this.localFileStream != null)
                         this.localFileStream.Dispose ();
-                    if (random != null)
-                        random.Dispose ();
                     if (hashAlg != null)
                         hashAlg.Dispose ();
                     disposed = true;
