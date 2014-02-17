@@ -106,6 +106,7 @@ SOURCES =  \
 	Sync/Solver/RemoteObjectMoved.cs \
 	Sync/Solver/RemoteObjectRenamed.cs \
 	Sync/Strategy/ContentChanges.cs \
+	Sync/Strategy/ContentChangeEventAccumulator.cs \
 	Sync/Strategy/Crawler.cs \
 	Sync/Strategy/FileEventHandler.cs \
 	Sync/Strategy/FileSynchronizer.cs \

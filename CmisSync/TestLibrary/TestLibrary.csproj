@@ -83,6 +83,7 @@
     <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
+    <Compile Include="SyncStrategiesTests\ContentChangeEventAccumulatorTest.cs" />
     <Compile Include="SyncStrategiesTests\SingleStepEventQueue.cs" />
     <Compile Include="SyncStrategiesTests\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
