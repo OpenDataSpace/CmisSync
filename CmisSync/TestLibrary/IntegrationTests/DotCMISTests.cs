@@ -16,6 +16,7 @@ using DotCMIS.Client;
 using DotCMIS.Client.Impl;
 using DotCMIS.Data;
 using DotCMIS.Data.Impl;
+using DotCMIS.Exceptions;
 
 using Newtonsoft.Json;
 
@@ -104,7 +105,7 @@ namespace TestLibrary.IntegrationTests
                     doc.Delete(true);
                     Console.WriteLine("Old file deleted");
                 }
-            }catch(Exception){}
+            }catch(CmisObjectNotFoundException){}
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             Console.WriteLine("Empty file created");
             Assert.AreEqual(0, emptyDoc.ContentStreamLength);
@@ -135,7 +136,7 @@ namespace TestLibrary.IntegrationTests
                     doc.Delete(true);
                     Console.WriteLine("Old file deleted");
                 }
-            }catch(Exception){}
+            }catch(CmisObjectNotFoundException){}
             //watch.Restart();
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             //watch.Stop();
