@@ -35,6 +35,9 @@ namespace CmisSync.Lib.Sync.Strategy
                 }catch(CmisObjectNotFoundException){
                     Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " has been deleted - ignore"); 
                     return true;
+                }catch(CmisPermissionDeniedException){
+                    Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " gives Access Denied: ACL changed - ignore"); 
+                    return true;
                 }catch(Exception ex){
                     Logger.Warn("Unable to fetch object " + contentChangeEvent.ObjectId + " starting CrawlSync");
                     Logger.Debug(ex.StackTrace);

@@ -56,13 +56,28 @@ namespace TestLibrary.SyncStrategiesTests {
 
         [Test, Category("Fast")]
         public void IgnoreEventsThatHaveBeenDeleted() {
+            var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var remoteObject = new Mock<ICmisObject>();
             session.Setup (s => s.GetObject (It.IsAny<string>())).Throws (new CmisObjectNotFoundException());
-            var accumulator = new ContentChangeEventAccumulator (session.Object, new Mock<ISyncEventQueue>().Object);
+            var accumulator = new ContentChangeEventAccumulator (session.Object, queue.Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, id);
 
             Assert.That(accumulator.Handle(contentChange), Is.True);
+            queue.Verify(q => q.AddEvent(It.IsAny<StartNextSyncEvent>()), Times.Never());
+        }
+
+        [Test, Category("Fast")]
+        public void IgnoreEventsThatWeDontHaveAccessTo() {
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
+            var remoteObject = new Mock<ICmisObject>();
+            session.Setup (s => s.GetObject (It.IsAny<string>())).Throws (new CmisPermissionDeniedException());
+            var accumulator = new ContentChangeEventAccumulator (session.Object, queue.Object);
+            var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, id);
+
+            Assert.That(accumulator.Handle(contentChange), Is.True);
+            queue.Verify(q => q.AddEvent(It.IsAny<StartNextSyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast")]
