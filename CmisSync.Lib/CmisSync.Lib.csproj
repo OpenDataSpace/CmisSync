@@ -9,6 +9,9 @@
     <OutputType>Library</OutputType>
     <RootNamespace>CmisSync.Lib</RootNamespace>
     <AssemblyName>CmisSync.Lib</AssemblyName>
+    <ReleaseVersion>
+    </ReleaseVersion>
+    <UseMSBuildEngine>False</UseMSBuildEngine>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -47,6 +50,9 @@
       <HintPath>..\Extras\sqlite-netFx40-binary-Win32-2010-1.0.84.0\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="XamMac, Version=0.0.0.0, Culture=neutral, PublicKeyToken=84e04ff9cfb79065">
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cmis\Crypto.cs" />
@@ -162,13 +168,15 @@
     <Compile Include="ContentTasks\IFileDownloader.cs" />
     <Compile Include="ContentTasks\IFileUploader.cs" />
     <Compile Include="ContentTasks\Utils.cs" />
+    <Compile Include="Sync\Strategy\MacWatcher.cs" />
+    <Compile Include="Sync\Strategy\NetWatcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="true" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="True" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />

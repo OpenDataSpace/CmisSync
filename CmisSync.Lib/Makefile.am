@@ -111,6 +111,8 @@ SOURCES =  \
 	Sync/Strategy/ISituationDetection.cs \
 	Sync/Strategy/LocalCrawler.cs \
 	Sync/Strategy/LocalSituationDetection.cs \
+	Sync/Strategy/MacWatcher.cs \
+	Sync/Strategy/NetWatcher.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SimpleFileSynchronizer.cs \
 	Sync/Strategy/Watcher.cs \
