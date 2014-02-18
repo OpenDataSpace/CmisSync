@@ -36,8 +36,6 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
             if(db == null)
                 throw new ArgumentNullException("Database instance is needed for the ChangeLogStrategy, but was null");
-            if(queue == null)
-                throw new ArgumentNullException("SyncEventQueue instance is needed for the ChangeLogStrategy, but was null");
             if(maxNumberOfContentChanges <= 1)
                 throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
             this.session = session;

@@ -15,14 +15,21 @@ namespace TestLibrary.SyncStrategiesTests {
     public class ContentChangeEventAccumulatorTest 
     {
         private static readonly string id = "myId";
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorTest () {
             var session = new Mock<ISession>();
             var accumulator = new ContentChangeEventAccumulator (session.Object, new Mock<ISyncEventQueue>().Object);
             Assert.That(accumulator.Priority, Is.EqualTo(2000));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void DbNullContstructorTest() {
+            var queue  = new Mock<ISyncEventQueue>();
+            var accumulator = new ContentChangeEventAccumulator(null, new Mock<ISyncEventQueue>().Object);
+        }
+
+        [Test, Category("Fast"), Category("ContentChange")]
         public void DocumentCreationAccumulated() {
             var session = new Mock<ISession>();
             var remoteObject = new Mock<ICmisObject>();
@@ -34,7 +41,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(contentChange.CmisObject, Is.EqualTo(remoteObject.Object));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void DocumentDeletionNotAccumulated() {
             var session = new Mock<ISession>();
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Deleted, id);
@@ -45,7 +52,7 @@ namespace TestLibrary.SyncStrategiesTests {
             session.Verify(foo => foo.GetObject(It.IsAny<string>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void DoesNotHandleWrongEvents() {
             var session = new Mock<ISession>();
             var contentChange = new Mock<ISyncEvent>().Object;
@@ -54,7 +61,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(accumulator.Handle(contentChange), Is.False);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void IgnoreEventsThatHaveBeenDeleted() {
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
@@ -67,7 +74,7 @@ namespace TestLibrary.SyncStrategiesTests {
             queue.Verify(q => q.AddEvent(It.IsAny<StartNextSyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void IgnoreEventsThatWeDontHaveAccessTo() {
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
@@ -80,7 +87,7 @@ namespace TestLibrary.SyncStrategiesTests {
             queue.Verify(q => q.AddEvent(It.IsAny<StartNextSyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void ExceptionTriggersFullSync() {
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();

@@ -15,7 +15,7 @@ namespace TestLibrary.SyncStrategiesTests {
     [TestFixture]
     public class ContentChangeEventTransformerTest {
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorTest() {
             var db = new Mock<IDatabase>();
             var queue  = new Mock<ISyncEventQueue>();
@@ -23,14 +23,14 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(transformer.Priority, Is.EqualTo(1000));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void DdNullContstructorTest() {
+        public void DbNullContstructorTest() {
             var queue  = new Mock<ISyncEventQueue>();
             var transformer = new ContentChangeEventTransformer(queue.Object, null);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void IgnoreDifferentEvent()
         {
             var db = new Mock<IDatabase>();
@@ -40,7 +40,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(transformer.Handle(e.Object), Is.False);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         [ExpectedException(typeof(ArgumentException))]
         public void IgnoreNotAccumulatedNonDeleteEvent()
         {
@@ -74,7 +74,7 @@ namespace TestLibrary.SyncStrategiesTests {
             return e;
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void DocumentCreationWithContent() {
             var db = new Mock<IDatabase>();
             FileEvent fileEvent = null;
@@ -91,7 +91,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void DocumentCreationWithOutContent() {
             var db = new Mock<IDatabase>();
             FileEvent fileEvent = null;
@@ -109,7 +109,7 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteSecurityChangeOfExistingFile ()
         {
             var db = new Mock<IDatabase>();
@@ -128,7 +128,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteSecurityChangeOfNonExistingFile ()
         {
             var db = new Mock<IDatabase>();
@@ -146,7 +146,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void LocallyNotExistingRemoteDocumentUpdated ()
         {
             var db = new Mock<IDatabase>();
@@ -164,7 +164,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void LocallyExistingRemoteDocumentUpdated ()
         {
             var db = new Mock<IDatabase>();
@@ -183,7 +183,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CHANGED));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteDeletionChangeWithoutLocalFile ()
         {
             var db = new Mock<IDatabase>();
@@ -200,7 +200,7 @@ namespace TestLibrary.SyncStrategiesTests {
 
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteDeletionChangeTest ()
         {
             var db = new Mock<IDatabase>();
@@ -219,7 +219,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteFolderDeletionWithoutLocalFolder ()
         {
             var db = new Mock<IDatabase>();
@@ -232,7 +232,7 @@ namespace TestLibrary.SyncStrategiesTests {
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());           
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteFolderDeletion ()
         {
             var db = new Mock<IDatabase>();
@@ -250,7 +250,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.DELETED));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteFolderCreation ()
         {
             var db = new Mock<IDatabase>();
@@ -268,7 +268,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteFolderUpdate ()
         {
             var db = new Mock<IDatabase>();
@@ -286,7 +286,7 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteFolderSecurity ()
         {
             var db = new Mock<IDatabase>();
