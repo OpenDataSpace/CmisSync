@@ -127,6 +127,8 @@
     <Compile Include="Sync\Strategy\Crawler.cs" />
     <Compile Include="Events\CrawlRequestEvent.cs" />
     <Compile Include="Sync\Strategy\ContentChanges.cs" />
+    <Compile Include="Sync\Strategy\ContentChangeEventAccumulator.cs" />
+    <Compile Include="Sync\Strategy\ContentChangeEventTransformer.cs" />
     <Compile Include="Events\ChangeEnums.cs" />
     <Compile Include="Sync\Strategy\Watcher.cs" />
     <Compile Include="Sync\Strategy\SimpleFileSynchronizer.cs" />

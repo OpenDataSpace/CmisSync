@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 
+using DotCMIS.Client;
+
 namespace CmisSync.Lib.Events
 {
 
@@ -13,7 +15,9 @@ namespace CmisSync.Lib.Events
 
         public string ObjectId { get; private set; }
 
-        public ContentChangeEvent (DotCMIS.Enums.ChangeType type, string objectId)
+        public ICmisObject CmisObject { get; private set; }
+
+        public ContentChangeEvent (DotCMIS.Enums.ChangeType? type, string objectId)
         {
             if (objectId == null) {
                 throw new ArgumentNullException ("Argument null in ContenChangeEvent Constructor", "path");
@@ -21,7 +25,7 @@ namespace CmisSync.Lib.Events
             if (type == null) {
                 throw new ArgumentNullException ("Argument null in ContenChangeEvent Constructor", "type");
             }
-            Type = type;
+            Type = (DotCMIS.Enums.ChangeType) type;
             ObjectId = objectId;
         }
 
@@ -30,6 +34,9 @@ namespace CmisSync.Lib.Events
             return string.Format ("ContenChangeEvent with type \"{0}\" and ID \"{1}\"", Type, ObjectId);
         }
 
+        public void UpdateObject(ISession session){
+           CmisObject = session.GetObject(ObjectId);
+        }        
     }
 }
 
