@@ -59,7 +59,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             Assert.False(watcher.EnableEvents);
             Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
         }
@@ -67,28 +67,28 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullWatcher() {
-            new Watcher(null, queue.Object);
+            new NetWatcher(null, queue.Object);
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullQueue() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            new Watcher(fswatcher, null);
+            new NetWatcher(fswatcher, null);
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentException ) )]
         public void ConstructorFailsWithWatcherOnNullPath() {
             var fswatcher = new Mock<FileSystemWatcher>().Object;
-            new Watcher(fswatcher, queue.Object);
+            new NetWatcher(fswatcher, queue.Object);
         }
 
         [Test, Category("Fast")]
         public void IgnoreWrongEventsTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             Assert.False(watcher.Handle(new Mock<ISyncEvent>().Object));
             Assert.False(watcher.Handle(new Mock<FileEvent>(new FileInfo("test"), null, null){CallBase = false}.Object));
         }
@@ -98,7 +98,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             var fileCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, localFile.FullName);
             Assert.True(watcher.Handle(fileCreatedFSEvent));
             Assert.AreEqual(MetaDataChangeType.CREATED, returnedFileEvent.Local);
@@ -114,7 +114,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             var fileChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, localFile.FullName);
             Assert.True(watcher.Handle(fileChangedFSEvent));
             Assert.AreEqual(MetaDataChangeType.NONE, returnedFileEvent.Local);
@@ -131,7 +131,7 @@ namespace TestLibrary.SyncStrategiesTests
             AbstractFolderEvent returnedFileEvent = null;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             var fileRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, localFile.FullName);
             Assert.True(watcher.Handle(fileRemovedFSEvent));
             Assert.AreEqual(MetaDataChangeType.DELETED, returnedFileEvent.Local);
@@ -148,7 +148,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFileEvent = f as AbstractFolderEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             var fileRenamedFSEvent = new FSMovedEvent(oldpath, localFile.FullName);
             Assert.True(watcher.Handle(fileRenamedFSEvent));
             Assert.AreEqual(MetaDataChangeType.MOVED, returnedFileEvent.Local);
@@ -165,7 +165,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFolderEvent = f as AbstractFolderEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             var folderCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, localFolder.FullName);
             Assert.True(watcher.Handle(folderCreatedFSEvent));
             Assert.AreEqual(MetaDataChangeType.CREATED, returnedFolderEvent.Local);
@@ -179,7 +179,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFolderEvent = f as AbstractFolderEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             var folderChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, localFolder.FullName);
             Assert.True(watcher.Handle(folderChangedFSEvent));
             Assert.AreEqual(MetaDataChangeType.CHANGED, returnedFolderEvent.Local);
@@ -193,7 +193,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFolderEvent = f as AbstractFolderEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             var folderRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, localFolder.FullName);
             Assert.True(watcher.Handle(folderRemovedFSEvent));
             Assert.AreEqual(MetaDataChangeType.DELETED, returnedFolderEvent.Local);
@@ -208,7 +208,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName){CallBase = true}.Object;
             queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => returnedFolderEvent = f as AbstractFolderEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             var folderRenamedFSEvent = new FSMovedEvent(oldpath, localFolder.FullName);
             Assert.True(watcher.Handle(folderRenamedFSEvent));
             Assert.AreEqual(MetaDataChangeType.MOVED, returnedFolderEvent.Local);
@@ -227,7 +227,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
@@ -253,7 +253,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
@@ -288,7 +288,7 @@ namespace TestLibrary.SyncStrategiesTests
             string newpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
@@ -320,7 +320,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
@@ -345,7 +345,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
@@ -371,7 +371,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
@@ -397,7 +397,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new FileSystemWatcher(localFolder.FullName);
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
@@ -424,7 +424,7 @@ namespace TestLibrary.SyncStrategiesTests
             string newpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent folder) => returnedFSEvent = folder as FSEvent);
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
@@ -460,7 +460,7 @@ namespace TestLibrary.SyncStrategiesTests
             List<FSEvent> returnedFSEvents = new List<FSEvent>();
             queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
                 .Callback((ISyncEvent f) => returnedFSEvents.Add(f as FSEvent));
-            var watcher = new Watcher(fswatcher, queue.Object);
+            var watcher = new NetWatcher(fswatcher, queue.Object);
             watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;

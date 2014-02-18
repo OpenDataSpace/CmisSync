@@ -12,51 +12,55 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 	   -r:$(srcdir)/lib/xunit.extensions.dll
 
 SOURCES =  \
-	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
+	ActiveActivitiesManagerTest.cs \
 	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
-	DataTests/PathMatcherTest.cs \
+	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
+	CmisDatabaseTest.cs \
+	ConfigurationTest.cs \
+	ContentTasksTests/ChunkedDownloaderTest.cs \
+	ContentTasksTests/ChunkedFileUploaderTest.cs \
+	ContentTasksTests/ContentTaskUtilsTest.cs \
+	ContentTasksTests/SimpleFileDownloaderTest.cs \
+	ContentTasksTests/SimpleFileUploaderTest.cs \
 	DataTests/MappedObjectsTest.cs \
-	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
+	DataTests/PathMatcherTest.cs \
+	DebugLoggingHandlerTest.cs \
+	EncodingTest.cs \
+	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
-	EventsTests/ExceptionEventTest.cs \
+	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/EventTypesTest.cs \
+	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
+	EventsTests/FullSyncCompletedEventTest.cs \
+	EventsTests/GenericSyncEventHandlerTest.cs \
+	EventsTests/PermissionDeniedEventHandlerTest.cs \
+	EventsTests/StartNextSyncEventTest.cs \
 	EventsTests/SyncEventManagerTest.cs \
 	EventsTests/SyncEventQueueTest.cs \
-	EventsTests/GenericSyncEventHandlerTest.cs \
-	EventsTests/FullSyncCompletedEventTest.cs \
-	EventsTests/StartNextSyncEventTest.cs \
-	EventsTests/EncapsuledEventTest.cs \
-	EventsTests/PermissionDeniedEventHandlerTest.cs \
+	FSDeletionHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	LocalFilesystemActivityGenerator.cs \
+	Properties/AssemblyInfo.cs \
+	StorageTests/PersistentStorageTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \
+	StreamTests/NonClosingHashStreamTest.cs \
 	StreamTests/OffsetStreamTest.cs \
 	StreamTests/ProgressStreamTest.cs \
-	StreamTests/NonClosingHashStreamTest.cs \
-	SyncStrategiesTests/FileSynchronizerTest.cs \
-	SyncStrategiesTests/CrawlerTest.cs \
-	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/ContentChangesTest.cs \
+	SyncStrategiesTests/CrawlerTest.cs \
+	SyncStrategiesTests/FileSynchronizerTest.cs \
+	SyncStrategiesTests/FolderSynchronizerTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
-	ContentTasksTests/ChunkedDownloaderTest.cs \
-	ContentTasksTests/SimpleFileDownloaderTest.cs \
-	ContentTasksTests/SimpleFileUploaderTest.cs \
-	ContentTasksTests/ChunkedFileUploaderTest.cs \
-	ContentTasksTests/ContentTaskUtilsTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
+	SyncStrategiesTests/WatcherTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
-	ActiveActivitiesManagerTest.cs \
-	CmisDatabaseTest.cs \
-	ConfigurationTest.cs \
-	DebugLoggingHandlerTest.cs \
-	EncodingTest.cs \
-	FSDeletionHandlerTest.cs \
-	LocalFilesystemActivityGenerator.cs \
+	UtilsTests/HttpProxyUtilsTest.cs \
 	WatcherTest.cs
 	
 
