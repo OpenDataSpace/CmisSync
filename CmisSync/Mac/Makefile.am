@@ -33,6 +33,9 @@ SOURCES =  \
 	EditWizard.designer.cs \
 	EditWizardController.cs \
 	MacWatcher.cs \
+	Notifications/Credentials.cs \
+	Notifications/FileSystemProgress.cs \
+	Notifications/TransmissionProgress.cs \
 	OutlineViewDelegate.cs \
 	Setup.cs \
 	SetupSubCustomize.cs \
