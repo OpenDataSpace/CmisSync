@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
         public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) : base(queue) {
             if(session == null)
-                throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
+                throw new ArgumentNullException("Session instance is needed for the ContentChangeEventAccumulator, but was null");
             this.session = session;
         }
     }
