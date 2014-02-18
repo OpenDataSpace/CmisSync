@@ -555,6 +555,7 @@ namespace CmisSync.Lib
             CUSTOM
         }
 
+        [Serializable]
         public class XmlUri : IXmlSerializable
         {
             private Uri _Value;

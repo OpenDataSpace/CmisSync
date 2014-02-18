@@ -83,7 +83,7 @@ namespace CmisSync.Lib.ContentTasks
                     contentStream.Stream = progressstream;
                     try{
                         if(isFirstChunk && result.ContentStreamId != null && overwrite)
-                            result.DeleteContentStream();
+                            result.DeleteContentStream(true);
                         result.AppendContentStream(contentStream, isLastChunk, true);
                     }catch(Exception e) {
                         throw new UploadFailedException(e, result);

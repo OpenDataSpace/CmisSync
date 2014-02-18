@@ -27,10 +27,10 @@ namespace TestLibrary.ContentTasksTests
         private FileTransmissionEvent transmissionEvent;
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
-        private long fileLength;
+        private readonly long fileLength = 1024 * 1024;
         private MemoryStream remoteStream;
         private byte[] localContent;
-        private long ChunkSize;
+        private readonly long ChunkSize = 1024;
         private int lastChunk;
         private Mock<IDocument> mockedDocument;
         private Mock<IContentStream> mockedStream;
@@ -40,8 +40,6 @@ namespace TestLibrary.ContentTasksTests
         public void SetUp ()
         {
             transmissionEvent = new FileTransmissionEvent (FileTransmissionType.UPLOAD_NEW_FILE, "testfile");
-            fileLength = 1024 * 1024;
-            ChunkSize = 1024;
             lastChunk = 0;
             localContent = new byte[fileLength];
             if (localFileStream != null)
@@ -57,15 +55,23 @@ namespace TestLibrary.ContentTasksTests
                 remoteStream.Dispose ();
             remoteStream = new MemoryStream ();
             mockedDocument = new Mock<IDocument> ();
-            mockedDocument.Setup (doc => doc.Name).Returns ("test.txt");
             mockedStream = new Mock<IContentStream> ();
             returnedObjectId = new Mock<IObjectId> ();
             mockedStream.Setup (stream => stream.Length).Returns (fileLength);
             mockedStream.Setup (stream => stream.Stream).Returns (remoteStream);
+            mockedDocument.Setup (doc => doc.Name).Returns ("test.txt");
+            mockedDocument.Setup (doc => doc.AppendContentStream (It.IsAny<IContentStream> (), It.Is<bool> (b => b == true), It.Is<bool> (b => b == true)))
+                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
+                .Returns (returnedObjectId.Object)
+                    .Callback (() => lastChunk++);
+            mockedDocument.Setup (doc => doc.AppendContentStream (It.IsAny<IContentStream> (), It.Is<bool> (b => b == false), It.Is<bool> (b => b == true)))
+                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
+                .Returns (returnedObjectId.Object);
+
         }
 
         [Test, Category("Fast")]
-        public void ContructorWithValidInputTest ()
+        public void ContructorWorksWithValidInput ()
         {
             using (var uploader = new ChunkedUploader()) {
                 Assert.Greater (uploader.ChunkSize, 0);
@@ -79,105 +85,75 @@ namespace TestLibrary.ContentTasksTests
         [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFailsWithZeroChunkSize ()
         {
-            using (new ChunkedUploader(0))
-                ;
+            using (new ChunkedUploader(0));
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFailsWithNegativeChunkSize ()
         {
-            using (new ChunkedUploader(-1))
-                ;
+            using (new ChunkedUploader(-1));
         }
 
         [Test, Category("Fast")]
-        public void NormalUploadTest ()
+        public void NormalUpload ()
         {
-            mockedDocument.Setup (doc => doc.AppendContentStream (It.IsAny<IContentStream> (), It.IsAny<bool> (), It.Is<bool> (b => b == true)))
-                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
-                .Returns (returnedObjectId.Object);
-            mockedDocument.Setup (doc => doc.ContentStreamId)
-                .Returns ((string)null);
-            mockedDocument.Setup (doc => doc.AppendContentStream (It.IsAny<IContentStream> (), It.Is<bool> (b => b == true), It.Is<bool> (b => b == true)))
-                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
-                .Returns (returnedObjectId.Object)
-                    .Callback (() => lastChunk++);
-            mockedDocument.Setup (doc => doc.AppendContentStream (It.IsAny<IContentStream> (), It.Is<bool> (b => b == false), It.Is<bool> (b => b == true)))
-                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
-                .Returns (returnedObjectId.Object);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                AssertThatProgressFitsMinimumLimits(e, 0, 0, 0);
+            };
 
             using (IFileUploader uploader = new ChunkedUploader(ChunkSize)) {
-                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-//                    Console.WriteLine(e.ToString());
-                    if (e.Length != null) {
-                        Assert.GreaterOrEqual (e.Length, 0);
-                        Assert.LessOrEqual (e.Length, localContent.Length);
-                    }
-                    if (e.Percent != null) {
-                        Assert.GreaterOrEqual (e.Percent, 0);
-                        Assert.LessOrEqual (e.Percent, 100);
-                    }
-                    if (e.ActualPosition != null) {
-                        Assert.GreaterOrEqual (e.ActualPosition, 0);
-                        Assert.LessOrEqual (e.ActualPosition, localContent.Length);
-                    }
-                };
                 uploader.UploadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
-                Assert.AreEqual (localContent.Length, remoteStream.Length);
-                //Assert.AreEqual (localContent, remoteStream.ToArray());
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localContent), hashAlg.Hash);
-                remoteStream.Seek (0, SeekOrigin.Begin);
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteStream), hashAlg.Hash);
-                Assert.AreEqual (1, lastChunk);
             }
+
+            AssertThatLocalAndRemoteContentAreEqualToHash();
+            Assert.AreEqual (1, lastChunk);
+
         }
 
         // Resumes to upload a file half uploaded in the past
         [Test, Category("Fast")]
-        public void ResumeUploadTest ()
+        public void ResumeUpload ()
         {
-            mockedDocument.Setup (doc => doc.AppendContentStream (It.IsAny<IContentStream> (), It.IsAny<bool> (), It.Is<bool> (b => b == true)))
-                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
-                .Returns (returnedObjectId.Object);
-            mockedDocument.Setup (doc => doc.AppendContentStream (It.IsAny<IContentStream> (), It.Is<bool> (b => b == true), It.Is<bool> (b => b == true)))
-                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
-                .Returns (returnedObjectId.Object)
-                    .Callback (() => lastChunk++);
-            mockedDocument.Setup (doc => doc.AppendContentStream (It.IsAny<IContentStream> (), It.Is<bool> (b => b == false), It.Is<bool> (b => b == true)))
-                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
-                .Returns (returnedObjectId.Object);
+            double successfulUploadPart = 0.5;
+            int successfulUploaded = (int) (fileLength * successfulUploadPart);
+            double minPercent = 100 * successfulUploadPart;
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                AssertThatProgressFitsMinimumLimits(e, successfulUploaded, minPercent, successfulUploaded);
+            };
+            // Copy half of data before start uploading
+            InitRemoteChunkWithSize(successfulUploaded);
+            hashAlg.TransformBlock (localContent, 0, successfulUploaded, localContent, 0);
+            localFileStream.Seek(successfulUploaded, SeekOrigin.Begin);
 
             using (IFileUploader uploader = new ChunkedUploader(ChunkSize)) {
-                int pos = localContent.Length / 2;
-                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-//                    Console.WriteLine(e.ToString());
-                    if (e.Length != null) {
-                        Assert.GreaterOrEqual (e.Length, pos);
-                        Assert.LessOrEqual (e.Length, localContent.Length);
-                    }
-                    if (e.Percent != null) {
-                        Assert.GreaterOrEqual (e.Percent, 50);
-                        Assert.LessOrEqual (e.Percent, 100);
-                    }
-                    if (e.ActualPosition != null) {
-                        Assert.GreaterOrEqual (e.ActualPosition, pos);
-                        Assert.LessOrEqual (e.ActualPosition, localContent.Length);
-                    }
-                };
-                // Copy half of data before start uploading
-                byte[] buffer = new byte[pos];
-                localFileStream.Read (buffer, 0, pos);
-                remoteStream.Write (buffer, 0, pos);
-                hashAlg.TransformBlock (buffer, 0, pos, buffer, 0);
                 uploader.UploadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
-                Assert.AreEqual (localContent.Length, remoteStream.Length);
-                //Assert.AreEqual (localContent, remoteStream.ToArray());
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localContent), hashAlg.Hash);
-                remoteStream.Seek (0, SeekOrigin.Begin);
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteStream), hashAlg.Hash);
-                Assert.AreEqual (1, lastChunk);
             }
+
+            AssertThatLocalAndRemoteContentAreEqualToHash();
+            Assert.AreEqual (1, lastChunk);
+
+        }
+
+        [Test, Category("Fast")]
+        public void ResumeUploadWithUtils ()
+        {
+            double successfulUploadPart = 0.2;
+            int successfulUploaded = (int) (fileLength * successfulUploadPart);
+            double minPercent = 100 * successfulUploadPart;
+            InitRemoteChunkWithSize (successfulUploaded);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                AssertThatProgressFitsMinimumLimits(e, successfulUploaded, minPercent, successfulUploaded);
+            };
+
+            using (IFileUploader uploader = new ChunkedUploader(ChunkSize)) {
+                ContentTaskUtils.PrepareResume(successfulUploaded, localFileStream, hashAlg);
+                uploader.UploadFile(mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
+            }
+
+            AssertThatLocalAndRemoteContentAreEqualToHash();
+            Assert.AreEqual (1, lastChunk);
+
         }
 
         [Test, Category("Fast")]
@@ -195,6 +171,65 @@ namespace TestLibrary.ContentTasksTests
                     Assert.AreEqual (mockedDocument.Object, ((UploadFailedException)e).LastSuccessfulDocument);
                 }
             }
+        }
+
+        [Test, Category("Fast")]
+        public void NormalUploadReplacesRemoteStreamIfRemoteStreamExists()
+        {
+            mockedDocument.Setup( doc => doc.ContentStreamId).Returns("StreamId");
+            mockedDocument.Setup( doc => doc.DeleteContentStream(It.IsAny<bool>())).Callback(()=> {
+                if (remoteStream != null)
+                remoteStream.Dispose ();
+                remoteStream = new MemoryStream ();
+            }).Returns(mockedDocument.Object);
+
+            remoteStream.WriteByte(1);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                AssertThatProgressFitsMinimumLimits(e, 0, 0, 0);
+            };
+
+            using (IFileUploader uploader = new ChunkedUploader(ChunkSize)) {
+                uploader.UploadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
+            }
+
+            mockedDocument.Verify( doc => doc.DeleteContentStream(It.IsAny<bool>()), Times.Once());
+            AssertThatLocalAndRemoteContentAreEqualToHash();
+            Assert.AreEqual (1, lastChunk);
+
+        }
+
+        private void InitRemoteChunkWithSize (int successfulUploaded)
+        {
+            byte[] buffer = new byte[successfulUploaded];
+            localFileStream.Read (buffer, 0, successfulUploaded);
+            remoteStream.Write (buffer, 0, successfulUploaded);
+            localFileStream.Seek (0, SeekOrigin.Begin);
+        }
+
+
+        private void AssertThatProgressFitsMinimumLimits(TransmissionProgressEventArgs args, long minLength, double minPercent, long minPos)
+        {
+            // Console.WriteLine(e.ToString());
+            if (args.Length != null) {
+                Assert.GreaterOrEqual (args.Length, minLength);
+                Assert.LessOrEqual (args.Length, localContent.Length);
+            }
+            if (args.Percent != null) {
+                Assert.GreaterOrEqual (args.Percent, minPercent);
+                Assert.LessOrEqual (args.Percent, 100);
+            }
+            if (args.ActualPosition != null) {
+                Assert.GreaterOrEqual (args.ActualPosition, minPos);
+                Assert.LessOrEqual (args.ActualPosition, localContent.Length);
+            }
+        }
+
+        private void AssertThatLocalAndRemoteContentAreEqualToHash() {
+                Assert.AreEqual (localContent.Length, remoteStream.Length);
+                //Assert.AreEqual (localContent, remoteStream.ToArray());
+                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localContent), hashAlg.Hash);
+                remoteStream.Seek (0, SeekOrigin.Begin);
+                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteStream), hashAlg.Hash);
         }
 
         #region boilerplate

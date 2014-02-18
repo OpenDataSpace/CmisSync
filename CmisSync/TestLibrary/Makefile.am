@@ -31,6 +31,7 @@ SOURCES =  \
 	EventsTests/PermissionDeniedEventHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/IntegrationTestUtils.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \
 	StreamTests/OffsetStreamTest.cs \
@@ -46,6 +47,7 @@ SOURCES =  \
 	ContentTasksTests/SimpleFileDownloaderTest.cs \
 	ContentTasksTests/SimpleFileUploaderTest.cs \
 	ContentTasksTests/ChunkedFileUploaderTest.cs \
+	ContentTasksTests/ContentTaskUtilsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
 	ActiveActivitiesManagerTest.cs \

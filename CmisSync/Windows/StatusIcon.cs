@@ -67,6 +67,36 @@ namespace CmisSync
             this.trayicon.ContextMenuStrip = this.traymenu;
             this.trayicon.Visible = true;
             this.trayicon.MouseClick += NotifyIcon1_MouseClick;
+
+            Program.Controller.ShowChangePassword += delegate(string reponame)
+            {
+                lock (repoCreditsErrorListLock)
+                {
+                    if (string.IsNullOrEmpty(repoCreditsErrorList.Find((string name) => { return name == reponame; })))
+                    {
+                        repoCreditsErrorList.Add(reponame);
+                    }
+                }
+                this.trayicon.ShowBalloonTip(30000, Properties_Resources.NotificationCreditsError, Properties_Resources.NotificationCreditsChange, ToolTipIcon.Error);
+            };
+
+            this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
+        }
+
+        private List<string> repoCreditsErrorList = new List<string>();
+
+        private Object repoCreditsErrorListLock = new Object();
+
+        private void trayicon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            lock (repoCreditsErrorListLock)
+            {
+                foreach (string reponame in repoCreditsErrorList)
+                {
+                    Program.Controller.EditRepositoryCredentials(reponame);
+                }
+                repoCreditsErrorList.Clear();
+            }
         }
 
 
@@ -97,10 +127,23 @@ namespace CmisSync
                 {
                     BeginInvoke((Action)delegate
                     {
-                        if (icon_frame > -1)
-                            this.trayicon.Icon = animationFrames[icon_frame];
-                        else
+                        if (icon_frame < 0)
+                        {
                             this.trayicon.Icon = SystemIcons.Error;
+                            return;
+                        }
+                        if (icon_frame > 0)
+                        {
+                            this.trayicon.Icon = animationFrames[icon_frame];
+                            return;
+                        }
+                        if (repoCreditsErrorList.Count > 0)
+                        {
+                            this.trayicon.Icon = SystemIcons.Warning;
+                            return;
+                        }
+                        this.trayicon.Icon = animationFrames[icon_frame];
+                        return;
                     });
                 }
             };
@@ -379,8 +422,11 @@ namespace CmisSync
         /// </summary>
         private void NotifyIcon1_MouseClick(Object sender, MouseEventArgs e)
         {
-            if(e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
+            {
+                trayicon_BalloonTipClicked(sender, e);
                 Controller.LocalFolderClicked("");
+            }
         }
 
         /// <summary>

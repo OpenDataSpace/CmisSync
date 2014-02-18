@@ -101,6 +101,8 @@ namespace TestLibrary.UtilsTests
             Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',','.'));
             p = 5.06;
             Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',','.'));
+            p = 0.1;
+            Assert.AreEqual("0.1 %", Utils.FormatPercent(p).Replace(',','.'));
         }
 
         [Test, Category("Fast")]

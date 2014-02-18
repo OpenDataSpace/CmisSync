@@ -19,18 +19,13 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
-using System.Text;
 
 using MonoMac.Foundation;
 using MonoMac.AppKit;
 using MonoMac.ObjCRuntime;
 
-using Mono.Unix.Native;
-
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
-
-using log4net;
 
 namespace CmisSync {
 
@@ -371,7 +366,6 @@ namespace CmisSync {
             if (!Directory.Exists (Program.Controller.FoldersPath)) {
                 Directory.CreateDirectory (Program.Controller.FoldersPath);
                 return true;
-
             } else {
                 return false;
             }
@@ -397,6 +391,7 @@ namespace CmisSync {
         public void LocalFolderClicked (string path)
         {
             notificationCenter.BeginInvokeOnMainThread (delegate
+
             {
                 NSWorkspace.SharedWorkspace.OpenFile (path);
             });
@@ -405,7 +400,7 @@ namespace CmisSync {
         public void OpenFile (string path)
         {
             path = Uri.UnescapeDataString (path);
-            notificationCenter.BeginInvokeOnMainThread (delegate
+            NSWorkspace.SharedWorkspace.BeginInvokeOnMainThread (delegate
             {
                 NSWorkspace.SharedWorkspace.OpenFile (path);
             });
