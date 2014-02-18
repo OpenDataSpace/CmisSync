@@ -20,6 +20,7 @@ using DotCMIS.Data.Impl;
 using Newtonsoft.Json;
 
 using NUnit.Framework;
+using DotCMIS.Enums;
 
 
 
@@ -42,7 +43,7 @@ namespace TestLibrary.IntegrationTests
         }
 
 
-         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void AppendContentStreamTest(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
         {
@@ -83,6 +84,15 @@ namespace TestLibrary.IntegrationTests
                 Assert.AreEqual(content.Length * (i+1), emptyDoc.ContentStreamLength);
             }
             emptyDoc.DeleteAllVersions();
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void GetRootFolderOfRepository(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            IFolder remoteFolder = (IFolder)session.GetObject(repositoryId);
+            Assert.IsNotNull(remoteFolder);
         }
 
         [Ignore]
@@ -230,7 +240,19 @@ namespace TestLibrary.IntegrationTests
             cmisParameters[SessionParameter.RepositoryId] = repoId;
             cmisParameters[SessionParameter.ConnectTimeout] = "-1";
 
-            return SessionFactory.NewInstance().CreateSession(cmisParameters);
+            ISession session =  SessionFactory.NewInstance().CreateSession(cmisParameters);
+            HashSet<string> filters = new HashSet<string>();
+            filters.Add("cmis:objectId");
+            filters.Add("cmis:name");
+            filters.Add("cmis:contentStreamFileName");
+            filters.Add("cmis:contentStreamLength");
+            filters.Add("cmis:lastModificationDate");
+            filters.Add("cmis:path");
+            filters.Add("cmis:changeToken");
+            HashSet<string> renditions = new HashSet<string>();
+            renditions.Add("cmis:none");
+            session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);
+            return session;
         }
 
         /// <summary>
