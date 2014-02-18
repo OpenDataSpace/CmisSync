@@ -94,11 +94,6 @@ namespace TestLibrary.IntegrationTests
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "testfile.txt";
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.BaseTypeId, "cmis:document");
-            properties.Add(PropertyIds.ObjectTypeId, "gds:sync");
-            properties.Add("cmis:secondaryObjectTypeIds", "*");
             try{
                 IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
                 if (doc!=null) {
@@ -106,6 +101,16 @@ namespace TestLibrary.IntegrationTests
                     Console.WriteLine("Old file deleted");
                 }
             }catch(CmisObjectNotFoundException){}
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            IList<string> devices = new List<string>();
+            devices.Add("*");
+            properties.Add("ignoreDeviceIds", devices);
+            IList<string> ids = new List<string>();
+            ids.Add("gds:sync");
+            properties.Add("cmis:secondaryObjectTypeIds", ids);
+
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             Console.WriteLine("Empty file created");
             Assert.AreEqual(0, emptyDoc.ContentStreamLength);
