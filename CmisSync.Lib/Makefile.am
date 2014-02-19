@@ -37,6 +37,7 @@ SOURCES =  \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
 	Events/ConfigChangedEvent.cs \
+	Events/ContentChangeEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/DebugLoggingHandler.cs \
 	Events/EncapsuledEvent.cs \
@@ -47,14 +48,13 @@ SOURCES =  \
 	Events/EventFilter/IgnoredFoldersFilter.cs \
 	Events/EventFilter/InvalidFolderNameFilter.cs \
 	Events/ExceptionEvent.cs \
+	Events/FSDeletionHandler.cs \
+	Events/FSEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileDownloadRequest.cs \
 	Events/FileEvent.cs \
 	Events/FileTransmissionEvent.cs \
 	Events/FolderEvent.cs \
-	Events/FSDeletionHandler.cs \
-	Events/FSEvent.cs \
-	Events/ContentChangeEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/ISyncEvent.cs \
@@ -107,9 +107,9 @@ SOURCES =  \
 	Sync/Solver/RemoteObjectDeleted.cs \
 	Sync/Solver/RemoteObjectMoved.cs \
 	Sync/Solver/RemoteObjectRenamed.cs \
-	Sync/Strategy/ContentChanges.cs \
 	Sync/Strategy/ContentChangeEventAccumulator.cs \
 	Sync/Strategy/ContentChangeEventTransformer.cs \
+	Sync/Strategy/ContentChanges.cs \
 	Sync/Strategy/Crawler.cs \
 	Sync/Strategy/FileEventHandler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
