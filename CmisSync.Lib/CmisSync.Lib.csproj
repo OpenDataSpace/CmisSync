@@ -156,6 +156,7 @@
     <Compile Include="ContentTasks\ChunkedDownloader.cs" />
     <Compile Include="ContentTasks\SimpleFileUploader.cs" />
     <Compile Include="Storage\ICookieStorage.cs" />
+    <Compile Include="Storage\IDirectoryInfo.cs" />
     <Compile Include="Events\PermissionDeniedEvent.cs" />
     <Compile Include="Events\ExceptionEvent.cs" />
     <Compile Include="Events\PermissionDeniedEventHandler.cs" />

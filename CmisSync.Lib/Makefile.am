@@ -81,6 +81,7 @@ SOURCES =  \
 	Storage/FailedOperationsStorage.cs \
 	Storage/GeneralRepoStorage.cs \
 	Storage/ICookieStorage.cs \
+	Storage/IDirectoryInfo.cs \
 	Storage/IMetaDataStorage.cs \
 	Storage/MetaDataStorage.cs \
 	Storage/PersistentStorage.cs \
