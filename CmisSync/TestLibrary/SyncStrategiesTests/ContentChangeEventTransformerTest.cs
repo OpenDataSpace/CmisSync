@@ -41,7 +41,7 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void IgnoreNotAccumulatedNonDeleteEvent()
         {
             var db = new Mock<IDatabase>();
