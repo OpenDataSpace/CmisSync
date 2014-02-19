@@ -106,6 +106,7 @@
     <Compile Include="StorageTests\PersistentStorageTest.cs" />
     <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
+    <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
