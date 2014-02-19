@@ -3,8 +3,8 @@ namespace CmisSync.Lib.Storage
     ///
     ///<summary>Interface to enable mocking of DirectoryInfo<summary>
     ///
-    public interface IDirectoryInfo
+    public interface IDirectoryInfo : IFileSystemInfo
     {
-
+        
     }
 }
