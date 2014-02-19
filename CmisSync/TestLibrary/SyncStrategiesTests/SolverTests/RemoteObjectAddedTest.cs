@@ -17,12 +17,14 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new RemoteObjectAdded();
         }
 
+        [Ignore]
         [Test, Category("Medium"), Category("Solver")]
         public void RemoteDocumentAdded()
         {
             Assert.Fail("TODO");
         }
 
+        [Ignore]
         [Test, Category("Medium"), Category("Solver")]
         public void RemoteFolderAdded()
         {
