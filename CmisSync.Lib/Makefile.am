@@ -79,6 +79,7 @@ SOURCES =  \
 	RepoInfo.cs \
 	Storage/EventStorage.cs \
 	Storage/FailedOperationsStorage.cs \
+	Storage/FileSystemInfoFactory.cs \
 	Storage/GeneralRepoStorage.cs \
 	Storage/ICookieStorage.cs \
 	Storage/IDirectoryInfo.cs \

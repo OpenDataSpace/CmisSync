@@ -39,6 +39,8 @@ SOURCES =  \
 	StreamTests/OffsetStreamTest.cs \
 	StreamTests/ProgressStreamTest.cs \
 	StreamTests/NonClosingHashStreamTest.cs \
+	StorageTests/PersistentStorageTest.cs \
+	StorageTests/FileSystemWrapperTests.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
