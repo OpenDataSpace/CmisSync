@@ -50,6 +50,8 @@ SOURCES =  \
 	SyncStrategiesTests/SyncMechanismTest.cs \
 	SyncStrategiesTests/SingleStepEventQueue.cs \
 	SyncStrategiesTests/SingleStepEventQueueTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
+	SyncStrategiesTests/SolverTests/RemoteObjectAddedTest.cs \
 	ContentTasksTests/ChunkedDownloaderTest.cs \
 	ContentTasksTests/SimpleFileDownloaderTest.cs \
 	ContentTasksTests/SimpleFileUploaderTest.cs \

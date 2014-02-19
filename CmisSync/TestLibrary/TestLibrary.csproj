@@ -54,7 +54,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MoqExtensions/MoqExtensions.cs" />
     <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="CmisDatabaseTest.cs" />
     <Compile Include="ConfigurationTest.cs" />
@@ -114,6 +113,8 @@
     <Compile Include="TestUtils\ObservableHandlerTest.cs" />
     <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
+    <Compile Include="MoqExtensions\MoqExtensions.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectAddedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
