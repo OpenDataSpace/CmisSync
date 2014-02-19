@@ -142,12 +142,38 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual((int)Math.Pow(Enum.GetNames(typeof(SituationType)).Length,2), solverCount);
         }
 
-        [Ignore]
+        // If a solver fails to solve the situation, the situation should be rescanned and if it changed, the new situation should be handled
         [Test, Category("Fast")]
         public void HandleErrorsOnSolverBecauseOfAChangedSituation()
         {
-            // If a solver fails to solve the situation, the situation should be rescanned and if it changed, the new situation should be handled
-            Assert.Fail ("TODO");
+            var localDetection = new Mock<ISituationDetection<FileSystemInfo>>();
+            var remoteDetection = new Mock<ISituationDetection<string>>();
+            localDetection.Setup(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<FileSystemInfo>())).Returns(SituationType.NOCHANGE);
+            remoteDetection.Setup(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<string>())).ReturnsInOrder(SituationType.CHANGED, SituationType.REMOVED);
+            var failingSolver = new Mock<ISolver>();
+            failingSolver.Setup(s => s.Solve(
+                It.Is<ISession>((se) => se == Session.Object),
+                It.IsAny<IMetaDataStorage>(),
+                It.IsAny<FileSystemInfo>(),
+                It.IsAny<string>()))
+                .Throws(new DotCMIS.Exceptions.CmisObjectNotFoundException());
+            var successfulSolver = new Mock<ISolver>();
+            successfulSolver.Setup( s => s.Solve(
+                It.Is<ISession>((se) => se == Session.Object),
+                It.IsAny<IMetaDataStorage>(),
+                It.IsAny<FileSystemInfo>(),
+                It.IsAny<string>()));
+
+            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, Queue.Object, Session.Object, Storage.Object);
+            var remoteDocument = new Mock<IDocument>();
+            var remoteEvent = new Mock<FileEvent>(null, null, remoteDocument.Object).Object;
+            mechanism.Solver[(int) SituationType.NOCHANGE, (int) SituationType.CHANGED] = failingSolver.Object;
+            mechanism.Solver[(int) SituationType.NOCHANGE, (int) SituationType.REMOVED] = successfulSolver.Object;
+
+            Assert.IsTrue(mechanism.Handle(remoteEvent));
+
+            localDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<FileSystemInfo>()), Times.Exactly(2));
+            remoteDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<string>()), Times.Exactly(2));
         }
 
         [Ignore]
@@ -160,7 +186,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Ignore]
         [Test, Category("Fast")]
-        public void HandleUncompleteEventInformations()
+        public void HandleIncompleteEventInformations()
         {
             // If a FileEvent doesn't contain all local and remote informations, the MetaDataStorage should be used to determine the missing informations
             Assert.Fail ("TODO");
