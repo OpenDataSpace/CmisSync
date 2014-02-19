@@ -72,17 +72,10 @@ namespace CmisSync.Lib.Sync.Strategy
             if(e is StartNextSyncEvent)
             {
                 CrawlSync(RemoteFolder, LocalFolder);
-                //StartAsync(RemoteFolder, LocalFolder);
                 Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
                 return true;
             }
             return false;
-        }
-
-        private void StartAsync(IFolder remoteFolder, DirectoryInfo localFolder) {
-            using (var task = new Task(() => CrawlSync(remoteFolder, localFolder))) {
-                task.Start();
-            }
         }
 
         /// <summary>
