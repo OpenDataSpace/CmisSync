@@ -99,32 +99,38 @@ namespace CmisSync.Lib.Sync.Strategy
         public override bool Handle (ISyncEvent e)
         {
             if (e is FolderEvent) {
-                HandleFolderEvent (e as FolderEvent);
+                HandleMetaData ((e as FolderEvent).LocalFolder,(e as FolderEvent).RemoteFolder.Id);
                 return true;
             }
             if (e is FileEvent) {
-                HandleFileEvent (e as FileEvent);
+                HandleFileEvent ((e as FileEvent));
                 return true;
             }
             return false;
         }
 
-        private void HandleFolderEvent (FolderEvent folder)
+        private void HandleMetaData (FileSystemInfo LocalObject, string RemoteObject)
         {
-            int localSituation = (int)LocalSituation.Analyse (Storage, folder.LocalFolder);
-            int remoteSituation = (int)RemoteSituation.Analyse (Storage, folder.RemoteFolder.Id);
+            int localSituation = (int)LocalSituation.Analyse (Storage, LocalObject);
+            int remoteSituation = (int)RemoteSituation.Analyse (Storage, RemoteObject);
             ISolver solver = Solver [localSituation, remoteSituation];
             if (solver != null)
-                solver.Solve (Session, Storage, folder.LocalFolder, folder.RemoteFolder.Id);
+            try{
+                solver.Solve(Session, Storage, LocalObject, RemoteObject);
+            }catch(DotCMIS.Exceptions.CmisBaseException) {
+                int newLocalSituation = (int) LocalSituation.Analyse(Storage, LocalObject);
+                int newRemoteSituation = (int) RemoteSituation.Analyse(Storage, RemoteObject);
+                solver = Solver [newLocalSituation, newRemoteSituation];
+                if(solver != null)
+                    solver.Solve(Session, Storage, LocalObject, RemoteObject);
+            }
+                
         }
 
         private void HandleFileEvent (FileEvent file)
         {
-            int localSituation = (int)LocalSituation.Analyse (Storage, file.LocalFile);
-            int remoteSituation = (int)RemoteSituation.Analyse (Storage, file.RemoteFile.Id);
-            ISolver solver = Solver [localSituation, remoteSituation];
-            if (solver != null)
-                solver.Solve (Session, Storage, file.LocalFile, file.RemoteFile.Id);
+            HandleMetaData (file.LocalFile, file.RemoteFile.Id);
+            //TODO Content sync if Situation is 
         }
     }
 }
