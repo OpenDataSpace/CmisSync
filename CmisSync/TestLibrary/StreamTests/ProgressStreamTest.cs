@@ -32,31 +32,32 @@ namespace TestLibrary.StreamTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTest ()
+        public void ConstructorWorksWithNonNullParams ()
         {
-            var mockedStream = new Mock<Stream> ();
-            var mockedEvent = new Mock<FileTransmissionEvent> (TransmissionType, Filename, null);
-            using (new ProgressStream(mockedStream.Object, mockedEvent.Object)) {
-            }
-            try {
-                using (new ProgressStream(null, null)) {
-                }
-                Assert.Fail ();
-            } catch (ArgumentNullException) {
-            }
-            try {
-                using (new ProgressStream(mockedStream.Object, null)) {
-                }
-                Assert.Fail ();
-            } catch (ArgumentNullException) {
-            }
-            try {
-                using (new ProgressStream(null, mockedEvent.Object)) {
-                }
-                Assert.Fail ();
-            } catch (ArgumentNullException) {
-            }
+            using (new ProgressStream(new Mock<Stream> ().Object, new Mock<FileTransmissionEvent> (TransmissionType, Filename, null).Object));
         }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsOnAllParameterNull()
+        {
+            using (new ProgressStream(null, null));
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsOnStreamIsNull()
+        {
+            using (new ProgressStream(null, new Mock<FileTransmissionEvent> (TransmissionType, Filename, null).Object));
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsOnTransmissionEventIsNull()
+        {
+            using (new ProgressStream(new Mock<Stream> ().Object, null));
+        }
+
 
         [Test, Category("Fast")]
         public void SetLengthTest ()
