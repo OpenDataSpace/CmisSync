@@ -167,6 +167,9 @@
     <Compile Include="EditWizard.designer.cs">
       <DependentUpon>EditWizard.cs</DependentUpon>
     </Compile>
+    <Compile Include="Notifications\FileSystemProgress.cs" />
+    <Compile Include="Notifications\TransmissionProgress.cs" />
+    <Compile Include="Notifications\Credentials.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -176,6 +179,7 @@
   <ItemGroup>
     <Folder Include="Pixmaps\" />
     <Folder Include="CmisTree\" />
+    <Folder Include="Notifications\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
