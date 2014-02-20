@@ -18,5 +18,11 @@ namespace CmisSync.Lib.Storage
             original.Create();
         }
 
+        public IDirectoryInfo Parent {
+            get { 
+                return new DirectoryInfoWrapper(original.Parent);
+            } 
+        }
+
     }
 }

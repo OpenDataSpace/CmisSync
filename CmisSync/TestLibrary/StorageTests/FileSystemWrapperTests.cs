@@ -106,5 +106,13 @@ namespace TestLibrary.StorageTests {
             IFileInfo fileInfo = factory.CreateFileInfo(fullPath);
             Assert.That(fileInfo.Directory.FullName, Is.EqualTo(testFolder.FullName));
         }
+
+        [Test, Category("Medium")]
+        public void Parent() {
+            string fileName = "test1";
+            string fullPath = Path.Combine(testFolder.FullName, fileName);
+            IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(fullPath);
+            Assert.That(dirInfo.Parent.FullName, Is.EqualTo(testFolder.FullName));
+        }
     }
 }
