@@ -104,7 +104,7 @@ namespace TestLibrary.SyncStrategiesTests
                 solver);
             var remoteDoc = new Mock<IDocument>();
             remoteDoc.Setup(doc => doc.Id).Returns(remoteId);
-            var noChangeEvent = new Mock<FileEvent>(new FileInfo(path), new DirectoryInfo(parentPath), remoteDoc.Object){CallBase=true}.Object;
+            var noChangeEvent = new Mock<FileEvent>(new FileInfoWrapper(new FileInfo(path)), new DirectoryInfoWrapper(new DirectoryInfo(parentPath)), remoteDoc.Object){CallBase=true}.Object;
             Assert.True(mechanism.Handle(noChangeEvent));
             noChangeSolver.Verify(s => s.Solve(
                 It.Is<ISession>(se => se == Session.Object),
