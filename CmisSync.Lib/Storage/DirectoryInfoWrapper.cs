@@ -31,9 +31,15 @@ namespace CmisSync.Lib.Storage
                 wrappedDirs[i] = new DirectoryInfoWrapper(originalDirs[i]);
             }
             return wrappedDirs;
-
-            
         }
 
+        public IFileInfo[] GetFiles() {
+            FileInfo[] originalFiles = original.GetFiles();
+            IFileInfo[] wrappedFiles = new IFileInfo[originalFiles.Length];
+            for(int i = 0; i < originalFiles.Length; i++){
+                wrappedFiles[i] = new FileInfoWrapper(originalFiles[i]);
+            }
+            return wrappedFiles;
+        }
     }
 }
