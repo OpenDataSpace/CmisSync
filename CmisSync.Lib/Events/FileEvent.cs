@@ -3,6 +3,8 @@ using System.IO;
 
 using DotCMIS.Client;
 
+using CmisSync.Lib.Storage;
+
 namespace CmisSync.Lib.Events
 {
     public class FileEvent : AbstractFolderEvent
@@ -13,11 +15,11 @@ namespace CmisSync.Lib.Events
 
         public FileInfo LocalFile { get; protected set; }
 
-        public DirectoryInfo LocalParentDirectory { get; protected set; }
+        public IDirectoryInfo LocalParentDirectory { get; protected set; }
 
         public IDocument RemoteFile { get; protected set; }
 
-        public FileEvent (FileInfo localFile = null, DirectoryInfo localParentDirectory = null, IDocument remoteFile = null)
+        public FileEvent (FileInfo localFile = null, IDirectoryInfo localParentDirectory = null, IDocument remoteFile = null)
         {
             if( localFile == null && remoteFile == null)
                 throw new ArgumentNullException("Given local or remote file must not be null");
@@ -41,13 +43,13 @@ namespace CmisSync.Lib.Events
     public class FileMovedEvent : FileEvent
     {
         public FileInfo OldLocalFile{ get; protected set; }
-        public DirectoryInfo OldParentFolder { get; protected set; }
+        public IDirectoryInfo OldParentFolder { get; protected set; }
         public string OldRemoteFilePath { get; protected set; }
         public FileMovedEvent(
             FileInfo oldLocalFile = null,
             FileInfo newLocalFile = null,
-            DirectoryInfo oldParentFolder = null,
-            DirectoryInfo newParentFolder = null,
+            IDirectoryInfo oldParentFolder = null,
+            IDirectoryInfo newParentFolder = null,
             string oldRemoteFilePath = null,
             IDocument newRemoteFile = null
         ) : base(newLocalFile, newParentFolder, newRemoteFile) {

@@ -9,6 +9,7 @@ using DotCMIS;
 using DotCMIS.Client;
 
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Storage;
 
 using log4net;
 
@@ -37,7 +38,10 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='queue'>
         /// Queue where the FSEvents and also the FileEvents and FolderEvents are reported.
         /// </param>
-        public Watcher (FileSystemWatcher watcher, ISyncEventQueue queue) : base(queue)
+        /// <param name='fsFactory'>
+        /// Factory for everyThing FileSystem related. Null leaves the default which is fine.
+        /// </param>
+        public Watcher (FileSystemWatcher watcher, ISyncEventQueue queue, FileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (watcher == null)
                 throw new ArgumentNullException ("The given fs watcher must not be null");
@@ -52,7 +56,12 @@ namespace CmisSync.Lib.Sync.Strategy
             FsWatcher.Created += new FileSystemEventHandler (OnCreatedChangedDeleted);
             FsWatcher.Deleted += new FileSystemEventHandler (OnCreatedChangedDeleted);
             FsWatcher.Changed += new FileSystemEventHandler (OnCreatedChangedDeleted);
-            FsWatcher.Renamed += new RenamedEventHandler (OnRenamed);
+            
+            if(fsFactory == null){
+                this.fsFactory = new FileSystemInfoFactory();
+            }else{
+                this.fsFactory = fsFactory;
+            }FsWatcher.Renamed += new RenamedEventHandler (OnRenamed);
         }
 
         /// <summary>
@@ -87,11 +96,11 @@ namespace CmisSync.Lib.Sync.Strategy
             FolderEvent folderEvent;
             if (movedEvent != null) {
                 folderEvent = new FolderMovedEvent (
-                    new DirectoryInfo (movedEvent.OldPath),
-                    new DirectoryInfo (movedEvent.Path),
+                    fsFactory.CreateDirectoryInfo (movedEvent.OldPath),
+                    fsFactory.CreateDirectoryInfo (movedEvent.Path),
                     null, null) {Local = MetaDataChangeType.MOVED};
             } else {
-                folderEvent = new FolderEvent (new DirectoryInfo (e.Path), null);
+                folderEvent = new FolderEvent (fsFactory.CreateDirectoryInfo (e.Path), null);
                 switch (e.Type) {
                 case WatcherChangeTypes.Created:
                     folderEvent.Local = MetaDataChangeType.CREATED;
