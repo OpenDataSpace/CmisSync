@@ -321,7 +321,9 @@ namespace CmisSync.Lib.Sync
                     filters.Add("cmis:lastModificationDate");
                     filters.Add("cmis:path");
                     filters.Add("cmis:changeToken");
-                    session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);
+                    HashSet<string> renditions = new HashSet<string>();
+                    renditions.Add("cmis:none");
+                    session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
                     Queue.AddEvent(new SuccessfulLoginEvent());
                 }
                 //TODO Implement error handling -> informing user about connection problems by showing status

@@ -96,7 +96,6 @@ namespace TestLibrary.IntegrationTests
             Assert.IsNotNull(remoteFolder);
         }
 
-        [Ignore]
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void GetSyncPropertyFromFile(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
@@ -119,13 +118,22 @@ namespace TestLibrary.IntegrationTests
             properties.Add("ignoreDeviceIds", devices);
             IList<string> ids = new List<string>();
             ids.Add("gds:sync");
-            properties.Add("cmis:secondaryObjectTypeIds", ids);
+            properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
 
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
-            Console.WriteLine("Empty file created");
             Assert.AreEqual(0, emptyDoc.ContentStreamLength);
             var context = new OperationContext();
-            session.GetObject(emptyDoc, context);
+            IDocument requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
+            bool propertyFound = false;
+            foreach(var prop in requestedDoc.Properties)
+            {
+                if(prop.Id == "ignoreDeviceIds")
+                {
+                    propertyFound = true;
+                    Assert.AreEqual("*", prop.FirstValue as string);
+                }
+            }
+            Assert.IsTrue(propertyFound);
             emptyDoc.DeleteAllVersions();
         }
 
@@ -255,6 +263,7 @@ namespace TestLibrary.IntegrationTests
             filters.Add("cmis:lastModificationDate");
             filters.Add("cmis:path");
             filters.Add("cmis:changeToken");
+            filters.Add(PropertyIds.SecondaryObjectTypeIds);
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);
