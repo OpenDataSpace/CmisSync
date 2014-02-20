@@ -6,5 +6,6 @@ namespace CmisSync.Lib.Storage
     public interface IDirectoryInfo : IFileSystemInfo
     {
         void Create();
+        IDirectoryInfo Parent { get; }
     }
 }
