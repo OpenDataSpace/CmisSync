@@ -24,5 +24,22 @@ namespace CmisSync.Lib.Storage
             } 
         }
 
+        public IDirectoryInfo[] GetDirectories() {
+            DirectoryInfo[] originalDirs = original.GetDirectories();
+            IDirectoryInfo[] wrappedDirs = new IDirectoryInfo[originalDirs.Length];
+            for(int i = 0; i < originalDirs.Length; i++){
+                wrappedDirs[i] = new DirectoryInfoWrapper(originalDirs[i]);
+            }
+            return wrappedDirs;
+        }
+
+        public IFileInfo[] GetFiles() {
+            FileInfo[] originalFiles = original.GetFiles();
+            IFileInfo[] wrappedFiles = new IFileInfo[originalFiles.Length];
+            for(int i = 0; i < originalFiles.Length; i++){
+                wrappedFiles[i] = new FileInfoWrapper(originalFiles[i]);
+            }
+            return wrappedFiles;
+        }
     }
 }

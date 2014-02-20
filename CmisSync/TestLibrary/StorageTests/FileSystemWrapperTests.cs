@@ -114,5 +114,44 @@ namespace TestLibrary.StorageTests {
             IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(fullPath);
             Assert.That(dirInfo.Parent.FullName, Is.EqualTo(testFolder.FullName));
         }
+
+        [Test, Category("Medium")]
+        public void GetDirectoriesFor2() {
+            string folder1 = "folder1";
+            string folder2 = "folder2";
+            testFolder.CreateSubdirectory(folder1);
+            testFolder.CreateSubdirectory(folder2);
+            IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(testFolder.FullName);
+            Assert.That(dirInfo.GetDirectories().Length, Is.EqualTo(2));
+            Assert.That(dirInfo.GetDirectories()[0].Name, Is.EqualTo(folder1));
+            Assert.That(dirInfo.GetDirectories()[1].Name, Is.EqualTo(folder2));
+        }
+
+        [Test, Category("Medium")]
+        public void GetDirectoriesFor0() {
+            IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(testFolder.FullName);
+            Assert.That(dirInfo.GetDirectories().Length, Is.EqualTo(0));
+        }
+
+        [Test, Category("Medium")]
+        public void GetFilesFor2() {
+            string file1 = "file1";
+            string file2 = "file2";
+            string fullPath1 = Path.Combine(testFolder.FullName, file1);
+            string fullPath2 = Path.Combine(testFolder.FullName, file2);
+            new FileInfo(fullPath1).Create();
+            new FileInfo(fullPath2).Create();
+            IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(testFolder.FullName);
+            Assert.That(dirInfo.GetFiles().Length, Is.EqualTo(2));
+            Assert.That(dirInfo.GetFiles()[0].Name, Is.EqualTo(file1));
+            Assert.That(dirInfo.GetFiles()[1].Name, Is.EqualTo(file2));
+        }
+
+        [Test, Category("Medium")]
+        public void GetFilesFor0() {
+            IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(testFolder.FullName);
+            Assert.That(dirInfo.GetFiles().Length, Is.EqualTo(0));
+        }
+
     }
 }
