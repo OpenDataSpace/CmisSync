@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Sync.Strategy;
@@ -11,14 +12,8 @@ using Moq;
 namespace TestLibrary.SyncStrategiesTests
 {
     [TestFixture]
-    public class NetWatcherTest : BaseWatcherTest
+    public class MacWatcherTest : BaseWatcherTest
     {
-
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "enabled");
-        }
 
         [SetUp]
         public new void SetUp() {
@@ -32,8 +27,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
-            var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            var watcher = new NetWatcher(fswatcher, queue.Object);
+            var watcher = new MacWatcher(localFolder.FullName, queue.Object);
             Assert.False(watcher.EnableEvents);
             Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
         }
@@ -41,33 +35,23 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullWatcher() {
-            new NetWatcher(null, queue.Object);
+            new MacWatcher(null, queue.Object);
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullQueue() {
-            var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            new NetWatcher(fswatcher, null);
-        }
-
-        [Test, Category("Fast")]
-        [ExpectedException( typeof( ArgumentException ) )]
-        public void ConstructorFailsWithWatcherOnNullPath() {
-            var fswatcher = new Mock<FileSystemWatcher>().Object;
-            new NetWatcher(fswatcher, queue.Object);
+            new MacWatcher(localFolder.FullName, null);
         }
 
         protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
             WatcherData watcherData = new WatcherData ();
-            watcherData.Data = new FileSystemWatcher (pathname);
-            watcherData.Watcher = new NetWatcher (watcherData.Data as FileSystemWatcher, queue);
+            watcherData.Watcher = new MacWatcher (localFolder.FullName, queue);
             return watcherData;
         }
 
         protected override void WaitWatcherData (WatcherData watcherData, WatcherChangeTypes types, int milliseconds) {
-            FileSystemWatcher watcher = watcherData.Data as FileSystemWatcher;
-            watcher.WaitForChanged (types, milliseconds);
+            Thread.Sleep (milliseconds);
         }
 
         [Test, Category("Medium")]

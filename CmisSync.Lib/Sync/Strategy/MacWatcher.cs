@@ -3,6 +3,7 @@ using System.IO;
 
 using MonoMac.Foundation;
 using MonoMac.CoreServices;
+using MonoMac.AppKit;
 
 using log4net;
 
@@ -30,13 +31,17 @@ namespace CmisSync.Lib.Sync.Strategy
         private FSEventStream FsStream;
         private bool isStarted = false;
 
-        public MacWatcher (FSEventStream stream, ISyncEventQueue queue) : base(queue)
+        public MacWatcher (string pathname, ISyncEventQueue queue) : base(queue)
         {
-            FsStream = stream;
+            NSApplication.Init ();
+
+            if (String.IsNullOrEmpty(pathname))
+                throw new ArgumentNullException ("The given fs stream must not be null");
+            FsStream = new FSEventStream (new [] { pathname }, TimeSpan.FromSeconds (1), FSEventStreamCreateFlags.FileEvents);
             EnableEvents = false;
 
-            stream.Events += OnFSEventStreamEvents;
-            stream.ScheduleWithRunLoop (NSRunLoop.Current);
+            FsStream.Events += OnFSEventStreamEvents;
+            FsStream.ScheduleWithRunLoop (NSRunLoop.Current);
         }
 
         private void OnFSEventStreamEvents (object sender, FSEventStreamEventsArgs e)

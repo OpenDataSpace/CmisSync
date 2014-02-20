@@ -55,11 +55,13 @@ SOURCES =  \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
 	SyncStrategiesTests/FolderSynchronizerTest.cs \
+	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
+	SyncStrategiesTests/WatcherTestUtils.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
 	WatcherTest.cs

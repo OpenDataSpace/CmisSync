@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <ReleaseVersion>
     </ReleaseVersion>
+    <UseMSBuildEngine>False</UseMSBuildEngine>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,6 +54,9 @@
     </Reference>
     <Reference Include="xunit">
       <HintPath>lib\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="XamMac">
+      <HintPath>..\..\..\..\..\..\..\..\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +111,8 @@
     <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
     <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
+    <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
+    <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
