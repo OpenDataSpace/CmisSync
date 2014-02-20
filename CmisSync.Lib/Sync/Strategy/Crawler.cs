@@ -105,7 +105,7 @@ namespace CmisSync.Lib.Sync.Strategy
             {
                 localDirNames.Add(subdir.Name);
             }
-            foreach(FileInfo file in localFolder.GetFiles())
+            foreach(IFileInfo file in localFolder.GetFiles())
             {
                 localFileNames.Add(file.Name);
             }
