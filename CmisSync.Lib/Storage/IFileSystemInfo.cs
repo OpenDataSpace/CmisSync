@@ -9,5 +9,6 @@ namespace CmisSync.Lib.Storage
     {
        String FullName {get; }    
        bool Exists {get; }
+       void Refresh();
     }
 }
