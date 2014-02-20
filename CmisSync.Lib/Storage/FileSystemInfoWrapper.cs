@@ -16,8 +16,9 @@ namespace CmisSync.Lib.Storage
         public string FullName {get {return original.FullName;}}       
 
         public string Name {get {return original.Name;}}       
-
         public bool Exists {get {return original.Exists;}}
+
+        public FileAttributes Attributes {get {return original.Attributes;}}
 
         public void Refresh() {
             original.Refresh();

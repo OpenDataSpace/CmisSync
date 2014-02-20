@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace CmisSync.Lib.Storage 
 {
@@ -11,5 +12,6 @@ namespace CmisSync.Lib.Storage
        String Name {get; }    
        bool Exists {get; }
        void Refresh();
+       FileAttributes Attributes { get;}
     }
 }
