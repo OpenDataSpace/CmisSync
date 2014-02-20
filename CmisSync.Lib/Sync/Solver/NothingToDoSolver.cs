@@ -9,7 +9,7 @@ namespace CmisSync.Lib.Sync.Solver
 {
     public class NothingToDoSolver : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, FileSystemInfo localFile, string remoteId)
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, string remoteId)
         {
 
         }

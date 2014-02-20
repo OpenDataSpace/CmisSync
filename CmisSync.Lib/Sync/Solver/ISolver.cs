@@ -10,7 +10,7 @@ namespace CmisSync.Lib.Sync.Solver
 {
     public interface ISolver 
     {
-        void Solve(ISession session, IMetaDataStorage storage, FileSystemInfo localFile, string remoteId);
+        void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, string remoteId);
     }
 }
 

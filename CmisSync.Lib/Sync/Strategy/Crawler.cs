@@ -141,7 +141,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     if(localFileNames.Contains(doc.Name)) {
                         // Both sides do have got the file, synchronize them if different
                         Queue.AddEvent( new FileEvent(
-                            localFile : new FileInfo(Path.Combine(localFolder.FullName, doc.Name)),
+                            localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
                             localParentDirectory : localFolder,
                             remoteFile : doc));
                         // Remove handled file from set
@@ -149,7 +149,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     } else {
                         // Only remote has got a file, figure out what to do
                         Queue.AddEvent(new FileEvent(
-                            localFile : new FileInfo(Path.Combine(localFolder.FullName, doc.Name)),
+                            localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
                             localParentDirectory : localFolder,
                             remoteFile: doc){Remote = MetaDataChangeType.CREATED});
                     }
@@ -164,7 +164,7 @@ namespace CmisSync.Lib.Sync.Strategy
             // Only local files are available, inform synchronizer about them
             foreach(string file in localFileNames) {
                 Queue.AddEvent(new FileEvent(
-                    localFile : new FileInfo(Path.Combine(localFolder.FullName, file)),
+                    localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, file)),
                     localParentDirectory : localFolder));
             }
         }

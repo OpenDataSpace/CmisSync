@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
+using CmisSync.Lib.Storage;
+
 using DotCMIS.Client;
 
 namespace CmisSync.Lib.Data
@@ -24,7 +26,7 @@ namespace CmisSync.Lib.Data
 
         bool Matches (string localPath, IFolder remoteFolder);
 
-        bool Matches (DirectoryInfo localFolder, IFolder remoteFolder);
+        bool Matches (IDirectoryInfo localFolder, IFolder remoteFolder);
 
         string CreateLocalPath (IFolder remoteFolder);
 
@@ -93,7 +95,7 @@ namespace CmisSync.Lib.Data
             return Matches (localPath, remoteFolder.Path);
         }
 
-        public bool Matches (DirectoryInfo localFolder, IFolder remoteFolder)
+        public bool Matches (IDirectoryInfo localFolder, IFolder remoteFolder)
         {
             return Matches (localFolder.FullName, remoteFolder.Path);
         }

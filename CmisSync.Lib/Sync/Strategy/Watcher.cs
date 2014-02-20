@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Sync.Strategy
         public static readonly int DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY = 1;
         private FileSystemWatcher FsWatcher;
 
+        private IFileSystemInfoFactory fsFactory;
         /// <summary>
         /// Enables the FSEvent report
         /// </summary>
@@ -56,12 +57,13 @@ namespace CmisSync.Lib.Sync.Strategy
             FsWatcher.Created += new FileSystemEventHandler (OnCreatedChangedDeleted);
             FsWatcher.Deleted += new FileSystemEventHandler (OnCreatedChangedDeleted);
             FsWatcher.Changed += new FileSystemEventHandler (OnCreatedChangedDeleted);
+            FsWatcher.Renamed += new RenamedEventHandler (OnRenamed);
             
             if(fsFactory == null){
                 this.fsFactory = new FileSystemInfoFactory();
             }else{
                 this.fsFactory = fsFactory;
-            }FsWatcher.Renamed += new RenamedEventHandler (OnRenamed);
+            }
         }
 
         /// <summary>
@@ -129,8 +131,8 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             var movedEvent = e as FSMovedEvent;
             if (movedEvent != null) {
-                var oldfile = new FileInfo (movedEvent.OldPath);
-                var newfile = new FileInfo (movedEvent.Path);
+                var oldfile = fsFactory.CreateFileInfo(movedEvent.OldPath);
+                var newfile = fsFactory.CreateFileInfo(movedEvent.Path);
                 var newEvent = new FileMovedEvent (
                     oldfile,
                     newfile,
@@ -138,7 +140,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     null, null);
                 Queue.AddEvent (newEvent);
             } else {
-                var file = new FileInfo (e.Path);
+                var file = fsFactory.CreateFileInfo(e.Path);
                 var newEvent = new FileEvent (file, file.Directory, null);
                 switch (e.Type) {
                 case WatcherChangeTypes.Created:

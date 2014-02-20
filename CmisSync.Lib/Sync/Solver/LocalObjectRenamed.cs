@@ -10,7 +10,7 @@ namespace CmisSync.Lib.Sync.Solver
 {
     public class LocalObjectRenamed : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, FileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, string remoteId){
             // Rename remote object
             throw new NotImplementedException();
         }

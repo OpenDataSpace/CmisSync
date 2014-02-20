@@ -3,17 +3,19 @@ using System.IO;
 
 using DotCMIS.Client;
 
+using CmisSync.Lib.Storage;
+
 namespace CmisSync.Lib.Events
 {
     public class FolderEvent : AbstractFolderEvent
     {
         public bool Recursive { get; set; }
 
-        public DirectoryInfo LocalFolder { get; set; }
+        public IDirectoryInfo LocalFolder { get; set; }
 
         public IFolder RemoteFolder { get; set; }
 
-        public FolderEvent (DirectoryInfo localFolder = null, IFolder remoteFolder = null)
+        public FolderEvent (IDirectoryInfo localFolder = null, IFolder remoteFolder = null)
         {
             if(localFolder == null && remoteFolder == null)
                 throw new ArgumentNullException("One of the given folders must not be null");
@@ -34,11 +36,11 @@ namespace CmisSync.Lib.Events
 
     public class FolderMovedEvent : FolderEvent
     {
-        public DirectoryInfo OldLocalFolder { get; private set; }
+        public IDirectoryInfo OldLocalFolder { get; private set; }
         public string OldRemoteFolderPath { get; private set; }
         public FolderMovedEvent(
-            DirectoryInfo oldLocalFolder,
-            DirectoryInfo newLocalFolder,
+            IDirectoryInfo oldLocalFolder,
+            IDirectoryInfo newLocalFolder,
             string oldRemoteFolderPath,
             IFolder newRemoteFolder) : base ( newLocalFolder, newRemoteFolder) {
             OldLocalFolder = oldLocalFolder;
