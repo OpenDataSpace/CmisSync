@@ -124,6 +124,7 @@
     <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectChangedTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectMovedTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectRenamedTest.cs" />
+    <Compile Include="UtilsTests\CredentialsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

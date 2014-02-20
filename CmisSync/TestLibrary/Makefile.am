@@ -69,6 +69,7 @@ SOURCES =  \
 	ContentTasksTests/ContentTaskUtilsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
+	UtilsTests/CredentialsTest.cs \
 	ActiveActivitiesManagerTest.cs \
 	CmisDatabaseTest.cs \
 	ConfigurationTest.cs \
