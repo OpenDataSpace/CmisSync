@@ -27,7 +27,10 @@ using DotCMIS.Enums;
 
 namespace TestLibrary.IntegrationTests
 {
-    [TestFixture]
+    /// <summary>
+    /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
+    /// </summary>
+    [TestFixture, Timeout(900000)]
     public class DotCMISTests
     {
 
@@ -203,7 +206,7 @@ namespace TestLibrary.IntegrationTests
     }
 
     /// <summary>
-    /// Dot CMIS session tests. Each log in process must be able to be executed in 10 seconds, otherwise the tests will fail
+    /// Dot CMIS session tests. Each log in process must be able to be executed in 60 seconds, otherwise the tests will fail.
     /// </summary>
     [TestFixture, Timeout(60000)]
     public class DotCMISSessionTests {
@@ -252,7 +255,8 @@ namespace TestLibrary.IntegrationTests
             cmisParameters[SessionParameter.User] = user;
             cmisParameters[SessionParameter.Password] = password.ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoId;
-            cmisParameters[SessionParameter.ConnectTimeout] = "-1";
+            // Sets the Connect Timeout to 60 secs
+            cmisParameters[SessionParameter.ConnectTimeout] = "60000";
 
             ISession session =  SessionFactory.NewInstance().CreateSession(cmisParameters);
             HashSet<string> filters = new HashSet<string>();
@@ -310,10 +314,10 @@ namespace TestLibrary.IntegrationTests
             cmisParameters[SessionParameter.User] = user;
             cmisParameters[SessionParameter.Password] = password;
             cmisParameters[SessionParameter.RepositoryId] = repositoryId;
-            // Sets the Connect Timeout to infinite
-            cmisParameters[SessionParameter.ConnectTimeout] = "10000";
-            // Sets the Read Timeout to infinite
-            cmisParameters[SessionParameter.ReadTimeout] = "10000";
+            // Sets the Connect Timeout to 60 secs
+            cmisParameters[SessionParameter.ConnectTimeout] = "60000";
+            // Sets the Read Timeout to 60 secs
+            cmisParameters[SessionParameter.ReadTimeout] = "60000";
             cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             SessionFactory.NewInstance().CreateSession(cmisParameters);
@@ -330,10 +334,10 @@ namespace TestLibrary.IntegrationTests
             cmisParameters[SessionParameter.Password] = password;
             cmisParameters[SessionParameter.RepositoryId] = repositoryId;
             cmisParameters[SessionParameter.Compression] = Boolean.TrueString;
-            // Sets the Connect Timeout to infinite
-            cmisParameters[SessionParameter.ConnectTimeout] = "10000";
-            // Sets the Read Timeout to infinite
-            cmisParameters[SessionParameter.ReadTimeout] = "10000";
+            // Sets the Connect Timeout to 60 secs
+            cmisParameters[SessionParameter.ConnectTimeout] = "60000";
+            // Sets the Read Timeout to 60 secs
+            cmisParameters[SessionParameter.ReadTimeout] = "60000";
             SessionFactory.NewInstance().CreateSession(cmisParameters);
         }
     }

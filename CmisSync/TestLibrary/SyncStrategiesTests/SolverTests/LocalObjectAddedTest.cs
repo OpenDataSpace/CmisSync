@@ -30,7 +30,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void DefaultConstructorTest(){
+        public void DefaultConstructorTest()
+        {
             new LocalObjectAdded();
         }
 

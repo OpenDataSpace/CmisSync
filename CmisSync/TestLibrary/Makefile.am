@@ -53,7 +53,15 @@ SOURCES =  \
 	SyncStrategiesTests/SingleStepEventQueue.cs \
 	SyncStrategiesTests/SingleStepEventQueueTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectChangedTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectDeletedTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectMovedTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectRenamedTest.cs \
 	SyncStrategiesTests/SolverTests/RemoteObjectAddedTest.cs \
+	SyncStrategiesTests/SolverTests/RemoteObjectChangedTest.cs \
+	SyncStrategiesTests/SolverTests/RemoteObjectDeletedTest.cs \
+	SyncStrategiesTests/SolverTests/RemoteObjectMovedTest.cs \
+	SyncStrategiesTests/SolverTests/RemoteObjectRenamedTest.cs \
 	ContentTasksTests/ChunkedDownloaderTest.cs \
 	ContentTasksTests/SimpleFileDownloaderTest.cs \
 	ContentTasksTests/SimpleFileUploaderTest.cs \

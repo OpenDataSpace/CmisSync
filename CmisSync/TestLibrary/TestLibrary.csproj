@@ -116,6 +116,14 @@
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectAddedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectRenamedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectDeletedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectChangedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectMovedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectDeletedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectChangedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectMovedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectRenamedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
