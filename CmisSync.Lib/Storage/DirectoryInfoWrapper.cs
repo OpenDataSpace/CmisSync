@@ -17,5 +17,6 @@ namespace CmisSync.Lib.Storage
         public void Create() {
             original.Create();
         }
+
     }
 }
