@@ -27,7 +27,7 @@ using DotCMIS.Enums;
 
 namespace TestLibrary.IntegrationTests
 {
-    [TestFixture]
+    [TestFixture, Timeout(900000)]
     public class DotCMISTests
     {
 
