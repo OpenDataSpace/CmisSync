@@ -6,12 +6,15 @@ namespace CmisSync.Lib.Storage
     ///
     public abstract class FileSystemInfoWrapper : IFileSystemInfo
     {
-        private FileSystemInfo fileSystemInfo;
+        private FileSystemInfo original;
 
-        protected FileSystemInfoWrapper(FileSystemInfo fileSystemInfo)
+        protected FileSystemInfoWrapper(FileSystemInfo original)
         {
-            this.fileSystemInfo = fileSystemInfo;
+            this.original = original;
         }
-        public string FullName{get {return fileSystemInfo.FullName;}}       
+
+        public string FullName {get {return original.FullName;}}       
+
+        public bool Exists {get {return original.Exists;}}
     }
 }

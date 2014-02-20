@@ -8,5 +8,6 @@ namespace CmisSync.Lib.Storage
     public interface IFileSystemInfo
     {
        String FullName {get; }    
+       bool Exists {get; }
     }
 }
