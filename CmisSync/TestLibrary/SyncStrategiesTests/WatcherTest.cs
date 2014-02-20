@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Storage;
 using CmisSync.Lib.Sync.Strategy;
 
 using NUnit.Framework;
@@ -90,7 +91,7 @@ namespace TestLibrary.SyncStrategiesTests
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var watcher = new Watcher(fswatcher, queue.Object);
             Assert.False(watcher.Handle(new Mock<ISyncEvent>().Object));
-            Assert.False(watcher.Handle(new Mock<FileEvent>(new FileInfo("test"), null, null){CallBase = false}.Object));
+            Assert.False(watcher.Handle(new Mock<FileEvent>(new Mock<IFileInfo>().Object, null, null){CallBase = false}.Object));
         }
 
         [Test, Category("Fast")]

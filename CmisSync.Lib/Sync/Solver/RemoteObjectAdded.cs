@@ -11,7 +11,7 @@ namespace CmisSync.Lib.Sync.Solver
 {
     public class RemoteObjectAdded : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, FileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, string remoteId){
             // Create local object
             throw new NotImplementedException();
         }

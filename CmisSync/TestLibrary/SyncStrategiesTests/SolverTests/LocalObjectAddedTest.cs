@@ -62,7 +62,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     It.Is<IObjectId>((id) => id.Equals(remoteParentFolderId)))
                     ).Returns(remoteParentFolder.Object);
 
-                solver.Solve(Session.Object, Storage.Object, new FileInfo(tempFile), null);
+                solver.Solve(Session.Object, Storage.Object, new Mock<IFileInfo>().Object, null);
                 Assert.IsTrue(remoteObjectCreated);
                 Assert.Fail("TODO");
             }finally{

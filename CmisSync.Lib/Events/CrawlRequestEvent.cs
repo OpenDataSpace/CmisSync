@@ -2,15 +2,17 @@ using System;
 using System.IO;
 using DotCMIS.Client;
 
+using CmisSync.Lib.Storage;
+
 namespace CmisSync.Lib.Events
 {
     public class CrawlRequestEvent : ISyncEvent
     {
         public IFolder RemoteFolder { get; private set; }
 
-        public DirectoryInfo LocalFolder { get; private set; }
+        public IDirectoryInfo LocalFolder { get; private set; }
 
-        public CrawlRequestEvent (DirectoryInfo localFolder, IFolder remoteFolder)
+        public CrawlRequestEvent (IDirectoryInfo localFolder, IFolder remoteFolder)
         {
             if(localFolder == null)
                 throw new ArgumentNullException("Given path is null");

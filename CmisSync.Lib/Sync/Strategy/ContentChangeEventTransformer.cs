@@ -4,6 +4,7 @@ using System.IO;
 using DotCMIS.Client;
 
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Storage;
 
 using log4net;
 
@@ -14,6 +15,7 @@ namespace CmisSync.Lib.Sync.Strategy {
 
         private IDatabase db;
 
+        private IFileSystemInfoFactory fsFactory;
         public override int Priority {
             get {
                 return DEFAULT_PRIORITY;
@@ -43,14 +45,14 @@ namespace CmisSync.Lib.Sync.Strategy {
             string path = db.GetFilePath(contentChangeEvent.ObjectId);
             if(path != null)
             {
-                var fileInfo = new FileInfo(path);
+                var fileInfo = fsFactory.CreateFileInfo(path);
                 Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
                 return;
             }
             path = db.GetFolderPath(contentChangeEvent.ObjectId);
             if(path != null)
             {
-                var dirInfo = new DirectoryInfo(path);
+                var dirInfo = fsFactory.CreateDirectoryInfo(path);
                 Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = MetaDataChangeType.DELETED});
                 return;
             }
@@ -71,7 +73,7 @@ namespace CmisSync.Lib.Sync.Strategy {
                 case DotCMIS.Enums.ChangeType.Security:
                     {
                         string path = db.GetFilePath(doc.Id);
-                        var fileInfo = (path == null) ? null : new FileInfo(path);
+                        var fileInfo = (path == null) ? null : fsFactory.CreateFileInfo(path);
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if( fileInfo != null )
                         {
@@ -86,7 +88,7 @@ namespace CmisSync.Lib.Sync.Strategy {
                 case DotCMIS.Enums.ChangeType.Updated:
                     {
                         string path = db.GetFilePath(doc.Id);
-                        var fileInfo = (path == null) ? null : new FileInfo(path);
+                        var fileInfo = (path == null) ? null : fsFactory.CreateFileInfo(path);
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if(fileInfo != null)
                         {
@@ -106,7 +108,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             IFolder folder = contentChangeEvent.CmisObject as IFolder;
 
             string path = db.GetFolderPath(folder.Id);
-            DirectoryInfo dirInfo = (path != null) ? new DirectoryInfo(path) : null;
+            IDirectoryInfo dirInfo = (path != null) ? fsFactory.CreateDirectoryInfo(path) : null;
             var folderEvent = new FolderEvent(dirInfo, folder);
             switch(contentChangeEvent.Type)
             {
@@ -123,11 +125,17 @@ namespace CmisSync.Lib.Sync.Strategy {
             Queue.AddEvent(folderEvent);
         }
 
-        public ContentChangeEventTransformer(ISyncEventQueue queue, IDatabase db): base(queue) {
+        public ContentChangeEventTransformer(ISyncEventQueue queue, IDatabase db, FileSystemInfoFactory fsFactory = null): base(queue) {
             
             if(db == null)
                 throw new ArgumentNullException("DataBase instance is needed for the ContentChangeEventTransformer, but was null");
             this.db = db;
+
+            if(fsFactory == null){
+                this.fsFactory = new FileSystemInfoFactory();
+            }else{
+                this.fsFactory = fsFactory;
+            }
         }
 
     }

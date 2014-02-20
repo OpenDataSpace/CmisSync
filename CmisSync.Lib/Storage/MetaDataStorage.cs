@@ -31,7 +31,7 @@ namespace CmisSync.Lib.Storage
         /// <summary>
         /// Add a file to the storage.
         /// </summary>
-        public void AddFile(FileInfo localFile, IDocument remoteFile) {
+        public void AddFile(IFileInfo localFile, IDocument remoteFile) {
 /*            if(!Matcher.Matches(localFile, remoteFile))
                 throw new ArgumentException(String.Format("Given file paths are not matching each other: local=\"{0}\" remote=\"{1}\"", localFile.FullName, remoteFile.Paths));
 */
@@ -40,7 +40,7 @@ namespace CmisSync.Lib.Storage
         /// <summary>
         /// Add a folder to the storage.
         /// </summary>
-        public void AddFolder(DirectoryInfo localFolder, IFolder remoteFolder) {
+        public void AddFolder(IDirectoryInfo localFolder, IFolder remoteFolder) {
             if(!Matcher.Matches(localFolder, remoteFolder))
                 throw new ArgumentException(String.Format("Given folder paths are not matching each other: local=\"{0}\" remote=\"{1}\"", localFolder.FullName, remoteFolder.Path));
             if(!ContainsFolder(localFolder.Parent.FullName))
@@ -146,7 +146,7 @@ namespace CmisSync.Lib.Storage
             }
         }
 
-        public bool TryGetMappedFolder (DirectoryInfo localFolder, out MappedFolder savedFolder)
+        public bool TryGetMappedFolder (IDirectoryInfo localFolder, out MappedFolder savedFolder)
         {
             throw new NotImplementedException ();
         }

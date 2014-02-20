@@ -10,7 +10,7 @@ namespace CmisSync.Lib.Sync.Solver
 {
     public class LocalObjectAdded : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, FileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, string remoteId){
             // Upload new file
             if((localFile.Attributes & FileAttributes.Directory) == FileAttributes.Directory) {
                 // Create remote folder

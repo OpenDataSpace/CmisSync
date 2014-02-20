@@ -16,7 +16,9 @@ namespace CmisSync.Lib.Sync.Strategy
         private MetaDataStorage MetaData;
         private ISession Session;
 
-        public FolderSynchronizer (ISyncEventQueue queue, MetaDataStorage metadata, ISession session) : base (queue)
+        private IFileSystemInfoFactory fsFactory;
+
+        public FolderSynchronizer (ISyncEventQueue queue, MetaDataStorage metadata, ISession session, FileSystemInfoFactory fsFactory = null) : base (queue)
         {
             if (metadata == null)
                 throw new ArgumentNullException ("Given Metadata is null");
@@ -24,6 +26,12 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException ("Given Session is null");
             this.MetaData = metadata;
             this.Session = session;
+
+            if(fsFactory == null){
+                this.fsFactory = new FileSystemInfoFactory();
+            }else{
+                this.fsFactory = fsFactory;
+            }
         }
 
         public override int Priority {
@@ -117,7 +125,8 @@ namespace CmisSync.Lib.Sync.Strategy
                             // 
                         }
                     } else {
-                        var dirInfo = Directory.CreateDirectory (newLocalPath);
+                        var dirInfo = fsFactory.CreateDirectoryInfo(newLocalPath);
+                        dirInfo.Create();
                         MetaData.AddFolder (dirInfo, folder.RemoteFolder);
                     }
                 } else {

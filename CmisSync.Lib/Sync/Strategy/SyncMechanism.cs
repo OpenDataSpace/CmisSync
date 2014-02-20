@@ -22,10 +22,10 @@ namespace CmisSync.Lib.Sync.Strategy
         }
 
         public ISolver[,] Solver;
-        public ISituationDetection<FileSystemInfo> LocalSituation;
+        public ISituationDetection<IFileSystemInfo> LocalSituation;
         public ISituationDetection<string> RemoteSituation;
 
-        public SyncMechanism (ISituationDetection<FileSystemInfo> localSituation,
+        public SyncMechanism (ISituationDetection<IFileSystemInfo> localSituation,
                               ISituationDetection<string> remoteSituation,
                               ISyncEventQueue queue,
                               ISession session,
@@ -109,20 +109,20 @@ namespace CmisSync.Lib.Sync.Strategy
             return false;
         }
 
-        private void HandleMetaData (FileSystemInfo LocalObject, string RemoteObject)
+        private void HandleMetaData (IFileSystemInfo localObject, string remoteObject)
         {
-            int localSituation = (int)LocalSituation.Analyse (Storage, LocalObject);
-            int remoteSituation = (int)RemoteSituation.Analyse (Storage, RemoteObject);
+            int localSituation = (int)LocalSituation.Analyse (Storage, localObject);
+            int remoteSituation = (int)RemoteSituation.Analyse (Storage, remoteObject);
             ISolver solver = Solver [localSituation, remoteSituation];
             if (solver != null)
             try{
-                solver.Solve(Session, Storage, LocalObject, RemoteObject);
+                solver.Solve(Session, Storage, localObject, remoteObject);
             }catch(DotCMIS.Exceptions.CmisBaseException) {
-                int newLocalSituation = (int) LocalSituation.Analyse(Storage, LocalObject);
-                int newRemoteSituation = (int) RemoteSituation.Analyse(Storage, RemoteObject);
+                int newLocalSituation = (int) LocalSituation.Analyse(Storage, localObject);
+                int newRemoteSituation = (int) RemoteSituation.Analyse(Storage, remoteObject);
                 solver = Solver [newLocalSituation, newRemoteSituation];
                 if(solver != null)
-                    solver.Solve(Session, Storage, LocalObject, RemoteObject);
+                    solver.Solve(Session, Storage, localObject, remoteObject);
             }
                 
         }

@@ -3,6 +3,7 @@ using System.IO;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Sync.Strategy;
+using CmisSync.Lib.Storage;
 
 using DotCMIS.Client;
 
@@ -16,70 +17,66 @@ namespace TestLibrary.SyncStrategiesTests
     public class CrawlerTest
     {
         private string localPath; 
-        private DirectoryInfo localFolder;
+        private IDirectoryInfo localFolder;
+        private DirectoryInfo realLocalFolder;
 
         [SetUp]
         public void SetUp() {
             localPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            localFolder = new DirectoryInfo(localPath);
+            realLocalFolder = new DirectoryInfo(localPath);
+            localFolder = new DirectoryInfoWrapper(realLocalFolder);
             localFolder.Create();
         }
 
         [TearDown]
         public void TearDown() {
             localFolder.Refresh();
-            localFolder.Delete();
+            realLocalFolder.Delete();
         }
 
         [Test, Category("Fast")]
         public void ConstructorWithValidInputTest () {
             var queue = new Mock<ISyncEventQueue>().Object;
             var remoteFolder = new Mock<IFolder>().Object;
-            var localFolder = new DirectoryInfo("test");
-            var crawler = new Crawler(queue, remoteFolder, localFolder);
+            var localFolder = new Mock<IDirectoryInfo>();
+            var crawler = new Crawler(queue, remoteFolder, localFolder.Object);
             Assert.AreEqual(Crawler.CRAWLER_PRIORITY, crawler.Priority);
         }
 
         [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullQueueTest ()
         {
             var remoteFolder = new Mock<IFolder>().Object;
-            var localFolder = new DirectoryInfo("test");
+            var localFolder = new Mock<IDirectoryInfo>();
 
-            try {
-                new Crawler(null, remoteFolder, localFolder);
-                Assert.Fail ();
-            }catch(ArgumentNullException){}
+            new Crawler(null, remoteFolder, localFolder.Object);
         }
 
         [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullLocalFolderTest ()
         {
             var queue = new Mock<ISyncEventQueue>().Object;
             var remoteFolder = new Mock<IFolder>().Object;
-            try {
-                new Crawler(queue, remoteFolder, null);
-                Assert.Fail ();
-            }catch(ArgumentNullException){}
+            new Crawler(queue, remoteFolder, null);
         }
 
         [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullRemoteFolderTest ()
         {
             var queue = new Mock<ISyncEventQueue>().Object;
-            try {
-                new Crawler(queue, null, localFolder);
-                Assert.Fail ();
-            }catch(ArgumentNullException){}
+            new Crawler(queue, null, localFolder);
         }
 
         [Test, Category("Fast")]
         public void IgnoreWrongEventsTest() {
             var queue = new Mock<ISyncEventQueue>().Object;
             var remoteFolder = new Mock<IFolder>().Object;
-            var localFolder = new DirectoryInfo("test");
+            var localFolder = new Mock<IDirectoryInfo>();
             var wrongEvent = new Mock<ISyncEvent>().Object;
-            var crawler = new Crawler(queue, remoteFolder, localFolder);
+            var crawler = new Crawler(queue, remoteFolder, localFolder.Object);
             Assert.False(crawler.Handle(wrongEvent));
         }
 

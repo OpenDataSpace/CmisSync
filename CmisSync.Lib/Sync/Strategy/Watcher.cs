@@ -9,6 +9,7 @@ using DotCMIS;
 using DotCMIS.Client;
 
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Storage;
 
 using log4net;
 
@@ -23,6 +24,7 @@ namespace CmisSync.Lib.Sync.Strategy
         public static readonly int DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY = 1;
         private FileSystemWatcher FsWatcher;
 
+        private IFileSystemInfoFactory fsFactory;
         /// <summary>
         /// Enables the FSEvent report
         /// </summary>
@@ -37,7 +39,10 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='queue'>
         /// Queue where the FSEvents and also the FileEvents and FolderEvents are reported.
         /// </param>
-        public Watcher (FileSystemWatcher watcher, ISyncEventQueue queue) : base(queue)
+        /// <param name='fsFactory'>
+        /// Factory for everyThing FileSystem related. Null leaves the default which is fine.
+        /// </param>
+        public Watcher (FileSystemWatcher watcher, ISyncEventQueue queue, FileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (watcher == null)
                 throw new ArgumentNullException ("The given fs watcher must not be null");
@@ -53,6 +58,12 @@ namespace CmisSync.Lib.Sync.Strategy
             FsWatcher.Deleted += new FileSystemEventHandler (OnCreatedChangedDeleted);
             FsWatcher.Changed += new FileSystemEventHandler (OnCreatedChangedDeleted);
             FsWatcher.Renamed += new RenamedEventHandler (OnRenamed);
+            
+            if(fsFactory == null){
+                this.fsFactory = new FileSystemInfoFactory();
+            }else{
+                this.fsFactory = fsFactory;
+            }
         }
 
         /// <summary>
@@ -87,11 +98,11 @@ namespace CmisSync.Lib.Sync.Strategy
             FolderEvent folderEvent;
             if (movedEvent != null) {
                 folderEvent = new FolderMovedEvent (
-                    new DirectoryInfo (movedEvent.OldPath),
-                    new DirectoryInfo (movedEvent.Path),
+                    fsFactory.CreateDirectoryInfo (movedEvent.OldPath),
+                    fsFactory.CreateDirectoryInfo (movedEvent.Path),
                     null, null) {Local = MetaDataChangeType.MOVED};
             } else {
-                folderEvent = new FolderEvent (new DirectoryInfo (e.Path), null);
+                folderEvent = new FolderEvent (fsFactory.CreateDirectoryInfo (e.Path), null);
                 switch (e.Type) {
                 case WatcherChangeTypes.Created:
                     folderEvent.Local = MetaDataChangeType.CREATED;
@@ -120,8 +131,8 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             var movedEvent = e as FSMovedEvent;
             if (movedEvent != null) {
-                var oldfile = new FileInfo (movedEvent.OldPath);
-                var newfile = new FileInfo (movedEvent.Path);
+                var oldfile = fsFactory.CreateFileInfo(movedEvent.OldPath);
+                var newfile = fsFactory.CreateFileInfo(movedEvent.Path);
                 var newEvent = new FileMovedEvent (
                     oldfile,
                     newfile,
@@ -129,7 +140,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     null, null);
                 Queue.AddEvent (newEvent);
             } else {
-                var file = new FileInfo (e.Path);
+                var file = fsFactory.CreateFileInfo(e.Path);
                 var newEvent = new FileEvent (file, file.Directory, null);
                 switch (e.Type) {
                 case WatcherChangeTypes.Created:

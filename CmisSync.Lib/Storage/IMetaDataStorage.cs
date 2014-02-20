@@ -18,12 +18,12 @@ namespace CmisSync.Lib.Storage
         /// <summary>
         /// Add a file to the storage.
         /// </summary>
-        void AddFile(FileInfo localFile, IDocument remoteFile);
+        void AddFile(IFileInfo localFile, IDocument remoteFile);
 
         /// <summary>
         /// Add a folder to the storage.
         /// </summary>
-        void AddFolder(DirectoryInfo localFolder, IFolder remoteFolder);
+        void AddFolder(IDirectoryInfo localFolder, IFolder remoteFolder);
 
         /// <summary>
         /// Remove a file from the storage.
@@ -87,7 +87,7 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         string GetFolderPath(string id);
 
-        bool TryGetMappedFolder (DirectoryInfo localFolder, out MappedFolder savedFolder);
+        bool TryGetMappedFolder (IDirectoryInfo localFolder, out MappedFolder savedFolder);
 
         bool TryGetMappedObjectByRemoteId(string remoteId, out AbstractMappedObject savedObject);
 

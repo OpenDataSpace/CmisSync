@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DotCMIS.Client;
 
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
@@ -19,7 +20,8 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </summary>
         public static readonly int CRAWLER_PRIORITY = 0;
         private IFolder RemoteFolder;
-        private DirectoryInfo LocalFolder;
+        private IDirectoryInfo LocalFolder;
+        private IFileSystemInfoFactory fsFactory;
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.Crawler"/> class.
         /// </summary>
@@ -32,7 +34,10 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='localFolder'>
         /// Local folder, which is the root of the crawl strategy.
         /// </param>
-        public Crawler (ISyncEventQueue queue, IFolder remoteFolder, DirectoryInfo localFolder) : base(queue)
+        /// <param name='fsFactory'>
+        /// Factory for everyThing FileSystem related. Null leaves the default which is fine.
+        /// </param>
+        public Crawler (ISyncEventQueue queue, IFolder remoteFolder, IDirectoryInfo localFolder, FileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if(localFolder == null)
                 throw new ArgumentNullException("Given local folder is null");
@@ -40,7 +45,14 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException("Given remote folder is null");
             this.RemoteFolder = remoteFolder;
             this.LocalFolder = localFolder;
+
+            if(fsFactory == null){
+                this.fsFactory = new FileSystemInfoFactory();
+            }else{
+                this.fsFactory = fsFactory;
+            }
         }
+
 
         /// <summary>
         ///  May not be changed during runtime 
@@ -82,18 +94,18 @@ namespace CmisSync.Lib.Sync.Strategy
         /// Synchronize by checking all folders/files one-by-one.
         /// This strategy is used if the CMIS server does not support the ChangeLog feature or as fallback if other methods failed.
         /// </summary>
-        private void CrawlSync (IFolder remoteFolder, DirectoryInfo localFolder)
+        private void CrawlSync (IFolder remoteFolder, IDirectoryInfo localFolder)
         {
             // Sets of local files/folders.
             ISet<string> localFileNames = new HashSet<string> ();
             ISet<string> localDirNames = new HashSet<string> ();
 
             // Collect all local folder and file names existing in local folder
-            foreach(DirectoryInfo subdir in localFolder.GetDirectories())
+            foreach(IDirectoryInfo subdir in localFolder.GetDirectories())
             {
                 localDirNames.Add(subdir.Name);
             }
-            foreach(FileInfo file in localFolder.GetFiles())
+            foreach(IFileInfo file in localFolder.GetFiles())
             {
                 localFileNames.Add(file.Name);
             }
@@ -107,11 +119,11 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Both sides do have got the same folder name
                         // Synchronize metadata if different
                         Queue.AddEvent(new FolderEvent(
-                            localFolder : new DirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
+                            localFolder : fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
                             remoteFolder: folder){Recursive = false});
                         // Recursive crawl the content of the folder
                         Queue.AddEvent(new CrawlRequestEvent(
-                            localFolder : new DirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
+                            localFolder : fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
                             remoteFolder: folder));
                         // Remove handled folder from set to get only the local only folders back from set if done
                         localDirNames.Remove(folder.Name);
@@ -129,7 +141,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     if(localFileNames.Contains(doc.Name)) {
                         // Both sides do have got the file, synchronize them if different
                         Queue.AddEvent( new FileEvent(
-                            localFile : new FileInfo(Path.Combine(localFolder.FullName, doc.Name)),
+                            localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
                             localParentDirectory : localFolder,
                             remoteFile : doc));
                         // Remove handled file from set
@@ -137,7 +149,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     } else {
                         // Only remote has got a file, figure out what to do
                         Queue.AddEvent(new FileEvent(
-                            localFile : new FileInfo(Path.Combine(localFolder.FullName, doc.Name)),
+                            localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
                             localParentDirectory : localFolder,
                             remoteFile: doc){Remote = MetaDataChangeType.CREATED});
                     }
@@ -146,13 +158,13 @@ namespace CmisSync.Lib.Sync.Strategy
             // Only local folders are available, inform synchronizer about them
             foreach(string folder in localDirNames) {
                 Queue.AddEvent(new FolderEvent(
-                    localFolder : new DirectoryInfo(Path.Combine(localFolder.FullName, folder)),
+                    localFolder : fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)),
                     remoteFolder: remoteFolder));
             }
             // Only local files are available, inform synchronizer about them
             foreach(string file in localFileNames) {
                 Queue.AddEvent(new FileEvent(
-                    localFile : new FileInfo(Path.Combine(localFolder.FullName, file)),
+                    localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, file)),
                     localParentDirectory : localFolder));
             }
         }
