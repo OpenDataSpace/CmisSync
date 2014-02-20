@@ -19,7 +19,6 @@ namespace TestLibrary.StorageTests {
             var tempFolder = new DirectoryInfo(tempPath);
             Assert.That(tempFolder.Exists, Is.True);
             testFolder = tempFolder.CreateSubdirectory("DSSFileSystemWrapperTest");
-            Console.WriteLine(testFolder.FullName);
         }
 
         [TearDown]
@@ -52,7 +51,7 @@ namespace TestLibrary.StorageTests {
         }
 
         [Test, Category("Medium")]
-        public void FullExists() {
+        public void Exists() {
             string fileName = "test1";
             string fullPath = Path.Combine(testFolder.FullName, fileName);
             IFileSystemInfo fileInfo = factory.CreateFileInfo(fullPath);
@@ -62,5 +61,16 @@ namespace TestLibrary.StorageTests {
             Assert.That(fileInfo.Exists, Is.EqualTo(true));
         }
 
+        [Test, Category("Medium")]
+        public void Refresh() {
+            string fileName = "test1";
+            string fullPath = Path.Combine(testFolder.FullName, fileName);
+            IFileSystemInfo fileInfo = factory.CreateFileInfo(fullPath);
+            //trigger lacy loading
+            Assert.That(fileInfo.Exists, Is.EqualTo(false));
+            new FileInfo(fullPath).Create();
+            fileInfo.Refresh();
+            Assert.That(fileInfo.Exists, Is.EqualTo(true));
+        }
     }
 }
