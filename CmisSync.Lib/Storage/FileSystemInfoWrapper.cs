@@ -1,3 +1,4 @@
+using System.IO;
 namespace CmisSync.Lib.Storage 
 {
     ///
@@ -5,6 +6,12 @@ namespace CmisSync.Lib.Storage
     ///
     public abstract class FileSystemInfoWrapper : IFileSystemInfo
     {
-        public string FullName{get {return "";}}       
+        private FileSystemInfo fileSystemInfo;
+
+        protected FileSystemInfoWrapper(FileSystemInfo fileSystemInfo)
+        {
+            this.fileSystemInfo = fileSystemInfo;
+        }
+        public string FullName{get {return fileSystemInfo.FullName;}}       
     }
 }

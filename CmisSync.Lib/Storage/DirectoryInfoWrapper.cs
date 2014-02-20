@@ -1,3 +1,4 @@
+using System.IO;
 namespace CmisSync.Lib.Storage 
 {
     ///
@@ -5,6 +6,9 @@ namespace CmisSync.Lib.Storage
     ///
     public class DirectoryInfoWrapper : FileSystemInfoWrapper, IDirectoryInfo
     {
-        public string FullName{get {return "";}}       
+        public DirectoryInfoWrapper(DirectoryInfo directoryInfo) 
+            : base(directoryInfo)
+        {
+        }
     }
 }

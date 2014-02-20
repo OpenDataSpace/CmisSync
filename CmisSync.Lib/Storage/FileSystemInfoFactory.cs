@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace CmisSync.Lib.Storage 
 {
@@ -8,11 +9,11 @@ namespace CmisSync.Lib.Storage
     public class FileSystemInfoFactory : IFileSystemInfoFactory
     {
         public IDirectoryInfo CreateDirectoryInfo(string path) {
-            return new DirectoryInfoWrapper();
+            return new DirectoryInfoWrapper(new DirectoryInfo(path));
         }
 
         public IFileInfo CreateFileInfo(string path) {
-            return new FileInfoWrapper();
+            return new FileInfoWrapper(new FileInfo(path));
         }
     }
 }

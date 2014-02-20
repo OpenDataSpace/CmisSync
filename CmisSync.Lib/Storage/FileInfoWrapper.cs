@@ -1,3 +1,4 @@
+using System.IO;
 namespace CmisSync.Lib.Storage 
 {
     ///
@@ -5,5 +6,9 @@ namespace CmisSync.Lib.Storage
     ///
     public class FileInfoWrapper : FileSystemInfoWrapper, IFileInfo
     {
+        public FileInfoWrapper(FileInfo fileInfo) 
+            : base(fileInfo)
+        {
+        }
     }
 }

@@ -27,19 +27,35 @@ namespace TestLibrary.StorageTests {
         }
 
         [Test, Category("Medium")]
-        public void FileInfoTest() {
+        public void FileSystemInfoTest() {
+            string fileName = "test1";
+            string fullPath = Path.Combine(testFolder.FullName, fileName);
             IFileSystemInfoFactory factory = new FileSystemInfoFactory();
-            IFileInfo fileInfo = factory.CreateFileInfo("");
+            IFileSystemInfo fileInfo = factory.CreateFileInfo(fullPath);
             Assert.That(fileInfo, Is.Not.Null);
-            Assert.That(fileInfo.FullName, Is.Not.Null);
+            Assert.That(fileInfo.FullName, Is.EqualTo(fullPath));
+        }
+
+        [Test, Category("Medium")]
+        public void FileInfoTest() {
+            string fileName = "test1";
+            string fullPath = Path.Combine(testFolder.FullName, fileName);
+            IFileSystemInfoFactory factory = new FileSystemInfoFactory();
+            IFileInfo fileInfo = factory.CreateFileInfo(fullPath);
+            Assert.That(fileInfo, Is.Not.Null);
+            //replace this line when Interface gets first member
+            Assert.That(fileInfo.FullName, Is.EqualTo(fullPath));
         }
 
         [Test, Category("Medium")]
         public void DirectoryInfoTest() {
+            string fileName = "test1";
+            string fullPath = Path.Combine(testFolder.FullName, fileName);
             IFileSystemInfoFactory factory = new FileSystemInfoFactory();
-            IDirectoryInfo directoryInfo = factory.CreateDirectoryInfo("");
-            Assert.That(directoryInfo, Is.Not.Null);
-            Assert.That(directoryInfo.FullName, Is.Not.Null);
+            IDirectoryInfo fileInfo = factory.CreateDirectoryInfo(fullPath);
+            Assert.That(fileInfo, Is.Not.Null);
+            //replace this line when Interface gets first member
+            Assert.That(fileInfo.FullName, Is.EqualTo(fullPath));
         }
     }
 }
