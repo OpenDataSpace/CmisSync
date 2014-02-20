@@ -75,6 +75,7 @@
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
     <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
     <Compile Include="StorageTests\PersistentStorageTest.cs" />
+    <Compile Include="StorageTests\FileSystemWrapperTests.cs" />
     <Compile Include="IntegrationTests\CmisSyncTests.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
