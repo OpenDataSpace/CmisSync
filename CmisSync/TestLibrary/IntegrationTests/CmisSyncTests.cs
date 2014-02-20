@@ -64,6 +64,7 @@ namespace TestLibrary.IntegrationTests
         [TestFixtureSetUp]
         public void ClassInit()
         {
+            // Disable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = delegate {return true;};
             try{
                 File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
@@ -80,7 +81,7 @@ namespace TestLibrary.IntegrationTests
                     File.Delete(file);
                 }
             }
-
+            // Reanable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
@@ -356,26 +357,6 @@ namespace TestLibrary.IntegrationTests
 
 
         // /////////////////////////// TESTS ///////////////////////////
-
-
-        [Test, Category("Fast")]
-        public void Placebo()
-        {
-            Assert.AreEqual(4, 2 + 2);
-        }
-
-
-        [Test, Category("Fast")]
-        public void TestCrypto()
-        {
-            String[] test_pws = { "", "test", "Whatever", "Something to try" };
-            foreach (String pass in test_pws)
-            {
-                String crypted = Crypto.Obfuscate(pass);
-                Assert.AreEqual(Crypto.Deobfuscate(crypted), pass);
-            }
-        }
-
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Timeout(20000)]
         public void GetRepositories(string canonical_name, string localPath, string remoteFolderPath,

@@ -17,13 +17,11 @@ using DotCMIS.Client.Impl;
 using DotCMIS.Data;
 using DotCMIS.Data.Impl;
 using DotCMIS.Exceptions;
+using DotCMIS.Enums;
 
 using Newtonsoft.Json;
 
 using NUnit.Framework;
-using DotCMIS.Enums;
-
-
 
 namespace TestLibrary.IntegrationTests
 {
@@ -33,20 +31,48 @@ namespace TestLibrary.IntegrationTests
     [TestFixture, Timeout(900000)]
     public class DotCMISTests
     {
-
+        /// <summary>
+        /// Disable HTTPS Verification
+        /// </summary>
         [TestFixtureSetUp]
         public void ClassInit()
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate {return true;};
         }
 
+        /// <summary>
+        /// Reanable HTTPS Verification
+        /// </summary>
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
-
+        /// <summary>
+        /// Appends content stream to a cmis document, which is created.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void AppendContentStreamTest(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
@@ -89,7 +115,30 @@ namespace TestLibrary.IntegrationTests
             }
             emptyDoc.DeleteAllVersions();
         }
-
+        /// <summary>
+        /// Gets the root folder of repository.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void GetRootFolderOfRepository(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
@@ -99,6 +148,30 @@ namespace TestLibrary.IntegrationTests
             Assert.IsNotNull(remoteFolder);
         }
 
+        /// <summary>
+        /// Tests the sync property on a cmis document object.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void GetSyncPropertyFromFile(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
@@ -140,6 +213,31 @@ namespace TestLibrary.IntegrationTests
             emptyDoc.DeleteAllVersions();
         }
 
+        /// <summary>
+        /// Sets the content stream on an empty file.
+        /// The file will be created as first step and after success, the content will be set.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void SetContentStreamTest(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
@@ -304,6 +402,30 @@ namespace TestLibrary.IntegrationTests
             CreateSession(user, password, url, repositoryId);
         }
 
+        /// <summary>
+        /// Creates the session with device management and user agent.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CreateSessionWithDeviceManagementAndUserAgent(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
@@ -323,6 +445,30 @@ namespace TestLibrary.IntegrationTests
             SessionFactory.NewInstance().CreateSession(cmisParameters);
         }
 
+        /// <summary>
+        /// Creates the session with compression enabled.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CreateSessionWithCompressionEnabled(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
