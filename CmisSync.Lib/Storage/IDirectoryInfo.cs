@@ -7,5 +7,6 @@ namespace CmisSync.Lib.Storage
     {
         void Create();
         IDirectoryInfo Parent { get; }
+        IDirectoryInfo[] GetDirectories();
     }
 }

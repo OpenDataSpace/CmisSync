@@ -114,5 +114,25 @@ namespace TestLibrary.StorageTests {
             IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(fullPath);
             Assert.That(dirInfo.Parent.FullName, Is.EqualTo(testFolder.FullName));
         }
+
+        [Test, Category("Medium")]
+        public void GetDirectoriesFor2() {
+            string folder1 = "folder1";
+            string folder2 = "folder2";
+            testFolder.CreateSubdirectory(folder1);
+            testFolder.CreateSubdirectory(folder2);
+            IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(testFolder.FullName);
+            Assert.That(dirInfo.GetDirectories().Length, Is.EqualTo(2));
+            Assert.That(dirInfo.GetDirectories()[0].Name, Is.EqualTo(folder1));
+            Assert.That(dirInfo.GetDirectories()[1].Name, Is.EqualTo(folder2));
+        }
+
+        [Test, Category("Medium")]
+        public void GetDirectoriesFor0() {
+            string folder1 = "folder1";
+            string folder2 = "folder2";
+            IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(testFolder.FullName);
+            Assert.That(dirInfo.GetDirectories().Length, Is.EqualTo(0));
+        }
     }
 }
