@@ -26,6 +26,7 @@ namespace TestLibrary.StorageTests {
             testFolder.Delete(true);
         }
 
+        ///Add tests for FileSystemInfoWrapper members here
         [Test, Category("Medium")]
         public void FileSystemInfoTest() {
             string fileName = "test1";
