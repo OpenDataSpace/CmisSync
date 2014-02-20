@@ -77,6 +77,8 @@ SOURCES =  \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
+	Storage/FileInfoWrapper.cs \
+	Storage/DirectoryInfoWrapper.cs \
 	Storage/EventStorage.cs \
 	Storage/FailedOperationsStorage.cs \
 	Storage/FileSystemInfoFactory.cs \

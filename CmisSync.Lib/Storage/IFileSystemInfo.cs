@@ -7,6 +7,6 @@ namespace CmisSync.Lib.Storage
     ///
     public interface IFileSystemInfo
     {
-        String FullName {get; }    
+       // String FullName {get; }    
     }
 }

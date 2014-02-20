@@ -8,11 +8,11 @@ namespace CmisSync.Lib.Storage
     public class FileSystemInfoFactory : IFileSystemInfoFactory
     {
         public IDirectoryInfo CreateDirectoryInfo(string path) {
-            return null;
+            return new DirectoryInfoWrapper();
         }
 
         public IFileInfo CreateFileInfo(string path) {
-            return null;
+            return new FileInfoWrapper();
         }
     }
 }

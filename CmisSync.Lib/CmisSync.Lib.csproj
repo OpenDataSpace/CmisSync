@@ -128,6 +128,8 @@
     <Compile Include="Events\SyncScheduler.cs" />
     <Compile Include="HttpProxyUtils.cs" />
     <Compile Include="IActivityListener.cs" />
+    <Compile Include="Storage\DirectoryInfoWrapper.cs" />
+    <Compile Include="Storage\FileInfoWrapper.cs" />
     <Compile Include="Storage\EventStorage.cs" />
     <Compile Include="Storage\FailedOperationsStorage.cs" />
     <Compile Include="Storage\FileSystemInfoFactory.cs" />
