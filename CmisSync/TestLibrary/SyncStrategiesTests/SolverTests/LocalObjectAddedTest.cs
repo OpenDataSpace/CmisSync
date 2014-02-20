@@ -14,7 +14,7 @@ using NUnit.Framework;
 using DotCMIS.Data;
 using DotCMIS.Enums;
 
-namespace TestLibrary
+namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
     [TestFixture]
     public class LocalObjectAddedTest
@@ -29,13 +29,13 @@ namespace TestLibrary
             Storage = new Mock<IMetaDataStorage>();
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorTest(){
+        [Test, Category("Fast"), Category("Solver")]
+        public void DefaultConstructorTest(){
             new LocalObjectAdded();
         }
 
         [Ignore]
-        [Test, Category("Medium")]
+        [Test, Category("Medium"), Category("Solver")]
         public void LocalFileAdded()
         {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
@@ -70,7 +70,7 @@ namespace TestLibrary
         }
 
         [Ignore]
-        [Test, Category("Medium")]
+        [Test, Category("Medium"), Category("Solver")]
         public void LocalFolderAdded()
         {
             Assert.Fail("TODO");

@@ -25,14 +25,20 @@ namespace TestLibrary.StreamTests
             using (var stream = new NonClosingHashStream(mock.Object,hashAlg.Object,CryptoStreamMode.Write)) {
                 Assert.AreEqual(CryptoStreamMode.Write, stream.CipherMode);
             }
-            try{
-                using (var stream = new NonClosingHashStream(mock.Object, null, CryptoStreamMode.Write));
-                Assert.Fail();
-            }catch(ArgumentNullException){}
-            try{
-                using (var stream = new NonClosingHashStream(null, hashAlg.Object, CryptoStreamMode.Write));
-                Assert.Fail();
-            }catch(ArgumentNullException){}
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsOnHashAlgorithmIsNull()
+        {
+            using (var stream = new NonClosingHashStream(new Mock<Stream>().Object, null, CryptoStreamMode.Write));
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsOnStreamIsNull()
+        {
+            using (var stream = new NonClosingHashStream(null, new Mock<HashAlgorithm>().Object, CryptoStreamMode.Write));
         }
 
         [Test, Category("Fast")]

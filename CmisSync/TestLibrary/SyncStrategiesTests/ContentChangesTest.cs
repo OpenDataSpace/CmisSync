@@ -13,72 +13,37 @@ using DotCMIS.Binding.Services;
 using NUnit.Framework;
 
 using Moq;
+using TestLibrary.TestUtils;
 
 namespace TestLibrary.SyncStrategiesTests
 {
     [TestFixture]
     public class ContentChangesTest
     {
-        private int maxNumberOfContentChanges;
-        private bool isPropertyChangesSupported;
-        private string changeLogToken = "token";
-        private string lastChangeLogToken = "lastToken";
-        private string latestChangeLogToken = "latestChangeLogToken";
-        private string repoId = "repoId";
-        private string objectId = "objectId";
-        private int handled = 0;
-        private Mock<ISyncEventQueue> queue;
-        private Mock<IDatabase> database;
-        private Mock<ISession> session;
 
+        private readonly bool isPropertyChangesSupported = false;
+        private readonly string changeLogToken = "token";
+        private readonly string latestChangeLogToken = "latestChangeLogToken";
+        private readonly string repoId = "repoId";
+        private readonly int maxNumberOfContentChanges = 1000;
 
-
-        [SetUp]
-        public void SetUp ()
+        [Test, Category("Fast"), Category("ContentChange")]
+        public void CorrectDefaultPriority ()
         {
-            maxNumberOfContentChanges = 1000;
-            isPropertyChangesSupported = false;
-            changeLogToken = "token";
-            lastChangeLogToken = "lastToken";
-            latestChangeLogToken = "latestChangeLogToken";
-            repoId = "repoId";
-            objectId = "objectId";
-            handled = 0;
-            queue = new Mock<ISyncEventQueue>();
-            database = new Mock<IDatabase>();
-            session = new Mock<ISession> ();
-
+            var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
+            var cc = new ContentChanges (session.Object, database.Object, queue.Object);
+            Assert.That(cc.Priority, Is.EqualTo(1000));
         }
 
-        private ContentChanges fillContentChangesWithChanges(DotCMIS.Enums.ChangeType type, Mock<ISyncEventQueue> queueMock, string documentContentStreamId = null) {
-            var changeEvents = new Mock<IChangeEvents> ();
-            var changeList = new List<IChangeEvent> ();
-            var changeEvent = new Mock<IChangeEvent> ();
-            var newRemoteObject = new Mock<IDocument> ();
-            changeEvent.Setup (ce => ce.ObjectId).Returns (objectId);
-            changeEvent.Setup (ce => ce.ChangeType).Returns (type);
-            changeList.Add (changeEvent.Object);
-            changeEvents.Setup (ce => ce.HasMoreItems).Returns ((bool?)false);
-            changeEvents.Setup (ce => ce.LatestChangeLogToken).Returns (latestChangeLogToken);
-            changeEvents.Setup (ce => ce.TotalNumItems).Returns (1);
-            changeEvents.Setup (ce => ce.ChangeEventList).Returns (changeList);
-            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
-            session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
-            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
-            session.Setup (s => s.GetContentChanges (lastChangeLogToken, isPropertyChangesSupported, maxNumberOfContentChanges)).Returns (changeEvents.Object);
-            newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
-            newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId==null? 0 : 1);
-            session.Setup (s => s.GetObject (objectId)).Returns (newRemoteObject.Object);
-            database.Setup (db => db.GetChangeLogToken ()).Returns (lastChangeLogToken);
-            var changes = new ContentChanges (session.Object, database.Object, queueMock.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
-            return changes;
 
-        }
-
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorWithVaildEntriesTest ()
         {
-            int maxNumberOfContentChanges = 1000;
+            var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             bool isPropertyChangesSupported = true;
             new ContentChanges (session.Object, database.Object, queue.Object);
             new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges);
@@ -87,16 +52,21 @@ namespace TestLibrary.SyncStrategiesTests
             new ContentChanges (session.Object, database.Object, queue.Object, isPropertyChangesSupported: false);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsOnNullDbTest ()
         {
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             new ContentChanges (session.Object, null, queue.Object);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorFailsOnInvalidMaxEventsLimitTest ()
         {
+            var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             try {
                 new ContentChanges (session.Object, database.Object, queue.Object, -1);
                 Assert.Fail ();
@@ -114,165 +84,97 @@ namespace TestLibrary.SyncStrategiesTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsOnNullSessionTest ()
         {
+            var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
             new ContentChanges (null, database.Object, queue.Object);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsOnNullQueueTest ()
         {
+            var database = new Mock<IDatabase>();
             var session = new Mock<ISession> ().Object;
             new ContentChanges (session, database.Object, null);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void IgnoreWrongEventTest ()
         {
+            var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var startSyncEvent = new StartNextSyncEvent (false);
+            Assert.IsFalse (changes.Handle (startSyncEvent));
+        }
+
+
+        [Test, Category("Fast"), Category("ContentChange")]
+        public void RetrunFalseOnError () {
+            //TODO: this might not be the best behavior, this test verifies the current implementation not the desired one
+            var database = new Mock<IDatabase>();
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
+            session.Setup(x => x.Binding).Throws(new Exception("SOME EXCEPTION"));
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             var wrongEvent = new Mock<ISyncEvent> ().Object;
             Assert.IsFalse (changes.Handle (wrongEvent));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void HandleFullSyncCompletedEventTest ()
         {
             string insertedToken = "";
             var startSyncEvent = new StartNextSyncEvent (false);
             startSyncEvent.SetParam (ContentChanges.FULL_SYNC_PARAM_NAME, changeLogToken);
             var completedEvent = new FullSyncCompletedEvent (startSyncEvent);
+            int handled = 0;
+            var database = new Mock<IDatabase>();
             database.Setup (db => db.SetChangeLogToken ("token")).Callback ((string s) => {
                 insertedToken = s;
                 handled ++;
             }
             );
+            var queue = new Mock<ISyncEventQueue>();
+            var session = new Mock<ISession>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsFalse (changes.Handle (completedEvent));
             Assert.AreEqual (1, handled);
             Assert.AreEqual (changeLogToken, insertedToken);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void HandleStartSyncEventOnNoRemoteChangeTest ()
         {
             var startSyncEvent = new StartNextSyncEvent (false);
-            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
-            session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
+            var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
+            var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsTrue (changes.Handle (startSyncEvent));
         }
 
-        private FileEvent LogIt()
-        {
-            return Match.Create<FileEvent>(f => f.RemoteContent == ContentChangeType.DELETED);
-        }
 
-        [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteDocumentCreationWithContent ()
-        {
-            ISyncEvent syncEvent = null;
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                syncEvent = f;
-            }
-            );
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = fillContentChangesWithChanges(DotCMIS.Enums.ChangeType.Created, queue, "streamId");
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(syncEvent, Is.TypeOf(typeof(FileEvent)));
-            var fileEvent = syncEvent as FileEvent;
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
-        }
-
-        [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteDocumentCreationWithoutContent ()
-        {
-            ISyncEvent syncEvent = null;
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                syncEvent = f;
-            }
-            );
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = fillContentChangesWithChanges(DotCMIS.Enums.ChangeType.Created, queue);
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(syncEvent, Is.TypeOf(typeof(FileEvent)));
-            var fileEvent = syncEvent as FileEvent;
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
-        }
-
-        [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneLocallyNotExistingRemoteDocumentUpdated ()
-        {
-            ISyncEvent syncEvent = null;
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                syncEvent = f;
-            }
-            );
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = fillContentChangesWithChanges(DotCMIS.Enums.ChangeType.Updated, queue);
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(syncEvent, Is.TypeOf(typeof(FileEvent)));
-            var fileEvent = syncEvent as FileEvent;
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
-        }
-
-        [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneLocallyExistingRemoteDocumentUpdated ()
-        {
-            ISyncEvent syncEvent = null;
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                syncEvent = f;
-            }
-            );
-            database.Setup(db => db.GetFilePath(It.IsAny<string>())).Returns("path");
-            var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = fillContentChangesWithChanges(DotCMIS.Enums.ChangeType.Updated, queue);
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            Assert.That(syncEvent, Is.TypeOf(typeof(FileEvent)));
-            var fileEvent = syncEvent as FileEvent;
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CHANGED));
-        }
-
-        [Ignore]
-        [Test, Category("Fast")]
-        public void HandleStartSyncEventOnOneRemoteDeletionChangeTest ()
-        {
-            ISyncEvent syncEvent = null;
-            queue.Setup(q => q.AddEvent (It.IsAny<FileEvent>())).Callback ((ISyncEvent f) => {
-                syncEvent = f;
-            }
-            );
-            var startSyncEvent = new StartNextSyncEvent (false);
-            queue.Verify(foo => foo.AddEvent(It.IsAny<FileEvent>()), Times.Once());
-            var changes = fillContentChangesWithChanges(DotCMIS.Enums.ChangeType.Deleted, queue);
-            Assert.IsTrue (changes.Handle (startSyncEvent));
-            Assert.That(syncEvent, Is.TypeOf(typeof(FileEvent)));
-            var fileEvent = syncEvent as FileEvent;
-            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.DELETED));
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.DELETED));
-        }
-
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void ExecuteCrawlSyncOnNoLocalTokenAvailableTest ()
         {
             ISyncEvent queuedEvent = null;
             var startSyncEvent = new StartNextSyncEvent (false);
-            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
-            session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
+            var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
+            int handled = 0;
+            var queue = new Mock<ISyncEventQueue>();
             queue.Setup (q => q.AddEvent (It.IsAny<ISyncEvent> ())).Callback<ISyncEvent> ((e) => {
                 handled ++;
                 queuedEvent = e;
@@ -289,24 +191,20 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual (changeLogToken, returnedChangeLogToken);
         }
 
-        [Ignore]
-        [Test, Category("Fast")]
-        public void IgnoreDuplicatedContentChangesEventTest ()
-        {
-            /* Paging is fucked up in a way that the last event of page 1 can be also the first of page 2*/
-            Assert.Fail ("TODO");
-        }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void IgnoreCrawlSyncEventTest ()
         {
             var start = new StartNextSyncEvent (true);
             var repositoryService = new Mock<IRepositoryService> ();
             repositoryService.Setup (r => r.GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
             repositoryService.Setup (r => r.GetRepositoryInfo (It.IsAny<string> (), It.IsAny<IExtensionsData> ()).LatestChangeLogToken).Returns (latestChangeLogToken);
+            var session = new Mock<ISession>();
             session.Setup (s => s.Binding.GetRepositoryService ()).Returns (repositoryService.Object);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
+            var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
+            var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
             string result;
@@ -314,17 +212,20 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.IsNull (result);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("ContentChange")]
         public void ExtendCrawlSyncEventTest ()
         {
             var start = new StartNextSyncEvent (true);
             var repositoryService = new Mock<IRepositoryService> ();
             repositoryService.Setup (r => r.GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
             repositoryService.Setup (r => r.GetRepositoryInfo (It.IsAny<string> (), It.IsAny<IExtensionsData> ()).LatestChangeLogToken).Returns (latestChangeLogToken);
+            var session = new Mock<ISession>();
             session.Setup (s => s.Binding.GetRepositoryService ()).Returns (repositoryService.Object);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
             var manager = new Mock<SyncEventManager> ().Object;
+            var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
+            var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
             string result;
@@ -332,11 +233,102 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual (latestChangeLogToken, result);
         }
 
-        [Ignore]
-        [Test, Category("Fast")]
+        private Mock<ISession> GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType type = DotCMIS.Enums.ChangeType.Updated, bool overlapping = false) {
+            var changeEvents = new Mock<IChangeEvents> ();
+            changeEvents.Setup (ce => ce.HasMoreItems).ReturnsInOrder ((bool?) true, (bool?) false);
+            changeEvents.Setup (ce => ce.LatestChangeLogToken).ReturnsInOrder ("A", "B");
+            changeEvents.Setup (ce => ce.TotalNumItems).ReturnsInOrder (3, overlapping ? 2 : 1);
+            var event1 = MockUtil.GenerateChangeEvent(type, "one");
+            var event2 = MockUtil.GenerateChangeEvent(type, "two");
+            var event3 = MockUtil.GenerateChangeEvent(type, "three");
+            List<IChangeEvent> changeList1 = new List<IChangeEvent>();
+            changeList1.Add(event1.Object);
+            changeList1.Add(event2.Object);
+            List<IChangeEvent> changeList2 = new List<IChangeEvent>();
+            if(overlapping) {
+                changeList2.Add(event2.Object);
+            }
+            changeList2.Add(event3.Object);
+            changeEvents.Setup (ce => ce.ChangeEventList).ReturnsInOrder (changeList1, changeList2);
+
+            var session = new Mock<ISession> ();
+            session.SetupSessionDefaultValues();
+            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (It.IsAny<string>(), null).LatestChangeLogToken).Returns (changeLogToken);
+            session.Setup (s => s.GetContentChanges (It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<long>())).Returns (changeEvents.Object);
+
+            return session;            
+        }
+
+        [Test, Category("Fast"), Category("ContentChange")]
+        public void GivesCorrectContentChangeEvent ()
+        {
+            ContentChangeEvent csEvent = null;
+            var queue = new Mock<ISyncEventQueue>();
+            queue.Setup(q => q.AddEvent (It.IsAny<ContentChangeEvent>())).Callback ((ISyncEvent f) => {
+                    csEvent = f as ContentChangeEvent;
+                }
+            );
+            string id = "myId";
+
+            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            var session = MockUtil.PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType.Created,id);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Once());
+            Assert.That(csEvent.Type, Is.EqualTo(DotCMIS.Enums.ChangeType.Created));
+            Assert.That(csEvent.ObjectId, Is.EqualTo(id));
+
+        }
+
+        [Test, Category("Fast"), Category("ContentChange")]
         public void PagingTest ()
         {
-            Assert.Fail ("TODO");
+            var queue = new Mock<ISyncEventQueue>();
+
+            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturning3Changesin2Batches();
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
+        }
+
+        [Test, Category("Fast"), Category("ContentChange")]
+        public void IgnoreDuplicatedContentChangesEventTestCreated ()
+        {
+            var queue = new Mock<ISyncEventQueue>();
+
+            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType.Created, true);
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
+        }
+
+        [Test, Category("Fast"), Category("ContentChange")]
+        public void IgnoreDuplicatedContentChangesEventTestDeleted ()
+        {
+            var queue = new Mock<ISyncEventQueue>();
+
+            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+
+            Mock<ISession> session = GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType.Deleted, true);
+
+            var startSyncEvent = new StartNextSyncEvent (false);
+            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+
+            Assert.IsTrue (changes.Handle (startSyncEvent));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
         }
     }
 }

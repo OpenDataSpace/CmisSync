@@ -2213,7 +2213,7 @@ namespace TestLibrary.IntegrationTests
         }
 
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(30000)]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(60000)]
         public void GetRepositoriesFuzzy(string url, string user, string password)
         {
             CmisSync.Lib.Credentials.ServerCredentials credentials = new CmisSync.Lib.Credentials.ServerCredentials()

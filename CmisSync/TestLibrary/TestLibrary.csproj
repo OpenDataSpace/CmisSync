@@ -67,7 +67,6 @@
     <Compile Include="StreamTests\ChunkedStreamTest.cs" />
     <Compile Include="StreamTests\BandwidthLimitedStreamTest.cs" />
     <Compile Include="StreamTests\ProgressStreamTest.cs" />
-    <Compile Include="IntegrationTests\CmisSyncTests.cs" />
     <Compile Include="EventsTests\EventTypesTest.cs" />
     <Compile Include="EventsTests\SyncEventManagerTest.cs" />
     <Compile Include="EventsTests\SyncEventQueueTest.cs" />
@@ -76,11 +75,17 @@
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
     <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
     <Compile Include="StorageTests\PersistentStorageTest.cs" />
+    <Compile Include="IntegrationTests\CmisSyncTests.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
+    <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
     <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
+    <Compile Include="SyncStrategiesTests\ContentChangeEventAccumulatorTest.cs" />
+    <Compile Include="SyncStrategiesTests\ContentChangeEventTransformerTest.cs" />
+    <Compile Include="SyncStrategiesTests\SingleStepEventQueue.cs" />
+    <Compile Include="SyncStrategiesTests\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
     <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
@@ -97,13 +102,19 @@
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
     <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
+    <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
     <Compile Include="EventsTests\ExceptionEventTest.cs" />
     <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
+    <Compile Include="TestUtils\MockUtil.cs" />
+    <Compile Include="TestUtils\ObservableHandler.cs" />
+    <Compile Include="TestUtils\ObservableHandlerTest.cs" />
     <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
+    <Compile Include="MoqExtensions\MoqExtensions.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectAddedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

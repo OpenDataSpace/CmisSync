@@ -12,6 +12,7 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
 	   -r:$(srcdir)/lib/xunit.extensions.dll
 
 SOURCES =  \
+    MoqExtensions/MoqExtensions.cs \
 	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
 	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
 	DataTests/PathMatcherTest.cs \
@@ -31,6 +32,7 @@ SOURCES =  \
 	EventsTests/PermissionDeniedEventHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \
@@ -41,8 +43,15 @@ SOURCES =  \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/ContentChangesTest.cs \
+	SyncStrategiesTests/ContentChangeEventAccumulatorTest.cs \
+	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
+	SyncStrategiesTests/SyncMechanismTest.cs \
+	SyncStrategiesTests/SingleStepEventQueue.cs \
+	SyncStrategiesTests/SingleStepEventQueueTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
+	SyncStrategiesTests/SolverTests/RemoteObjectAddedTest.cs \
 	ContentTasksTests/ChunkedDownloaderTest.cs \
 	ContentTasksTests/SimpleFileDownloaderTest.cs \
 	ContentTasksTests/SimpleFileUploaderTest.cs \
@@ -57,7 +66,10 @@ SOURCES =  \
 	EncodingTest.cs \
 	FSDeletionHandlerTest.cs \
 	LocalFilesystemActivityGenerator.cs \
-	WatcherTest.cs
+	WatcherTest.cs \
+	TestUtils/MockUtil.cs \
+	TestUtils/ObservableHandler.cs \
+	TestUtils/ObservableHandlerTest.cs 
 	
 
 EXTRA_DIST = TestLibrary.csproj \

@@ -36,26 +36,39 @@ namespace TestLibrary.StreamTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTest(){
-            var mockedStream = new Mock<Stream> ().Object;
-            using (var stream = new OffsetStream(mockedStream)){
+        public void ConstructorWithoutOffset(){
+            using (var stream = new OffsetStream(new Mock<Stream>().Object)){
                 Assert.AreEqual(0, stream.Offset);
             }
-            using (var stream = new OffsetStream(mockedStream, 10)){
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorWithOffset()
+        {
+            using (var stream = new OffsetStream(new Mock<Stream>().Object, 10)){
                 Assert.AreEqual(10, stream.Offset);
             }
-            try{
-                using(new OffsetStream(null));
-                Assert.Fail ();
-            }catch(ArgumentNullException){}
-            try{
-                using(new OffsetStream(null, 10));
-                Assert.Fail ();
-            }catch(ArgumentNullException){}
-            try{
-                using(new OffsetStream(mockedStream, -1));
-                Assert.Fail ();
-            }catch(ArgumentOutOfRangeException){}
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsOnStreamIsNull()
+        {
+            using(new OffsetStream(null));
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsOnStreamIsNullAnOffsetIsGiven()
+        {
+            using(new OffsetStream(null, 10));
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ConstructorFailsOnNegativeOffset()
+        {
+            using(new OffsetStream(new Mock<Stream>().Object, -1));
         }
 
         [Test, Category("Fast")]
