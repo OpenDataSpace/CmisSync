@@ -3,7 +3,7 @@ namespace CmisSync.Lib.Storage
     ///
     ///<summary>Wrapper for DirectoryInfo<summary>
     ///
-    public class DirectoryInfoWrapper : FileSystemInfoWrapper, IDirectoryInfo
+    public abstract class FileSystemInfoWrapper : IFileSystemInfo
     {
         public string FullName{get {return "";}}       
     }

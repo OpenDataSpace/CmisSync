@@ -133,6 +133,7 @@
     <Compile Include="Storage\EventStorage.cs" />
     <Compile Include="Storage\FailedOperationsStorage.cs" />
     <Compile Include="Storage\FileSystemInfoFactory.cs" />
+    <Compile Include="Storage\FileSystemInfoWrapper.cs" />
     <Compile Include="Storage\GeneralRepoStorage.cs" />
     <Compile Include="Storage\ICookieStorage.cs" />
     <Compile Include="Storage\IDirectoryInfo.cs" />

@@ -3,8 +3,7 @@ namespace CmisSync.Lib.Storage
     ///
     ///<summary>Wrapper for FileInfo<summary>
     ///
-    public class FileInfoWrapper : IFileInfo
+    public class FileInfoWrapper : FileSystemInfoWrapper, IFileInfo
     {
-        
     }
 }
