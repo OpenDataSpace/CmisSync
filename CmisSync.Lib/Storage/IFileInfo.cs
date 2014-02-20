@@ -5,6 +5,6 @@ namespace CmisSync.Lib.Storage
     ///
     public interface IFileInfo : IFileSystemInfo
     {
-        
+        IDirectoryInfo Directory { get; }
     }
 }

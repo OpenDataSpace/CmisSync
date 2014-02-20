@@ -6,9 +6,18 @@ namespace CmisSync.Lib.Storage
     ///
     public class FileInfoWrapper : FileSystemInfoWrapper, IFileInfo
     {
+        private FileInfo original;
+
         public FileInfoWrapper(FileInfo fileInfo) 
             : base(fileInfo)
         {
+            this.original = fileInfo;
+        }
+
+        public IDirectoryInfo Directory {
+            get { 
+                return new DirectoryInfoWrapper(original.Directory);
+            } 
         }
     }
 }
