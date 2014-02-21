@@ -1,5 +1,6 @@
 using System.IO;
-namespace CmisSync.Lib.Storage 
+
+namespace CmisSync.Lib.Storage
 {
     ///
     ///<summary>Wrapper for DirectoryInfo<summary>
@@ -8,20 +9,22 @@ namespace CmisSync.Lib.Storage
     {
         private FileSystemInfo original;
 
-        protected FileSystemInfoWrapper(FileSystemInfo original)
+        protected FileSystemInfoWrapper (FileSystemInfo original)
         {
             this.original = original;
         }
 
-        public string FullName {get {return original.FullName;}}       
+        public string FullName { get { return original.FullName; } }
 
-        public string Name {get {return original.Name;}}       
-        public bool Exists {get {return original.Exists;}}
+        public string Name { get { return original.Name; } }
 
-        public FileAttributes Attributes {get {return original.Attributes;}}
+        public bool Exists { get { return original.Exists; } }
 
-        public void Refresh() {
-            original.Refresh();
+        public FileAttributes Attributes { get { return original.Attributes; } }
+
+        public void Refresh ()
+        {
+            original.Refresh ();
         }
     }
 }

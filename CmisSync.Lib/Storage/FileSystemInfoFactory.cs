@@ -4,7 +4,7 @@ using System.IO;
 namespace CmisSync.Lib.Storage
 {
     ///
-    ///<summary>Interface for Creating IFileSystemInfo Implementations <summary>
+    ///<summary>Wrapps all interfaced methods and calls the Systems.IO classes<summary>
     ///
     public class FileSystemInfoFactory : IFileSystemInfoFactory
     {

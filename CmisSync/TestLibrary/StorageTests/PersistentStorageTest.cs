@@ -1,12 +1,17 @@
 using System;
 
-namespace TestLibrary
+using CmisSync.Lib.Storage;
+
+using NUnit.Framework;
+
+using Moq;
+
+namespace TestLibrary.StorageTests
 {
+    [TestFixture]
     public class PersistentStorageTest
     {
-        public PersistentStorageTest ()
-        {
-        }
+
     }
 }
 
