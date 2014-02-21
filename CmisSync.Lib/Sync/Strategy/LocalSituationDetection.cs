@@ -5,10 +5,35 @@ using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
-    public class LocalSituationDetection : ISituationDetection<FileSystemInfo>
+    public class LocalSituationDetection : ISituationDetection<IFileSystemInfo>
     {
-        public SituationType Analyse(IMetaDataStorage storage, FileSystemInfo actualObject)
+        private IFileSystemInfoFactory FsFactory;
+        public LocalSituationDetection(IFileSystemInfoFactory fsFactory = null)
         {
+            if(fsFactory == null)
+                FsFactory = new FileSystemInfoFactory();
+            else
+                FsFactory = fsFactory;
+        }
+
+        public SituationType Analyse(IMetaDataStorage storage, IFileSystemInfo actualObject)
+        {
+            actualObject.Refresh();
+            if(!actualObject.Exists)
+            {
+                // Remove & NoChange are possible
+                if(!storage.ContainsFile(actualObject.FullName) && !storage.ContainsFolder(actualObject.FullName))
+                    // Object has already been removed or wasn't ever in the storage
+                    return SituationType.NOCHANGE;
+                else
+                    return SituationType.REMOVED;
+            }
+            else
+            {
+                // Move & Rename & Added & NoChange are possible
+                if(!storage.ContainsFile(actualObject.FullName) && !storage.ContainsFolder(actualObject.FullName))
+                    return SituationType.ADDED;
+            }
             throw new NotImplementedException();
         }
     }
