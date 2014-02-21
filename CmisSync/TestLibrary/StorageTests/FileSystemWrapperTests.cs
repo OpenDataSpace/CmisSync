@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 using Moq;
 namespace TestLibrary.StorageTests {
-          
+
     [TestFixture]
     public class FileSystemWrapperTests {
         private static readonly IFileSystemInfoFactory factory = new FileSystemInfoFactory();
