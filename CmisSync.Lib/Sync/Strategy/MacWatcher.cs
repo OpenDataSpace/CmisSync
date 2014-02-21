@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 
 using MonoMac.Foundation;
 using MonoMac.CoreServices;
@@ -31,45 +32,64 @@ namespace CmisSync.Lib.Sync.Strategy
         private FSEventStream FsStream;
         private bool isStarted = false;
 
-        public MacWatcher (string pathname, ISyncEventQueue queue) : base(queue)
+        public MacWatcher (string pathname, ISyncEventQueue queue, NSRunLoop loop) : base(queue)
         {
-            NSApplication.Init ();
-
-            if (String.IsNullOrEmpty(pathname))
+            if (String.IsNullOrEmpty (pathname) || loop == null)
                 throw new ArgumentNullException ("The given fs stream must not be null");
+
             FsStream = new FSEventStream (new [] { pathname }, TimeSpan.FromSeconds (1), FSEventStreamCreateFlags.FileEvents);
             EnableEvents = false;
 
             FsStream.Events += OnFSEventStreamEvents;
-            FsStream.ScheduleWithRunLoop (NSRunLoop.Current);
+            FsStream.ScheduleWithRunLoop (loop);
         }
 
         private void OnFSEventStreamEvents (object sender, FSEventStreamEventsArgs e)
         {
             foreach(MonoMac.CoreServices.FSEvent fsEvent in e.Events) {
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemCreated) != 0) {
-                    if (File.Exists (fsEvent.Path)) {
+                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0 && File.Exists (fsEvent.Path)) {
+                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
+                        return;
+                    }
+                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0 && Directory.Exists (fsEvent.Path)) {
                         Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
                         return;
                     }
                 }
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRemoved) != 0) {
-                    if (!File.Exists (fsEvent.Path)) {
+                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0 && !File.Exists (fsEvent.Path)) {
+                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
+                        return;
+                    }
+                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0 && !Directory.Exists (fsEvent.Path)) {
                         Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
                         return;
                     }
                 }
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemModified) != 0) {
-                    if (File.Exists (fsEvent.Path)) {
+                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0 && File.Exists (fsEvent.Path)) {
                         Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Changed, fsEvent.Path));
+                    }
+                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0 && Directory.Exists (fsEvent.Path)) {
+                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
                     }
                 }
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRenamed) != 0) {
                     //TODO rename optimization
-                    if (File.Exists (fsEvent.Path)) {
-                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
-                    } else {
-                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
+                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0) {
+                        if (File.Exists (fsEvent.Path)) {
+                            Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
+                        } else {
+                            Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
+                        }
+                    }
+                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0) {
+                        if (Directory.Exists (fsEvent.Path)) {
+                            Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
+                        } else {
+                            Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
+                        }
                     }
                 }
             }

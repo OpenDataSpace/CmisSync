@@ -2,6 +2,9 @@ using System;
 using System.IO;
 using System.Threading;
 
+using MonoMac.Foundation;
+using MonoMac.AppKit;
+
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Sync.Strategy;
 
@@ -14,10 +17,47 @@ namespace TestLibrary.SyncStrategiesTests
     [TestFixture]
     public class MacWatcherTest : BaseWatcherTest
     {
+        private bool StopRunLoop = false;
+        private NSRunLoop RunLoop = null;
+        private Thread RunLoopThread = null;
+
+        [TestFixtureSetUp]
+        public void ClassSetUp()
+        {
+            NSApplication.Init ();
+            RunLoopThread = new Thread (() =>
+            {
+                RunLoop = NSRunLoop.Current;
+                while (!StopRunLoop) {
+                    RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(0.01));
+                    Thread.Sleep(10);
+                }
+            });
+            RunLoopThread.Start ();
+            while (RunLoop == null) {
+                Thread.Sleep(10);
+            }
+        }
+
+        [TestFixtureTearDown]
+        public void ClassTearDown()
+        {
+            StopRunLoop = true;
+            RunLoopThread.Join ();
+        }
 
         [SetUp]
         public new void SetUp() {
-            base.SetUp ();
+//            base.SetUp ();
+            string localPath = Path.Combine (System.Environment.CurrentDirectory, Path.GetRandomFileName ());
+            localFolder = new DirectoryInfo(localPath);
+            localFolder.Create();
+            localSubFolder = new DirectoryInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));
+            localSubFolder.Create();
+            localFile = new FileInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));
+            using(localFile.Create());
+            queue = new Mock<ISyncEventQueue>();
+            returnedFSEvent = null;
         }
 
         [TearDown]
@@ -27,7 +67,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
-            var watcher = new MacWatcher(localFolder.FullName, queue.Object);
+            var watcher = new MacWatcher(localFolder.FullName, queue.Object, RunLoop);
             Assert.False(watcher.EnableEvents);
             Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
         }
@@ -35,18 +75,24 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullWatcher() {
-            new MacWatcher(null, queue.Object);
+            new MacWatcher(null, queue.Object, RunLoop);
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullQueue() {
-            new MacWatcher(localFolder.FullName, null);
+            new MacWatcher(localFolder.FullName, null, RunLoop);
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException( typeof( ArgumentNullException ) )]
+        public void ConstructorFailsWithNullRunLoop() {
+            new MacWatcher(localFolder.FullName, queue.Object, null);
         }
 
         protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
             WatcherData watcherData = new WatcherData ();
-            watcherData.Watcher = new MacWatcher (localFolder.FullName, queue);
+            watcherData.Watcher = new MacWatcher (pathname, queue, RunLoop);
             return watcherData;
         }
 

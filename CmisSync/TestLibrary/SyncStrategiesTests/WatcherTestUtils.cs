@@ -21,17 +21,16 @@ namespace TestLibrary.SyncStrategiesTests
     public class BaseWatcherTest
     {
         protected DirectoryInfo localFolder;
+        protected FileInfo localFile;
+        protected DirectoryInfo localSubFolder;
         protected Mock<ISyncEventQueue> queue;
+        protected FSEvent returnedFSEvent;
 
-        private string localPath;
-        private FileInfo localFile;
-        private DirectoryInfo localSubFolder;
         private static readonly int RETRIES = 10;
         private static readonly int MILISECONDSWAIT = 1000;
-        private FSEvent returnedFSEvent;
 
         protected void SetUp() {
-            localPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string localPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             localFolder = new DirectoryInfo(localPath);
             localFolder.Create();
             localSubFolder = new DirectoryInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));

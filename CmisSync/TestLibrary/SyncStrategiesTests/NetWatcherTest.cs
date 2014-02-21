@@ -14,12 +14,6 @@ namespace TestLibrary.SyncStrategiesTests
     public class NetWatcherTest : BaseWatcherTest
     {
 
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "enabled");
-        }
-
         [SetUp]
         public new void SetUp() {
             base.SetUp ();

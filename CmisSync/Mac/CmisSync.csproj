@@ -54,9 +54,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net" />
     <Reference Include="Mono.Posix" />
-    <Reference Include="XamMac, Version=0.0.0.0, Culture=neutral, PublicKeyToken=84e04ff9cfb79065">
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="XamMac, Version=0.0.0.0, Culture=neutral, PublicKeyToken=84e04ff9cfb79065" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Extras\Newtonsoft.Json.dll</HintPath>
