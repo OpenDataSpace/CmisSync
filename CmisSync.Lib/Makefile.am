@@ -29,6 +29,8 @@ SOURCES =  \
 	ContentTasks/SimpleFileUploader.cs \
 	ContentTasks/Utils.cs \
 	Credentials.cs \
+	Data/MappedFile.cs \
+	Data/MappedFolder.cs \
 	Data/MappedObjects.cs \
 	Data/PathMatcher.cs \
 	Defines.cs \
@@ -77,10 +79,10 @@ SOURCES =  \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
-	Storage/FileInfoWrapper.cs \
 	Storage/DirectoryInfoWrapper.cs \
 	Storage/EventStorage.cs \
 	Storage/FailedOperationsStorage.cs \
+	Storage/FileInfoWrapper.cs \
 	Storage/FileSystemInfoFactory.cs \
 	Storage/FileSystemInfoWrapper.cs \
 	Storage/GeneralRepoStorage.cs \

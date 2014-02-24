@@ -175,6 +175,8 @@
     <Compile Include="Sync\Strategy\SimpleFileSynchronizer.cs" />
     <Compile Include="Sync\Strategy\SyncMechanism.cs" />
     <Compile Include="Sync\Strategy\Watcher.cs" />
+    <Compile Include="Data\MappedFile.cs" />
+    <Compile Include="Data\MappedFolder.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

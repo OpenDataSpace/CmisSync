@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
+using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib
 {
@@ -231,7 +232,7 @@ namespace CmisSync.Lib
             }
         }
 
-        public static byte[] CalculateChecksum(string hashAlgorithm, FileInfo file) {
+        public static byte[] CalculateChecksum(string hashAlgorithm, IFileInfo file) {
             using (var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 return CalculateChecksum(hashAlgorithm, stream);
