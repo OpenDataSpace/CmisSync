@@ -52,7 +52,7 @@ namespace DataSpaceSync.Console
                 ConfigMigration.Migrate();
 
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-
+            CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
             if (args.Length != 0)
             {
                 foreach(string arg in args) {

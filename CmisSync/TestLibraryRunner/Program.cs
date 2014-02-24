@@ -83,6 +83,8 @@ namespace TestLibraryRunner
                 log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
             }
 
+            CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
+
             //new CmisSyncTests().TestCrypto();
             test(path == null ? "../../../TestLibrary/test-servers.json" : path);
             //testFuzzy();
