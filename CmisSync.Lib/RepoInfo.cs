@@ -166,6 +166,19 @@ namespace CmisSync.Lib
         }
 
         /// <summary>
+        /// Sets the ignored paths.
+        /// </summary>
+        /// <param name='paths'>
+        /// Paths.
+        /// </param>
+        public void SetIgnoredPaths(string[] paths)
+        {
+            ignoredPaths.Clear();
+            foreach(var path in paths)
+                ignoredPaths.Add(path);
+        }
+
+        /// <summary>
         /// If the given path should be ignored, TRUE will be returned,
         /// otherwise FALSE.
         /// </summary>
