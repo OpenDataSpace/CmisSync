@@ -32,6 +32,7 @@ SOURCES =  \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/ExceptionEventTest.cs \
+	EventsTests/FileEventTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
@@ -75,12 +76,12 @@ SOURCES =  \
 	SyncStrategiesTests/WatcherTest.cs \
 	TestUtils/MockUtil.cs \
 	TestUtils/ObservableHandler.cs \
-	TestUtils/ObservableHandlerTest.cs 
+	TestUtils/ObservableHandlerTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
 	UtilsTests/CredentialsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
 	WatcherTest.cs \
-    MoqExtensions/MoqExtensions.cs \
+    MoqExtensions/MoqExtensions.cs 
 	
 
 EXTRA_DIST = TestLibrary.csproj \
