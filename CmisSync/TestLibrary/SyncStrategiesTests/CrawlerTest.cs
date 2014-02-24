@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 using CmisSync.Lib.Events;
@@ -92,15 +93,27 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.Fail("TODO");
         }
 
-        [Ignore]
         [Test, Category("Fast")]
         public void CrawlingEmptyFoldersTest() {
-            var queuemanager = new Mock<SyncEventManager>().Object;
-            var queue = new Mock<SyncEventQueue>(queuemanager).Object;
+            var queue = new Mock<ISyncEventQueue>();
+
             var remoteFolder = new Mock<IFolder>();
             var remoteChildren = new Mock<IItemEnumerable<ICmisObject>>();
-//            remoteChildren.Setup(remoteChildren => remoteChildren.)
-//            remoteFolder.Setup(folder => folder.GetChildren()).Returns()
+            var list = new List<ICmisObject>();
+            remoteChildren.Setup(r => r.GetEnumerator()).Returns(list.GetEnumerator());
+            remoteFolder.Setup(r => r.GetChildren()).Returns(remoteChildren.Object);
+
+            var localFolder = new Mock<IDirectoryInfo>();
+
+            var crawler = new Crawler(queue.Object, remoteFolder.Object, localFolder.Object);
+            var startEvent = new StartNextSyncEvent(true);
+            Assert.True(crawler.Handle(startEvent));
+
+
+            queue.Verify(q => q.AddEvent(It.IsAny<FullSyncCompletedEvent>()),Times.Once());
+            //this and only this should be added
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()),Times.Once());
+
         }
     }
 }
