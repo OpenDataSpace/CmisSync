@@ -146,6 +146,16 @@ namespace CmisSync.Lib.Sync
             /// EventQueue
             /// </summary>
             public SyncEventQueue Queue {get; private set;}
+
+            /// <summary>
+            /// Track whether a full sync is done
+            /// </summary>
+            private bool syncFull = false;
+
+            /// <summary>
+            /// If set to true, the session should be reconnected on next sync.
+            /// </summary>
+            private bool reconnect = false;
             
             /// <summary>
             ///  Constructor for Repo (at every launch of CmisSync)
@@ -210,6 +220,7 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private void UpdateCmisParameters()
             {
+                reconnect = true;
                 cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
                 cmisParameters[SessionParameter.AtomPubUrl] = repoinfo.Address.ToString();
                 cmisParameters[SessionParameter.User] = repoinfo.User;
@@ -325,6 +336,7 @@ namespace CmisSync.Lib.Sync
                     renditions.Add("cmis:none");
                     session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
                     Queue.AddEvent(new SuccessfulLoginEvent());
+                    reconnect = false;
                 }
                 //TODO Implement error handling -> informing user about connection problems by showing status
                 catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
@@ -345,12 +357,6 @@ namespace CmisSync.Lib.Sync
                     Logger.Error("Failed to create session to remote " + this.repoinfo.Address.ToString() + ": ", e);
                 }
             }
-
-
-            /// <summary>
-            /// Track whether a full sync is done
-            /// </summary>
-            private bool syncFull = false;
 
             /// <summary>
             /// Forces the full sync independent of FS events or Remote events.
@@ -377,7 +383,7 @@ namespace CmisSync.Lib.Sync
             public void Sync()
             {
                 //// If not connected, connect.
-                if (session == null)
+                if (session == null || reconnect)
                 {
                     Connect();
                 } else {

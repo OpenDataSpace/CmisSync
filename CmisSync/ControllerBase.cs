@@ -368,33 +368,11 @@ namespace CmisSync
                         }
                         folder.ObfuscatedPassword = edit.Credentials.Password.ObfuscatedPassword;
                         ConfigManager.CurrentConfig.Save();
-                        foreach (string oldIgnore in oldIgnores)
+                        foreach (RepoBase repo in this.repositories)
                         {
-                            if (String.IsNullOrEmpty(edit.Ignores.Find(
-                                delegate(string ignore)
-                                {
-                                    if (ignore == oldIgnore || oldIgnore.StartsWith(ignore + "/"))
-                                    {
-                                        return true;
-                                    }
-                                    else
-                                    {
-                                        return false;
-                                    }
-                                })))
+                            if (repo.Name == reponame)
                             {
-                                Logger.Info(String.Format("The remote folder {0} should be synced after editing ignore folders", oldIgnore));
-                                lock (this.repo_lock)
-                                {
-                                    foreach (RepoBase repo in this.repositories)
-                                    {
-                                        if (repo.Name == reponame)
-                                        {
-                                            repo.Queue.AddEvent(new RepoConfigChangedEvent(folder.GetRepoInfo()));
-                                        }
-                                    }
-                                }
-                                break;
+                                repo.Queue.AddEvent(new RepoConfigChangedEvent(folder.GetRepoInfo()));
                             }
                         }
                     }

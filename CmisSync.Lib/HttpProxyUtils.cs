@@ -12,7 +12,7 @@ namespace CmisSync.Lib
         public static void SetDefaultProxy(Config.ProxySettings settings)
         {
             try{
-            if(settings == null || settings.Selection == Config.ProxySelection.SYSTEM)
+            if(settings.Selection == Config.ProxySelection.SYSTEM)
             {
                 WebRequest.DefaultWebProxy = WebRequest.GetSystemWebProxy();
             }

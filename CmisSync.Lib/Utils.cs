@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using log4net;
 using System.IO;
 
 using System.Security;
@@ -13,6 +12,11 @@ using System.Text.RegularExpressions;
 //using Mono.Unix.Native;
 //#endif
 using System.Globalization;
+using System.Reflection;
+
+using log4net;
+
+using Newtonsoft.Json;
 
 namespace CmisSync.Lib
 {
@@ -446,6 +450,18 @@ namespace CmisSync.Lib
                                  Environment.OSVersion.ToString(),
                                  System.Environment.MachineName,
                                  CultureInfo.CurrentCulture.Name);
+        }
+
+        public static void EnsureNeededDependenciesAreAvailable()
+        {
+            Type[] types = new Type[]{
+                typeof(Newtonsoft.Json.JsonConvert)
+            };
+            foreach (var type in types)
+            {
+                System.Reflection.Assembly info = type.Assembly;
+                Logger.Debug(String.Format("Needed dependency \"{0}\" is available", info));
+            }
         }
     }
 }
