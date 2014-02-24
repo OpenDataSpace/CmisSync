@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -90,14 +91,55 @@ namespace TestLibrary.SyncStrategiesTests
             new MacWatcher(localFolder.FullName, queue.Object, null);
         }
 
+        public class EventQueue : ISyncEventQueue
+        {
+            private ISyncEventQueue Queue;
+            public List<FSEvent> Events = new List<FSEvent>();
+
+            public EventQueue(ISyncEventQueue queue)
+            {
+                Queue = queue;
+            }
+
+            public void AddEvent(ISyncEvent newEvent)
+            {
+                lock (Events) {
+                    FSEvent fsEvent = newEvent as FSEvent;
+                    if (fsEvent != null) {
+                        Events.Add (fsEvent);
+                    }
+                    Queue.AddEvent (newEvent);
+                }
+            }
+
+            public bool IsStopped
+            {
+                get { return Queue.IsStopped; }
+            } 
+        }
+
         protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
             WatcherData watcherData = new WatcherData ();
-            watcherData.Watcher = new MacWatcher (pathname, queue, RunLoop);
+            watcherData.Data = new EventQueue(queue);
+            watcherData.Watcher = new MacWatcher (pathname, watcherData.Data as ISyncEventQueue, RunLoop);
             return watcherData;
         }
 
-        protected override void WaitWatcherData (WatcherData watcherData, WatcherChangeTypes types, int milliseconds) {
-            Thread.Sleep (milliseconds);
+        protected override void WaitWatcherData (WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
+            EventQueue queue = watcherData.Data as EventQueue;
+            while (milliseconds >= 0) {
+                FSEvent[] events;
+                lock (queue.Events) {
+                    events = queue.Events.ToArray ();
+                }
+                foreach (FSEvent fsEvent in events) {
+                    if (fsEvent.Path == pathname && fsEvent.Type == types) {
+                        return;
+                    }
+                }
+                Thread.Sleep (10);
+                milliseconds -= 10;
+            }
         }
 
         [Test, Category("Medium")]

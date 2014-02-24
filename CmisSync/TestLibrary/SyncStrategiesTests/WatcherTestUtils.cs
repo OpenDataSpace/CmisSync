@@ -58,21 +58,21 @@ namespace TestLibrary.SyncStrategiesTests
             return new WatcherData();
         }
 
-        protected virtual void WaitWatcherData (WatcherData watcherData, WatcherChangeTypes types, int milliseconds) {
+        protected virtual void WaitWatcherData (WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
             Assert.Fail ("to be implemented in sub class");
         }
 
         public void ReportFSFileAddedEvent () {
             localFile.Delete();
             localFile = new FileInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));
-            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+            queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Path == localFile.FullName)))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcherData = GetWatcherData (localFolder.FullName, queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while(returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Created, MILISECONDSWAIT);
+                    WaitWatcherData(watcherData, localFile.FullName, WatcherChangeTypes.Created, MILISECONDSWAIT);
                     count ++;
                 }
             });
@@ -89,14 +89,14 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         public void ReportFSFileChangedEvent () {
-            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+            queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Path == localFile.FullName && e.Type == WatcherChangeTypes.Changed)))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcherData = GetWatcherData (localFolder.FullName, queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while(returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Changed, MILISECONDSWAIT);
+                    WaitWatcherData(watcherData, localFile.FullName, WatcherChangeTypes.Changed, MILISECONDSWAIT);
                     count ++;
                 }
             });
@@ -122,14 +122,14 @@ namespace TestLibrary.SyncStrategiesTests
         public void ReportFSFileRenamedEvent () {
             string oldpath = localFile.FullName;
             string newpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
-            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+            queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Path == localFile.FullName)))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcherData = GetWatcherData (localFolder.FullName, queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while(returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Renamed, MILISECONDSWAIT);
+                    WaitWatcherData(watcherData, newpath, WatcherChangeTypes.Renamed, MILISECONDSWAIT);
                     count ++;
                 }
             });
@@ -152,22 +152,22 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         public void ReportFSFileRemovedEvent () {
-            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+            queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Path == localFile.FullName)))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcherData = GetWatcherData (localFolder.FullName, queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
-                while(returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Deleted, MILISECONDSWAIT);
+                while((returnedFSEvent == null ) && count < RETRIES) {
+                    WaitWatcherData(watcherData, localFile.FullName, WatcherChangeTypes.Deleted, MILISECONDSWAIT);
                     count ++;
                 }
             });
             localFile.Delete();
             t.Wait();
             if(returnedFSEvent!= null) {
+                Assert.AreEqual(WatcherChangeTypes.Deleted, returnedFSEvent.Type, localFile.FullName + " " + returnedFSEvent.Path);
                 Assert.AreEqual(localFile.FullName, returnedFSEvent.Path);
-                Assert.AreEqual(WatcherChangeTypes.Deleted, returnedFSEvent.Type);
             }
             else
                 Assert.Inconclusive("Missed file removed event");
@@ -175,14 +175,14 @@ namespace TestLibrary.SyncStrategiesTests
 
         public void ReportFSFolderAddedEvent () {
             localSubFolder.Delete();
-            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+            queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Path == localSubFolder.FullName)))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcherData = GetWatcherData (localFolder.FullName, queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while(returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Created, MILISECONDSWAIT);
+                    WaitWatcherData(watcherData, localSubFolder.FullName, WatcherChangeTypes.Created, MILISECONDSWAIT);
                     count ++;
                 }
             });
@@ -199,14 +199,14 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         public void ReportFSFolderChangedEvent () {
-            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+            queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Path == localSubFolder.FullName && e.Type == WatcherChangeTypes.Changed)))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcherData = GetWatcherData (localFolder.FullName, queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while(returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Changed, MILISECONDSWAIT);
+                    WaitWatcherData(watcherData, localSubFolder.FullName, WatcherChangeTypes.Changed, MILISECONDSWAIT);
                     count ++;
                 }
             });
@@ -223,14 +223,14 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         public void ReportFSFolderRemovedEvent () {
-            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+            queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Path == localSubFolder.FullName)))
                 .Callback((ISyncEvent file) => returnedFSEvent = file as FSEvent);
             var watcherData = GetWatcherData (localFolder.FullName, queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while(returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Deleted, MILISECONDSWAIT);
+                    WaitWatcherData(watcherData, localSubFolder.FullName, WatcherChangeTypes.Deleted, MILISECONDSWAIT);
                     count ++;
                 }
             });
@@ -248,14 +248,14 @@ namespace TestLibrary.SyncStrategiesTests
         public void ReportFSFolderRenamedEvent () {
             string oldpath = localSubFolder.FullName;
             string newpath = Path.Combine(localFolder.FullName, Path.GetRandomFileName());
-            queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
+            queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Path == newpath)))
                 .Callback((ISyncEvent folder) => returnedFSEvent = folder as FSEvent);
             var watcherData = GetWatcherData (localFolder.FullName, queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while(returnedFSEvent == null && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Renamed, MILISECONDSWAIT);
+                    WaitWatcherData(watcherData, newpath, WatcherChangeTypes.Renamed, MILISECONDSWAIT);
                     count ++;
                 }
             });
@@ -289,7 +289,7 @@ namespace TestLibrary.SyncStrategiesTests
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
                 while(returnedFSEvents.Count < 2 && count < RETRIES) {
-                    WaitWatcherData(watcherData,WatcherChangeTypes.Renamed, MILISECONDSWAIT);
+                    WaitWatcherData(watcherData, newpath, WatcherChangeTypes.Renamed, MILISECONDSWAIT);
                     count ++;
                 }
             });
@@ -314,7 +314,6 @@ namespace TestLibrary.SyncStrategiesTests
                 Assert.Inconclusive("Missed folder moved event(s)");
             localSubFolder = new DirectoryInfo(newpath);
         }
-
 
     }
 }

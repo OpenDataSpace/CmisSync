@@ -59,7 +59,7 @@ namespace TestLibrary.SyncStrategiesTests
             return watcherData;
         }
 
-        protected override void WaitWatcherData (WatcherData watcherData, WatcherChangeTypes types, int milliseconds) {
+        protected override void WaitWatcherData (WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
             FileSystemWatcher watcher = watcherData.Data as FileSystemWatcher;
             watcher.WaitForChanged (types, milliseconds);
         }
