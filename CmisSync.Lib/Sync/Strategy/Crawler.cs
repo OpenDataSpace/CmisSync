@@ -78,7 +78,6 @@ namespace CmisSync.Lib.Sync.Strategy
             {
                 var request = e as CrawlRequestEvent;
                 CrawlSync(request.RemoteFolder, request.LocalFolder);
-                //StartAsync(request.RemoteFolder, request.LocalFolder);
                 return true;
             }
             if(e is StartNextSyncEvent)
