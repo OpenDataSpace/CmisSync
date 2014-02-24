@@ -29,6 +29,10 @@ namespace CmisSync.CmisTree
                     Parent = parent,
                     LocationType = Node.NodeLocationType.LOCAL
                 };
+                if(f.Parent.Path.EndsWith("/"))
+                    f.Path = f.Parent.Path + f.Name ;
+                else
+                    f.Path = f.Parent.Path + "/" + f.Name ;
                 f.IsIllegalFileNameInPath = CmisSync.Lib.Utils.IsInvalidFolderName(f.Name);
                 List<Node> children = CreateNodesFromLocalFolder(subdir, f);
                 foreach (Node child in children)
@@ -45,7 +49,7 @@ namespace CmisSync.CmisTree
         /// <param name="localPath"></param>
         public static void AddLocalFolderToRootNode(RootFolder repo, string localPath)
         {
-            List<Node> children = CreateNodesFromLocalFolder(localPath, null);
+            List<Node> children = CreateNodesFromLocalFolder(localPath, repo);
             AsyncNodeLoader.MergeFolderTrees(repo, children);
         }
     }
