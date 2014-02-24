@@ -52,7 +52,7 @@ namespace TestLibrary.UtilsTests
             Settings.Server = new Uri("http://example-false.com:8080/");
             HttpProxyUtils.SetDefaultProxy(Settings);
 
-            HttpProxyUtils.SetDefaultProxy(null);
+            HttpProxyUtils.SetDefaultProxy(new Config.ProxySettings{Selection = Config.ProxySelection.SYSTEM});
             Assert.AreEqual(WebRequest.DefaultWebProxy, WebRequest.GetSystemWebProxy() );
         }
 

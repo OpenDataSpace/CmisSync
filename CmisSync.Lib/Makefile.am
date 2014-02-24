@@ -48,13 +48,13 @@ SOURCES =  \
 	Events/EventFilter/IgnoredFoldersFilter.cs \
 	Events/EventFilter/InvalidFolderNameFilter.cs \
 	Events/ExceptionEvent.cs \
-	Events/FSDeletionHandler.cs \
-	Events/FSEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileDownloadRequest.cs \
 	Events/FileEvent.cs \
 	Events/FileTransmissionEvent.cs \
 	Events/FolderEvent.cs \
+	Events/FSDeletionHandler.cs \
+	Events/FSEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/ISyncEvent.cs \

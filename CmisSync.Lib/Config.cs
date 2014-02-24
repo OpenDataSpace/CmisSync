@@ -489,19 +489,22 @@ namespace CmisSync.Lib
             }
         }
 
-        public class IgnoredFolder
+        [Serializable]
+        public struct IgnoredFolder
         {
             [XmlAttribute("path")]
             public string Path { get; set; }
         }
 
-        public class User {
+        [Serializable]
+        public struct User {
             [XmlElement("name")]
             public string Name { get; set; }
             [XmlElement("email")]
             public string EMail { get; set; }
         }
 
+        [Serializable]
         public class Feature {
             [XmlElement("getFolderTree")]
             public bool? GetFolderTreeSupport {get; set;}
@@ -531,7 +534,7 @@ namespace CmisSync.Lib
         }
 
         [Serializable]
-        public class ProxySettings {
+        public struct ProxySettings {
             [XmlAttribute("selected")]
             [DefaultValue(ProxySelection.SYSTEM)]
             public ProxySelection Selection {get; set;}
@@ -548,6 +551,7 @@ namespace CmisSync.Lib
             [DefaultValue(null)]
             public string ObfuscatedPassword { get; set; }
         }
+
         [Serializable]
         public enum ProxySelection {
             SYSTEM,
