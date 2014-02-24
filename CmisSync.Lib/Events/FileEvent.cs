@@ -8,6 +8,7 @@ using CmisSync.Lib.Storage;
 namespace CmisSync.Lib.Events
 {
     public class FileEvent : AbstractFolderEvent
+
     {
         public ContentChangeType LocalContent { get; set; }
 
@@ -29,6 +30,7 @@ namespace CmisSync.Lib.Events
             this.LocalContent = ContentChangeType.NONE;
             this.RemoteContent = ContentChangeType.NONE;
         }
+
 
         public override string ToString ()
         {
