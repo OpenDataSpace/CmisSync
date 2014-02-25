@@ -109,6 +109,8 @@ namespace CmisSync
 
         public event CmisSync.Lib.Events.ShowChangePasswordEventHandler ShowChangePassword = delegate { };
 
+        public delegate void SuccessfulLoginEventHandler (string reponame);
+        public event SuccessfulLoginEventHandler SuccessfulLogin = delegate { };
 
         /// <summary>
         /// Get the repositories configured in CmisSync.
@@ -277,6 +279,10 @@ namespace CmisSync
                 return false;
             }));
             repo.EventManager.AddEventHandler(new PermissionDeniedEventHandler(repositoryInfo.Name, ShowChangePassword));
+            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>( 0, delegate(ISyncEvent e) {
+                SuccessfulLogin(repositoryInfo.Name);
+                return false;
+            }));
             this.repositories.Add(repo);
             repo.Initialize();
         }

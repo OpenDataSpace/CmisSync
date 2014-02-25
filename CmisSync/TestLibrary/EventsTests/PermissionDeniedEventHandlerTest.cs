@@ -94,7 +94,7 @@ namespace TestLibrary.EventsTests
             });
             Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
             Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
-            Assert.IsFalse (handler.Handle (new SuccessfulLoginEvent ()));
+            Assert.IsFalse (handler.Handle (new SuccessfulLoginEvent (new Uri("http://example.com"))));
             Assert.IsTrue (handler.Handle (PermissionDeniedEvent));
             Assert.AreEqual (2, handled);
         }

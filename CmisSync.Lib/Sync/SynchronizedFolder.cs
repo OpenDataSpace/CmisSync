@@ -335,7 +335,7 @@ namespace CmisSync.Lib.Sync
                     HashSet<string> renditions = new HashSet<string>();
                     renditions.Add("cmis:none");
                     session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
-                    Queue.AddEvent(new SuccessfulLoginEvent());
+                    Queue.AddEvent(new SuccessfulLoginEvent(repoinfo.Address));
                     reconnect = false;
                 }
                 //TODO Implement error handling -> informing user about connection problems by showing status
