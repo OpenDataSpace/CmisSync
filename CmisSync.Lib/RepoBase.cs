@@ -25,7 +25,9 @@ using log4net;
 
 using Timers = System.Timers;
 using CmisSync.Lib.Events;
-
+#if __COCOA__
+using MonoMac.Foundation;
+#endif
 namespace CmisSync.Lib
 {
 
@@ -127,38 +129,18 @@ namespace CmisSync.Lib
         /// <summary>
         /// Watches the local filesystem for changes.
         /// </summary>
-        public Watcher Watcher { get; private set; }
-
-
-        /// <summary>
-        /// Interval at which the local and remote filesystems should be polled.
-        /// </summary>
-        //private TimeSpan poll_interval = PollInterval.Short;
-
+        public CmisSync.Lib.Sync.Strategy.Watcher Watcher { get; private set; }
 
         /// <summary>
-        /// When the local and remote filesystems were last checked for modifications.
+        /// The ignored folders filter.
         /// </summary>
-        //private DateTime last_poll = DateTime.Now;
-
         private Events.Filter.IgnoredFoldersFilter ignoredFoldersFilter;
 
-
-        /// <summary>
-        /// Timer for watching the local and remote filesystems.
-        /// </summary>
-        private Timers.Timer remote_timer = new Timers.Timer();
-
-
-        /// <summary>
-        /// Intervals for local and remote filesystems polling.
-        /// Currently the polling interval is fixed.
-        /// </summary>
-        private static class PollInterval
-        {
-            public static readonly TimeSpan Short = new TimeSpan(0, 0, 5, 0);
-        }
-
+#if __COCOA__
+        private bool StopRunLoop = false;
+        private NSRunLoop RunLoop = null;
+        private Thread RunLoopThread = null;
+#endif
 
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
@@ -185,24 +167,33 @@ namespace CmisSync.Lib
             // start scheduler
             Scheduler = new SyncScheduler(Queue, repoInfo.PollInterval);
             EventManager.AddEventHandler(Scheduler);
-            // start full crawl sync on beginning
-            Queue.AddEvent(new StartNextSyncEvent(true));
-            Logger.Info("Repo " + repoInfo.Name + " - Set poll interval to " + repoInfo.PollInterval + "ms");
-            this.remote_timer.Interval = repoInfo.PollInterval;
+
+            EventManager.AddEventHandler(new GenericSyncEventHandler<StartNextSyncEvent>(0, delegate(ISyncEvent e) {
+                SyncInBackground();
+                return true;
+            }));
+
 
             SyncStatusChanged += delegate(SyncStatus status)
             {
                 Status = status;
             };
-
-            this.Watcher = new Watcher(LocalPath);
-
-            // Main loop syncing every X seconds.
-            this.remote_timer.Elapsed += delegate
+            #if __COCOA__
+            RunLoopThread = new Thread (() =>
             {
-                // Synchronize.
-                SyncInBackground();
-            };
+                RunLoop = NSRunLoop.Current;
+                while (!StopRunLoop) {
+                    RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(1));
+                }
+            });
+            RunLoopThread.Start ();
+            while (RunLoop == null) {
+                Thread.Sleep(10);
+            }
+            this.Watcher = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue, RunLoop);
+            #else
+            this.Watcher = new CmisSync.Lib.Sync.Strategy.NetWatcher( new FileSystemWatcher(LocalPath), Queue);
+            #endif
         }
 
         private bool RepoInfoChanged(ISyncEvent e)
@@ -250,8 +241,10 @@ namespace CmisSync.Lib
                 if (disposing)
                 {
                     this.Scheduler.Dispose();
-                    this.remote_timer.Stop();
-                    this.remote_timer.Dispose();
+#if __COCOA__
+                    StopRunLoop = true;
+                    RunLoopThread.Join ();
+#endif
                     this.Watcher.Dispose();
                     this.Queue.StopListener();
                     int timeout = 500;
@@ -271,9 +264,8 @@ namespace CmisSync.Lib
         {
             // Sync up everything that changed
             // since we've been offline
-//            SyncInBackground();
-
-            this.remote_timer.Start();
+            // start full crawl sync on beginning
+            Queue.AddEvent(new StartNextSyncEvent(true));
         }
 
         /// <summary>
