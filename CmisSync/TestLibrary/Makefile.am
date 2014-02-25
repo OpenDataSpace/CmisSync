@@ -4,7 +4,7 @@ TARGET = library
 ASSEMBLY_INFO_SOURCE =  \
 	Properties/AssemblyInfo.cs
 
-LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
+LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(MONOMAC_LIBS) \
 	   $(LIBS_CMISSYNCLIB_DEPS) \
 	   $(NUNIT_LIBS) \
 	   -r:$(srcdir)/lib/Moq.dll \
