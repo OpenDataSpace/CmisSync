@@ -27,7 +27,11 @@ namespace CmisSync.Lib.Events
         public virtual bool IsDirectory ()
         {
             //detect whether its a directory or file
-            return (File.GetAttributes (Path) & FileAttributes.Directory) == FileAttributes.Directory;
+            try {
+                return (File.GetAttributes (Path) & FileAttributes.Directory) == FileAttributes.Directory;
+            } catch(IOException) {
+                return false;
+            }
         }
     }
 

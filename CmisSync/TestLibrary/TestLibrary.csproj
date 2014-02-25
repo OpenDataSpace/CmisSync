@@ -11,6 +11,9 @@
     <RootNamespace>TestLibrary</RootNamespace>
     <AssemblyName>TestLibrary</AssemblyName>
     <FileAlignment>512</FileAlignment>
+    <ReleaseVersion>
+    </ReleaseVersion>
+    <UseMSBuildEngine>False</UseMSBuildEngine>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,6 +29,22 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug_MonoMac|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;__COCOA__</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_MonoMac|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;__COCOA__</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -52,6 +71,9 @@
     <Reference Include="xunit">
       <HintPath>lib\xunit.dll</HintPath>
     </Reference>
+    <Reference Include="XamMac">
+      <HintPath>..\..\..\..\..\..\..\..\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
@@ -59,7 +81,6 @@
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="LocalFilesystemActivityGenerator.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WatcherTest.cs" />
     <Compile Include="DebugLoggingHandlerTest.cs" />
     <Compile Include="FSDeletionHandlerTest.cs" />
@@ -79,6 +100,10 @@
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
+    <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
+    <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
+    <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
+    <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
     <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
@@ -90,7 +115,6 @@
     <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="DataTests\PathMatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
     <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />
@@ -105,7 +129,6 @@
     <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
     <Compile Include="EventsTests\ExceptionEventTest.cs" />
     <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
     <Compile Include="TestUtils\MockUtil.cs" />
@@ -114,6 +137,7 @@
     <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectAddedTest.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -136,9 +160,11 @@
     <None Include="test-servers.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!--
   <PropertyGroup>
     <PreBuildEvent>Copy "$(SolutionDir)..\..\extras\sqlite-netFx40-binary-Win32-2010-1.0.84.0\SQLite.Interop.dll" "$(ProjectDir)$(OutDir)SQLite.Interop.dll"</PreBuildEvent>
   </PropertyGroup>
+  -->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -163,14 +189,14 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile.am" SyncReferences="true" IsAutotoolsProject="true" RelativeConfigureInPath="../..">
-          <BuildFilesVar Sync="true" Name="ASSEMBLY_INFO_SOURCE" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="True" RelativeConfigureInPath="../..">
+          <BuildFilesVar Sync="True" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
-          <GacRefVar Sync="true" Name="LIBS" Prefix="-r:" />
-          <AsmRefVar Sync="true" Name="LIBS" Prefix="-r:" />
-          <ProjectRefVar Sync="true" Name="LIBS" Prefix="-r:" />
+          <GacRefVar Name="LIBS" Prefix="-r:" />
+          <AsmRefVar Name="LIBS" Prefix="-r:" />
+          <ProjectRefVar Name="LIBS" Prefix="-r:" />
         </MonoDevelop.Autotools.MakefileInfo>
       </Properties>
     </MonoDevelop>
