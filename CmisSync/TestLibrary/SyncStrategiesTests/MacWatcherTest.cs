@@ -1,3 +1,5 @@
+#if __COCOA__
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,8 +32,7 @@ namespace TestLibrary.SyncStrategiesTests
             {
                 RunLoop = NSRunLoop.Current;
                 while (!StopRunLoop) {
-                    RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(0.01));
-                    Thread.Sleep(10);
+                    RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(1));
                 }
             });
             RunLoopThread.Start ();
@@ -189,3 +190,4 @@ namespace TestLibrary.SyncStrategiesTests
     }
 }
 
+#endif

@@ -1,3 +1,5 @@
+#if __COCOA__
+
 using System;
 using System.IO;
 using System.Threading;
@@ -51,6 +53,12 @@ namespace CmisSync.Lib.Sync.Strategy
             FsStream.ScheduleWithRunLoop (loop);
         }
 
+        ~MacWatcher()
+        {
+            EnableEvents = false;
+            FsStream.Invalidate ();
+        }
+
         private void OnFSEventStreamEvents (object sender, FSEventStreamEventsArgs e)
         {
             foreach(MonoMac.CoreServices.FSEvent fsEvent in e.Events) {
@@ -102,3 +110,4 @@ namespace CmisSync.Lib.Sync.Strategy
     }
 }
 
+#endif
