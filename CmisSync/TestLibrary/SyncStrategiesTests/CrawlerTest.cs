@@ -93,13 +93,16 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.Fail("TODO");
         }
 
-        private Mock<IFolder> CreateFolder(List<string> fileNames, int folderCount) {
+        private Mock<IFolder> CreateFolder(List<string> fileNames, int folderCount, bool contentStream = false) {
             var remoteFolder = new Mock<IFolder>();
             var remoteChildren = new Mock<IItemEnumerable<ICmisObject>>();
             var list = new List<ICmisObject>();
             foreach(var name in fileNames) {
                 var doc = new Mock<IDocument>();
                 doc.Setup(d => d.Name).Returns(name);
+                if(contentStream){
+                    doc.Setup(d => d.ContentStreamId).Returns(name);
+                }
                 list.Add(doc.Object);
             }
             remoteChildren.Setup(r => r.GetEnumerator()).Returns(list.GetEnumerator());
@@ -191,6 +194,25 @@ namespace TestLibrary.SyncStrategiesTests
 
             queue.Verify(q => q.AddEvent(
                         It.Is<FileEvent>(e => VerifyRemoteFileEvent(e, localPath, name, MetaDataChangeType.CREATED, ContentChangeType.NONE))
+                        ), Times.Once());
+        } 
+        
+        [Test, Category("Fast")]
+        public void CrawlingRemoteFolderWith1FileWithContentEmptyLocal () {
+            string localPath = "/";
+            string name = "file";
+            var queue = new Mock<ISyncEventQueue>();
+
+            var remoteFolder = CreateFolder(new List<string> {name}, 0, true);
+
+            var localFolder = CreateLocalFolder(localPath, new List<string>());
+
+            var crawler = GetCrawlerWithFakes(queue);
+            var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
+            Assert.True(crawler.Handle(crawlEvent));
+
+            queue.Verify(q => q.AddEvent(
+                        It.Is<FileEvent>(e => VerifyRemoteFileEvent(e, localPath, name, MetaDataChangeType.CREATED, ContentChangeType.CREATED))
                         ), Times.Once());
         } 
 

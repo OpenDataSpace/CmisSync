@@ -149,7 +149,9 @@ namespace CmisSync.Lib.Sync.Strategy
                     } else {
                         // Only remote has got a file, figure out what to do
                         fileEvent.Remote = MetaDataChangeType.CREATED;
-// if contentstreamId                        fileEvent.RemoteContent = ContentChangeType.CREATED;
+                        if(doc.ContentStreamId != null) {
+                            fileEvent.RemoteContent = ContentChangeType.CREATED;
+                        }
                         Queue.AddEvent(fileEvent);
                     }
                 }
