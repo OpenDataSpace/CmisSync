@@ -15,8 +15,15 @@ using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
+    /// <summary>
+    /// Implementation of a Mac OS specific file system watcher.
+    /// </summary>
     public class MacWatcher : Watcher
     {
+        /// <summary>
+        /// Enables the FSEvent report
+        /// </summary>
+        /// <value><c>true</c> if enable events; otherwise, <c>false</c>.</value>
         public override bool EnableEvents {
             get {
                 return isStarted;
@@ -43,16 +50,36 @@ namespace CmisSync.Lib.Sync.Strategy
         private FSEventStream FsStream;
         private bool isStarted = false;
 
-        public MacWatcher (string pathname, ISyncEventQueue queue, NSRunLoop loop) : base(queue)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.MacWatcher"/> class.
+        /// The default latency is set to 1 second.
+        /// </summary>
+        /// <param name="pathname">Pathname.</param>
+        /// <param name="queue">Queue.</param>
+        /// <param name="loop">Loop.</param>
+        public MacWatcher (string pathname, ISyncEventQueue queue, NSRunLoop loop) : this(pathname, queue, loop, TimeSpan.FromSeconds(1))
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.MacWatcher"/> class.
+        /// </summary>
+        /// <param name="pathname">Pathname.</param>
+        /// <param name="queue">Queue.</param>
+        /// <param name="loop">Loop.</param>
+        /// <param name="latency">Latency.</param>
+        public MacWatcher (string pathname, ISyncEventQueue queue, NSRunLoop loop, TimeSpan latency) : base(queue)
         {
             if (String.IsNullOrEmpty (pathname) || loop == null)
                 throw new ArgumentNullException ("The given fs stream must not be null");
-
-            FsStream = new FSEventStream (new [] { pathname }, TimeSpan.FromSeconds (1), FSEventStreamCreateFlags.FileEvents);
+            FsStream = new FSEventStream (new [] { pathname }, latency, FSEventStreamCreateFlags.FileEvents);
             EnableEvents = false;
             FsStream.ScheduleWithRunLoop (loop);
         }
 
+        /// <summary>
+        /// Releases unmanaged resources and performs other cleanup operations before the
+        /// <see cref="CmisSync.Lib.Sync.Strategy.MacWatcher"/> is reclaimed by garbage collection.
+        /// </summary>
         ~MacWatcher()
         {
             EnableEvents = false;
