@@ -122,7 +122,7 @@ namespace CmisSync {
                     LocalFolderClicked (Path.GetDirectoryName (e.Notification.InformativeText));
                 }
                 if (IsNotificationCredentials(e.Notification)) {
-                    RemoveNotificationCredentials(e.Notification.Title);
+                    //RemoveNotificationCredentials(e.Notification.Title);
                     EditRepositoryCredentials(e.Notification.Title);
                 }
             };

@@ -244,7 +244,6 @@ namespace CmisSync
             if (firstRun)
             {
                 ShowSetupWindow(PageType.Setup);
-
             }
             else
             {
