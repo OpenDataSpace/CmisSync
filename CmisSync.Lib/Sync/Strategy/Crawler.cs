@@ -137,20 +137,20 @@ namespace CmisSync.Lib.Sync.Strategy
                     }
                 }else if(cmisObject is IDocument) {
                     IDocument doc = cmisObject as IDocument;
+                    var fileEvent = new FileEvent(
+                        localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
+                        localParentDirectory : localFolder,
+                        remoteFile : doc);
                     if(localFileNames.Contains(doc.Name)) {
                         // Both sides do have got the file, synchronize them if different
-                        Queue.AddEvent( new FileEvent(
-                            localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
-                            localParentDirectory : localFolder,
-                            remoteFile : doc));
+                        Queue.AddEvent(fileEvent);
                         // Remove handled file from set
                         localFileNames.Remove(doc.Name);
                     } else {
                         // Only remote has got a file, figure out what to do
-                        Queue.AddEvent(new FileEvent(
-                            localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
-                            localParentDirectory : localFolder,
-                            remoteFile: doc){Remote = MetaDataChangeType.CREATED});
+                        fileEvent.Remote = MetaDataChangeType.CREATED;
+// if contentstreamId                        fileEvent.RemoteContent = ContentChangeType.CREATED;
+                        Queue.AddEvent(fileEvent);
                     }
                 }
             }
@@ -158,13 +158,16 @@ namespace CmisSync.Lib.Sync.Strategy
             foreach(string folder in localDirNames) {
                 Queue.AddEvent(new FolderEvent(
                     localFolder : fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)),
-                    remoteFolder: remoteFolder));
+                    remoteFolder: remoteFolder){Local = MetaDataChangeType.CREATED});
             }
             // Only local files are available, inform synchronizer about them
             foreach(string file in localFileNames) {
                 Queue.AddEvent(new FileEvent(
                     localFile : fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, file)),
-                    localParentDirectory : localFolder));
+                    localParentDirectory : localFolder)
+                        {Local = MetaDataChangeType.CREATED, 
+                        LocalContent = ContentChangeType.CREATED}
+                        );
             }
         }
     }
