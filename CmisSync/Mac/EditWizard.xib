@@ -210,7 +210,7 @@
                                             </connections>
                                         </secureTextField>
                                         <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="GSK-hS-kr7">
-                                            <rect key="frame" x="362" y="113" width="16" height="16"/>
+                                            <rect key="frame" x="359" y="141" width="16" height="16"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                         </progressIndicator>
                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="6PX-1p-udZ">
