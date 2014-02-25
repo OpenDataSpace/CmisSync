@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='fsFactory'>
         /// Factory for everyThing FileSystem related. Null leaves the default which is fine.
         /// </param>
-        public Crawler (ISyncEventQueue queue, IFolder remoteFolder, IDirectoryInfo localFolder, FileSystemInfoFactory fsFactory = null) : base(queue)
+        public Crawler (ISyncEventQueue queue, IFolder remoteFolder, IDirectoryInfo localFolder, IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if(localFolder == null)
                 throw new ArgumentNullException("Given local folder is null");
