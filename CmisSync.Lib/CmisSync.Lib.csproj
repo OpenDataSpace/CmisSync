@@ -51,7 +51,7 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="XamMac">
-      <HintPath>..\..\..\..\..\..\..\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
+      <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
