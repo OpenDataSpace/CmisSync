@@ -75,24 +75,6 @@ namespace TestLibrary.IntegrationTests
             return observer;
         }
 
-        private void AssertHandlerGotSingleFolderEvent(ObservableHandler observer, MetaDataChangeType metaType) {
-            Assert.That(observer.list.Count, Is.EqualTo(1));
-            Assert.That(observer.list[0], Is.TypeOf(typeof(FolderEvent)));
-            var folderEvent = observer.list[0] as FolderEvent;
-            Assert.That(folderEvent.Remote, Is.EqualTo(metaType), "MetaDataChangeType incorrect");
-            
-        }
-
-        private void AssertHandlerGotSingleFileEvent(ObservableHandler observer, MetaDataChangeType metaType, ContentChangeType contentType) {
-            Assert.That(observer.list.Count, Is.EqualTo(1));
-            Assert.That(observer.list[0], Is.TypeOf(typeof(FileEvent)));
-            var fileEvent = observer.list[0] as FileEvent;
-
-            Assert.That(fileEvent.Remote, Is.EqualTo(metaType), "MetaDataChangeType incorrect");
-            Assert.That(fileEvent.RemoteContent, Is.EqualTo(contentType), "ContentChangeType incorrect");
-            
-        }
-
         [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteSecurityChangeOfExistingFile ()
         {
@@ -102,7 +84,7 @@ namespace TestLibrary.IntegrationTests
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
             ObservableHandler observer = RunQueue(session, database);
 
-            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CHANGED, ContentChangeType.NONE);
+            observer.AssertGotSingleFileEvent(MetaDataChangeType.CHANGED, ContentChangeType.NONE);
 
         }
 
@@ -116,7 +98,7 @@ namespace TestLibrary.IntegrationTests
 
             ObservableHandler observer = RunQueue(session, database);
             
-            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CREATED, ContentChangeType.CREATED);
+            observer.AssertGotSingleFileEvent(MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
 
 
@@ -129,7 +111,7 @@ namespace TestLibrary.IntegrationTests
 
             ObservableHandler observer = RunQueue(session, database);
 
-            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.CREATED, ContentChangeType.CREATED);
+            observer.AssertGotSingleFileEvent(MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
 
 
@@ -142,7 +124,7 @@ namespace TestLibrary.IntegrationTests
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
             ObservableHandler observer = RunQueue(session, database);
 
-            AssertHandlerGotSingleFileEvent(observer, MetaDataChangeType.DELETED, ContentChangeType.NONE);
+            observer.AssertGotSingleFileEvent(MetaDataChangeType.DELETED, ContentChangeType.NONE);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -153,7 +135,7 @@ namespace TestLibrary.IntegrationTests
             Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created);
             ObservableHandler observer = RunQueue(session, database);
 
-            AssertHandlerGotSingleFolderEvent(observer, MetaDataChangeType.CREATED);
+            observer.AssertGotSingleFolderEvent(MetaDataChangeType.CREATED);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
