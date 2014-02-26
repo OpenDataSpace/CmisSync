@@ -83,14 +83,13 @@ namespace TestLibrary.IntegrationTests
             /* This is not implemented yet
             var ignoreFileFilter = new IgnoredFilesFilter(queue);
             manager.AddEventHandler(ignoreFileFilter);
+
+            var failedOperationsFilder = new FailedOperationsFilter(queue);
+            manager.AddEventHandler(failedOperationsFilder);
             */
             var ignoreFileNamesFilter = new IgnoredFileNamesFilter(queue);
             manager.AddEventHandler(ignoreFileNamesFilter);
 
-            /* TODO: change IDataBase
-            var failedOperationsFilder = new FailedOperationsFilter(database.Object, queue);
-            manager.AddEventHandler(failedOperationsFilder);
-            */
 
             var debugHandler = new DebugLoggingHandler();
             manager.AddEventHandler(debugHandler);

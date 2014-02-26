@@ -193,7 +193,6 @@ namespace CmisSync.Lib.Sync
                 //this.watcherStrategy = new WatcherSync(repoinfo, session);
                 //repoCmis.EventManager.AddEventHandler(this.watcherStrategy);
                 repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(10, RepoInfoChanged));
-                repoCmis.EventManager.AddEventHandler(new Events.Filter.FailedOperationsFilter(database, Queue));
             }
 
             /// <summary>

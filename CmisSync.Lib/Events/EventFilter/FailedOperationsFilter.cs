@@ -9,7 +9,6 @@ namespace CmisSync.Lib.Events.Filter
     public class FailedOperationsFilter : AbstractFileFilter
     {
         private static readonly int DEFAULT_FILTER_PRIORITY = 9998;
-        private Database database;
 
         /// <summary>
         /// Returns the default filter priority and cannot be changed during runtime.
@@ -52,11 +51,10 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='queue'>
         /// Queue where ignored requests are reported to.
         /// </param>
-        public FailedOperationsFilter (Database db, ISyncEventQueue queue) : base(queue)
+        public FailedOperationsFilter (ISyncEventQueue queue) : base(queue)
         {
-            if (db == null)
-                throw new ArgumentNullException ("The given database instance must not be null");
-            this.database = db;
+            throw new NotImplementedException("This is a draft, don't use");
+
         }
 
         /// <summary>
@@ -67,16 +65,6 @@ namespace CmisSync.Lib.Events.Filter
         /// </param>
         public override bool Handle (ISyncEvent e)
         {
-            // TODO Filter all kinds of requested operations, not only file downloads
-            FileDownloadRequest request = e as FileDownloadRequest;
-            if (request != null) {
-                long counter = database.GetOperationRetryCounter (request.TargetFilePath, Database.OperationType.DOWNLOAD);
-                if (counter > MaxDownloadRetries) {
-                    string reason = String.Format ("Skipping download of file {0} because of too many failed ({1}) downloads", request.TargetFilePath, counter);
-                    Queue.AddEvent (new RequestIgnoredEvent (e, reason: reason));
-                    return true;
-                }
-            }
             return false;
         }
     }
