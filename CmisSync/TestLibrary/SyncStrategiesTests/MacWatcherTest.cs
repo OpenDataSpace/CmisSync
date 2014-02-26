@@ -28,24 +28,6 @@ namespace TestLibrary.SyncStrategiesTests
         public void ClassSetUp()
         {
             NSApplication.Init ();
-            RunLoopThread = new Thread (() =>
-            {
-                RunLoop = NSRunLoop.Current;
-                while (!StopRunLoop) {
-                    RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(1));
-                }
-            });
-            RunLoopThread.Start ();
-            while (RunLoop == null) {
-                Thread.Sleep(10);
-            }
-        }
-
-        [TestFixtureTearDown]
-        public void ClassTearDown()
-        {
-            StopRunLoop = true;
-            RunLoopThread.Join ();
         }
 
         [SetUp]
@@ -69,33 +51,29 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
-            var watcher = new MacWatcher(localFolder.FullName, queue.Object, RunLoop);
-            Assert.False(watcher.EnableEvents);
-            Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
+            using (var watcher = new MacWatcher(localFolder.FullName, queue.Object))
+            {
+                Assert.False(watcher.EnableEvents);
+                Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
+            }
         }
 
         [Test, Category("Fast")]
         public void ConstructorWithCustomLatency()
         {
-            new MacWatcher(localFolder.FullName, queue.Object, RunLoop, TimeSpan.FromMilliseconds(100));
+            using (new MacWatcher(localFolder.FullName, queue.Object, TimeSpan.FromMilliseconds(100)));
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullWatcher() {
-            new MacWatcher(null, queue.Object, RunLoop);
+            using(new MacWatcher(null, queue.Object));
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullQueue() {
-            new MacWatcher(localFolder.FullName, null, RunLoop);
-        }
-
-        [Test, Category("Fast")]
-        [ExpectedException( typeof( ArgumentNullException ) )]
-        public void ConstructorFailsWithNullRunLoop() {
-            new MacWatcher(localFolder.FullName, queue.Object, null);
+            using(new MacWatcher(localFolder.FullName, null));
         }
 
         public class EventQueue : ISyncEventQueue
@@ -128,7 +106,7 @@ namespace TestLibrary.SyncStrategiesTests
         protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
             WatcherData watcherData = new WatcherData ();
             watcherData.Data = new EventQueue(queue);
-            watcherData.Watcher = new MacWatcher (pathname, watcherData.Data as ISyncEventQueue, RunLoop, TimeSpan.FromMilliseconds(100));
+            watcherData.Watcher = new MacWatcher (pathname, watcherData.Data as ISyncEventQueue, TimeSpan.FromMilliseconds(100));
             return watcherData;
         }
 
