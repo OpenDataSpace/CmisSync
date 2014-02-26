@@ -545,29 +545,30 @@ namespace CmisSync
             HideWindowEvent();
         }
 
-		/// <summary>
-		/// Gets the connections problem warning message internationalized.
-		/// </summary>
-		/// <returns>The connections problem warning.</returns>
-		/// <param name="server">Tried server.</param>
-		/// <param name="e">Returned Exception</param>
-		public string getConnectionsProblemWarning(CmisServer server, Exception e)
-		{
-			string warning = "";
-			string message = e.Message;
-			if (e is CmisPermissionDeniedException)
-				warning = Properties_Resources.LoginFailedForbidden;
-			else if (e is CmisServerNotFoundException)
-				warning = Properties_Resources.ConnectFailure;
-			else if (e.Message == "SendFailure" && server.Url.Scheme.StartsWith("https"))
-				warning = Properties_Resources.SendFailureHttps;
-			else if (e.Message == "TrustFailure")
-				warning = Properties_Resources.TrustFailure;
-			/*						else if (e.Message == "NameResolutionFailure")
-				warning = Properties_Resources.NameResolutionFailure;*/
-			else
-				warning = message + Environment.NewLine + Properties_Resources.Sorry;
-			return warning;
-		}
+        /// <summary>
+        /// Gets the connections problem warning message internationalized.
+        /// </summary>
+        /// <returns>The connections problem warning.</returns>
+        /// <param name="server">Tried server.</param>
+        /// <param name="e">Returned Exception</param>
+        public string GetConnectionsProblemWarning(CmisServer server, Exception e)
+        {
+            string warning = "";
+            string message = e.Message;
+            if (e is CmisPermissionDeniedException)
+                warning = Properties_Resources.LoginFailedForbidden;
+            else if (e is CmisServerNotFoundException)
+                warning = Properties_Resources.ConnectFailure;
+            else if (e.Message == "SendFailure" && server.Url.Scheme.StartsWith("https"))
+                warning = Properties_Resources.SendFailureHttps;
+            else if (e.Message == "TrustFailure")
+                warning = Properties_Resources.TrustFailure;
+            /*                        else if (e.Message == "NameResolutionFailure")
+                warning = Properties_Resources.NameResolutionFailure;*/
+            else
+                warning = String.Format("{0}{1}{2}", message, Environment.NewLine, 
+                    String.Format(Properties_Resources.Sorry, Properties_Resources.ApplicationName));
+            return warning;
+        }
     }
 }

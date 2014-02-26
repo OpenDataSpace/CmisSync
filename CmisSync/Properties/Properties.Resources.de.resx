@@ -124,7 +124,7 @@
     <value>Fügen Sie einen Remote Ordner ein...</value>
   </data>
   <data name="AddFolders" xml:space="preserve">
-    <value>Hinzufügen von synchronisierten Ordnern zu DataSpace Sync</value>
+    <value>Hinzufügen von synchronisierten Ordnern zu {0}</value>
   </data>
   <data name="AddingFolder" xml:space="preserve">
     <value>Ordner hinzufügen</value>
@@ -136,7 +136,7 @@
     <value>Abbrechen</value>
   </data>
   <data name="CmisSyncCreates" xml:space="preserve">
-    <value>DataSpace Sync erstellt einen speziellen Ordner auf Ihrem Computer, in welchem die Dokumente synchronisiert werden.</value>
+    <value>{0} erstellt einen speziellen Ordner auf Ihrem Computer, in welchem die Dokumente synchronisiert werden.</value>
   </data>
   <data name="Continue" xml:space="preserve">
     <value>Weiter</value>
@@ -169,13 +169,13 @@
     <value>Fertig stellen</value>
   </data>
   <data name="FolderAlreadyExist" xml:space="preserve">
-    <value>Der Ordner existiert bereits im Stammordner DataSpace Sync</value>
+    <value>Der Ordner existiert bereits im Stammordner {0}</value>
   </data>
   <data name="Help" xml:space="preserve">
     <value>Hilfe</value>
   </data>
   <data name="Intro" xml:space="preserve">
-    <value>Mit DataSpace Sync können Sie mit jedem CMIS-konformen Server ihre Daten synchron halten, und Ihre Dokumente auch im Offlinemodus verwenden.</value>
+    <value>Mit {0} können Sie mit jedem CMIS-konformen Server ihre Daten synchron halten, und Ihre Dokumente auch im Offlinemodus verwenden.</value>
   </data>
   <data name="InvalidFolderName" xml:space="preserve">
     <value>Der Ordnername ist ungültig. Sonderzeichen sind nicht erlaubt.</value>
@@ -208,16 +208,16 @@
     <value>Einführung überspringen</value>
   </data>
   <data name="Sorry" xml:space="preserve">
-    <value>Leider kann DataSpace Sync keinen CMIS-Server unter dieser Adresse finden. Bitte prüfen Sie angegebene Adresse. Wenn Sie sich sicher sind das die Adresse stimmt, öffnen Sie diese in einem Browser und posten Sie die XML Antwort im CmisSync Forum.</value>
+    <value>Leider kann {0} keinen CMIS-Server unter dieser Adresse finden. Bitte prüfen Sie angegebene Adresse. Wenn Sie sich sicher sind das die Adresse stimmt, öffnen Sie diese in einem Browser und senden Sie uns die XML Antwort.</value>
   </data>
   <data name="Startup" xml:space="preserve">
-    <value>DataSpace Sync im Autostart hinzufügen</value>
+    <value>{0} im Autostart hinzufügen</value>
   </data>
   <data name="StatusIcon" xml:space="preserve">
     <value>Das Symbol ist in der Statusleiste zu finden</value>
   </data>
   <data name="StatusIconShows" xml:space="preserve">
-    <value>Das DataSpace Sync Status-Symbol zeigt den Fortschritt der Synchronisierung und bietet einfachen Zugriff auf Ihre Ordner.</value>
+    <value>Das {0} Status-Symbol zeigt den Fortschritt der Synchronisierung und bietet einfachen Zugriff auf Ihre Ordner.</value>
   </data>
   <data name="Synchronization" xml:space="preserve">
     <value>Synchronisation</value>
@@ -229,7 +229,7 @@
     <value>Benutzer</value>
   </data>
   <data name="Welcome" xml:space="preserve">
-    <value>Willkommen zu DataSpace Sync!</value>
+    <value>Willkommen zu {0}!</value>
   </data>
   <data name="WhatsNext" xml:space="preserve">
     <value>Was passiert als nächstes?</value>
@@ -247,7 +247,7 @@
     <value>Sie können einen neuen CMIS-Ordner jederzeit problemlos hinzufügen.</value>
   </data>
   <data name="YouCanFind" xml:space="preserve">
-    <value>Sie finden den im Ordner DataSpace Sync.</value>
+    <value>Sie finden Sie im Ordner {0}.</value>
   </data>
   <data name="ChangeRepoPath" xml:space="preserve">
     <value>Ändern Sie den lokalen Pfad dieses Ordners:</value>
@@ -330,5 +330,26 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   </data>
   <data name="ConfirmExistingLocalFolderTitle" xml:space="preserve">
     <value>Lokales Synchronisationsziel "{0}"</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>Infos über {0}</value>
+  </data>
+  <data name="CmisWebAddress" xml:space="preserve">
+    <value>Adresse</value>
+  </data>
+  <data name="Credentials" xml:space="preserve">
+    <value>Zugangsdaten</value>
+  </data>
+  <data name="NotificationChangeCredentials" xml:space="preserve">
+    <value>Klicken um die Zugangsdaten zu ändern</value>
+  </data>
+  <data name="NotificationCredentialsError" xml:space="preserve">
+    <value>Zugriff auf {0} verweigert</value>
+  </data>
+  <data name="NotificationFileDownload" xml:space="preserve">
+    <value>Datei herunterladen</value>
+  </data>
+  <data name="ViewLog" xml:space="preserve">
+    <value>Protokoll anzeigen</value>
   </data>
 </root>

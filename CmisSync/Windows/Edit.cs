@@ -118,7 +118,7 @@ namespace CmisSync
 
             TextBlock addressLabel = new TextBlock()
             {
-                Text = Properties_Resources.EnterWebAddress,
+                Text = Properties_Resources.CmisWebAddress + ":",
                 FontWeight = FontWeights.Bold
             };
             TextBox addressBox = new TextBox()
@@ -186,7 +186,7 @@ namespace CmisSync
             tab.Items.Add(tabItemSelection);
 
             TabItem tabItemCredentials = new TabItem();
-            tabItemCredentials.Header = Properties_Resources.Credits;
+            tabItemCredentials.Header = Properties_Resources.Credentials;
             tabItemCredentials.Content = canvasCredentials;
             tab.Items.Add(tabItemCredentials);
 

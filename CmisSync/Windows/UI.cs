@@ -45,6 +45,12 @@ namespace CmisSync {
 
 
         /// <summary>
+        /// Small dialog showing setting about CmisSync.
+        /// </summary>
+        public Setting Setting;
+
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public UI ()
@@ -54,6 +60,7 @@ namespace CmisSync {
 			// The ease out animation always seems to work
             Setup      = new Setup ();
             About      = new About ();
+            Setting    = new Setting ();
             
             Program.Controller.UIHasLoaded ();
         }

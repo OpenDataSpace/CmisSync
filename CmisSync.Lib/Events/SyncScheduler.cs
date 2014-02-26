@@ -34,7 +34,6 @@ namespace CmisSync.Lib.Events
             this.timer.Elapsed += delegate(object sender, ElapsedEventArgs e) {
                 this.queue.AddEvent(new StartNextSyncEvent());
             };
-            this.Start();
         }
 
         /// <summary>

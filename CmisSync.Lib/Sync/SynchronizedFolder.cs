@@ -348,10 +348,9 @@ namespace CmisSync.Lib.Sync
                     Queue.AddEvent(new SuccessfulLoginEvent(repoinfo.Address));
                     reconnect = false;
                 }
-                //TODO Implement error handling -> informing user about connection problems by showing status
                 catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
                 {
-                    Logger.Warn(String.Format("Failed to connect to server {0}", repoinfo.Address.AbsoluteUri), e);
+                    Logger.Info(String.Format("Failed to connect to server {0}", repoinfo.Address.AbsoluteUri), e);
                     Queue.AddEvent(new PermissionDeniedEvent(e));
                 }
                 catch (CmisRuntimeException e)
