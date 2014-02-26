@@ -16,7 +16,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='queue'>
         /// Queue.
         /// </param>
-        public IgnoredFilesFilter (SyncEventQueue queue) : base(queue)
+        public IgnoredFilesFilter (ISyncEventQueue queue) : base(queue)
         {
             throw new NotImplementedException("IgnoredFilesFilter is not yet implemented, because there is no possibility to ignore excact files");
         }

@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='queue'>
         /// Queue where ignored requests are reported to.
         /// </param>
-        public FailedOperationsFilter (Database db, SyncEventQueue queue) : base(queue)
+        public FailedOperationsFilter (Database db, ISyncEventQueue queue) : base(queue)
         {
             if (db == null)
                 throw new ArgumentNullException ("The given database instance must not be null");

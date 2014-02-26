@@ -7,6 +7,7 @@ using CmisSync.Lib.Events;
 using CmisSync.Lib.Storage;
 using Strategy = CmisSync.Lib.Sync.Strategy;
 using CmisSync.Lib.Sync.Strategy;
+using CmisSync.Lib.Events.Filter;
 
 using DotCMIS.Client;
 using DotCMIS.Data;
@@ -27,6 +28,9 @@ namespace TestLibrary.IntegrationTests
         private readonly bool isPropertyChangesSupported = false;
         private readonly string repoId = "repoId";
         private readonly int maxNumberOfContentChanges = 1000;
+
+        public static void fakeDelegate(string repoId) {
+        }
         
         [Test, Category("Fast")]
         public void RemoteSecurityChangeOfExistingFile ()
@@ -50,7 +54,7 @@ namespace TestLibrary.IntegrationTests
             var accumulator = new ContentChangeEventAccumulator(session.Object, queue);
             manager.AddEventHandler(accumulator);
 
-            /* FileSystemWatcher is not mockable
+            /* TODO: FileSystemWatcher is not mockable
             var fsWatcher = new Mock<FileSystemWatcher>();
             fsWatcher.Setup(f=>f.Path).Returns("/tmp");
             var watcher = new Strategy.Watcher(fsWatcher.Object, queue);
@@ -60,8 +64,40 @@ namespace TestLibrary.IntegrationTests
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection(session.Object);
             var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage.Object);
+            manager.AddEventHandler(syncMechanism);
 
+            var remoteFolder = new Mock<IFolder>();
+            var localFolder = new Mock<IDirectoryInfo>();
+            var crawler = new Crawler(queue, remoteFolder.Object, localFolder.Object);
+            manager.AddEventHandler(crawler);
 
+            var permissionDenied = new PermissionDeniedEventHandler(repoId, fakeDelegate);
+            manager.AddEventHandler(permissionDenied);
+
+            var invalidFolderNameFilter = new InvalidFolderNameFilter(queue);
+            manager.AddEventHandler(invalidFolderNameFilter);
+
+            var ignoreFolderFilter = new IgnoredFoldersFilter(queue);
+            manager.AddEventHandler(ignoreFolderFilter);
+
+            /* This is not implemented yet
+            var ignoreFileFilter = new IgnoredFilesFilter(queue);
+            manager.AddEventHandler(ignoreFileFilter);
+            */
+            var ignoreFileNamesFilter = new IgnoredFileNamesFilter(queue);
+            manager.AddEventHandler(ignoreFileNamesFilter);
+
+            /* TODO: change IDataBase
+            var failedOperationsFilder = new FailedOperationsFilter(database.Object, queue);
+            manager.AddEventHandler(failedOperationsFilder);
+            */
+
+            var debugHandler = new DebugLoggingHandler();
+            manager.AddEventHandler(debugHandler);
+
+            var myEvent = new Mock<ISyncEvent>();
+            queue.AddEvent(myEvent.Object);
+            queue.Run();
         }
 
 
