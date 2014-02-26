@@ -140,6 +140,7 @@
     <Compile Include="Storage\IFileInfo.cs" />
     <Compile Include="Storage\IFileSystemInfo.cs" />
     <Compile Include="Storage\IFileSystemInfoFactory.cs" />
+    <Compile Include="Storage\IFileSystemWatcher.cs" />
     <Compile Include="Storage\IMetaDataStorage.cs" />
     <Compile Include="Storage\MetaDataStorage.cs" />
     <Compile Include="Storage\PersistentStorage.cs" />

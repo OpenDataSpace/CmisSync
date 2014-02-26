@@ -91,6 +91,7 @@ SOURCES =  \
 	Storage/IFileInfo.cs \
 	Storage/IFileSystemInfo.cs \
 	Storage/IFileSystemInfoFactory.cs \
+	Storage/IFileSystemWatcher.cs \
 	Storage/IMetaDataStorage.cs \
 	Storage/MetaDataStorage.cs \
 	Storage/PersistentStorage.cs \
