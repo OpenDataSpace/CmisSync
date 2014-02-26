@@ -279,7 +279,9 @@ namespace CmisSync
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 return false;
             }));
-            repo.EventManager.AddEventHandler(new PermissionDeniedEventHandler(repositoryInfo.Name, ShowChangePassword));
+            repo.EventManager.AddEventHandler(new PermissionDeniedEventHandler(repositoryInfo.Name, delegate(string reponame) {
+                ShowChangePassword(reponame);
+                }));
             repo.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>( 0, delegate(ISyncEvent e) {
                 SuccessfulLogin(repositoryInfo.Name);
                 return false;
