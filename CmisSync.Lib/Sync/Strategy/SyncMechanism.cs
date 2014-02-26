@@ -23,10 +23,10 @@ namespace CmisSync.Lib.Sync.Strategy
 
         public ISolver[,] Solver;
         public ISituationDetection<IFileSystemInfo> LocalSituation;
-        public ISituationDetection<string> RemoteSituation;
+        public ISituationDetection<IObjectId> RemoteSituation;
 
         public SyncMechanism (ISituationDetection<IFileSystemInfo> localSituation,
-                              ISituationDetection<string> remoteSituation,
+                              ISituationDetection<IObjectId> remoteSituation,
                               ISyncEventQueue queue,
                               ISession session,
                               IMetaDataStorage storage,
@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Sync.Strategy
         public override bool Handle (ISyncEvent e)
         {
             if (e is FolderEvent) {
-                HandleMetaData ((e as FolderEvent).LocalFolder,(e as FolderEvent).RemoteFolder.Id);
+                HandleMetaData ((e as FolderEvent).LocalFolder,(e as FolderEvent).RemoteFolder);
                 return true;
             }
             if (e is FileEvent) {
@@ -109,7 +109,7 @@ namespace CmisSync.Lib.Sync.Strategy
             return false;
         }
 
-        private void HandleMetaData (IFileSystemInfo localObject, string remoteObject)
+        private void HandleMetaData (IFileSystemInfo localObject, IObjectId remoteObject)
         {
             int localSituation = (int)LocalSituation.Analyse (Storage, localObject);
             int remoteSituation = (int)RemoteSituation.Analyse (Storage, remoteObject);
@@ -129,7 +129,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private void HandleFileEvent (FileEvent file)
         {
-            HandleMetaData (file.LocalFile, file.RemoteFile.Id);
+            HandleMetaData (file.LocalFile, file.RemoteFile);
             //TODO Content sync if Situation is 
         }
     }

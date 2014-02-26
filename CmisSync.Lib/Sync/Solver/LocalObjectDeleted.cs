@@ -10,7 +10,7 @@ namespace CmisSync.Lib.Sync.Solver
 {
     public class LocalObjectDeleted : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId){
             // Upload new file
             throw new NotImplementedException();
         }

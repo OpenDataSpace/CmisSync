@@ -10,7 +10,7 @@ namespace CmisSync.Lib.Sync.Solver
 {
     public class LocalObjectChanged : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, string remoteId){
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId){
             // Match local changes to remote changes and updated them remotely
             throw new NotImplementedException();
         }
