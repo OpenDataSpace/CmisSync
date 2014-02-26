@@ -258,7 +258,7 @@ namespace CmisSync.Lib
 
 
         /// <summary>
-        /// Initialize the watcher.
+        /// Initialize the scheduled background sync processes.
         /// </summary>
         public virtual void Initialize()
         {
@@ -266,6 +266,7 @@ namespace CmisSync.Lib
             // since we've been offline
             // start full crawl sync on beginning
             Queue.AddEvent(new StartNextSyncEvent(true));
+            Scheduler.Start();
         }
 
         /// <summary>
