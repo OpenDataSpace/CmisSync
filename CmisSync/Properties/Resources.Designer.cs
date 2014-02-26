@@ -61,7 +61,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to About DataSpace Sync.
+        ///   Looks up a localized string similar to About {0}.
         /// </summary>
         internal static string About {
             get {
@@ -88,7 +88,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Adding synchronized folders to DataSpace Sync.
+        ///   Looks up a localized string similar to Adding synchronized folders to {0}.
         /// </summary>
         internal static string AddFolders {
             get {
@@ -102,6 +102,15 @@ namespace CmisSync {
         internal static string AddingFolder {
             get {
                 return ResourceManager.GetString("AddingFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DataSpace Sync.
+        /// </summary>
+        internal static string ApplicationName {
+            get {
+                return ResourceManager.GetString("ApplicationName", resourceCulture);
             }
         }
         
@@ -142,11 +151,20 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DataSpace Sync creates a special folder on your computer where the documents are synchronized..
+        ///   Looks up a localized string similar to {0} creates a special folder on your computer where the documents are synchronized..
         /// </summary>
         internal static string CmisSyncCreates {
             get {
                 return ResourceManager.GetString("CmisSyncCreates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Address.
+        /// </summary>
+        internal static string CmisWebAddress {
+            get {
+                return ResourceManager.GetString("CmisWebAddress", resourceCulture);
             }
         }
         
@@ -186,6 +204,15 @@ namespace CmisSync {
         internal static string Continue {
             get {
                 return ResourceManager.GetString("Continue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Credentials.
+        /// </summary>
+        internal static string Credentials {
+            get {
+                return ResourceManager.GetString("Credentials", resourceCulture);
             }
         }
         
@@ -317,7 +344,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A folder already in the DataSpace Sync root folder.
+        ///   Looks up a localized string similar to A folder already in the {0} root folder.
         /// </summary>
         internal static string FolderAlreadyExist {
             get {
@@ -353,7 +380,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DataSpace Sync allows you to keep in sync with any CMIS-compliant enterprise server, and use your documents even when offline..
+        ///   Looks up a localized string similar to {0} allows you to keep in sync with any CMIS-compliant enterprise server, and use your documents even when offline..
         /// </summary>
         internal static string Intro {
             get {
@@ -509,18 +536,18 @@ namespace CmisSync {
         /// <summary>
         ///   Looks up a localized string similar to Click to update the credentials.
         /// </summary>
-        internal static string NotificationCreditsChange {
+        internal static string NotificationChangeCredentials {
             get {
-                return ResourceManager.GetString("NotificationCreditsChange", resourceCulture);
+                return ResourceManager.GetString("NotificationChangeCredentials", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Credentials Error.
+        ///   Looks up a localized string similar to Failed to log in on {0}.
         /// </summary>
-        internal static string NotificationCreditsError {
+        internal static string NotificationCredentialsError {
             get {
-                return ResourceManager.GetString("NotificationCreditsError", resourceCulture);
+                return ResourceManager.GetString("NotificationCredentialsError", resourceCulture);
             }
         }
         
@@ -742,10 +769,10 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sorry, DataSpace Sync can not find a CMIS server at this address.
+        ///   Looks up a localized string similar to Sorry, {0} can not find a CMIS server at this address.
         ///Please ask your server administrator for the CMIS endpoint URL.
-        ///If you are sure about the address, open it in a browser and post
-        ///the resulting XML on the cmissync forum..
+        ///If you are sure about the address, open it in a browser and send us 
+        ///the resulting XML..
         /// </summary>
         internal static string Sorry {
             get {
@@ -754,7 +781,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add DataSpace Sync to startup items.
+        ///   Looks up a localized string similar to Add {0} to startup items.
         /// </summary>
         internal static string Startup {
             get {
@@ -772,7 +799,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DataSpace Sync&apos;s status icon shows the syncing progress, and provides easy access to your folders..
+        ///   Looks up a localized string similar to {0}&apos;s status icon shows the syncing progress, and provides easy access to your folders..
         /// </summary>
         internal static string StatusIconShows {
             get {
@@ -853,7 +880,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to DataSpace Sync!.
+        ///   Looks up a localized string similar to Welcome to {0}!.
         /// </summary>
         internal static string Welcome {
             get {
@@ -907,7 +934,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You can find them in your DataSpace Sync folder..
+        ///   Looks up a localized string similar to You can find them in your {0} folder..
         /// </summary>
         internal static string YouCanFind {
             get {

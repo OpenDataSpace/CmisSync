@@ -106,7 +106,7 @@ namespace CmisSync
                             {
                                 // UI elements.
 
-                                Header = Properties_Resources.Welcome;
+                                Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                                 Description = Properties_Resources.Intro;
 
                                 Button cancel_button = new Button()
@@ -166,7 +166,7 @@ namespace CmisSync
                                             // UI elements.
 
                                             Header = Properties_Resources.WhatsNext;
-                                            Description = Properties_Resources.CmisSyncCreates;
+                                            Description = String.Format(Properties_Resources.CmisSyncCreates,Properties_Resources.ApplicationName);
 
                                             WPF.Image slide_image = new WPF.Image()
                                             {
@@ -254,7 +254,9 @@ namespace CmisSync
                                             // UI elements.
 
                                             Header = Properties_Resources.StatusIcon;
-                                            Description = Properties_Resources.StatusIconShows;
+                                            Description = String.Format(
+                                                Properties_Resources.StatusIconShows,
+                                                Properties_Resources.ApplicationName);
 
 
                                             Button continue_button = new Button()
@@ -292,7 +294,7 @@ namespace CmisSync
                                         {
                                             // UI elements.
 
-                                            Header = Properties_Resources.AddFolders;
+                                            Header = String.Format(Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
                                             Description = Properties_Resources.YouCan;
 
 
@@ -311,7 +313,7 @@ namespace CmisSync
 
                                             CheckBox check_box = new CheckBox()
                                             {
-                                                Content = Properties_Resources.Startup,
+                                                Content = String.Format(Properties_Resources.Startup, Properties_Resources.ApplicationName),
                                                 IsChecked = true
                                             };
 
@@ -363,7 +365,7 @@ namespace CmisSync
                                 TextBox address_box = new TextBox()
                                 {
                                     Width = 420,
-                                    Text = (Controller.PreviousAddress!=null)?Controller.PreviousAddress.ToString():""
+                                    Text = (Controller.PreviousAddress!=null)?Controller.PreviousAddress.ToString():String.Empty
                                 };
 
                                 TextBlock address_help_label = new TextBlock()
@@ -599,29 +601,7 @@ namespace CmisSync
                                     if (Controller.repositories == null)
                                     {
                                         // Could not retrieve repositories list from server, show warning.
-                                        string warning = "";
-                                        string message = result.Item2.Message;
-                                        Exception e = result.Item2;
-                                        if (e is CmisPermissionDeniedException)
-                                        {
-                                            warning = Properties_Resources.LoginFailedForbidden;
-                                        }
-                                        else if (e is CmisServerNotFoundException)
-                                        {
-                                            warning = Properties_Resources.ConnectFailure;
-                                        }
-                                        else if (e.Message == "SendFailure" && cmisServer.Url.Scheme.StartsWith("https"))
-                                        {
-                                            warning = Properties_Resources.SendFailureHttps;
-                                        }
-                                        else if (e.Message == "TrustFailure")
-                                        {
-                                            warning = Properties_Resources.TrustFailure;
-                                        }
-                                        else
-                                        {
-                                            warning = message + Environment.NewLine + Properties_Resources.Sorry;
-                                        }
+                                        string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
                                         address_error_label.Text = warning;
                                         address_error_label.Visibility = Visibility.Visible;
                                     }

@@ -77,7 +77,7 @@ namespace CmisSync {
         public SetupWindow ()
         {
             // Window properties.
-            Title      = CmisSync.Properties_Resources.ResourceManager.GetString("AddARemoteFolder", CultureInfo.CurrentCulture);
+            Title      = CmisSync.Properties_Resources.AddARemoteFolder;
             Width      = 640;
             Height     = 440;
             ResizeMode = ResizeMode.NoResize;
@@ -86,11 +86,11 @@ namespace CmisSync {
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
             Content    = ContentCanvas;
             Closing += Close;
-			
+
             // Taskbar
-			TaskbarItemInfo = new TaskbarItemInfo () {
-				Description = "DataSpace Sync"
-			};
+            TaskbarItemInfo = new TaskbarItemInfo () {
+                Description = Properties_Resources.ApplicationName
+            };
 
             // Separation and background for the line of buttons.
             this.buttonsLine = new Rectangle()

@@ -71,7 +71,7 @@ namespace CmisSync {
         /// <summary>
         /// Short text shown at the top of the menu of the CmisSync tray icon.
         /// </summary>
-        public string StateText = Properties_Resources.Welcome;
+        public string StateText = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
 
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace CmisSync {
                     CurrentState = IconState.Idle;
 
                     if (Program.Controller.Folders.Count == 0)
-                        StateText = Properties_Resources.Welcome;
+                        StateText = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                     else
                         StateText = Properties_Resources.FilesUpToDate;
                 }
@@ -176,7 +176,7 @@ namespace CmisSync {
                     CurrentState = IconState.Idle;
 
                     if (Program.Controller.Folders.Count == 0)
-                        StateText = Properties_Resources.Welcome;
+                        StateText = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
                     else
                         StateText = Properties_Resources.FilesUpToDate;
                 }

@@ -63,7 +63,7 @@ namespace CmisSync
 
             // Setup the status icon.
             this.trayicon.Icon = animationFrames[0];
-            this.trayicon.Text = "DataSpace Sync";
+            this.trayicon.Text = Properties_Resources.ApplicationName;
             this.trayicon.ContextMenuStrip = this.traymenu;
             this.trayicon.Visible = true;
             this.trayicon.MouseClick += NotifyIcon1_MouseClick;
@@ -77,7 +77,10 @@ namespace CmisSync
                         repoCreditsErrorList.Add(reponame);
                     }
                 }
-                this.trayicon.ShowBalloonTip(30000, Properties_Resources.NotificationCreditsError, Properties_Resources.NotificationCreditsChange, ToolTipIcon.Error);
+                this.trayicon.ShowBalloonTip(30000,
+                    String.Format(Properties_Resources.NotificationCredentialsError, reponame),
+                    Properties_Resources.NotificationChangeCredentials,
+                    ToolTipIcon.Warning);
             };
 
             this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
@@ -157,7 +160,7 @@ namespace CmisSync
                     BeginInvoke((Action)delegate
                     {
                         this.stateItem.Text = state_text;
-                        this.trayicon.Text = "DataSpace Sync\n" + state_text;
+                        this.trayicon.Text = String.Format("{0}\n{1}", Properties_Resources.ApplicationName, state_text);
                     });
                 }
             };
@@ -268,7 +271,7 @@ namespace CmisSync
                 Enabled = false
             };
             this.traymenu.Items.Add(stateItem);
-            this.trayicon.Text = "DataSpace Sync\n" + Controller.StateText;
+            this.trayicon.Text = String.Format("{0}\n{1}", Properties_Resources.ApplicationName, Controller.StateText);
             this.traymenu.Items.Add(new ToolStripSeparator());
             /*this.transmissionItem = new ToolStripMenuItem()
             {
@@ -380,7 +383,7 @@ namespace CmisSync
             // Create the About menu.
             ToolStripMenuItem about_item = new ToolStripMenuItem()
             {
-                Text = CmisSync.Properties_Resources.About
+                Text = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName)
             };
             about_item.Click += delegate
             {

@@ -48,7 +48,7 @@ namespace CmisSync {
         /// </summary>
         public About ()
         {
-            Title      = Properties_Resources.About;
+            Title      = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
             ResizeMode = ResizeMode.NoResize;
             Height     = 288;
             Width      = 640;
@@ -123,10 +123,12 @@ namespace CmisSync {
             TextBlock credits = new TextBlock () {
                 FontSize     = 11,
                 Foreground = new SolidColorBrush (Color.FromRgb (15, 133, 203)),
-                Text         = "Copyright © 2013–" + DateTime.Now.Year.ToString() + " GRAU DATA AG, Aegif and others.\n" +
-                    "\n" +
-                    "DataSpace Sync is Open Source software. You are free to use, modify, " +
-                    "and redistribute it under the GNU General Public License version 3 or later.",
+                Text         = String.Format("Copyright © {0}–{1} {2}\n\n{3} {4}",
+                    "2013",
+                    DateTime.Now.Year.ToString(),
+                    " GRAU DATA AG, Aegif and others.",
+                    Properties_Resources.ApplicationName,
+                    "is Open Source software. You are free to use, modify, and redistribute it under the GNU General Public License version 3 or later."),
                 TextWrapping = TextWrapping.Wrap,
                 Width        = 318
             };
