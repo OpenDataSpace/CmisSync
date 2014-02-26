@@ -52,7 +52,7 @@ namespace CmisSync {
 
                 Delegate    = new AboutDelegate ();
                 StyleMask   = (NSWindowStyle.Closable | NSWindowStyle.Titled);
-                Title       = Properties_Resources.About;
+                Title       = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
                 MaxSize     = new SizeF (640, 281);
                 MinSize     = new SizeF (640, 281);
                 HasShadow   = true;
