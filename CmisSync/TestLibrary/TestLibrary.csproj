@@ -83,6 +83,7 @@
     <Compile Include="EventsTests\SyncEventManagerTest.cs" />
     <Compile Include="EventsTests\SyncEventQueueTest.cs" />
     <Compile Include="FSDeletionHandlerTest.cs" />
+    <Compile Include="IntegrationTests\AllHandlersIT.cs" />
     <Compile Include="IntegrationTests\CmisSyncTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
