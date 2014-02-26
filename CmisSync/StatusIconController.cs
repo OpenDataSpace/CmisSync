@@ -235,6 +235,15 @@ namespace CmisSync {
 
 
         /// <summary>
+        /// Show the Setting dialog.
+        /// </summary>
+        public void SettingClicked()
+        {
+            Program.Controller.ShowSettingWindow();
+        }
+
+
+        /// <summary>
         /// Open the CmisSync log with a text file viewer.
         /// </summary>
         public void LogClicked()

@@ -393,4 +393,19 @@ This could lead to a lot of conflict files!</value>
   <data name="NotificationFileUpload" xml:space="preserve">
     <value>Upload file</value>
   </data>
+  <data name="NetworkProxyLogin" xml:space="preserve">
+    <value>Require Login</value>
+  </data>
+  <data name="NetworkProxySelectCustom" xml:space="preserve">
+    <value>Custom Proxy</value>
+  </data>
+  <data name="NetworkProxySelectNone" xml:space="preserve">
+    <value>No Proxy</value>
+  </data>
+  <data name="NetworkProxySelectSystem" xml:space="preserve">
+    <value>System Default Proxy</value>
+  </data>
+  <data name="NetworkProxyServer" xml:space="preserve">
+    <value>Proxy Server</value>
+  </data>
 </root>

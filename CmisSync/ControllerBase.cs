@@ -87,6 +87,8 @@ namespace CmisSync
         public event ShowSetupWindowEventHandler ShowSetupWindowEvent = delegate { };
         public delegate void ShowSetupWindowEventHandler(PageType page_type);
 
+        public event Action ShowSettingWindowEvent = delegate { };
+
         public event Action ShowAboutWindowEvent = delegate { };
 
         public event FolderFetchedEventHandler FolderFetched = delegate { };
@@ -592,6 +594,15 @@ namespace CmisSync
         public void ShowSetupWindow(PageType page_type)
         {
             ShowSetupWindowEvent(page_type);
+        }
+
+
+        /// <summary>
+        /// Show setting dialog
+        /// </summary>
+        public void ShowSettingWindow()
+        {
+            ShowSettingWindowEvent();
         }
 
 

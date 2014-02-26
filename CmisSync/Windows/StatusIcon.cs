@@ -355,6 +355,17 @@ namespace CmisSync
             this.traymenu.Items.Add(addFolderItem);
             this.traymenu.Items.Add(new ToolStripSeparator());
 
+            // Create the menu item that lets the user view setting.
+            ToolStripMenuItem setting_item = new ToolStripMenuItem()
+            {
+                Text = CmisSync.Properties_Resources.EditTitle
+            };
+            setting_item.Click += delegate
+            {
+                Controller.SettingClicked();
+            };
+            this.traymenu.Items.Add(setting_item);
+
             // Create the menu item that lets the user view the log.
             ToolStripMenuItem log_item = new ToolStripMenuItem()
             {
