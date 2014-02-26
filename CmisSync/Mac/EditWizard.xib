@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
     </dependencies>
@@ -13,6 +13,8 @@
                 <outlet property="FinishButton" destination="JwM-f9-9JD" id="HNC-Dx-xpM"/>
                 <outlet property="FolderTab" destination="ItF-y3-PY5" id="U9a-Mp-ySE"/>
                 <outlet property="Header" destination="BS8-fW-t2P" id="Ng4-1A-Prk"/>
+                <outlet property="LoginStatusLabel" destination="6PX-1p-udZ" id="0s1-cg-aCv"/>
+                <outlet property="LoginStatusProgress" destination="GSK-hS-kr7" id="wS0-Ji-5AX"/>
                 <outlet property="Outline" destination="sKL-Lb-8vs" id="tnO-NV-cZZ"/>
                 <outlet property="PasswordLabel" destination="K2z-Jt-HMc" id="Y1Y-MP-TOb"/>
                 <outlet property="PasswordText" destination="0Mr-H1-8Aw" id="fXK-Cl-bAQ"/>
@@ -203,7 +205,23 @@
                                                     <string>NSAllRomanInputSourcesLocaleIdentifier</string>
                                                 </allowedInputSourceLocales>
                                             </secureTextFieldCell>
+                                            <connections>
+                                                <action selector="OnPasswordChanged:" target="-2" id="iIq-jC-fm2"/>
+                                            </connections>
                                         </secureTextField>
+                                        <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="GSK-hS-kr7">
+                                            <rect key="frame" x="359" y="141" width="16" height="16"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        </progressIndicator>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="6PX-1p-udZ">
+                                            <rect key="frame" x="200" y="113" width="156" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Label" id="gjM-Qc-l2r">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
                                     </subviews>
                                 </view>
                             </tabViewItem>

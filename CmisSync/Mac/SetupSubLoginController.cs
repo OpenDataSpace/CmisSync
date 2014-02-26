@@ -122,12 +122,13 @@ namespace CmisSync
                 Password = PasswordText.StringValue,
                 Address = new Uri(AddressText.StringValue)
             };
+            WarnText.StringValue = String.Empty;
             AddressText.Enabled = false;
             UserText.Enabled = false;
             PasswordText.Enabled = false;
             ContinueButton.Enabled = false;
             CancelButton.Enabled = false;
-
+            LoginProgress.StartAnimation(this);
             Thread check = new Thread(() => {
                 Tuple<CmisServer, Exception> fuzzyResult = CmisUtils.GetRepositoriesFuzzy(credentials);
                 CmisServer cmisServer = fuzzyResult.Item1;
@@ -154,6 +155,7 @@ namespace CmisSync
                         RemoveEvent();
                         Controller.Add1PageCompleted(cmisServer.Url, credentials.UserName, credentials.Password.ToString());
                     }
+                    LoginProgress.StopAnimation(this);
                 });
             });
             check.Start();

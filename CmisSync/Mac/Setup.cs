@@ -32,6 +32,7 @@ using Mono.Unix;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
+using System.Threading.Tasks;
 
 namespace CmisSync {
 
@@ -365,7 +366,8 @@ namespace CmisSync {
                     ContinueButton.Enabled = false;
                     CancelButton.Enabled = false;
                 });
-                Thread check = new Thread(() => {
+                //                this.LoginProgress.StartAnimation(this);
+                new TaskFactory().StartNew(() => {
                     Tuple<CmisServer, Exception> fuzzyResult = CmisUtils.GetRepositoriesFuzzy(credentials);
                     CmisServer cmisServer = fuzzyResult.Item1;
                     if (cmisServer != null)
@@ -382,6 +384,7 @@ namespace CmisSync {
                             WarningTextField.StringValue = Controller.getConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
                             ContinueButton.Enabled = true;
                             CancelButton.Enabled = true;
+                            //          this.LoginProgress.StopAnimation(this);
                         }
                         else
                         {
@@ -389,8 +392,8 @@ namespace CmisSync {
                         }
                     });
                 });
-                check.Start();
             };
+
             CancelButton.Activated += delegate
             {
                 Controller.PageCancelled();

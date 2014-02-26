@@ -9,6 +9,7 @@ using MonoMac.AppKit;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
+using System.Threading.Tasks;
 
 namespace CmisSync
 {
@@ -122,7 +123,8 @@ namespace CmisSync
             this.PasswordText.StringValue = Credentials.Password.ToString ();
             this.AddressText.Enabled = false;
             this.UserText.Enabled = false;
-
+            this.LoginStatusProgress.IsDisplayedWhenStopped = false;
+            this.LoginStatusLabel.Hidden = true;
             this.FolderTab.Label = Properties_Resources.AddingFolder;
             this.CredentialsTab.Label = Properties_Resources.Credits;
             switch (this.type) {
@@ -229,6 +231,33 @@ namespace CmisSync
             Loader.Cancel ();
             RemoveEvent ();
             Controller.CloseWindow ();
+        }
+
+        partial void OnPasswordChanged(NSObject sender)
+        {
+            this.LoginStatusLabel.StringValue = "logging in";
+            this.LoginStatusLabel.Hidden = false;
+            this.LoginStatusProgress.StartAnimation(this);
+            ServerCredentials cred = new ServerCredentials() {
+                Address = Credentials.Address,
+                UserName = Credentials.UserName,
+                Password = PasswordText.StringValue
+            };
+            new TaskFactory().StartNew(() => {
+                try{
+                    CmisUtils.GetRepositories(cred);
+                    InvokeOnMainThread(()=> {
+                        this.LoginStatusLabel.StringValue = "login successful";
+                    });
+                }catch(Exception e) {
+                    InvokeOnMainThread(() => {
+                        this.LoginStatusLabel.StringValue = "login failed: " + e.Message;
+                    });
+                }
+                InvokeOnMainThread(()=> {
+                    this.LoginStatusProgress.StopAnimation(this);
+                });
+            });
         }
 
         partial void OnFinish (MonoMac.Foundation.NSObject sender)

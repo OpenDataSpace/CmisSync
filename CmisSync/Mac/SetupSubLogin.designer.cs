@@ -28,6 +28,9 @@ namespace CmisSync
 		MonoMac.AppKit.NSButton ContinueButton { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSProgressIndicator LoginProgress { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSTextField PasswordLabel { get; set; }
 
 		[Outlet]
@@ -99,15 +102,26 @@ namespace CmisSync
 				WarnText.Dispose ();
 				WarnText = null;
 			}
+
+			if (LoginProgress != null) {
+				LoginProgress.Dispose ();
+				LoginProgress = null;
+			}
 		}
 	}
 
 	[Register ("SetupSubLogin")]
 	partial class SetupSubLogin
 	{
+		[Outlet]
+		MonoMac.AppKit.NSProgressIndicator LoginProgress { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (LoginProgress != null) {
+				LoginProgress.Dispose ();
+				LoginProgress = null;
+			}
 		}
 	}
 }

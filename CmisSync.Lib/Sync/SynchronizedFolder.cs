@@ -79,7 +79,7 @@ namespace CmisSync.Lib.Sync
 
             /// <summary>
             /// Path of the root in the remote repository.
-            // Example: "/User Homes/nicolas.raoul/demos"
+            /// Example: "/User Homes/nicolas.raoul/demos"
             /// </summary>
             private string remoteFolderPath;
 
@@ -153,6 +153,11 @@ namespace CmisSync.Lib.Sync
             private bool syncFull = false;
 
             /// <summary>
+            /// Changes on file system detected.
+            /// </summary>
+            private bool changesOnFileSystemDetected = true;
+
+            /// <summary>
             /// If set to true, the session should be reconnected on next sync.
             /// </summary>
             private bool reconnect = false;
@@ -194,6 +199,11 @@ namespace CmisSync.Lib.Sync
                 //repoCmis.EventManager.AddEventHandler(this.watcherStrategy);
                 repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(10, RepoInfoChanged));
                 repoCmis.EventManager.AddEventHandler(new Events.Filter.FailedOperationsFilter(database, Queue));
+                repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<FSEvent>(0, delegate(ISyncEvent e) {
+                    Logger.Debug("FSEvent found on Queue");
+                    this.changesOnFileSystemDetected = true;
+                    return true;
+                }));
             }
 
             /// <summary>
@@ -335,7 +345,7 @@ namespace CmisSync.Lib.Sync
                     HashSet<string> renditions = new HashSet<string>();
                     renditions.Add("cmis:none");
                     session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
-                    Queue.AddEvent(new SuccessfulLoginEvent());
+                    Queue.AddEvent(new SuccessfulLoginEvent(repoinfo.Address));
                     reconnect = false;
                 }
                 //TODO Implement error handling -> informing user about connection problems by showing status
@@ -401,12 +411,6 @@ namespace CmisSync.Lib.Sync
                 IFolder remoteFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
                 string localFolder = repoinfo.TargetDirectory;
 
-                if (!repo.Watcher.EnableRaisingEvents)
-                {
-                    repo.Watcher.RemoveAll();
-                    repo.Watcher.EnableRaisingEvents = true;
-                    syncFull = false;
-                }
                 if (!syncFull)
                 {
                     Logger.Debug("Invoke a full crawl sync");
@@ -418,28 +422,20 @@ namespace CmisSync.Lib.Sync
                 {
                     Logger.Debug("Invoke a remote change log sync");
                     ChangeLogSync(remoteFolder);
-                    if(repo.Watcher.GetChangeList().Count > 0)
+                    if(changesOnFileSystemDetected)
                     {
                         Logger.Debug("Changes on the local file system detected => starting crawl sync");
-                        repo.Watcher.RemoveAll();
-                        if(!CrawlSync(remoteFolder,localFolder))
-                            repo.Watcher.InsertChange("/", Watcher.ChangeTypes.Changed);
+                        changesOnFileSystemDetected = false;
+                        if (!CrawlSync(remoteFolder, localFolder))
+                            changesOnFileSystemDetected = true;
                     }
                 }
                 else
                 {
                     //  have to crawl remote
                     Logger.Debug("Invoke a remote crawl sync");
-                    repo.Watcher.RemoveAll();
                     CrawlSync(remoteFolder, localFolder);
                 }
-                /*
-                Logger.Debug("Invoke a file system watcher sync");
-                WatcherSync(remoteFolderPath, localFolder);
-                foreach (string name in repo.Watcher.GetChangeList())
-                {
-                    Logger.Debug(String.Format("Change name {0} type {1}", name, repo.Watcher.GetChangeType(name)));
-                }*/
             }
 
 

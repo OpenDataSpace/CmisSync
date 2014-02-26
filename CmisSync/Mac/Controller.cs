@@ -113,7 +113,7 @@ namespace CmisSync {
 
             notificationCenter.DidDeliverNotification += (s, e) => 
             {
-                Console.WriteLine("Notification Delivered");
+                //Console.WriteLine("Notification Delivered");
             };
 
             notificationCenter.DidActivateNotification += (s, e) => 
@@ -122,7 +122,7 @@ namespace CmisSync {
                     LocalFolderClicked (Path.GetDirectoryName (e.Notification.InformativeText));
                 }
                 if (IsNotificationCredentials(e.Notification)) {
-                    RemoveNotificationCredentials(e.Notification.Title);
+                    //RemoveNotificationCredentials(e.Notification.Title);
                     EditRepositoryCredentials(e.Notification.Title);
                 }
             };
@@ -132,6 +132,11 @@ namespace CmisSync {
 
             ShowChangePassword += delegate(string reponame) {
                 InsertNotificationCredentials(reponame);
+            };
+
+            SuccessfulLogin += delegate(string reponame)
+            {
+                RemoveNotificationCredentials(reponame);
             };
 
             OnTransmissionListChanged += delegate {
@@ -235,13 +240,12 @@ namespace CmisSync {
                 break;
             }
             if (transmission.Status.Aborted == true) {
-                type += " aborted";
+                return String.Format("{0} {1}", type, "aborted");
             } else if (transmission.Status.Completed == true) {
-                type += " completed";
+                return String.Format("{0} {1}", type, "completed");
             } else if (transmission.Status.FailedException != null) {
-                type += " failed";
+                return String.Format("{0} {1}", type, "failed");
             }
-
             return String.Format("{0} ({1} {2})",
                 type,
                 CmisSync.Lib.Utils.FormatPercent(transmission.Status.Percent.GetValueOrDefault(0)),

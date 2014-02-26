@@ -75,6 +75,12 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
+        public void ConstructorWithCustomLatency()
+        {
+            new MacWatcher(localFolder.FullName, queue.Object, RunLoop, TimeSpan.FromMilliseconds(100));
+        }
+
+        [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullWatcher() {
             new MacWatcher(null, queue.Object, RunLoop);
@@ -122,7 +128,7 @@ namespace TestLibrary.SyncStrategiesTests
         protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
             WatcherData watcherData = new WatcherData ();
             watcherData.Data = new EventQueue(queue);
-            watcherData.Watcher = new MacWatcher (pathname, watcherData.Data as ISyncEventQueue, RunLoop);
+            watcherData.Watcher = new MacWatcher (pathname, watcherData.Data as ISyncEventQueue, RunLoop, TimeSpan.FromMilliseconds(100));
             return watcherData;
         }
 
