@@ -6,8 +6,22 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GeneralSettingsController">
             <connections>
-                <outlet property="BandwidthTabView" destination="Kok-HG-CSN" id="eN6-EY-oMU"/>
-                <outlet property="ProxyTabView" destination="PMW-X0-t4R" id="H8X-2m-WSy"/>
+                <outlet property="CancelButton" destination="Afi-3E-jSe" id="2j5-rX-ij1"/>
+                <outlet property="HelpButton" destination="tOT-dI-cEZ" id="sbR-ea-ziG"/>
+                <outlet property="ManualProxyButton" destination="2HG-la-V7V" id="Fqm-cZ-ODo"/>
+                <outlet property="NoProxyButton" destination="pRY-GC-Bfp" id="TK0-9G-WSc"/>
+                <outlet property="ProxyPassword" destination="B9w-Re-bgg" id="VqH-20-OOK"/>
+                <outlet property="ProxyPasswordLabel" destination="07K-W3-nSA" id="Xau-eF-MeD"/>
+                <outlet property="ProxyServer" destination="C6T-sd-v9k" id="xxE-f9-E3q"/>
+                <outlet property="ProxyServerLabel" destination="uaM-78-VyV" id="G7J-JR-1Kq"/>
+                <outlet property="ProxyTab" destination="uHG-tn-Goj" id="rbv-ul-aRc"/>
+                <outlet property="ProxyTabView" destination="uHG-tn-Goj" id="m54-d1-di9"/>
+                <outlet property="ProxyUsername" destination="OyS-nN-bUL" id="SmA-6c-pVm"/>
+                <outlet property="ProxyUsernameLabel" destination="BbT-PM-4PL" id="Ut9-4L-mHs"/>
+                <outlet property="RequiresAuthorizationCheckBox" destination="Qu8-Um-sa0" id="U9n-ex-cHb"/>
+                <outlet property="SaveButton" destination="fZo-ke-tHN" id="O62-Jh-AkB"/>
+                <outlet property="SystemDefaultProxyButton" destination="KpR-fk-s9e" id="y6Q-Ha-9f0"/>
+                <outlet property="TabView" destination="SOA-sW-bOc" id="MzZ-DL-no8"/>
                 <outlet property="window" destination="2" id="6"/>
             </connections>
         </customObject>
@@ -28,15 +42,103 @@
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
                             <tabViewItem label="Proxy" identifier="1" id="uHG-tn-Goj">
-                                <view key="view" id="PMW-X0-t4R">
+                                <view key="view" id="PMW-X0-t4R" customClass="ProxySettings">
                                     <rect key="frame" x="10" y="33" width="560" height="259"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                </view>
-                            </tabViewItem>
-                            <tabViewItem label="Bandwidth" identifier="2" id="Mb0-qs-f35">
-                                <view key="view" id="Kok-HG-CSN">
-                                    <rect key="frame" x="10" y="33" width="560" height="259"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <matrix verticalHuggingPriority="750" allowsEmptySelection="NO" autorecalculatesCellSize="YES" id="SGw-ZV-uBI">
+                                            <rect key="frame" x="17" y="189" width="526" height="67"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            <size key="cellSize" width="161" height="18"/>
+                                            <size key="intercellSpacing" width="4" height="2"/>
+                                            <buttonCell key="prototype" type="radio" title="Radio" imagePosition="left" alignment="left" inset="2" id="nRm-5B-wZ4">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <cells>
+                                                <column>
+                                                    <buttonCell type="radio" title="No Proxy" imagePosition="left" alignment="left" tag="1" inset="2" id="pRY-GC-Bfp">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <buttonCell type="radio" title="System Settings" imagePosition="left" alignment="left" state="on" inset="2" id="KpR-fk-s9e">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <buttonCell type="radio" title="Manual Proxy Settings" imagePosition="left" alignment="left" inset="2" id="2HG-la-V7V">
+                                                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                </column>
+                                            </cells>
+                                        </matrix>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="uaM-78-VyV">
+                                            <rect key="frame" x="15" y="164" width="530" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Server" id="kDG-PF-Twq">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <textField verticalHuggingPriority="750" id="C6T-sd-v9k">
+                                            <rect key="frame" x="17" y="134" width="526" height="22"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="0Re-Er-LDv">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <button id="O2i-4B-8yI">
+                                            <rect key="frame" x="15" y="110" width="530" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="Requires Authorization" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Qu8-Um-sa0">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                        </button>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="BbT-PM-4PL">
+                                            <rect key="frame" x="15" y="87" width="249" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Username" id="kGp-7G-x7Y">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="07K-W3-nSA">
+                                            <rect key="frame" x="287" y="87" width="258" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Password" id="f2z-dY-Unb">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <textField verticalHuggingPriority="750" id="OyS-nN-bUL">
+                                            <rect key="frame" x="17" y="57" width="245" height="22"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="X0H-V2-KAD">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <secureTextField verticalHuggingPriority="750" id="B9w-Re-bgg">
+                                            <rect key="frame" x="289" y="57" width="254" height="22"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="Vhn-N0-jA0">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                <allowedInputSourceLocales>
+                                                    <string>NSAllRomanInputSourcesLocaleIdentifier</string>
+                                                </allowedInputSourceLocales>
+                                            </secureTextFieldCell>
+                                        </secureTextField>
+                                    </subviews>
                                 </view>
                             </tabViewItem>
                         </tabViewItems>
@@ -48,7 +150,7 @@
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                             <connections>
-                                <action selector="OnSave:" target="-2" id="4fP-ej-nvr"/>
+                                <action selector="OnSave:" target="-2" id="QKf-1m-Bma"/>
                             </connections>
                         </buttonCell>
                     </button>
@@ -60,7 +162,7 @@
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="OnCancel:" target="-2" id="TFL-UR-4X3"/>
+                            <action selector="performClose:" target="2" id="WWv-8T-B7G"/>
                         </connections>
                     </button>
                     <button horizontalHuggingPriority="750" verticalHuggingPriority="750" id="tOT-dI-cEZ">

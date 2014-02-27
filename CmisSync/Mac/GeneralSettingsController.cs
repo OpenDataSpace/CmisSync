@@ -29,10 +29,30 @@ namespace CmisSync
         // Shared initialization code
         void Initialize()
         {
+            Controller.HideWindowEvent += delegate
+            {
+                using (var a = new NSAutoreleasePool ())
+                {
+                    InvokeOnMainThread (delegate {
+                        Window.PerformClose (this);
+                    });
+                }
+            };
+
+            Controller.ShowWindowEvent += delegate
+            {
+                using (var a = new NSAutoreleasePool ())
+                {
+                    InvokeOnMainThread (delegate {
+                        Window.OrderFrontRegardless ();
+                    });
+                }
+            };
+
         }
 
         #endregion
-
+        private SettingController Controller = new SettingController();
         //strongly typed window accessor
         public new GeneralSettings Window
         {
@@ -42,15 +62,14 @@ namespace CmisSync
             }
         }
 
-        private NSViewController ProxySubController_ = null;
-        private NSViewController ProxySubController {
-            get { return ProxySubController_; }
-            set {
-                if (ProxySubController_ != null) {
-                    ProxySubController_.Dispose ();
-                    ProxySubController_ = null;
-                }
-                ProxySubController_ = value;
+        public void OnCancel()
+        {
+            using (var a = new NSAutoreleasePool())
+            {
+                InvokeOnMainThread(delegate
+                {
+                    Window.PerformClose(this.Window);
+                });
             }
         }
     }

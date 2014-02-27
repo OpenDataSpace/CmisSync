@@ -13,7 +13,7 @@ namespace CmisSync
 	partial class GeneralSettingsController
 	{
 		[Outlet]
-		MonoMac.AppKit.NSView BandwidthTabView { get; set; }
+		MonoMac.AppKit.NSTabViewItem BandwidthTabView { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSButton CancelButton { get; set; }
@@ -22,10 +22,43 @@ namespace CmisSync
 		MonoMac.AppKit.NSButton HelpButton { get; set; }
 
 		[Outlet]
-		MonoMac.AppKit.NSView ProxyTabView { get; set; }
+		MonoMac.AppKit.NSButtonCell ManualProxyButton { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButtonCell NoProxyButton { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSSecureTextField ProxyPassword { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField ProxyPasswordLabel { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField ProxyServer { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField ProxyServerLabel { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTabViewItem ProxyTab { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTabViewItem ProxyTabView { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField ProxyUsername { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField ProxyUsernameLabel { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButtonCell RequiresAuthorizationCheckBox { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSButton SaveButton { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButtonCell SystemDefaultProxyButton { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSTabView TabView { get; set; }
@@ -41,6 +74,11 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (BandwidthTabView != null) {
+				BandwidthTabView.Dispose ();
+				BandwidthTabView = null;
+			}
+
 			if (CancelButton != null) {
 				CancelButton.Dispose ();
 				CancelButton = null;
@@ -51,14 +89,39 @@ namespace CmisSync
 				HelpButton = null;
 			}
 
-			if (SaveButton != null) {
-				SaveButton.Dispose ();
-				SaveButton = null;
+			if (ManualProxyButton != null) {
+				ManualProxyButton.Dispose ();
+				ManualProxyButton = null;
 			}
 
-			if (TabView != null) {
-				TabView.Dispose ();
-				TabView = null;
+			if (NoProxyButton != null) {
+				NoProxyButton.Dispose ();
+				NoProxyButton = null;
+			}
+
+			if (ProxyPassword != null) {
+				ProxyPassword.Dispose ();
+				ProxyPassword = null;
+			}
+
+			if (ProxyPasswordLabel != null) {
+				ProxyPasswordLabel.Dispose ();
+				ProxyPasswordLabel = null;
+			}
+
+			if (ProxyServer != null) {
+				ProxyServer.Dispose ();
+				ProxyServer = null;
+			}
+
+			if (ProxyServerLabel != null) {
+				ProxyServerLabel.Dispose ();
+				ProxyServerLabel = null;
+			}
+
+			if (ProxyTab != null) {
+				ProxyTab.Dispose ();
+				ProxyTab = null;
 			}
 
 			if (ProxyTabView != null) {
@@ -66,9 +129,34 @@ namespace CmisSync
 				ProxyTabView = null;
 			}
 
-			if (BandwidthTabView != null) {
-				BandwidthTabView.Dispose ();
-				BandwidthTabView = null;
+			if (ProxyUsername != null) {
+				ProxyUsername.Dispose ();
+				ProxyUsername = null;
+			}
+
+			if (ProxyUsernameLabel != null) {
+				ProxyUsernameLabel.Dispose ();
+				ProxyUsernameLabel = null;
+			}
+
+			if (RequiresAuthorizationCheckBox != null) {
+				RequiresAuthorizationCheckBox.Dispose ();
+				RequiresAuthorizationCheckBox = null;
+			}
+
+			if (SaveButton != null) {
+				SaveButton.Dispose ();
+				SaveButton = null;
+			}
+
+			if (SystemDefaultProxyButton != null) {
+				SystemDefaultProxyButton.Dispose ();
+				SystemDefaultProxyButton = null;
+			}
+
+			if (TabView != null) {
+				TabView.Dispose ();
+				TabView = null;
 			}
 		}
 	}
