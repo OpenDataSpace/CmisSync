@@ -143,7 +143,7 @@ namespace CmisSync
                 InvokeOnMainThread(delegate {
                     if (Controller.repositories == null)
                     {
-                        WarnText.StringValue = Controller.getConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
+                        WarnText.StringValue = Controller.GetConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
                         AddressText.Enabled = true;
                         UserText.Enabled = true;
                         PasswordText.Enabled = true;

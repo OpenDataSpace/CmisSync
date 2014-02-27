@@ -136,12 +136,6 @@ namespace CmisSync.Lib
         /// </summary>
         private Events.Filter.IgnoredFoldersFilter ignoredFoldersFilter;
 
-#if __COCOA__
-        private bool StopRunLoop = false;
-        private NSRunLoop RunLoop = null;
-        private Thread RunLoopThread = null;
-#endif
-
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
@@ -179,18 +173,7 @@ namespace CmisSync.Lib
                 Status = status;
             };
             #if __COCOA__
-            RunLoopThread = new Thread (() =>
-            {
-                RunLoop = NSRunLoop.Current;
-                while (!StopRunLoop) {
-                    RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(1));
-                }
-            });
-            RunLoopThread.Start ();
-            while (RunLoop == null) {
-                Thread.Sleep(10);
-            }
-            this.Watcher = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue, RunLoop);
+            this.Watcher = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
             #else
             this.Watcher = new CmisSync.Lib.Sync.Strategy.NetWatcher( new FileSystemWatcher(LocalPath), Queue);
             #endif
@@ -241,10 +224,6 @@ namespace CmisSync.Lib
                 if (disposing)
                 {
                     this.Scheduler.Dispose();
-#if __COCOA__
-                    StopRunLoop = true;
-                    RunLoopThread.Join ();
-#endif
                     this.Watcher.Dispose();
                     this.Queue.StopListener();
                     int timeout = 500;

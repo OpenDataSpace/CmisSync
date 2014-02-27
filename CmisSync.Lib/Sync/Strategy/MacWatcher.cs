@@ -20,6 +20,14 @@ namespace CmisSync.Lib.Sync.Strategy
     /// </summary>
     public class MacWatcher : Watcher
     {
+
+        private FSEventStream FsStream;
+        private bool isStarted = false;
+        private bool disposed = false;
+        private bool StopRunLoop = false;
+        private NSRunLoop RunLoop = null;
+        private Thread RunLoopThread = null;
+
         /// <summary>
         /// Enables the FSEvent report
         /// </summary>
@@ -47,9 +55,6 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
-        private FSEventStream FsStream;
-        private bool isStarted = false;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.MacWatcher"/> class.
         /// The default latency is set to 1 second.
@@ -57,7 +62,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="pathname">Pathname.</param>
         /// <param name="queue">Queue.</param>
         /// <param name="loop">Loop.</param>
-        public MacWatcher (string pathname, ISyncEventQueue queue, NSRunLoop loop) : this(pathname, queue, loop, TimeSpan.FromSeconds(1))
+        public MacWatcher (string pathname, ISyncEventQueue queue) : this(pathname, queue, TimeSpan.FromSeconds(1))
         { }
 
         /// <summary>
@@ -67,24 +72,46 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="queue">Queue.</param>
         /// <param name="loop">Loop.</param>
         /// <param name="latency">Latency.</param>
-        public MacWatcher (string pathname, ISyncEventQueue queue, NSRunLoop loop, TimeSpan latency) : base(queue)
+        public MacWatcher (string pathname, ISyncEventQueue queue, TimeSpan latency) : base(queue)
         {
-            if (String.IsNullOrEmpty (pathname) || loop == null)
+            if (String.IsNullOrEmpty (pathname))
                 throw new ArgumentNullException ("The given fs stream must not be null");
+            RunLoopThread = new Thread (() =>
+            {
+                RunLoop = NSRunLoop.Current;
+                while (!StopRunLoop) {
+                    RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(1));
+                }
+            });
+            RunLoopThread.Start ();
+            while (RunLoop == null) {
+                Thread.Sleep(10);
+            }
             FsStream = new FSEventStream (new [] { pathname }, latency, FSEventStreamCreateFlags.FileEvents);
             EnableEvents = false;
-            FsStream.ScheduleWithRunLoop (loop);
+            FsStream.ScheduleWithRunLoop (RunLoop);
         }
 
         /// <summary>
-        /// Releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.MacWatcher"/> is reclaimed by garbage collection.
+        /// Dispose the FsStream.
         /// </summary>
-        ~MacWatcher()
+        /// <param name="disposing">If set to <c>true</c> disposing.</param>
+        protected override void Dispose(bool disposing)
         {
-            EnableEvents = false;
-            FsStream.Invalidate ();
-        }
+            if (! disposed) {
+                if (disposing) {
+                    // Dispose of any managed resources of the derived class here.
+                    EnableEvents = false;
+                    FsStream.Invalidate ();
+                    // Call the base class implementation.
+                    base.Dispose(disposing);
+                    StopRunLoop = true;
+                    RunLoopThread.Join ();
+                    disposed = true;
+                }
+                // Dispose of any unmanaged resources of the derived class here.
+            }
+        } 
 
         private void OnFSEventStreamEvents (object sender, FSEventStreamEventsArgs e)
         {

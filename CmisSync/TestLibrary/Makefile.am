@@ -12,8 +12,7 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(MONOMAC_LIBS) \
 	   -r:$(srcdir)/lib/xunit.extensions.dll
 
 SOURCES =  \
-    MoqExtensions/MoqExtensions.cs \
-	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
+	ActiveActivitiesManagerTest.cs \
 	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
 	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
 	CmisDatabaseTest.cs \
@@ -42,10 +41,11 @@ SOURCES =  \
 	EventsTests/SyncEventQueueTest.cs \
 	FSDeletionHandlerTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
-	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
+	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	LocalFilesystemActivityGenerator.cs \
+	MoqExtensions/MoqExtensions.cs \
 	Properties/AssemblyInfo.cs \
 	StorageTests/PersistentStorageTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
@@ -53,9 +53,9 @@ SOURCES =  \
 	StreamTests/NonClosingHashStreamTest.cs \
 	StreamTests/OffsetStreamTest.cs \
 	StreamTests/ProgressStreamTest.cs \
-	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/ContentChangeEventAccumulatorTest.cs \
 	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
+	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
 	SyncStrategiesTests/FolderSynchronizerTest.cs \
@@ -65,29 +65,17 @@ SOURCES =  \
 	SyncStrategiesTests/SingleStepEventQueueTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
-	SyncStrategiesTests/SyncMechanismTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
 	SyncStrategiesTests/SolverTests/RemoteObjectAddedTest.cs \
+	SyncStrategiesTests/SyncMechanismTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/WatcherTestUtils.cs \
-	ContentTasksTests/ChunkedDownloaderTest.cs \
-	ContentTasksTests/SimpleFileDownloaderTest.cs \
-	ContentTasksTests/SimpleFileUploaderTest.cs \
-	ContentTasksTests/ChunkedFileUploaderTest.cs \
-	ContentTasksTests/ContentTaskUtilsTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs \
-	UtilsTests/CmisSyncLibUtilsTest.cs \
-	ActiveActivitiesManagerTest.cs \
-	CmisDatabaseTest.cs \
-	ConfigurationTest.cs \
-	DebugLoggingHandlerTest.cs \
-	EncodingTest.cs \
-	FSDeletionHandlerTest.cs \
-	LocalFilesystemActivityGenerator.cs \
-	WatcherTest.cs \
 	TestUtils/MockUtil.cs \
 	TestUtils/ObservableHandler.cs \
-	TestUtils/ObservableHandlerTest.cs 
+	TestUtils/ObservableHandlerTest.cs \
+	UtilsTests/CmisSyncLibUtilsTest.cs \
+	UtilsTests/HttpProxyUtilsTest.cs \
+	WatcherTest.cs 
 	
 
 EXTRA_DIST = TestLibrary.csproj \

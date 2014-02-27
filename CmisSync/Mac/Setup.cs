@@ -381,7 +381,7 @@ namespace CmisSync {
                     InvokeOnMainThread(delegate {
                         if (Controller.repositories == null)
                         {
-                            WarningTextField.StringValue = Controller.getConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
+                            WarningTextField.StringValue = Controller.GetConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
                             ContinueButton.Enabled = true;
                             CancelButton.Enabled = true;
                             //          this.LoginProgress.StopAnimation(this);
