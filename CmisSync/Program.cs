@@ -90,8 +90,8 @@ namespace CmisSync
 
                 string n = Environment.NewLine;
 
-                Console.WriteLine(n +
-                    "DataSpace Sync is a collaboration and sharing tool that is" + n +
+                Console.WriteLine(n + Properties_Resources.ApplicationName +
+                    " is a collaboration and sharing tool that is" + n +
                     "designed to keep things simple and to stay out of your way." + n +
                     n +
                     "Version: " + CmisSync.Lib.Backend.Version + n +
@@ -109,7 +109,7 @@ namespace CmisSync
             // Only allow one instance of CmisSync (on Windows)
             if (!program_mutex.WaitOne(0, false))
             {
-                Logger.Error("DataSpace Sync is already running.");
+                Logger.Error(Properties_Resources.ApplicationName + " is already running.");
                 Environment.Exit(-1);
             }
 

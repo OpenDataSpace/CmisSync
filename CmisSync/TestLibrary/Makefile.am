@@ -4,7 +4,7 @@ TARGET = library
 ASSEMBLY_INFO_SOURCE =  \
 	Properties/AssemblyInfo.cs
 
-LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) \
+LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(MONOMAC_LIBS) \
 	   $(LIBS_CMISSYNCLIB_DEPS) \
 	   $(NUNIT_LIBS) \
 	   -r:$(srcdir)/lib/Moq.dll \
@@ -47,6 +47,8 @@ SOURCES =  \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	LocalFilesystemActivityGenerator.cs \
+	MoqExtensions/MoqExtensions.cs \
+	Properties/AssemblyInfo.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/PersistentStorageTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
@@ -59,6 +61,9 @@ SOURCES =  \
 	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
+	SyncStrategiesTests/FolderSynchronizerTest.cs \
+	SyncStrategiesTests/MacWatcherTest.cs \
+	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/SingleStepEventQueue.cs \
 	SyncStrategiesTests/SingleStepEventQueueTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
@@ -75,6 +80,7 @@ SOURCES =  \
 	SyncStrategiesTests/SolverTests/RemoteObjectRenamedTest.cs \
 	SyncStrategiesTests/SyncMechanismTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
+	SyncStrategiesTests/WatcherTestUtils.cs \
 	TestUtils/MockUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \

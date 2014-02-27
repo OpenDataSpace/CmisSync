@@ -49,7 +49,7 @@ namespace TestLibrary
         }
 
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestEnableRaisingEvents()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -98,7 +98,7 @@ namespace TestLibrary
             }
         };
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestEnableEvent()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -158,7 +158,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestRemove()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -250,7 +250,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeCreated()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -312,7 +312,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeChanged()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -377,7 +377,7 @@ namespace TestLibrary
             //Assert.Fail("TODO");
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeDeleted()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -435,7 +435,7 @@ namespace TestLibrary
         private static readonly string oldname = Path.Combine(TestFolder, "test.old");
         private static readonly string newname = Path.Combine(TestFolder, "test.new");
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeForMoveInsideSyncedFolder()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -458,7 +458,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeForMoveIntoSyncedFolder()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -474,7 +474,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeForMoveOutOfSyncedFolder()
         {
 
@@ -505,7 +505,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeForMoveInNotSyncedFolder()
         {
 

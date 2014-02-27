@@ -87,6 +87,8 @@ namespace CmisSync
         public event ShowSetupWindowEventHandler ShowSetupWindowEvent = delegate { };
         public delegate void ShowSetupWindowEventHandler(PageType page_type);
 
+        public event Action ShowSettingWindowEvent = delegate { };
+
         public event Action ShowAboutWindowEvent = delegate { };
 
         public event FolderFetchedEventHandler FolderFetched = delegate { };
@@ -109,6 +111,8 @@ namespace CmisSync
 
         public event CmisSync.Lib.Events.ShowChangePasswordEventHandler ShowChangePassword = delegate { };
 
+        public delegate void SuccessfulLoginEventHandler (string reponame);
+        public event SuccessfulLoginEventHandler SuccessfulLogin = delegate { };
 
         /// <summary>
         /// Get the repositories configured in CmisSync.
@@ -242,7 +246,6 @@ namespace CmisSync
             if (firstRun)
             {
                 ShowSetupWindow(PageType.Setup);
-
             }
             else
             {
@@ -276,7 +279,13 @@ namespace CmisSync
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 return false;
             }));
-            repo.EventManager.AddEventHandler(new PermissionDeniedEventHandler(repositoryInfo.Name, ShowChangePassword));
+            repo.EventManager.AddEventHandler(new PermissionDeniedEventHandler(repositoryInfo.Name, delegate(string reponame) {
+                ShowChangePassword(reponame);
+                }));
+            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>( 0, delegate(ISyncEvent e) {
+                SuccessfulLogin(repositoryInfo.Name);
+                return false;
+            }));
             this.repositories.Add(repo);
             repo.Initialize();
         }
@@ -587,6 +596,15 @@ namespace CmisSync
         public void ShowSetupWindow(PageType page_type)
         {
             ShowSetupWindowEvent(page_type);
+        }
+
+
+        /// <summary>
+        /// Show setting dialog
+        /// </summary>
+        public void ShowSettingWindow()
+        {
+            ShowSettingWindowEvent();
         }
 
 

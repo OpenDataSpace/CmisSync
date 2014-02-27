@@ -125,8 +125,8 @@ namespace CmisSync {
                 notificationCenter.BeginInvokeOnMainThread(delegate {
                     NSUserNotification notification = new NSUserNotification();
                     notification.Title = reponame;
-                    notification.Subtitle = Properties_Resources.NotificationCreditsError;
-                    notification.InformativeText = Properties_Resources.NotificationCreditsChange;
+                    notification.Subtitle = String.Format(Properties_Resources.NotificationCredentialsError, reponame);
+                    notification.InformativeText = Properties_Resources.NotificationChangeCredentials;
                     NSMutableDictionary userInfo = new NSMutableDictionary();
                     userInfo.Add ((NSString)notificationType, (NSString)notificationTypeCredentials);
                     notification.UserInfo = userInfo;
@@ -214,9 +214,9 @@ namespace CmisSync {
             status = Properties_Resources.NotificationFileStatusFailed;
             }
 
-            return String.Format("{0} {1} ({2:###.#}% {3})",
+            return String.Format("{0} {1} ({2} {3})",
                 type, status,
-                Math.Round (transmission.Status.Percent.GetValueOrDefault(), 1),
+                CmisSync.Lib.Utils.FormatPercent(transmission.Status.Percent.GetValueOrDefault()),
                 CmisSync.Lib.Utils.FormatBandwidth ((long)transmission.Status.BitsPerSecond.GetValueOrDefault()));
         }
 
@@ -355,7 +355,7 @@ namespace CmisSync {
 
             notificationCenter.DidDeliverNotification += (s, e) => 
             {
-                Console.WriteLine("Notification Delivered");
+                //Console.WriteLine("Notification Delivered");
             };
 
             notificationCenter.DidActivateNotification += (s, e) => 
@@ -505,7 +505,7 @@ namespace CmisSync {
                 };
 
                 this.log_item = new NSMenuItem () {
-                    Title = CmisSync.Properties_Resources.ViewLog
+                    Title = Properties_Resources.ViewLog
                 };
 
                 this.log_item.Activated += delegate
@@ -514,7 +514,7 @@ namespace CmisSync {
                 };
 
                 this.add_item = new NSMenuItem () {
-                    Title   = CmisSync.Properties_Resources.AddARemoteFolder,
+                    Title   = Properties_Resources.AddARemoteFolder,
                     Enabled = true
                 };
 
@@ -523,7 +523,7 @@ namespace CmisSync {
                 };
 
                 this.about_item = new NSMenuItem () {
-                    Title   = CmisSync.Properties_Resources.About,
+                    Title   = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName),
                     Enabled = true
                 };
 
@@ -532,7 +532,7 @@ namespace CmisSync {
                 };
 
                 this.quit_item = new NSMenuItem () {
-                    Title   = CmisSync.Properties_Resources.Exit,
+                    Title   = Properties_Resources.Exit,
                     Enabled = true
                 };
 

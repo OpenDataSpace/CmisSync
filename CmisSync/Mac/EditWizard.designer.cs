@@ -34,6 +34,12 @@ namespace CmisSync
 		MonoMac.AppKit.NSTextField Header { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSTextField LoginStatusLabel { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSProgressIndicator LoginStatusProgress { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSOutlineView Outline { get; set; }
 
 		[Outlet]
@@ -59,6 +65,9 @@ namespace CmisSync
 
 		[Action ("OnFinish:")]
 		partial void OnFinish (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnPasswordChanged:")]
+		partial void OnPasswordChanged (MonoMac.Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
@@ -97,6 +106,16 @@ namespace CmisSync
 				Header = null;
 			}
 
+			if (LoginStatusLabel != null) {
+				LoginStatusLabel.Dispose ();
+				LoginStatusLabel = null;
+			}
+
+			if (LoginStatusProgress != null) {
+				LoginStatusProgress.Dispose ();
+				LoginStatusProgress = null;
+			}
+
 			if (Outline != null) {
 				Outline.Dispose ();
 				Outline = null;
@@ -117,6 +136,11 @@ namespace CmisSync
 				SideSplashView = null;
 			}
 
+			if (TabView != null) {
+				TabView.Dispose ();
+				TabView = null;
+			}
+
 			if (UserLabel != null) {
 				UserLabel.Dispose ();
 				UserLabel = null;
@@ -125,11 +149,6 @@ namespace CmisSync
 			if (UserText != null) {
 				UserText.Dispose ();
 				UserText = null;
-			}
-
-			if (TabView != null) {
-				TabView.Dispose ();
-				TabView = null;
 			}
 		}
 	}

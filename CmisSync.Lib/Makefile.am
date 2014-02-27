@@ -3,7 +3,7 @@ TARGET = library
 
 ASSEMBLY_INFO_SOURCE = Defines.cs
 
-LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(WEBLIBS) $(MONOPOSIX)
+LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS)
 
 SOURCES =  \
 	ActivityListenerAggregator.cs \
@@ -126,6 +126,8 @@ SOURCES =  \
 	Sync/Strategy/ISituationDetection.cs \
 	Sync/Strategy/LocalCrawler.cs \
 	Sync/Strategy/LocalSituationDetection.cs \
+	Sync/Strategy/MacWatcher.cs \
+	Sync/Strategy/NetWatcher.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SimpleFileSynchronizer.cs \
 	Sync/Strategy/SyncMechanism.cs \

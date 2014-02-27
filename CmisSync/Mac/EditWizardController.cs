@@ -9,6 +9,7 @@ using MonoMac.AppKit;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
+using System.Threading.Tasks;
 
 namespace CmisSync
 {
@@ -63,7 +64,6 @@ namespace CmisSync
         protected override void Dispose (bool disposing)
         {
             base.Dispose (disposing);
-            Console.WriteLine (this.GetType ().ToString () + " disposed " + disposing.ToString ());
         }
 
         public EditController Controller = new EditController();
@@ -80,6 +80,8 @@ namespace CmisSync
         private CmisTreeDataSource DataSource;
         private OutlineViewDelegate DataDelegate;
         private AsyncNodeLoader Loader;
+        private Object loginLock = new Object();
+        private bool isClosed;
 
         public override void AwakeFromNib ()
         {
@@ -113,7 +115,7 @@ namespace CmisSync
             Outline.DataSource = DataSource;
             Outline.Delegate = DataDelegate;
 
-            this.AddressLabel.StringValue = Properties_Resources.EnterWebAddress;
+            this.AddressLabel.StringValue = Properties_Resources.CmisWebAddress;
             this.UserLabel.StringValue = Properties_Resources.User;
             this.PasswordLabel.StringValue = Properties_Resources.Password;
 
@@ -122,9 +124,10 @@ namespace CmisSync
             this.PasswordText.StringValue = Credentials.Password.ToString ();
             this.AddressText.Enabled = false;
             this.UserText.Enabled = false;
-
+            this.LoginStatusProgress.IsDisplayedWhenStopped = false;
+            this.LoginStatusLabel.Hidden = true;
             this.FolderTab.Label = Properties_Resources.AddingFolder;
-            this.CredentialsTab.Label = Properties_Resources.Credits;
+            this.CredentialsTab.Label = Properties_Resources.Credentials;
             switch (this.type) {
             case EditType.EditFolder:
                 TabView.SelectAt (0);
@@ -148,6 +151,8 @@ namespace CmisSync
 
             //  must be called after InsertEvent()
             Loader.Load(Repo);
+            lock(loginLock)
+                isClosed = false;
         }
 
         void InsertEvent ()
@@ -226,13 +231,61 @@ namespace CmisSync
 
         partial void OnCancel (MonoMac.Foundation.NSObject sender)
         {
+            lock(loginLock)
+            {
+                isClosed = true;
+            }
             Loader.Cancel ();
             RemoveEvent ();
             Controller.CloseWindow ();
         }
 
+        partial void OnPasswordChanged(NSObject sender)
+        {
+            this.LoginStatusLabel.StringValue = "logging in";
+            this.LoginStatusLabel.Hidden = false;
+            this.LoginStatusProgress.StartAnimation(this);
+            ServerCredentials cred = new ServerCredentials() {
+                Address = Credentials.Address,
+                UserName = Credentials.UserName,
+                Password = PasswordText.StringValue
+            };
+            new TaskFactory().StartNew(() => {
+                try{
+                    CmisUtils.GetRepositories(cred);
+                    InvokeOnMainThread(()=> {
+                        lock(loginLock)
+                        {
+                            if(!isClosed)
+                                this.LoginStatusLabel.StringValue = "login successful";
+                        }
+
+                    });
+                }catch(Exception e) {
+                    InvokeOnMainThread(() => {
+                        lock (loginLock)
+                        {
+                            if(!isClosed)
+                                this.LoginStatusLabel.StringValue = "login failed: " + e.Message;
+                        }
+                    });
+                }
+                InvokeOnMainThread(() => {
+                    lock (loginLock)
+                    {
+                        if(!isClosed)
+                            this.LoginStatusProgress.StopAnimation(this);
+                    }
+                });
+            });
+        }
+
         partial void OnFinish (MonoMac.Foundation.NSObject sender)
         {
+            lock(loginLock)
+            {
+                isClosed = true;
+            }
             Loader.Cancel ();
             RemoveEvent ();
             Ignores = NodeModelUtils.GetIgnoredFolder (Repo);
