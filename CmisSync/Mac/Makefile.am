@@ -12,6 +12,7 @@ SOURCES =  \
 	../EditController.cs \
 	../Program.cs \
 	../Properties/Resources.Designer.cs \
+	../SettingController.cs \
 	../SetupController.cs \
 	../StatusIconController.cs \
 	../Windows/FolderTreeMVC/IgnoredFolderLoader.cs \
@@ -32,11 +33,17 @@ SOURCES =  \
 	EditWizard.cs \
 	EditWizard.designer.cs \
 	EditWizardController.cs \
+	GeneralSettings.cs \
+	GeneralSettings.designer.cs \
+	GeneralSettingsController.cs \
 	MacWatcher.cs \
 	Notifications/Credentials.cs \
 	Notifications/FileSystemProgress.cs \
 	Notifications/TransmissionProgress.cs \
 	OutlineViewDelegate.cs \
+	ProxySettings.cs \
+	ProxySettings.designer.cs \
+	ProxySettingsController.cs \
 	Setup.cs \
 	SetupSubCustomize.cs \
 	SetupSubCustomize.designer.cs \
