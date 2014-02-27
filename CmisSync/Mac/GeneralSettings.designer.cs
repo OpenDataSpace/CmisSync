@@ -9,12 +9,9 @@ using System.CodeDom.Compiler;
 
 namespace CmisSync
 {
-	[Register ("GeneralSettingsController")]
-	partial class GeneralSettingsController
+	[Register ("GeneralSettings")]
+	partial class GeneralSettings
 	{
-		[Outlet]
-		MonoMac.AppKit.NSTabViewItem BandwidthTabView { get; set; }
-
 		[Outlet]
 		MonoMac.AppKit.NSButton CancelButton { get; set; }
 
@@ -43,9 +40,6 @@ namespace CmisSync
 		MonoMac.AppKit.NSTabViewItem ProxyTab { get; set; }
 
 		[Outlet]
-		MonoMac.AppKit.NSTabViewItem ProxyTabView { get; set; }
-
-		[Outlet]
 		MonoMac.AppKit.NSTextField ProxyUsername { get; set; }
 
 		[Outlet]
@@ -66,19 +60,26 @@ namespace CmisSync
 		[Action ("OnCancel:")]
 		partial void OnCancel (MonoMac.Foundation.NSObject sender);
 
+		[Action ("OnDefaultProxy:")]
+		partial void OnDefaultProxy (MonoMac.Foundation.NSObject sender);
+
 		[Action ("OnHelp:")]
 		partial void OnHelp (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnManualProxy:")]
+		partial void OnManualProxy (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnNoProxy:")]
+		partial void OnNoProxy (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnRequireAuth:")]
+		partial void OnRequireAuth (MonoMac.Foundation.NSObject sender);
 
 		[Action ("OnSave:")]
 		partial void OnSave (MonoMac.Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (BandwidthTabView != null) {
-				BandwidthTabView.Dispose ();
-				BandwidthTabView = null;
-			}
-
 			if (CancelButton != null) {
 				CancelButton.Dispose ();
 				CancelButton = null;
@@ -124,11 +125,6 @@ namespace CmisSync
 				ProxyTab = null;
 			}
 
-			if (ProxyTabView != null) {
-				ProxyTabView.Dispose ();
-				ProxyTabView = null;
-			}
-
 			if (ProxyUsername != null) {
 				ProxyUsername.Dispose ();
 				ProxyUsername = null;
@@ -161,9 +157,17 @@ namespace CmisSync
 		}
 	}
 
-	[Register ("GeneralSettings")]
-	partial class GeneralSettings
+	[Register ("GeneralSettingsController")]
+	partial class GeneralSettingsController
 	{
+		[Action ("OnCancel:")]
+		partial void OnCancel (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnHelp:")]
+		partial void OnHelp (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnSave:")]
+		partial void OnSave (MonoMac.Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{

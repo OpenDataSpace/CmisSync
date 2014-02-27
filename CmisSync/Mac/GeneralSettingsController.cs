@@ -48,7 +48,6 @@ namespace CmisSync
                     });
                 }
             };
-
         }
 
         #endregion
@@ -62,15 +61,11 @@ namespace CmisSync
             }
         }
 
-        public void OnCancel()
-        {
-            using (var a = new NSAutoreleasePool())
-            {
-                InvokeOnMainThread(delegate
-                {
-                    Window.PerformClose(this.Window);
-                });
-            }
+        public enum Type {
+            DEFAULT = 0,
+            PROXY,
+            BANDWIDTH,
+            DEVICEMANAGEMENT
         }
     }
 }

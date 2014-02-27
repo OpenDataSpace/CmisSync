@@ -6,7 +6,6 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GeneralSettingsController">
             <connections>
-                <outlet property="CancelButton" destination="Afi-3E-jSe" id="2j5-rX-ij1"/>
                 <outlet property="HelpButton" destination="tOT-dI-cEZ" id="sbR-ea-ziG"/>
                 <outlet property="ManualProxyButton" destination="2HG-la-V7V" id="Fqm-cZ-ODo"/>
                 <outlet property="NoProxyButton" destination="pRY-GC-Bfp" id="TK0-9G-WSc"/>
@@ -61,14 +60,23 @@
                                                     <buttonCell type="radio" title="No Proxy" imagePosition="left" alignment="left" tag="1" inset="2" id="pRY-GC-Bfp">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
+                                                        <connections>
+                                                            <action selector="OnNoProxy:" target="2" id="Pso-ZM-jmz"/>
+                                                        </connections>
                                                     </buttonCell>
                                                     <buttonCell type="radio" title="System Settings" imagePosition="left" alignment="left" state="on" inset="2" id="KpR-fk-s9e">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
+                                                        <connections>
+                                                            <action selector="OnDefaultProxy:" target="2" id="JQ3-oe-LOg"/>
+                                                        </connections>
                                                     </buttonCell>
                                                     <buttonCell type="radio" title="Manual Proxy Settings" imagePosition="left" alignment="left" inset="2" id="2HG-la-V7V">
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
+                                                        <connections>
+                                                            <action selector="OnManualProxy:" target="2" id="L9x-t7-kZc"/>
+                                                        </connections>
                                                     </buttonCell>
                                                 </column>
                                             </cells>
@@ -97,6 +105,9 @@
                                             <buttonCell key="cell" type="check" title="Requires Authorization" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Qu8-Um-sa0">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
+                                                <connections>
+                                                    <action selector="OnRequireAuth:" target="2" id="Njn-JR-JD9"/>
+                                                </connections>
                                             </buttonCell>
                                         </button>
                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="BbT-PM-4PL">
@@ -149,10 +160,10 @@
                         <buttonCell key="cell" type="push" title="Save Changes" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="vg7-JW-Ggy">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
-                            <connections>
-                                <action selector="OnSave:" target="-2" id="QKf-1m-Bma"/>
-                            </connections>
                         </buttonCell>
+                        <connections>
+                            <action selector="OnSave:" target="2" id="gZy-Sb-BoW"/>
+                        </connections>
                     </button>
                     <button verticalHuggingPriority="750" id="Afi-3E-jSe">
                         <rect key="frame" x="329" y="6" width="137" height="32"/>
@@ -162,7 +173,7 @@
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="performClose:" target="2" id="WWv-8T-B7G"/>
+                            <action selector="performClose:" target="2" id="GuL-pU-fDX"/>
                         </connections>
                     </button>
                     <button horizontalHuggingPriority="750" verticalHuggingPriority="750" id="tOT-dI-cEZ">
@@ -172,9 +183,29 @@
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <connections>
+                            <action selector="OnHelp:" target="2" id="HKl-Da-QqL"/>
+                        </connections>
                     </button>
                 </subviews>
             </view>
+            <connections>
+                <outlet property="CancelButton" destination="Afi-3E-jSe" id="yet-4B-dPh"/>
+                <outlet property="HelpButton" destination="tOT-dI-cEZ" id="h6E-uV-Zk0"/>
+                <outlet property="ManualProxyButton" destination="2HG-la-V7V" id="nVN-Sq-Huh"/>
+                <outlet property="NoProxyButton" destination="pRY-GC-Bfp" id="6TG-XC-dbC"/>
+                <outlet property="ProxyPassword" destination="B9w-Re-bgg" id="9gd-Bc-GBa"/>
+                <outlet property="ProxyPasswordLabel" destination="07K-W3-nSA" id="G8U-Cf-p2M"/>
+                <outlet property="ProxyServer" destination="C6T-sd-v9k" id="MsG-FA-KiM"/>
+                <outlet property="ProxyServerLabel" destination="uaM-78-VyV" id="9c7-mt-Zj9"/>
+                <outlet property="ProxyTab" destination="uHG-tn-Goj" id="tdr-jG-IhA"/>
+                <outlet property="ProxyUsername" destination="OyS-nN-bUL" id="OhR-NJ-1Gr"/>
+                <outlet property="ProxyUsernameLabel" destination="BbT-PM-4PL" id="rqQ-Mc-dsE"/>
+                <outlet property="RequiresAuthorizationCheckBox" destination="Qu8-Um-sa0" id="MAz-tr-DMl"/>
+                <outlet property="SaveButton" destination="fZo-ke-tHN" id="akH-xY-ffS"/>
+                <outlet property="SystemDefaultProxyButton" destination="KpR-fk-s9e" id="vlh-PL-feY"/>
+                <outlet property="TabView" destination="SOA-sW-bOc" id="LWV-dK-Av3"/>
+            </connections>
         </window>
     </objects>
 </document>
