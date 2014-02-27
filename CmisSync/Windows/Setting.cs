@@ -13,15 +13,21 @@ using CmisSync.Lib;
 
 namespace CmisSync
 {
+    /// <summary>
+    /// Setting widget
+    /// </summary>
     public class Setting : Window
     {
         private SettingController Controller = new SettingController();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public Setting()
         {
             Title = Properties_Resources.EditTitle;
             ResizeMode = ResizeMode.NoResize;
-            Height = 288;
+            Height = 340;
             Width = 640;
             Icon = UIHelpers.GetImageSource("app", "ico");
 
@@ -33,7 +39,7 @@ namespace CmisSync
                 args.Cancel = true;
             };
 
-            CreateSetting();
+            LoadSetting();
 
             Controller.ShowWindowEvent += delegate
             {
@@ -52,148 +58,6 @@ namespace CmisSync
                 {
                     Hide();
                 });
-            };
-        }
-
-        private RadioButton ProxyNone = new RadioButton();
-        private RadioButton ProxySystem = new RadioButton();
-        private RadioButton ProxyCustom = new RadioButton();
-        private CheckBox LoginCheck = new CheckBox();
-        private TextBlock AddressLabel;
-        private TextBox AddressText;
-        private TextBlock UserLabel;
-        private TextBox UserText;
-        private TextBlock PasswordLabel;
-        private PasswordBox PasswordText;
-        Button FinishButton = new Button();
-        Button CancelButton = new Button();
-
-        private void SelectProxyCustom(bool select)
-        {
-            ProxyCustom.IsChecked = select;
-            AddressText.IsEnabled = select;
-            LoginCheck.IsEnabled = select;
-            UpdateProxyLogin();
-        }
-
-        private void UpdateProxyLogin()
-        {
-            if (LoginCheck.IsEnabled && LoginCheck.IsChecked.GetValueOrDefault())
-            {
-                UserText.IsEnabled = true;
-                PasswordText.IsEnabled = true;
-            }
-            else
-            {
-                UserText.IsEnabled = false;
-                PasswordText.IsEnabled = false;
-            }
-        }
-
-        private void RefreshSetting()
-        {
-            LoginCheck.IsChecked = ConfigManager.CurrentConfig.Proxy.LoginRequired;
-            AddressText.Text = ConfigManager.CurrentConfig.Proxy.Server == null ? "" : ((Uri)ConfigManager.CurrentConfig.Proxy.Server).ToString();
-            UserText.Text = ConfigManager.CurrentConfig.Proxy.Username == null ? "" : ConfigManager.CurrentConfig.Proxy.Username;
-            PasswordText.Password = ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword == null ? "" : Crypto.Deobfuscate(ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword);
-            SelectProxyCustom(false);
-            switch (ConfigManager.CurrentConfig.Proxy.Selection)
-            {
-                case Config.ProxySelection.NOPROXY:
-                    SelectProxyCustom(true);
-                    break;
-                case Config.ProxySelection.SYSTEM:
-                    ProxySystem.IsChecked = true;
-                    break;
-                case Config.ProxySelection.CUSTOM:
-                    ProxyCustom.IsChecked = true;
-                    break;
-                default:
-                    break;
-            }
-            FinishButton.Focus();
-        }
-
-        private void CreateSetting()
-        {
-            int textFullLength = 500;
-            int textMiddleLength = 240;
-            int radioLeft = 50;
-            int textFullLeft = 70;
-            int textMiddleLeft = textFullLeft + textFullLength - textMiddleLength;
-
-            ProxyNone.GroupName = ProxySystem.GroupName = ProxyCustom.GroupName = "proxy";
-            ProxyNone.Content = Properties_Resources.NetworkProxySelectNone;
-            ProxySystem.Content = Properties_Resources.NetworkProxySelectSystem;
-            ProxyCustom.Content = Properties_Resources.NetworkProxySelectCustom;
-            ProxyCustom.Checked += delegate
-            {
-                SelectProxyCustom(true);
-            };
-            ProxyCustom.Unchecked += delegate
-            {
-                SelectProxyCustom(false);
-            };
-
-            LoginCheck.Content = Properties_Resources.NetworkProxyLogin;
-            LoginCheck.Checked += delegate
-            {
-                UpdateProxyLogin();
-            };
-            LoginCheck.Unchecked += delegate
-            {
-                UpdateProxyLogin();
-            };
-
-            AddressLabel = new TextBlock()
-            {
-                Width = textFullLength,
-                Text = Properties_Resources.NetworkProxyServer + ":",
-                FontWeight = FontWeights.Bold
-            };
-
-            AddressText = new TextBox()
-            {
-                Width = textFullLength,
-                Text = ""
-            };
-
-            UserLabel = new TextBlock()
-            {
-                Width = textMiddleLength,
-                Text = Properties_Resources.User + ":",
-                FontWeight = FontWeights.Bold,
-            };
-
-            UserText = new TextBox()
-            {
-                Width = textMiddleLength,
-                Text = ""
-            };
-
-            PasswordLabel = new TextBlock()
-            {
-                Width = textMiddleLength,
-                Text = Properties_Resources.Password + ":",
-                FontWeight = FontWeights.Bold,
-            };
-
-            PasswordText = new PasswordBox()
-            {
-                Width = textMiddleLength,
-                Password = ""
-            };
-
-            FinishButton = new Button()
-            {
-                Content = Properties_Resources.SaveChanges,
-                IsDefault = true
-            };
-
-            CancelButton = new Button()
-            {
-                Content = Properties_Resources.DiscardChanges,
-                IsDefault = false
             };
 
             FinishButton.Click += delegate
@@ -226,58 +90,71 @@ namespace CmisSync
             {
                 Controller.HideWindow();
             };
+        }
 
-            Canvas canvas = new Canvas();
+        private RadioButton ProxyNone;
+        private RadioButton ProxySystem;
+        private RadioButton ProxyCustom;
+        private CheckBox LoginCheck;
+        private TextBlock AddressLabel;
+        private TextBox AddressText;
+        private TextBlock UserLabel;
+        private TextBox UserText;
+        private TextBlock PasswordLabel;
+        private PasswordBox PasswordText;
+        Button FinishButton;
+        Button CancelButton;
 
-            canvas.Children.Add(ProxyNone);
-            Canvas.SetLeft(ProxyNone, radioLeft);
-            Canvas.SetTop(ProxyNone, 30);
+        private void RefreshSetting()
+        {
+            AddressText.Text = ConfigManager.CurrentConfig.Proxy.Server == null ? "" : ((Uri)ConfigManager.CurrentConfig.Proxy.Server).ToString();
+            UserText.Text = ConfigManager.CurrentConfig.Proxy.Username == null ? "" : ConfigManager.CurrentConfig.Proxy.Username;
+            PasswordText.Password = ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword == null ? "" : Crypto.Deobfuscate(ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword);
 
-            canvas.Children.Add(ProxySystem);
-            Canvas.SetLeft(ProxySystem, radioLeft);
-            Canvas.SetTop(ProxySystem, 50);
+            LoginCheck.IsChecked = ConfigManager.CurrentConfig.Proxy.LoginRequired;
 
-            canvas.Children.Add(ProxyCustom);
-            Canvas.SetLeft(ProxyCustom, radioLeft);
-            Canvas.SetTop(ProxyCustom, 70);
+            //  Force to trigger Checked and Unchecked event handle
+            ProxyNone.IsChecked = true;
+            ProxySystem.IsChecked = true;
+            ProxyCustom.IsChecked = true;
 
-            canvas.Children.Add(AddressLabel);
-            Canvas.SetLeft(AddressLabel, textFullLeft);
-            Canvas.SetTop(AddressLabel, 90);
+            switch (ConfigManager.CurrentConfig.Proxy.Selection)
+            {
+                case Config.ProxySelection.NOPROXY:
+                    ProxyNone.IsChecked = true;
+                    break;
+                case Config.ProxySelection.SYSTEM:
+                    ProxySystem.IsChecked = true;
+                    break;
+                case Config.ProxySelection.CUSTOM:
+                    ProxyCustom.IsChecked = true;
+                    break;
+                default:
+                    break;
+            }
 
-            canvas.Children.Add(AddressText);
-            Canvas.SetLeft(AddressText, textFullLeft);
-            Canvas.SetTop(AddressText, 110);
+            FinishButton.Focus();
+        }
 
-            canvas.Children.Add(LoginCheck);
-            Canvas.SetLeft(LoginCheck, textFullLeft);
-            Canvas.SetTop(LoginCheck, 140);
+        private void LoadSetting()
+        {
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SettingWPF.xaml", System.UriKind.Relative);
+            UserControl SettingWPF = Application.LoadComponent(resourceLocater) as UserControl;
 
-            canvas.Children.Add(UserLabel);
-            Canvas.SetLeft(UserLabel, textFullLeft);
-            Canvas.SetTop(UserLabel, 160);
+            ProxyNone = SettingWPF.FindName("ProxyNone") as RadioButton;
+            ProxySystem = SettingWPF.FindName("ProxySystem") as RadioButton;
+            ProxyCustom = SettingWPF.FindName("ProxyCustom") as RadioButton;
+            LoginCheck = SettingWPF.FindName("LoginCheck") as CheckBox;
+            AddressLabel = SettingWPF.FindName("AddressLabel") as TextBlock;
+            AddressText = SettingWPF.FindName("AddressText") as TextBox;
+            UserLabel = SettingWPF.FindName("UserLabel") as TextBlock;
+            UserText = SettingWPF.FindName("UserText") as TextBox;
+            PasswordLabel = SettingWPF.FindName("PasswordLabel") as TextBlock;
+            PasswordText = SettingWPF.FindName("PasswordText") as PasswordBox;
+            FinishButton = SettingWPF.FindName("FinishButton") as Button;
+            CancelButton = SettingWPF.FindName("CancelButton") as Button;
 
-            canvas.Children.Add(UserText);
-            Canvas.SetLeft(UserText, textFullLeft);
-            Canvas.SetTop(UserText, 180);
-
-            canvas.Children.Add(PasswordLabel);
-            Canvas.SetLeft(PasswordLabel, textMiddleLeft);
-            Canvas.SetTop(PasswordLabel, 160);
-
-            canvas.Children.Add(PasswordText);
-            Canvas.SetLeft(PasswordText, textMiddleLeft);
-            Canvas.SetTop(PasswordText, 180);
-
-            canvas.Children.Add(CancelButton);
-            Canvas.SetLeft(CancelButton, textMiddleLeft);
-            Canvas.SetTop(CancelButton, 220);
-
-            canvas.Children.Add(FinishButton);
-            Canvas.SetLeft(FinishButton, textMiddleLeft + 100);
-            Canvas.SetTop(FinishButton, 220);
-
-            Content = canvas;
+            Content = SettingWPF;
         }
 
     }
