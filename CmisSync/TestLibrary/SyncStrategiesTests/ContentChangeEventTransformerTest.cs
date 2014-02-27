@@ -27,7 +27,7 @@ namespace TestLibrary.SyncStrategiesTests {
         [ExpectedException(typeof(ArgumentNullException))]
         public void DbNullContstructorTest() {
             var queue  = new Mock<ISyncEventQueue>();
-            var transformer = new ContentChangeEventTransformer(queue.Object, null);
+            new ContentChangeEventTransformer(queue.Object, null);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -53,7 +53,6 @@ namespace TestLibrary.SyncStrategiesTests {
 
         private static readonly string id = "myId";
         private ContentChangeEvent prepareEvent(DotCMIS.Enums.ChangeType type, bool hasContentStream) {
-            var db = new Mock<IDatabase>();
             var e = new ContentChangeEvent(type, id);
             var remoteObject = MockUtil.CreateRemoteObjectMock(hasContentStream ? "streamId" : null);
             var session = new Mock<ISession>();
@@ -64,7 +63,6 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         private ContentChangeEvent prepareFolderEvent(DotCMIS.Enums.ChangeType type) {
-            var db = new Mock<IDatabase>();
             var e = new ContentChangeEvent(type, id);
             var remoteObject = new Mock<IFolder>();
             var session = new Mock<ISession>();
@@ -187,10 +185,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteDeletionChangeWithoutLocalFile ()
         {
             var db = new Mock<IDatabase>();
-            FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
-                    .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, db.Object);
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Deleted, false);

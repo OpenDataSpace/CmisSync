@@ -25,8 +25,7 @@ namespace TestLibrary.SyncStrategiesTests {
         [Test, Category("Fast"), Category("ContentChange")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void DbNullContstructorTest() {
-            var queue  = new Mock<ISyncEventQueue>();
-            var accumulator = new ContentChangeEventAccumulator(null, new Mock<ISyncEventQueue>().Object);
+            new ContentChangeEventAccumulator(null, new Mock<ISyncEventQueue>().Object);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -65,7 +64,6 @@ namespace TestLibrary.SyncStrategiesTests {
         public void IgnoreEventsThatHaveBeenDeleted() {
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
-            var remoteObject = new Mock<ICmisObject>();
             session.Setup (s => s.GetObject (It.IsAny<string>())).Throws (new CmisObjectNotFoundException());
             var accumulator = new ContentChangeEventAccumulator (session.Object, queue.Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, id);
@@ -78,7 +76,6 @@ namespace TestLibrary.SyncStrategiesTests {
         public void IgnoreEventsThatWeDontHaveAccessTo() {
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
-            var remoteObject = new Mock<ICmisObject>();
             session.Setup (s => s.GetObject (It.IsAny<string>())).Throws (new CmisPermissionDeniedException());
             var accumulator = new ContentChangeEventAccumulator (session.Object, queue.Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, id);
@@ -91,7 +88,6 @@ namespace TestLibrary.SyncStrategiesTests {
         public void ExceptionTriggersFullSync() {
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
-            var remoteObject = new Mock<ICmisObject>();
             session.Setup (s => s.GetObject (It.IsAny<string>())).Throws (new Exception());
             var accumulator = new ContentChangeEventAccumulator (session.Object, queue.Object);
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, id);

@@ -22,7 +22,6 @@ namespace TestLibrary.IntegrationTests
     public class ContentChangeIT
     {
         private readonly bool isPropertyChangesSupported = false;
-        private readonly string repoId = "repoId";
         private readonly int maxNumberOfContentChanges = 1000;
         
         private Mock<IFolder> CreateRemoteFolderMock(string folderId){
