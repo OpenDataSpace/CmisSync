@@ -54,12 +54,8 @@ namespace TestLibrary.IntegrationTests
             var accumulator = new ContentChangeEventAccumulator(session.Object, queue);
             manager.AddEventHandler(accumulator);
 
-            /* TODO: FileSystemWatcher is not mockable
-            var fsWatcher = new Mock<FileSystemWatcher>();
-            fsWatcher.Setup(f=>f.Path).Returns("/tmp");
-            var watcher = new Strategy.Watcher(fsWatcher.Object, queue);
-            manager.AddEventHandler(watcher);
-            */
+            var watcher = new Mock<Strategy.Watcher>(queue){CallBase = true};
+            manager.AddEventHandler(watcher.Object);
 
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection(session.Object);
