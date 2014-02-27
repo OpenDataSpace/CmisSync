@@ -65,6 +65,36 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
+        /// <summary>
+        /// Whether this object has been disposed or not.
+        /// </summary>
+        private bool disposed = false;
+
+
+        /// <summary>
+        /// Dispose of the watcher.
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    this.EnableEvents = false;
+                }
+                disposed = true;
+            }
+            base.Dispose(disposing);
+        }
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
     }
 }
 
