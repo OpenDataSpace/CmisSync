@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DotCMIS.Client;
+using DotCMIS.Exceptions;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Events;
 
@@ -109,8 +110,9 @@ namespace CmisSync.Lib.Sync.Strategy
                 }
                 // No changes or background process started
                 return true;
-            }catch(Exception e) {
+            }catch(CmisRuntimeException e) {
                 Logger.Warn("ContentChangeSync not successfull, fallback to CrawlSync");
+                Logger.Debug(e.Message);
                 Logger.Debug(e.StackTrace);
                 // Use fallback sync algorithm
                 return false;
@@ -129,9 +131,8 @@ namespace CmisSync.Lib.Sync.Strategy
             if (lastTokenOnClient == null)
             {
                 // Token is null, which means no content change sync has ever happened yet, so just sync everything from remote.
-                // Force full sync with lastTokenOnServer as param
+                // Force full sync  
                 var fullsyncevent = new StartNextSyncEvent(true);
-                fullsyncevent.SetParam(FULL_SYNC_PARAM_NAME, lastTokenOnServer);
                 Queue.AddEvent(fullsyncevent);
                 return;
             }

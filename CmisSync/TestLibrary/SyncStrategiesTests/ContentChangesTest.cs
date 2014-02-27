@@ -109,7 +109,7 @@ namespace TestLibrary.SyncStrategiesTests
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var changes = new ContentChanges (session.Object, database.Object, queue.Object);
-            var startSyncEvent = new StartNextSyncEvent (false);
+            var startSyncEvent = new Mock<ISyncEvent>().Object ;
             Assert.IsFalse (changes.Handle (startSyncEvent));
         }
 

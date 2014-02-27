@@ -12,6 +12,8 @@ using NUnit.Framework;
 
 using Moq;
 
+using TestLibrary.TestUtils;
+
 namespace TestLibrary.SyncStrategiesTests
 {
     [TestFixture]
@@ -82,32 +84,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.False(crawler.Handle(wrongEvent));
         }
 
-        private Mock<IFolder> CreateFolder(List<string> fileNames = null, List<string> folderNames = null, bool contentStream = false) {
-            var remoteFolder = new Mock<IFolder>();
-            var remoteChildren = new Mock<IItemEnumerable<ICmisObject>>();
-            var list = new List<ICmisObject>();
-            if(fileNames != null) {
-                foreach(var name in fileNames) {
-                    var doc = new Mock<IDocument>();
-                    doc.Setup(d => d.Name).Returns(name);
-                    if(contentStream){
-                        doc.Setup(d => d.ContentStreamId).Returns(name);
-                    }
-                    list.Add(doc.Object);
-                }
-            }
-            if(folderNames != null){
-                foreach(var name in folderNames) {
-                    var folder = new Mock<IFolder>();
-                    folder.Setup(d => d.Name).Returns(name);
-                    list.Add(folder.Object);
-                }
-            }
-            remoteChildren.Setup(r => r.GetEnumerator()).Returns(list.GetEnumerator());
-            remoteFolder.Setup(r => r.GetChildren()).Returns(remoteChildren.Object);
-            return remoteFolder;
-        }
-
         private Mock<IDirectoryInfo> CreateLocalFolder(string path, List<string> fileNames = null, List<string> folderNames = null) {
             var localFolder = new Mock<IDirectoryInfo>();
             localFolder.Setup(f => f.FullName).Returns(path);
@@ -145,7 +121,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void CrawlingFullSyncEmptyFoldersTest() {
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = CreateFolder();
+            var remoteFolder = MockUtil.CreateCmisFolder();
 
             var localFolder = new Mock<IDirectoryInfo>();
 
@@ -193,7 +169,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = CreateFolder(fileNames : new List<string> {name});
+            var remoteFolder = MockUtil.CreateCmisFolder(fileNames : new List<string> {name});
 
             var localFolder = CreateLocalFolder(localPath);
 
@@ -212,7 +188,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = CreateFolder(fileNames : new List<string> {name}, contentStream : true);
+            var remoteFolder = MockUtil.CreateCmisFolder(fileNames : new List<string> {name}, contentStream : true);
 
             var localFolder = CreateLocalFolder(localPath);
 
@@ -231,7 +207,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = CreateFolder(fileNames : new List<string> {name});
+            var remoteFolder = MockUtil.CreateCmisFolder(fileNames : new List<string> {name});
 
             var localFolder = CreateLocalFolder(localPath, fileNames : new List<string> {name});
 
@@ -251,7 +227,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = CreateFolder();
+            var remoteFolder = MockUtil.CreateCmisFolder();
 
             var localFolder = CreateLocalFolder(localPath, fileNames : new List<string> {name});
 
@@ -279,7 +255,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = CreateFolder();
+            var remoteFolder = MockUtil.CreateCmisFolder();
 
             var localFolder = CreateLocalFolder(localPath, folderNames : new List<string> {name});
 
@@ -308,7 +284,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = CreateFolder(folderNames : new List<string> {name});
+            var remoteFolder = MockUtil.CreateCmisFolder(folderNames : new List<string> {name});
 
             var localFolder = CreateLocalFolder(localPath);
 
@@ -343,7 +319,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = CreateFolder(folderNames : new List<string> {name});
+            var remoteFolder = MockUtil.CreateCmisFolder(folderNames : new List<string> {name});
 
             var localFolder = CreateLocalFolder(localPath, folderNames : new List<string> {name});
 
@@ -371,7 +347,7 @@ namespace TestLibrary.SyncStrategiesTests
             var localFolders = new List<string> {"a","c"};
             var remoteFolders = new List<string> {"a","b"};
 
-            var remoteFolder = CreateFolder(fileNames : remoteFiles, folderNames : remoteFolders);
+            var remoteFolder = MockUtil.CreateCmisFolder(fileNames : remoteFiles, folderNames : remoteFolders);
 
             var localFolder = CreateLocalFolder(localPath, fileNames : localFiles, folderNames : localFolders);
 

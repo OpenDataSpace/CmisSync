@@ -11,6 +11,10 @@ namespace CmisSync.Lib.Events
         /// Completed sync requested event
         /// </summary>
         public StartNextSyncEvent StartEvent { get { return this.Event as StartNextSyncEvent; } }
+
+        public override string ToString() {
+            return "FullSyncCompletedEvent: " + base.ToString();
+        }
     }
 }
 

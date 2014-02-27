@@ -19,6 +19,11 @@ namespace TestLibrary.TestUtils
             session.Setup (s => s.RepositoryInfo.Id).Returns ("repoId");
         }
 
+        public static void SetupChangeLogToken(this Mock<ISession> session, string changeLogToken){
+            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (It.IsAny<string>(), null).LatestChangeLogToken).Returns (changeLogToken);
+        }
+
+
         public static Mock<IDatabase> GetDbMockWithToken(string token = "lastToken"){
             var database = new Mock<IDatabase>();
             database.Setup (db => db.GetChangeLogToken ()).Returns (token);
@@ -50,7 +55,7 @@ namespace TestLibrary.TestUtils
 
             var session = new Mock<ISession> ();
             session.SetupSessionDefaultValues();
-            session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (It.IsAny<string>(), null).LatestChangeLogToken).Returns (changeLogToken);
+            session.SetupChangeLogToken(changeLogToken);
             session.Setup (s => s.GetContentChanges (It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<long>())).Returns (changeEvents.Object);
             return session;
 
@@ -69,6 +74,33 @@ namespace TestLibrary.TestUtils
         public static void AddLocalFolder(this Mock<IDatabase> db, string path = "path"){
             db.Setup(foo => foo.GetFolderPath(It.IsAny<string>())).Returns(path);
         }
+
+        public static Mock<IFolder> CreateCmisFolder(List<string> fileNames = null, List<string> folderNames = null, bool contentStream = false) {
+            var remoteFolder = new Mock<IFolder>();
+            var remoteChildren = new Mock<IItemEnumerable<ICmisObject>>();
+            var list = new List<ICmisObject>();
+            if(fileNames != null) {
+                foreach(var name in fileNames) {
+                    var doc = new Mock<IDocument>();
+                    doc.Setup(d => d.Name).Returns(name);
+                    if(contentStream){
+                        doc.Setup(d => d.ContentStreamId).Returns(name);
+                    }
+                    list.Add(doc.Object);
+                }
+            }
+            if(folderNames != null){
+                foreach(var name in folderNames) {
+                    var folder = new Mock<IFolder>();
+                    folder.Setup(d => d.Name).Returns(name);
+                    list.Add(folder.Object);
+                }
+            }
+            remoteChildren.Setup(r => r.GetEnumerator()).Returns(list.GetEnumerator());
+            remoteFolder.Setup(r => r.GetChildren()).Returns(remoteChildren.Object);
+            return remoteFolder;
+        }
+
     }
 
 }

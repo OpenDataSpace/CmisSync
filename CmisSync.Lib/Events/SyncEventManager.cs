@@ -15,6 +15,7 @@ namespace CmisSync.Lib.Events
 
         public void AddEventHandler(SyncEventHandler h)
         {
+            logger.Debug("Adding Eventhandler " + h);
             //The zero-based index of item in the sorted List<T>, 
             //if item is found; otherwise, a negative number that 
             //is the bitwise complement of the index of the next 
@@ -30,7 +31,7 @@ namespace CmisSync.Lib.Events
             for(int i = handler.Count-1; i >= 0; i--)
             {
                 var h = handler[i];
-//                logger.Debug("Forwarding to Handler " + h);
+                logger.Debug("Forwarding to Handler " + h);
                 if(handler[i].Handle(e)){
                     return;
                 }

@@ -16,7 +16,7 @@ namespace TestLibrary.TestUtils
 
         public override int Priority
         {
-            get {return 1;}
+            get {return int.MinValue;}
         }
 
         public void AssertGotSingleFolderEvent(MetaDataChangeType metaType) {

@@ -25,17 +25,20 @@ namespace TestLibrary.IntegrationTests
     [TestFixture]
     public class AllHandlersIT
     {
+        [TestFixtureSetUp]
+        public void ClassInit()
+        {
+            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
+        }
+
         private readonly bool isPropertyChangesSupported = false;
         private readonly string repoId = "repoId";
         private readonly int maxNumberOfContentChanges = 1000;
 
         public static void fakeDelegate(string repoId) {
         }
-        
-        [Test, Category("Fast")]
-        public void RemoteSecurityChangeOfExistingFile ()
-        {
-            var session = new Mock<ISession>();
+
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session) {
             var database = new Mock<IDatabase>();
             var storage = new Mock<IMetaDataStorage>();
 
@@ -62,7 +65,7 @@ namespace TestLibrary.IntegrationTests
             var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage.Object);
             manager.AddEventHandler(syncMechanism);
 
-            var remoteFolder = new Mock<IFolder>();
+            var remoteFolder = MockUtil.CreateCmisFolder();
             var localFolder = new Mock<IDirectoryInfo>();
             var crawler = new Crawler(queue, remoteFolder.Object, localFolder.Object);
             manager.AddEventHandler(crawler);
@@ -90,12 +93,30 @@ namespace TestLibrary.IntegrationTests
             var debugHandler = new DebugLoggingHandler();
             manager.AddEventHandler(debugHandler);
 
+            return queue;
+        }
+        
+        [Test, Category("Fast")]
+        public void RunFakeEvent ()
+        {
+            var session = new Mock<ISession>();
+            var queue = CreateQueue(session);
             var myEvent = new Mock<ISyncEvent>();
             queue.AddEvent(myEvent.Object);
             queue.Run();
         }
 
-
+        [Test, Category("Fast")]
+        public void RunStartNewSyncEvent ()
+        {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            session.SetupChangeLogToken("default");
+            var queue = CreateQueue(session);
+            var myEvent = new StartNextSyncEvent();
+            queue.AddEvent(myEvent);
+            queue.Run();
+        }
 
     }
 }
