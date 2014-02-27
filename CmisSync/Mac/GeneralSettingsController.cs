@@ -41,6 +41,18 @@ namespace CmisSync
                 return (GeneralSettings)base.Window;
             }
         }
+
+        private NSViewController ProxySubController_ = null;
+        private NSViewController ProxySubController {
+            get { return ProxySubController_; }
+            set {
+                if (ProxySubController_ != null) {
+                    ProxySubController_.Dispose ();
+                    ProxySubController_ = null;
+                }
+                ProxySubController_ = value;
+            }
+        }
     }
 }
 
