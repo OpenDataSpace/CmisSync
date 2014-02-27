@@ -44,7 +44,6 @@ SOURCES =  \
 	ProxySettings.cs \
 	ProxySettings.designer.cs \
 	ProxySettingsController.cs \
-	Setup.cs \
 	SetupSubCustomize.cs \
 	SetupSubCustomize.designer.cs \
 	SetupSubCustomizeController.cs \
@@ -69,7 +68,6 @@ SOURCES =  \
 	SetupSubWelcome.cs \
 	SetupSubWelcome.designer.cs \
 	SetupSubWelcomeController.cs \
-	SetupWindow.cs \
 	SetupWizard.cs \
 	SetupWizard.designer.cs \
 	SetupWizardController.cs \

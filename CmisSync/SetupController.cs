@@ -111,10 +111,11 @@ namespace CmisSync
         public double ProgressBarPercentage { get; private set; }
 
         public Uri saved_address = null;
-        public string saved_remote_path = "";
-        public string saved_user = "";
-        public string saved_password = "";
-        public string saved_repository = "";
+        public string saved_remote_path = String.Empty;
+        public string saved_user = String.Empty;
+        public string saved_password = String.Empty;
+        public string saved_repository = String.Empty;
+        public string saved_local_path = String.Empty;
         public List<string> ignoredPaths = new List<string>();
 
         /// <summary>
@@ -184,11 +185,11 @@ namespace CmisSync
         /// </summary>
         public SetupController()
         {
-            Logger.Info("Entering constructor.");
+            Logger.Debug("Entering constructor.");
 
             TutorialCurrentPage = 0;
             PreviousAddress = null;
-            PreviousPath = "";
+            PreviousPath = String.Empty;
             SyncingReponame = "";
             DefaultRepoPath = Program.Controller.FoldersPath;
 
@@ -235,7 +236,7 @@ namespace CmisSync
                 ChangePageEvent(page);
                 ShowWindowEvent();
             };
-            Logger.Info("Exiting constructor.");
+            Logger.Debug("Exiting constructor.");
         }
 
 
@@ -245,8 +246,8 @@ namespace CmisSync
         public void PageCancelled()
         {
             PreviousAddress = null;
-            PreviousRepository = "";
-            PreviousPath = "";
+            PreviousRepository = String.Empty;
+            PreviousPath = String.Empty;
             ignoredPaths.Clear();
 
             WindowIsOpen = false;
@@ -473,7 +474,7 @@ namespace CmisSync
                 }
             }
             SyncingReponame = repoName;
-
+            saved_local_path = localrepopath;
             ChangePageEvent(PageType.Syncing);
 
             Program.Controller.FolderFetched += AddPageFetchedDelegate;

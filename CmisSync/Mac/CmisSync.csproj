@@ -71,8 +71,6 @@
     </Compile>
     <Compile Include="MacWatcher.cs" />
     <Compile Include="Badger.cs" />
-    <Compile Include="Setup.cs" />
-    <Compile Include="SetupWindow.cs" />
     <Compile Include="..\StatusIconController.cs">
       <Link>StatusIconController.cs</Link>
     </Compile>
