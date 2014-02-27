@@ -41,7 +41,7 @@ namespace CmisSync {
             BorderWidth    = 0;
             IconName       = "folder-cmissync";
             WindowPosition = WindowPosition.Center;
-            Title          = Properties_Resources.About;
+            Title          = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
             AppPaintable   = true;
 
             string image_path = System.IO.Path.Combine(UI.AssetsPath, "pixmaps", "about.png");
