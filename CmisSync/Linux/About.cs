@@ -41,7 +41,7 @@ namespace CmisSync {
             BorderWidth    = 0;
             IconName       = "folder-cmissync";
             WindowPosition = WindowPosition.Center;
-            Title          = Properties_Resources.About;
+            Title          = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
             AppPaintable   = true;
 
             string image_path = System.IO.Path.Combine(UI.AssetsPath, "pixmaps", "about.png");
@@ -116,8 +116,8 @@ namespace CmisSync {
                              LineWrapMode = Pango.WrapMode.Word,
                              Markup = "<span font_size='small' fgcolor='#729fcf'>" +
                                  "Copyright © 2013–" + DateTime.Now.Year.ToString() + " GRAU DATA AG, Aegif and others.\n" +
-                                 "\n" +
-                                 "DataSpace Sync is Open Source software. You are free to use, modify, " +
+                                 "\n" + Properties_Resources.ApplicationName +
+                                 " is Open Source software. You are free to use, modify, " +
                                  "and redistribute it under the GNU General Public License version 3 or later." +
                                  "</span>",
                              WidthRequest = 330,

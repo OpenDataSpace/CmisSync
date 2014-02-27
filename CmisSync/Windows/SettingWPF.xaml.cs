@@ -80,7 +80,7 @@ namespace CmisSync
                 }
             }
             FinishButton.IsEnabled = true;
-            FinishButton.Focus();
+            FinishButton.IsDefault = true;
             AddressError.Text = String.Empty;
         }
 
