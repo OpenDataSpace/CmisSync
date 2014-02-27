@@ -13,10 +13,16 @@ namespace CmisSync
 	partial class GeneralSettingsController
 	{
 		[Outlet]
+		MonoMac.AppKit.NSView BandwidthTabView { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSButton CancelButton { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSButton HelpButton { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSView ProxyTabView { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSButton SaveButton { get; set; }
@@ -40,6 +46,11 @@ namespace CmisSync
 				CancelButton = null;
 			}
 
+			if (HelpButton != null) {
+				HelpButton.Dispose ();
+				HelpButton = null;
+			}
+
 			if (SaveButton != null) {
 				SaveButton.Dispose ();
 				SaveButton = null;
@@ -50,9 +61,14 @@ namespace CmisSync
 				TabView = null;
 			}
 
-			if (HelpButton != null) {
-				HelpButton.Dispose ();
-				HelpButton = null;
+			if (ProxyTabView != null) {
+				ProxyTabView.Dispose ();
+				ProxyTabView = null;
+			}
+
+			if (BandwidthTabView != null) {
+				BandwidthTabView.Dispose ();
+				BandwidthTabView = null;
 			}
 		}
 	}

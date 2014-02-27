@@ -6,6 +6,8 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GeneralSettingsController">
             <connections>
+                <outlet property="BandwidthTabView" destination="Kok-HG-CSN" id="eN6-EY-oMU"/>
+                <outlet property="ProxyTabView" destination="PMW-X0-t4R" id="H8X-2m-WSy"/>
                 <outlet property="window" destination="2" id="6"/>
             </connections>
         </customObject>
