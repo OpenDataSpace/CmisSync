@@ -30,11 +30,7 @@ namespace CmisSync {
     public class UI : AppDelegate {
 
         public StatusIcon StatusIcon;
-        #if ODS_NEW_GUI
         public SetupWizardController Setup;
-        #else
-        public Setup Setup;
-        #endif
         public About About;
         
         public static NSFont Font = NSFontManager.SharedFontManager.FontWithFamily (
@@ -52,11 +48,7 @@ namespace CmisSync {
 
                 SetFolderIcon ();
 
-                #if ODS_NEW_GUI    
                 Setup      = new SetupWizardController ();
-                #else
-                Setup      = new Setup();
-                #endif
                 About      = new About ();
                 StatusIcon = new StatusIcon ();
 
