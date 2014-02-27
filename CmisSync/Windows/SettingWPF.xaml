@@ -6,17 +6,28 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="640">
     <Grid>
-        <RadioButton x:Name="ProxyNone" Content="No Proxy" HorizontalAlignment="Left" Margin="50,30,0,0" VerticalAlignment="Top"/>
-        <RadioButton x:Name="ProxySystem" Content="System Default Proxy" HorizontalAlignment="Left" Margin="50,55,0,0" VerticalAlignment="Top"/>
-        <RadioButton x:Name="ProxyCustom" Content="Custom Proxy" HorizontalAlignment="Left" Margin="50,80,0,0" VerticalAlignment="Top"/>
-        <TextBlock x:Name="AddressLabel" HorizontalAlignment="Left" Margin="70,105,0,0" TextWrapping="NoWrap" Text="Proxy Server:" VerticalAlignment="Top"/>
-        <TextBox x:Name="AddressText" HorizontalAlignment="Left" Margin="70,130,0,0" TextWrapping="NoWrap" Text="http://" VerticalAlignment="Top" Width="500"/>
-        <CheckBox x:Name="LoginCheck" Content="Require Login" HorizontalAlignment="Left" Margin="70,160,0,0" VerticalAlignment="Top"/>
-        <TextBlock x:Name="UserLabel" HorizontalAlignment="Left" Margin="70,185,0,0" TextWrapping="NoWrap" Text="User:" VerticalAlignment="Top"/>
-        <TextBox x:Name="UserText" HorizontalAlignment="Left" Margin="70,210,0,0" TextWrapping="NoWrap" Text="Username" VerticalAlignment="Top" Width="240"/>
-        <TextBlock x:Name="PasswordLabel" HorizontalAlignment="Left" Margin="330,185,0,0" TextWrapping="NoWrap" Text="Password:" VerticalAlignment="Top"/>
-        <PasswordBox x:Name="PasswordText" HorizontalAlignment="Left" Margin="330,210,0,0" VerticalAlignment="Top" Width="240"/>
-        <Button x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Left" Margin="400,260,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button x:Name="FinishButton" Content="Finish" HorizontalAlignment="Left" Margin="495,260,0,0" VerticalAlignment="Top" Width="75"/>
+        <TabControl HorizontalAlignment="Left" Height="300" Margin="0,0,0,0" VerticalAlignment="Top" Width="640">
+            <TabItem Name ="ProxyTab" Header="Proxy">
+                <Grid>
+                    <RadioButton x:Name="ProxyNone" Content="No Proxy" HorizontalAlignment="Left" Margin="50,10,0,0" VerticalAlignment="Top"/>
+                    <RadioButton x:Name="ProxySystem" Content="System Default Proxy" HorizontalAlignment="Left" Margin="50,35,0,0" VerticalAlignment="Top"/>
+                    <RadioButton x:Name="ProxyCustom" Content="Custom Proxy" HorizontalAlignment="Left" Margin="50,60,0,0" VerticalAlignment="Top"/>
+                    <TextBlock x:Name="AddressLabel" HorizontalAlignment="Left" Margin="70,80,0,0" TextWrapping="NoWrap" Text="Proxy Server:" VerticalAlignment="Top"/>
+                    <TextBox x:Name="AddressText" HorizontalAlignment="Left" Margin="70,105,0,0" TextWrapping="NoWrap" Text="http://" VerticalAlignment="Top" Width="500"/>
+                    <TextBlock x:Name="AddressError" HorizontalAlignment="Left" Margin="70,135,0,0" TextWrapping="NoWrap" Text="Invalid URL address" VerticalAlignment="Top" Foreground="Red"/>
+                    <CheckBox x:Name="LoginCheck" Content="Require Login" HorizontalAlignment="Left" Margin="50,160,0,0" VerticalAlignment="Top"/>
+                    <TextBlock x:Name="UserLabel" HorizontalAlignment="Left" Margin="70,185,0,0" TextWrapping="NoWrap" Text="User:" VerticalAlignment="Top"/>
+                    <TextBox x:Name="UserText" HorizontalAlignment="Left" Margin="70,210,0,0" TextWrapping="NoWrap" Text="Username" VerticalAlignment="Top" Width="240"/>
+                    <TextBlock x:Name="PasswordLabel" HorizontalAlignment="Left" Margin="330,185,0,0" TextWrapping="NoWrap" Text="Password:" VerticalAlignment="Top"/>
+                    <PasswordBox x:Name="PasswordText" HorizontalAlignment="Left" Margin="330,210,0,0" VerticalAlignment="Top" Width="240"/>
+                </Grid>
+            </TabItem>
+            <TabItem Name="BandwidthTab" Header="Bandwidth">
+                <Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Button x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Left" Margin="350,270,0,0" VerticalAlignment="Top" Width="100"/>
+        <Button x:Name="FinishButton" Content="Finish" HorizontalAlignment="Left" Margin="470,270,0,0" VerticalAlignment="Top" Width="100"/>
     </Grid>
 </UserControl>

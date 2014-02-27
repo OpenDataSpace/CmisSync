@@ -28,11 +28,25 @@ namespace CmisSync
             ApplySetting();
         }
 
-        private void SelectProxyCustom(bool select)
+        private void SelectProxy()
         {
-            AddressText.IsEnabled = select;
-            LoginCheck.IsEnabled = select;
+            if (ProxyNone.IsChecked.GetValueOrDefault())
+            {
+                AddressText.IsEnabled = false;
+                LoginCheck.IsEnabled = false;
+            }
+            else if (ProxySystem.IsChecked.GetValueOrDefault())
+            {
+                AddressText.IsEnabled = false;
+                LoginCheck.IsEnabled = true;
+            }
+            else if (ProxyCustom.IsChecked.GetValueOrDefault())
+            {
+                AddressText.IsEnabled = true;
+                LoginCheck.IsEnabled = true;
+            }
             UpdateProxyLogin();
+            CheckAddress();
         }
 
         private void UpdateProxyLogin()
@@ -49,19 +63,44 @@ namespace CmisSync
             }
         }
 
+        private void CheckAddress()
+        {
+            if (AddressText.IsEnabled)
+            {
+                string uriString = AddressText.Text;
+                try
+                {
+                    Uri uri = new Uri(uriString);
+                }
+                catch (Exception)
+                {
+                    FinishButton.IsEnabled = false;
+                    AddressError.Text = Properties_Resources.InvalidURL;
+                    return;
+                }
+            }
+            FinishButton.IsEnabled = true;
+            FinishButton.Focus();
+            AddressError.Text = String.Empty;
+        }
+
         private void ApplySetting()
         {
             ProxyNone.GroupName = ProxySystem.GroupName = ProxyCustom.GroupName = "proxy";
             ProxyNone.Content = Properties_Resources.NetworkProxySelectNone;
             ProxySystem.Content = Properties_Resources.NetworkProxySelectSystem;
             ProxyCustom.Content = Properties_Resources.NetworkProxySelectCustom;
+            ProxyNone.Checked += delegate
+            {
+                SelectProxy();
+            };
+            ProxySystem.Checked += delegate
+            {
+                SelectProxy();
+            };
             ProxyCustom.Checked += delegate
             {
-                SelectProxyCustom(true);
-            };
-            ProxyCustom.Unchecked += delegate
-            {
-                SelectProxyCustom(false);
+                SelectProxy();
             };
 
             LoginCheck.Content = Properties_Resources.NetworkProxyLogin;
@@ -77,6 +116,11 @@ namespace CmisSync
             AddressLabel.Text = Properties_Resources.NetworkProxyServer + ":";
             UserLabel.Text = Properties_Resources.User + ":";
             PasswordLabel.Text = Properties_Resources.Password + ":";
+
+            AddressText.TextChanged += delegate(object sender, TextChangedEventArgs e)
+            {
+                CheckAddress();
+            };
 
             FinishButton.Content = Properties_Resources.SaveChanges;
             CancelButton.Content = Properties_Resources.DiscardChanges;

@@ -76,7 +76,14 @@ namespace CmisSync
                     proxy.Selection = Config.ProxySelection.CUSTOM;
                 }
                 proxy.LoginRequired = LoginCheck.IsChecked.GetValueOrDefault();
-                proxy.Server = new Uri(AddressText.Text);
+                try
+                {
+                    proxy.Server = new Uri(AddressText.Text);
+                }
+                catch (Exception)
+                {
+                    proxy.Server = ConfigManager.CurrentConfig.Proxy.Server;
+                }
                 proxy.Username = UserText.Text;
                 proxy.ObfuscatedPassword = Crypto.Obfuscate(PasswordText.Password);
 
@@ -102,8 +109,8 @@ namespace CmisSync
         private TextBox UserText;
         private TextBlock PasswordLabel;
         private PasswordBox PasswordText;
-        Button FinishButton;
-        Button CancelButton;
+        private Button FinishButton;
+        private Button CancelButton;
 
         private void RefreshSetting()
         {
