@@ -284,29 +284,7 @@ namespace CmisSync {
                 if (Controller.repositories == null)
                 {
                     // Show warning
-                    string warning = "";
-                    string message = result.Item2.Message;
-                    Exception e = result.Item2;
-                    if (e is CmisPermissionDeniedException)
-                    {
-                        warning = Properties_Resources.LoginFailedForbidden;
-                    }
-                    else if (e is CmisServerNotFoundException)
-                    {
-                        warning = Properties_Resources.ConnectFailure;
-                    }
-                    else if (e.Message == "SendFailure" && cmisServer.Url.Scheme.StartsWith("https"))
-                    {
-                        warning = Properties_Resources.SendFailureHttps;
-                    }
-                    else if (e.Message == "TrustFailure")
-                    {
-                        warning = Properties_Resources.TrustFailure;
-                    }
-                    else
-                    {
-                        warning = message + Environment.NewLine + Properties_Resources.Sorry;
-                    }
+                    string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
                     address_error_label.Markup = "<span foreground=\"red\">" + warning + "</span>";
                     address_error_label.Show();
                 }

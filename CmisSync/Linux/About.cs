@@ -116,8 +116,8 @@ namespace CmisSync {
                              LineWrapMode = Pango.WrapMode.Word,
                              Markup = "<span font_size='small' fgcolor='#729fcf'>" +
                                  "Copyright © 2013–" + DateTime.Now.Year.ToString() + " GRAU DATA AG, Aegif and others.\n" +
-                                 "\n" +
-                                 "DataSpace Sync is Open Source software. You are free to use, modify, " +
+                                 "\n" + Properties_Resources.ApplicationName +
+                                 " is Open Source software. You are free to use, modify, " +
                                  "and redistribute it under the GNU General Public License version 3 or later." +
                                  "</span>",
                              WidthRequest = 330,
