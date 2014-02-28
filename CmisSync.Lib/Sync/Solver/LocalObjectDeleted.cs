@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 
 using DotCMIS.Client;
@@ -11,8 +11,7 @@ namespace CmisSync.Lib.Sync.Solver
     public class LocalObjectDeleted : ISolver
     {
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId){
-            // Upload new file
-            throw new NotImplementedException();
+            session.Delete(remoteId, true);
         }
     }
 }

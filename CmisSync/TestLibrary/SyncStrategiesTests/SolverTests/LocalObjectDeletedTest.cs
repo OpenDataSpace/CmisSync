@@ -25,7 +25,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void SetUp()
         {
             Session = new Mock<ISession>(MockBehavior.Strict);
-            Storage = new Mock<IMetaDataStorage>();
+            Storage = new Mock<IMetaDataStorage>(MockBehavior.Strict);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -34,7 +34,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new LocalObjectDeleted();
         }
 
-        [Ignore]
         [Test, Category("Medium"), Category("Solver")]
         public void LocalFileDeleted()
         {
@@ -94,7 +93,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             }
         }
 
-        [Ignore]
         [Test, Category("Medium"), Category("Solver")]
         public void LocalFolderDeleted()
         {
