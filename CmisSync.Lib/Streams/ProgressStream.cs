@@ -109,8 +109,8 @@ namespace CmisSync.Lib
             /// </summary>
             public override void Close ()
             {
-                long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(start, DateTime.Now, bytesTransmittedSinceLastSecond);
-                this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () { BitsPerSecond = result});
+                long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(start, DateTime.Now.AddMilliseconds(1), bytesTransmittedSinceLastSecond);
+                this.TransmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = result });
                 base.Close ();
             }
         }
