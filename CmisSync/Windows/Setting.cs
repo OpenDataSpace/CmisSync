@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Controls;
+using System.Windows.Forms.Integration;
 
 using CmisSync.Lib;
 
@@ -30,6 +31,7 @@ namespace CmisSync
             Height = 340;
             Width = 640;
             Icon = UIHelpers.GetImageSource("app", "ico");
+            ElementHost.EnableModelessKeyboardInterop(this);
 
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
 

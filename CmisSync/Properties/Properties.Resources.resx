@@ -417,4 +417,7 @@ This could lead to a lot of conflict files!</value>
   <data name="Credits" xml:space="preserve">
     <value>Credits</value>
   </data>
+  <data name="SettingProxy" xml:space="preserve">
+    <value>Proxy</value>
+  </data>
 </root>

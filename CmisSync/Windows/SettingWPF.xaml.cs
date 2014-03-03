@@ -86,6 +86,7 @@ namespace CmisSync
 
         private void ApplySetting()
         {
+            ProxyTab.Header = Properties_Resources.SettingProxy;
             ProxyNone.GroupName = ProxySystem.GroupName = ProxyCustom.GroupName = "proxy";
             ProxyNone.Content = Properties_Resources.NetworkProxySelectNone;
             ProxySystem.Content = Properties_Resources.NetworkProxySelectSystem;
