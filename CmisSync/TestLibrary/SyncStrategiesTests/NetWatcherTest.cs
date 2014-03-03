@@ -27,29 +27,31 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            var watcher = new NetWatcher(fswatcher, queue.Object);
-            Assert.False(watcher.EnableEvents);
-            Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
+            using (var watcher = new NetWatcher(fswatcher, queue.Object))
+            {
+                Assert.False(watcher.EnableEvents);
+                Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
+            }
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullWatcher() {
-            new NetWatcher(null, queue.Object);
+            using (new NetWatcher(null, queue.Object));
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsWithNullQueue() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            new NetWatcher(fswatcher, null);
+            using (new NetWatcher(fswatcher, null));
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentException ) )]
         public void ConstructorFailsWithWatcherOnNullPath() {
             var fswatcher = new Mock<FileSystemWatcher>().Object;
-            new NetWatcher(fswatcher, queue.Object);
+            using (new NetWatcher(fswatcher, queue.Object));
         }
 
         protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
