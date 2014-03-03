@@ -57,7 +57,7 @@ namespace TestLibrary.StreamTests
             //Assert.Fail("TODO");
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void TestWrite()
         {
             //using (Database database = new Database(DatabasePath))
@@ -148,7 +148,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void TestRead()
         {
             //using (Database database = new Database(DatabasePath))

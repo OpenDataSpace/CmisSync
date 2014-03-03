@@ -93,7 +93,7 @@ namespace CmisSync.Lib
                     pos = null;
                 }
                 if(diff.Seconds >= 1) {
-                    long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(start,DateTime.Now, bytesTransmittedSinceLastSecond);
+                    long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(start, DateTime.Now, bytesTransmittedSinceLastSecond);
                     this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos, BitsPerSecond = result});
                     this.bytesTransmittedSinceLastSecond = 0;
                     start = start + diff;
@@ -102,6 +102,16 @@ namespace CmisSync.Lib
                 }else{
                     this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () {ActualPosition = pos});
                 }
+            }
+
+            /// <summary>
+            /// Close this instance and calculates the bandwidth of the last second.
+            /// </summary>
+            public override void Close ()
+            {
+                long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(start, DateTime.Now, bytesTransmittedSinceLastSecond);
+                this.TransmissionEvent.ReportProgress (new TransmissionProgressEventArgs () { BitsPerSecond = result});
+                base.Close ();
             }
         }
     }
