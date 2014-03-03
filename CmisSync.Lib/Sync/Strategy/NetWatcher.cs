@@ -82,6 +82,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 if (disposing)
                 {
                     this.EnableEvents = false;
+                    this.FsWatcher.Dispose();
                 }
                 disposed = true;
             }
