@@ -385,6 +385,22 @@ namespace CmisSync.Lib
             /// <value>The proxy.</value>
             [XmlElement("network")]
             public ProxySettings Proxy{ get; set;}
+            /// <summary>
+            /// Gets or sets the ignored folder names.
+            /// </summary>
+            /// <value>
+            /// The ignored folder names.
+            /// </value>
+            [XmlElement("ignoreFolderNames")]
+            public List<string> IgnoreFolderNames { get; set; }
+            /// <summary>
+            /// Gets or sets the ignored file names.
+            /// </summary>
+            /// <value>
+            /// The ignored file names.
+            /// </value>
+            [XmlElement("ignoreFileNames")]
+            public List<string> IgnoreFileNames { get; set; }
 
             public class Folder {
                 /// <summary>
@@ -542,6 +558,24 @@ namespace CmisSync.Lib
                         }
                     }
                 }
+
+                /// <summary>
+                /// Gets or sets the ignored folder names.
+                /// </summary>
+                /// <value>
+                /// The ignored folder names.
+                /// </value>
+                [XmlElement("ignoreFolderNames")]
+                public List<string> IgnoreFolderNames { get; set; }
+
+                /// <summary>
+                /// Gets or sets the ignored file names.
+                /// </summary>
+                /// <value>
+                /// The ignored file names.
+                /// </value>
+                [XmlElement("ignoreFileNames")]
+                public List<string> IgnoreFileNames { get; set; }
 
                 /// <summary>
                 /// Get all the configured info about a synchronized folder.
