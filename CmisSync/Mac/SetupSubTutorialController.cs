@@ -56,7 +56,7 @@ namespace CmisSync
                 TutorialText.StringValue = Properties_Resources.DocumentsAre;
                 break;
             case 3:
-                TutorialText.StringValue = Properties_Resources.StatusIconShows;
+				TutorialText.StringValue = String.Format(Properties_Resources.StatusIconShows, Properties_Resources.ApplicationName);
                 break;
             }
         }
