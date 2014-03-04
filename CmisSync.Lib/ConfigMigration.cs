@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Sync
             ReplaceXMLRootElement();
             CheckForDoublicatedLog4NetElement();
             ReplaceTrunkByChunk();
+            MigrateIgnoredPatterns();
         }
 
         private static void CheckForDoublicatedLog4NetElement()
@@ -87,5 +88,18 @@ namespace CmisSync.Lib.Sync
                 System.Console.Out.WriteLine("Migrated old upper case notification to lower case");
             }
         }
+
+        private static void MigrateIgnoredPatterns ()
+        {
+            if(ConfigManager.CurrentConfig.Version < 1.0)
+            {
+                Config conf = ConfigManager.CurrentConfig;
+                conf.Version = 1.0;
+                conf.IgnoreFileNames = Config.CreateInitialListOfGloballyIgnoredFileNames();
+                conf.IgnoreFolderNames = Config.CreateInitialListOfGloballyIgnoredFolderNames();
+                conf.Save();
+            }
+        }
+
     }
 }

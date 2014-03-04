@@ -522,7 +522,7 @@ namespace CmisSync.Lib.Sync
                             }
                             else
                             {
-                                if (Utils.WorthSyncing(cmisObject.Name))
+                                if (Utils.WorthSyncing(cmisObject.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
                                     // It is a file, just download it.
                                     success = DownloadFile((IDocument)cmisObject, localFolder) && success;
                             }
@@ -636,7 +636,7 @@ namespace CmisSync.Lib.Sync
                 }
 
                 // Check if file extension is allowed
-                if (!Utils.WorthSyncing(fileName))
+                if (!Utils.WorthSyncing(fileName, ConfigManager.CurrentConfig.IgnoreFileNames))
                 {
                     Logger.Info("Ignore the unworth syncing remote file: " + fileName);
                     return true;
@@ -1074,7 +1074,7 @@ namespace CmisSync.Lib.Sync
                     // Upload each file in this folder.
                     foreach (string file in Directory.GetFiles(localFolder))
                     {
-                        if (Utils.WorthSyncing(file.Substring(file.LastIndexOf(Path.DirectorySeparatorChar)+1)))
+                        if (Utils.WorthSyncing(file.Substring(file.LastIndexOf(Path.DirectorySeparatorChar)+1), ConfigManager.CurrentConfig.IgnoreFileNames))
                         {
                             Logger.Debug(String.Format("Invoke upload file {0} of folder {1}", file, localFolder));
                             success = UploadFile(file, folder) && success;

@@ -136,6 +136,8 @@ namespace CmisSync.Lib
         /// </summary>
         private Events.Filter.IgnoredFoldersFilter ignoredFoldersFilter;
 
+        private Events.Filter.IgnoredFileNamesFilter ignoredFileNameFilter;
+
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
@@ -154,8 +156,9 @@ namespace CmisSync.Lib
             LocalPath = repoInfo.TargetDirectory;
             Name = repoInfo.Name;
             RemoteUrl = repoInfo.Address;
-            EventManager.AddEventHandler(new Events.Filter.IgnoredFileNamesFilter(Queue));
             ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths=new List<string>(repoInfo.getIgnoredPaths())};
+            ignoredFileNameFilter = new CmisSync.Lib.Events.Filter.IgnoredFileNamesFilter(Queue){Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames};
+            EventManager.AddEventHandler(ignoredFileNameFilter);
             EventManager.AddEventHandler(ignoredFoldersFilter);
             EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
             // start scheduler
@@ -185,6 +188,7 @@ namespace CmisSync.Lib
             {
                 this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
                 this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.getIgnoredPaths());
+                this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
                 return true;
             }
             else

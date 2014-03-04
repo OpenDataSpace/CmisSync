@@ -241,7 +241,7 @@ namespace CmisSync.Lib.Sync
 
                         string fileName = Path.GetFileName(filePath);
 
-                        if (Utils.WorthSyncing(fileName))
+                        if (Utils.WorthSyncing(fileName, ConfigManager.CurrentConfig.IgnoreFileNames))
                         {
                             if (!remoteFiles.Contains(fileName))
                             {

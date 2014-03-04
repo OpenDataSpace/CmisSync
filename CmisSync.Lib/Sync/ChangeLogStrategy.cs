@@ -171,7 +171,7 @@ namespace CmisSync.Lib.Sync
                 }
                 if (remoteDocument != null)
                 {
-                    if (!Utils.WorthSyncing(remoteDocument.Name))
+                    if (!Utils.WorthSyncing(remoteDocument.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
                     {
                         Logger.Info("Change in remote unworth syncing file: " + remoteDocument.Paths);
                         return true;

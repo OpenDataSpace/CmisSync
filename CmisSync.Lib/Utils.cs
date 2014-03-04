@@ -168,24 +168,10 @@ namespace CmisSync.Lib
         }
 
         /// <summary>
-        /// Extensions of files that must be excluded from synchronization.
-        /// </summary>
-        private static HashSet<String> ignoredExtensions = new HashSet<String>{
-            ".autosave", // Various autosaving apps
-            ".~lock", // LibreOffice
-            ".part", ".crdownload", // Firefox and Chromium temporary download files
-            ".un~", ".swp", ".swo", // vi(m)
-            ".tmp", // Microsoft Office
-            ".sync", // CmisSync download
-            ".cmissync" // CmisSync database
-        };
-
-
-        /// <summary>
         /// Check whether the file is worth syncing or not.
         /// Files that are not worth syncing include temp files, locks, etc.
         /// </summary>
-        public static Boolean WorthSyncing(string filename)
+        public static Boolean WorthSyncing(string filename, List<string> ignoreWildcards)
         {
             if (null == filename)
             {
@@ -200,30 +186,15 @@ namespace CmisSync.Lib
             //    ".*.sw[a-z]", // vi(m)
             //    "*(Autosaved).graffle", // Omnigraffle
 
-            // "*~", // gedit and emacs
-            if(filename.EndsWith("~"))
+            foreach(var wildcard in ignoreWildcards)
             {
-                Logger.Debug("Unworth syncing: " + filename);
-                return false;
+                var regex = IgnoreLineToRegex(wildcard);
+                if(regex.IsMatch(filename))
+                {
+                    Logger.Debug(String.Format("Unworth syncing: \"{0}\" because it matches \"{1}\"", filename, wildcard));
+                    return false;
+                }
             }
-
-            // Ignore meta data stores of MacOS
-            if (filename == ".DS_Store")
-            {
-                Logger.Debug("Unworth syncing MacOS meta data file .DS_Store");
-                return false;
-            }
-            filename = filename.ToLower();
-
-            if (ignoredExtensions.Contains(Path.GetExtension(filename))
-                || filename[0] == '~' // Microsoft Office temporary files start with ~
-                || filename[0] == '.' && filename[1] == '_') // Mac OS X files starting with ._
-            {
-                Logger.Debug("Unworth syncing: " + filename);
-                return false;
-            }
-
-            //Logger.Info("SynchronizedFolder | Worth syncing:" + filename);
             return true;
         }
 
@@ -462,6 +433,13 @@ namespace CmisSync.Lib
                 System.Reflection.Assembly info = type.Assembly;
                 Logger.Debug(String.Format("Needed dependency \"{0}\" is available", info));
             }
+        }
+
+        public static Regex IgnoreLineToRegex(string line)
+        {
+            return new Regex("^" + Regex.Escape(line).
+                Replace("\\*", ".*").
+                Replace("\\?", ".") + "$");
         }
     }
 }

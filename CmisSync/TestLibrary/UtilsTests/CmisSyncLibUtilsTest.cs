@@ -5,6 +5,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace TestLibrary.UtilsTests
 {
@@ -106,13 +107,54 @@ namespace TestLibrary.UtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateUserAgentTest()
+        public void CreateUserAgent()
         {
             var useragent = Utils.CreateUserAgent();
             Assert.IsTrue(useragent.Contains(Backend.Version));
             Assert.IsTrue(useragent.Contains("hostname="));
             Assert.IsTrue(useragent.Contains(CultureInfo.CurrentCulture.Name));
 //            Console.WriteLine(useragent);
+        }
+
+        [Test, Category("Fast")]
+        public void CreateRegexFromIgnoreAllWildcard()
+        {
+            var regex = Utils.IgnoreLineToRegex("*");
+            Assert.That(regex.IsMatch(""));
+            Assert.That(regex.IsMatch(" "));
+            Assert.That(regex.IsMatch("test"));
+            Assert.That(regex.IsMatch("stuff.txt"));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateRegexFromIgnoreDotsAtTheBeginningWildcard()
+        {
+            var regex = Utils.IgnoreLineToRegex(".*");
+            Assert.That(!regex.IsMatch(""));
+            Assert.That(!regex.IsMatch("s."));
+            Assert.That(!regex.IsMatch("test"));
+            Assert.That(!regex.IsMatch("stuff.txt"));
+            Assert.That(regex.IsMatch(".git"));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateRegexFromIgnoreTildeAtTheBeginningWildcard()
+        {
+            var regex = Utils.IgnoreLineToRegex("~*");
+            Assert.That(regex.IsMatch("~test"));
+            Assert.That(regex.IsMatch("~"));
+            Assert.That(!regex.IsMatch("stuff.txt"));
+            Assert.That(!regex.IsMatch(".~"));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateRegexFromIgnoreTempFilesWildcard()
+        {
+            var regex = Utils.IgnoreLineToRegex("*.tmp");
+            Assert.That(regex.IsMatch("~test.tmp"));
+            Assert.That(regex.IsMatch(".tmp"));
+            Assert.That(!regex.IsMatch("stuff.tmp~"));
+            Assert.That(!regex.IsMatch("tmp.test"));
         }
     }
 }
