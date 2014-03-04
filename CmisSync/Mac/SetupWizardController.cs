@@ -187,7 +187,7 @@ namespace CmisSync
                 SubController = new SetupSubTutorialController (Controller);
                 break;
             case 4:
-                Header.StringValue = Properties_Resources.AddFolders;
+				Header.StringValue = String.Format(Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
                 SubController = new SetupSubTutorialEndController (Controller);
                 break;
             }

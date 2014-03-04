@@ -54,7 +54,7 @@ namespace CmisSync
 
             switch (Controller.TutorialCurrentPage) {
             case 1:
-                TutorialText.StringValue = Properties_Resources.CmisSyncCreates;
+				TutorialText.StringValue = String.Format(Properties_Resources.CmisSyncCreates, Properties_Resources.ApplicationName);
                 break;
             default:
                 break;
