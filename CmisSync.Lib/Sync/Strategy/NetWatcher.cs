@@ -88,14 +88,6 @@ namespace CmisSync.Lib.Sync.Strategy
             }
             base.Dispose(disposing);
         }
-
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
     }
 }
 
