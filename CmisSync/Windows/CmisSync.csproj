@@ -117,6 +117,9 @@
     <Compile Include="SettingWPF.xaml.cs">
       <DependentUpon>SettingWPF.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SetupWPF.xaml.cs">
+      <DependentUpon>SetupWPF.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Shortcut.cs" />
     <Compile Include="StatusIcon.cs">
       <SubType>Form</SubType>
@@ -307,6 +310,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="SettingWPF.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SetupWPF.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
