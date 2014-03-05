@@ -101,947 +101,39 @@ namespace CmisSync
                     switch (type)
                     {
                         // Welcome page that shows up at first run.
-                        #region Page Setup
                         case PageType.Setup:
-                            {
-                                // UI elements.
+                            SetupWelcome();
+                            break;
 
-                                Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
-                                Description = Properties_Resources.Intro;
-
-                                Button cancel_button = new Button()
-                                {
-                                    Content = Properties_Resources.Cancel
-                                };
-
-                                Button continue_button = new Button()
-                                {
-                                    Content = Properties_Resources.Continue,
-                                    IsEnabled = false
-                                };
-
-                                Buttons.Add(continue_button);
-                                Buttons.Add(cancel_button);
-
-                                continue_button.Focus();
-
-                                // Actions.
-
-                                Controller.UpdateSetupContinueButtonEvent += delegate(bool enabled)
-                                {
-                                    Dispatcher.BeginInvoke((Action)delegate
-                                    {
-                                        continue_button.IsEnabled = enabled;
-                                    });
-                                };
-
-                                cancel_button.Click += delegate
-                                {
-                                    Dispatcher.BeginInvoke((Action)delegate
-                                    {
-                                        Program.UI.StatusIcon.Dispose();
-                                        Controller.SetupPageCancelled();
-                                    });
-                                };
-
-                                continue_button.Click += delegate
-                                {
-                                    Controller.SetupPageCompleted();
-                                };
-
-                                Controller.CheckSetupPage();
-
-                                break;
-                            }
-                        #endregion
-
-                        #region Page Tutorial
                         case PageType.Tutorial:
-                            {
-                                switch (Controller.TutorialCurrentPage)
-                                {
-                                    // First page of the tutorial.
-                                    case 1:
-                                        {
-                                            // UI elements.
-
-                                            Header = Properties_Resources.WhatsNext;
-                                            Description = String.Format(Properties_Resources.CmisSyncCreates,Properties_Resources.ApplicationName);
-
-                                            WPF.Image slide_image = new WPF.Image()
-                                            {
-                                                Width = 350,
-                                                Height = 200
-                                            };
-
-                                            slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-1");
-
-                                            Button skip_tutorial_button = new Button()
-                                            {
-                                                Content = Properties_Resources.SkipTutorial
-                                            };
-
-                                            Button continue_button = new Button()
-                                            {
-                                                Content = Properties_Resources.Continue
-                                            };
-
-
-                                            ContentCanvas.Children.Add(slide_image);
-                                            Canvas.SetLeft(slide_image, 215);
-                                            Canvas.SetTop(slide_image, 130);
-
-                                            Buttons.Add(continue_button);
-                                            Buttons.Add(skip_tutorial_button);
-
-                                            // Actions.
-
-                                            skip_tutorial_button.Click += delegate
-                                            {
-                                                Controller.TutorialSkipped();
-                                            };
-
-                                            continue_button.Click += delegate
-                                            {
-                                                Controller.TutorialPageCompleted();
-                                            };
-
-                                            break;
-                                        }
-
-                                    // Second page of the tutorial.
-                                    case 2:
-                                        {
-                                            // UI elements.
-
-                                            Header = Properties_Resources.Synchronization;
-                                            Description = Properties_Resources.DocumentsAre;
-
-
-                                            Button continue_button = new Button()
-                                            {
-                                                Content = Properties_Resources.Continue
-                                            };
-
-                                            WPF.Image slide_image = new WPF.Image()
-                                            {
-                                                Width = 350,
-                                                Height = 200
-                                            };
-
-                                            slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-2");
-
-
-                                            ContentCanvas.Children.Add(slide_image);
-                                            Canvas.SetLeft(slide_image, 215);
-                                            Canvas.SetTop(slide_image, 130);
-
-                                            Buttons.Add(continue_button);
-
-                                            // Actions.
-
-                                            continue_button.Click += delegate
-                                            {
-                                                Controller.TutorialPageCompleted();
-                                            };
-
-                                            break;
-                                        }
-
-                                    // Third page of the tutorial.
-                                    case 3:
-                                        {
-                                            // UI elements.
-
-                                            Header = Properties_Resources.StatusIcon;
-                                            Description = String.Format(
-                                                Properties_Resources.StatusIconShows,
-                                                Properties_Resources.ApplicationName);
-
-
-                                            Button continue_button = new Button()
-                                            {
-                                                Content = Properties_Resources.Continue
-                                            };
-
-                                            WPF.Image slide_image = new WPF.Image()
-                                            {
-                                                Width = 350,
-                                                Height = 200
-                                            };
-
-                                            slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-3");
-
-
-                                            ContentCanvas.Children.Add(slide_image);
-                                            Canvas.SetLeft(slide_image, 215);
-                                            Canvas.SetTop(slide_image, 130);
-
-                                            Buttons.Add(continue_button);
-
-                                            // Actions.
-
-                                            continue_button.Click += delegate
-                                            {
-                                                Controller.TutorialPageCompleted();
-                                            };
-
-                                            break;
-                                        }
-
-                                    // Fourth page of the tutorial.
-                                    case 4:
-                                        {
-                                            // UI elements.
-
-                                            Header = String.Format(Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
-                                            Description = Properties_Resources.YouCan;
-
-
-                                            Button finish_button = new Button()
-                                            {
-                                                Content = Properties_Resources.Finish
-                                            };
-
-                                            WPF.Image slide_image = new WPF.Image()
-                                            {
-                                                Width = 350,
-                                                Height = 200
-                                            };
-
-                                            slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-4");
-
-                                            CheckBox check_box = new CheckBox()
-                                            {
-                                                Content = String.Format(Properties_Resources.Startup, Properties_Resources.ApplicationName),
-                                                IsChecked = true
-                                            };
-
-
-                                            ContentCanvas.Children.Add(slide_image);
-                                            Canvas.SetLeft(slide_image, 215);
-                                            Canvas.SetTop(slide_image, 130);
-
-                                            ContentCanvas.Children.Add(check_box);
-                                            Canvas.SetLeft(check_box, 185);
-                                            Canvas.SetBottom(check_box, 12);
-
-                                            Buttons.Add(finish_button);
-
-                                            // Actions.
-
-                                            check_box.Click += delegate
-                                            {
-                                                Controller.StartupItemChanged(check_box.IsChecked.Value);
-                                            };
-
-                                            finish_button.Click += delegate
-                                            {
-                                                Controller.TutorialPageCompleted();
-                                            };
-
-                                            break;
-                                        }
-                                }
-                                break;
-                            }
-                        #endregion
+                            SetupTutorial();
+                            break;
 
                         // First step of the remote folder addition dialog: Specifying the server.
-                        #region Page Add1
                         case PageType.Add1:
-                            {
-                                // UI elements.
-
-                                Header = Properties_Resources.Where;
-
-                                // Address input UI.
-                                TextBlock address_label = new TextBlock()
-                                {
-                                    Text = Properties_Resources.EnterWebAddress,
-                                    FontWeight = FontWeights.Bold
-                                };
-
-                                TextBox address_box = new TextBox()
-                                {
-                                    Width = 420,
-                                    Text = (Controller.PreviousAddress!=null)?Controller.PreviousAddress.ToString():String.Empty
-                                };
-
-                                TextBlock address_help_label = new TextBlock()
-                                {
-                                    Text = Properties_Resources.Help + ": ",
-                                    FontSize = 11,
-                                    Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
-                                };
-                                Run run = new Run(Properties_Resources.WhereToFind);
-                                Hyperlink link = new Hyperlink(run);
-                                link.NavigateUri = new Uri("https://github.com/nicolas-raoul/CmisSync/wiki/What-address");
-                                address_help_label.Inlines.Add(link);
-                                link.RequestNavigate += (sender, e) =>
-                                    {
-                                        System.Diagnostics.Process.Start(e.Uri.ToString());
-                                    };
-
-                                // Rather than a TextBlock, we use a textBox so that users can copy/paste the error message and Google it.
-                                TextBox address_error_label = new TextBox()
-                                {
-                                    FontSize = 11,
-                                    Foreground = new SolidColorBrush(Color.FromRgb(255, 128, 128)),
-                                    TextWrapping = TextWrapping.Wrap,
-                                    Visibility = Visibility.Hidden,
-                                    BorderThickness = new Thickness(0),
-                                    IsReadOnly = true,
-                                    Background = Brushes.Transparent,
-                                    MaxWidth = 420
-                                };
-
-
-                                // User input UI.
-                                TextBlock user_label = new TextBlock()
-                                {
-                                    Text = Properties_Resources.User + ":",
-                                    FontWeight = FontWeights.Bold,
-                                    Width = 200
-                                };
-
-                                TextBox user_box = new TextBox()
-                                {
-                                    Width = 200
-                                };
-                                if (Controller.saved_user == String.Empty || Controller.saved_user == null)
-                                {
-                                    user_box.Text = Environment.UserName;
-                                }
-                                else
-                                {
-                                    user_box.Text = Controller.saved_user;
-                                }
-
-                                TextBlock user_help_label = new TextBlock()
-                                {
-                                    FontSize = 11,
-                                    Width = 200,
-                                    Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
-                                };
-
-                                // Password input UI.
-                                TextBlock password_label = new TextBlock()
-                                {
-                                    Text = Properties_Resources.Password + ":",
-                                    FontWeight = FontWeights.Bold,
-                                    Width = 200
-                                };
-
-                                PasswordBox password_box = new PasswordBox()
-                                {
-                                    Width = 200
-                                };
-
-                                TextBlock password_help_label = new TextBlock()
-                                {
-                                    FontSize = 11,
-                                    Width = 200,
-                                    Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
-                                };
-
-                                // Buttons.
-                                Button cancel_button = new Button()
-                                {
-                                    Content = Properties_Resources.Cancel
-                                };
-
-                                Button continue_button = new Button()
-                                {
-                                    Content = Properties_Resources.Continue
-                                };
-
-                                Buttons.Add(continue_button);
-                                Buttons.Add(cancel_button);
-
-                                // Address
-                                ContentCanvas.Children.Add(address_label);
-                                Canvas.SetTop(address_label, 100);
-                                Canvas.SetLeft(address_label, 185);
-
-                                ContentCanvas.Children.Add(address_box);
-                                Canvas.SetTop(address_box, 120);
-                                Canvas.SetLeft(address_box, 185);
-
-                                ContentCanvas.Children.Add(address_help_label);
-                                Canvas.SetTop(address_help_label, 145);
-                                Canvas.SetLeft(address_help_label, 185);
-
-                                // User
-                                ContentCanvas.Children.Add(user_label);
-                                Canvas.SetTop(user_label, 160);
-                                Canvas.SetLeft(user_label, 185);
-
-                                ContentCanvas.Children.Add(user_box);
-                                Canvas.SetTop(user_box, 180);
-                                Canvas.SetLeft(user_box, 185);
-
-                                ContentCanvas.Children.Add(user_help_label);
-                                Canvas.SetTop(user_help_label, 215);
-                                Canvas.SetLeft(user_help_label, 185);
-
-                                // Password
-                                ContentCanvas.Children.Add(password_label);
-                                Canvas.SetTop(password_label, 160);
-                                Canvas.SetRight(password_label, 30);
-
-                                ContentCanvas.Children.Add(password_box);
-                                Canvas.SetTop(password_box, 180);
-                                Canvas.SetRight(password_box, 30);
-
-                                ContentCanvas.Children.Add(password_help_label);
-                                Canvas.SetTop(password_help_label, 215);
-                                Canvas.SetRight(password_help_label, 30);
-
-                                ContentCanvas.Children.Add(address_error_label);
-                                Canvas.SetTop(address_error_label, 220);
-                                Canvas.SetLeft(address_error_label, 185);
-
-                                TaskbarItemInfo.ProgressValue = 0.0;
-                                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-
-                                if (Controller.PreviousAddress == null || Controller.PreviousAddress.ToString() == String.Empty)
-                                    address_box.Text = "https://";
-                                else
-                                    address_box.Text = Controller.PreviousAddress.ToString();
-                                address_box.Focus();
-                                address_box.Select(address_box.Text.Length, 0);
-
-                                // Actions.
-
-                                Controller.ChangeAddressFieldEvent += delegate(string text,
-                                    string example_text)
-                                {
-                                    Dispatcher.BeginInvoke((Action)delegate
-                                    {
-                                        address_box.Text = text;
-                                        address_help_label.Text = example_text;
-                                    });
-                                };
-
-                                Controller.ChangeUserFieldEvent += delegate(string text,
-                                    string example_text)
-                                {
-                                    Dispatcher.BeginInvoke((Action)delegate
-                                    {
-                                        user_box.Text = text;
-                                        user_help_label.Text = example_text;
-                                    });
-                                };
-
-                                Controller.ChangePasswordFieldEvent += delegate(string text,
-                                    string example_text)
-                                {
-                                    Dispatcher.BeginInvoke((Action)delegate
-                                    {
-                                        password_box.Password = text;
-                                        password_help_label.Text = example_text;
-                                    });
-                                };
-
-                                Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled)
-                                {
-                                    Dispatcher.BeginInvoke((Action)delegate
-                                    {
-                                        continue_button.IsEnabled = button_enabled;
-                                    });
-                                };
-
-                                Controller.CheckAddPage(address_box.Text);
-
-                                address_box.TextChanged += delegate
-                                {
-                                    string error = Controller.CheckAddPage(address_box.Text);
-                                    if (!String.IsNullOrEmpty(error))
-                                    {
-                                        address_error_label.Text = Properties_Resources.ResourceManager.GetString(error, CultureInfo.CurrentCulture);
-                                        address_error_label.Visibility = Visibility.Visible;
-                                    }
-                                    else address_error_label.Visibility = Visibility.Hidden;
-                                };
-
-                                cancel_button.Click += delegate
-                                {
-                                    Controller.PageCancelled();
-                                };
-
-                                continue_button.Click += delegate
-                                {
-                                    // Show wait cursor
-                                    System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
-
-                                    // Try to find the CMIS server (asynchronously)
-                                    GetRepositoriesFuzzyDelegate dlgt =
-                                        new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
-                                    ServerCredentials credentials = new ServerCredentials()
-                                    {
-                                        UserName = user_box.Text,
-                                        Password = password_box.Password,
-                                        Address = new Uri(address_box.Text)
-                                    };
-                                    IAsyncResult ar = dlgt.BeginInvoke(credentials, null, null);
-                                    while (!ar.AsyncWaitHandle.WaitOne(100)) {
-                                        System.Windows.Forms.Application.DoEvents();
-                                    }
-                                    Tuple<CmisServer, Exception> result = dlgt.EndInvoke(ar);
-                                    CmisServer cmisServer = result.Item1;
-                                    
-                                    Controller.repositories = cmisServer != null ? cmisServer.Repositories : null;
-
-                                    address_box.Text = cmisServer.Url.ToString();
-
-                                    // Hide wait cursor
-                                    System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
-
-                                    if (Controller.repositories == null)
-                                    {
-                                        // Could not retrieve repositories list from server, show warning.
-                                        string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
-                                        address_error_label.Text = warning;
-                                        address_error_label.Visibility = Visibility.Visible;
-                                    }
-                                    else
-                                    {
-                                        // Continue to next step, which is choosing a particular folder.
-                                        Controller.Add1PageCompleted(
-                                            new Uri(address_box.Text), user_box.Text, password_box.Password);
-                                    }
-                                };
-                                break;
-                            }
-                        #endregion
+                            SetupAddLogin();
+                            break;
 
                         // Second step of the remote folder addition dialog: choosing the folder.
-                        #region Page Add2
                         case PageType.Add2:
-                            {
-                                // UI elements.
-
-                                Header = Properties_Resources.Which;
-
-                                // A tree allowing the user to browse CMIS repositories/folders.
-                                System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/FolderTreeMVC/TreeView.xaml", System.UriKind.Relative);
-                                System.Windows.Controls.TreeView treeView = System.Windows.Application.LoadComponent(resourceLocater) as TreeView;
-
-                                ObservableCollection<RootFolder> repos = new ObservableCollection<RootFolder>();
-                                Dictionary<string, AsyncNodeLoader> loader = new Dictionary<string, AsyncNodeLoader>();
-                                // Some CMIS servers hold several repositories (ex:Nuxeo). Show one root per repository.
-                                bool firstRepo = true;
-                                foreach (KeyValuePair<String, String> repository in Controller.repositories)
-                                {
-                                    RootFolder repo = new RootFolder()
-                                    {
-                                        Name = repository.Value,
-                                        Id = repository.Key,
-                                        Address = Controller.saved_address.ToString()
-                                    };
-                                    repos.Add(repo);
-                                    if (firstRepo)
-                                    {
-                                        repo.Selected = true;
-                                        firstRepo = false;
-                                    }
-                                    else
-                                    {
-                                        repo.Selected = false;
-                                    }
-                                    CmisRepoCredentials cred = new CmisRepoCredentials()
-                                    {
-                                        UserName = Controller.saved_user,
-                                        Password = Controller.saved_password,
-                                        Address = Controller.saved_address,
-                                        RepoId = repository.Key
-                                    };
-                                    AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
-                                    asyncLoader.Load(repo);
-                                    loader.Add(repo.Id, asyncLoader);
-                                }
-                                treeView.DataContext = repos;
-                                treeView.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(delegate(object sender, RoutedEventArgs e)
-                                {
-                                    TreeViewItem expandedItem = e.OriginalSource as TreeViewItem;
-                                    Node expandedNode = expandedItem.Header as Folder;
-                                    if (expandedNode != null)
-                                    {
-                                        Node parent = expandedNode.Parent;
-                                        while (parent is Folder)
-                                        {
-                                            parent = parent.Parent;
-                                        }
-                                        if (parent is RootFolder)
-                                        {
-                                            AsyncNodeLoader l;
-                                            RootFolder r = parent as RootFolder;
-                                            if (loader.TryGetValue(r.Id, out l))
-                                            {
-                                                l.Load(expandedNode);
-                                            }
-                                        }
-                                    }
-                                }));
-                                ContentCanvas.Children.Add(treeView);
-                                Canvas.SetTop(treeView, 70);
-                                Canvas.SetLeft(treeView, 185);
-
-                                Button continue_button = new Button()
-                                {
-                                    Content = Properties_Resources.Continue,
-                                    IsEnabled = !firstRepo,
-                                    IsDefault = true
-                                };
-
-                                Button cancel_button = new Button()
-                                {
-                                    Content = Properties_Resources.Cancel
-                                };
-
-                                Button back_button = new Button()
-                                {
-                                    Content = Properties_Resources.Back,
-                                    IsDefault = false
-                                };
-
-                                Buttons.Add(back_button);
-                                Buttons.Add(continue_button);
-                                Buttons.Add(cancel_button);
-
-                                continue_button.Focus();
-
-                                cancel_button.Click += delegate
-                                {
-                                    Controller.PageCancelled();
-                                };
-
-                                continue_button.Click += delegate
-                                {
-                                    List<string> ignored = new List<string>();
-                                    List<string> selectedFolder = new List<string>();
-                                    ItemCollection items = treeView.Items;
-                                    RootFolder selectedRepo = null;
-                                    foreach (var item in items)
-                                    {
-                                        RootFolder repo = item as RootFolder;
-                                        if (repo != null)
-                                            if (repo.Selected != false)
-                                            {
-                                                selectedRepo = repo;
-                                                break;
-                                            }
-                                    }
-                                    if (selectedRepo != null)
-                                    {
-                                        ignored.AddRange(NodeModelUtils.GetIgnoredFolder(selectedRepo));
-                                        selectedFolder.AddRange(NodeModelUtils.GetSelectedFolder(selectedRepo));
-                                        Controller.saved_repository = selectedRepo.Id;
-                                        Controller.saved_remote_path = selectedRepo.Path;
-                                        Controller.Add2PageCompleted(
-                                            Controller.saved_repository, Controller.saved_remote_path, ignored.ToArray(), selectedFolder.ToArray());
-                                        foreach (AsyncNodeLoader task in loader.Values)
-                                            task.Cancel();
-                                    }
-                                    else
-                                    {
-                                        return;
-                                    }
-                                };
-
-                                back_button.Click += delegate
-                                {
-                                    Controller.BackToPage1();
-                                    foreach (AsyncNodeLoader task in loader.Values)
-                                        task.Cancel();
-                                };
-
-                                Controller.HideWindowEvent += delegate
-                                {
-                                    foreach (AsyncNodeLoader task in loader.Values)
-                                        task.Cancel();
-                                };
-                                break;
-                            }
-                        #endregion
+                            SetupAddSelectRepo();
+                            break;
 
                         // Third step of the remote folder addition dialog: Customizing the local folder.
-                        #region Page Customize
                         case PageType.Customize:
-                            {
-                                string parentFolder = Controller.DefaultRepoPath;
-
-                                // UI elements.
-
-                                Header = Properties_Resources.Customize;
-
-                                // Customize local folder name
-                                TextBlock localfolder_label = new TextBlock()
-                                {
-                                    Text = Properties_Resources.EnterLocalFolderName,
-                                    FontWeight = FontWeights.Bold,
-                                    TextWrapping = TextWrapping.Wrap,
-                                    Width = 420
-                                };
-                                string localfoldername = Controller.saved_address.Host.ToString();
-                                foreach (KeyValuePair<String, String> repository in Controller.repositories)
-                                {
-                                    if (repository.Key == Controller.saved_repository)
-                                    {
-                                        localfoldername += "\\" + repository.Value;
-                                        break;
-                                    }
-                                }
-                                TextBox localfolder_box = new TextBox()
-                                {
-                                    Width = 420,
-                                    Text = localfoldername
-                                };
-
-                                TextBlock localrepopath_label = new TextBlock()
-                                {
-                                    Text = Properties_Resources.ChangeRepoPath,
-                                    FontWeight = FontWeights.Bold
-                                };
-
-                                TextBox localrepopath_box = new TextBox()
-                                {
-                                    Width = 375,
-                                    Text = Path.Combine(parentFolder, localfolder_box.Text)
-                                };
-
-                                localfolder_box.TextChanged += delegate
-                                {
-                                    try
-                                    {
-                                        localrepopath_box.Text = Path.Combine(parentFolder, localfolder_box.Text);
-                                    }
-                                    catch (Exception)
-                                    {}
-                                };
-
-                                Button choose_folder_button = new Button()
-                                {
-                                    Width = 40,
-                                    Content = "..."
-                                };
-
-                                TextBlock localfolder_error_label = new TextBlock()
-                                {
-                                    FontSize = 11,
-                                    Foreground = new SolidColorBrush(Color.FromRgb(255, 128, 128)),
-                                    Visibility = Visibility.Hidden,
-                                    TextWrapping = TextWrapping.Wrap,
-                                    MaxWidth = 420
-                                };
-
-                                Button cancel_button = new Button()
-                                {
-                                    Content = Properties_Resources.Cancel
-                                };
-
-                                Button add_button = new Button()
-                                {
-                                    Content = Properties_Resources.Add,
-                                    IsDefault = true
-                                };
-
-                                Button back_button = new Button()
-                                {
-                                    Content = Properties_Resources.Back
-                                };
-
-                                Buttons.Add(back_button);
-                                Buttons.Add(add_button);
-                                Buttons.Add(cancel_button);
-
-                                // Local Folder Name
-                                ContentCanvas.Children.Add(localfolder_label);
-                                Canvas.SetTop(localfolder_label, 160);
-                                Canvas.SetLeft(localfolder_label, 185);
-
-                                ContentCanvas.Children.Add(localfolder_box);
-                                Canvas.SetTop(localfolder_box, 180);
-                                Canvas.SetLeft(localfolder_box, 185);
-
-                                ContentCanvas.Children.Add(localrepopath_label);
-                                Canvas.SetTop(localrepopath_label, 200);
-                                Canvas.SetLeft(localrepopath_label, 185);
-
-                                ContentCanvas.Children.Add(localrepopath_box);
-                                Canvas.SetTop(localrepopath_box, 220);
-                                Canvas.SetLeft(localrepopath_box, 185);
-
-                                ContentCanvas.Children.Add(choose_folder_button);
-                                Canvas.SetTop(choose_folder_button, 220);
-                                Canvas.SetLeft(choose_folder_button, 565);
-
-                                ContentCanvas.Children.Add(localfolder_error_label);
-                                Canvas.SetTop(localfolder_error_label, 275);
-                                Canvas.SetLeft(localfolder_error_label, 185);
-
-                                TaskbarItemInfo.ProgressValue = 0.0;
-                                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-
-                                localfolder_box.Focus();
-                                localfolder_box.Select(localfolder_box.Text.Length, 0);
-
-                                // Repo path validity.
-
-                                CheckCustomizeInput(localfolder_box, localrepopath_box, localfolder_error_label);
-
-                                // Actions.
-
-                                Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled)
-                                {
-                                    Dispatcher.BeginInvoke((Action)delegate
-                                    {
-                                        if (add_button.IsEnabled != button_enabled)
-                                        {
-                                            add_button.IsEnabled = button_enabled;
-                                            if (button_enabled)
-                                            {
-                                                add_button.IsDefault = true;
-                                                back_button.IsDefault = false;
-                                            }
-                                        }
-                                    });
-                                };
-
-                                localfolder_box.TextChanged += delegate
-                                {
-                                    CheckCustomizeInput(localfolder_box, localrepopath_box, localfolder_error_label);
-                                };
-
-                                localrepopath_box.TextChanged += delegate
-                                {
-                                    CheckCustomizeInput(localfolder_box, localrepopath_box, localfolder_error_label);
-                                };
-
-                                // Choose a folder.
-                                choose_folder_button.Click += delegate
-                                {
-                                    System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-                                    if (folderBrowserDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                                    {
-                                        parentFolder = folderBrowserDialog1.SelectedPath;
-                                        localrepopath_box.Text = Path.Combine(parentFolder, localfolder_box.Text);
-                                    }
-                                };
-
-                                // Other actions.
-
-                                cancel_button.Click += delegate
-                                {
-                                    Controller.PageCancelled();
-                                };
-
-                                back_button.Click += delegate
-                                {
-                                    Controller.BackToPage2();
-                                };
-
-                                add_button.Click += delegate
-                                {
-                                    Controller.CustomizePageCompleted(localfolder_box.Text, localrepopath_box.Text);
-                                };
-
-                                Controller.LocalPathExists += LocalPathExistsHandler;
-                                break;
-                            }
-                        #endregion
+                            SetupAddCustomize();
+                            break;
 
                         // Fourth page of the remote folder addition dialog: starting to sync.
                         // TODO: This step should be removed. Now it appears just a brief instant, because sync is asynchronous.
-                        #region Page Syncing
                         case PageType.Syncing:
-                            {
-                                // UI elements.
-
-                                Header = Properties_Resources.AddingFolder + " ‘" + Controller.SyncingReponame + "’…";
-                                Description = Properties_Resources.MayTakeTime;
-
-                                Button finish_button = new Button()
-                                {
-                                    Content = Properties_Resources.Finish,
-                                    IsEnabled = false
-                                };
-
-                                ProgressBar progress_bar = new ProgressBar()
-                                {
-                                    Width = 414,
-                                    Height = 15,
-                                    Value = Controller.ProgressBarPercentage
-                                };
-
-
-                                ContentCanvas.Children.Add(progress_bar);
-                                Canvas.SetLeft(progress_bar, 185);
-                                Canvas.SetTop(progress_bar, 150);
-
-                                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
-
-                                Buttons.Add(finish_button);
-
-                                // Actions.
-
-                                Controller.UpdateProgressBarEvent += delegate(double percentage)
-                                {
-                                    Dispatcher.BeginInvoke((Action)delegate
-                                    {
-                                        progress_bar.Value = percentage;
-                                        TaskbarItemInfo.ProgressValue = percentage / 100;
-                                    });
-                                };
-
-                                break;
-                            }
-                        #endregion
+                            SetupAddSyncing();
+                            break;
 
                         // Final page of the remote folder addition dialog: end of the addition wizard.
-                        #region Page Finished
                         case PageType.Finished:
-                            {
-                                // UI elements.
-
-                                Header = Properties_Resources.Ready;
-                                Description = Properties_Resources.YouCanFind;
-
-                                Button finish_button = new Button()
-                                {
-                                    Content = Properties_Resources.Finish
-                                };
-
-                                Button open_folder_button = new Button()
-                                {
-                                    Content = Properties_Resources.OpenFolder
-                                };
-
-                                TaskbarItemInfo.ProgressValue = 0.0;
-                                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-
-                                Buttons.Add(open_folder_button);
-                                Buttons.Add(finish_button);
-
-                                // Actions.
-
-                                finish_button.Click += delegate
-                                {
-                                    Controller.FinishPageCompleted();
-                                };
-
-                                open_folder_button.Click += delegate
-                                {
-                                    Controller.OpenFolderClicked();
-                                };
-
-
-                                SystemSounds.Exclamation.Play();
-
-                                break;
-                            }
-                        #endregion
+                            SetupAddFinish();
+                            break;
                     }
 
                     ShowAll();
@@ -1055,6 +147,862 @@ namespace CmisSync
 
             Controller.PageCancelled();
             Logger.Info("Exiting constructor.");
+        }
+
+        private void SetupWelcome()
+        {
+            // UI elements.
+            Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
+            Description = Properties_Resources.Intro;
+
+            Button cancel_button = new Button()
+            {
+                Content = Properties_Resources.Cancel
+            };
+            Button continue_button = new Button()
+            {
+                Content = Properties_Resources.Continue,
+                IsEnabled = false
+            };
+            Buttons.Add(continue_button);
+            Buttons.Add(cancel_button);
+            continue_button.Focus();
+
+            // Actions.
+
+            Controller.UpdateSetupContinueButtonEvent += delegate(bool enabled)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    continue_button.IsEnabled = enabled;
+                });
+            };
+
+            cancel_button.Click += delegate
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    Program.UI.StatusIcon.Dispose();
+                    Controller.SetupPageCancelled();
+                });
+            };
+
+            continue_button.Click += delegate
+            {
+                Controller.SetupPageCompleted();
+            };
+
+            Controller.CheckSetupPage();
+        }
+
+        private void SetupTutorial()
+        {
+            switch (Controller.TutorialCurrentPage)
+            {
+                // First page of the tutorial.
+                case 1:
+                    {
+                        // UI elements.
+                        Header = Properties_Resources.WhatsNext;
+                        Description = String.Format(Properties_Resources.CmisSyncCreates, Properties_Resources.ApplicationName);
+
+                        WPF.Image slide_image = new WPF.Image()
+                        {
+                            Width = 350,
+                            Height = 200
+                        };
+                        slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-1");
+
+                        Button skip_tutorial_button = new Button()
+                        {
+                            Content = Properties_Resources.SkipTutorial
+                        };
+                        Button continue_button = new Button()
+                        {
+                            Content = Properties_Resources.Continue
+                        };
+                        Buttons.Add(continue_button);
+                        Buttons.Add(skip_tutorial_button);
+
+                        ContentCanvas.Children.Add(slide_image);
+                        Canvas.SetLeft(slide_image, 215);
+                        Canvas.SetTop(slide_image, 130);
+
+                        // Actions.
+
+                        skip_tutorial_button.Click += delegate
+                        {
+                            Controller.TutorialSkipped();
+                        };
+
+                        continue_button.Click += delegate
+                        {
+                            Controller.TutorialPageCompleted();
+                        };
+
+                        break;
+                    }
+
+                // Second page of the tutorial.
+                case 2:
+                    {
+                        // UI elements.
+                        Header = Properties_Resources.Synchronization;
+                        Description = Properties_Resources.DocumentsAre;
+
+                        WPF.Image slide_image = new WPF.Image()
+                        {
+                            Width = 350,
+                            Height = 200
+                        };
+                        slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-2");
+
+                        ContentCanvas.Children.Add(slide_image);
+                        Canvas.SetLeft(slide_image, 215);
+                        Canvas.SetTop(slide_image, 130);
+
+                        Button continue_button = new Button()
+                        {
+                            Content = Properties_Resources.Continue
+                        };
+                        Buttons.Add(continue_button);
+
+                        // Actions.
+
+                        continue_button.Click += delegate
+                        {
+                            Controller.TutorialPageCompleted();
+                        };
+
+                        break;
+                    }
+
+                // Third page of the tutorial.
+                case 3:
+                    {
+                        // UI elements.
+                        Header = Properties_Resources.StatusIcon;
+                        Description = String.Format(
+                            Properties_Resources.StatusIconShows,
+                            Properties_Resources.ApplicationName);
+
+                        WPF.Image slide_image = new WPF.Image()
+                        {
+                            Width = 350,
+                            Height = 200
+                        };
+                        slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-3");
+
+                        ContentCanvas.Children.Add(slide_image);
+                        Canvas.SetLeft(slide_image, 215);
+                        Canvas.SetTop(slide_image, 130);
+
+                        Button continue_button = new Button()
+                        {
+                            Content = Properties_Resources.Continue
+                        };
+                        Buttons.Add(continue_button);
+
+                        // Actions.
+
+                        continue_button.Click += delegate
+                        {
+                            Controller.TutorialPageCompleted();
+                        };
+
+                        break;
+                    }
+
+                // Fourth page of the tutorial.
+                case 4:
+                    {
+                        // UI elements.
+                        Header = String.Format(Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
+                        Description = Properties_Resources.YouCan;
+
+
+
+                        WPF.Image slide_image = new WPF.Image()
+                        {
+                            Width = 350,
+                            Height = 200
+                        };
+                        slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-4");
+
+                        CheckBox check_box = new CheckBox()
+                        {
+                            Content = String.Format(Properties_Resources.Startup, Properties_Resources.ApplicationName),
+                            IsChecked = true
+                        };
+
+                        ContentCanvas.Children.Add(slide_image);
+                        Canvas.SetLeft(slide_image, 215);
+                        Canvas.SetTop(slide_image, 130);
+
+                        ContentCanvas.Children.Add(check_box);
+                        Canvas.SetLeft(check_box, 185);
+                        Canvas.SetBottom(check_box, 12);
+
+                        Button finish_button = new Button()
+                        {
+                            Content = Properties_Resources.Finish
+                        };
+                        Buttons.Add(finish_button);
+
+                        // Actions.
+
+                        check_box.Click += delegate
+                        {
+                            Controller.StartupItemChanged(check_box.IsChecked.Value);
+                        };
+
+                        finish_button.Click += delegate
+                        {
+                            Controller.TutorialPageCompleted();
+                        };
+
+                        break;
+                    }
+            }
+        }
+
+        private void SetupAddLogin()
+        {
+            // UI elements.
+            Header = Properties_Resources.Where;
+
+            // Address input UI.
+            TextBlock address_label = new TextBlock()
+            {
+                Text = Properties_Resources.EnterWebAddress,
+                FontWeight = FontWeights.Bold
+            };
+            TextBox address_box = new TextBox()
+            {
+                Width = 420,
+                Text = (Controller.PreviousAddress != null) ? Controller.PreviousAddress.ToString() : String.Empty
+            };
+            TextBlock address_help_label = new TextBlock()
+            {
+                Text = Properties_Resources.Help + ": ",
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
+            };
+            Run run = new Run(Properties_Resources.WhereToFind);
+            Hyperlink link = new Hyperlink(run);
+            link.NavigateUri = new Uri("https://github.com/nicolas-raoul/CmisSync/wiki/What-address");
+            address_help_label.Inlines.Add(link);
+            link.RequestNavigate += (sender, e) =>
+            {
+                System.Diagnostics.Process.Start(e.Uri.ToString());
+            };
+
+            // Rather than a TextBlock, we use a textBox so that users can copy/paste the error message and Google it.
+            TextBox address_error_label = new TextBox()
+            {
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Color.FromRgb(255, 128, 128)),
+                TextWrapping = TextWrapping.Wrap,
+                Visibility = Visibility.Hidden,
+                BorderThickness = new Thickness(0),
+                IsReadOnly = true,
+                Background = Brushes.Transparent,
+                MaxWidth = 420
+            };
+
+            // User input UI.
+            TextBlock user_label = new TextBlock()
+            {
+                Text = Properties_Resources.User + ":",
+                FontWeight = FontWeights.Bold,
+                Width = 200
+            };
+            TextBox user_box = new TextBox()
+            {
+                Width = 200
+            };
+            if (Controller.saved_user == String.Empty || Controller.saved_user == null)
+            {
+                user_box.Text = Environment.UserName;
+            }
+            else
+            {
+                user_box.Text = Controller.saved_user;
+            }
+            TextBlock user_help_label = new TextBlock()
+            {
+                FontSize = 11,
+                Width = 200,
+                Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
+            };
+
+            // Password input UI.
+            TextBlock password_label = new TextBlock()
+            {
+                Text = Properties_Resources.Password + ":",
+                FontWeight = FontWeights.Bold,
+                Width = 200
+            };
+            PasswordBox password_box = new PasswordBox()
+            {
+                Width = 200
+            };
+            TextBlock password_help_label = new TextBlock()
+            {
+                FontSize = 11,
+                Width = 200,
+                Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
+            };
+
+            // Buttons.
+            Button cancel_button = new Button()
+            {
+                Content = Properties_Resources.Cancel
+            };
+            Button continue_button = new Button()
+            {
+                Content = Properties_Resources.Continue
+            };
+            Buttons.Add(continue_button);
+            Buttons.Add(cancel_button);
+
+            // Address
+            ContentCanvas.Children.Add(address_label);
+            Canvas.SetTop(address_label, 100);
+            Canvas.SetLeft(address_label, 185);
+            ContentCanvas.Children.Add(address_box);
+            Canvas.SetTop(address_box, 120);
+            Canvas.SetLeft(address_box, 185);
+            ContentCanvas.Children.Add(address_help_label);
+            Canvas.SetTop(address_help_label, 145);
+            Canvas.SetLeft(address_help_label, 185);
+
+            // User
+            ContentCanvas.Children.Add(user_label);
+            Canvas.SetTop(user_label, 160);
+            Canvas.SetLeft(user_label, 185);
+            ContentCanvas.Children.Add(user_box);
+            Canvas.SetTop(user_box, 180);
+            Canvas.SetLeft(user_box, 185);
+            ContentCanvas.Children.Add(user_help_label);
+            Canvas.SetTop(user_help_label, 215);
+            Canvas.SetLeft(user_help_label, 185);
+
+            // Password
+            ContentCanvas.Children.Add(password_label);
+            Canvas.SetTop(password_label, 160);
+            Canvas.SetRight(password_label, 30);
+            ContentCanvas.Children.Add(password_box);
+            Canvas.SetTop(password_box, 180);
+            Canvas.SetRight(password_box, 30);
+            ContentCanvas.Children.Add(password_help_label);
+            Canvas.SetTop(password_help_label, 215);
+            Canvas.SetRight(password_help_label, 30);
+
+            ContentCanvas.Children.Add(address_error_label);
+            Canvas.SetTop(address_error_label, 220);
+            Canvas.SetLeft(address_error_label, 185);
+
+            TaskbarItemInfo.ProgressValue = 0.0;
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+
+            if (Controller.PreviousAddress == null || Controller.PreviousAddress.ToString() == String.Empty)
+                address_box.Text = "https://";
+            else
+                address_box.Text = Controller.PreviousAddress.ToString();
+            address_box.Focus();
+            address_box.Select(address_box.Text.Length, 0);
+
+            // Actions.
+
+            Controller.ChangeAddressFieldEvent += delegate(string text,
+                string example_text)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    address_box.Text = text;
+                    address_help_label.Text = example_text;
+                });
+            };
+
+            Controller.ChangeUserFieldEvent += delegate(string text,
+                string example_text)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    user_box.Text = text;
+                    user_help_label.Text = example_text;
+                });
+            };
+
+            Controller.ChangePasswordFieldEvent += delegate(string text,
+                string example_text)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    password_box.Password = text;
+                    password_help_label.Text = example_text;
+                });
+            };
+
+            Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    continue_button.IsEnabled = button_enabled;
+                });
+            };
+
+            Controller.CheckAddPage(address_box.Text);
+
+            address_box.TextChanged += delegate
+            {
+                string error = Controller.CheckAddPage(address_box.Text);
+                if (!String.IsNullOrEmpty(error))
+                {
+                    address_error_label.Text = Properties_Resources.ResourceManager.GetString(error, CultureInfo.CurrentCulture);
+                    address_error_label.Visibility = Visibility.Visible;
+                }
+                else address_error_label.Visibility = Visibility.Hidden;
+            };
+
+            cancel_button.Click += delegate
+            {
+                Controller.PageCancelled();
+            };
+
+            continue_button.Click += delegate
+            {
+                // Show wait cursor
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+
+                // Try to find the CMIS server (asynchronously)
+                GetRepositoriesFuzzyDelegate dlgt =
+                    new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
+                ServerCredentials credentials = new ServerCredentials()
+                {
+                    UserName = user_box.Text,
+                    Password = password_box.Password,
+                    Address = new Uri(address_box.Text)
+                };
+                IAsyncResult ar = dlgt.BeginInvoke(credentials, null, null);
+                while (!ar.AsyncWaitHandle.WaitOne(100))
+                {
+                    System.Windows.Forms.Application.DoEvents();
+                }
+                Tuple<CmisServer, Exception> result = dlgt.EndInvoke(ar);
+                CmisServer cmisServer = result.Item1;
+
+                Controller.repositories = cmisServer != null ? cmisServer.Repositories : null;
+
+                address_box.Text = cmisServer.Url.ToString();
+
+                // Hide wait cursor
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+
+                if (Controller.repositories == null)
+                {
+                    // Could not retrieve repositories list from server, show warning.
+                    string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
+                    address_error_label.Text = warning;
+                    address_error_label.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    // Continue to next step, which is choosing a particular folder.
+                    Controller.Add1PageCompleted(
+                        new Uri(address_box.Text), user_box.Text, password_box.Password);
+                }
+            };
+        }
+
+        private void SetupAddSelectRepo()
+        {
+            // UI elements.
+            Header = Properties_Resources.Which;
+
+            // A tree allowing the user to browse CMIS repositories/folders.
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/FolderTreeMVC/TreeView.xaml", System.UriKind.Relative);
+            System.Windows.Controls.TreeView treeView = System.Windows.Application.LoadComponent(resourceLocater) as TreeView;
+
+            ObservableCollection<RootFolder> repos = new ObservableCollection<RootFolder>();
+            Dictionary<string, AsyncNodeLoader> loader = new Dictionary<string, AsyncNodeLoader>();
+            // Some CMIS servers hold several repositories (ex:Nuxeo). Show one root per repository.
+            bool firstRepo = true;
+            foreach (KeyValuePair<String, String> repository in Controller.repositories)
+            {
+                RootFolder repo = new RootFolder()
+                {
+                    Name = repository.Value,
+                    Id = repository.Key,
+                    Address = Controller.saved_address.ToString()
+                };
+                repos.Add(repo);
+                if (firstRepo)
+                {
+                    repo.Selected = true;
+                    firstRepo = false;
+                }
+                else
+                {
+                    repo.Selected = false;
+                }
+                CmisRepoCredentials cred = new CmisRepoCredentials()
+                {
+                    UserName = Controller.saved_user,
+                    Password = Controller.saved_password,
+                    Address = Controller.saved_address,
+                    RepoId = repository.Key
+                };
+                AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+                asyncLoader.Load(repo);
+                loader.Add(repo.Id, asyncLoader);
+            }
+            treeView.DataContext = repos;
+            treeView.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(delegate(object sender, RoutedEventArgs e)
+            {
+                TreeViewItem expandedItem = e.OriginalSource as TreeViewItem;
+                Node expandedNode = expandedItem.Header as Folder;
+                if (expandedNode != null)
+                {
+                    Node parent = expandedNode.Parent;
+                    while (parent is Folder)
+                    {
+                        parent = parent.Parent;
+                    }
+                    if (parent is RootFolder)
+                    {
+                        AsyncNodeLoader l;
+                        RootFolder r = parent as RootFolder;
+                        if (loader.TryGetValue(r.Id, out l))
+                        {
+                            l.Load(expandedNode);
+                        }
+                    }
+                }
+            }));
+            ContentCanvas.Children.Add(treeView);
+            Canvas.SetTop(treeView, 70);
+            Canvas.SetLeft(treeView, 185);
+
+            Button continue_button = new Button()
+            {
+                Content = Properties_Resources.Continue,
+                IsEnabled = !firstRepo,
+                IsDefault = true
+            };
+            Button cancel_button = new Button()
+            {
+                Content = Properties_Resources.Cancel
+            };
+            Button back_button = new Button()
+            {
+                Content = Properties_Resources.Back,
+                IsDefault = false
+            };
+            Buttons.Add(back_button);
+            Buttons.Add(continue_button);
+            Buttons.Add(cancel_button);
+            continue_button.Focus();
+
+            cancel_button.Click += delegate
+            {
+                Controller.PageCancelled();
+            };
+
+            continue_button.Click += delegate
+            {
+                List<string> ignored = new List<string>();
+                List<string> selectedFolder = new List<string>();
+                ItemCollection items = treeView.Items;
+                RootFolder selectedRepo = null;
+                foreach (var item in items)
+                {
+                    RootFolder repo = item as RootFolder;
+                    if (repo != null)
+                        if (repo.Selected != false)
+                        {
+                            selectedRepo = repo;
+                            break;
+                        }
+                }
+                if (selectedRepo != null)
+                {
+                    ignored.AddRange(NodeModelUtils.GetIgnoredFolder(selectedRepo));
+                    selectedFolder.AddRange(NodeModelUtils.GetSelectedFolder(selectedRepo));
+                    Controller.saved_repository = selectedRepo.Id;
+                    Controller.saved_remote_path = selectedRepo.Path;
+                    Controller.Add2PageCompleted(
+                        Controller.saved_repository, Controller.saved_remote_path, ignored.ToArray(), selectedFolder.ToArray());
+                    foreach (AsyncNodeLoader task in loader.Values)
+                        task.Cancel();
+                }
+                else
+                {
+                    return;
+                }
+            };
+
+            back_button.Click += delegate
+            {
+                Controller.BackToPage1();
+                foreach (AsyncNodeLoader task in loader.Values)
+                    task.Cancel();
+            };
+
+            Controller.HideWindowEvent += delegate
+            {
+                foreach (AsyncNodeLoader task in loader.Values)
+                    task.Cancel();
+            };
+        }
+
+        private void SetupAddCustomize()
+        {
+            string parentFolder = Controller.DefaultRepoPath;
+
+            // UI elements.
+            Header = Properties_Resources.Customize;
+
+
+
+            // Customize local folder name
+            TextBlock localfolder_label = new TextBlock()
+            {
+                Text = Properties_Resources.EnterLocalFolderName,
+                FontWeight = FontWeights.Bold,
+                TextWrapping = TextWrapping.Wrap,
+                Width = 420
+            };
+            string localfoldername = Controller.saved_address.Host.ToString();
+            foreach (KeyValuePair<String, String> repository in Controller.repositories)
+            {
+                if (repository.Key == Controller.saved_repository)
+                {
+                    localfoldername += "\\" + repository.Value;
+                    break;
+                }
+            }
+            TextBox localfolder_box = new TextBox()
+            {
+                Width = 420,
+                Text = localfoldername
+            };
+            TextBlock localrepopath_label = new TextBlock()
+            {
+                Text = Properties_Resources.ChangeRepoPath,
+                FontWeight = FontWeights.Bold
+            };
+            TextBox localrepopath_box = new TextBox()
+            {
+                Width = 375,
+                Text = Path.Combine(parentFolder, localfolder_box.Text)
+            };
+            localfolder_box.TextChanged += delegate
+            {
+                try
+                {
+                    localrepopath_box.Text = Path.Combine(parentFolder, localfolder_box.Text);
+                }
+                catch (Exception)
+                { }
+            };
+            Button choose_folder_button = new Button()
+            {
+                Width = 40,
+                Content = "..."
+            };
+            TextBlock localfolder_error_label = new TextBlock()
+            {
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Color.FromRgb(255, 128, 128)),
+                Visibility = Visibility.Hidden,
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = 420
+            };
+
+            Button cancel_button = new Button()
+            {
+                Content = Properties_Resources.Cancel
+            };
+            Button add_button = new Button()
+            {
+                Content = Properties_Resources.Add,
+                IsDefault = true
+            };
+            Button back_button = new Button()
+            {
+                Content = Properties_Resources.Back
+            };
+            Buttons.Add(back_button);
+            Buttons.Add(add_button);
+            Buttons.Add(cancel_button);
+
+            // Local Folder Name
+            ContentCanvas.Children.Add(localfolder_label);
+            Canvas.SetTop(localfolder_label, 160);
+            Canvas.SetLeft(localfolder_label, 185);
+
+            ContentCanvas.Children.Add(localfolder_box);
+            Canvas.SetTop(localfolder_box, 180);
+            Canvas.SetLeft(localfolder_box, 185);
+
+            ContentCanvas.Children.Add(localrepopath_label);
+            Canvas.SetTop(localrepopath_label, 200);
+            Canvas.SetLeft(localrepopath_label, 185);
+
+            ContentCanvas.Children.Add(localrepopath_box);
+            Canvas.SetTop(localrepopath_box, 220);
+            Canvas.SetLeft(localrepopath_box, 185);
+
+            ContentCanvas.Children.Add(choose_folder_button);
+            Canvas.SetTop(choose_folder_button, 220);
+            Canvas.SetLeft(choose_folder_button, 565);
+
+            ContentCanvas.Children.Add(localfolder_error_label);
+            Canvas.SetTop(localfolder_error_label, 275);
+            Canvas.SetLeft(localfolder_error_label, 185);
+
+            TaskbarItemInfo.ProgressValue = 0.0;
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+
+            localfolder_box.Focus();
+            localfolder_box.Select(localfolder_box.Text.Length, 0);
+
+            // Repo path validity.
+
+            CheckCustomizeInput(localfolder_box, localrepopath_box, localfolder_error_label);
+
+            // Actions.
+
+            Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    if (add_button.IsEnabled != button_enabled)
+                    {
+                        add_button.IsEnabled = button_enabled;
+                        if (button_enabled)
+                        {
+                            add_button.IsDefault = true;
+                            back_button.IsDefault = false;
+                        }
+                    }
+                });
+            };
+
+            localfolder_box.TextChanged += delegate
+            {
+                CheckCustomizeInput(localfolder_box, localrepopath_box, localfolder_error_label);
+            };
+
+            localrepopath_box.TextChanged += delegate
+            {
+                CheckCustomizeInput(localfolder_box, localrepopath_box, localfolder_error_label);
+            };
+
+            // Choose a folder.
+            choose_folder_button.Click += delegate
+            {
+                System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+                if (folderBrowserDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    parentFolder = folderBrowserDialog1.SelectedPath;
+                    localrepopath_box.Text = Path.Combine(parentFolder, localfolder_box.Text);
+                }
+            };
+
+            // Other actions.
+
+            cancel_button.Click += delegate
+            {
+                Controller.PageCancelled();
+            };
+
+            back_button.Click += delegate
+            {
+                Controller.BackToPage2();
+            };
+
+            add_button.Click += delegate
+            {
+                Controller.CustomizePageCompleted(localfolder_box.Text, localrepopath_box.Text);
+            };
+
+            Controller.LocalPathExists += LocalPathExistsHandler;
+        }
+
+        private void SetupAddSyncing()
+        {
+            // UI elements.
+            Header = Properties_Resources.AddingFolder + " ‘" + Controller.SyncingReponame + "’…";
+            Description = Properties_Resources.MayTakeTime;
+
+            ProgressBar progress_bar = new ProgressBar()
+            {
+                Width = 414,
+                Height = 15,
+                Value = Controller.ProgressBarPercentage
+            };
+
+            ContentCanvas.Children.Add(progress_bar);
+            Canvas.SetLeft(progress_bar, 185);
+            Canvas.SetTop(progress_bar, 150);
+
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
+
+            Button finish_button = new Button()
+            {
+                Content = Properties_Resources.Finish,
+                IsEnabled = false
+            };
+            Buttons.Add(finish_button);
+
+            // Actions.
+
+            Controller.UpdateProgressBarEvent += delegate(double percentage)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    progress_bar.Value = percentage;
+                    TaskbarItemInfo.ProgressValue = percentage / 100;
+                });
+            };
+        }
+
+        private void SetupAddFinish()
+        {
+            // UI elements.
+            Header = Properties_Resources.Ready;
+            Description = Properties_Resources.YouCanFind;
+
+            TaskbarItemInfo.ProgressValue = 0.0;
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+
+            Button finish_button = new Button()
+            {
+                Content = Properties_Resources.Finish
+            };
+            Button open_folder_button = new Button()
+            {
+                Content = Properties_Resources.OpenFolder
+            };
+            Buttons.Add(open_folder_button);
+            Buttons.Add(finish_button);
+
+            // Actions.
+
+            finish_button.Click += delegate
+            {
+                Controller.FinishPageCompleted();
+            };
+
+            open_folder_button.Click += delegate
+            {
+                Controller.OpenFolderClicked();
+            };
+
+            SystemSounds.Exclamation.Play();
         }
 
         private static bool LocalPathExistsHandler(string path) {
