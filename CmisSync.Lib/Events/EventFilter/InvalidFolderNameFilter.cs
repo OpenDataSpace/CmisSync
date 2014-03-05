@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace CmisSync.Lib.Events.Filter
 {
@@ -32,7 +33,7 @@ namespace CmisSync.Lib.Events.Filter
         /// </param>
         private bool checkPath (ISyncEvent e, string path)
         {
-            if (Utils.IsInvalidFolderName (path.Replace ("/", "").Replace ("\"", ""))) {
+            if (Utils.IsInvalidFolderName (path.Replace ("/", "").Replace ("\"", ""), new List<string>())) {
                 Queue.AddEvent (new RequestIgnoredEvent (e, source: this));
                 return true;
             }

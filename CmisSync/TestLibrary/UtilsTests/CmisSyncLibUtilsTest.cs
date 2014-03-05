@@ -156,5 +156,14 @@ namespace TestLibrary.UtilsTests
             Assert.That(!regex.IsMatch("stuff.tmp~"));
             Assert.That(!regex.IsMatch("tmp.test"));
         }
+
+        [Test, Category("Fast")]
+        public void IgnoreFolderByWildard()
+        {
+            var wildcards = new List<string>();
+            wildcards.Add(".*");
+            Assert.IsFalse(Utils.IsInvalidFolderName("test", wildcards), "test is a valid folder name");
+            Assert.IsTrue(Utils.IsInvalidFolderName(".test", wildcards), ".test is not a valid folder name");
+        }
     }
 }

@@ -191,7 +191,7 @@ namespace CmisSync.Lib.Sync
                     remoteParent = remoteFolder.FolderParent;
                     foreach (string name in remotePath.Split('/'))
                     {
-                        if (!String.IsNullOrEmpty(name) && Utils.IsInvalidFolderName(name))
+                        if (!String.IsNullOrEmpty(name) && Utils.IsInvalidFolderName(name, ConfigManager.CurrentConfig.IgnoreFolderNames))
                         {
                             Logger.Info(String.Format("Change in illegal syncing path name {0}: {1}", name, remotePath));
                             return true;

@@ -245,13 +245,23 @@ namespace CmisSync.Lib
         /// <summary>
         /// Check whether a folder name is valid or not.
         /// </summary>
-        public static bool IsInvalidFolderName(string name)
+        public static bool IsInvalidFolderName(string name, List<string> ignoreWildcards)
         {
+            if (ignoreWildcards == null)
+                throw new ArgumentNullException("Given wildcards are null");
             bool ret = invalidFolderNameRegex.IsMatch(name);
             if (ret)
             {
                 Logger.Debug(String.Format("The given directory name {0} contains invalid patterns", name));
                 return ret;
+            }
+            foreach(string wildcard in ignoreWildcards)
+            {
+                if(Utils.IgnoreLineToRegex(wildcard).IsMatch(name))
+                {
+                    Logger.Debug(String.Format("The given folder name \"{0}\" matches the wildcard \"{1}\"", name, wildcard));
+                    return true;
+                }
             }
             ret = !IsValidISO88591(name);
             if (ret)
