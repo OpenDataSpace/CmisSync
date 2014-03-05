@@ -333,6 +333,16 @@ namespace CmisSync.Lib.Sync
                 string savedDocumentPath = database.GetFilePath(change.ObjectId);
                 if (null != savedDocumentPath)
                 {
+                    string relativePath = Path.GetDirectoryName(savedDocumentPath).Substring(this.repoinfo.TargetDirectory.Length);
+                    string[] names = relativePath.Split(Path.DirectorySeparatorChar);
+                    foreach(string name in names)
+                    {
+                        if(!String.IsNullOrEmpty(name) && Utils.IsInvalidFolderName(name, ConfigManager.CurrentConfig.IgnoreFolderNames))
+                        {
+                            Logger.Debug(String.Format("Ignore remote deletion of \"{0}\" because \"{1}\" is ignored locally", savedDocumentPath, name));
+                            return true;
+                        }
+                    }
                     Logger.Info("Remove local document: " + savedDocumentPath);
                     if(File.Exists(savedDocumentPath))
                         File.Delete(savedDocumentPath);
@@ -344,6 +354,16 @@ namespace CmisSync.Lib.Sync
                 string savedFolderPath = database.GetFolderPath(change.ObjectId);
                 if (null != savedFolderPath)
                 {
+                    string relativePath = savedFolderPath.Substring(this.repoinfo.TargetDirectory.Length);
+                    string[] names = relativePath.Split(Path.DirectorySeparatorChar);
+                    foreach(string name in names)
+                    {
+                        if(!String.IsNullOrEmpty(name) && Utils.IsInvalidFolderName(name, ConfigManager.CurrentConfig.IgnoreFolderNames))
+                        {
+                            Logger.Debug(String.Format("Ignore remote deletion of \"{0}\" because \"{1}\" is ignored locally", savedFolderPath, name));
+                            return true;
+                        }
+                    }
                     Logger.Info("Remove local folder: " + savedFolderPath);
                     if(Directory.Exists(savedFolderPath)) {
                         Directory.Delete(savedFolderPath, true);

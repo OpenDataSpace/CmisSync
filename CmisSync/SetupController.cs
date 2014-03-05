@@ -374,12 +374,12 @@ namespace CmisSync
 
                 // Check whether folder name contains invalid characters.
                 Regex regexRepoName = (Path.DirectorySeparatorChar.Equals('\\')) ? RepositoryRegex : RepositoryRegexLinux;
-                if (!regexRepoName.IsMatch(reponame)||CmisSync.Lib.Utils.IsInvalidFolderName(reponame.Replace(Path.DirectorySeparatorChar, ' ')))
+                if (!regexRepoName.IsMatch(reponame)||CmisSync.Lib.Utils.IsInvalidFolderName(reponame.Replace(Path.DirectorySeparatorChar, ' '), new List<string>()))
                     throw new ArgumentException(String.Format(Properties_Resources.InvalidRepoName, reponame));
                 // Validate localpath
                 if(localpath.EndsWith(Path.DirectorySeparatorChar.ToString()))
                     localpath = localpath.Substring(0,localpath.Length-1);
-                if (CmisSync.Lib.Utils.IsInvalidFolderName(Path.GetFileName(localpath)))
+                if (CmisSync.Lib.Utils.IsInvalidFolderName(Path.GetFileName(localpath), new List<string>()))
                     throw new ArgumentException(String.Format(Properties_Resources.InvalidFolderName, Path.GetFileName(localpath)));
                 // If no warning handler is registered, handle warning as error
                 if (LocalPathExists == null)

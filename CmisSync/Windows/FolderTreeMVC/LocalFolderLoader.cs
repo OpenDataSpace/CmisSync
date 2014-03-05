@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CmisSync.Lib;
 
 namespace CmisSync.CmisTree
 {
@@ -33,7 +34,7 @@ namespace CmisSync.CmisTree
                     f.Path = f.Parent.Path + f.Name ;
                 else
                     f.Path = f.Parent.Path + "/" + f.Name ;
-                f.IsIllegalFileNameInPath = CmisSync.Lib.Utils.IsInvalidFolderName(f.Name);
+                f.IsIllegalFileNameInPath = CmisSync.Lib.Utils.IsInvalidFolderName(f.Name, ConfigManager.CurrentConfig.IgnoreFolderNames);
                 List<Node> children = CreateNodesFromLocalFolder(subdir, f);
                 foreach (Node child in children)
                     f.Children.Add(child);
