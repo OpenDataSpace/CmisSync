@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Events
                 Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
                 Status.Length = (status.Length != null) ? status.Length : Status.Length;
                 Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
-                Status.BitsPerSecond = (status.BitsPerSecond != null && Status.BitsPerSecond!=status.BitsPerSecond) ? status.BitsPerSecond : null;
+                Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
             if (TransmissionStatus != null)
                 TransmissionStatus(this, Status);
         }
