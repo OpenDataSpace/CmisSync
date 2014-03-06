@@ -99,6 +99,7 @@ namespace CmisSync.Lib.Events
                 Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
                 Status.Length = (status.Length != null) ? status.Length : Status.Length;
                 Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
+				Status.Started = (status.Started != null) ? status.Started : Status.Started;
                 Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
             if (TransmissionStatus != null)
                 TransmissionStatus(this, Status);
@@ -171,6 +172,14 @@ namespace CmisSync.Lib.Events
         /// Transmission aborted.
         /// </value>
         public bool? Aborted{ get; set; }
+
+		/// <summary>
+		/// Gets or sets if the transmission is started.
+		/// </summary>
+		/// <value>
+		/// Transmission started.
+		/// </value>
+		public bool? Started { get; set; }
 
         /// <summary>
         /// Gets or sets if the transmission is completed.
