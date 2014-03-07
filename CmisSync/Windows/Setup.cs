@@ -112,6 +112,7 @@ namespace CmisSync
                         // First step of the remote folder addition dialog: Specifying the server.
                         case PageType.Add1:
                             SetupAddLogin();
+                            //LoadAddLoginWPF();
                             break;
 
                         // Second step of the remote folder addition dialog: choosing the folder.
@@ -150,6 +151,52 @@ namespace CmisSync
         }
 
         private void SetupWelcome()
+        {
+            // UI elements.
+            Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
+            Description = Properties_Resources.Intro;
+
+            Button cancel_button = new Button()
+            {
+                Content = Properties_Resources.Cancel
+            };
+            Button continue_button = new Button()
+            {
+                Content = Properties_Resources.Continue,
+                IsEnabled = false
+            };
+            Buttons.Add(continue_button);
+            Buttons.Add(cancel_button);
+            continue_button.Focus();
+
+            // Actions.
+
+            Controller.UpdateSetupContinueButtonEvent += delegate(bool enabled)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    continue_button.IsEnabled = enabled;
+                });
+            };
+
+            cancel_button.Click += delegate
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    Program.UI.StatusIcon.Dispose();
+                    Controller.SetupPageCancelled();
+                });
+            };
+
+            continue_button.Click += delegate
+            {
+                Controller.SetupPageCompleted();
+            };
+
+            Controller.CheckSetupPage();
+        }
+
+        private void LoadWelcomeWPF()
         {
             // UI elements.
             Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
@@ -615,6 +662,187 @@ namespace CmisSync
                 }
             };
         }
+
+        // LoadAddLogin
+        private TextBlock address_label;
+        private TextBox address_box;
+        private TextBlock address_help_label;
+        private TextBlock user_label;
+        private TextBox user_box;
+        private TextBlock user_help_label;
+        private TextBlock password_label;
+        private PasswordBox password_box;
+        private TextBlock password_help_label;
+        private TextBox address_error_label;
+
+        // Public Buttons
+        private Button continue_button;
+        private Button cancel_button;
+
+        private void LoadAddLoginWPF()
+        {
+            // define UI elements.
+            Header = Properties_Resources.Where;
+
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupAddLoginWPF.xaml", System.UriKind.Relative);
+            UserControl LoadAddLoginWPF = Application.LoadComponent(resourceLocater) as UserControl;
+
+            address_label = LoadAddLoginWPF.FindName("address_label") as TextBlock;
+            address_box = LoadAddLoginWPF.FindName("address_box") as TextBox;
+            address_help_label = LoadAddLoginWPF.FindName("address_help_label") as TextBlock;
+            user_label = LoadAddLoginWPF.FindName("user_label") as TextBlock;
+            user_box = LoadAddLoginWPF.FindName("user_box") as TextBox;
+            user_help_label = LoadAddLoginWPF.FindName("user_help_label") as TextBlock;
+            password_label = LoadAddLoginWPF.FindName("password_label") as TextBlock;
+            password_box = LoadAddLoginWPF.FindName("password_box") as PasswordBox;
+            password_help_label = LoadAddLoginWPF.FindName("password_help_label") as TextBlock;
+            address_error_label = LoadAddLoginWPF.FindName("address_error_label") as TextBox;
+            continue_button = LoadAddLoginWPF.FindName("continue_button") as Button;
+            cancel_button = LoadAddLoginWPF.FindName("cancel_button") as Button;
+
+            ContentCanvas.Children.Add(LoadAddLoginWPF);
+
+            // init UI elements.
+            address_label.Text = Properties_Resources.EnterWebAddress;
+            address_box.Text = (Controller.PreviousAddress != null) ? Controller.PreviousAddress.ToString() : String.Empty;
+
+            address_help_label.Text = Properties_Resources.Help + ": ";
+
+            Run run = new Run(Properties_Resources.WhereToFind);
+            Hyperlink link = new Hyperlink(run);
+            link.NavigateUri = new Uri("https://github.com/nicolas-raoul/CmisSync/wiki/What-address");
+            address_help_label.Inlines.Add(link);
+            link.RequestNavigate += (sender, e) =>
+            {
+                System.Diagnostics.Process.Start(e.Uri.ToString());
+            };
+
+            user_label.Text = Properties_Resources.User + ":";
+
+            if (Controller.saved_user == String.Empty || Controller.saved_user == null)
+            {
+                user_box.Text = Environment.UserName;
+            }
+            else
+            {
+                user_box.Text = Controller.saved_user;
+            }
+
+            password_label.Text = Properties_Resources.Password + ":";
+            continue_button.Content = Properties_Resources.Continue;
+            cancel_button.Content = Properties_Resources.Cancel;
+            TaskbarItemInfo.ProgressValue = 0.0;
+            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+
+            if (Controller.PreviousAddress == null || Controller.PreviousAddress.ToString() == String.Empty)
+                address_box.Text = "https://";
+            else
+                address_box.Text = Controller.PreviousAddress.ToString();
+            address_box.Focus();
+            address_box.Select(address_box.Text.Length, 0);
+
+            // Actions.
+            Controller.ChangeAddressFieldEvent += delegate(string text,
+                string example_text)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    address_box.Text = text;
+                    address_help_label.Text = example_text;
+                });
+            };
+
+            Controller.ChangeUserFieldEvent += delegate(string text,
+                string example_text)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    user_box.Text = text;
+                    user_help_label.Text = example_text;
+                });
+            };
+
+            Controller.ChangePasswordFieldEvent += delegate(string text,
+                string example_text)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    password_box.Password = text;
+                    password_help_label.Text = example_text;
+                });
+            };
+
+            Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled)
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    continue_button.IsEnabled = button_enabled;
+                });
+            };
+
+            Controller.CheckAddPage(address_box.Text);
+
+            address_box.TextChanged += delegate
+            {
+                string error = Controller.CheckAddPage(address_box.Text);
+                if (!String.IsNullOrEmpty(error))
+                {
+                    address_error_label.Text = Properties_Resources.ResourceManager.GetString(error, CultureInfo.CurrentCulture);
+                    address_error_label.Visibility = Visibility.Visible;
+                }
+                else address_error_label.Visibility = Visibility.Hidden;
+            };
+
+            cancel_button.Click += delegate
+            {
+                Controller.PageCancelled();
+            };
+
+            continue_button.Click += delegate
+            {
+                // Show wait cursor
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+
+                // Try to find the CMIS server (asynchronously)
+                GetRepositoriesFuzzyDelegate dlgt =
+                    new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
+                ServerCredentials credentials = new ServerCredentials()
+                {
+                    UserName = user_box.Text,
+                    Password = password_box.Password,
+                    Address = new Uri(address_box.Text)
+                };
+                IAsyncResult ar = dlgt.BeginInvoke(credentials, null, null);
+                while (!ar.AsyncWaitHandle.WaitOne(100))
+                {
+                    System.Windows.Forms.Application.DoEvents();
+                }
+                Tuple<CmisServer, Exception> result = dlgt.EndInvoke(ar);
+                CmisServer cmisServer = result.Item1;
+
+                Controller.repositories = cmisServer != null ? cmisServer.Repositories : null;
+
+                address_box.Text = cmisServer.Url.ToString();
+
+                // Hide wait cursor
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+
+                if (Controller.repositories == null)
+                {
+                    // Could not retrieve repositories list from server, show warning.
+                    string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
+                    address_error_label.Text = warning;
+                    address_error_label.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    // Continue to next step, which is choosing a particular folder.
+                    Controller.Add1PageCompleted(
+                        new Uri(address_box.Text), user_box.Text, password_box.Password);
+                }
+            };
+        }
+
 
         private void SetupAddSelectRepo()
         {

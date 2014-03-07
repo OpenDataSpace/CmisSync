@@ -73,7 +73,7 @@ namespace CmisSync {
         /// </summary>
         private Rectangle buttonsBackground;
 
-        private bool useXAML = false;
+        private bool useXAML = true;
 
         /// <summary>
         /// Constructor.

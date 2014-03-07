@@ -134,6 +134,9 @@
       <Link>Program.cs</Link>
     </Compile>
     <Compile Include="Utils.cs" />
+    <Compile Include="SetupAddLoginWPF.xaml.cs">
+      <DependentUpon>SetupAddLoginWPF.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -316,6 +319,10 @@
     <Page Include="SetupWPF.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SetupAddLoginWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <PropertyGroup>
