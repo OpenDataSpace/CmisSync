@@ -6,10 +6,15 @@ using DotCMIS.Client;
 using DotCMIS.Exceptions;
 using System.Collections.Generic;
 
+using log4net;
+
 namespace CmisSync.Lib.Sync.Strategy
 {
     public class RemoteSituationDetection : ISituationDetection<IObjectId>
     {
+
+        private static readonly ILog logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
+
         private ISession Session;
         public RemoteSituationDetection(ISession session)
         {
@@ -18,7 +23,15 @@ namespace CmisSync.Lib.Sync.Strategy
             Session = session;
         }
 
-        public SituationType Analyse(IMetaDataStorage storage, IObjectId objectId)
+        public SituationType Analyse(IMetaDataStorage storage, IObjectId objectId) 
+        {
+            SituationType type = DoAnalyse(storage, objectId);
+            logger.Debug(String.Format("Remote Situation is: {1}", type));
+            return type;
+
+        }
+
+        private SituationType DoAnalyse(IMetaDataStorage storage, IObjectId objectId)
         {
             //Object has never been uploaded
             if(objectId == null) {
