@@ -20,10 +20,15 @@ namespace CmisSync.Lib.Sync.Strategy
 
         public SituationType Analyse(IMetaDataStorage storage, IObjectId objectId)
         {
+            //Object has never been uploaded
+            if(objectId == null) {
+                return SituationType.NOCHANGE;
+            }
             try {
                 ICmisObject remoteObject = Session.GetObject(objectId);
-                if(storage.GetFilePath(objectId.Id) == null && storage.GetFolderPath(objectId.Id) == null)
+                if(storage.GetFilePath(objectId.Id) == null && storage.GetFolderPath(objectId.Id) == null) {
                     return SituationType.ADDED;
+                }
                 var document = remoteObject as IDocument;
                 if(document != null)
                 {

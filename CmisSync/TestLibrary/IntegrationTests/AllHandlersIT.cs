@@ -37,15 +37,19 @@ namespace TestLibrary.IntegrationTests
 
         public static void fakeDelegate(string repoId) {
         }
+        
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session) 
+        {
+            return CreateQueue(session, new ObservableHandler());
+        }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session) {
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, ObservableHandler observer) {
             var database = new Mock<IDatabase>();
             var storage = new Mock<IMetaDataStorage>();
 
             var manager = new SyncEventManager();
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
 
-            var observer = new ObservableHandler();
             manager.AddEventHandler(observer);
 
             var changes = new ContentChanges (session.Object, database.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
@@ -100,10 +104,12 @@ namespace TestLibrary.IntegrationTests
         public void RunFakeEvent ()
         {
             var session = new Mock<ISession>();
-            var queue = CreateQueue(session);
+            var observer = new ObservableHandler();
+            var queue = CreateQueue(session, observer);
             var myEvent = new Mock<ISyncEvent>();
             queue.AddEvent(myEvent.Object);
             queue.Run();
+            Assert.That(observer.list.Count, Is.EqualTo(1));
         }
 
         [Test, Category("Fast")]
@@ -112,10 +118,26 @@ namespace TestLibrary.IntegrationTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
-            var queue = CreateQueue(session);
             var myEvent = new StartNextSyncEvent();
+            var observer = new ObservableHandler();
+            var queue = CreateQueue(session, observer);
             queue.AddEvent(myEvent);
             queue.Run();
+            Assert.That(observer.list.Count, Is.EqualTo(1));
+            Assert.That(observer.list[0], Is.TypeOf(typeof(FullSyncCompletedEvent)));
+        }
+
+        [Test, Category("Fast")]
+        public void RunFSEventDeleted ()
+        {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            session.SetupChangeLogToken("default");
+            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, "/tmp/a");
+            var queue = CreateQueue(session);
+            queue.AddEvent(myEvent);
+            queue.Run();
+            
         }
 
     }
