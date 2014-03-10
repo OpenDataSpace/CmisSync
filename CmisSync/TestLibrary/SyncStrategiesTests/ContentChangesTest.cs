@@ -21,6 +21,11 @@ namespace TestLibrary.SyncStrategiesTests
     public class ContentChangesTest
     {
 
+        [TestFixtureSetUp]
+        public void ClassInit()
+        {
+            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
+        }
         private readonly bool isPropertyChangesSupported = false;
         private readonly string changeLogToken = "token";
         private readonly string latestChangeLogToken = "latestChangeLogToken";
@@ -186,9 +191,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.NotNull (queuedEvent);
             Assert.IsTrue (queuedEvent is StartNextSyncEvent);
             Assert.IsTrue (((StartNextSyncEvent)queuedEvent).FullSyncRequested);
-            string returnedChangeLogToken;
-            Assert.IsTrue (((StartNextSyncEvent)queuedEvent).TryGetParam (ContentChanges.FULL_SYNC_PARAM_NAME, out returnedChangeLogToken));
-            Assert.AreEqual (changeLogToken, returnedChangeLogToken);
         }
 
 
