@@ -9,6 +9,7 @@ using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
+    //TODO Is this still needed?
     public class FileEventHandler : ReportingSyncEventHandler
     {
         public static readonly int FILEEVENTHANDLERPRIORITY = 0;
