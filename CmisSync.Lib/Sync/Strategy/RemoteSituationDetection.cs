@@ -26,7 +26,7 @@ namespace CmisSync.Lib.Sync.Strategy
         public SituationType Analyse(IMetaDataStorage storage, IObjectId objectId) 
         {
             SituationType type = DoAnalyse(storage, objectId);
-            logger.Debug(String.Format("Remote Situation is: {1}", type));
+            logger.Debug(String.Format("Remote Situation is: {0}", type));
             return type;
 
         }
