@@ -60,6 +60,7 @@ namespace CmisSync
         delegate Tuple<CmisServer, Exception> GetRepositoriesFuzzyDelegate(ServerCredentials credentials);
 
         // Public Buttons
+        private Button back_button;
         private Button continue_button;
         private Button cancel_button;
 
@@ -106,29 +107,26 @@ namespace CmisSync
                     {
                         // Welcome page that shows up at first run.
                         case PageType.Setup:
-                            //SetupWelcome();
                             LoadWelcomeWPF();
                             break;
 
                         case PageType.Tutorial:
-                            //SetupTutorial();
                             LoadTutorialWFP();
                             break;
 
                         // First step of the remote folder addition dialog: Specifying the server.
                         case PageType.Add1:
-                            //SetupAddLogin();
                             LoadAddLoginWPF();
                             break;
 
                         // Second step of the remote folder addition dialog: choosing the folder.
                         case PageType.Add2:
-                            SetupAddSelectRepo();
+                            LoadAddSelectRepoWPF();
                             break;
 
                         // Third step of the remote folder addition dialog: Customizing the local folder.
                         case PageType.Customize:
-                            SetupAddCustomize();
+                            LoadAddCustomizeWPF();
                             break;
 
                         // Fourth page of the remote folder addition dialog: starting to sync.
@@ -489,18 +487,25 @@ namespace CmisSync
             };
         }
 
+        private Dictionary<string, AsyncNodeLoader> loader;
 
-        private void SetupAddSelectRepo()
+        private void SelectRepoCancelAction()
+        {
+            foreach (AsyncNodeLoader task in loader.Values)
+                task.Cancel();
+        }
+
+        private void LoadAddSelectRepoWPF()
         {
             // UI elements.
             Header = Properties_Resources.Which;
 
             // A tree allowing the user to browse CMIS repositories/folders.
-            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/FolderTreeMVC/TreeView.xaml", System.UriKind.Relative);
-            System.Windows.Controls.TreeView treeView = System.Windows.Application.LoadComponent(resourceLocater) as TreeView;
+            System.Uri resourceTreeLocater = new System.Uri("/DataSpaceSync;component/FolderTreeMVC/TreeView.xaml", System.UriKind.Relative);
+            System.Windows.Controls.TreeView treeView = System.Windows.Application.LoadComponent(resourceTreeLocater) as TreeView;
 
             ObservableCollection<RootFolder> repos = new ObservableCollection<RootFolder>();
-            Dictionary<string, AsyncNodeLoader> loader = new Dictionary<string, AsyncNodeLoader>();
+            loader = new Dictionary<string, AsyncNodeLoader>();
             // Some CMIS servers hold several repositories (ex:Nuxeo). Show one root per repository.
             bool firstRepo = true;
             foreach (KeyValuePair<String, String> repository in Controller.repositories)
@@ -555,32 +560,26 @@ namespace CmisSync
                     }
                 }
             }));
+
             ContentCanvas.Children.Add(treeView);
             Canvas.SetTop(treeView, 70);
             Canvas.SetLeft(treeView, 185);
 
-            Button continue_button = new Button()
-            {
-                Content = Properties_Resources.Continue,
-                IsEnabled = !firstRepo,
-                IsDefault = true
-            };
-            Button cancel_button = new Button()
-            {
-                Content = Properties_Resources.Cancel
-            };
-            Button back_button = new Button()
-            {
-                Content = Properties_Resources.Back,
-                IsDefault = false
-            };
-            Buttons.Add(back_button);
-            Buttons.Add(continue_button);
-            Buttons.Add(cancel_button);
-            continue_button.Focus();
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupAddSelectRepoWPF.xaml", System.UriKind.Relative);
+            UserControl LoadXAML = Application.LoadComponent(resourceLocater) as UserControl;
 
+            back_button = LoadXAML.FindName("back_button") as Button;
+            continue_button = LoadXAML.FindName("continue_button") as Button;
+            cancel_button = LoadXAML.FindName("cancel_button") as Button;
+
+            continue_button.IsEnabled = !firstRepo;
+
+            ContentCanvas.Children.Add(LoadXAML);
+       
+            // Actions 
             cancel_button.Click += delegate
             {
+                SelectRepoCancelAction();
                 Controller.PageCancelled();
             };
 
@@ -606,10 +605,9 @@ namespace CmisSync
                     selectedFolder.AddRange(NodeModelUtils.GetSelectedFolder(selectedRepo));
                     Controller.saved_repository = selectedRepo.Id;
                     Controller.saved_remote_path = selectedRepo.Path;
+                    SelectRepoCancelAction();
                     Controller.Add2PageCompleted(
                         Controller.saved_repository, Controller.saved_remote_path, ignored.ToArray(), selectedFolder.ToArray());
-                    foreach (AsyncNodeLoader task in loader.Values)
-                        task.Cancel();
                 }
                 else
                 {
@@ -619,35 +617,69 @@ namespace CmisSync
 
             back_button.Click += delegate
             {
+                SelectRepoCancelAction();
                 Controller.BackToPage1();
-                foreach (AsyncNodeLoader task in loader.Values)
-                    task.Cancel();
-            };
-
-            Controller.HideWindowEvent += delegate
-            {
-                foreach (AsyncNodeLoader task in loader.Values)
-                    task.Cancel();
             };
         }
 
-        private void SetupAddCustomize()
+        private void ControllerCustomizeAddProjectAction(bool button_enabled)
+        {
+            Dispatcher.BeginInvoke((Action)delegate
+            {
+                if (continue_button.IsEnabled != button_enabled)
+                {
+                    continue_button.IsEnabled = button_enabled;
+                    if (button_enabled)
+                    {
+                        continue_button.IsDefault = true;
+                        back_button.IsDefault = false;
+                    }
+                }
+            });
+        }
+
+        private void ControllerCustomizeInsertAction()
+        {
+            Controller.UpdateAddProjectButtonEvent += ControllerCustomizeAddProjectAction;
+            Controller.LocalPathExists += LocalPathExistsHandler;
+        }
+
+        private void ControllerCustomizeRemoveAction()
+        {
+            Controller.UpdateAddProjectButtonEvent -= ControllerCustomizeAddProjectAction;
+            Controller.LocalPathExists -= LocalPathExistsHandler;
+        }
+
+        private TextBlock localfolder_label;
+        private TextBox localfolder_box;
+        private TextBlock localrepopath_label;
+        private TextBox localrepopath_box;
+        private Button choose_folder_button;
+        private TextBlock localfolder_error_label;
+
+        private void LoadAddCustomizeWPF()
         {
             string parentFolder = Controller.DefaultRepoPath;
 
             // UI elements.
             Header = Properties_Resources.Customize;
 
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupAddCustomizeWPF.xaml", System.UriKind.Relative);
+            UserControl LoadXAML = Application.LoadComponent(resourceLocater) as UserControl;
 
+            localfolder_label = LoadXAML.FindName("localfolder_label") as TextBlock;
+            localfolder_box = LoadXAML.FindName("localfolder_box") as TextBox;
+            localrepopath_label = LoadXAML.FindName("localrepopath_label") as TextBlock;
+            localrepopath_box = LoadXAML.FindName("localrepopath_box") as TextBox;
+            localfolder_error_label = LoadXAML.FindName("localfolder_error_label") as TextBlock;
 
-            // Customize local folder name
-            TextBlock localfolder_label = new TextBlock()
-            {
-                Text = Properties_Resources.EnterLocalFolderName,
-                FontWeight = FontWeights.Bold,
-                TextWrapping = TextWrapping.Wrap,
-                Width = 420
-            };
+            choose_folder_button = LoadXAML.FindName("choose_folder_button") as Button;
+
+            back_button = LoadXAML.FindName("back_button") as Button;
+            continue_button = LoadXAML.FindName("continue_button") as Button;
+            cancel_button = LoadXAML.FindName("cancel_button") as Button;
+
+            // init UI elements.
             string localfoldername = Controller.saved_address.Host.ToString();
             foreach (KeyValuePair<String, String> repository in Controller.repositories)
             {
@@ -657,21 +689,11 @@ namespace CmisSync
                     break;
                 }
             }
-            TextBox localfolder_box = new TextBox()
-            {
-                Width = 420,
-                Text = localfoldername
-            };
-            TextBlock localrepopath_label = new TextBlock()
-            {
-                Text = Properties_Resources.ChangeRepoPath,
-                FontWeight = FontWeights.Bold
-            };
-            TextBox localrepopath_box = new TextBox()
-            {
-                Width = 375,
-                Text = Path.Combine(parentFolder, localfolder_box.Text)
-            };
+            localfolder_box.Text = localfoldername;
+            localrepopath_box.Text = Path.Combine(parentFolder, localfolder_box.Text);
+
+            ContentCanvas.Children.Add(LoadXAML);
+            
             localfolder_box.TextChanged += delegate
             {
                 try
@@ -681,89 +703,18 @@ namespace CmisSync
                 catch (Exception)
                 { }
             };
-            Button choose_folder_button = new Button()
-            {
-                Width = 40,
-                Content = "..."
-            };
-            TextBlock localfolder_error_label = new TextBlock()
-            {
-                FontSize = 11,
-                Foreground = new SolidColorBrush(Color.FromRgb(255, 128, 128)),
-                Visibility = Visibility.Hidden,
-                TextWrapping = TextWrapping.Wrap,
-                MaxWidth = 420
-            };
-
-            Button cancel_button = new Button()
-            {
-                Content = Properties_Resources.Cancel
-            };
-            Button add_button = new Button()
-            {
-                Content = Properties_Resources.Add,
-                IsDefault = true
-            };
-            Button back_button = new Button()
-            {
-                Content = Properties_Resources.Back
-            };
-            Buttons.Add(back_button);
-            Buttons.Add(add_button);
-            Buttons.Add(cancel_button);
-
-            // Local Folder Name
-            ContentCanvas.Children.Add(localfolder_label);
-            Canvas.SetTop(localfolder_label, 160);
-            Canvas.SetLeft(localfolder_label, 185);
-
-            ContentCanvas.Children.Add(localfolder_box);
-            Canvas.SetTop(localfolder_box, 180);
-            Canvas.SetLeft(localfolder_box, 185);
-
-            ContentCanvas.Children.Add(localrepopath_label);
-            Canvas.SetTop(localrepopath_label, 200);
-            Canvas.SetLeft(localrepopath_label, 185);
-
-            ContentCanvas.Children.Add(localrepopath_box);
-            Canvas.SetTop(localrepopath_box, 220);
-            Canvas.SetLeft(localrepopath_box, 185);
-
-            ContentCanvas.Children.Add(choose_folder_button);
-            Canvas.SetTop(choose_folder_button, 220);
-            Canvas.SetLeft(choose_folder_button, 565);
-
-            ContentCanvas.Children.Add(localfolder_error_label);
-            Canvas.SetTop(localfolder_error_label, 275);
-            Canvas.SetLeft(localfolder_error_label, 185);
 
             TaskbarItemInfo.ProgressValue = 0.0;
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
 
-            localfolder_box.Focus();
-            localfolder_box.Select(localfolder_box.Text.Length, 0);
+            // Actions.
+            ControllerCustomizeInsertAction();
 
             // Repo path validity.
-
             CheckCustomizeInput(localfolder_box, localrepopath_box, localfolder_error_label);
 
-            // Actions.
-
-            Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    if (add_button.IsEnabled != button_enabled)
-                    {
-                        add_button.IsEnabled = button_enabled;
-                        if (button_enabled)
-                        {
-                            add_button.IsDefault = true;
-                            back_button.IsDefault = false;
-                        }
-                    }
-                });
-            };
+            localfolder_box.Select(localfolder_box.Text.Length, 0);
+            localfolder_box.Focus();
 
             localfolder_box.TextChanged += delegate
             {
@@ -787,23 +738,23 @@ namespace CmisSync
             };
 
             // Other actions.
-
             cancel_button.Click += delegate
             {
+                ControllerCustomizeRemoveAction();
                 Controller.PageCancelled();
             };
 
             back_button.Click += delegate
             {
+                ControllerCustomizeRemoveAction();
                 Controller.BackToPage2();
             };
 
-            add_button.Click += delegate
+            continue_button.Click += delegate
             {
+                ControllerCustomizeRemoveAction();
                 Controller.CustomizePageCompleted(localfolder_box.Text, localrepopath_box.Text);
             };
-
-            Controller.LocalPathExists += LocalPathExistsHandler;
         }
 
         private void SetupAddSyncing()

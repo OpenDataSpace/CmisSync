@@ -123,6 +123,9 @@
     <Compile Include="SettingWPF.xaml.cs">
       <DependentUpon>SettingWPF.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SetupAddSelectRepoWPF.xaml.cs">
+      <DependentUpon>SetupAddSelectRepoWPF.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SetupWPF.xaml.cs">
       <DependentUpon>SetupWPF.xaml</DependentUpon>
     </Compile>
@@ -157,6 +160,9 @@
     </Compile>
     <Compile Include="SetupTutorialFourthWPF.xaml.cs">
       <DependentUpon>SetupTutorialFourthWPF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SetupAddCustomizeWPF.xaml.cs">
+      <DependentUpon>SetupAddCustomizeWPF.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ProjectExtensions>
@@ -347,6 +353,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="SetupAddSelectRepoWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="SetupWPF.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -372,6 +382,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SetupTutorialFourthWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SetupAddCustomizeWPF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
