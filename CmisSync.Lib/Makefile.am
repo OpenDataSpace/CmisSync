@@ -55,7 +55,6 @@ SOURCES =  \
 	Events/FileEvent.cs \
 	Events/FileTransmissionEvent.cs \
 	Events/FolderEvent.cs \
-	Events/FSDeletionHandler.cs \
 	Events/FSEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
 	Events/GenericSyncEventHandler.cs \

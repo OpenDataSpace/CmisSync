@@ -40,7 +40,6 @@ SOURCES =  \
 	EventsTests/StartNextSyncEventTest.cs \
 	EventsTests/SyncEventManagerTest.cs \
 	EventsTests/SyncEventQueueTest.cs \
-	FSDeletionHandlerTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
