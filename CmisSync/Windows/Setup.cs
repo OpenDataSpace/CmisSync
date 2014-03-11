@@ -59,6 +59,10 @@ namespace CmisSync
 
         delegate Tuple<CmisServer, Exception> GetRepositoriesFuzzyDelegate(ServerCredentials credentials);
 
+        // Public Buttons
+        private Button continue_button;
+        private Button cancel_button;
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -102,17 +106,19 @@ namespace CmisSync
                     {
                         // Welcome page that shows up at first run.
                         case PageType.Setup:
-                            SetupWelcome();
+                            //SetupWelcome();
+                            LoadWelcomeWPF();
                             break;
 
                         case PageType.Tutorial:
-                            SetupTutorial();
+                            //SetupTutorial();
+                            LoadTutorialWFP();
                             break;
 
                         // First step of the remote folder addition dialog: Specifying the server.
                         case PageType.Add1:
-                            SetupAddLogin();
-                            //LoadAddLoginWPF();
+                            //SetupAddLogin();
+                            LoadAddLoginWPF();
                             break;
 
                         // Second step of the remote folder addition dialog: choosing the folder.
@@ -150,73 +156,21 @@ namespace CmisSync
             Logger.Info("Exiting constructor.");
         }
 
-        private void SetupWelcome()
-        {
-            // UI elements.
-            Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
-            Description = Properties_Resources.Intro;
-
-            Button cancel_button = new Button()
-            {
-                Content = Properties_Resources.Cancel
-            };
-            Button continue_button = new Button()
-            {
-                Content = Properties_Resources.Continue,
-                IsEnabled = false
-            };
-            Buttons.Add(continue_button);
-            Buttons.Add(cancel_button);
-            continue_button.Focus();
-
-            // Actions.
-
-            Controller.UpdateSetupContinueButtonEvent += delegate(bool enabled)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    continue_button.IsEnabled = enabled;
-                });
-            };
-
-            cancel_button.Click += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    Program.UI.StatusIcon.Dispose();
-                    Controller.SetupPageCancelled();
-                });
-            };
-
-            continue_button.Click += delegate
-            {
-                Controller.SetupPageCompleted();
-            };
-
-            Controller.CheckSetupPage();
-        }
-
         private void LoadWelcomeWPF()
         {
             // UI elements.
             Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
-            Description = Properties_Resources.Intro;
+            Description = String.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
 
-            Button cancel_button = new Button()
-            {
-                Content = Properties_Resources.Cancel
-            };
-            Button continue_button = new Button()
-            {
-                Content = Properties_Resources.Continue,
-                IsEnabled = false
-            };
-            Buttons.Add(continue_button);
-            Buttons.Add(cancel_button);
-            continue_button.Focus();
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupWelcomeWPF.xaml", System.UriKind.Relative);
+            UserControl LoadXAML = Application.LoadComponent(resourceLocater) as UserControl;
+
+            continue_button = LoadXAML.FindName("continue_button") as Button;
+            cancel_button = LoadXAML.FindName("cancel_button") as Button;
+
+            ContentCanvas.Children.Add(LoadXAML);
 
             // Actions.
-
             Controller.UpdateSetupContinueButtonEvent += delegate(bool enabled)
             {
                 Dispatcher.BeginInvoke((Action)delegate
@@ -242,7 +196,10 @@ namespace CmisSync
             Controller.CheckSetupPage();
         }
 
-        private void SetupTutorial()
+        private WPF.Image slide_image;
+        private CheckBox check_box;
+
+        private void LoadTutorialWFP()
         {
             switch (Controller.TutorialCurrentPage)
             {
@@ -253,31 +210,17 @@ namespace CmisSync
                         Header = Properties_Resources.WhatsNext;
                         Description = String.Format(Properties_Resources.CmisSyncCreates, Properties_Resources.ApplicationName);
 
-                        WPF.Image slide_image = new WPF.Image()
-                        {
-                            Width = 350,
-                            Height = 200
-                        };
-                        slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-1");
+                        System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupTutorialFirstWPF.xaml", System.UriKind.Relative);
+                        UserControl LoadXAML = Application.LoadComponent(resourceLocater) as UserControl;
 
-                        Button skip_tutorial_button = new Button()
-                        {
-                            Content = Properties_Resources.SkipTutorial
-                        };
-                        Button continue_button = new Button()
-                        {
-                            Content = Properties_Resources.Continue
-                        };
-                        Buttons.Add(continue_button);
-                        Buttons.Add(skip_tutorial_button);
+                        slide_image = LoadXAML.FindName("slide_image") as WPF.Image;
+                        continue_button = LoadXAML.FindName("continue_button") as Button;
+                        cancel_button = LoadXAML.FindName("cancel_button") as Button;
 
-                        ContentCanvas.Children.Add(slide_image);
-                        Canvas.SetLeft(slide_image, 215);
-                        Canvas.SetTop(slide_image, 130);
+                        ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
-
-                        skip_tutorial_button.Click += delegate
+                        cancel_button.Click += delegate
                         {
                             Controller.TutorialSkipped();
                         };
@@ -297,25 +240,15 @@ namespace CmisSync
                         Header = Properties_Resources.Synchronization;
                         Description = Properties_Resources.DocumentsAre;
 
-                        WPF.Image slide_image = new WPF.Image()
-                        {
-                            Width = 350,
-                            Height = 200
-                        };
-                        slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-2");
+                        System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupTutorialSecondWPF.xaml", System.UriKind.Relative);
+                        UserControl LoadXAML = Application.LoadComponent(resourceLocater) as UserControl;
 
-                        ContentCanvas.Children.Add(slide_image);
-                        Canvas.SetLeft(slide_image, 215);
-                        Canvas.SetTop(slide_image, 130);
+                        slide_image = LoadXAML.FindName("slide_image") as WPF.Image;
+                        continue_button = LoadXAML.FindName("continue_button") as Button;
 
-                        Button continue_button = new Button()
-                        {
-                            Content = Properties_Resources.Continue
-                        };
-                        Buttons.Add(continue_button);
+                        ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
-
                         continue_button.Click += delegate
                         {
                             Controller.TutorialPageCompleted();
@@ -333,25 +266,15 @@ namespace CmisSync
                             Properties_Resources.StatusIconShows,
                             Properties_Resources.ApplicationName);
 
-                        WPF.Image slide_image = new WPF.Image()
-                        {
-                            Width = 350,
-                            Height = 200
-                        };
-                        slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-3");
+                        System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupTutorialThirdWPF.xaml", System.UriKind.Relative);
+                        UserControl LoadXAML = Application.LoadComponent(resourceLocater) as UserControl;
 
-                        ContentCanvas.Children.Add(slide_image);
-                        Canvas.SetLeft(slide_image, 215);
-                        Canvas.SetTop(slide_image, 130);
+                        slide_image = LoadXAML.FindName("slide_image") as WPF.Image;
+                        continue_button = LoadXAML.FindName("continue_button") as Button;
 
-                        Button continue_button = new Button()
-                        {
-                            Content = Properties_Resources.Continue
-                        };
-                        Buttons.Add(continue_button);
+                        ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
-
                         continue_button.Click += delegate
                         {
                             Controller.TutorialPageCompleted();
@@ -367,43 +290,22 @@ namespace CmisSync
                         Header = String.Format(Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
                         Description = Properties_Resources.YouCan;
 
+                        System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupTutorialFourthWPF.xaml", System.UriKind.Relative);
+                        UserControl LoadXAML = Application.LoadComponent(resourceLocater) as UserControl;
 
-
-                        WPF.Image slide_image = new WPF.Image()
-                        {
-                            Width = 350,
-                            Height = 200
-                        };
-                        slide_image.Source = UIHelpers.GetImageSource("tutorial-slide-4");
-
-                        CheckBox check_box = new CheckBox()
-                        {
-                            Content = String.Format(Properties_Resources.Startup, Properties_Resources.ApplicationName),
-                            IsChecked = true
-                        };
-
-                        ContentCanvas.Children.Add(slide_image);
-                        Canvas.SetLeft(slide_image, 215);
-                        Canvas.SetTop(slide_image, 130);
-
-                        ContentCanvas.Children.Add(check_box);
-                        Canvas.SetLeft(check_box, 185);
-                        Canvas.SetBottom(check_box, 12);
-
-                        Button finish_button = new Button()
-                        {
-                            Content = Properties_Resources.Finish
-                        };
-                        Buttons.Add(finish_button);
+                        slide_image = LoadXAML.FindName("slide_image") as WPF.Image;
+                        continue_button = LoadXAML.FindName("continue_button") as Button;
+                        check_box = LoadXAML.FindName("check_box") as WPF.CheckBox;
+                        
+                        ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
-
                         check_box.Click += delegate
                         {
                             Controller.StartupItemChanged(check_box.IsChecked.Value);
                         };
 
-                        finish_button.Click += delegate
+                        continue_button.Click += delegate
                         {
                             Controller.TutorialPageCompleted();
                         };
@@ -413,254 +315,55 @@ namespace CmisSync
             }
         }
 
-        private void SetupAddLogin()
+        private void ControllerChangeAddressAction(string text, string example_text)
         {
-            // UI elements.
-            Header = Properties_Resources.Where;
-
-            // Address input UI.
-            TextBlock address_label = new TextBlock()
+            Dispatcher.BeginInvoke((Action)delegate
             {
-                Text = Properties_Resources.EnterWebAddress,
-                FontWeight = FontWeights.Bold
-            };
-            TextBox address_box = new TextBox()
+                address_box.Text = text;
+                address_help_label.Text = example_text;
+            });
+        }
+
+        private void ControllerChangeUserAction(string text, string example_text)
+        {
+            Dispatcher.BeginInvoke((Action)delegate
             {
-                Width = 420,
-                Text = (Controller.PreviousAddress != null) ? Controller.PreviousAddress.ToString() : String.Empty
-            };
-            TextBlock address_help_label = new TextBlock()
+                user_box.Text = text;
+                user_help_label.Text = example_text;
+            });
+        }
+
+        private void ControllerChangePasswordAction(string text, string example_text)
+        {
+            Dispatcher.BeginInvoke((Action)delegate
             {
-                Text = Properties_Resources.Help + ": ",
-                FontSize = 11,
-                Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
-            };
-            Run run = new Run(Properties_Resources.WhereToFind);
-            Hyperlink link = new Hyperlink(run);
-            link.NavigateUri = new Uri("https://github.com/nicolas-raoul/CmisSync/wiki/What-address");
-            address_help_label.Inlines.Add(link);
-            link.RequestNavigate += (sender, e) =>
+                password_box.Password = text;
+                password_help_label.Text = example_text;
+            });
+        }
+
+        private void ControllerLoginAddProjectAction(bool button_enabled)
+        {
+            Dispatcher.BeginInvoke((Action)delegate
             {
-                System.Diagnostics.Process.Start(e.Uri.ToString());
-            };
+                continue_button.IsEnabled = button_enabled;
+            });
+        }
 
-            // Rather than a TextBlock, we use a textBox so that users can copy/paste the error message and Google it.
-            TextBox address_error_label = new TextBox()
-            {
-                FontSize = 11,
-                Foreground = new SolidColorBrush(Color.FromRgb(255, 128, 128)),
-                TextWrapping = TextWrapping.Wrap,
-                Visibility = Visibility.Hidden,
-                BorderThickness = new Thickness(0),
-                IsReadOnly = true,
-                Background = Brushes.Transparent,
-                MaxWidth = 420
-            };
+        private void ControllerLoginInsertAction()
+        {
+            Controller.ChangeAddressFieldEvent += ControllerChangeAddressAction;
+            Controller.ChangeUserFieldEvent += ControllerChangeUserAction;
+            Controller.ChangePasswordFieldEvent += ControllerChangePasswordAction;
+            Controller.UpdateAddProjectButtonEvent += ControllerLoginAddProjectAction;
+        }
 
-            // User input UI.
-            TextBlock user_label = new TextBlock()
-            {
-                Text = Properties_Resources.User + ":",
-                FontWeight = FontWeights.Bold,
-                Width = 200
-            };
-            TextBox user_box = new TextBox()
-            {
-                Width = 200
-            };
-            if (Controller.saved_user == String.Empty || Controller.saved_user == null)
-            {
-                user_box.Text = Environment.UserName;
-            }
-            else
-            {
-                user_box.Text = Controller.saved_user;
-            }
-            TextBlock user_help_label = new TextBlock()
-            {
-                FontSize = 11,
-                Width = 200,
-                Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
-            };
-
-            // Password input UI.
-            TextBlock password_label = new TextBlock()
-            {
-                Text = Properties_Resources.Password + ":",
-                FontWeight = FontWeights.Bold,
-                Width = 200
-            };
-            PasswordBox password_box = new PasswordBox()
-            {
-                Width = 200
-            };
-            TextBlock password_help_label = new TextBlock()
-            {
-                FontSize = 11,
-                Width = 200,
-                Foreground = new SolidColorBrush(Color.FromRgb(128, 128, 128))
-            };
-
-            // Buttons.
-            Button cancel_button = new Button()
-            {
-                Content = Properties_Resources.Cancel
-            };
-            Button continue_button = new Button()
-            {
-                Content = Properties_Resources.Continue
-            };
-            Buttons.Add(continue_button);
-            Buttons.Add(cancel_button);
-
-            // Address
-            ContentCanvas.Children.Add(address_label);
-            Canvas.SetTop(address_label, 100);
-            Canvas.SetLeft(address_label, 185);
-            ContentCanvas.Children.Add(address_box);
-            Canvas.SetTop(address_box, 120);
-            Canvas.SetLeft(address_box, 185);
-            ContentCanvas.Children.Add(address_help_label);
-            Canvas.SetTop(address_help_label, 145);
-            Canvas.SetLeft(address_help_label, 185);
-
-            // User
-            ContentCanvas.Children.Add(user_label);
-            Canvas.SetTop(user_label, 160);
-            Canvas.SetLeft(user_label, 185);
-            ContentCanvas.Children.Add(user_box);
-            Canvas.SetTop(user_box, 180);
-            Canvas.SetLeft(user_box, 185);
-            ContentCanvas.Children.Add(user_help_label);
-            Canvas.SetTop(user_help_label, 215);
-            Canvas.SetLeft(user_help_label, 185);
-
-            // Password
-            ContentCanvas.Children.Add(password_label);
-            Canvas.SetTop(password_label, 160);
-            Canvas.SetRight(password_label, 30);
-            ContentCanvas.Children.Add(password_box);
-            Canvas.SetTop(password_box, 180);
-            Canvas.SetRight(password_box, 30);
-            ContentCanvas.Children.Add(password_help_label);
-            Canvas.SetTop(password_help_label, 215);
-            Canvas.SetRight(password_help_label, 30);
-
-            ContentCanvas.Children.Add(address_error_label);
-            Canvas.SetTop(address_error_label, 220);
-            Canvas.SetLeft(address_error_label, 185);
-
-            TaskbarItemInfo.ProgressValue = 0.0;
-            TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-
-            if (Controller.PreviousAddress == null || Controller.PreviousAddress.ToString() == String.Empty)
-                address_box.Text = "https://";
-            else
-                address_box.Text = Controller.PreviousAddress.ToString();
-            address_box.Focus();
-            address_box.Select(address_box.Text.Length, 0);
-
-            // Actions.
-
-            Controller.ChangeAddressFieldEvent += delegate(string text,
-                string example_text)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    address_box.Text = text;
-                    address_help_label.Text = example_text;
-                });
-            };
-
-            Controller.ChangeUserFieldEvent += delegate(string text,
-                string example_text)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    user_box.Text = text;
-                    user_help_label.Text = example_text;
-                });
-            };
-
-            Controller.ChangePasswordFieldEvent += delegate(string text,
-                string example_text)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    password_box.Password = text;
-                    password_help_label.Text = example_text;
-                });
-            };
-
-            Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    continue_button.IsEnabled = button_enabled;
-                });
-            };
-
-            Controller.CheckAddPage(address_box.Text);
-
-            address_box.TextChanged += delegate
-            {
-                string error = Controller.CheckAddPage(address_box.Text);
-                if (!String.IsNullOrEmpty(error))
-                {
-                    address_error_label.Text = Properties_Resources.ResourceManager.GetString(error, CultureInfo.CurrentCulture);
-                    address_error_label.Visibility = Visibility.Visible;
-                }
-                else address_error_label.Visibility = Visibility.Hidden;
-            };
-
-            cancel_button.Click += delegate
-            {
-                Controller.PageCancelled();
-            };
-
-            continue_button.Click += delegate
-            {
-                // Show wait cursor
-                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
-
-                // Try to find the CMIS server (asynchronously)
-                GetRepositoriesFuzzyDelegate dlgt =
-                    new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
-                ServerCredentials credentials = new ServerCredentials()
-                {
-                    UserName = user_box.Text,
-                    Password = password_box.Password,
-                    Address = new Uri(address_box.Text)
-                };
-                IAsyncResult ar = dlgt.BeginInvoke(credentials, null, null);
-                while (!ar.AsyncWaitHandle.WaitOne(100))
-                {
-                    System.Windows.Forms.Application.DoEvents();
-                }
-                Tuple<CmisServer, Exception> result = dlgt.EndInvoke(ar);
-                CmisServer cmisServer = result.Item1;
-
-                Controller.repositories = cmisServer != null ? cmisServer.Repositories : null;
-
-                address_box.Text = cmisServer.Url.ToString();
-
-                // Hide wait cursor
-                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
-
-                if (Controller.repositories == null)
-                {
-                    // Could not retrieve repositories list from server, show warning.
-                    string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
-                    address_error_label.Text = warning;
-                    address_error_label.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    // Continue to next step, which is choosing a particular folder.
-                    Controller.Add1PageCompleted(
-                        new Uri(address_box.Text), user_box.Text, password_box.Password);
-                }
-            };
+        private void ControllerLoginRemoveAction()
+        {
+            Controller.ChangeAddressFieldEvent -= ControllerChangeAddressAction;
+            Controller.ChangeUserFieldEvent -= ControllerChangeUserAction;
+            Controller.ChangePasswordFieldEvent -= ControllerChangePasswordAction;
+            Controller.UpdateAddProjectButtonEvent -= ControllerLoginAddProjectAction;
         }
 
         // LoadAddLogin
@@ -674,10 +377,6 @@ namespace CmisSync
         private PasswordBox password_box;
         private TextBlock password_help_label;
         private TextBox address_error_label;
-
-        // Public Buttons
-        private Button continue_button;
-        private Button cancel_button;
 
         private void LoadAddLoginWPF()
         {
@@ -702,22 +401,7 @@ namespace CmisSync
 
             ContentCanvas.Children.Add(LoadAddLoginWPF);
 
-            // init UI elements.
-            address_label.Text = Properties_Resources.EnterWebAddress;
             address_box.Text = (Controller.PreviousAddress != null) ? Controller.PreviousAddress.ToString() : String.Empty;
-
-            address_help_label.Text = Properties_Resources.Help + ": ";
-
-            Run run = new Run(Properties_Resources.WhereToFind);
-            Hyperlink link = new Hyperlink(run);
-            link.NavigateUri = new Uri("https://github.com/nicolas-raoul/CmisSync/wiki/What-address");
-            address_help_label.Inlines.Add(link);
-            link.RequestNavigate += (sender, e) =>
-            {
-                System.Diagnostics.Process.Start(e.Uri.ToString());
-            };
-
-            user_label.Text = Properties_Resources.User + ":";
 
             if (Controller.saved_user == String.Empty || Controller.saved_user == null)
             {
@@ -728,9 +412,6 @@ namespace CmisSync
                 user_box.Text = Controller.saved_user;
             }
 
-            password_label.Text = Properties_Resources.Password + ":";
-            continue_button.Content = Properties_Resources.Continue;
-            cancel_button.Content = Properties_Resources.Cancel;
             TaskbarItemInfo.ProgressValue = 0.0;
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
 
@@ -742,44 +423,7 @@ namespace CmisSync
             address_box.Select(address_box.Text.Length, 0);
 
             // Actions.
-            Controller.ChangeAddressFieldEvent += delegate(string text,
-                string example_text)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    address_box.Text = text;
-                    address_help_label.Text = example_text;
-                });
-            };
-
-            Controller.ChangeUserFieldEvent += delegate(string text,
-                string example_text)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    user_box.Text = text;
-                    user_help_label.Text = example_text;
-                });
-            };
-
-            Controller.ChangePasswordFieldEvent += delegate(string text,
-                string example_text)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    password_box.Password = text;
-                    password_help_label.Text = example_text;
-                });
-            };
-
-            Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    continue_button.IsEnabled = button_enabled;
-                });
-            };
-
+            ControllerLoginInsertAction();
             Controller.CheckAddPage(address_box.Text);
 
             address_box.TextChanged += delegate
@@ -795,6 +439,7 @@ namespace CmisSync
 
             cancel_button.Click += delegate
             {
+                ControllerLoginRemoveAction();
                 Controller.PageCancelled();
             };
 
@@ -836,6 +481,7 @@ namespace CmisSync
                 }
                 else
                 {
+                    ControllerLoginRemoveAction();
                     // Continue to next step, which is choosing a particular folder.
                     Controller.Add1PageCompleted(
                         new Uri(address_box.Text), user_box.Text, password_box.Password);
@@ -1202,11 +848,11 @@ namespace CmisSync
         {
             // UI elements.
             Header = Properties_Resources.Ready;
-            Description = Properties_Resources.YouCanFind;
+            Description = String.Format(Properties_Resources.YouCanFind, Properties_Resources.ApplicationName);
 
             TaskbarItemInfo.ProgressValue = 0.0;
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-
+            
             Button finish_button = new Button()
             {
                 Content = Properties_Resources.Finish
@@ -1219,7 +865,6 @@ namespace CmisSync
             Buttons.Add(finish_button);
 
             // Actions.
-
             finish_button.Click += delegate
             {
                 Controller.FinishPageCompleted();

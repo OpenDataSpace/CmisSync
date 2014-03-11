@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,6 +46,8 @@ namespace CmisSync
 
         private EditType type;
 
+        private bool useXAML = true;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -58,8 +60,20 @@ namespace CmisSync
             this.localPath = localPath;
             this.type = type;
 
-            CreateEdit();
+            CreateTreeView();
 
+            if (useXAML)
+            {
+                LoadEdit();
+            }
+            else
+            {
+                CreateEdit();
+            }
+
+            this.Title = Properties_Resources.EditTitle;
+            this.Description = "";
+            this.ShowAll();
 
             // Defines how to show the setup window.
             Controller.OpenWindowEvent += delegate
@@ -71,6 +85,24 @@ namespace CmisSync
                     BringIntoView();
                 });
             };
+
+            Controller.CloseWindowEvent += delegate
+            {
+                asyncLoader.Cancel();
+            };
+
+            finishButton.Click += delegate
+            {
+                Ignores = NodeModelUtils.GetIgnoredFolder(repo);
+                Credentials.Password = passwordBox.Password;
+                Controller.SaveFolder();
+                Close();
+            };
+
+            cancelButton.Click += delegate
+            {
+                Close();
+            };
         }
 
 
@@ -80,21 +112,35 @@ namespace CmisSync
         }
 
 
-        /// <summary>
-        /// Create the UI
-        /// </summary>
-        private void CreateEdit()
+        CmisSync.CmisTree.RootFolder repo;
+        private AsyncNodeLoader asyncLoader;
+
+        TreeView treeView;
+        private TabControl tab;
+        private TabItem tabItemSelection;
+        private TabItem tabItemCredentials;
+        private TextBlock addressLabel;
+        private TextBox addressBox;
+        private TextBlock userLabel;
+        private TextBox userBox;
+        private TextBlock passwordLabel;
+        private PasswordBox passwordBox;
+        private Button finishButton;
+        private Button cancelButton;
+
+
+        private void CreateTreeView()
         {
             System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/FolderTreeMVC/TreeView.xaml", System.UriKind.Relative);
-            TreeView treeView = Application.LoadComponent(resourceLocater) as TreeView;
+            treeView = Application.LoadComponent(resourceLocater) as TreeView;
 
-            CmisSync.CmisTree.RootFolder repo = new CmisSync.CmisTree.RootFolder()
+            repo = new CmisSync.CmisTree.RootFolder()
             {
                 Name = FolderName,
                 Id = Credentials.RepoId,
                 Address = Credentials.Address.ToString()
             };
-            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
             IgnoredFolderLoader.AddIgnoredFolderToRootNode(repo, Ignores);
             LocalFolderLoader.AddLocalFolderToRootNode(repo, localPath);
 
@@ -115,37 +161,71 @@ namespace CmisSync
                     asyncLoader.Load(expandedNode);
                 }
             }));
+        }
 
-            TextBlock addressLabel = new TextBlock()
+
+        private void LoadEdit()
+        {
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/EditWPF.xaml", System.UriKind.Relative);
+            UserControl editWPF = Application.LoadComponent(resourceLocater) as UserControl;
+
+            tab = editWPF.FindName("tab") as TabControl;
+            tabItemSelection = editWPF.FindName("tabItemSelection") as TabItem;
+            tabItemCredentials = editWPF.FindName("tabItemCredentials") as TabItem;
+            addressLabel = editWPF.FindName("addressLabel") as TextBlock;
+            addressBox = editWPF.FindName("addressBox") as TextBox;
+            userLabel = editWPF.FindName("userLabel") as TextBlock;
+            userBox = editWPF.FindName("userBox") as TextBox;
+            passwordLabel = editWPF.FindName("passwordLabel") as TextBlock;
+            passwordBox = editWPF.FindName("passwordBox") as PasswordBox;
+            finishButton = editWPF.FindName("finishButton") as Button;
+            cancelButton = editWPF.FindName("cancelButton") as Button;
+
+            tabItemSelection.Content = treeView;
+
+            addressBox.Text = Credentials.Address.ToString();
+            userBox.Text = Credentials.UserName;
+            passwordBox.Password = Credentials.Password.ToString();
+
+            ContentCanvas.Children.Add(editWPF);
+        }
+
+
+        /// <summary>
+        /// Create the UI
+        /// </summary>
+        private void CreateEdit()
+        {
+            addressLabel = new TextBlock()
             {
                 Text = Properties_Resources.CmisWebAddress + ":",
                 FontWeight = FontWeights.Bold
             };
-            TextBox addressBox = new TextBox()
+            addressBox = new TextBox()
             {
                 Width = 410,
                 Text = this.Credentials.Address.ToString(),
                 IsEnabled = false
             };
-            TextBlock userLabel = new TextBlock()
+            userLabel = new TextBlock()
             {
                 Width = 200,
                 Text = Properties_Resources.User + ":",
                 FontWeight = FontWeights.Bold
             };
-            TextBox userBox = new TextBox()
+            userBox = new TextBox()
             {
                 Width = 200,
                 Text = this.Credentials.UserName,
                 IsEnabled = false
             };
-            TextBlock passwordLabel = new TextBlock()
+            passwordLabel = new TextBlock()
             {
                 Width = 200,
                 Text = Properties_Resources.Password + ":",
                 FontWeight = FontWeights.Bold
             };
-            PasswordBox passwordBox = new PasswordBox()
+            passwordBox = new PasswordBox()
             {
                 Width = 200,
                 Password = this.Credentials.Password.ToString()
@@ -178,14 +258,14 @@ namespace CmisSync
             Canvas.SetTop(passwordBox, 120);
             Canvas.SetLeft(passwordBox, 220);
 
-            TabControl tab = new TabControl();
+            tab = new TabControl();
 
-            TabItem tabItemSelection = new TabItem();
+            tabItemSelection = new TabItem();
             tabItemSelection.Header = Properties_Resources.AddingFolder;
             tabItemSelection.Content = canvasSelection;
             tab.Items.Add(tabItemSelection);
 
-            TabItem tabItemCredentials = new TabItem();
+            tabItemCredentials = new TabItem();
             tabItemCredentials.Header = Properties_Resources.Credentials;
             tabItemCredentials.Content = canvasCredentials;
             tab.Items.Add(tabItemCredentials);
@@ -194,44 +274,22 @@ namespace CmisSync
             Canvas.SetTop(tab, 30);
             Canvas.SetLeft(tab, 175);
 
-            Controller.CloseWindowEvent += delegate
-            {
-                asyncLoader.Cancel();
-            };
-
-
-            Button finish_button = new Button()
+            finishButton = new Button()
             {
                 Content = Properties_Resources.SaveChanges,
                 IsDefault = true
             };
 
-            Button cancel_button = new Button()
+            cancelButton = new Button()
             {
                 Content = Properties_Resources.DiscardChanges,
                 IsDefault = false
             };
 
-            Buttons.Add(finish_button);
-            Buttons.Add(cancel_button);
+            Buttons.Add(finishButton);
+            Buttons.Add(cancelButton);
 
-            finish_button.Focus();
-
-            finish_button.Click += delegate
-            {
-                Ignores = NodeModelUtils.GetIgnoredFolder(repo);
-                Credentials.Password = passwordBox.Password;
-                Controller.SaveFolder();
-                Close();
-            };
-
-            cancel_button.Click += delegate
-            {
-                Close();
-            };
-            this.Title = Properties_Resources.EditTitle;
-            this.Description = "";
-            this.ShowAll();
+            finishButton.Focus();
         }
     }
 }

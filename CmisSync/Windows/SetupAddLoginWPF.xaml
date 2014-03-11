@@ -6,9 +6,6 @@
              xmlns:local="clr-namespace:CmisSync" x:Class="CmisSync.SetupAddLoginWPF" 
              mc:Ignorable="d" Height="400" Width="620">
     <Grid HorizontalAlignment="Right" Width="441" Margin="0,75,10,65">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
         <TextBlock x:Name="address_label" TextWrapping="Wrap" Text="TextBlock" FontWeight="Bold" VerticalAlignment="Top" Height="21" Margin="10,26,35,0"/>
         <TextBox x:Name="address_box" TextWrapping="Wrap" Text="" Width="420" Margin="10,47,10,190"/>
         <TextBlock x:Name="address_help_label" TextWrapping="Wrap" Text="Help:" FontSize="11" Foreground="Gray" Margin="10,75,178,169"/>
@@ -18,11 +15,10 @@
         <PasswordBox x:Name="password_box" HorizontalAlignment="Left" Margin="220,107,0,0" VerticalAlignment="Top" Width="200" Height="23"/>
         <TextBlock x:Name="user_help_label" TextWrapping="Wrap" Width="200" FontSize="11" Foreground="Blue" Visibility="Hidden" Background="Transparent" Text="TextBlock" Margin="10,135,359,109"/>
         <TextBlock x:Name="password_help_label" TextWrapping="Wrap" Width="200" FontSize="11" Foreground="Blue" Visibility="Hidden" Background="Transparent" Margin="220,135,149,109"/>
-        <TextBox x:Name="address_error_label" HorizontalAlignment="Left" Height="23" Margin="10,151,0,0" TextWrapping="Wrap" Text="TextBox" FontSize="11" Foreground="Red" BorderThickness="0" IsReadOnly="True" Background="Transparent" MaxWidth="420" VerticalAlignment="Top" Width="120" Visibility="Hidden"/>
-        <Grid HorizontalAlignment="Left" Height="41" Margin="131,272,-22,-53" VerticalAlignment="Top" Width="311">
-            <Button x:Name="continue_button" Content="Button" Margin="137,9,99,10"/>
-            <Button x:Name="cancel_button" Content="Button" Margin="228,9,8,10"/>
+        <TextBox x:Name="address_error_label" HorizontalAlignment="Left" Margin="10,151,0,0" TextWrapping="Wrap" Text="TextBox" FontSize="11" Foreground="Red" BorderThickness="0" IsReadOnly="True" Background="Transparent" MaxWidth="420" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Grid HorizontalAlignment="Left" Height="41" Margin="139,284,-9,-65" VerticalAlignment="Top" Width="311">
+            <Button x:Name="continue_button" Content="Button" Margin="132,9,104,10"/>
+            <Button x:Name="cancel_button" Content="Button" Margin="221,9,15,10"/>
         </Grid>
-        
     </Grid>
 </UserControl>

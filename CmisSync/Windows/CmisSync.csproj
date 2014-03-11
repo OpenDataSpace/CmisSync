@@ -101,8 +101,14 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Properties.Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="AboutWPF.xaml.cs">
+      <DependentUpon>AboutWPF.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CertPolicyWindow.cs" />
     <Compile Include="Edit.cs" />
+    <Compile Include="EditWPF.xaml.cs">
+      <DependentUpon>EditWPF.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FolderTreeMVC\InvalidPatternConverter.cs" />
     <Compile Include="FolderTreeMVC\NodeLoader.cs" />
     <Compile Include="FolderTreeMVC\IgnoredFolderLoader.cs" />
@@ -136,6 +142,21 @@
     <Compile Include="Utils.cs" />
     <Compile Include="SetupAddLoginWPF.xaml.cs">
       <DependentUpon>SetupAddLoginWPF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SetupWelcomeWPF.xaml.cs">
+      <DependentUpon>SetupWelcomeWPF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SetupTutorialFirstWPF.xaml.cs">
+      <DependentUpon>SetupTutorialFirstWPF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SetupTutorialSecondWPF.xaml.cs">
+      <DependentUpon>SetupTutorialSecondWPF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SetupTutorialThirdWPF.xaml.cs">
+      <DependentUpon>SetupTutorialThirdWPF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SetupTutorialFourthWPF.xaml.cs">
+      <DependentUpon>SetupTutorialFourthWPF.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ProjectExtensions>
@@ -252,7 +273,9 @@
     <EmbeddedResource Include="..\Properties\Properties.Resources.fr.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Properties\Properties.Resources.tlh-KX.resx" />
+    <EmbeddedResource Include="..\Properties\Properties.Resources.tlh-KX.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\Properties\Properties.Resources.uk.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -312,6 +335,14 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="AboutWPF.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="SettingWPF.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -321,6 +352,26 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SetupAddLoginWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SetupWelcomeWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SetupTutorialFirstWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SetupTutorialSecondWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SetupTutorialThirdWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SetupTutorialFourthWPF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

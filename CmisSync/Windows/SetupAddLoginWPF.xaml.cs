@@ -25,29 +25,27 @@ namespace CmisSync
         public SetupAddLoginWPF()
         {
             InitializeComponent();
-            //ApplyAddLogin();
+            ApplyAddLogin();
         }
         
-        /*
         private void ApplyAddLogin()
         {
             address_label.Text = Properties_Resources.EnterWebAddress;
-            //address_box.Text = (Controller.PreviousAddress != null) ? Controller.PreviousAddress.ToString() : String.Empty;
-            address_help_label.Text = Properties_Resources.User + ":";
+            address_help_label.Text = Properties_Resources.Help + ": ";
+            Run run = new Run(Properties_Resources.WhereToFind);
+            Hyperlink link = new Hyperlink(run);
+            link.NavigateUri = new Uri("https://github.com/nicolas-raoul/CmisSync/wiki/What-address");
+            address_help_label.Inlines.Add(link);
+            link.RequestNavigate += (sender, e) =>
+            {
+                System.Diagnostics.Process.Start(e.Uri.ToString());
+            };
 
             user_label.Text = Properties_Resources.User + ":";
-            user_box.Text = Properties_Resources.User + ":";
-            user_help_label.Text = Properties_Resources.User + ":";
+            password_label.Text = Properties_Resources.Password + ":";
 
-            password_label.Text = Properties_Resources.User + ":";
-            //password_box.Password = Properties_Resources.User + ":";
-            password_help_label.Text = Properties_Resources.User + ":";
-
-            address_error_label.Text = Properties_Resources.User + ":";         
-
-            continue_button.Content = Properties_Resources.SaveChanges;
-            cancel_button.Content = Properties_Resources.DiscardChanges;
+            continue_button.Content = Properties_Resources.Continue;
+            cancel_button.Content = Properties_Resources.Cancel;
         }
-        */
     }
 }

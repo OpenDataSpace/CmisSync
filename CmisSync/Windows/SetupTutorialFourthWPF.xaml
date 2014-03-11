@@ -1,0 +1,15 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CmisSync" x:Class="CmisSync.SetupTutorialFourthWPF" 
+             mc:Ignorable="d" Height="400" Width="620">
+    <Grid HorizontalAlignment="Right" Width="441" Margin="0,75,10,65">
+        <Grid HorizontalAlignment="Left" Height="41" Margin="139,284,-9,-65" VerticalAlignment="Top" Width="311">
+            <Button x:Name="continue_button" Content="Button" Margin="221,9,15,10"/>
+        </Grid>
+        <Image x:Name="slide_image" HorizontalAlignment="Left" Height="200" Margin="45,50,0,0" VerticalAlignment="Top" Width="350"/>
+        <CheckBox x:Name="check_box" Content="CheckBox" HorizontalAlignment="Left" Height="32" Margin="-22,293,0,-65" VerticalAlignment="Top" Width="242" IsChecked="True"/>
+    </Grid>
+</UserControl>
