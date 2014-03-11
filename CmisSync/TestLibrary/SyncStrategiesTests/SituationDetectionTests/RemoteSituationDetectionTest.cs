@@ -43,14 +43,14 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             new RemoteSituationDetection(SessionMock.Object);
         }
 
-        [Ignore]
         [Test, Category("Fast")]
-        public void NoChangeDetectionTest()
+        [Ignore]
+        public void NoChangeDetectionForFileTest()
         {
 
             // Test is incomplete
             var lastModificationDate = DateTime.Now;
-            var remoteObject = new Mock<ICmisObject>();
+            var remoteObject = new Mock<IDocument>();
             remoteObject.Setup(remote => remote.ChangeToken).Returns(RemoteChangeToken);
             remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
             remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
