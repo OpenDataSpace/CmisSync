@@ -1,0 +1,10 @@
+This file is to track the open TODO's and their dependencies for the implementation of the event design.
+
+Important
+- Finish RemoteSituationDetection: Unit-Tests and Implementation
+- Refactor Interface of RemoteSituationDetection to get the full instead of the ObjectId, this is needed because for a remote-deletion there is no valid Id left but it is clear that a deletion happened.
+- Finish the Integration Test in AllHandlersIT
+- Implement MetaDataStorage
+
+NiceToHave Refactorings:
+- Tear apart Watcher: EventProducer and EventHandler in seperate classes.
