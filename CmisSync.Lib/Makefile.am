@@ -119,7 +119,6 @@ SOURCES =  \
 	Sync/Strategy/ContentChangeEventTransformer.cs \
 	Sync/Strategy/ContentChanges.cs \
 	Sync/Strategy/Crawler.cs \
-	Sync/Strategy/FileEventHandler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/FolderSynchronizer.cs \
 	Sync/Strategy/ISituationDetection.cs \

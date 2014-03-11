@@ -171,7 +171,6 @@
     <Compile Include="Sync\Strategy\ContentChangeEventTransformer.cs" />
     <Compile Include="Sync\Strategy\ContentChanges.cs" />
     <Compile Include="Sync\Strategy\Crawler.cs" />
-    <Compile Include="Sync\Strategy\FileEventHandler.cs" />
     <Compile Include="Sync\Strategy\FileSynchronizer.cs" />
     <Compile Include="Sync\Strategy\FolderSynchronizer.cs" />
     <Compile Include="Sync\Strategy\ISituationDetection.cs" />
