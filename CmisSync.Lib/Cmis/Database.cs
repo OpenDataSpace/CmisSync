@@ -32,6 +32,7 @@ namespace CmisSync.Lib.Cmis
     /// Database to cache remote information from the CMIS server.
     /// Implemented with SQLite.
     /// </summary>
+    [Obsolete("Migrate to IMetaDataStorage")]
     public class Database : IDisposable
     {
         /// <summary>
