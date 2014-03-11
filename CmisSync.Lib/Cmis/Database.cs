@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Cmis
     /// Database to cache remote information from the CMIS server.
     /// Implemented with SQLite.
     /// </summary>
-    public class Database : IDatabase, IDisposable
+    public class Database : IDisposable
     {
         /// <summary>
         /// Log.

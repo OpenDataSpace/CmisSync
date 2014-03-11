@@ -14,7 +14,6 @@ SOURCES =  \
 	Cmis/CmisUtils.cs \
 	Cmis/Crypto.cs \
 	Cmis/Database.cs \
-	Cmis/IDatabase.cs \
 	Cmis/MimeType.cs \
 	Cmis/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/PersistentStandardAuthenticationProvider.cs \

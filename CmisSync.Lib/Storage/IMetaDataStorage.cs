@@ -96,6 +96,18 @@ namespace CmisSync.Lib.Storage
         bool TryGetMappedFolderByRemoteId(string remoteId, out MappedFolder savedFolder);
 
         /// <summary>
+        /// Get the ChangeLog token that was stored at the end of the last successful CmisSync synchronization.
+        /// </summary>
+        string GetChangeLogToken();
+
+
+        /// <summary>
+        /// Set the stored ChangeLog token.
+        /// This should be called after each successful CmisSync synchronization.
+        /// </summary>
+        void SetChangeLogToken(string token);
+
+        /// <summary>
         /// Check whether a file's content has changed locally since it was last synchronized.
         /// This happens when the user edits a file on the local computer.
         /// This method does not communicate with the CMIS server, it just checks whether the checksum has changed.

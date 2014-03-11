@@ -203,6 +203,14 @@ namespace CmisSync.Lib.Storage
             }
             return Path.Combine(RemoteSyncTargetPath, relativePath).Replace('/', Path.DirectorySeparatorChar);
         }
+
+        public string GetChangeLogToken() {
+            throw new NotImplementedException();
+        }
+
+        public void SetChangeLogToken(string token) {
+            throw new NotImplementedException();
+        }
     }
 }
 

@@ -13,7 +13,7 @@ namespace CmisSync.Lib.Sync.Strategy {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChangeEventTransformer));
         public static readonly int DEFAULT_PRIORITY = 1000;
 
-        private IDatabase db;
+        private IMetaDataStorage storage;
 
         private IFileSystemInfoFactory fsFactory;
         public override int Priority {
@@ -42,21 +42,21 @@ namespace CmisSync.Lib.Sync.Strategy {
         }
 
         private void HandleDeletion(ContentChangeEvent contentChangeEvent) {
-            string path = db.GetFilePath(contentChangeEvent.ObjectId);
+            string path = storage.GetFilePath(contentChangeEvent.ObjectId);
             if(path != null)
             {
                 var fileInfo = fsFactory.CreateFileInfo(path);
                 Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
                 return;
             }
-            path = db.GetFolderPath(contentChangeEvent.ObjectId);
+            path = storage.GetFolderPath(contentChangeEvent.ObjectId);
             if(path != null)
             {
                 var dirInfo = fsFactory.CreateDirectoryInfo(path);
                 Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = MetaDataChangeType.DELETED});
                 return;
             }
-            //If nothing found in local db it has never been synced -> nop
+            //If nothing found in local storage it has never been synced -> nop
         }
 
         private void HandleAsIDocument(ContentChangeEvent contentChangeEvent){
@@ -72,7 +72,7 @@ namespace CmisSync.Lib.Sync.Strategy {
                     }
                 case DotCMIS.Enums.ChangeType.Security:
                     {
-                        string path = db.GetFilePath(doc.Id);
+                        string path = storage.GetFilePath(doc.Id);
                         var fileInfo = (path == null) ? null : fsFactory.CreateFileInfo(path);
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if( fileInfo != null )
@@ -87,7 +87,7 @@ namespace CmisSync.Lib.Sync.Strategy {
                     }
                 case DotCMIS.Enums.ChangeType.Updated:
                     {
-                        string path = db.GetFilePath(doc.Id);
+                        string path = storage.GetFilePath(doc.Id);
                         var fileInfo = (path == null) ? null : fsFactory.CreateFileInfo(path);
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if(fileInfo != null)
@@ -107,7 +107,7 @@ namespace CmisSync.Lib.Sync.Strategy {
         private void HandleAsIFolder(ContentChangeEvent contentChangeEvent){
             IFolder folder = contentChangeEvent.CmisObject as IFolder;
 
-            string path = db.GetFolderPath(folder.Id);
+            string path = storage.GetFolderPath(folder.Id);
             IDirectoryInfo dirInfo = (path != null) ? fsFactory.CreateDirectoryInfo(path) : null;
             var folderEvent = new FolderEvent(dirInfo, folder);
             switch(contentChangeEvent.Type)
@@ -125,11 +125,11 @@ namespace CmisSync.Lib.Sync.Strategy {
             Queue.AddEvent(folderEvent);
         }
 
-        public ContentChangeEventTransformer(ISyncEventQueue queue, IDatabase db, FileSystemInfoFactory fsFactory = null): base(queue) {
+        public ContentChangeEventTransformer(ISyncEventQueue queue, IMetaDataStorage storage, FileSystemInfoFactory fsFactory = null): base(queue) {
             
-            if(db == null)
-                throw new ArgumentNullException("DataBase instance is needed for the ContentChangeEventTransformer, but was null");
-            this.db = db;
+            if(storage == null)
+                throw new ArgumentNullException("Storage instance is needed for the ContentChangeEventTransformer, but was null");
+            this.storage = storage;
 
             if(fsFactory == null){
                 this.fsFactory = new FileSystemInfoFactory();

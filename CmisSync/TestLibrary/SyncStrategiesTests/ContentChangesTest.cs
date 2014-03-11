@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Sync.Strategy;
+using CmisSync.Lib.Storage;
 
 using DotCMIS.Client;
 using DotCMIS.Data;
@@ -35,10 +36,10 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void CorrectDefaultPriority ()
         {
-            var database = new Mock<IDatabase>();
+            var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
-            var cc = new ContentChanges (session.Object, database.Object, queue.Object);
+            var cc = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.That(cc.Priority, Is.EqualTo(1000));
         }
 
@@ -46,15 +47,15 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorWithVaildEntriesTest ()
         {
-            var database = new Mock<IDatabase>();
+            var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             bool isPropertyChangesSupported = true;
-            new ContentChanges (session.Object, database.Object, queue.Object);
-            new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges);
-            new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
-            new ContentChanges (session.Object, database.Object, queue.Object, isPropertyChangesSupported: true);
-            new ContentChanges (session.Object, database.Object, queue.Object, isPropertyChangesSupported: false);
+            new ContentChanges (session.Object, storage.Object, queue.Object);
+            new ContentChanges (session.Object, storage.Object, queue.Object, maxNumberOfContentChanges);
+            new ContentChanges (session.Object, storage.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+            new ContentChanges (session.Object, storage.Object, queue.Object, isPropertyChangesSupported: true);
+            new ContentChanges (session.Object, storage.Object, queue.Object, isPropertyChangesSupported: false);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -69,21 +70,21 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorFailsOnInvalidMaxEventsLimitTest ()
         {
-            var database = new Mock<IDatabase>();
+            var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             try {
-                new ContentChanges (session.Object, database.Object, queue.Object, -1);
+                new ContentChanges (session.Object, storage.Object, queue.Object, -1);
                 Assert.Fail ();
             } catch (ArgumentException) {
             }
             try {
-                new ContentChanges (session.Object, database.Object, queue.Object, 0);
+                new ContentChanges (session.Object, storage.Object, queue.Object, 0);
                 Assert.Fail ();
             } catch (ArgumentException) {
             }
             try {
-                new ContentChanges (session.Object, database.Object, queue.Object, 1);
+                new ContentChanges (session.Object, storage.Object, queue.Object, 1);
                 Assert.Fail ();
             } catch (ArgumentException) {
             }
@@ -93,27 +94,27 @@ namespace TestLibrary.SyncStrategiesTests
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsOnNullSessionTest ()
         {
-            var database = new Mock<IDatabase>();
+            var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
-            new ContentChanges (null, database.Object, queue.Object);
+            new ContentChanges (null, storage.Object, queue.Object);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void ConstructorFailsOnNullQueueTest ()
         {
-            var database = new Mock<IDatabase>();
+            var storage = new Mock<IMetaDataStorage>();
             var session = new Mock<ISession> ().Object;
-            new ContentChanges (session, database.Object, null);
+            new ContentChanges (session, storage.Object, null);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
         public void IgnoreWrongEventTest ()
         {
-            var database = new Mock<IDatabase>();
+            var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             var startSyncEvent = new Mock<ISyncEvent>().Object ;
             Assert.IsFalse (changes.Handle (startSyncEvent));
         }
@@ -122,11 +123,11 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void RetrunFalseOnError () {
             //TODO: this might not be the best behavior, this test verifies the current implementation not the desired one
-            var database = new Mock<IDatabase>();
+            var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             session.Setup(x => x.Binding).Throws(new Exception("SOME EXCEPTION"));
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             var wrongEvent = new Mock<ISyncEvent> ().Object;
             Assert.IsFalse (changes.Handle (wrongEvent));
         }
@@ -139,15 +140,15 @@ namespace TestLibrary.SyncStrategiesTests
             startSyncEvent.SetParam (ContentChanges.FULL_SYNC_PARAM_NAME, changeLogToken);
             var completedEvent = new FullSyncCompletedEvent (startSyncEvent);
             int handled = 0;
-            var database = new Mock<IDatabase>();
-            database.Setup (db => db.SetChangeLogToken ("token")).Callback ((string s) => {
+            var storage = new Mock<IMetaDataStorage>();
+            storage.Setup (db => db.SetChangeLogToken ("token")).Callback ((string s) => {
                 insertedToken = s;
                 handled ++;
             }
             );
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsFalse (changes.Handle (completedEvent));
             Assert.AreEqual (1, handled);
             Assert.AreEqual (changeLogToken, insertedToken);
@@ -160,10 +161,10 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
-            var database = new Mock<IDatabase>();
-            database.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
+            var storage = new Mock<IMetaDataStorage>();
+            storage.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
             var queue = new Mock<ISyncEventQueue>();
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsTrue (changes.Handle (startSyncEvent));
         }
 
@@ -176,8 +177,8 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
-            var database = new Mock<IDatabase>();
-            database.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
+            var storage = new Mock<IMetaDataStorage>();
+            storage.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
             int handled = 0;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup (q => q.AddEvent (It.IsAny<ISyncEvent> ())).Callback<ISyncEvent> ((e) => {
@@ -185,7 +186,7 @@ namespace TestLibrary.SyncStrategiesTests
                 queuedEvent = e;
             }
             );
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsTrue (changes.Handle (startSyncEvent));
             Assert.AreEqual (1, handled);
             Assert.NotNull (queuedEvent);
@@ -204,10 +205,10 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             session.Setup (s => s.Binding.GetRepositoryService ()).Returns (repositoryService.Object);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
-            var database = new Mock<IDatabase>();
-            database.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
+            var storage = new Mock<IMetaDataStorage>();
+            storage.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
             var queue = new Mock<ISyncEventQueue>();
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
             string result;
             Assert.IsFalse (start.TryGetParam (ContentChanges.FULL_SYNC_PARAM_NAME, out result));
@@ -225,10 +226,10 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup (s => s.Binding.GetRepositoryService ()).Returns (repositoryService.Object);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
             var manager = new Mock<SyncEventManager> ().Object;
-            var database = new Mock<IDatabase>();
-            database.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
+            var storage = new Mock<IMetaDataStorage>();
+            storage.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
             var queue = new Mock<ISyncEventQueue>();
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
             string result;
             Assert.IsTrue (start.TryGetParam (ContentChanges.FULL_SYNC_PARAM_NAME, out result));
@@ -272,9 +273,9 @@ namespace TestLibrary.SyncStrategiesTests
             );
             string id = "myId";
 
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
             var session = MockUtil.PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType.Created,id);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
 
             var startSyncEvent = new StartNextSyncEvent (false);
             Assert.IsTrue (changes.Handle (startSyncEvent));
@@ -290,12 +291,12 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var queue = new Mock<ISyncEventQueue>();
 
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturning3Changesin2Batches();
 
             var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
 
             Assert.IsTrue (changes.Handle (startSyncEvent));
             queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
@@ -306,12 +307,12 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var queue = new Mock<ISyncEventQueue>();
 
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType.Created, true);
 
             var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
 
             Assert.IsTrue (changes.Handle (startSyncEvent));
             queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
@@ -322,12 +323,12 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var queue = new Mock<ISyncEventQueue>();
 
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType.Deleted, true);
 
             var startSyncEvent = new StartNextSyncEvent (false);
-            var changes = new ContentChanges (session.Object, database.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
+            var changes = new ContentChanges (session.Object, storage.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
 
             Assert.IsTrue (changes.Handle (startSyncEvent));
             queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));

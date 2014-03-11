@@ -44,7 +44,6 @@ namespace TestLibrary.IntegrationTests
         }
 
         private SingleStepEventQueue CreateQueue(Mock<ISession> session, ObservableHandler observer) {
-            var database = new Mock<IDatabase>();
             var storage = new Mock<IMetaDataStorage>();
 
             var manager = new SyncEventManager();
@@ -52,10 +51,10 @@ namespace TestLibrary.IntegrationTests
 
             manager.AddEventHandler(observer);
 
-            var changes = new ContentChanges (session.Object, database.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
+            var changes = new ContentChanges (session.Object, storage.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
             manager.AddEventHandler(changes);
 
-            var transformer = new ContentChangeEventTransformer(queue, database.Object);
+            var transformer = new ContentChangeEventTransformer(queue, storage.Object);
             manager.AddEventHandler(transformer);
 
             var accumulator = new ContentChangeEventAccumulator(session.Object, queue);
@@ -138,7 +137,6 @@ namespace TestLibrary.IntegrationTests
             queue.AddEvent(myEvent);
             queue.Run();
 
-                       
             session.Verify(f => f.Delete(It.IsAny<IObjectId>()), Times.Once());
         }
 

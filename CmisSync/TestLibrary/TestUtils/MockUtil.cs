@@ -9,6 +9,7 @@ using DotCMIS.Client;
 using DotCMIS.Data;
 using DotCMIS.Data.Extensions;
 using DotCMIS.Binding.Services;
+using CmisSync.Lib.Storage;
 using Moq;
 
 namespace TestLibrary.TestUtils
@@ -24,10 +25,10 @@ namespace TestLibrary.TestUtils
         }
 
 
-        public static Mock<IDatabase> GetDbMockWithToken(string token = "lastToken"){
-            var database = new Mock<IDatabase>();
-            database.Setup (db => db.GetChangeLogToken ()).Returns (token);
-            return database;
+        public static Mock<IMetaDataStorage> GetMetaStorageMockWithToken(string token = "lastToken"){
+            var storage = new Mock<IMetaDataStorage>();
+            storage.Setup (db => db.GetChangeLogToken ()).Returns (token);
+            return storage;
         }
         
         public static Mock<IChangeEvent> GenerateChangeEvent(DotCMIS.Enums.ChangeType type, string objectId) {
@@ -67,11 +68,11 @@ namespace TestLibrary.TestUtils
             return changeList;
         }
 
-        public static void AddLocalFile(this Mock<IDatabase> db, string path = "path"){
+        public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path = "path"){
             db.Setup(foo => foo.GetFilePath(It.IsAny<string>())).Returns(path);
         }
 
-        public static void AddLocalFolder(this Mock<IDatabase> db, string path = "path"){
+        public static void AddLocalFolder(this Mock<IMetaDataStorage> db, string path = "path"){
             db.Setup(foo => foo.GetFolderPath(It.IsAny<string>())).Returns(path);
         }
 

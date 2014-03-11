@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Sync.Strategy;
+using CmisSync.Lib.Storage;
 
 using DotCMIS.Client;
 using DotCMIS.Data;
@@ -50,7 +51,7 @@ namespace TestLibrary.IntegrationTests
         }
 
 
-        private ObservableHandler RunQueue(Mock<ISession> session, Mock<IDatabase> database) {
+        private ObservableHandler RunQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage) {
             var manager = new SyncEventManager();
 
             var observer = new ObservableHandler();
@@ -58,10 +59,10 @@ namespace TestLibrary.IntegrationTests
 
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
 
-            var changes = new ContentChanges (session.Object, database.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
+            var changes = new ContentChanges (session.Object, storage.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
             manager.AddEventHandler(changes);
 
-            var transformer = new ContentChangeEventTransformer(queue, database.Object);
+            var transformer = new ContentChangeEventTransformer(queue, storage.Object);
             manager.AddEventHandler(transformer);
 
             var accumulator = new ContentChangeEventAccumulator(session.Object, queue);
@@ -77,11 +78,11 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteSecurityChangeOfExistingFile ()
         {
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
-            database.AddLocalFile();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
+            storage.AddLocalFile();
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
-            ObservableHandler observer = RunQueue(session, database);
+            ObservableHandler observer = RunQueue(session, storage);
 
             observer.AssertGotSingleFileEvent(MetaDataChangeType.CHANGED, ContentChangeType.NONE);
 
@@ -91,11 +92,11 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteDocumentCreationWithContent ()
         {
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, "someStreamId");
 
-            ObservableHandler observer = RunQueue(session, database);
+            ObservableHandler observer = RunQueue(session, storage);
             
             observer.AssertGotSingleFileEvent(MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
@@ -104,11 +105,11 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void LocallyNotExistingRemoteDocumentUpdated ()
         {
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Updated, null);
 
-            ObservableHandler observer = RunQueue(session, database);
+            ObservableHandler observer = RunQueue(session, storage);
 
             observer.AssertGotSingleFileEvent(MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
@@ -117,11 +118,11 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteDeletionChangeTest ()
         {
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
-            database.AddLocalFile();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
+            storage.AddLocalFile();
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
-            ObservableHandler observer = RunQueue(session, database);
+            ObservableHandler observer = RunQueue(session, storage);
 
             observer.AssertGotSingleFileEvent(MetaDataChangeType.DELETED, ContentChangeType.NONE);
         }
@@ -129,10 +130,10 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteFolderCreation ()
         {
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created);
-            ObservableHandler observer = RunQueue(session, database);
+            ObservableHandler observer = RunQueue(session, storage);
 
             observer.AssertGotSingleFolderEvent(MetaDataChangeType.CREATED);
         }
@@ -140,10 +141,10 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteFolderDeletionWithoutLocalFolder ()
         {
-            Mock<IDatabase> database = MockUtil.GetDbMockWithToken();
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted);
-            ObservableHandler observer = RunQueue(session, database);
+            ObservableHandler observer = RunQueue(session, storage);
             Assert.That(observer.list.Count, Is.EqualTo(0));
 
         }

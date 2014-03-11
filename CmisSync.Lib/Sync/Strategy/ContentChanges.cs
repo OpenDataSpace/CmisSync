@@ -6,6 +6,7 @@ using DotCMIS.Client;
 using DotCMIS.Exceptions;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Storage;
 
 using log4net;
 
@@ -15,7 +16,7 @@ namespace CmisSync.Lib.Sync.Strategy
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChanges));
         private ISession session;
-        private IDatabase db;
+        private IMetaDataStorage storage;
         private int MaxNumberOfContentChanges;
         private bool IsPropertyChangesSupported;
 
@@ -32,15 +33,15 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
-        public ContentChanges(ISession session, IDatabase db, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base (queue) {
+        public ContentChanges(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base (queue) {
             if(session == null)
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
-            if(db == null)
-                throw new ArgumentNullException("Database instance is needed for the ChangeLogStrategy, but was null");
+            if(storage == null)
+                throw new ArgumentNullException("MetaDataStorage instance is needed for the ChangeLogStrategy, but was null");
             if(maxNumberOfContentChanges <= 1)
                 throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
             this.session = session;
-            this.db = db;
+            this.storage = storage;
             this.MaxNumberOfContentChanges = maxNumberOfContentChanges;
             this.IsPropertyChangesSupported = isPropertyChangesSupported;
         }
@@ -55,7 +56,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     // Get last change log token on server side.
                     session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
                     string lastRemoteChangeLogTokenBeforeFullCrawlSync = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
-                    if(db.GetChangeLogToken() == null) {
+                    if(storage.GetChangeLogToken() == null) {
                         syncEvent.SetParam(FULL_SYNC_PARAM_NAME, lastRemoteChangeLogTokenBeforeFullCrawlSync);
                     }
                     // Use fallback sync algorithm
@@ -73,7 +74,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 string lastTokenOnServer;
                 if(syncCompleted.StartEvent.TryGetParam(FULL_SYNC_PARAM_NAME, out lastTokenOnServer))
                 {
-                    db.SetChangeLogToken(lastTokenOnServer);
+                    storage.SetChangeLogToken(lastTokenOnServer);
                 }
             }
 
@@ -88,7 +89,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </returns>
         private bool startSync() {
             try {
-                string lastTokenOnClient = db.GetChangeLogToken();
+                string lastTokenOnClient = storage.GetChangeLogToken();
 
                 // Get last change log token on server side.
                 session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
@@ -126,7 +127,7 @@ namespace CmisSync.Lib.Sync.Strategy
             string lastTokenOnServer = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
 
             // Get last change token that had been saved on client side.
-            string lastTokenOnClient = db.GetChangeLogToken();
+            string lastTokenOnClient = storage.GetChangeLogToken();
 
             if (lastTokenOnClient == null)
             {
@@ -171,7 +172,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 {
                     lastTokenOnClient = lastTokenOnServer;
                 }
-                db.SetChangeLogToken(lastTokenOnClient);
+                storage.SetChangeLogToken(lastTokenOnClient);
                 session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
                 lastTokenOnServer = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
             }
