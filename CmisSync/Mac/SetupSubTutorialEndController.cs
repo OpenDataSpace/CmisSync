@@ -43,7 +43,7 @@ namespace CmisSync
         {
             base.AwakeFromNib ();
 
-            this.StartCheck.Title = Properties_Resources.Startup;
+			this.StartCheck.Title = String.Format(Properties_Resources.Startup, Properties_Resources.ApplicationName);
             this.FinishButton.Title = Properties_Resources.Finish;
 //            this.FinishButton.KeyEquivalent = "\r";
 

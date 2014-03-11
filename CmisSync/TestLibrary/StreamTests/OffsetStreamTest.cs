@@ -35,14 +35,14 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ConstructorWithoutOffset(){
             using (var stream = new OffsetStream(new Mock<Stream>().Object)){
                 Assert.AreEqual(0, stream.Offset);
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ConstructorWithOffset()
         {
             using (var stream = new OffsetStream(new Mock<Stream>().Object, 10)){
@@ -50,28 +50,28 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnStreamIsNull()
         {
             using(new OffsetStream(null));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnStreamIsNullAnOffsetIsGiven()
         {
             using(new OffsetStream(null, 10));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ConstructorFailsOnNegativeOffset()
         {
             using(new OffsetStream(new Mock<Stream>().Object, -1));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void LengthTest() {
             //static length test
             using(MemoryStream memstream = new MemoryStream(content))
@@ -97,7 +97,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void SeekTest() {
             using(MemoryStream memstream = new MemoryStream(content))
                 using(OffsetStream offsetstream = new OffsetStream(memstream, offset))
@@ -142,7 +142,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ReadTest() {
             // Read block
             byte[] buffer = new byte[contentLength];
@@ -161,7 +161,7 @@ namespace TestLibrary.StreamTests
         }
 
         
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void WriteTest() {
             // Write one block
             using (MemoryStream memstream = new MemoryStream())

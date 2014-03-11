@@ -15,7 +15,7 @@ namespace TestLibrary.StreamTests
     [TestFixture]
     public class NonClosingHashStreamTest
     {
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ConstructorTest() {
             var mock = new Mock<Stream>();
             var hashAlg = new Mock<HashAlgorithm>();
@@ -27,21 +27,21 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnHashAlgorithmIsNull()
         {
             using (var stream = new NonClosingHashStream(new Mock<Stream>().Object, null, CryptoStreamMode.Write));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnStreamIsNull()
         {
             using (var stream = new NonClosingHashStream(null, new Mock<HashAlgorithm>().Object, CryptoStreamMode.Write));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ReadTest() {
             byte[] content = new byte[1024];
             using(var stream = new MemoryStream(content))
@@ -57,7 +57,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void WriteTest() {
             byte[] content = new byte[1024];
             using(var stream = new MemoryStream(content))

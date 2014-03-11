@@ -53,7 +53,18 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        public void CalcBitsPerSecondTest()
+        public void CalculateBitsPerSecondWithOneMinuteDifference()
+        {
+            DateTime start = DateTime.Now;
+            DateTime end = start.AddMinutes(1);
+            long? BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, end, 1);
+            Assert.AreEqual(0, BitsPerSecond);
+            BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, end, 60);
+            Assert.AreEqual(8, BitsPerSecond);
+        }
+
+        [Test, Category("Fast")]
+        public void CalcBitsPerSecondWithOneSecondDifference()
         {
             DateTime start = DateTime.Now;
             DateTime end = start.AddSeconds(1);
@@ -62,11 +73,25 @@ namespace TestLibrary.EventsTests
             BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, start, 100);
             Assert.Null(BitsPerSecond);
             BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, end, 100);
-            Assert.AreEqual(8*100, BitsPerSecond);
-            try{
-                TransmissionProgressEventArgs.CalcBitsPerSecond(end, start, 100);
-                Assert.Fail();
-            }catch(ArgumentException){}
+            Assert.AreEqual(8 * 100, BitsPerSecond);
+        }
+
+        [Test, Category("Fast")]
+        public void CalculateBitsPerSecondWithOneMilisecondDifference()
+        {
+            DateTime start = DateTime.Now;
+            DateTime end = start.AddMilliseconds(1);
+            long? BitsPerSecond = TransmissionProgressEventArgs.CalcBitsPerSecond(start, end, 1);
+            Assert.AreEqual(8000, BitsPerSecond);
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void CalculationOfBitsPerSecondFailsOnIllegalDifference()
+        {
+            DateTime start = DateTime.Now;
+            DateTime end = start.AddSeconds(1);
+            TransmissionProgressEventArgs.CalcBitsPerSecond(end, start, 100);
         }
 
         [Test, Category("Fast")]

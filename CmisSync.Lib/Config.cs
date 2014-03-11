@@ -64,6 +64,14 @@ namespace CmisSync.Lib
         public ProxySettings Proxy { get { return configXml.Proxy; } set{configXml.Proxy = value;} }
 
         /// <summary>
+        /// Gets or sets the version.
+        /// </summary>
+        /// <value>
+        /// The version.
+        /// </value>
+        public double Version { get {return configXml.Version; } set { configXml.Version = value;} }
+
+        /// <summary>
         /// Gets the device identifier. If no ID has been created yet, a new one is generated and saved.
         /// </summary>
         /// <value>The device identifier.</value>
@@ -222,11 +230,39 @@ namespace CmisSync.Lib
                 },
                 Notifications = true,
                 Log4Net = createDefaultLog4NetElement(),
-                DeviceId = Guid.NewGuid()
+                DeviceId = Guid.NewGuid(),
+                IgnoreFileNames = CreateInitialListOfGloballyIgnoredFileNames(),
+                IgnoreFolderNames = CreateInitialListOfGloballyIgnoredFolderNames(),
+                Version = 1.0
             };
 
             // Save it as an XML file.
             Save();
+        }
+
+        public static List<string> CreateInitialListOfGloballyIgnoredFileNames()
+        {
+            List<string> list = new List<string>();
+            list.Add (".*");
+            list.Add ("*~");
+            list.Add ("~*");
+            list.Add ("*.autosave*");
+            list.Add (".DS_Store");
+            list.Add ("*.tmp");
+            list.Add ("*.~lock");
+            list.Add ("*.part");
+            list.Add ("*.crdownload");
+            list.Add ("*.un~");
+            list.Add ("*.swp");
+            list.Add ( "*.swo");
+            return list;
+        }
+
+        public static List<string> CreateInitialListOfGloballyIgnoredFolderNames()
+        {
+            List<string> list = new List<string>();
+            list.Add(".*");
+            return list;
         }
 
 
@@ -248,6 +284,15 @@ namespace CmisSync.Lib
             this.configXml.Log4Net = node;
         }
 
+        public List<string> IgnoreFileNames {
+            get { return this.configXml.IgnoreFileNames; }
+            set { this.configXml.IgnoreFileNames = value; }
+        }
+
+        public List<string> IgnoreFolderNames {
+            get { return this.configXml.IgnoreFolderNames; }
+            set { this.configXml.IgnoreFolderNames = value; }
+        }
 
         /// <summary>
         /// Add a synchronized folder to the configuration.
@@ -385,6 +430,32 @@ namespace CmisSync.Lib
             /// <value>The proxy.</value>
             [XmlElement("network")]
             public ProxySettings Proxy{ get; set;}
+            /// <summary>
+            /// Gets or sets the ignored folder names.
+            /// </summary>
+            /// <value>
+            /// The ignored folder names.
+            /// </value>
+            [XmlArray("ignoreFolderNames")]
+            [XmlArrayItem("pattern")]
+            public List<string> IgnoreFolderNames { get; set; }
+            /// <summary>
+            /// Gets or sets the ignored file names.
+            /// </summary>
+            /// <value>
+            /// The ignored file names.
+            /// </value>
+            [XmlArray("ignoreFileNames")]
+            [XmlArrayItem("pattern")]
+            public List<string> IgnoreFileNames { get; set; }
+            /// <summary>
+            /// Gets or sets the version.
+            /// </summary>
+            /// <value>
+            /// The version.
+            /// </value>
+            [XmlAttribute("version")]
+            public double Version {get; set;}
 
             public class Folder {
                 /// <summary>
@@ -544,6 +615,26 @@ namespace CmisSync.Lib
                 }
 
                 /// <summary>
+                /// Gets or sets the ignored folder names.
+                /// </summary>
+                /// <value>
+                /// The ignored folder names.
+                /// </value>
+                [XmlArray("ignoreFolderNames")]
+                [XmlArrayItem("pattern")]
+                public List<string> IgnoreFolderNames { get; set; }
+
+                /// <summary>
+                /// Gets or sets the ignored file names.
+                /// </summary>
+                /// <value>
+                /// The ignored file names.
+                /// </value>
+                [XmlArray("ignoreFileNames")]
+                [XmlArrayItem("pattern")]
+                public List<string> IgnoreFileNames { get; set; }
+
+                /// <summary>
                 /// Get all the configured info about a synchronized folder.
                 /// </summary>
                 public RepoInfo GetRepoInfo()
@@ -581,10 +672,16 @@ namespace CmisSync.Lib
                 }
             }
         }
-            
+
         [Serializable]
         public struct IgnoredFolder
         {
+            /// <summary>
+            /// Gets or sets the path of the ignored folder.
+            /// </summary>
+            /// <value>
+            /// The path.
+            /// </value>
             [XmlAttribute("path")]
             public string Path { get; set; }
         }
