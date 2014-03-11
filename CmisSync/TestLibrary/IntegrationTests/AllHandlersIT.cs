@@ -137,6 +137,7 @@ namespace TestLibrary.IntegrationTests
             var queue = CreateQueue(session);
             queue.AddEvent(myEvent);
             queue.Run();
+            //TODO finish this when Detection is ready
             
         }
 
