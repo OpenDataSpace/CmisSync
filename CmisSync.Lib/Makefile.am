@@ -123,7 +123,6 @@ SOURCES =  \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/FolderSynchronizer.cs \
 	Sync/Strategy/ISituationDetection.cs \
-	Sync/Strategy/LocalCrawler.cs \
 	Sync/Strategy/LocalSituationDetection.cs \
 	Sync/Strategy/MacWatcher.cs \
 	Sync/Strategy/NetWatcher.cs \

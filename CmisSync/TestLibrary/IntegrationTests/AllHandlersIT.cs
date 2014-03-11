@@ -137,8 +137,9 @@ namespace TestLibrary.IntegrationTests
             var queue = CreateQueue(session);
             queue.AddEvent(myEvent);
             queue.Run();
-            //TODO finish this when Detection is ready
-            
+
+                       
+            session.Verify(f => f.Delete(It.IsAny<IObjectId>()), Times.Once());
         }
 
     }
