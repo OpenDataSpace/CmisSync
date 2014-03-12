@@ -123,64 +123,6 @@ namespace CmisSync {
             Content = aboutWPF;
         }
 
-        /// <summary>
-        /// Create the UI.
-        /// </summary>
-        private void CreateAbout ()
-        {
-            image = new Image () {
-                Width  = 640,
-                Height = 260
-            };
-        
-            image.Source = UIHelpers.GetImageSource ("about");
-            
-            version = new Label () {
-                Content    = String.Format(Properties_Resources.Version, Controller.RunningVersion),
-                FontSize   = 11,
-                Foreground = new SolidColorBrush (Color.FromRgb (15, 133, 203))
-            };
-
-            updates = new Label () {
-                Content    = "", //"Checking for updates...",
-                FontSize   = 11,
-                Foreground = new SolidColorBrush (Color.FromRgb (15, 133, 203))
-            };
-            
-            credits = new TextBlock () {
-                FontSize     = 11,
-                Foreground = new SolidColorBrush (Color.FromRgb (15, 133, 203)),
-                Text         = String.Format("Copyright © {0}–{1} {2}\n\n{3} {4}",
-                    "2013",
-                    DateTime.Now.Year.ToString(),
-                    " GRAU DATA AG, Aegif and others.",
-                    Properties_Resources.ApplicationName,
-                    "is Open Source software. You are free to use, modify, and redistribute it under the GNU General Public License version 3 or later."),
-                TextWrapping = TextWrapping.Wrap,
-                Width        = 318
-            };
-            
-            canvas = new Canvas ();
-            
-            canvas.Children.Add (image);
-            Canvas.SetLeft (image, 0);
-            Canvas.SetTop (image, 0);
-
-            canvas.Children.Add (version);
-            Canvas.SetLeft (version, 289);
-            Canvas.SetTop (version, 92);
-            
-            canvas.Children.Add (this.updates);
-            Canvas.SetLeft (this.updates, 289);
-            Canvas.SetTop (this.updates, 109);
-            
-            canvas.Children.Add (credits);
-            Canvas.SetLeft (credits, 294);
-            Canvas.SetTop (credits, 142);
-
-            Content = canvas;
-        }
-
         private void CreateLink()
         {
             Link website_link = new Link(Properties_Resources.Website, Controller.WebsiteLinkAddress);

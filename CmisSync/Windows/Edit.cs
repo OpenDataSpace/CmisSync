@@ -46,8 +46,6 @@ namespace CmisSync
 
         private EditType type;
 
-        private bool useXAML = true;
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -61,14 +59,17 @@ namespace CmisSync
             this.type = type;
 
             CreateTreeView();
-
-            if (useXAML)
+            LoadEdit();
+            switch (type)
             {
-                LoadEdit();
-            }
-            else
-            {
-                CreateEdit();
+                case EditType.EditFolder:
+                    tab.SelectedItem = tabItemSelection;
+                    break;
+                case EditType.EditCredentials:
+                    tab.SelectedItem = tabItemCredentials;
+                    break;
+                default:
+                    break;
             }
 
             this.Title = Properties_Resources.EditTitle;
@@ -188,108 +189,6 @@ namespace CmisSync
             passwordBox.Password = Credentials.Password.ToString();
 
             ContentCanvas.Children.Add(editWPF);
-        }
-
-
-        /// <summary>
-        /// Create the UI
-        /// </summary>
-        private void CreateEdit()
-        {
-            addressLabel = new TextBlock()
-            {
-                Text = Properties_Resources.CmisWebAddress + ":",
-                FontWeight = FontWeights.Bold
-            };
-            addressBox = new TextBox()
-            {
-                Width = 410,
-                Text = this.Credentials.Address.ToString(),
-                IsEnabled = false
-            };
-            userLabel = new TextBlock()
-            {
-                Width = 200,
-                Text = Properties_Resources.User + ":",
-                FontWeight = FontWeights.Bold
-            };
-            userBox = new TextBox()
-            {
-                Width = 200,
-                Text = this.Credentials.UserName,
-                IsEnabled = false
-            };
-            passwordLabel = new TextBlock()
-            {
-                Width = 200,
-                Text = Properties_Resources.Password + ":",
-                FontWeight = FontWeights.Bold
-            };
-            passwordBox = new PasswordBox()
-            {
-                Width = 200,
-                Password = this.Credentials.Password.ToString()
-            };
-
-            Canvas canvasSelection = new Canvas();
-            canvasSelection.Width = 430;
-            canvasSelection.Height = 287;
-            canvasSelection.Children.Add(treeView);
-
-            Canvas canvasCredentials = new Canvas();
-            canvasCredentials.Width = 430;
-            canvasCredentials.Height = 287;
-            canvasCredentials.Children.Add(addressLabel);
-            Canvas.SetTop(addressLabel, 40);
-            Canvas.SetLeft(addressLabel, 10);
-            canvasCredentials.Children.Add(addressBox);
-            Canvas.SetTop(addressBox, 60);
-            Canvas.SetLeft(addressBox, 10);
-            canvasCredentials.Children.Add(userLabel);
-            Canvas.SetTop(userLabel, 100);
-            Canvas.SetLeft(userLabel, 10);
-            canvasCredentials.Children.Add(userBox);
-            Canvas.SetTop(userBox, 120);
-            Canvas.SetLeft(userBox, 10);
-            canvasCredentials.Children.Add(passwordLabel);
-            Canvas.SetTop(passwordLabel, 100);
-            Canvas.SetLeft(passwordLabel, 220);
-            canvasCredentials.Children.Add(passwordBox);
-            Canvas.SetTop(passwordBox, 120);
-            Canvas.SetLeft(passwordBox, 220);
-
-            tab = new TabControl();
-
-            tabItemSelection = new TabItem();
-            tabItemSelection.Header = Properties_Resources.AddingFolder;
-            tabItemSelection.Content = canvasSelection;
-            tab.Items.Add(tabItemSelection);
-
-            tabItemCredentials = new TabItem();
-            tabItemCredentials.Header = Properties_Resources.Credentials;
-            tabItemCredentials.Content = canvasCredentials;
-            tab.Items.Add(tabItemCredentials);
-
-            ContentCanvas.Children.Add(tab);
-            Canvas.SetTop(tab, 30);
-            Canvas.SetLeft(tab, 175);
-
-            finishButton = new Button()
-            {
-                Content = Properties_Resources.SaveChanges,
-                IsDefault = true
-            };
-
-            cancelButton = new Button()
-            {
-                Content = Properties_Resources.DiscardChanges,
-                IsDefault = false
-            };
-
-            Buttons.Add(finishButton);
-            Buttons.Add(cancelButton);
-
-            finishButton.Focus();
         }
     }
 }
