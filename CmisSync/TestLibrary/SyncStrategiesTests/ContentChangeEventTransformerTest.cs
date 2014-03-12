@@ -55,7 +55,7 @@ namespace TestLibrary.SyncStrategiesTests {
         private static readonly string id = "myId";
         private ContentChangeEvent prepareEvent(DotCMIS.Enums.ChangeType type, bool hasContentStream) {
             var e = new ContentChangeEvent(type, id);
-            var remoteObject = MockUtil.CreateRemoteObjectMock(hasContentStream ? "streamId" : null);
+            var remoteObject = MockUtil.CreateRemoteObjectMock(hasContentStream ? "streamId" : null, id);
             var session = new Mock<ISession>();
             session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (remoteObject.Object);
 
@@ -112,7 +112,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteSecurityChangeOfExistingFile ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile();
+            storage.AddLocalFile("path",id);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
@@ -167,7 +167,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void LocallyExistingRemoteDocumentUpdated ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile();
+            storage.AddLocalFile("path",id);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
@@ -200,7 +200,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteDeletionChangeTest ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile();
+            storage.AddLocalFile("path",id);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
@@ -232,7 +232,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteFolderDeletion ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder();
+            storage.AddLocalFolder("path", id);
             FolderEvent folderEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FolderEvent>()))
@@ -250,7 +250,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteFolderCreation ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder();
+            storage.AddLocalFolder("path", id);
             FolderEvent folderEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FolderEvent>()))
@@ -268,7 +268,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteFolderUpdate ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder();
+            storage.AddLocalFolder("path", id);
             FolderEvent folderEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FolderEvent>()))
@@ -286,7 +286,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteFolderSecurity ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder();
+            storage.AddLocalFolder("path", id);
             FolderEvent folderEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FolderEvent>()))

@@ -1,6 +1,7 @@
 This file is to track the open TODO's and their dependencies for the implementation of the event design.
 
 Important
+- Add EventHandler that fetches IDocument or IFolder for given File or Folder Event
 - Finish the Integration Test in AllHandlersIT
 - Finish RemoteSituationDetection: Unit-Tests and Implementation
 - Refactor Interface of RemoteSituationDetection to get the full instead of the ObjectId, this is needed because for a remote-deletion there is no valid Id left but it is clear that a deletion happened.

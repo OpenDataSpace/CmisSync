@@ -39,10 +39,11 @@ namespace TestLibrary.TestUtils
             return changeEvent;
         }
 
-        public static Mock<IDocument> CreateRemoteObjectMock(string documentContentStreamId){
+        public static Mock<IDocument> CreateRemoteObjectMock(string documentContentStreamId, string id){
             var newRemoteObject = new Mock<IDocument> ();
             newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
             newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId==null? 0 : 1);
+            newRemoteObject.Setup(d => d.Id).Returns(id);
             return newRemoteObject;
         }
 
@@ -68,12 +69,14 @@ namespace TestLibrary.TestUtils
             return changeList;
         }
 
-        public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path = "path"){
-            db.Setup(foo => foo.GetFilePath(It.IsAny<string>())).Returns(path);
+        public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id){
+            db.Setup(foo => foo.GetFilePath(id)).Returns(path);
+            db.Setup(foo => foo.ContainsFile(path)).Returns(true);
         }
 
-        public static void AddLocalFolder(this Mock<IMetaDataStorage> db, string path = "path"){
-            db.Setup(foo => foo.GetFolderPath(It.IsAny<string>())).Returns(path);
+        public static void AddLocalFolder(this Mock<IMetaDataStorage> db, string path, string id){
+            db.Setup(foo => foo.GetFolderPath(id)).Returns(path);
+            db.Setup(foo => foo.ContainsFolder(path)).Returns(true);
         }
 
         public static Mock<IFolder> CreateCmisFolder(List<string> fileNames = null, List<string> folderNames = null, bool contentStream = false) {

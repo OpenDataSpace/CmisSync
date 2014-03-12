@@ -61,6 +61,7 @@ namespace CmisSync.Lib.Sync.Strategy {
 
         private void HandleAsIDocument(ContentChangeEvent contentChangeEvent){
             IDocument doc = contentChangeEvent.CmisObject as IDocument;
+            Logger.Debug("asdasdasd"+doc.Id);
             switch(contentChangeEvent.Type)
             {
                 case DotCMIS.Enums.ChangeType.Created:

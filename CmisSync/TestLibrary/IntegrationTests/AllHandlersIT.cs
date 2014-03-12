@@ -38,13 +38,12 @@ namespace TestLibrary.IntegrationTests
         public static void fakeDelegate(string repoId) {
         }
         
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session) 
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage) 
         {
-            return CreateQueue(session, new ObservableHandler());
+            return CreateQueue(session, storage, new ObservableHandler());
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, ObservableHandler observer) {
-            var storage = new Mock<IMetaDataStorage>();
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage, ObservableHandler observer) {
 
             var manager = new SyncEventManager();
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
@@ -104,7 +103,8 @@ namespace TestLibrary.IntegrationTests
         {
             var session = new Mock<ISession>();
             var observer = new ObservableHandler();
-            var queue = CreateQueue(session, observer);
+            var storage = new Mock<IMetaDataStorage>();
+            var queue = CreateQueue(session, storage, observer);
             var myEvent = new Mock<ISyncEvent>();
             queue.AddEvent(myEvent.Object);
             queue.Run();
@@ -114,12 +114,13 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast")]
         public void RunStartNewSyncEvent ()
         {
+            var storage = new Mock<IMetaDataStorage>();
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
             var myEvent = new StartNextSyncEvent();
             var observer = new ObservableHandler();
-            var queue = CreateQueue(session, observer);
+            var queue = CreateQueue(session, storage, observer);
             queue.AddEvent(myEvent);
             queue.Run();
             Assert.That(observer.list.Count, Is.EqualTo(1));
@@ -129,15 +130,20 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast")]
         public void RunFSEventDeleted ()
         {
+            var storage = new Mock<IMetaDataStorage>();
+            string path = "/tmp/a/b";
+            string id = "id";
+            storage.AddLocalFile(path, id);
+            
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
-            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, "/tmp/a");
-            var queue = CreateQueue(session);
+            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path);
+            var queue = CreateQueue(session, storage);
             queue.AddEvent(myEvent);
             queue.Run();
 
-            session.Verify(f => f.Delete(It.IsAny<IObjectId>()), Times.Once());
+            session.Verify(f => f.Delete(It.Is<IObjectId>(i=>i.Id==id), true), Times.Once());
         }
 
     }

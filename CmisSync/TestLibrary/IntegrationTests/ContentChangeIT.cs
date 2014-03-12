@@ -22,6 +22,11 @@ namespace TestLibrary.IntegrationTests
     [TestFixture]
     public class ContentChangeIT
     {
+        [TestFixtureSetUp]
+        public void ClassInit()
+        {
+            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
+        }
         private readonly bool isPropertyChangesSupported = false;
         private readonly int maxNumberOfContentChanges = 1000;
         
@@ -32,11 +37,13 @@ namespace TestLibrary.IntegrationTests
         }
 
 
+        private static readonly string defaultId = "defaultId";
+
         
         private Mock<ISession> GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType type, string documentContentStreamId = null) {
-            var session = MockUtil.PrepareSessionMockForSingleChange(type);
+            var session = MockUtil.PrepareSessionMockForSingleChange(type, defaultId);
 
-            var newRemoteObject =  MockUtil.CreateRemoteObjectMock(documentContentStreamId);
+            var newRemoteObject =  MockUtil.CreateRemoteObjectMock(documentContentStreamId, defaultId);
             session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
          
             return session;
@@ -79,10 +86,12 @@ namespace TestLibrary.IntegrationTests
         public void RemoteSecurityChangeOfExistingFile ()
         {
             Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
-            storage.AddLocalFile();
+            storage.AddLocalFile("path", defaultId);
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
             ObservableHandler observer = RunQueue(session, storage);
+
+            storage.Verify(s=>s.GetFilePath(defaultId), Times.Once());
 
             observer.AssertGotSingleFileEvent(MetaDataChangeType.CHANGED, ContentChangeType.NONE);
 
@@ -119,7 +128,7 @@ namespace TestLibrary.IntegrationTests
         public void RemoteDeletionChangeTest ()
         {
             Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
-            storage.AddLocalFile();
+            storage.AddLocalFile("path", defaultId);
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
             ObservableHandler observer = RunQueue(session, storage);
