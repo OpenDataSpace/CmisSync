@@ -20,7 +20,7 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Grid HorizontalAlignment="Left" Height="50" Margin="140,320,0,-50" Width="300">
+        <Grid HorizontalAlignment="Left" Height="50" Margin="156,320,-16,-50" Width="300">
             <Button x:Name="finishButton" Content="SaveChanges" HorizontalAlignment="Left" Margin="80,19,0,0" VerticalAlignment="Top" Width="100"/>
             <Button x:Name="cancelButton" Content="DiscardChanges" HorizontalAlignment="Left" Margin="190,19,0,0" VerticalAlignment="Top" Width="100"/>
         </Grid>

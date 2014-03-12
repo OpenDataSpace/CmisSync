@@ -10,7 +10,7 @@
         <TextBox x:Name="localfolder_box" TextWrapping="NoWrap" Text="" Width="420" Margin="6,91,15,146"/>
         <TextBlock x:Name="localrepopath_label" TextWrapping="NoWrap" Text="TextBlock" FontWeight="Bold" VerticalAlignment="Top" Width="425" Height="21" Margin="6,114,10,0"/>
         <TextBox x:Name="localrepopath_box" TextWrapping="NoWrap" Width="375" Text="TextBox" Margin="6,135,60,102"/>
-        <Grid HorizontalAlignment="Left" Height="41" Margin="139,284,-9,-65" VerticalAlignment="Top" Width="311">
+        <Grid HorizontalAlignment="Left" Height="41" Margin="140,284,-10,-65" VerticalAlignment="Top" Width="311">
             <Button x:Name="back_button" Content="Button" Margin="37,10,199,10" RenderTransformOrigin="-0.813,0.364"/>
             <Button x:Name="continue_button" Content="Button" Margin="129,10,107,10" RenderTransformOrigin="-0.813,0.364"/>
             <Button x:Name="cancel_button" Content="Button" Margin="221,10,15,10"/>

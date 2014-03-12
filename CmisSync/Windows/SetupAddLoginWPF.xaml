@@ -16,7 +16,7 @@
         <TextBlock x:Name="user_help_label" TextWrapping="Wrap" Width="200" FontSize="11" Foreground="Blue" Visibility="Hidden" Background="Transparent" Text="TextBlock" Margin="10,135,359,109"/>
         <TextBlock x:Name="password_help_label" TextWrapping="Wrap" Width="200" FontSize="11" Foreground="Blue" Visibility="Hidden" Background="Transparent" Margin="220,135,149,109"/>
         <TextBox x:Name="address_error_label" HorizontalAlignment="Left" Margin="10,151,0,0" TextWrapping="Wrap" Text="TextBox" FontSize="11" Foreground="Red" BorderThickness="0" IsReadOnly="True" Background="Transparent" MaxWidth="420" VerticalAlignment="Top" Visibility="Hidden"/>
-        <Grid HorizontalAlignment="Left" Height="41" Margin="139,284,-9,-65" VerticalAlignment="Top" Width="311">
+        <Grid Height="41" Margin="140,284,-10,-65" VerticalAlignment="Top">
             <Button x:Name="continue_button" Content="Button" Margin="129,10,107,10" RenderTransformOrigin="-0.813,0.364"/>
             <Button x:Name="cancel_button" Content="Button" Margin="221,10,15,10"/>
         </Grid>
