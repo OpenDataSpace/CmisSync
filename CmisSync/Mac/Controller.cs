@@ -33,6 +33,7 @@ namespace CmisSync {
 
         private NSUserNotificationCenter notificationCenter;
         private Dictionary<string,DateTime> transmissionFiles = new Dictionary<string, DateTime> ();
+        private HashSet<string> startedTransmissions = new HashSet<string> ();
         private Object transmissionLock = new object ();
         private int notificationInterval = 5;
         private int notificationKeep = 5;
@@ -170,12 +171,16 @@ namespace CmisSync {
                                 if (transmission.Status.Aborted == true) {
                                     continue;
                                 }
-                                if (transmission.Status.Completed == true) {
-                                    continue;
-                                }
+
                                 if (transmission.Status.FailedException != null) {
                                     continue;
                                 }
+                                Console.WriteLine(startedTransmissions.Count);
+                                if(startedTransmissions.Contains(transmission.Path)) {
+                                    continue;
+                                }
+                                startedTransmissions.Add(transmission.Path);
+
                                 NSUserNotification notification = new NSUserNotification();
                                 notification.Title = Path.GetFileName (transmission.Path);
                                 notification.Subtitle = TransmissionStatus(transmission);
@@ -185,7 +190,8 @@ namespace CmisSync {
                                 notification.UserInfo = userInfo;
                                 notification.DeliveryDate = NSDate.Now;
                                 notificationCenter.DeliverNotification (notification);
-                                transmissionFiles.Add (transmission.Path, notification.DeliveryDate);
+
+                                transmissionFiles.Add (transmission.Path, NSDate.Now);
                                 UpdateFileStatus (transmission, null);
                                 transmission.TransmissionStatus += TransmissionReport;
                             }
@@ -245,14 +251,13 @@ namespace CmisSync {
                 status = Properties_Resources.NotificationFileStatusAborted;
             } else if (transmission.Status.Completed == true) {
                 status = Properties_Resources.NotificationFileStatusCompleted;
+                //startedTransmissions.Remove (transmission.Path);
             } else if (transmission.Status.FailedException != null) {
                 status = Properties_Resources.NotificationFileStatusFailed;
             }
 
-            return String.Format("{0} {1} ({2} {3})",
-                type, status,
-                CmisSync.Lib.Utils.FormatPercent(transmission.Status.Percent.GetValueOrDefault(0)),
-                CmisSync.Lib.Utils.FormatBandwidth ((long)transmission.Status.BitsPerSecond.GetValueOrDefault()));
+            return String.Format("{0} {1}",
+                type, status);
         }
 
         private void TransmissionReport(object sender, TransmissionProgressEventArgs e)
@@ -283,7 +288,10 @@ namespace CmisSync {
                             if (!IsNotificationTransmission(notification)) {
                                 continue;
                             }
-                            if (notification.InformativeText == transmission.Path) {
+                            bool pathCorrect = notification.InformativeText == transmission.Path;
+                            bool isCompleted = transmission.Status.Completed == true;
+                            bool isAlreadyStarted = startedTransmissions.Contains(transmission.Path);
+                            if (pathCorrect && (!isAlreadyStarted || isCompleted)) {
                                 notificationCenter.RemoveDeliveredNotification (notification);
                                 notification.DeliveryDate = NSDate.Now;
                                 notification.Subtitle = TransmissionStatus (transmission);

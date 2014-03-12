@@ -152,7 +152,7 @@ namespace CmisSync {
                             state_item.Enabled = false;
                         }
                     });
-                }
+				}
             };
         }
 
