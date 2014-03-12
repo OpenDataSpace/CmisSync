@@ -8,16 +8,6 @@ namespace CmisSync.Lib.Events.Filter
     /// </summary>
     public class FailedOperationsFilter : AbstractFileFilter
     {
-        private static readonly int DEFAULT_FILTER_PRIORITY = 9998;
-
-        /// <summary>
-        /// Returns the default filter priority and cannot be changed during runtime.
-        /// </summary>
-        /// <value>
-        /// The priority is 9998.
-        /// </value>
-        public override int Priority { get { return DEFAULT_FILTER_PRIORITY; } }
-
         /// <summary>
         /// Gets or sets the max upload retries.
         /// </summary>

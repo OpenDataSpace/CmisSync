@@ -14,7 +14,11 @@ namespace CmisSync.Lib.Events
         ///<summary>
         ///May not be changed during runtime
         ///</summary>
-        public abstract int Priority {get;}
+        public virtual int Priority {
+            get {
+                return EventHandlerPriorities.GetPriority(this.GetType());
+            }
+        }
 
         public int CompareTo(SyncEventHandler other) {
             return Priority.CompareTo(other.Priority);
@@ -31,7 +35,7 @@ namespace CmisSync.Lib.Events
         }
 
         public override string ToString() {
-            return this.GetType() + " with Priority " + Priority.ToString();
+            return this.GetType() + " with Priority " + this.Priority.ToString();
         }
     }
 

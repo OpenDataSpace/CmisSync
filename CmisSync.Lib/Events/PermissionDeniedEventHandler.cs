@@ -6,9 +6,6 @@ namespace CmisSync.Lib.Events
 
     public class PermissionDeniedEventHandler : SyncEventHandler
     {
-        public static readonly int PERMISSIONDENIEDHANDLERPRIORITY = 100;
-
-        public override int Priority { get { return PERMISSIONDENIEDHANDLERPRIORITY; } }
 
         private string Repo;
         private ShowChangePasswordEventHandler Callback;

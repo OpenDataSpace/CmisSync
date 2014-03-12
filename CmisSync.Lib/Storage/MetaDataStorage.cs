@@ -211,6 +211,14 @@ namespace CmisSync.Lib.Storage
         public void SetChangeLogToken(string token) {
             throw new NotImplementedException();
         }
+
+        public string GetFileId(string path) {
+            throw new NotImplementedException();
+        }
+
+        public string GetFolderId(string path) {
+            throw new NotImplementedException();
+        }
     }
 }
 

@@ -11,15 +11,8 @@ namespace CmisSync.Lib.Sync.Strategy
 {
     public class SyncMechanism : ReportingSyncEventHandler
     {
-        public static readonly int DEFAULT_PRIORITY = 1;
         private ISession Session;
         private IMetaDataStorage Storage;
-
-        public override int Priority {
-            get {
-                return DEFAULT_PRIORITY;
-            }
-        }
 
         public ISolver[,] Solver;
         public ISituationDetection<IFileSystemInfo> LocalSituation;

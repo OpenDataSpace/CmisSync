@@ -72,11 +72,13 @@ namespace TestLibrary.TestUtils
         public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id){
             db.Setup(foo => foo.GetFilePath(id)).Returns(path);
             db.Setup(foo => foo.ContainsFile(path)).Returns(true);
+            db.Setup(foo => foo.GetFileId(path)).Returns(id);
         }
 
         public static void AddLocalFolder(this Mock<IMetaDataStorage> db, string path, string id){
             db.Setup(foo => foo.GetFolderPath(id)).Returns(path);
             db.Setup(foo => foo.ContainsFolder(path)).Returns(true);
+            db.Setup(foo => foo.GetFolderId(path)).Returns(id);
         }
 
         public static Mock<IFolder> CreateCmisFolder(List<string> fileNames = null, List<string> folderNames = null, bool contentStream = false) {

@@ -12,16 +12,7 @@ namespace CmisSync.Lib.Sync.Strategy
     public class ContentChangeEventAccumulator : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChangeEventAccumulator));
 
-        /// this has to run before ContentChangeEventTransformer
-        public static readonly int DEFAULT_PRIORITY = 2000;
-
         private ISession session;
-
-        public override int Priority {
-            get {
-                return DEFAULT_PRIORITY;
-            }
-        }
 
         public override bool Handle (ISyncEvent e) {
             if(!(e is ContentChangeEvent)){

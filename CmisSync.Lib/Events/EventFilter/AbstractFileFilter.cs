@@ -7,18 +7,10 @@ namespace CmisSync.Lib.Events.Filter
     /// </summary>
     public abstract class AbstractFileFilter : SyncEventHandler
     {
-        private static readonly int DEFAULT_FILTER_PRIORITY = 9999;
         /// <summary>
         /// The queue where the ignores should be reported to.
         /// </summary>
         protected readonly ISyncEventQueue Queue;
-        /// <summary>
-        /// Default filter priority is set to 9999. May not be changed during runtime.
-        /// </summary>
-        /// <value>
-        /// The priority of the filter.
-        /// </value>
-        public override int Priority { get { return DEFAULT_FILTER_PRIORITY; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.AbstractFileFilter"/> class.

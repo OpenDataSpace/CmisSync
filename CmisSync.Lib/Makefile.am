@@ -48,6 +48,7 @@ SOURCES =  \
 	Events/EventFilter/IgnoredFilesFilter.cs \
 	Events/EventFilter/IgnoredFoldersFilter.cs \
 	Events/EventFilter/InvalidFolderNameFilter.cs \
+	Events/EventHandlerPriorities.cs \
 	Events/ExceptionEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileDownloadRequest.cs \
@@ -119,6 +120,7 @@ SOURCES =  \
 	Sync/Strategy/ContentChanges.cs \
 	Sync/Strategy/Crawler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
+	Sync/Strategy/FileSystemEventAccumulator.cs \
 	Sync/Strategy/FolderSynchronizer.cs \
 	Sync/Strategy/ISituationDetection.cs \
 	Sync/Strategy/LocalSituationDetection.cs \

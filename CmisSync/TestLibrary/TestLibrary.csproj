@@ -91,6 +91,7 @@
     <Compile Include="DebugLoggingHandlerTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
+    <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
     <Compile Include="EventsTests\EventTypesTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
     <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
     <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
+    <Compile Include="SyncStrategiesTests\FileSystemEventAccumulatorTest.cs" />
     <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
     <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />

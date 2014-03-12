@@ -23,15 +23,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private object syncLock = new object();
 
         public static readonly string FULL_SYNC_PARAM_NAME = "lastTokenOnServer";
-        public static readonly int DEFAULT_PRIORITY = 1000;
-
         private IChangeEvent lastChange;
-
-        public override int Priority {
-            get {
-                return DEFAULT_PRIORITY;
-            }
-        }
 
         public ContentChanges(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base (queue) {
             if(session == null)

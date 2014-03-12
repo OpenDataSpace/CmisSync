@@ -18,7 +18,7 @@ namespace CmisSync.Lib.Events
 
         public IDirectoryInfo LocalParentDirectory { get; protected set; }
 
-        public IDocument RemoteFile { get; protected set; }
+        public IDocument RemoteFile { get; set; }
 
         public FileEvent (IFileInfo localFile = null, IDirectoryInfo localParentDirectory = null, IDocument remoteFile = null)
         {

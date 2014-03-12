@@ -20,15 +20,18 @@ namespace CmisSync.Lib.Sync.Strategy
     /// </summary>
     public class Watcher : ReportingSyncEventHandler, IDisposable
     {
+
+        // This is a workaround to enable mocking Watcher with callbase
+        // TODO: Remove this when Watcher is seperated
+        public override int Priority {
+            get {
+                return EventHandlerPriorities.GetPriority(typeof(CmisSync.Lib.Sync.Strategy.Watcher));
+            }
+        }
         /// <summary>
         /// The disposed.
         /// </summary>
         private bool _disposed;
-
-        /// <summary>
-        /// The default file system watcher strategy priority
-        /// </summary>
-        public static readonly int DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY = 1;
 
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
         /// <summary>
@@ -141,17 +144,6 @@ namespace CmisSync.Lib.Sync.Strategy
 
         }
 
-        /// <summary>
-        /// Returns 1. Cannot be changed during runtime.
-        /// </summary>
-        /// <value>
-        /// The priority.
-        /// </value>
-        public override int Priority {
-            get {
-                return DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY;
-            }
-        }
 
         #region IDisposable implementation
 

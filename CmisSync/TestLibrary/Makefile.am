@@ -27,6 +27,7 @@ SOURCES =  \
 	DebugLoggingHandlerTest.cs \
 	EncodingTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
+	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/EventTypesTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
@@ -60,6 +61,7 @@ SOURCES =  \
 	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
+	SyncStrategiesTests/FileSystemEventAccumulatorTest.cs \
 	SyncStrategiesTests/FolderSynchronizerTest.cs \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \

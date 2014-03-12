@@ -44,7 +44,6 @@ namespace TestLibrary.EventsTests
         {
             var handler = new PermissionDeniedEventHandler (Repo, delegate(string name) {
             });
-            Assert.AreEqual (PermissionDeniedEventHandler.PERMISSIONDENIEDHANDLERPRIORITY, handler.Priority);
         }
 
         [Test, Category("Fast")]

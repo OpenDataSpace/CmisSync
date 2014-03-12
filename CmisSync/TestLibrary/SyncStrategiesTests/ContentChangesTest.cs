@@ -40,7 +40,6 @@ namespace TestLibrary.SyncStrategiesTests
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var cc = new ContentChanges (session.Object, storage.Object, queue.Object);
-            Assert.That(cc.Priority, Is.EqualTo(1000));
         }
 
 

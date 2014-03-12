@@ -56,8 +56,11 @@ namespace TestLibrary.IntegrationTests
             var transformer = new ContentChangeEventTransformer(queue, storage.Object);
             manager.AddEventHandler(transformer);
 
-            var accumulator = new ContentChangeEventAccumulator(session.Object, queue);
-            manager.AddEventHandler(accumulator);
+            var ccaccumulator = new ContentChangeEventAccumulator(session.Object, queue);
+            manager.AddEventHandler(ccaccumulator);
+
+            var feaccumulator = new FileSystemEventAccumulator(queue, session.Object, storage.Object);
+            manager.AddEventHandler(feaccumulator);
 
             var watcher = new Mock<Strategy.Watcher>(queue){CallBase = true};
             manager.AddEventHandler(watcher.Object);
@@ -138,6 +141,8 @@ namespace TestLibrary.IntegrationTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
+            IDocument remote = MockUtil.CreateRemoteObjectMock(null, id).Object;
+            session.Setup(s => s.GetObject(id)).Returns(remote);
             var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path);
             var queue = CreateQueue(session, storage);
             queue.AddEvent(myEvent);

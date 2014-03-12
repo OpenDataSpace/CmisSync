@@ -44,7 +44,6 @@ namespace TestLibrary.SyncStrategiesTests
             var localFolder = new Mock<IDirectoryInfo>();
             var factory = new Mock<IFileSystemInfoFactory>();
             var crawler = new Crawler(queue, remoteFolder, localFolder.Object, factory.Object);
-            Assert.AreEqual(Crawler.CRAWLER_PRIORITY, crawler.Priority);
         }
 
         [Test, Category("Fast")]

@@ -18,7 +18,6 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <summary>
         /// The Crawler Strategy is the last strategy in the event queue, so the priority is zero.
         /// </summary>
-        public static readonly int CRAWLER_PRIORITY = 0;
         private IFolder RemoteFolder;
         private IDirectoryInfo LocalFolder;
         private IFileSystemInfoFactory fsFactory;
@@ -50,19 +49,6 @@ namespace CmisSync.Lib.Sync.Strategy
                 this.fsFactory = new FileSystemInfoFactory();
             }else{
                 this.fsFactory = fsFactory;
-            }
-        }
-
-
-        /// <summary>
-        ///  May not be changed during runtime 
-        /// </summary>
-        /// <value>
-        /// The priority.
-        /// </value>
-        public override int Priority {
-            get {
-                return CRAWLER_PRIORITY;
             }
         }
 

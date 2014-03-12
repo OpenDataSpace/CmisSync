@@ -11,7 +11,6 @@ namespace CmisSync.Lib.Events
         /// <summary>
         /// The default Queue Event Handler PRIORITY.
         /// </summary>
-        public static readonly int POLLSCHEDULERPRIORITY = 1000;
         private double interval;
         private ISyncEventQueue queue;
         private Timer timer;
@@ -77,16 +76,6 @@ namespace CmisSync.Lib.Events
                 Start();
             }
             return false;
-        }
-
-        /// <summary>
-        /// Cannot be changed during runtime. Just returns the Priority in the Event queue.
-        /// </summary>
-        /// <value>The priority.</value>
-        public override int Priority {
-            get {
-                return POLLSCHEDULERPRIORITY;
-            }
         }
 
         /// <summary>

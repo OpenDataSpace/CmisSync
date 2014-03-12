@@ -11,16 +11,10 @@ using log4net;
 namespace CmisSync.Lib.Sync.Strategy { 
     public class ContentChangeEventTransformer : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChangeEventTransformer));
-        public static readonly int DEFAULT_PRIORITY = 1000;
 
         private IMetaDataStorage storage;
 
         private IFileSystemInfoFactory fsFactory;
-        public override int Priority {
-            get {
-                return DEFAULT_PRIORITY;
-            }
-        }
 
         public override bool Handle(ISyncEvent e) {
             if(! (e is ContentChangeEvent)) {

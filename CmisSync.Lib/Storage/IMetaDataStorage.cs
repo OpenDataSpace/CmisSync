@@ -78,6 +78,16 @@ namespace CmisSync.Lib.Storage
         bool ContainsFolder(string path);
 
         /// <summary>
+        /// Returns id for given Path
+        /// </summary>
+        string GetFileId(string path);
+
+        /// <summary>
+        /// Returns id for given Path
+        /// </summary>
+        string GetFolderId(string path);
+
+        /// <summary>
         /// Checks whether the storage contains a given folder.
         /// </summary>
         bool ContainsFolder(DirectoryInfo folder);

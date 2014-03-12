@@ -29,7 +29,6 @@ namespace TestLibrary.SyncStrategiesTests
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
             var watcher = new NetWatcher(fswatcher, queue.Object);
             Assert.False(watcher.EnableEvents);
-            Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
         }
 
         [Test, Category("Fast")]
