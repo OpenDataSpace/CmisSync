@@ -120,7 +120,7 @@ namespace CmisSync
 
         partial void OnHelp(NSObject sender)
         {
-            throw new System.NotImplementedException();
+            NSHelpManager.SharedHelpManager().FindString("proxy","MacHelp");
         }
 
         partial void OnCancel(NSObject sender)
