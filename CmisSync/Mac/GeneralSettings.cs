@@ -42,7 +42,7 @@ namespace CmisSync
             base.AwakeFromNib ();
             this.Title = Properties_Resources.EditTitle;
             this.ProxySettings = ConfigManager.CurrentConfig.Proxy;
-            this.CancelButton.Title = Properties_Resources.Cancel;
+            this.CancelButton.Title = Properties_Resources.DiscardChanges;
             this.SaveButton.Title = Properties_Resources.SaveChanges;
             this.RequiresAuthorizationCheckBox.StringValue = Properties_Resources.NetworkProxyLogin;
             this.ProxyPasswordLabel.StringValue = Properties_Resources.Password;
