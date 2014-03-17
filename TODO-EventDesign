@@ -1,5 +1,8 @@
 This file is to track the open TODO's and their dependencies for the implementation of the event design.
 
+RemoteSituation Detection now can assume that IFolder and IDocument are prefetched. If is null it can assume that it is deleted when the event contains this information (set in accumulator). Change interface of RemoteSituation Detection to get Event instead of ID. Check whether it is better to have two situationdetection classes depending on file and folders.
+
+
 Important
 - Finish the Integration Test in AllHandlersIT
 - Finish RemoteSituationDetection: Unit-Tests and Implementation
