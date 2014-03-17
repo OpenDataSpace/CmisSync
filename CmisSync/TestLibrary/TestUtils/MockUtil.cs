@@ -46,6 +46,12 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.Id).Returns(id);
             return newRemoteObject;
         }
+        
+        public static Mock<IFolder> CreateRemoteFolderMock(string id){
+            var newRemoteObject = new Mock<IFolder> ();
+            newRemoteObject.Setup(d => d.Id).Returns(id);
+            return newRemoteObject;
+        }
 
         public static Mock<ISession> PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType type, string objectId = "objectId", string changeLogToken = "token", string latestChangeLogToken = "latestChangeLogToken") {
             var changeEvents = new Mock<IChangeEvents> ();

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 
 using DotCMIS.Client;
+using DotCMIS.Exceptions;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Storage;
@@ -15,13 +16,54 @@ namespace CmisSync.Lib.Sync.Strategy {
         private IMetaDataStorage storage;
         private ISession session;
 
+        private ICmisObject GetRemoteObject(ISyncEvent e) {
+            if(e is FileEvent) {
+                return (e as FileEvent).RemoteFile;
+            }else if (e is FolderEvent) {
+                return (e as FolderEvent).RemoteFolder;
+            }
+            return null;
+        }
+
+        private void SetRemoteObject(ISyncEvent e, ICmisObject remote) {
+            if(e is FileEvent) {
+                (e as FileEvent).RemoteFile = remote as IDocument;
+            }else if (e is FolderEvent) {
+                (e as FolderEvent).RemoteFolder = remote as IFolder;
+            }
+        }
+
+        private string FetchIdFromStorage(ISyncEvent e) {
+            if(e is FileEvent) {
+                string fileName = (e as FileEvent).LocalFile.FullName;
+                return storage.GetFileId(fileName);
+            }else if (e is FolderEvent) {
+                string folderName = (e as FolderEvent).LocalFolder.FullName;
+                return storage.GetFolderId(folderName);
+            }
+            return null;
+        }
 
         public override bool Handle(ISyncEvent e) {
-            FileEvent fileEvent = e as FileEvent;
-            if(fileEvent != null) {
-                string fileName = fileEvent.LocalFile.FullName;
-                fileEvent.RemoteFile = session.GetObject(storage.GetFileId(fileName)) as IDocument;
+            if(!(e is FileEvent || e is FolderEvent)){
+                return false;
             }
+            ICmisObject remote = GetRemoteObject(e);
+            //already there, no need to GetObject
+            if (remote != null) {
+                return false;
+            }
+
+            string id = FetchIdFromStorage(e);
+
+            try {
+                remote = session.GetObject(id);
+            } catch (CmisObjectNotFoundException) {
+                //Deleted on Server, this is ok
+                remote = null;
+            }
+
+            SetRemoteObject(e, remote);
             return false;
         }
 
