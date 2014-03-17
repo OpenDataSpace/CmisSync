@@ -19,16 +19,14 @@ namespace CmisSync.Lib.Sync.Strategy {
         private ICmisObject GetRemoteObject(ISyncEvent e) {
             if(e is FileEvent) {
                 return (e as FileEvent).RemoteFile;
-            }else if (e is FolderEvent) {
-                return (e as FolderEvent).RemoteFolder;
             }
-            return null;
+            return (e as FolderEvent).RemoteFolder;
         }
 
         private void SetRemoteObject(ISyncEvent e, ICmisObject remote) {
             if(e is FileEvent) {
                 (e as FileEvent).RemoteFile = remote as IDocument;
-            }else if (e is FolderEvent) {
+            }else{
                 (e as FolderEvent).RemoteFolder = remote as IFolder;
             }
         }
@@ -37,11 +35,9 @@ namespace CmisSync.Lib.Sync.Strategy {
             if(e is FileEvent) {
                 string fileName = (e as FileEvent).LocalFile.FullName;
                 return storage.GetFileId(fileName);
-            }else if (e is FolderEvent) {
-                string folderName = (e as FolderEvent).LocalFolder.FullName;
-                return storage.GetFolderId(folderName);
             }
-            return null;
+            string folderName = (e as FolderEvent).LocalFolder.FullName;
+            return storage.GetFolderId(folderName);
         }
 
         public override bool Handle(ISyncEvent e) {
@@ -60,7 +56,7 @@ namespace CmisSync.Lib.Sync.Strategy {
                 remote = session.GetObject(id);
             } catch (CmisObjectNotFoundException) {
                 //Deleted on Server, this is ok
-                remote = null;
+                return false;
             }
 
             SetRemoteObject(e, remote);
