@@ -82,19 +82,12 @@ namespace CmisSync.Lib.Sync.Strategy
                 if (disposing)
                 {
                     this.EnableEvents = false;
+                    this.FsWatcher.Dispose();
                 }
                 disposed = true;
             }
             base.Dispose(disposing);
         }
-
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
     }
 }
 

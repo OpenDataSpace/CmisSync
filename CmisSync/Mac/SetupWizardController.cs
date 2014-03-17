@@ -117,7 +117,7 @@ namespace CmisSync
         void ShowLoginPage()
         {
             Header.StringValue = Properties_Resources.Where;
-            Description.StringValue = "";
+            Description.StringValue = String.Empty;
             SubController = new SetupSubLoginController (Controller);
             Content.ContentView = SubController.View;
         }
@@ -125,7 +125,7 @@ namespace CmisSync
         void ShowRepoSelectPage()
         {
             Header.StringValue = Properties_Resources.Which;
-            Description.StringValue = "";
+            Description.StringValue = String.Empty;
             SubController = new SetupSubRepoSelectController (Controller);
             Content.ContentView = SubController.View;
         }
@@ -133,7 +133,7 @@ namespace CmisSync
         void ShowCustomizePage()
         {
             Header.StringValue = Properties_Resources.Customize;
-            Description.StringValue = "";
+            Description.StringValue = String.Empty;
             SubController = new SetupSubCustomizeController (Controller);
             Content.ContentView = SubController.View;
         }
@@ -157,7 +157,7 @@ namespace CmisSync
         void ShowFinishedPage()
         {
             Header.StringValue = Properties_Resources.Ready;
-            Description.StringValue = Properties_Resources.YouCanFind;
+            Description.StringValue = String.Format(Properties_Resources.YouCanFind, Controller.saved_local_path);
             SubController = new SetupSubFinishedController (Controller);
             Content.ContentView = SubController.View;
         }
@@ -165,7 +165,7 @@ namespace CmisSync
         void ShowWelcomePage()
         {
             Header.StringValue = Properties_Resources.Ready;
-            Description.StringValue = "";
+            Description.StringValue = String.Empty;
             SubController = new SetupSubWelcomeController (Controller);
             Content.ContentView = SubController.View;
         }
@@ -187,11 +187,11 @@ namespace CmisSync
                 SubController = new SetupSubTutorialController (Controller);
                 break;
             case 4:
-                Header.StringValue = Properties_Resources.AddFolders;
+				Header.StringValue = String.Format(Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
                 SubController = new SetupSubTutorialEndController (Controller);
                 break;
             }
-            Description.StringValue = "";
+            Description.StringValue = String.Empty;
             Content.ContentView = SubController.View;
         }
 

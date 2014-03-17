@@ -22,7 +22,7 @@ namespace TestLibrary.StreamTests
             Buffer = new byte[Length];
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ConstructorTest ()
         {
             long limit = 0;
@@ -68,7 +68,7 @@ namespace TestLibrary.StreamTests
         }
 
         [Ignore]
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Streams")]
         public void ReadTest ()
         {
             byte [] buf = new byte[Length];
@@ -95,7 +95,7 @@ namespace TestLibrary.StreamTests
         }
 
         [Ignore]
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Streams")]
         public void WriteTest ()
         {
             byte [] buf = new byte[Length];
@@ -118,7 +118,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ConfigureLimitsTest ()
         {
             long limit = Length;

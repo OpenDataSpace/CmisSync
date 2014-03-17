@@ -268,7 +268,7 @@ namespace CmisSync {
 
             // About Menu
             MenuItem about_item = new MenuItem (
-                    CmisSync.Properties_Resources.About);
+                    String.Format(CmisSync.Properties_Resources.About, Properties_Resources.ApplicationName));
             about_item.Activated += delegate {
                 Controller.AboutClicked ();
             };

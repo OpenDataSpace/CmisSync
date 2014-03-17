@@ -9,6 +9,7 @@ namespace CmisSync.Lib.Events.Filter
     public class IgnoredFoldersFilter : AbstractFileFilter
     {
         private List<string> ignoredPaths = new List<string>();
+        private List<string> wildcards = new List<string>();
         private object ListLock = new object();
 
         /// <summary>
@@ -29,6 +30,14 @@ namespace CmisSync.Lib.Events.Filter
         /// Queue.
         /// </param>
         public IgnoredFoldersFilter (ISyncEventQueue queue) : base(queue) { }
+
+        public List<string> IgnoreWildcards { set {
+                lock(ListLock)
+                {
+                    this.wildcards = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Checks the path if it begins with any path, which is ignored. Reports ignores to the queue.

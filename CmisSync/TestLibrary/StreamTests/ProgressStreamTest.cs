@@ -31,27 +31,27 @@ namespace TestLibrary.StreamTests
             Percent = 0;
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ConstructorWorksWithNonNullParams ()
         {
             using (new ProgressStream(new Mock<Stream> ().Object, new Mock<FileTransmissionEvent> (TransmissionType, Filename, null).Object));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnAllParameterNull()
         {
             using (new ProgressStream(null, null));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnStreamIsNull()
         {
             using (new ProgressStream(null, new Mock<FileTransmissionEvent> (TransmissionType, Filename, null).Object));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnTransmissionEventIsNull()
         {
@@ -59,7 +59,7 @@ namespace TestLibrary.StreamTests
         }
 
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void SetLengthTest ()
         {
             var mockedStream = new Mock<Stream> ();
@@ -76,7 +76,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void PositionTest ()
         {
             var mockedStream = new Mock<Stream> ();
@@ -104,7 +104,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ReadTest ()
         {
             using (Stream stream = new MemoryStream()) {
@@ -145,7 +145,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void WriteTest ()
         {
             using (Stream stream = new MemoryStream()) {
@@ -186,7 +186,7 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void SeekTest ()
         {
             using (Stream stream = new MemoryStream()) {
@@ -230,13 +230,13 @@ namespace TestLibrary.StreamTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Streams")]
         public void ResumeTest()
         {
             byte[] inputContent = new byte[100];
             long offset = 100;
             using (Stream stream = new MemoryStream(inputContent)) 
-                using(OffsetStream offsetstream = new OffsetStream(stream, offset))
+            using(OffsetStream offsetstream = new OffsetStream(stream, offset))
             {
                 FileTransmissionEvent TransmissionEvent = new FileTransmissionEvent (TransmissionType, Filename);
                 TransmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
@@ -265,6 +265,21 @@ namespace TestLibrary.StreamTests
                     Assert.AreEqual (56, Percent);
                 }
             }
+        }
+
+        [Test, Category("Fast"), Category("Streams")]
+        public void EnsureBandwidthIsReportedIfProgressIsShorterThanOneSecond()
+        {
+            byte[] inputContent = new byte[1024];
+            FileTransmissionEvent transmission = new FileTransmissionEvent(TransmissionType, Filename);
+            using (var inputStream = new MemoryStream(inputContent))
+            using (var outputStream = new MemoryStream())
+            using (var progressStream = new ProgressStream(inputStream, transmission))
+            {
+                progressStream.CopyTo(outputStream);
+                Assert.That(outputStream.Length == inputContent.Length);
+            }
+            Assert.Greater(transmission.Status.BitsPerSecond, 0);
         }
     }
 }

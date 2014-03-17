@@ -71,8 +71,6 @@
     </Compile>
     <Compile Include="MacWatcher.cs" />
     <Compile Include="Badger.cs" />
-    <Compile Include="Setup.cs" />
-    <Compile Include="SetupWindow.cs" />
     <Compile Include="..\StatusIconController.cs">
       <Link>StatusIconController.cs</Link>
     </Compile>
@@ -168,6 +166,19 @@
     <Compile Include="Notifications\FileSystemProgress.cs" />
     <Compile Include="Notifications\TransmissionProgress.cs" />
     <Compile Include="Notifications\Credentials.cs" />
+    <Compile Include="GeneralSettings.cs" />
+    <Compile Include="GeneralSettingsController.cs" />
+    <Compile Include="GeneralSettings.designer.cs">
+      <DependentUpon>GeneralSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProxySettings.cs" />
+    <Compile Include="ProxySettingsController.cs" />
+    <Compile Include="ProxySettings.designer.cs">
+      <DependentUpon>ProxySettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\SettingController.cs">
+      <Link>SettingController.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -299,6 +310,8 @@
     <InterfaceDefinition Include="SetupSubTutorialBegin.xib" />
     <InterfaceDefinition Include="SetupSubTutorialEnd.xib" />
     <InterfaceDefinition Include="EditWizard.xib" />
+    <InterfaceDefinition Include="GeneralSettings.xib" />
+    <InterfaceDefinition Include="ProxySettings.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />

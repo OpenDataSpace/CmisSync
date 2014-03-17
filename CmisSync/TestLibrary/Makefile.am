@@ -30,6 +30,7 @@ SOURCES =  \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/EventTypesTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/ExceptionEventTest.cs \

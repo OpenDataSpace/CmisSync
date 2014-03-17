@@ -129,7 +129,7 @@ namespace CmisSync.Lib.Events
                     return null;
                 if(Length == 0)
                     return 100d;
-                return ((double)ActualPosition*100d)/(double)Length;
+                return ((double) ActualPosition * 100d) / (double) Length;
             } }
 
         /// <summary>
@@ -210,9 +210,9 @@ namespace CmisSync.Lib.Events
                 return null;
             }
             TimeSpan difference = end - start;
-            if(difference.Seconds == 0)
-                return null;
-            return (bytes*8) / (difference.Seconds);
+            double seconds = difference.TotalMilliseconds / 1000d;
+            double dbytes = bytes;
+            return (long) ((dbytes * 8) / seconds);
         }
 
         /// <summary>

@@ -22,10 +22,10 @@
                     <PasswordBox x:Name="PasswordText" HorizontalAlignment="Left" Margin="330,210,0,0" VerticalAlignment="Top" Width="240"/>
                 </Grid>
             </TabItem>
-            <TabItem Name="BandwidthTab" Header="Bandwidth">
+            <!--<TabItem Name="BandwidthTab" Header="Bandwidth">
                 <Grid>
                 </Grid>
-            </TabItem>
+            </TabItem>-->
         </TabControl>
         <Button x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Left" Margin="350,270,0,0" VerticalAlignment="Top" Width="100"/>
         <Button x:Name="FinishButton" Content="Finish" HorizontalAlignment="Left" Margin="470,270,0,0" VerticalAlignment="Top" Width="100"/>

@@ -38,7 +38,6 @@ namespace CmisSync
         protected override void Dispose (bool disposing)
         {
             base.Dispose (disposing);
-            Console.WriteLine (this.GetType ().ToString () + " disposed " + disposing.ToString ());
         }
 
         SetupController Controller;

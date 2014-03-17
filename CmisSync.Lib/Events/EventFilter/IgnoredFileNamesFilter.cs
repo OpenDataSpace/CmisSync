@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace CmisSync.Lib.Events.Filter
 {
@@ -8,6 +10,9 @@ namespace CmisSync.Lib.Events.Filter
     /// </summary>
     public class IgnoredFileNamesFilter : AbstractFileFilter
     {
+        private List<Regex> wildcards = new List<Regex>();
+        private Object wildCardLock = new Object();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoredFileNamesFilter"/> class.
         /// </summary>
@@ -15,6 +20,19 @@ namespace CmisSync.Lib.Events.Filter
         /// Queue.
         /// </param>
         public IgnoredFileNamesFilter(ISyncEventQueue queue) : base(queue) { }
+
+        public List<string> Wildcards { set
+            {
+                lock(wildCardLock)
+                {
+                    this.wildcards.Clear();
+                    foreach(var wildcard in value)
+                    {
+                        this.wildcards.Add(Utils.IgnoreLineToRegex(wildcard));
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Checks the filename for valid regex.
@@ -29,9 +47,20 @@ namespace CmisSync.Lib.Events.Filter
         /// If set to <c>true</c> file name.
         /// </param>
         private bool checkFile(ISyncEvent e, string fileName) {
-            if(!Utils.WorthSyncing(fileName)) {
-                Queue.AddEvent(new RequestIgnoredEvent(e, source: this));
-                return true;
+            lock(this.wildCardLock)
+            {
+                if(!Utils.WorthSyncing(fileName, new List<string>())) {
+                    Queue.AddEvent(new RequestIgnoredEvent(e, source: this));
+                    return true;
+                }
+                foreach(var wildcard in wildcards)
+                {
+                    if(wildcard.IsMatch(fileName))
+                    {
+                        Queue.AddEvent(new RequestIgnoredEvent(e, reason: String.Format("filename matches: {0}", wildcard.ToString()) ,source: this));
+                        return true;
+                    }
+                }
             }
             return false;
         }

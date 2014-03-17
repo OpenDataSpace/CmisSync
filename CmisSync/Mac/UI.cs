@@ -30,12 +30,9 @@ namespace CmisSync {
     public class UI : AppDelegate {
 
         public StatusIcon StatusIcon;
-        #if ODS_NEW_GUI
         public SetupWizardController Setup;
-        #else
-        public Setup Setup;
-        #endif
         public About About;
+        public GeneralSettingsController Settings;
         
         public static NSFont Font = NSFontManager.SharedFontManager.FontWithFamily (
             "Lucida Grande", NSFontTraitMask.Condensed, 0, 13);
@@ -52,13 +49,10 @@ namespace CmisSync {
 
                 SetFolderIcon ();
 
-                #if ODS_NEW_GUI    
                 Setup      = new SetupWizardController ();
-                #else
-                Setup      = new Setup();
-                #endif
                 About      = new About ();
                 StatusIcon = new StatusIcon ();
+                Settings   = new GeneralSettingsController();
 
                 Program.Controller.UIHasLoaded ();
             }
@@ -83,11 +77,7 @@ namespace CmisSync {
 
         public void UpdateDockIconVisibility ()
         {
-            #if ODS_NEW_GUI
-            if ((Setup.IsWindowLoaded && Setup.Window.IsVisible) || About.IsVisible || Program.Controller.IsEditWindowVisible)
-            #else
-            if (Setup.IsVisible || About.IsVisible || Program.Controller.IsEditWindowVisible)
-            #endif
+            if ((Setup.IsWindowLoaded && Setup.Window.IsVisible) || About.IsVisible || Program.Controller.IsEditWindowVisible || (Settings.IsWindowLoaded && Settings.Window.IsVisible))
                 ShowDockIcon ();
             else
                 HideDockIcon ();

@@ -760,6 +760,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Proxy.
+        /// </summary>
+        internal static string SettingProxy {
+            get {
+                return ResourceManager.GetString("SettingProxy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Skip Tutorial.
         /// </summary>
         internal static string SkipTutorial {

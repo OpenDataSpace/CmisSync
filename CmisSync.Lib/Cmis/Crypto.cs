@@ -206,7 +206,11 @@ namespace CmisSync.Lib
                 "Thou art so farth away, I miss you my dear files❥, with CmisSync be forever by my side!");
         }
 
-
+        /// <summary>
+        /// Creates the hash algorithm by the given name.
+        /// </summary>
+        /// <returns>The hash algorithm.</returns>
+        /// <param name="name">Name.</param>
         public static HashAlgorithm CreateHashAlgorithm(string name) {
             name = name.ToLower();
             if(name.Equals("sha1"))
@@ -224,6 +228,12 @@ namespace CmisSync.Lib
             return HashAlgorithm.Create();
         }
 
+        /// <summary>
+        /// Calculates the checksum over the given stream.
+        /// </summary>
+        /// <returns>The checksum.</returns>
+        /// <param name="hashAlgorithm">Hash algorithm.</param>
+        /// <param name="stream">Stream.</param>
         public static byte[] CalculateChecksum(string hashAlgorithm, Stream stream) {
             using (var bs = new BufferedStream(stream))
             using (var hash = CreateHashAlgorithm(hashAlgorithm))
@@ -232,6 +242,12 @@ namespace CmisSync.Lib
             }
         }
 
+        /// <summary>
+        /// Calculates the checksum over the given stream with a former created hashAlgorithm
+        /// </summary>
+        /// <returns>The checksum.</returns>
+        /// <param name="hashAlgorithm">Hash algorithm.</param>
+        /// <param name="file">File.</param>
         public static byte[] CalculateChecksum(string hashAlgorithm, IFileInfo file) {
             using (var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
             {
