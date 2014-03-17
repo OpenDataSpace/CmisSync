@@ -63,7 +63,6 @@ SOURCES =  \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
 	SyncStrategiesTests/FileSystemEventAccumulatorTest.cs \
-	SyncStrategiesTests/FolderSynchronizerTest.cs \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/SingleStepEventQueue.cs \

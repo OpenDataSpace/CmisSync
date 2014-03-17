@@ -242,6 +242,11 @@ namespace CmisSync.Lib
             "[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())+"\"?:/\\|<>*") + "]");
 
 
+        public static bool IsInvalidFolderName(string name) 
+        {
+            return IsInvalidFolderName(name, new List<string>());
+        }
+
         /// <summary>
         /// Check whether a folder name is valid or not.
         /// </summary>

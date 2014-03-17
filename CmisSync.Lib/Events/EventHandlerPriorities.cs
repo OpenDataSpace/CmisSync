@@ -19,6 +19,7 @@ namespace CmisSync.Lib.Events {
 
             map[typeof(IgnoredFileNamesFilter)] = FILTER;
             map[typeof(IgnoredFilesFilter)] = FILTER;
+            map[typeof(IgnoredFolderNameFilter)] = FILTER;
             map[typeof(InvalidFolderNameFilter)] = FILTER;
             map[typeof(IgnoredFoldersFilter)] = FILTER;
 

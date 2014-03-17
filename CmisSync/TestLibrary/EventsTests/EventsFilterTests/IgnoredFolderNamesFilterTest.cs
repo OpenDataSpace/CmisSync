@@ -28,14 +28,6 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void PriorityFitsDefaultFileEventFilterPriority()
-        {
-            var filefilter = new Mock<AbstractFileFilter>(new Mock<ISyncEventQueue>().Object){CallBase = true}.Object;
-            var filter = new IgnoredFolderNameFilter(new Mock<ISyncEventQueue>().Object);
-            Assert.AreEqual(filefilter.Priority, filter.Priority);
-        }
-
-        [Test, Category("Fast"), Category("EventFilter")]
         public void FilterIgnoresNonFittingISyncEvents()
         {
             var genericEvent = new Mock<ISyncEvent>().Object;

@@ -122,7 +122,6 @@ SOURCES =  \
 	Sync/Strategy/Crawler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/FileSystemEventAccumulator.cs \
-	Sync/Strategy/FolderSynchronizer.cs \
 	Sync/Strategy/ISituationDetection.cs \
 	Sync/Strategy/LocalSituationDetection.cs \
 	Sync/Strategy/MacWatcher.cs \
