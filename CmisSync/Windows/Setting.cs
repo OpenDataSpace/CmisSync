@@ -78,11 +78,12 @@ namespace CmisSync
                     proxy.Selection = Config.ProxySelection.CUSTOM;
                 }
                 proxy.LoginRequired = LoginCheck.IsChecked.GetValueOrDefault();
-                try
+                string server = Controller.GetServer(AddressText.Text);
+                if (server != null)
                 {
-                    proxy.Server = new Uri(AddressText.Text);
+                    proxy.Server = new Uri(server);
                 }
-                catch (Exception)
+                else
                 {
                     proxy.Server = ConfigManager.CurrentConfig.Proxy.Server;
                 }
@@ -120,23 +121,18 @@ namespace CmisSync
             UserText.Text = ConfigManager.CurrentConfig.Proxy.Username == null ? "" : ConfigManager.CurrentConfig.Proxy.Username;
             PasswordText.Password = ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword == null ? "" : Crypto.Deobfuscate(ConfigManager.CurrentConfig.Proxy.ObfuscatedPassword);
 
-            LoginCheck.IsChecked = ConfigManager.CurrentConfig.Proxy.LoginRequired;
-
-            //  Force to trigger Checked and Unchecked event handle
-            ProxyNone.IsChecked = true;
-            ProxySystem.IsChecked = true;
-            ProxyCustom.IsChecked = true;
+            Controller.CheckLogin(ConfigManager.CurrentConfig.Proxy.LoginRequired);
 
             switch (ConfigManager.CurrentConfig.Proxy.Selection)
             {
                 case Config.ProxySelection.NOPROXY:
-                    ProxyNone.IsChecked = true;
+                    Controller.CheckProxyNone();
                     break;
                 case Config.ProxySelection.SYSTEM:
-                    ProxySystem.IsChecked = true;
+                    Controller.CheckProxySystem();
                     break;
                 case Config.ProxySelection.CUSTOM:
-                    ProxyCustom.IsChecked = true;
+                    Controller.CheckProxyCustom();
                     break;
                 default:
                     break;
@@ -148,22 +144,24 @@ namespace CmisSync
         private void LoadSetting()
         {
             System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SettingWPF.xaml", System.UriKind.Relative);
-            UserControl SettingWPF = Application.LoadComponent(resourceLocater) as UserControl;
+            SettingWPF wpf = Application.LoadComponent(resourceLocater) as SettingWPF;
 
-            ProxyNone = SettingWPF.FindName("ProxyNone") as RadioButton;
-            ProxySystem = SettingWPF.FindName("ProxySystem") as RadioButton;
-            ProxyCustom = SettingWPF.FindName("ProxyCustom") as RadioButton;
-            LoginCheck = SettingWPF.FindName("LoginCheck") as CheckBox;
-            AddressLabel = SettingWPF.FindName("AddressLabel") as TextBlock;
-            AddressText = SettingWPF.FindName("AddressText") as TextBox;
-            UserLabel = SettingWPF.FindName("UserLabel") as TextBlock;
-            UserText = SettingWPF.FindName("UserText") as TextBox;
-            PasswordLabel = SettingWPF.FindName("PasswordLabel") as TextBlock;
-            PasswordText = SettingWPF.FindName("PasswordText") as PasswordBox;
-            FinishButton = SettingWPF.FindName("FinishButton") as Button;
-            CancelButton = SettingWPF.FindName("CancelButton") as Button;
+            ProxyNone = wpf.FindName("ProxyNone") as RadioButton;
+            ProxySystem = wpf.FindName("ProxySystem") as RadioButton;
+            ProxyCustom = wpf.FindName("ProxyCustom") as RadioButton;
+            LoginCheck = wpf.FindName("LoginCheck") as CheckBox;
+            AddressLabel = wpf.FindName("AddressLabel") as TextBlock;
+            AddressText = wpf.FindName("AddressText") as TextBox;
+            UserLabel = wpf.FindName("UserLabel") as TextBlock;
+            UserText = wpf.FindName("UserText") as TextBox;
+            PasswordLabel = wpf.FindName("PasswordLabel") as TextBlock;
+            PasswordText = wpf.FindName("PasswordText") as PasswordBox;
+            FinishButton = wpf.FindName("FinishButton") as Button;
+            CancelButton = wpf.FindName("CancelButton") as Button;
 
-            Content = SettingWPF;
+            wpf.ApplyController(Controller);
+
+            Content = wpf;
         }
 
     }
