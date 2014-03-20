@@ -177,13 +177,21 @@ namespace CmisSync
         partial void OnSave(NSObject sender)
         {
             Config.ProxySettings settings = this.ProxySettings;
-            settings.Username = this.ProxyUsername.StringValue;
-            settings.ObfuscatedPassword = Crypto.Obfuscate(this.ProxyPassword.StringValue);
+            if (NoProxyButton.State == NSCellStateValue.On) {
+                settings.Selection = Config.ProxySelection.NOPROXY;
+            } else if(SystemDefaultProxyButton.State == NSCellStateValue.On) {
+                settings.Selection = Config.ProxySelection.SYSTEM;
+            } else if(ManualProxyButton.State == NSCellStateValue.On) {
+                settings.Selection = Config.ProxySelection.CUSTOM;
+            }
             string server = Controller.GetServer(this.ProxyServer.StringValue);
             if (server!=null)
             {
                 settings.Server = new Uri(server);
             }
+            settings.LoginRequired = (this.RequiresAuthorizationCheckBox.State == NSCellStateValue.On);
+            settings.Username = this.ProxyUsername.StringValue;
+            settings.ObfuscatedPassword = Crypto.Obfuscate(this.ProxyPassword.StringValue);
             this.ProxySettings = settings;
             ConfigManager.CurrentConfig.Proxy = settings;
             ConfigManager.CurrentConfig.Save();
