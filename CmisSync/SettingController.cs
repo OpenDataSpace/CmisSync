@@ -19,6 +19,14 @@ namespace CmisSync {
         /// </summary>
         public event Action HideWindowEvent = delegate { };
 
+        public event Action<bool> CheckProxyNoneEvent = delegate { };
+        public event Action<bool> CheckProxySystemEvent = delegate { };
+        public event Action<bool> CheckProxyCutomEvent = delegate { };
+        public event Action<string> UpdateServerHelpEvent = delegate { };
+        public event Action<bool> EnableLoginEvent = delegate { };
+        public event Action<bool> CheckLoginEvent = delegate { };
+        public event Action<bool> UpdateSaveEvent = delegate { };
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -38,6 +46,68 @@ namespace CmisSync {
         public void HideWindow()
         {
             HideWindowEvent();
+        }
+
+        public void CheckProxyNone()
+        {
+            CheckProxyNoneEvent(true);
+            CheckProxySystemEvent(false);
+            CheckProxyCutomEvent(false);
+            EnableLoginEvent(false);
+        }
+
+        public void CheckProxySystem()
+        {
+            CheckProxyNoneEvent(false);
+            CheckProxySystemEvent(true);
+            CheckProxyCutomEvent(false);
+            EnableLoginEvent(true);
+        }
+
+        public void CheckProxyCustom()
+        {
+            CheckProxyNoneEvent(false);
+            CheckProxySystemEvent(false);
+            CheckProxyCutomEvent(true);
+            EnableLoginEvent(true);
+        }
+
+        public void CheckLogin(bool check)
+        {
+            CheckLoginEvent(check);
+        }
+
+        public string GetServer(string server)
+        {
+            try
+            {
+                Uri uri = new Uri(server);
+                return server;
+            }
+            catch (Exception)
+            {
+                if (!server.StartsWith("http://"))
+                {
+                    server = "http://" + server;
+                    Uri uri = new Uri(server);
+                    return server;
+                }
+            }
+            return null;
+        }
+
+        public void ValidateServer(string server)
+        {
+            if (GetServer(server) == null)
+            {
+                UpdateServerHelpEvent(Properties_Resources.InvalidURL);
+                UpdateSaveEvent(false);
+            }
+            else
+            {
+                UpdateServerHelpEvent(string.Empty);
+                UpdateSaveEvent(true);
+            }
         }
     }
 
