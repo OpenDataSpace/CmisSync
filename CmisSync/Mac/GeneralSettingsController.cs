@@ -51,7 +51,7 @@ namespace CmisSync
         }
 
         #endregion
-        private SettingController Controller = new SettingController();
+        public SettingController Controller = new SettingController();
         //strongly typed window accessor
         public new GeneralSettings Window
         {

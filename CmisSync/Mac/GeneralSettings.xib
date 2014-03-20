@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
     </dependencies>
@@ -49,7 +49,7 @@
                                             <rect key="frame" x="17" y="189" width="526" height="67"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                            <size key="cellSize" width="161" height="18"/>
+                                            <size key="cellSize" width="162" height="18"/>
                                             <size key="intercellSpacing" width="4" height="2"/>
                                             <buttonCell key="prototype" type="radio" title="Radio" imagePosition="left" alignment="left" inset="2" id="nRm-5B-wZ4">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -82,7 +82,7 @@
                                             </cells>
                                         </matrix>
                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="uaM-78-VyV">
-                                            <rect key="frame" x="15" y="164" width="530" height="17"/>
+                                            <rect key="frame" x="15" y="174" width="530" height="17"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Server" id="kDG-PF-Twq">
                                                 <font key="font" metaFont="systemBold"/>
@@ -91,7 +91,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <textField verticalHuggingPriority="750" id="C6T-sd-v9k">
-                                            <rect key="frame" x="17" y="134" width="526" height="22"/>
+                                            <rect key="frame" x="17" y="144" width="526" height="22"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="0Re-Er-LDv">
                                                 <font key="font" metaFont="system"/>
@@ -100,7 +100,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <button id="O2i-4B-8yI">
-                                            <rect key="frame" x="15" y="110" width="530" height="18"/>
+                                            <rect key="frame" x="15" y="87" width="530" height="18"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Requires Authorization" bezelStyle="regularSquare" imagePosition="left" inset="2" id="Qu8-Um-sa0">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -111,7 +111,7 @@
                                             </buttonCell>
                                         </button>
                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="BbT-PM-4PL">
-                                            <rect key="frame" x="15" y="87" width="249" height="17"/>
+                                            <rect key="frame" x="15" y="67" width="249" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Username" id="kGp-7G-x7Y">
                                                 <font key="font" metaFont="systemBold"/>
@@ -120,7 +120,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="07K-W3-nSA">
-                                            <rect key="frame" x="287" y="87" width="258" height="17"/>
+                                            <rect key="frame" x="287" y="67" width="258" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Password" id="f2z-dY-Unb">
                                                 <font key="font" metaFont="systemBold"/>
@@ -129,7 +129,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <textField verticalHuggingPriority="750" id="OyS-nN-bUL">
-                                            <rect key="frame" x="17" y="57" width="245" height="22"/>
+                                            <rect key="frame" x="17" y="37" width="245" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="X0H-V2-KAD">
                                                 <font key="font" metaFont="system"/>
@@ -138,7 +138,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <secureTextField verticalHuggingPriority="750" id="B9w-Re-bgg">
-                                            <rect key="frame" x="289" y="57" width="254" height="22"/>
+                                            <rect key="frame" x="289" y="37" width="254" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="Vhn-N0-jA0">
                                                 <font key="font" metaFont="system"/>
@@ -149,6 +149,15 @@
                                                 </allowedInputSourceLocales>
                                             </secureTextFieldCell>
                                         </secureTextField>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="VPL-jR-SMP">
+                                            <rect key="frame" x="15" y="120" width="530" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Invalid URL" id="TH8-st-PYP">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
                                     </subviews>
                                 </view>
                             </tabViewItem>
@@ -197,6 +206,7 @@
                 <outlet property="ProxyPassword" destination="B9w-Re-bgg" id="9gd-Bc-GBa"/>
                 <outlet property="ProxyPasswordLabel" destination="07K-W3-nSA" id="G8U-Cf-p2M"/>
                 <outlet property="ProxyServer" destination="C6T-sd-v9k" id="MsG-FA-KiM"/>
+                <outlet property="ProxyServerHelp" destination="VPL-jR-SMP" id="MtR-ZM-jcM"/>
                 <outlet property="ProxyServerLabel" destination="uaM-78-VyV" id="9c7-mt-Zj9"/>
                 <outlet property="ProxyTab" destination="uHG-tn-Goj" id="tdr-jG-IhA"/>
                 <outlet property="ProxyUsername" destination="OyS-nN-bUL" id="OhR-NJ-1Gr"/>

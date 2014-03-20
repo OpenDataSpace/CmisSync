@@ -89,8 +89,14 @@ namespace CmisSync {
                 if (!server.StartsWith("http://"))
                 {
                     server = "http://" + server;
-                    Uri uri = new Uri(server);
-                    return server;
+                    try
+                    {
+                        Uri uri = new Uri(server);
+                        return server;
+                    }
+                    catch(Exception)
+                    {
+                    }
                 }
             }
             return null;
