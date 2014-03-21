@@ -1006,7 +1006,7 @@ namespace CmisSync
                                 // UI elements.
 
                                 Header = Properties_Resources.Ready;
-                                Description = Properties_Resources.YouCanFind;
+                                Description = String.Format(Properties_Resources.YouCanFind, Controller.saved_local_path);
 
                                 Button finish_button = new Button()
                                 {
