@@ -590,6 +590,21 @@ namespace CmisSync
         }
 
 
+        public void AddRepo(RepoInfo info)
+        {
+            lock (this.repo_lock)
+            {
+                // Add folder to XML config file.
+                ConfigManager.CurrentConfig.AddFolder(info);
+                // Initialize in the UI.
+                AddRepository(info);
+            }
+
+            // Update UI.
+            FolderListChanged();
+        }
+
+
         /// <summary>
         /// Show first-time wizard.
         /// </summary>

@@ -9,6 +9,7 @@ using CmisSync.Lib.Events.Filter;
 using NUnit.Framework;
 
 using Moq;
+using System.Collections.Generic;
 
 namespace TestLibrary.EventsTests.EventsFilterTests
 {
@@ -35,56 +36,61 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         [Test,Category("Fast")]
         public void AllowCorrectFSEventsTest() {
             var file = new FileInfo(Path.Combine(Path.GetTempPath(), "testfile"));
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var filter = new IgnoredFileNamesFilter(queue.Object);
             var fileEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, file.FullName);
             fileEvent.Setup(e => e.IsDirectory()).Returns(false);
             fileEvent.Setup(e => e.Path).Returns(file.FullName);
+
             Assert.IsFalse(filter.Handle(fileEvent.Object));
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast")]
         public void HandleIgnoredFileNamesTest() {
-            int called = 0;
             var file = new FileInfo(Path.Combine(Path.GetTempPath(), "file~"));
-            queue.Setup(q => q.AddEvent(It.IsAny<RequestIgnoredEvent>())).Callback(()=>called++);
-            var filter = new IgnoredFileNamesFilter(queue.Object);
+            List<string> wildcards = new List<string>();
+            wildcards.Add("*~");
+            var filter = new IgnoredFileNamesFilter(queue.Object) {Wildcards = wildcards};
             var fileEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, file.FullName);
             fileEvent.Setup(e => e.IsDirectory()).Returns(false);
             fileEvent.Setup(e => e.Path).Returns(file.FullName);
+
             Assert.IsTrue(filter.Handle(fileEvent.Object));
-            Assert.AreEqual(1, called);
+            queue.Verify(q => q.AddEvent(It.IsAny<RequestIgnoredEvent>()), Times.Once());
         }
 
         [Test, Category("Fast")]
         public void IgnoreFolderFSEventsTest() {
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var filter = new IgnoredFileNamesFilter(queue.Object);
             var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, "");
             folderEvent.Setup(e => e.IsDirectory()).Returns(true);
-            folderEvent.VerifyGet( e => e.Path, Times.Never());
+
             Assert.IsFalse(filter.Handle(folderEvent.Object));
+            folderEvent.VerifyGet( e => e.Path, Times.Never());
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast")]
         public void IgnoreNonExsitingFileOrFolderFSEventsTest() {
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var filter = new IgnoredFileNamesFilter(queue.Object);
             var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, "");
             folderEvent.Setup(e => e.IsDirectory()).Throws(new FileNotFoundException());
-            folderEvent.VerifyGet( e => e.Path, Times.Never());
+
             Assert.IsFalse(filter.Handle(folderEvent.Object));
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            folderEvent.VerifyGet( e => e.Path, Times.Never());
         }
 
         [Test, Category("Fast")]
         public void IgnoreFolderMovedFSEventsTest() {
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var filter = new IgnoredFileNamesFilter(queue.Object);
             var moveEvent = new Mock<FSMovedEvent>(" ", " ");
             moveEvent.Setup(e => e.IsDirectory()).Returns(true);
+
+            Assert.IsFalse(filter.Handle(moveEvent.Object));
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             moveEvent.VerifyGet( m => m.Path, Times.Never());
             moveEvent.VerifyGet( m => m.OldPath, Times.Never());
-            Assert.IsFalse(filter.Handle(moveEvent.Object));
         }
     }
 }

@@ -28,60 +28,91 @@ namespace CmisSync
             ApplySetting();
         }
 
-        private void SelectProxy()
-        {
-            if (ProxyNone.IsChecked.GetValueOrDefault())
-            {
-                AddressText.IsEnabled = false;
-                LoginCheck.IsEnabled = false;
-            }
-            else if (ProxySystem.IsChecked.GetValueOrDefault())
-            {
-                AddressText.IsEnabled = false;
-                LoginCheck.IsEnabled = true;
-            }
-            else if (ProxyCustom.IsChecked.GetValueOrDefault())
-            {
-                AddressText.IsEnabled = true;
-                LoginCheck.IsEnabled = true;
-            }
-            UpdateProxyLogin();
-            CheckAddress();
-        }
-
-        private void UpdateProxyLogin()
-        {
-            if (LoginCheck.IsEnabled && LoginCheck.IsChecked.GetValueOrDefault())
-            {
-                UserText.IsEnabled = true;
-                PasswordText.IsEnabled = true;
-            }
-            else
-            {
-                UserText.IsEnabled = false;
-                PasswordText.IsEnabled = false;
-            }
-        }
-
-        private void CheckAddress()
+        private void CheckAddress(SettingController controller)
         {
             if (AddressText.IsEnabled)
             {
-                string uriString = AddressText.Text;
-                try
-                {
-                    Uri uri = new Uri(uriString);
-                }
-                catch (Exception)
-                {
-                    FinishButton.IsEnabled = false;
-                    AddressError.Text = Properties_Resources.InvalidURL;
-                    return;
-                }
+                controller.ValidateServer(AddressText.Text);
             }
-            FinishButton.IsEnabled = true;
-            FinishButton.IsDefault = true;
-            AddressError.Text = String.Empty;
+            else
+            {
+                FinishButton.IsEnabled = true;
+                AddressError.Text = String.Empty;
+            }
+        }
+
+        public void ApplyController(SettingController controller)
+        {
+            ProxyNone.Checked += delegate { controller.CheckProxyNone(); };
+            ProxySystem.Checked += delegate { controller.CheckProxySystem(); };
+            ProxyCustom.Checked += delegate { controller.CheckProxyCustom(); };
+            LoginCheck.Checked += delegate { controller.CheckLogin(true); };
+            LoginCheck.Unchecked += delegate { controller.CheckLogin(false); };
+            AddressText.TextChanged += delegate(object sender, TextChangedEventArgs e)
+            {
+                controller.ValidateServer(AddressText.Text);
+            };
+
+            controller.CheckProxyNoneEvent += (check) =>
+            {
+                if (check != ProxyNone.IsChecked)
+                {
+                    ProxyNone.IsChecked = check;
+                }
+            };
+
+            controller.CheckProxySystemEvent += (check) =>
+            {
+                if (check != ProxySystem.IsChecked)
+                {
+                    ProxySystem.IsChecked = check;
+                }
+            };
+
+            controller.CheckProxyCutomEvent += (check) =>
+            {
+                if (check != ProxyCustom.IsChecked)
+                {
+                    ProxyCustom.IsChecked = check;
+                }
+                AddressText.IsEnabled = check;
+                CheckAddress(controller);
+            };
+
+            controller.EnableLoginEvent += (enable) =>
+            {
+                LoginCheck.IsEnabled = enable;
+                if (enable)
+                {
+                    controller.CheckLogin(LoginCheck.IsChecked.GetValueOrDefault());
+                }
+                else
+                {
+                    UserText.IsEnabled = false;
+                    PasswordText.IsEnabled = false;
+                }
+            };
+
+            controller.CheckLoginEvent += (check) =>
+            {
+                if (check != LoginCheck.IsChecked)
+                {
+                    LoginCheck.IsChecked = check;
+                }
+                UserText.IsEnabled = check;
+                PasswordText.IsEnabled = check;
+            };
+
+            controller.UpdateServerHelpEvent += (message) =>
+            {
+                AddressError.Text = message;
+            };
+
+            controller.UpdateSaveEvent += (enable) =>
+            {
+                FinishButton.IsEnabled = enable;
+            };
+
         }
 
         private void ApplySetting()
@@ -91,37 +122,13 @@ namespace CmisSync
             ProxyNone.Content = Properties_Resources.NetworkProxySelectNone;
             ProxySystem.Content = Properties_Resources.NetworkProxySelectSystem;
             ProxyCustom.Content = Properties_Resources.NetworkProxySelectCustom;
-            ProxyNone.Checked += delegate
-            {
-                SelectProxy();
-            };
-            ProxySystem.Checked += delegate
-            {
-                SelectProxy();
-            };
-            ProxyCustom.Checked += delegate
-            {
-                SelectProxy();
-            };
-
-            LoginCheck.Content = Properties_Resources.NetworkProxyLogin;
-            LoginCheck.Checked += delegate
-            {
-                UpdateProxyLogin();
-            };
-            LoginCheck.Unchecked += delegate
-            {
-                UpdateProxyLogin();
-            };
 
             AddressLabel.Text = Properties_Resources.NetworkProxyServer + ":";
+
+            LoginCheck.Content = Properties_Resources.NetworkProxyLogin;
+
             UserLabel.Text = Properties_Resources.User + ":";
             PasswordLabel.Text = Properties_Resources.Password + ":";
-
-            AddressText.TextChanged += delegate(object sender, TextChangedEventArgs e)
-            {
-                CheckAddress();
-            };
 
             FinishButton.Content = Properties_Resources.SaveChanges;
             CancelButton.Content = Properties_Resources.DiscardChanges;

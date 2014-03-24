@@ -27,6 +27,7 @@ SOURCES =  \
 	DebugLoggingHandlerTest.cs \
 	EncodingTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
+	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \

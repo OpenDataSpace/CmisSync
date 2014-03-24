@@ -33,20 +33,13 @@ namespace CmisSync {
 
         private NSUserNotificationCenter notificationCenter;
         private Dictionary<string,DateTime> transmissionFiles = new Dictionary<string, DateTime> ();
+        private HashSet<string> startedTransmissions = new HashSet<string> ();
         private Object transmissionLock = new object ();
         private int notificationInterval = 5;
         private int notificationKeep = 5;
         private readonly string notificationType = "Type";
         private readonly string notificationTypeCredentials = "Credentials";
         private readonly string notificationTypeTransmission = "Transmission";
-
-        public bool IsNotificationTransmission(NSUserNotification notification)
-        {
-            if (null != notification.UserInfo && notification.UserInfo.ContainsKey ((NSString)notificationType)) {
-                return notificationTypeTransmission == (string)(notification.UserInfo [notificationType] as NSString);
-            }
-            return false;
-        }
 
         private class ComparerNSUserNotification : IComparer<NSUserNotification>
         {
@@ -56,6 +49,14 @@ namespace CmisSync {
                 DateTime yDate = y.DeliveryDate;
                 return xDate.CompareTo (yDate);
             }
+        }
+
+        public bool IsNotificationTransmission(NSUserNotification notification)
+        {
+            if (null != notification.UserInfo && notification.UserInfo.ContainsKey ((NSString)notificationType)) {
+                return notificationTypeTransmission == (string)(notification.UserInfo [notificationType] as NSString);
+            }
+            return false;
         }
 
         private bool IsNotificationCredentials(NSUserNotification notification)
@@ -90,8 +91,8 @@ namespace CmisSync {
                 notificationCenter.BeginInvokeOnMainThread(delegate {
                     NSUserNotification notification = new NSUserNotification();
                     notification.Title = reponame;
-                    notification.Subtitle = "Credentials Error";
-                    notification.InformativeText = "Click to update the credentials";
+                    notification.Subtitle = String.Format(Properties_Resources.NotificationCredentialsError, reponame);
+                    notification.InformativeText = Properties_Resources.NotificationChangeCredentials;
                     NSMutableDictionary userInfo = new NSMutableDictionary();
                     userInfo.Add ((NSString)notificationType, (NSString)notificationTypeCredentials);
                     notification.UserInfo = userInfo;
@@ -170,12 +171,16 @@ namespace CmisSync {
                                 if (transmission.Status.Aborted == true) {
                                     continue;
                                 }
-                                if (transmission.Status.Completed == true) {
-                                    continue;
-                                }
+
                                 if (transmission.Status.FailedException != null) {
                                     continue;
                                 }
+                                Console.WriteLine(startedTransmissions.Count);
+                                if(startedTransmissions.Contains(transmission.Path)) {
+                                    continue;
+                                }
+                                startedTransmissions.Add(transmission.Path);
+
                                 NSUserNotification notification = new NSUserNotification();
                                 notification.Title = Path.GetFileName (transmission.Path);
                                 notification.Subtitle = TransmissionStatus(transmission);
@@ -185,7 +190,8 @@ namespace CmisSync {
                                 notification.UserInfo = userInfo;
                                 notification.DeliveryDate = NSDate.Now;
                                 notificationCenter.DeliverNotification (notification);
-                                transmissionFiles.Add (transmission.Path, notification.DeliveryDate);
+
+                                transmissionFiles.Add (transmission.Path, NSDate.Now);
                                 UpdateFileStatus (transmission, null);
                                 transmission.TransmissionStatus += TransmissionReport;
                             }
@@ -227,29 +233,31 @@ namespace CmisSync {
             string type = "Unknown";
             switch (transmission.Type) {
             case FileTransmissionType.UPLOAD_NEW_FILE:
-                type = "Upload new file";
+                type = Properties_Resources.NotificationFileUpload;
                 break;
             case FileTransmissionType.UPLOAD_MODIFIED_FILE:
-                type = "Update remote file";
+                type = Properties_Resources.NotificationFileUpdateRemote;
                 break;
             case FileTransmissionType.DOWNLOAD_NEW_FILE:
-                type = "Download new file";
+                type = Properties_Resources.NotificationFileDownload;
                 break;
             case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
-                type = "Update local file";
+                type = Properties_Resources.NotificationFileUpdateLocal;
                 break;
             }
+
+            string status = "";
             if (transmission.Status.Aborted == true) {
-                return String.Format("{0} {1}", type, "aborted");
+                status = Properties_Resources.NotificationFileStatusAborted;
             } else if (transmission.Status.Completed == true) {
-                return String.Format("{0} {1}", type, "completed");
+                status = Properties_Resources.NotificationFileStatusCompleted;
+                //startedTransmissions.Remove (transmission.Path);
             } else if (transmission.Status.FailedException != null) {
-                return String.Format("{0} {1}", type, "failed");
+                status = Properties_Resources.NotificationFileStatusFailed;
             }
-            return String.Format("{0} ({1} {2})",
-                type,
-                CmisSync.Lib.Utils.FormatPercent(transmission.Status.Percent.GetValueOrDefault(0)),
-                CmisSync.Lib.Utils.FormatBandwidth ((long)transmission.Status.BitsPerSecond.GetValueOrDefault()));
+
+            return String.Format("{0} {1}",
+                type, status);
         }
 
         private void TransmissionReport(object sender, TransmissionProgressEventArgs e)
@@ -280,7 +288,10 @@ namespace CmisSync {
                             if (!IsNotificationTransmission(notification)) {
                                 continue;
                             }
-                            if (notification.InformativeText == transmission.Path) {
+                            bool pathCorrect = notification.InformativeText == transmission.Path;
+                            bool isCompleted = transmission.Status.Completed == true;
+                            bool isAlreadyStarted = startedTransmissions.Contains(transmission.Path);
+                            if (pathCorrect && (!isAlreadyStarted || isCompleted)) {
                                 notificationCenter.RemoveDeliveredNotification (notification);
                                 notification.DeliveryDate = NSDate.Now;
                                 notification.Subtitle = TransmissionStatus (transmission);

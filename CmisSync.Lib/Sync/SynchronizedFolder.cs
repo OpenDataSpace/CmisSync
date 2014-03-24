@@ -506,7 +506,7 @@ namespace CmisSync.Lib.Sync
                             {
                                 IFolder remoteSubFolder = (IFolder)cmisObject;
                                 string localSubFolder = localFolder + Path.DirectorySeparatorChar.ToString() + cmisObject.Name;
-                                if (!Utils.IsInvalidFolderName(remoteFolder.Name) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
+                                if (!Utils.IsInvalidFolderName(remoteFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
                                 {
                                     // Create local folder.
                                     Logger.Info("Creating local directory: "+ localSubFolder);
@@ -522,7 +522,7 @@ namespace CmisSync.Lib.Sync
                             }
                             else
                             {
-                                if (Utils.WorthSyncing(cmisObject.Name))
+                                if (Utils.WorthSyncing(cmisObject.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
                                     // It is a file, just download it.
                                     success = DownloadFile((IDocument)cmisObject, localFolder) && success;
                             }
@@ -589,7 +589,7 @@ namespace CmisSync.Lib.Sync
                     }
 
                     // Skip if invalid folder name. See https://github.com/nicolas-raoul/CmisSync/issues/196
-                    if (Utils.IsInvalidFolderName(name))
+                    if (Utils.IsInvalidFolderName(name, ConfigManager.CurrentConfig.IgnoreFolderNames))
                     {
                         Logger.Info("Skipping download of folder with illegal name: " + name);
                     }
@@ -636,7 +636,7 @@ namespace CmisSync.Lib.Sync
                 }
 
                 // Check if file extension is allowed
-                if (!Utils.WorthSyncing(fileName))
+                if (!Utils.WorthSyncing(fileName, ConfigManager.CurrentConfig.IgnoreFileNames))
                 {
                     Logger.Info("Ignore the unworth syncing remote file: " + fileName);
                     return true;
@@ -790,6 +790,8 @@ namespace CmisSync.Lib.Sync
                             Logger.Debug("Creating local download file: " + tmpfilepath);
                             using (FileStream file = new FileStream(tmpfilepath, (truncate)? FileMode.Create : FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read)){
                                 this.Queue.AddEvent(transmissionEvent);
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = true});
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = false});
                                 downloader.DownloadFile(remoteDocument, file, transmissionEvent, hashAlg);
                                 file.Close();
                             }
@@ -916,7 +918,9 @@ namespace CmisSync.Lib.Sync
                         try
                         {
                             Logger.Info("Uploading: " + filePath);
-                            Queue.AddEvent(transmissionEvent);
+                            this.Queue.AddEvent(transmissionEvent);
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = true});
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = false});
                             // Prepare properties
                             string fileName = Path.GetFileName(filePath);
                             Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -1074,7 +1078,7 @@ namespace CmisSync.Lib.Sync
                     // Upload each file in this folder.
                     foreach (string file in Directory.GetFiles(localFolder))
                     {
-                        if (Utils.WorthSyncing(file.Substring(file.LastIndexOf(Path.DirectorySeparatorChar)+1)))
+                        if (Utils.WorthSyncing(file.Substring(file.LastIndexOf(Path.DirectorySeparatorChar)+1), ConfigManager.CurrentConfig.IgnoreFileNames))
                         {
                             Logger.Debug(String.Format("Invoke upload file {0} of folder {1}", file, localFolder));
                             success = UploadFile(file, folder) && success;
@@ -1086,7 +1090,7 @@ namespace CmisSync.Lib.Sync
                     {
                         string path = subfolder.Substring(repoinfo.TargetDirectory.Length);
                         path = path.Replace("\\\\","/");
-                        if (!Utils.IsInvalidFolderName(subfolder) && !repoinfo.isPathIgnored(path))
+                        if (!Utils.IsInvalidFolderName(Path.GetFileName(subfolder), ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(path))
                         {
                             Logger.Debug("Start recursive upload of folder: " + subfolder);
                             success = UploadFolderRecursively(folder, subfolder) && success;
@@ -1138,6 +1142,8 @@ namespace CmisSync.Lib.Sync
                             return true;
                         }
                         this.Queue.AddEvent(transmissionEvent);
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = true});
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = false});
                         IFileUploader uploader = ContentTaskUtils.CreateUploader(repoinfo.ChunkSize);
                         using (var hashAlg = new SHA1Managed()) {
                             IDocument lastState;

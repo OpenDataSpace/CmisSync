@@ -45,6 +45,7 @@ SOURCES =  \
 	Events/EventFilter/FailedOperationsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
 	Events/EventFilter/IgnoredFilesFilter.cs \
+	Events/EventFilter/IgnoredFolderNameFilter.cs \
 	Events/EventFilter/IgnoredFoldersFilter.cs \
 	Events/EventFilter/InvalidFolderNameFilter.cs \
 	Events/ExceptionEvent.cs \

@@ -137,6 +137,16 @@ namespace CmisSync.Lib
         private Events.Filter.IgnoredFoldersFilter ignoredFoldersFilter;
 
         /// <summary>
+        /// The ignored file name filter.
+        /// </summary>
+        private Events.Filter.IgnoredFileNamesFilter ignoredFileNameFilter;
+
+        /// <summary>
+        /// The ignored folder name filter.
+        /// </summary>
+        private Events.Filter.IgnoredFolderNameFilter ignoredFolderNameFilter;
+
+        /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
         private bool disposed = false;
@@ -154,9 +164,12 @@ namespace CmisSync.Lib
             LocalPath = repoInfo.TargetDirectory;
             Name = repoInfo.Name;
             RemoteUrl = repoInfo.Address;
-            EventManager.AddEventHandler(new Events.Filter.IgnoredFileNamesFilter(Queue));
             ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths=new List<string>(repoInfo.getIgnoredPaths())};
+            ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(Queue){Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames};
+            ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(Queue) {Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames};
             EventManager.AddEventHandler(ignoredFoldersFilter);
+            EventManager.AddEventHandler(ignoredFileNameFilter);
+            EventManager.AddEventHandler(ignoredFolderNameFilter);
             EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
             // start scheduler
             Scheduler = new SyncScheduler(Queue, repoInfo.PollInterval);
@@ -185,6 +198,8 @@ namespace CmisSync.Lib
             {
                 this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
                 this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.getIgnoredPaths());
+                this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
+                this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
                 return true;
             }
             else

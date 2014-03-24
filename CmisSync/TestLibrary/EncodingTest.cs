@@ -55,27 +55,27 @@ namespace TestLibrary
         [Test, Category("Fast")]
         public void ValidFolderNameTest()
         {
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("abcdefghijklmnopqrstuvwxyz"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("1234567890"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("ÄÖÜäöüß"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("-_.,;#+"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("¦§$%&()[]{}"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("'´`"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("@~¹²³±×"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("¡¢£¤¥¨©ª«¬®¯°µ¶·¸º»¼¼¾¿"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ"));
-            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("Þàáâãäåæçèéê"));
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("?"), "?");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName(":"), ":");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("/"), "/");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("\\"), "\\");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("\""), "\"");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("<"), "<");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName(">"), ">");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("*"), "*");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("|"), "|");
-            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("–€"), "Non Valid ISO 8859-1 Character accepted");
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("abcdefghijklmnopqrstuvwxyz", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("ABCDEFGHIJKLMNOPQRSTUVWXYZ", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("1234567890", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("ÄÖÜäöüß", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("-_.,;#+", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("¦§$%&()[]{}", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("'´`", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("@~¹²³±×", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("¡¢£¤¥¨©ª«¬®¯°µ¶·¸º»¼¼¾¿", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ", new List<string>()));
+            Assert.IsFalse(CmisSync.Lib.Utils.IsInvalidFolderName("Þàáâãäåæçèéê", new List<string>()));
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("?", new List<string>()), "?");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName(":", new List<string>()), ":");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("/", new List<string>()), "/");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("\\", new List<string>()), "\\");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("\"", new List<string>()), "\"");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("<", new List<string>()), "<");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName(">", new List<string>()), ">");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("*", new List<string>()), "*");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("|", new List<string>()), "|");
+            Assert.IsTrue(CmisSync.Lib.Utils.IsInvalidFolderName("–€", new List<string>()), "Non Valid ISO 8859-1 Character accepted");
         }
     }
 }
