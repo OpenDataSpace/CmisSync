@@ -36,22 +36,109 @@ namespace CmisSync
 
         #endregion
 
+        SettingController Controller;
 
         public override void AwakeFromNib ()
         {
             base.AwakeFromNib ();
             this.Title = Properties_Resources.EditTitle;
             this.ProxySettings = ConfigManager.CurrentConfig.Proxy;
-            this.CancelButton.Title = Properties_Resources.Cancel;
+            this.CancelButton.Title = Properties_Resources.DiscardChanges;
             this.SaveButton.Title = Properties_Resources.SaveChanges;
             this.RequiresAuthorizationCheckBox.StringValue = Properties_Resources.NetworkProxyLogin;
             this.ProxyPasswordLabel.StringValue = Properties_Resources.Password;
             this.ProxyUsernameLabel.StringValue = Properties_Resources.User;
-            Uri url = ProxySettings.Server;
-            this.ProxyServer.StringValue = (url != null) ? url.ToString() : String.Empty;
-            this.ProxyUsername.StringValue = (ProxySettings.Username != null) ? ProxySettings.Username : String.Empty;
-            this.ProxyPassword.StringValue = (ProxySettings.ObfuscatedPassword != null) ? Crypto.Deobfuscate(ProxySettings.ObfuscatedPassword) : String.Empty;
+
+            Controller = (this.WindowController as GeneralSettingsController).Controller;
+
+            this.ProxyServer.Delegate = new TextFieldDelegate ();
+            (this.ProxyServer.Delegate as TextFieldDelegate).StringValueChanged += delegate
+            {
+                Controller.ValidateServer(this.ProxyServer.StringValue);
+            };
+
+
+            Controller.CheckProxyNoneEvent += (check) =>
+            {
+                if(check != (NoProxyButton.State == NSCellStateValue.On))
+                {
+                    NoProxyButton.State = check ? NSCellStateValue.On : NSCellStateValue.Off;
+                }
+            };
+
+            Controller.CheckProxySystemEvent += (check) =>
+            {
+                if(check != (SystemDefaultProxyButton.State == NSCellStateValue.On))
+                {
+                    SystemDefaultProxyButton.State = check ? NSCellStateValue.On : NSCellStateValue.Off;
+                }
+            };
+
+            Controller.CheckProxyCutomEvent += (check) =>
+            {
+                if(check != (ManualProxyButton.State == NSCellStateValue.On))
+                {
+                    ManualProxyButton.State = check ? NSCellStateValue.On : NSCellStateValue.Off;
+                }
+                ProxyServerLabel.Enabled = check;
+                ProxyServer.Enabled = check;
+                ProxyServerHelp.Enabled = check;
+                CheckAddress(Controller);
+            };
+
+            Controller.EnableLoginEvent += (enable) =>
+            {
+                RequiresAuthorizationCheckBox.Enabled = enable;
+                if (enable)
+                {
+                    Controller.CheckLogin(RequiresAuthorizationCheckBox.State == NSCellStateValue.On);
+                }
+                else
+                {
+                    ProxyUsernameLabel.Enabled = false;
+                    ProxyUsername.Enabled = false;
+                    ProxyPasswordLabel.Enabled = false;
+                    ProxyPassword.Enabled = false;
+                }
+            };
+            
+            Controller.CheckLoginEvent += (check) =>
+            {
+                if (check != (RequiresAuthorizationCheckBox.State == NSCellStateValue.On))
+                {
+                    RequiresAuthorizationCheckBox.State = check ? NSCellStateValue.On : NSCellStateValue.Off;
+                }
+                ProxyUsernameLabel.Enabled = check;
+                ProxyUsername.Enabled = check;
+                ProxyPasswordLabel.Enabled = check;
+                ProxyPassword.Enabled = check;
+            };
+
+            Controller.UpdateServerHelpEvent += (message) =>
+            {
+                ProxyServerHelp.StringValue = message;
+            };
+
+
+            Controller.UpdateSaveEvent += (enable) =>
+            {
+                SaveButton.Enabled = enable;
+            };
+
             RefreshStates();
+        }
+
+        private void CheckAddress(SettingController controller)
+        {
+            if (ProxyServer.Enabled)
+            {
+                controller.ValidateServer(ProxyServer.StringValue);
+            }
+            else
+            {
+                SaveButton.Enabled = true;
+                ProxyServerHelp.StringValue = String.Empty;
+            }
         }
 
         public override void OrderFrontRegardless ()
@@ -64,12 +151,6 @@ namespace CmisSync
                 Program.UI.UpdateDockIconVisibility ();
 
             base.OrderFrontRegardless ();
-            this.ProxySettings = ConfigManager.CurrentConfig.Proxy;
-            if (ProxySettings.Server != null)
-            {
-                Uri url = ProxySettings.Server;
-                this.ProxyServer.StringValue = url.ToString();
-            }
             RefreshStates();
         }
 
@@ -96,31 +177,30 @@ namespace CmisSync
         partial void OnSave(NSObject sender)
         {
             Config.ProxySettings settings = this.ProxySettings;
+            if (NoProxyButton.State == NSCellStateValue.On) {
+                settings.Selection = Config.ProxySelection.NOPROXY;
+            } else if(SystemDefaultProxyButton.State == NSCellStateValue.On) {
+                settings.Selection = Config.ProxySelection.SYSTEM;
+            } else if(ManualProxyButton.State == NSCellStateValue.On) {
+                settings.Selection = Config.ProxySelection.CUSTOM;
+            }
+            string server = Controller.GetServer(this.ProxyServer.StringValue);
+            if (server!=null)
+            {
+                settings.Server = new Uri(server);
+            }
+            settings.LoginRequired = (this.RequiresAuthorizationCheckBox.State == NSCellStateValue.On);
             settings.Username = this.ProxyUsername.StringValue;
             settings.ObfuscatedPassword = Crypto.Obfuscate(this.ProxyPassword.StringValue);
-            try{
-                settings.Server = new Uri(this.ProxyServer.StringValue);
-                ConfigManager.CurrentConfig.Proxy = settings;
-                ConfigManager.CurrentConfig.Save();
-                PerformClose(this);
-            }
-            catch(UriFormatException)
-            {
-                try{
-                    if(!this.ProxyServer.StringValue.StartsWith("http://"))
-                    {
-                        settings.Server = new Uri("http://" + this.ProxyServer.StringValue);
-                        ConfigManager.CurrentConfig.Proxy = settings;
-                        ConfigManager.CurrentConfig.Save();
-                        PerformClose(this);
-                    }
-                }catch(UriFormatException){}
-            }
+            this.ProxySettings = settings;
+            ConfigManager.CurrentConfig.Proxy = settings;
+            ConfigManager.CurrentConfig.Save();
+            PerformClose(this);
         }
 
         partial void OnHelp(NSObject sender)
         {
-            throw new System.NotImplementedException();
+            NSHelpManager.SharedHelpManager().FindString("proxy","MacHelp");
         }
 
         partial void OnCancel(NSObject sender)
@@ -130,59 +210,49 @@ namespace CmisSync
 
         partial void OnRequireAuth(NSObject sender)
         {
-            Config.ProxySettings settings = this.ProxySettings;
-            settings.LoginRequired = (this.RequiresAuthorizationCheckBox.State == NSCellStateValue.On);
-            this.ProxySettings = settings;
-            RefreshStates();
+            Controller.CheckLogin(this.RequiresAuthorizationCheckBox.State == NSCellStateValue.On);
         }
 
         partial void OnNoProxy(NSObject sender)
         {
             if(this.NoProxyButton.State == NSCellStateValue.On)
             {
-                Config.ProxySettings settings = this.ProxySettings;
-                settings.Selection = Config.ProxySelection.NOPROXY;
-                settings.LoginRequired = false;
-                this.ProxySettings = settings;
+                Controller.CheckProxyNone();
             }
-            RefreshStates();
         }
 
         partial void OnDefaultProxy(NSObject sender)
         {
             if(this.SystemDefaultProxyButton.State == NSCellStateValue.On)
             {
-                Config.ProxySettings settings = ProxySettings;
-                settings.Selection = Config.ProxySelection.SYSTEM;
-                ProxySettings = settings;
+                Controller.CheckProxySystem();
             }
-            RefreshStates();
         }
 
         partial void OnManualProxy(NSObject sender)
         {
             if(this.ManualProxyButton.State == NSCellStateValue.On)
             {
-                Config.ProxySettings settings = ProxySettings;
-                settings.Selection = Config.ProxySelection.CUSTOM;
-                ProxySettings = settings;
+                Controller.CheckProxyCustom();
             }
-            RefreshStates();
         }
 
         void RefreshStates()
         {
-            this.RequiresAuthorizationCheckBox.State = ProxySettings.LoginRequired ? NSCellStateValue.On : NSCellStateValue.Off;
-            this.ProxyUsername.Enabled = ProxySettings.LoginRequired;
-            this.ProxyPassword.Enabled = ProxySettings.LoginRequired;
-            this.ProxyUsernameLabel.Enabled = ProxySettings.LoginRequired;
-            this.ProxyPasswordLabel.Enabled = ProxySettings.LoginRequired;
-            this.ProxyServerLabel.Enabled = ProxySettings.Selection == Config.ProxySelection.CUSTOM;
-            this.ProxyServer.Enabled = ProxySettings.Selection == Config.ProxySelection.CUSTOM;
-            this.RequiresAuthorizationCheckBox.Enabled = ProxySettings.Selection != Config.ProxySelection.NOPROXY;
-            this.NoProxyButton.State = ProxySettings.Selection == Config.ProxySelection.NOPROXY ? NSCellStateValue.On : NSCellStateValue.Off;
-            this.SystemDefaultProxyButton.State = ProxySettings.Selection == Config.ProxySelection.SYSTEM ? NSCellStateValue.On : NSCellStateValue.Off;
-            this.ManualProxyButton.State = ProxySettings.Selection == Config.ProxySelection.CUSTOM ? NSCellStateValue.On : NSCellStateValue.Off;
+            Uri url = ProxySettings.Server;
+            this.ProxyServer.StringValue = (url != null) ? url.ToString() : String.Empty;
+            this.ProxyUsername.StringValue = (ProxySettings.Username != null) ? ProxySettings.Username : String.Empty;
+            this.ProxyPassword.StringValue = (ProxySettings.ObfuscatedPassword != null) ? Crypto.Deobfuscate(ProxySettings.ObfuscatedPassword) : String.Empty;
+            Controller.CheckLogin (ProxySettings.LoginRequired);
+            if (ProxySettings.Selection == Config.ProxySelection.NOPROXY) {
+                Controller.CheckProxyNone ();
+            } else if (ProxySettings.Selection == Config.ProxySelection.SYSTEM) {
+                Controller.CheckProxySystem ();
+            } else if (ProxySettings.Selection == Config.ProxySelection.CUSTOM) {
+                Controller.CheckProxyCustom ();
+            } else {
+                Controller.CheckProxyNone ();
+            }
         }
     }
 }
