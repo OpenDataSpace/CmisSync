@@ -354,7 +354,15 @@ namespace CmisSync.Lib.Sync
                 }
                 catch (CmisRuntimeException e)
                 {
-                    Logger.Error("Connection to repository failed: ", e);
+                    if(e.Message == "Proxy Authentication Required")
+                    {
+                        Queue.AddEvent(new ProxyAuthRequiredEvent(e));
+                        Logger.Warn("Proxy Settings Problem", e);
+                    }
+                    else
+                    {
+                        Logger.Error("Connection to repository failed: ", e);
+                    }
                 }
                 catch (CmisObjectNotFoundException e)
                 {
@@ -789,6 +797,8 @@ namespace CmisSync.Lib.Sync
                             Logger.Debug("Creating local download file: " + tmpfilepath);
                             using (FileStream file = new FileStream(tmpfilepath, (truncate)? FileMode.Create : FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read)){
                                 this.Queue.AddEvent(transmissionEvent);
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = true});
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = false});
                                 downloader.DownloadFile(remoteDocument, file, transmissionEvent, hashAlg);
                                 file.Close();
                             }
@@ -915,7 +925,9 @@ namespace CmisSync.Lib.Sync
                         try
                         {
                             Logger.Info("Uploading: " + filePath);
-                            Queue.AddEvent(transmissionEvent);
+                            this.Queue.AddEvent(transmissionEvent);
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = true});
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = false});
                             // Prepare properties
                             string fileName = Path.GetFileName(filePath);
                             Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -1137,6 +1149,8 @@ namespace CmisSync.Lib.Sync
                             return true;
                         }
                         this.Queue.AddEvent(transmissionEvent);
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = true});
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = false});
                         IFileUploader uploader = ContentTaskUtils.CreateUploader(repoinfo.ChunkSize);
                         using (var hashAlg = new SHA1Managed()) {
                             IDocument lastState;

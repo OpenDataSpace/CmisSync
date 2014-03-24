@@ -30,6 +30,7 @@ SOURCES =  \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/EventTypesTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
+	EventsTests/EventsFilterTests/GenericHandleDoublicatedEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
@@ -38,7 +39,7 @@ SOURCES =  \
 	EventsTests/FileTransmissionEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
-	EventsTests/PermissionDeniedEventHandlerTest.cs \
+	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
 	EventsTests/SyncEventManagerTest.cs \
 	EventsTests/SyncEventQueueTest.cs \

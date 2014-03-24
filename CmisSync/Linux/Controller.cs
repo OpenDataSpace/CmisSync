@@ -37,7 +37,22 @@ namespace CmisSync {
         /// <param name="firstRun">Whether it is the first time that CmisSync is being run.</param>
         public override void Initialize(Boolean firstRun)
         {
+            this.ProxyAuthReqired += delegate(string reponame) {
+                Process process = new Process();
+                process.StartInfo.FileName  = "notify-send";
+                process.StartInfo.Arguments = String.Format("-i \"/usr/share/icons/hicolor/32x32/apps/app-cmissync.png\" \"{0}\" \"{1}\"", reponame, Properties_Resources.NetworkProxyLogin);
+                process.Start ();
+            };
+
+            this.ShowChangePassword += delegate(string reponame) {
+                Process process = new Process();
+                process.StartInfo.FileName  = "notify-send";
+                process.StartInfo.Arguments = String.Format("-i \"/usr/share/icons/hicolor/32x32/apps/app-cmissync.png\" \"{0}\" \"{1}\"", reponame, String.Format(Properties_Resources.NotificationCredentialsError, reponame));
+                process.Start ();
+            };
             base.Initialize(firstRun);
+
+
         }
 
         // Creates a .desktop entry in autostart folder to

@@ -34,6 +34,9 @@ namespace CmisSync
 		MonoMac.AppKit.NSTextField ProxyServer { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSTextField ProxyServerHelp { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSTextField ProxyServerLabel { get; set; }
 
 		[Outlet]
@@ -118,6 +121,11 @@ namespace CmisSync
 			if (ProxyServerLabel != null) {
 				ProxyServerLabel.Dispose ();
 				ProxyServerLabel = null;
+			}
+
+			if (ProxyServerHelp != null) {
+				ProxyServerHelp.Dispose ();
+				ProxyServerHelp = null;
 			}
 
 			if (ProxyTab != null) {

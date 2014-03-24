@@ -35,9 +35,6 @@ namespace TestLibrary.IntegrationTests
         private readonly string repoId = "repoId";
         private readonly int maxNumberOfContentChanges = 1000;
 
-        public static void fakeDelegate(string repoId) {
-        }
-        
         private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage) 
         {
             return CreateQueue(session, storage, new ObservableHandler());
@@ -75,7 +72,7 @@ namespace TestLibrary.IntegrationTests
             var crawler = new Crawler(queue, remoteFolder.Object, localFolder.Object);
             manager.AddEventHandler(crawler);
 
-            var permissionDenied = new PermissionDeniedEventHandler(repoId, fakeDelegate);
+            var permissionDenied = new GenericHandleDoublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();
             manager.AddEventHandler(permissionDenied);
 
             var invalidFolderNameFilter = new InvalidFolderNameFilter(queue);

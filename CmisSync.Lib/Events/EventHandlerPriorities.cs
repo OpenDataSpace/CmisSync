@@ -9,10 +9,10 @@ namespace CmisSync.Lib.Events {
     public static class EventHandlerPriorities {
         private static IDictionary<Type, int> map = new Dictionary<Type, int>();
 
-        private static readonly int DEBUG = 100000;
-        private static readonly int FILTER = 10000;
-        private static readonly int HIGH = 2000;
-        private static readonly int NORMAL = 1000;
+        public static readonly int DEBUG = 100000;
+        public static readonly int FILTER = 10000;
+        public static readonly int HIGH = 2000;
+        public static readonly int NORMAL = 1000;
 
         static EventHandlerPriorities() {
             map[typeof(DebugLoggingHandler)] = DEBUG;
@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Events {
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;
-            map[typeof(PermissionDeniedEventHandler)] = NORMAL;
+            map[typeof(GenericHandleDoublicatedEventsFilter<,>)] = FILTER;
             map[typeof(CmisSync.Lib.Sync.Strategy.Watcher)] = NORMAL;
             map[typeof(Crawler)] = NORMAL;
             map[typeof(SyncMechanism)] = NORMAL;

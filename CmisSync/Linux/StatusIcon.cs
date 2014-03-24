@@ -16,6 +16,7 @@
 
 
 using System;
+using System.Diagnostics;
 
 #if HAVE_APP_INDICATOR
 using AppIndicator;
@@ -64,7 +65,7 @@ namespace CmisSync {
             this.status_icon        = new Gtk.StatusIcon ();
             this.status_icon.Pixbuf = this.animation_frames [0];
 
-            this.status_icon.Activate  += ShowMenu; // Primary mouse button click
+            this.status_icon.Activate  += OpenFolderDelegate(null); // Primary mouse button click shows default folder
             this.status_icon.PopupMenu += ShowMenu; // Secondary mouse button click
 #endif
 
@@ -403,6 +404,10 @@ namespace CmisSync {
             Label text = this.Child as Label;
             if(text != null)
                 text.Text = String.Format("{0}: {1} ({2})", TypeString, System.IO.Path.GetFileName(Path), CmisSync.Lib.Utils.FormatPercent(percent));
+            Process process = new Process();
+            process.StartInfo.FileName  = "notify-send";
+            process.StartInfo.Arguments = String.Format("-i \"/usr/share/icons/hicolor/32x32/apps/app-cmissync.png\" \"{0}:{1}\" \"{2}\"", TypeString, System.IO.Path.GetFileName(Path), Path);
+            process.Start ();
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
                 percent = (status.Percent != null)? (double) status.Percent: 0;
                 long? bitsPerSecond = status.BitsPerSecond;

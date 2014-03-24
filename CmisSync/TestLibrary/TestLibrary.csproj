@@ -11,8 +11,6 @@
     <RootNamespace>TestLibrary</RootNamespace>
     <AssemblyName>TestLibrary</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <ReleaseVersion>
-    </ReleaseVersion>
     <UseMSBuildEngine>False</UseMSBuildEngine>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -153,13 +151,9 @@
     <Compile Include="UtilsTests\CredentialsTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="WatcherTest.cs" />
-    <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
-    <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
-    <Compile Include="MoqExtensions\MoqExtensions.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectAddedTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\GenericHandleDoublicatedEventsFilterTest.cs" />
+    <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

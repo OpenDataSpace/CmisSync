@@ -190,6 +190,18 @@ namespace CmisSync
             tabItemCredentials.Content = canvasCredentials;
             tab.Items.Add(tabItemCredentials);
 
+            switch (type)
+            {
+                case EditType.EditFolder:
+                    tab.SelectedItem = tabItemSelection;
+                    break;
+                case EditType.EditCredentials:
+                    tab.SelectedItem = tabItemCredentials;
+                    break;
+                default:
+                    break;
+            }
+
             ContentCanvas.Children.Add(tab);
             Canvas.SetTop(tab, 30);
             Canvas.SetLeft(tab, 175);

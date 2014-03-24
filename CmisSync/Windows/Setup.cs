@@ -107,7 +107,7 @@ namespace CmisSync
                                 // UI elements.
 
                                 Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
-                                Description = Properties_Resources.Intro;
+                                Description = String.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
 
                                 Button cancel_button = new Button()
                                 {
@@ -1006,7 +1006,7 @@ namespace CmisSync
                                 // UI elements.
 
                                 Header = Properties_Resources.Ready;
-                                Description = Properties_Resources.YouCanFind;
+                                Description = String.Format(Properties_Resources.YouCanFind, Controller.saved_local_path);
 
                                 Button finish_button = new Button()
                                 {

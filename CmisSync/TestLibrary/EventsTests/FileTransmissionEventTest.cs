@@ -45,11 +45,20 @@ namespace TestLibrary.EventsTests
                 Completed = this.expectedArgs.Completed
             };
             transmission.ReportProgress(otherArgs);
+            TransmissionProgressEventArgs nullArgs = new TransmissionProgressEventArgs()
+            {
+                Length = null,
+                ActualPosition = null,
+                BitsPerSecond = null,
+                Completed = null
+            };
+            transmission.ReportProgress(nullArgs);
         }
 
         private void TransmissionEventHandler(object sender, TransmissionProgressEventArgs e)
         {
             Assert.AreEqual(expectedArgs, e, "The reported transmission events doesn't fit to the expected ones");
+            Assert.AreEqual(expectedArgs.BitsPerSecond, e.BitsPerSecond);
         }
 
         [Test, Category("Fast")]
