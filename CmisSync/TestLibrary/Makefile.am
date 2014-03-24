@@ -27,6 +27,7 @@ SOURCES =  \
 	DebugLoggingHandlerTest.cs \
 	EncodingTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
+	EventsTests/EventsFilterTests/GenericHandleDoublicatedEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
@@ -36,7 +37,7 @@ SOURCES =  \
 	EventsTests/FileTransmissionEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
-	EventsTests/PermissionDeniedEventHandlerTest.cs \
+	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
 	EventsTests/SyncEventManagerTest.cs \
 	EventsTests/SyncEventQueueTest.cs \

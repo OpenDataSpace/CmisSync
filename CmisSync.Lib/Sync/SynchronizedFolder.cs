@@ -355,7 +355,15 @@ namespace CmisSync.Lib.Sync
                 }
                 catch (CmisRuntimeException e)
                 {
-                    Logger.Error("Connection to repository failed: ", e);
+                    if(e.Message == "Proxy Authentication Required")
+                    {
+                        Queue.AddEvent(new ProxyAuthRequiredEvent(e));
+                        Logger.Warn("Proxy Settings Problem", e);
+                    }
+                    else
+                    {
+                        Logger.Error("Connection to repository failed: ", e);
+                    }
                 }
                 catch (CmisObjectNotFoundException e)
                 {

@@ -25,7 +25,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             queue = new Mock<ISyncEventQueue>();
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("EventFilter")]
         public void ConstructorExceptionOnNullQueueTest() {
             try{
                 new IgnoredFileNamesFilter(null);
@@ -33,7 +33,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             }catch(ArgumentNullException){}
         }
 
-        [Test,Category("Fast")]
+        [Test,Category("Fast"), Category("EventFilter")]
         public void AllowCorrectFSEventsTest() {
             var file = new FileInfo(Path.Combine(Path.GetTempPath(), "testfile"));
             var filter = new IgnoredFileNamesFilter(queue.Object);
@@ -45,7 +45,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("EventFilter")]
         public void HandleIgnoredFileNamesTest() {
             var file = new FileInfo(Path.Combine(Path.GetTempPath(), "file~"));
             List<string> wildcards = new List<string>();
@@ -59,7 +59,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             queue.Verify(q => q.AddEvent(It.IsAny<RequestIgnoredEvent>()), Times.Once());
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("EventFilter")]
         public void IgnoreFolderFSEventsTest() {
             var filter = new IgnoredFileNamesFilter(queue.Object);
             var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, "");
@@ -70,7 +70,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("EventFilter")]
         public void IgnoreNonExsitingFileOrFolderFSEventsTest() {
             var filter = new IgnoredFileNamesFilter(queue.Object);
             var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, "");
@@ -81,7 +81,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             folderEvent.VerifyGet( e => e.Path, Times.Never());
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("EventFilter")]
         public void IgnoreFolderMovedFSEventsTest() {
             var filter = new IgnoredFileNamesFilter(queue.Object);
             var moveEvent = new Mock<FSMovedEvent>(" ", " ");

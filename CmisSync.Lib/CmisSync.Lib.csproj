@@ -9,8 +9,6 @@
     <OutputType>Library</OutputType>
     <RootNamespace>CmisSync.Lib</RootNamespace>
     <AssemblyName>CmisSync.Lib</AssemblyName>
-    <ReleaseVersion>
-    </ReleaseVersion>
     <UseMSBuildEngine>False</UseMSBuildEngine>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -123,7 +121,6 @@
     <Compile Include="Events\ISyncEvent.cs" />
     <Compile Include="Events\ISyncEventQueue.cs" />
     <Compile Include="Events\PermissionDeniedEvent.cs" />
-    <Compile Include="Events\PermissionDeniedEventHandler.cs" />
     <Compile Include="Events\RemoteEvent.cs" />
     <Compile Include="Events\ReportingSyncEventHandler.cs" />
     <Compile Include="Events\RequestIgnoredEvent.cs" />
@@ -178,6 +175,8 @@
     <Compile Include="Sync\Strategy\MacWatcher.cs" />
     <Compile Include="Sync\Strategy\NetWatcher.cs" />
     <Compile Include="Events\EventFilter\IgnoredFolderNameFilter.cs" />
+    <Compile Include="Events\ProxyAuthRequiredEvent.cs" />
+    <Compile Include="Events\EventFilter\GenericHandleDoublicatedEventsFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
