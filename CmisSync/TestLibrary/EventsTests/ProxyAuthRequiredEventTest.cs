@@ -24,7 +24,9 @@ namespace TestLibrary.EventsTests
         public void ReturnsStringOnToString()
         {
             var exception = new Mock<CmisRuntimeException>();
-            exception.Setup(e => e.ToString()).Returns("AuthRequiredException");
+            string message = "AuthRequiredException";
+            exception.Setup(e => e.ToString()).Returns(message);
+            exception.Setup(e => e.Message).Returns(message);
             var ev = new ProxyAuthRequiredEvent(exception.Object);
             string s = ev.ToString();
             Assert.IsNotNullOrEmpty(s);
