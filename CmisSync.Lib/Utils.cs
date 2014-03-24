@@ -441,7 +441,8 @@ namespace CmisSync.Lib
         public static void EnsureNeededDependenciesAreAvailable()
         {
             Type[] types = new Type[]{
-                typeof(Newtonsoft.Json.JsonConvert)
+                typeof(Newtonsoft.Json.JsonConvert),
+                typeof(DotCMIS.Client.Impl.Session)
             };
             foreach (var type in types)
             {

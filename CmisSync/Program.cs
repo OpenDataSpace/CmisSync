@@ -112,9 +112,15 @@ namespace CmisSync
                 Logger.Error(Properties_Resources.ApplicationName + " is already running.");
                 Environment.Exit(-1);
             }
-
-            CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
-
+            try{
+                CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
+            } catch(Exception e)
+            {
+                string message = String.Format("Missing Dependency: {0}{1}{2}", e.Message, Environment.NewLine, e.StackTrace);
+                Logger.Error(message);
+                Console.Error.WriteLine(message);
+                Environment.Exit(-1);
+            }
             // Increase the number of concurrent requests to each server,
             // as an unsatisfying workaround until this DotCMIS bug 632 is solved.
             // See https://github.com/nicolas-raoul/CmisSync/issues/140
