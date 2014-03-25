@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 using CmisSync.Lib.Sync.Strategy;
@@ -20,8 +21,11 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
         private Mock<IMetaDataStorage> StorageMock;
         private string RemoteChangeToken = "changeToken";
         private readonly IObjectId ObjectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
-        private string RemotePath = "/object/path";
-        private string RemoteName = "path";
+        private readonly string RemotePath = "/object/path";
+        private readonly string RemoteName = "path";
+        //private readonly string LocalPath = Path.Combine("object", "path");
+        //private readonly string LocalName = "path";
+
 
         [SetUp]
         public void SetUp() {
@@ -44,18 +48,19 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
         }
 
         [Test, Category("Fast")]
-        [Ignore]
         public void NoChangeDetectionForFileTest()
         {
-
-            // Test is incomplete
             var lastModificationDate = DateTime.Now;
             var remoteObject = new Mock<IDocument>();
-            remoteObject.Setup(remote => remote.ChangeToken).Returns(RemoteChangeToken);
+            var remotePaths = new List<string>();
+            remotePaths.Add(RemotePath);
+            remoteObject.Setup (remote => remote.ChangeToken).Returns(RemoteChangeToken);
             remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
             remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
+            remoteObject.Setup (remote => remote.Paths).Returns(remotePaths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
             StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
+            StorageMock.Setup(storage => storage.GetFilePath(It.Is<string>(s => s == ObjectId.Id))).Returns("path");
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, ObjectId));
         }
