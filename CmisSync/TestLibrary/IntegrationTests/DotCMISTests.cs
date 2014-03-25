@@ -164,7 +164,7 @@ namespace TestLibrary.IntegrationTests
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             //watch.Stop();
             //Console.WriteLine(String.Format("Created empty doc in {0} msec", watch.ElapsedMilliseconds));
-            Assert.AreEqual(0, emptyDoc.ContentStreamLength, "returned document shouldn't got any content");
+            Assert.That(emptyDoc.ContentStreamLength == null || emptyDoc.ContentStreamLength == 0, "returned document shouldn't got any content");
             string content = "";
             content += "Test ";
             ContentStream contentStream = new ContentStream();
