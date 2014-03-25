@@ -4,9 +4,9 @@ using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Events.Filter
 {
-    public class GenericHandleDoublicatedEventsFilter<Filter, Reset> : SyncEventHandler
-        where Filter: ISyncEvent
-        where Reset : ISyncEvent
+    public class GenericHandleDoublicatedEventsFilter<TFilter, TReset> : SyncEventHandler
+        where TFilter: ISyncEvent
+        where TReset : ISyncEvent
     {
         private bool firstOccurence = true;
         private int priority;
@@ -17,7 +17,7 @@ namespace CmisSync.Lib.Events.Filter
 
         public override bool Handle (ISyncEvent e)
         {
-            if(e is Filter)
+            if(e is TFilter)
             {
                 if(firstOccurence)
                 {
@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events.Filter
                     return true;
                 }
             }
-            if(e is Reset)
+            if(e is TReset)
             {
                 firstOccurence = true;
             }
