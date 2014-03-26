@@ -343,8 +343,8 @@ namespace CmisSync
                     // Add the main item.
                     this.traymenu.Items.Add(subfolderItem);
                 }
+                this.traymenu.Items.Add(new ToolStripSeparator());
             }
-            this.traymenu.Items.Add(new ToolStripSeparator());
 
             // Create the menu item that lets the user add a new synchronized folder.
             ToolStripMenuItem addFolderItem = new ToolStripMenuItem()
