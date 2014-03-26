@@ -629,15 +629,6 @@ namespace CmisSync.Lib.Sync
                 string fileName = remoteDocument.Name;
                 string filePath = Path.Combine(localFolder, fileName);
 
-                // If this file does not have a filename, ignore it.
-                // It sometimes happen on IBM P8 CMIS server, not sure why.
-                if (remoteDocument.ContentStreamFileName == null)
-                {
-                    //TODO Possibly the file content has been changed to 0, this case should be handled
-                    Logger.Warn("Skipping download of '" + fileName + "' with null content stream in " + localFolder);
-                    return true;
-                }
-
                 if (null != remoteFiles)
                 {
                     remoteFiles.Add(fileName);
