@@ -221,7 +221,7 @@ namespace CmisSync
         }
 
         public List<FileTransmissionEvent> ActiveTransmissions() {
-            return this.activitiesManager.ActiveTransmissions.ToList<FileTransmissionEvent>();
+            return this.activitiesManager.ActiveTransmissionsAsList();
         }
 
 

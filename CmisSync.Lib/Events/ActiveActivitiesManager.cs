@@ -28,10 +28,21 @@ namespace CmisSync.Lib.Events
         {
             get
             {
-                lock (Lock)
-                {
-                    return activeTransmissions;
-                }
+                return activeTransmissions;
+            }
+        }
+
+        /// <summary>
+        /// Active the transmissions as list.
+        /// </summary>
+        /// <returns>
+        /// The transmissions as list.
+        /// </returns>
+        public List<FileTransmissionEvent> ActiveTransmissionsAsList ()
+        {
+            lock(this.Lock)
+            {
+                return activeTransmissions.ToList<FileTransmissionEvent>();
             }
         }
 
