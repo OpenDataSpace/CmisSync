@@ -510,6 +510,7 @@ namespace CmisSync.Lib.Sync
                         // List all children.
                         foreach (ICmisObject cmisObject in remoteFolder.GetChildren())
                         {
+                            sleepWhileSuspended();
                             if (cmisObject is DotCMIS.Client.Impl.Folder)
                             {
                                 IFolder remoteSubFolder = (IFolder)cmisObject;
@@ -551,6 +552,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool SyncDownloadFolder(IFolder remoteSubFolder, string localFolder)
             {
+                sleepWhileSuspended();
+
                 string name = remoteSubFolder.Name;
                 string remotePathname = remoteSubFolder.Path;
                 string localSubFolder = Path.Combine(localFolder, name);
@@ -626,6 +629,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool SyncDownloadFile(IDocument remoteDocument, string localFolder, IList<string> remoteFiles = null)
             {
+                sleepWhileSuspended();
+
                 string fileName = remoteDocument.Name;
                 string filePath = Path.Combine(localFolder, fileName);
 
@@ -724,6 +729,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool DownloadFile(IDocument remoteDocument, string localFolder)
             {
+                sleepWhileSuspended();
+
                 RequestFileDownload(remoteDocument, localFolder);
                 using (new ActivityListenerResource(activityListener))
                 {
@@ -902,6 +909,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool UploadFile(string filePath, IFolder remoteFolder)
             {
+                sleepWhileSuspended();
+
                 using (new ActivityListenerResource(activityListener))
                 {
                     long retries = database.GetOperationRetryCounter(filePath, Database.OperationType.UPLOAD);
@@ -1032,6 +1041,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool UploadFolderRecursively(IFolder remoteBaseFolder, string localFolder)
             {
+                sleepWhileSuspended();
+
                 // Create remote folder.
                 Dictionary<string, object> properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.Name, Path.GetFileName(localFolder));

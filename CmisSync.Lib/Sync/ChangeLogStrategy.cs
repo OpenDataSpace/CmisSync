@@ -73,6 +73,7 @@ namespace CmisSync.Lib.Sync
                     bool success = true;
                     foreach (IChangeEvent change in changes.ChangeEventList)
                     {
+                        sleepWhileSuspended();
                         try
                         {
                             switch (change.ChangeType)
