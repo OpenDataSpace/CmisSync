@@ -395,6 +395,10 @@ namespace CmisSync {
 
     //TODO This isn't working well, please create a native COCOA like solution 
     public class TransmissionMenuItem : NSMenuItem {
+
+        private int updateInterval = 1;
+        private DateTime updateTime;
+
         public TransmissionMenuItem(FileTransmissionEvent transmission) {
 
             Title = System.IO.Path.GetFileName(transmission.Path);
@@ -403,7 +407,15 @@ namespace CmisSync {
                 NSWorkspace.SharedWorkspace.OpenFile (System.IO.Directory.GetParent(transmission.Path).FullName);
             };
 
+            updateTime = DateTime.Now;
+
             transmission.TransmissionStatus += delegate (object sender, TransmissionProgressEventArgs e){
+                TimeSpan diff = DateTime.Now - updateTime;
+                if (diff.Seconds <= updateInterval) {
+                    return;
+                }
+                updateTime = DateTime.Now;
+
                 double? percent = e.Percent;
                 long? bitsPerSecond = e.BitsPerSecond;
                 if( percent != null && bitsPerSecond != null ) {
