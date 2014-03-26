@@ -121,7 +121,7 @@
     <value>Add</value>
   </data>
   <data name="AddARemoteFolder" xml:space="preserve">
-    <value>Add a remote folder…</value>
+    <value>Add a Remote Folder…</value>
   </data>
   <data name="AddFolders" xml:space="preserve">
     <value>Adding synchronized folders to {0}</value>

@@ -79,7 +79,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add a remote folder….
+        ///   Looks up a localized string similar to Add a Remote Folder….
         /// </summary>
         internal static string AddARemoteFolder {
             get {
