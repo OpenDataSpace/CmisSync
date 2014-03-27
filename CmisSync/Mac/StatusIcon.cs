@@ -145,6 +145,12 @@ namespace CmisSync {
                             NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
                             transmissionmenu.AddItem(transmissionItem);
                         }
+                        if(state_item.Submenu!=null){
+                            foreach(NSMenuItem item in state_item.Submenu.ItemArray()){
+                                item.Dispose();
+                            }
+                            state_item.Submenu.RemoveAllItems();
+                        }
                         if(transmissions.Count > 0) {
                             state_item.Submenu = transmissionmenu;
                             state_item.Enabled = true;
@@ -396,37 +402,69 @@ namespace CmisSync {
     //TODO This isn't working well, please create a native COCOA like solution 
     public class TransmissionMenuItem : NSMenuItem {
 
+        private FileTransmissionEvent transmissionEvent;
         private int updateInterval = 1;
         private DateTime updateTime;
+        private bool run = false;
+        private object disposeLock = new object ();
+        private bool disposed = false;
 
-        public TransmissionMenuItem(FileTransmissionEvent transmission) {
-
-            Title = System.IO.Path.GetFileName(transmission.Path);
-
-            Activated += delegate {
-                NSWorkspace.SharedWorkspace.OpenFile (System.IO.Directory.GetParent(transmission.Path).FullName);
-            };
-
-            updateTime = DateTime.Now;
-
-            transmission.TransmissionStatus += delegate (object sender, TransmissionProgressEventArgs e){
+        private void TransmissionEvent(object sender, TransmissionProgressEventArgs e)
+        {
+            lock (disposeLock) {
+                if (disposed) {
+                    return;
+                }
                 TimeSpan diff = DateTime.Now - updateTime;
                 if (diff.Seconds <= updateInterval) {
                     return;
                 }
-                updateTime = DateTime.Now;
+                if (run) {
+                    return;
+                }
 
+                run = true;
+                updateTime = DateTime.Now;
                 double? percent = e.Percent;
                 long? bitsPerSecond = e.BitsPerSecond;
-                if( percent != null && bitsPerSecond != null ) {
-                    BeginInvokeOnMainThread(delegate {
-                        Title = String.Format("{0} ({1:###.#}% {2})",
-                            System.IO.Path.GetFileName(transmission.Path),
-                            Math.Round((double)percent,1),
-                            CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
+                if (percent != null && bitsPerSecond != null) {
+                    BeginInvokeOnMainThread (delegate
+                    {
+                        Title = String.Format ("{0} ({1:###.#}% {2})",
+                            System.IO.Path.GetFileName (transmissionEvent.Path),
+                            Math.Round ((double)percent, 1),
+                            CmisSync.Lib.Utils.FormatBandwidth ((long)bitsPerSecond));
                     });
                 }
+                run = false;
+            }
+        }
+
+        public TransmissionMenuItem(FileTransmissionEvent transmission) {
+            Title = System.IO.Path.GetFileName (transmission.Path);
+
+            Activated += delegate
+            {
+                NSWorkspace.SharedWorkspace.OpenFile (System.IO.Directory.GetParent (transmission.Path).FullName);
             };
+
+            transmissionEvent = transmission;
+            updateTime = DateTime.Now;
+
+            Console.WriteLine (transmissionEvent.Path + " insert event");
+            transmissionEvent.TransmissionStatus += TransmissionEvent;
+        }
+
+        protected override void Dispose (bool disposing)
+        {
+            lock (disposeLock) {
+                if (!disposed) {
+                    transmissionEvent.TransmissionStatus -= TransmissionEvent;
+                    Console.WriteLine (transmissionEvent.Path + " delete event");
+                }
+                disposed = true;
+            }
+            base.Dispose (disposing);
         }
     }
 
