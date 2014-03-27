@@ -139,20 +139,20 @@ namespace CmisSync {
             {
                 using (var a = new NSAutoreleasePool()) {
                     BeginInvokeOnMainThread(delegate {
-                        List<FileTransmissionEvent> transmissions =    Program.Controller.ActiveTransmissions();
-                        NSMenu transmissionmenu = new NSMenu();
-                        foreach(FileTransmissionEvent transmission in transmissions) {
-                            NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
-                            transmissionmenu.AddItem(transmissionItem);
-                        }
                         if(state_item.Submenu!=null){
                             foreach(NSMenuItem item in state_item.Submenu.ItemArray()){
                                 item.Dispose();
                             }
                             state_item.Submenu.RemoveAllItems();
+                        } else {
+                            state_item.Submenu = new NSMenu();
+                        }
+                        List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
+                        foreach(FileTransmissionEvent transmission in transmissions) {
+                            NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
+                            state_item.Submenu.AddItem(transmissionItem);
                         }
                         if(transmissions.Count > 0) {
-                            state_item.Submenu = transmissionmenu;
                             state_item.Enabled = true;
                         }else{
                             state_item.Enabled = false;
@@ -428,12 +428,13 @@ namespace CmisSync {
                 double? percent = e.Percent;
                 long? bitsPerSecond = e.BitsPerSecond;
                 if (percent != null && bitsPerSecond != null) {
+                    string title = String.Format ("{0} ({1:###.#}% {2})",
+                        System.IO.Path.GetFileName (transmissionEvent.Path),
+                        Math.Round ((double)percent, 1),
+                        CmisSync.Lib.Utils.FormatBandwidth ((long)bitsPerSecond));
                     BeginInvokeOnMainThread (delegate
                     {
-                        Title = String.Format ("{0} ({1:###.#}% {2})",
-                            System.IO.Path.GetFileName (transmissionEvent.Path),
-                            Math.Round ((double)percent, 1),
-                            CmisSync.Lib.Utils.FormatBandwidth ((long)bitsPerSecond));
+                        Title = title;
                     });
                 }
                 run = false;
@@ -451,7 +452,6 @@ namespace CmisSync {
             transmissionEvent = transmission;
             updateTime = DateTime.Now;
 
-            Console.WriteLine (transmissionEvent.Path + " insert event");
             transmissionEvent.TransmissionStatus += TransmissionEvent;
         }
 
@@ -460,7 +460,6 @@ namespace CmisSync {
             lock (disposeLock) {
                 if (!disposed) {
                     transmissionEvent.TransmissionStatus -= TransmissionEvent;
-                    Console.WriteLine (transmissionEvent.Path + " delete event");
                 }
                 disposed = true;
             }
