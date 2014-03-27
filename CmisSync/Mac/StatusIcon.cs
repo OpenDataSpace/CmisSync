@@ -409,6 +409,20 @@ namespace CmisSync {
         private object disposeLock = new object ();
         private bool disposed = false;
 
+        private string TransmissionStatus(TransmissionProgressEventArgs e)
+        {
+            double? percent = e.Percent;
+            long? bitsPerSecond = e.BitsPerSecond;
+            if (percent != null && bitsPerSecond != null) {
+                return String.Format ("{0} ({1:###.#}% {2})",
+                    System.IO.Path.GetFileName (transmissionEvent.Path),
+                    Math.Round ((double)percent, 1),
+                    CmisSync.Lib.Utils.FormatBandwidth ((long)bitsPerSecond));
+            } else {
+                return System.IO.Path.GetFileName (transmissionEvent.Path);
+            }
+        }
+
         private void TransmissionEvent(object sender, TransmissionProgressEventArgs e)
         {
             lock (disposeLock) {
@@ -416,7 +430,7 @@ namespace CmisSync {
                     return;
                 }
                 TimeSpan diff = DateTime.Now - updateTime;
-                if (diff.Seconds <= updateInterval) {
+                if (diff.Seconds < updateInterval) {
                     return;
                 }
                 if (run) {
@@ -425,25 +439,20 @@ namespace CmisSync {
 
                 run = true;
                 updateTime = DateTime.Now;
-                double? percent = e.Percent;
-                long? bitsPerSecond = e.BitsPerSecond;
-                if (percent != null && bitsPerSecond != null) {
-                    string title = String.Format ("{0} ({1:###.#}% {2})",
-                        System.IO.Path.GetFileName (transmissionEvent.Path),
-                        Math.Round ((double)percent, 1),
-                        CmisSync.Lib.Utils.FormatBandwidth ((long)bitsPerSecond));
-                    BeginInvokeOnMainThread (delegate
-                    {
-                        Title = title;
-                    });
-                }
+                string title = TransmissionStatus (e);
+                BeginInvokeOnMainThread (delegate
+                {
+                    lock(disposeLock) {
+                        if (!disposed) {
+                            Title = title;
+                        }
+                    }
+                });
                 run = false;
             }
         }
 
         public TransmissionMenuItem(FileTransmissionEvent transmission) {
-            Title = System.IO.Path.GetFileName (transmission.Path);
-
             Activated += delegate
             {
                 NSWorkspace.SharedWorkspace.OpenFile (System.IO.Directory.GetParent (transmission.Path).FullName);
@@ -451,6 +460,8 @@ namespace CmisSync {
 
             transmissionEvent = transmission;
             updateTime = DateTime.Now;
+
+            Title = TransmissionStatus (transmission.Status);
 
             transmissionEvent.TransmissionStatus += TransmissionEvent;
         }
