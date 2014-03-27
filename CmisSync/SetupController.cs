@@ -176,8 +176,8 @@ namespace CmisSync
         /// Regex to check a CmisSync repository local folder name.
         /// Basically, it should be a valid local filesystem folder name.
         /// </summary>
-        Regex RepositoryRegex = new Regex(@"^([a-zA-Z0-9][^*/><?\|:]*)$");
-        Regex RepositoryRegexLinux = new Regex(@"^([a-zA-Z0-9][^*\\><?\|:]*)$");
+        Regex RepositoryRegex = new Regex(@"^([a-zA-Z0-9][^*/><?\|:;]*)$");
+        Regex RepositoryRegexLinux = new Regex(@"^([a-zA-Z0-9][^*\\><?\|:;]*)$");
 
 
         /// <summary>
