@@ -157,7 +157,7 @@ namespace CmisSync
         void ShowFinishedPage()
         {
             Header.StringValue = Properties_Resources.Ready;
-            Description.StringValue = String.Format(Properties_Resources.YouCanFind, Controller.saved_local_path);
+            Description.StringValue = String.Empty;
             SubController = new SetupSubFinishedController (Controller);
             Content.ContentView = SubController.View;
         }
