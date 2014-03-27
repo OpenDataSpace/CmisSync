@@ -85,11 +85,19 @@ namespace CmisSync.Lib.Sync
 
 
             /// <summary>
-            /// Syncing lock.
-            /// true if syncing is being performed right now.
-            /// TODO use is_syncing variable in parent
+            /// Backgound syncing flag.
             /// </summary>
-            private bool syncing;
+            private bool backgroundSyncing = false;
+
+            /// <summary>
+            /// The background syncing lock for operations on the flag.
+            /// </summary>
+            private Object bgSyncingLock = new Object();
+
+            /// <summary>
+            /// The sync lock for executing only one sync process per instance
+            /// </summary>
+            private Object syncLock = new Object();
 
 
             /// <summary>
@@ -399,49 +407,51 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             public void Sync()
             {
-                //// If not connected, connect.
-                if (session == null || reconnect)
-                {
-                    Connect();
-                } else {
-                    //  Force to reset the cache for each Sync
-                    session.Clear();
-                }
-                sleepWhileSuspended();
-
-                if (session == null)
-                {
-                    Logger.Error("Could not connect to: " + cmisParameters[SessionParameter.AtomPubUrl]);
-                    return; // Will try again at next sync. 
-                }
-
-                IFolder remoteFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
-                string localFolder = repoinfo.TargetDirectory;
-
-                if (!syncFull)
-                {
-                    Logger.Debug("Invoke a full crawl sync");
-                    syncFull = CrawlSync(remoteFolder, localFolder);
-                    return;
-                }
-
-                if (ChangeLogCapability)
-                {
-                    Logger.Debug("Invoke a remote change log sync");
-                    ChangeLogSync(remoteFolder);
-                    if(changesOnFileSystemDetected)
+                lock(syncLock) {
+                    // If not connected, connect.
+                    if (session == null || reconnect)
                     {
-                        Logger.Debug("Changes on the local file system detected => starting crawl sync");
-                        changesOnFileSystemDetected = false;
-                        if (!CrawlSync(remoteFolder, localFolder))
-                            changesOnFileSystemDetected = true;
+                        Connect();
+                    } else {
+                        // Force to reset the cache for each Sync
+                        session.Clear();
                     }
-                }
-                else
-                {
-                    //  have to crawl remote
-                    Logger.Debug("Invoke a remote crawl sync");
-                    CrawlSync(remoteFolder, localFolder);
+                    sleepWhileSuspended();
+
+                    if (session == null)
+                    {
+                        Logger.Error("Could not connect to: " + cmisParameters[SessionParameter.AtomPubUrl]);
+                        return; // Will try again at next sync.
+                    }
+
+                    IFolder remoteFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+                    string localFolder = repoinfo.TargetDirectory;
+
+                    if (!syncFull)
+                    {
+                        Logger.Debug("Invoke a full crawl sync");
+                        syncFull = CrawlSync(remoteFolder, localFolder);
+                        return;
+                    }
+
+                    if (ChangeLogCapability)
+                    {
+                        Logger.Debug("Invoke a remote change log sync");
+                        ChangeLogSync(remoteFolder);
+                        if(changesOnFileSystemDetected)
+                        {
+                            Logger.Debug("Changes on the local file system detected => starting crawl sync");
+                            changesOnFileSystemDetected = false;
+                            if (!CrawlSync(remoteFolder, localFolder))
+                                changesOnFileSystemDetected = true;
+                        }
+                    }
+                    else
+                    {
+                        //  have to crawl remote
+                        Logger.Debug("Invoke a remote crawl sync");
+                        CrawlSync(remoteFolder, localFolder);
+                    }
                 }
             }
 
@@ -451,13 +461,15 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             public void SyncInBackground()
             {
-                if (this.syncing)
-                {
-                    //Logger.Debug("Sync already running in background: " + repoinfo.TargetDirectory);
-                    return;
+                lock(bgSyncingLock) {
+                    if (backgroundSyncing)
+                    {
+                        //Logger.Debug("Already executing a sync process in background");
+                        return;
+                    } else {
+                        backgroundSyncing = true;
+                    }
                 }
-                this.syncing = true;
-
                 using (BackgroundWorker bw = new BackgroundWorker())
                 {
                     bw.DoWork += new DoWorkEventHandler(
@@ -488,7 +500,10 @@ namespace CmisSync.Lib.Sync
                     bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(
                         delegate(object o, RunWorkerCompletedEventArgs args)
                         {
-                            this.syncing = false;
+                            lock(bgSyncingLock)
+                            {
+                                this.backgroundSyncing = false;
+                            }
                         }
                     );
                     bw.RunWorkerAsync();
