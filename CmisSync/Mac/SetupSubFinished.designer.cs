@@ -16,6 +16,9 @@ namespace CmisSync
 		MonoMac.AppKit.NSButton FinishButton { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSTextField FinishText { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSButton OpenButton { get; set; }
 
 		[Action ("OnFinish:")]
@@ -26,14 +29,19 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (OpenButton != null) {
-				OpenButton.Dispose ();
-				OpenButton = null;
+			if (FinishText != null) {
+				FinishText.Dispose ();
+				FinishText = null;
 			}
 
 			if (FinishButton != null) {
 				FinishButton.Dispose ();
 				FinishButton = null;
+			}
+
+			if (OpenButton != null) {
+				OpenButton.Dispose ();
+				OpenButton = null;
 			}
 		}
 	}
