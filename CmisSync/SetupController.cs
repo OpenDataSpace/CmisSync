@@ -371,7 +371,7 @@ namespace CmisSync
                 // Check whether foldername is already in use
                 int index = Program.Controller.Folders.FindIndex(x => x.Equals(reponame, StringComparison.OrdinalIgnoreCase));
                 if ( index != -1)
-                    throw new ArgumentException(String.Format(Properties_Resources.FolderAlreadyInUse, localpath, Program.Controller.Folders[index]));
+                    throw new ArgumentException(String.Format(Properties_Resources.FolderAlreadyExist, reponame));
 
                 // Check whether folder name contains invalid characters.
                 Regex regexRepoName = (Path.DirectorySeparatorChar.Equals('\\')) ? RepositoryRegex : RepositoryRegexLinux;
