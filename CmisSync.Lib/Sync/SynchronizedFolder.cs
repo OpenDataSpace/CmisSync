@@ -501,50 +501,47 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool RecursiveFolderCopy(IFolder remoteFolder, string localFolder)
             {
-                using (new ActivityListenerResource(activityListener))
+                bool success = true;
+
+                try
                 {
-                    bool success = true;
-
-                    try
+                    // List all children.
+                    foreach (ICmisObject cmisObject in remoteFolder.GetChildren())
                     {
-                        // List all children.
-                        foreach (ICmisObject cmisObject in remoteFolder.GetChildren())
+                        sleepWhileSuspended();
+                        if (cmisObject is DotCMIS.Client.Impl.Folder)
                         {
-                            sleepWhileSuspended();
-                            if (cmisObject is DotCMIS.Client.Impl.Folder)
+                            IFolder remoteSubFolder = (IFolder)cmisObject;
+                            string localSubFolder = localFolder + Path.DirectorySeparatorChar.ToString() + cmisObject.Name;
+                            if (!Utils.IsInvalidFolderName(remoteFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
                             {
-                                IFolder remoteSubFolder = (IFolder)cmisObject;
-                                string localSubFolder = localFolder + Path.DirectorySeparatorChar.ToString() + cmisObject.Name;
-                                if (!Utils.IsInvalidFolderName(remoteFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
-                                {
-                                    // Create local folder.
-                                    Logger.Info("Creating local directory: "+ localSubFolder);
-                                    Directory.CreateDirectory(localSubFolder);
+                                // Create local folder.
+                                Logger.Info("Creating local directory: "+ localSubFolder);
+                                Directory.CreateDirectory(localSubFolder);
 
-                                    // Create database entry for this folder
+                                // Create database entry for this folder
                                     // TODO Add metadata
-                                    database.AddFolder(localSubFolder, remoteSubFolder.Id, remoteSubFolder.LastModificationDate);
+                                database.AddFolder(localSubFolder, remoteSubFolder.Id, remoteSubFolder.LastModificationDate);
 
-                                    // Recurse into folder.
-                                    success = RecursiveFolderCopy(remoteSubFolder, localSubFolder) && success;
-                                }
-                            }
-                            else
-                            {
-                                if (Utils.WorthSyncing(cmisObject.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
-                                    // It is a file, just download it.
-                                    success = DownloadFile((IDocument)cmisObject, localFolder) && success;
+                                // Recurse into folder.
+                                success = RecursiveFolderCopy(remoteSubFolder, localSubFolder) && success;
                             }
                         }
+                        else
+                        {
+                            if (Utils.WorthSyncing(cmisObject.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
+                                // It is a file, just download it.
+                                success = DownloadFile((IDocument)cmisObject, localFolder) && success;
+                        }
                     }
-                    catch (Exception e)
-                    {
-                        Logger.Warn(String.Format("Exception while download to local folder {0}: {1}", localFolder, Utils.ToLogString(e)));
-                        success = false;
-                    }
-
-                    return success;
                 }
+                catch (Exception e)
+                {
+                    Logger.Warn(String.Format("Exception while download to local folder {0}: {1}", localFolder, Utils.ToLogString(e)));
+                    success = false;
+                }
+
+                return success;
             }
 
             /// <summary>
