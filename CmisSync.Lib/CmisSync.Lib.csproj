@@ -10,6 +10,8 @@
     <RootNamespace>CmisSync.Lib</RootNamespace>
     <AssemblyName>CmisSync.Lib</AssemblyName>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <ReleaseVersion>
+    </ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -51,6 +53,7 @@
     <Reference Include="XamMac">
       <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Posix" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Backend.cs" />
@@ -182,8 +185,8 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="true" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="True" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
