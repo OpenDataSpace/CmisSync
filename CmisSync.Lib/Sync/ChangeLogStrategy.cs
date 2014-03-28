@@ -73,6 +73,7 @@ namespace CmisSync.Lib.Sync
                     bool success = true;
                     foreach (IChangeEvent change in changes.ChangeEventList)
                     {
+                        sleepWhileSuspended();
                         try
                         {
                             switch (change.ChangeType)
@@ -173,7 +174,7 @@ namespace CmisSync.Lib.Sync
                 {
                     if (!Utils.WorthSyncing(remoteDocument.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
                     {
-                        Logger.Info("Change in remote unworth syncing file: " + remoteDocument.Paths);
+                        Logger.Info("Change in remote unworth syncing file: " + remoteDocument.Paths[0]);
                         return true;
                     }
                     if (remoteDocument.Paths.Count == 0)

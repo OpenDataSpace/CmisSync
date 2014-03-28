@@ -787,8 +787,24 @@ namespace TestLibrary.IntegrationTests
                                 try{
                                     string remoteFilePath = (remoteFolderPath + "/" + filename).Replace("//", "/");
                                     IDocument d = (IDocument)CreateSession(repoInfo).GetObjectByPath(remoteFilePath);
-                                    if(d == null || d.ContentStreamLength != length)
+                                    if(d == null )
+                                    {
                                         return false;
+                                    }
+                                    if(length == 0)
+                                    {
+                                        if (!(d.ContentStreamLength == 0 || d.ContentStreamLength == null))
+                                        {
+                                            return false;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (d.ContentStreamLength != length)
+                                        {
+                                            return false;
+                                        }
+                                    }
                                 }catch(Exception)
                                 {return false;}
                             }

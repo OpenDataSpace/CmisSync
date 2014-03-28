@@ -254,7 +254,7 @@ namespace CmisSync.Lib
             list.Add ("*.crdownload");
             list.Add ("*.un~");
             list.Add ("*.swp");
-            list.Add ( "*.swo");
+            list.Add ("*.swo");
             return list;
         }
 
@@ -284,11 +284,27 @@ namespace CmisSync.Lib
             this.configXml.Log4Net = node;
         }
 
+        /// <summary>
+        /// Gets and sets the list of file name wildcards which should be ignored on sync
+        /// </summary>
         public List<string> IgnoreFileNames {
-            get { return this.configXml.IgnoreFileNames; }
+            get {
+                List<string> copy = new List<string>(this.configXml.IgnoreFileNames);
+                if (!copy.Contains("*.sync"))
+                {
+                    copy.Add("*.sync");
+                }
+                if (!copy.Contains("*.cmissync"))
+                {
+                    copy.Add("*.cmissync");
+                }
+                return copy; }
             set { this.configXml.IgnoreFileNames = value; }
         }
 
+        /// <summary>
+        /// Gets and sets the list of folder name wildcards which should be ignored on sync
+        /// </summary>
         public List<string> IgnoreFolderNames {
             get { return this.configXml.IgnoreFolderNames; }
             set { this.configXml.IgnoreFolderNames = value; }

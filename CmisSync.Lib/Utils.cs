@@ -8,9 +8,9 @@ using System.Security;
 using System.Security.Permissions;
 
 using System.Text.RegularExpressions;
-//#if __MonoCS__
-//using Mono.Unix.Native;
-//#endif
+#if __MonoCS__
+using Mono.Unix.Native;
+#endif
 using System.Globalization;
 using System.Reflection;
 
@@ -68,9 +68,9 @@ namespace CmisSync.Lib
             }
             catch (System.PlatformNotSupportedException)
             {
-//#if __MonoCS__
-//                writeAllow = (0 == Syscall.access(path, AccessModes.W_OK));
-//#endif
+#if __MonoCS__
+                writeAllow = (0 == Syscall.access(path, AccessModes.W_OK));
+#endif
             }
             catch(System.UnauthorizedAccessException) {
                 var permission = new FileIOPermission(FileIOPermissionAccess.Write, path);

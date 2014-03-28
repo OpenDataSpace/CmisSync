@@ -176,8 +176,8 @@ namespace CmisSync
         /// Regex to check a CmisSync repository local folder name.
         /// Basically, it should be a valid local filesystem folder name.
         /// </summary>
-        Regex RepositoryRegex = new Regex(@"^([a-zA-Z0-9][^*/><?\|:]*)$");
-        Regex RepositoryRegexLinux = new Regex(@"^([a-zA-Z0-9][^*\\><?\|:]*)$");
+        Regex RepositoryRegex = new Regex(@"^([a-zA-Z0-9][^*/><?\|:;]*)$");
+        Regex RepositoryRegexLinux = new Regex(@"^([a-zA-Z0-9][^*\\><?\|:;]*)$");
 
 
         /// <summary>
@@ -371,7 +371,7 @@ namespace CmisSync
                 // Check whether foldername is already in use
                 int index = Program.Controller.Folders.FindIndex(x => x.Equals(reponame, StringComparison.OrdinalIgnoreCase));
                 if ( index != -1)
-                    throw new ArgumentException(String.Format(Properties_Resources.FolderAlreadyInUse, localpath, Program.Controller.Folders[index]));
+                    throw new ArgumentException(String.Format(Properties_Resources.FolderAlreadyExist, reponame));
 
                 // Check whether folder name contains invalid characters.
                 Regex regexRepoName = (Path.DirectorySeparatorChar.Equals('\\')) ? RepositoryRegex : RepositoryRegexLinux;

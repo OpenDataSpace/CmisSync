@@ -100,7 +100,7 @@ namespace TestLibrary.IntegrationTests
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             //watch.Stop();
             //Console.WriteLine(String.Format("Created empty doc in {0} msec", watch.ElapsedMilliseconds));
-            Assert.AreEqual(0, emptyDoc.ContentStreamLength, "returned document shouldn't got any content");
+            Assert.That( emptyDoc.ContentStreamLength == 0 || emptyDoc.ContentStreamLength == null, "returned document shouldn't got any content");
             string content = "test";
             for(int i = 0; i < 10; i++) {
                 ContentStream contentStream = new ContentStream();
@@ -197,7 +197,7 @@ namespace TestLibrary.IntegrationTests
             properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
 
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
-            Assert.AreEqual(0, emptyDoc.ContentStreamLength);
+            Assert.That(emptyDoc.ContentStreamLength == 0 || emptyDoc.ContentStreamLength == null);
             var context = new OperationContext();
             IDocument requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
             bool propertyFound = false;
@@ -265,7 +265,7 @@ namespace TestLibrary.IntegrationTests
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
             //watch.Stop();
             //Console.WriteLine(String.Format("Created empty doc in {0} msec", watch.ElapsedMilliseconds));
-            Assert.AreEqual(0, emptyDoc.ContentStreamLength, "returned document shouldn't got any content");
+            Assert.That(emptyDoc.ContentStreamLength == null || emptyDoc.ContentStreamLength == 0, "returned document shouldn't got any content");
             string content = "";
             content += "Test ";
             ContentStream contentStream = new ContentStream();
