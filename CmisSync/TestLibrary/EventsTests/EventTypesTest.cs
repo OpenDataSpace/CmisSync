@@ -12,25 +12,16 @@ namespace TestLibrary.EventsTests
     [TestFixture]
     public class EventTypesTest
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(EventTypesTest));
-
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-        }
-
-
         [Test, Category("Fast")]
         public void FSEventTest() {
             ISyncEvent e = new FSEvent(WatcherChangeTypes.Created, "test");
-            Assert.AreEqual("FSEvent with type \"Created\" on path \"test\"",e.ToString());
+            Assert.AreEqual("FSEvent with type \"Created\" on path \"test\"", e.ToString());
         }
 
         [Test, Category("Fast")]
         [ExpectedException( typeof( ArgumentNullException ) )]
         public void FSEventPreventNullTest() {
-            ISyncEvent e = new FSEvent(WatcherChangeTypes.Created,null);
+            new FSEvent(WatcherChangeTypes.Created,null);
         }
     }
 }
