@@ -1,5 +1,4 @@
-#if __COCOA__
-#else
+#if ! __COCOA__
 using System;
 using System.IO;
 
