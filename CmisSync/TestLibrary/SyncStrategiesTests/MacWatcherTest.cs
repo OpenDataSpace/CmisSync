@@ -20,10 +20,6 @@ namespace TestLibrary.SyncStrategiesTests
     [TestFixture]
     public class MacWatcherTest : BaseWatcherTest
     {
-        private bool StopRunLoop = false;
-        private NSRunLoop RunLoop = null;
-        private Thread RunLoopThread = null;
-
         [TestFixtureSetUp]
         public void ClassSetUp()
         {
