@@ -8,6 +8,8 @@ namespace CmisSync.Lib.Storage
         string GetExtendedAttribute(string path, string key);
 
         void SetExtendedAttribute(string path, string key, string value);
+
+        void RemoveExtendedAttribute(string path, string key);
     }
 
 }

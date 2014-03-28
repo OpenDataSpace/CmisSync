@@ -15,6 +15,11 @@ namespace CmisSync.Lib.Storage
         {
             throw new NotImplementedException ();
         }
+
+        public void RemoveExtendedAttribute (string path, string key)
+        {
+            throw new NotImplementedException ();
+        }
     }
 
 }
