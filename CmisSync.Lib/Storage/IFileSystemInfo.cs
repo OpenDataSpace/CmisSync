@@ -13,5 +13,7 @@ namespace CmisSync.Lib.Storage
         bool Exists { get; }
         FileAttributes Attributes { get; }
         void Refresh ();
+        void SetExtendedAttribute(string key, string value);
+        string GetExtendedAttribute(string key);
     }
 }

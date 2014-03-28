@@ -28,12 +28,12 @@ SOURCES =  \
 	EncodingTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
-	EventsTests/EventTypesTest.cs \
-	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/GenericHandleDoublicatedEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
+	EventsTests/EventTypesTest.cs \
 	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
@@ -51,6 +51,7 @@ SOURCES =  \
 	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
 	Properties/AssemblyInfo.cs \
+	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/PersistentStorageTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \

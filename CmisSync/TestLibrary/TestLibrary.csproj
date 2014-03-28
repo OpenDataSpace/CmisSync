@@ -100,7 +100,6 @@
     <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
     <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
-    <Compile Include="EventsTests\PermissionDeniedEventHandlerTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
     <Compile Include="EventsTests\SyncEventManagerTest.cs" />
     <Compile Include="EventsTests\SyncEventQueueTest.cs" />
@@ -154,6 +153,7 @@
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDoublicatedEventsFilterTest.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
+    <Compile Include="StorageTests\ExtendedAttributeReaderUnixTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

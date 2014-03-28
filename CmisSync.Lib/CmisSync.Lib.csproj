@@ -186,13 +186,17 @@
     <Compile Include="Events\EventFilter\IgnoredFolderNameFilter.cs" />
     <Compile Include="Events\ProxyAuthRequiredEvent.cs" />
     <Compile Include="Events\EventFilter\GenericHandleDoublicatedEventsFilter.cs" />
+    <Compile Include="Storage\ExtendedAttributeException.cs" />
+    <Compile Include="Storage\IExtendedAttributeReader.cs" />
+    <Compile Include="Storage\ExtendedAttributeReaderUnix.cs" />
+    <Compile Include="Storage\ExtendedAttributeReaderDos.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
