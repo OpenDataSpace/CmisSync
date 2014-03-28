@@ -1,3 +1,5 @@
+#if __COCOA__
+#else
 using System;
 using System.IO;
 
@@ -111,4 +113,4 @@ namespace TestLibrary.SyncStrategiesTests
         }
     }
 }
-
+#endif
