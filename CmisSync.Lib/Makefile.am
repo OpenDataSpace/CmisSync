@@ -82,6 +82,9 @@ SOURCES =  \
 	RepoInfo.cs \
 	Storage/DirectoryInfoWrapper.cs \
 	Storage/EventStorage.cs \
+	Storage/ExtendedAttributeException.cs \
+	Storage/ExtendedAttributeReaderDos.cs \
+	Storage/ExtendedAttributeReaderUnix.cs \
 	Storage/FailedOperationsStorage.cs \
 	Storage/FileInfoWrapper.cs \
 	Storage/FileSystemInfoFactory.cs \
@@ -89,6 +92,7 @@ SOURCES =  \
 	Storage/GeneralRepoStorage.cs \
 	Storage/ICookieStorage.cs \
 	Storage/IDirectoryInfo.cs \
+	Storage/IExtendedAttributeReader.cs \
 	Storage/IFileInfo.cs \
 	Storage/IFileSystemInfo.cs \
 	Storage/IFileSystemInfoFactory.cs \
