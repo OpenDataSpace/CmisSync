@@ -43,11 +43,11 @@ namespace CmisSync {
         private static Gdk.Cursor default_cursor = new Gdk.Cursor(Gdk.CursorType.LeftPtr);
 
         private string cancelText =
-            CmisSync.Properties_Resources.Cancel;
+            Properties_Resources.Cancel;
         private string continueText =
-            CmisSync.Properties_Resources.Continue;
+            Properties_Resources.Continue;
         private string backText =
-            CmisSync.Properties_Resources.Back;
+            Properties_Resources.Back;
 
         delegate Tuple<CmisServer, Exception> GetRepositoriesFuzzyDelegate(ServerCredentials credentials);
 
@@ -56,8 +56,8 @@ namespace CmisSync {
 
         private void ShowSetupPage()
         {
-            Header = CmisSync.Properties_Resources.Welcome;
-            Description = CmisSync.Properties_Resources.Intro;
+            Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
+            Description = String.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
 
             Add(new Label("")); // Page must have at least one element in order to show Header and Descripton
 
@@ -90,7 +90,7 @@ namespace CmisSync {
         private void ShowAdd1Page()
         {
             this.Present();
-            Header = CmisSync.Properties_Resources.Where;
+            Header = Properties_Resources.Where;
 
             VBox layout_vertical   = new VBox (false, 12);
             HBox layout_fields     = new HBox (true, 12);
@@ -105,7 +105,7 @@ namespace CmisSync {
                 UseMarkup = true,
                           Xalign = 0,
                           Markup = "<b>" + 
-                              CmisSync.Properties_Resources.EnterWebAddress +
+                              Properties_Resources.EnterWebAddress +
                               "</b>"
             };
 
@@ -119,7 +119,7 @@ namespace CmisSync {
                 Xalign = 0,
                        UseMarkup = true,
                        Markup = "<span foreground=\"#808080\" size=\"small\">" +
-                           CmisSync.Properties_Resources.Help + ": " +
+                           Properties_Resources.Help + ": " +
                            "</span>"
             };
             EventBox address_help_urlbox = new EventBox();
@@ -128,7 +128,7 @@ namespace CmisSync {
                 Xalign = 0,
                        UseMarkup = true,
                        Markup = "<span foreground=\"blue\" underline=\"single\" size=\"small\">" +
-                           CmisSync.Properties_Resources.WhereToFind +
+                           Properties_Resources.WhereToFind +
                            "</span>"
             };
             address_help_urlbox.Add(address_help_urllabel);
@@ -198,7 +198,7 @@ namespace CmisSync {
             address_entry.Changed += delegate {
                 string error = Controller.CheckAddPage(address_entry.Text);
                 if (!String.IsNullOrEmpty(error)) {
-                    address_error_label.Markup = "<span foreground=\"red\">" + CmisSync.Properties_Resources.ResourceManager.GetString(error, CultureInfo.CurrentCulture) + "</span>";
+                    address_error_label.Markup = "<span foreground=\"red\">" + Properties_Resources.ResourceManager.GetString(error, CultureInfo.CurrentCulture) + "</span>";
                     address_error_label.Show();
                 } else {
                     address_error_label.Hide();
@@ -215,14 +215,14 @@ namespace CmisSync {
 
             // User
             layout_user.PackStart (new Label () {
-                    Markup = "<b>" + CmisSync.Properties_Resources.User + ":</b>",
+                    Markup = "<b>" + Properties_Resources.User + ":</b>",
                     Xalign = 0
                     }, true, true, 0);
             layout_user.PackStart (user_entry, false, false, 0);
 
             // Password
             layout_password.PackStart (new Label () {
-                    Markup = "<b>" + CmisSync.Properties_Resources.Password + ":</b>",
+                    Markup = "<b>" + Properties_Resources.Password + ":</b>",
                     Xalign = 0
                     }, true, true, 0);
             layout_password.PackStart (password_entry, false, false, 0);
@@ -354,7 +354,7 @@ namespace CmisSync {
                 loader.Add (root.Id, asyncLoader);
             }
 
-            Header = CmisSync.Properties_Resources.Which;
+            Header = Properties_Resources.Which;
 
             VBox layout_vertical   = new VBox (false, 12);
 
@@ -496,7 +496,7 @@ namespace CmisSync {
 
         private void ShowCustomizePage()
         {
-            Header = CmisSync.Properties_Resources.Customize;
+            Header = Properties_Resources.Customize;
             string localfoldername = Controller.saved_address.Host.ToString();
             foreach (KeyValuePair<String, String> repository in Controller.repositories)
             {
@@ -509,7 +509,7 @@ namespace CmisSync {
             Label localfolder_label = new Label() {
                 Xalign = 0,
                        UseMarkup = true,
-                       Markup = "<b>" + CmisSync.Properties_Resources.EnterLocalFolderName + "</b>"
+                       Markup = "<b>" + Properties_Resources.EnterLocalFolderName + "</b>"
             };
 
             Entry localfolder_entry = new Entry() {
@@ -520,7 +520,7 @@ namespace CmisSync {
             Label localrepopath_label = new Label() {
                 Xalign = 0,
                        UseMarkup = true,
-                       Markup = "<b>" + CmisSync.Properties_Resources.ChangeRepoPath + "</b>"
+                       Markup = "<b>" + Properties_Resources.ChangeRepoPath + "</b>"
             };
 
             Entry localrepopath_entry = new Entry() {
@@ -542,11 +542,11 @@ namespace CmisSync {
             Button cancel_button = new Button(cancelText);
 
             Button add_button = new Button(
-                    CmisSync.Properties_Resources.Add
+                    Properties_Resources.Add
                     );
 
             Button back_button = new Button(
-                    CmisSync.Properties_Resources.Back
+                    Properties_Resources.Back
                     );
 
             Controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled) {
@@ -631,9 +631,9 @@ namespace CmisSync {
 
         private void ShowSyncingPage()
         {
-            Header = CmisSync.Properties_Resources.AddingFolder
+            Header = Properties_Resources.AddingFolder
                 + " ‘" + Controller.SyncingReponame + "’…";
-            Description = CmisSync.Properties_Resources.MayTakeTime;
+            Description = Properties_Resources.MayTakeTime;
 
             this.progress_bar.Fraction = Controller.ProgressBarPercentage / 100;
 
@@ -664,8 +664,8 @@ namespace CmisSync {
         {
             UrgencyHint = true;
 
-            Header = CmisSync.Properties_Resources.Ready;
-            Description = CmisSync.Properties_Resources.YouCanFind;
+            Header = Properties_Resources.Ready;
+            Description = Properties_Resources.YouCanFind;
 
             // A button that opens the synced folder
             Button open_folder_button = new Button (string.Format ("Open {0}",
@@ -675,7 +675,7 @@ namespace CmisSync {
                 Controller.OpenFolderClicked ();
             };
 
-            Button finish_button = new Button (CmisSync.Properties_Resources.Finish);
+            Button finish_button = new Button (Properties_Resources.Finish);
 
             finish_button.Clicked += delegate {
                 Controller.FinishPageCompleted ();
@@ -693,10 +693,10 @@ namespace CmisSync {
             switch (Controller.TutorialCurrentPage) {
                 case 1:
                     {
-                        Header = CmisSync.Properties_Resources.WhatsNext;
-                        Description = CmisSync.Properties_Resources.CmisSyncCreates;
+                        Header = Properties_Resources.WhatsNext;
+                        Description = String.Format(Properties_Resources.CmisSyncCreates, Properties_Resources.ApplicationName);
 
-                        Button skip_tutorial_button = new Button (CmisSync.Properties_Resources.SkipTutorial);
+                        Button skip_tutorial_button = new Button (Properties_Resources.SkipTutorial);
                         skip_tutorial_button.Clicked += delegate {
                             Controller.TutorialSkipped ();
                         };
@@ -718,8 +718,8 @@ namespace CmisSync {
 
                 case 2:
                     {
-                        Header      = CmisSync.Properties_Resources.Synchronization;
-                        Description = CmisSync.Properties_Resources.DocumentsAre;
+                        Header      = Properties_Resources.Synchronization;
+                        Description = Properties_Resources.DocumentsAre;
 
                         Button continue_button = new Button (continueText);
                         continue_button.Clicked += delegate {
@@ -736,8 +736,8 @@ namespace CmisSync {
 
                 case 3:
                     {
-                        Header      = CmisSync.Properties_Resources.StatusIcon;
-                        Description = CmisSync.Properties_Resources.StatusIconShows;
+                        Header      = Properties_Resources.StatusIcon;
+                        Description = String.Format(Properties_Resources.StatusIconShows, Properties_Resources.ApplicationName);
 
                         Button continue_button = new Button (continueText);
                         continue_button.Clicked += delegate {
@@ -754,18 +754,18 @@ namespace CmisSync {
 
                 case 4:
                     {
-                        Header      = Properties_Resources.AddFolders;
+                        Header      = String.Format (Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
                         Description = Properties_Resources.YouCan;
 
                         Image slide = UIHelpers.GetImage ("tutorial-slide-4.png");
 
-                        Button finish_button = new Button (CmisSync.Properties_Resources.Finish);
+                        Button finish_button = new Button (Properties_Resources.Finish);
                         finish_button.Clicked += delegate {
                             Controller.TutorialPageCompleted ();
                         };
 
 
-                        CheckButton check_button = new CheckButton (CmisSync.Properties_Resources.Startup) {
+                        CheckButton check_button = new CheckButton (String.Format(Properties_Resources.Startup, Properties_Resources.ApplicationName)) {
                             Active = true
                         };
 
