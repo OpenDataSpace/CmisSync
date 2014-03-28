@@ -54,7 +54,7 @@ namespace TestLibrary.SyncStrategiesTests
             using (var watcher = new MacWatcher(localFolder.FullName, queue.Object))
             {
                 Assert.False(watcher.EnableEvents);
-                Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
+                Assert.AreEqual(EventHandlerPriorities.NORMAL, watcher.Priority);
             }
         }
 
