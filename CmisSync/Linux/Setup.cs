@@ -56,8 +56,8 @@ namespace CmisSync {
 
         private void ShowSetupPage()
         {
-            Header = Properties_Resources.Welcome;
-            Description = Properties_Resources.Intro;
+            Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
+            Description = String.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
 
             Add(new Label("")); // Page must have at least one element in order to show Header and Descripton
 
@@ -737,7 +737,7 @@ namespace CmisSync {
                 case 3:
                     {
                         Header      = Properties_Resources.StatusIcon;
-                        Description = Properties_Resources.StatusIconShows;
+                        Description = String.Format(Properties_Resources.StatusIconShows, Properties_Resources.ApplicationName);
 
                         Button continue_button = new Button (continueText);
                         continue_button.Clicked += delegate {
@@ -754,7 +754,7 @@ namespace CmisSync {
 
                 case 4:
                     {
-                        Header      = Properties_Resources.AddFolders;
+                        Header      = String.Format (Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
                         Description = Properties_Resources.YouCan;
 
                         Image slide = UIHelpers.GetImage ("tutorial-slide-4.png");
@@ -765,7 +765,7 @@ namespace CmisSync {
                         };
 
 
-                        CheckButton check_button = new CheckButton (Properties_Resources.Startup) {
+                        CheckButton check_button = new CheckButton (String.Format(Properties_Resources.Startup, Properties_Resources.ApplicationName)) {
                             Active = true
                         };
 
