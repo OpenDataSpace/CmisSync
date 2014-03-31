@@ -48,6 +48,7 @@ SOURCES =  \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	LegacyCodeTests/RepoInfoTests.cs \
 	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
 	Properties/AssemblyInfo.cs \

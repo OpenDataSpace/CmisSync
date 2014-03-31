@@ -487,6 +487,34 @@ namespace CmisSync
     {
         private FileTransmissionType Type { get; set; }
         private string Path { get; set; }
+        private Control Parent;
+        private FileTransmissionEvent transmissionEvent;
+
+        private int updateInterval = 1;
+        private DateTime updateTime;
+
+        private object disposeLock = new object();
+        private bool disposed = false;
+
+        private string TransmissionStatus(TransmissionProgressEventArgs status)
+        {
+            double percent = (status.Percent != null) ? (double)status.Percent : 0;
+            long? bitsPerSecond = status.BitsPerSecond;
+            if (bitsPerSecond != null)
+            {
+                return String.Format("{0} ({1} {2})",
+                    System.IO.Path.GetFileName(Path),
+                    CmisSync.Lib.Utils.FormatPercent(percent),
+                    CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
+            }
+            else
+            {
+                return String.Format("{0} ({1})",
+                    System.IO.Path.GetFileName(Path),
+                    CmisSync.Lib.Utils.FormatPercent(percent));
+            }
+        }
+
         /// <summary>
         /// Creates a new menu item, which updates itself on transmission events
         /// </summary>
@@ -496,6 +524,8 @@ namespace CmisSync
         {
             Path = e.Path;
             Type = e.Type;
+            Parent = parent;
+            transmissionEvent = e;
             switch (Type)
             {
                 case FileTransmissionType.DOWNLOAD_NEW_FILE:
@@ -510,29 +540,50 @@ namespace CmisSync
                     Image = UIHelpers.GetBitmap("Updating");
                     break;
             }
-            double percent = (e.Status.Percent == null) ? 0 : (double)e.Status.Percent;
-            Text = String.Format("{0} ({1})", System.IO.Path.GetFileName(Path), CmisSync.Lib.Utils.FormatPercent(percent));
-            e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status)
-            {
-                percent = (status.Percent != null) ? (double)status.Percent : 0;
-                long? bitsPerSecond = status.BitsPerSecond;
-                if (status.Percent != null && bitsPerSecond != null)
-                {
-                    parent.BeginInvoke((Action) delegate()
-                    {
-                        Text = String.Format("{0} ({1} {2})",
-                                  System.IO.Path.GetFileName(Path),
-                                  CmisSync.Lib.Utils.FormatPercent(percent),
-                                  CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
-                    });
-                }
-            };
+            Text = TransmissionStatus(transmissionEvent.Status);
+            transmissionEvent.TransmissionStatus += TransmissionEvent;
             Click += TransmissionEventMenuItem_Click;
+        }
+
+        private void TransmissionEvent(object sender, TransmissionProgressEventArgs status)
+        {
+            lock (disposeLock)
+            {
+                if (disposed)
+                    return;
+                TimeSpan diff = DateTime.Now - updateTime;
+                if (diff.Seconds < updateInterval)
+                {
+                    return;
+                }
+                updateTime = DateTime.Now;
+
+                Parent.BeginInvoke((Action)delegate()
+                {
+                    lock (disposeLock)
+                    {
+                        if (disposed)
+                            return;
+                        Text = TransmissionStatus(status);
+                    }
+                });
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            lock (disposeLock)
+            {
+                if (!disposed)
+                    transmissionEvent.TransmissionStatus -= TransmissionEvent;
+                disposed = true;
+            }
+            base.Dispose(disposing);
         }
 
         void TransmissionEventMenuItem_Click(object sender, EventArgs e)
         {
-                Utils.OpenFolder(System.IO.Directory.GetParent(Path).FullName);
+            Utils.OpenFolder(System.IO.Directory.GetParent(Path).FullName);
         }
     }
 }

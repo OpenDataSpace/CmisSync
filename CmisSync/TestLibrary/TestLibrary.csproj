@@ -154,6 +154,7 @@
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDoublicatedEventsFilterTest.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
     <Compile Include="StorageTests\ExtendedAttributeReaderUnixTest.cs" />
+    <Compile Include="LegacyCodeTests\RepoInfoTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -200,6 +201,7 @@
     <Folder Include="AuthenticationProviderTests\" />
     <Folder Include="UtilsTests\" />
     <Folder Include="SyncStrategiesTests\SolverTests\" />
+    <Folder Include="LegacyCodeTests\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

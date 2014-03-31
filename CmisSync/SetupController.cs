@@ -1,4 +1,4 @@
-﻿//   CmisSync, a collaboration and sharing tool.
+//   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -518,7 +518,7 @@ namespace CmisSync
                 repoInfo.PollInterval = 5000;
                 repoInfo.MaxUploadRetries = 2;
                 foreach (string ignore in ignoredPaths)
-                    repoInfo.addIgnorePath(ignore);
+                    repoInfo.AddIgnorePath(ignore);
 
                 // Check that the folder exists.
                 if (Directory.Exists(repoInfo.TargetDirectory))

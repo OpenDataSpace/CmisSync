@@ -331,7 +331,7 @@ namespace CmisSync.Lib
                 PollInterval = repoInfo.PollInterval,
                 SupportedFeatures = null
             };
-            foreach (string ignoredFolder in repoInfo.getIgnoredPaths())
+            foreach (string ignoredFolder in repoInfo.GetIgnoredPaths())
             {
                 folder.IgnoredFolders.Add(new IgnoredFolder(){Path = ignoredFolder});
             }
@@ -670,7 +670,7 @@ namespace CmisSync.Lib
                         repoInfo.PollInterval = PollInterval;
                     foreach (IgnoredFolder ignoredFolder in IgnoredFolders)
                     {
-                        repoInfo.addIgnorePath(ignoredFolder.Path);
+                        repoInfo.AddIgnorePath(ignoredFolder.Path);
                     }
                     if(SupportedFeatures != null && SupportedFeatures.ChunkedSupport != null && SupportedFeatures.ChunkedSupport == true)
                     {
