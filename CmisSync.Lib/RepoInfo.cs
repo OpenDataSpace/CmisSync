@@ -186,8 +186,12 @@ namespace CmisSync.Lib
         /// <returns></returns>
         public bool IsPathIgnored(string path)
         {
-            if(Utils.IsInvalidFolderName(path.Replace("/", "").Replace("\"",""), new List<string>()))
-                return true;
+            string[] names = path.Split("/".ToCharArray());
+            foreach(string name in names)
+            {
+                if(Utils.IsInvalidFolderName(name, new List<string>()))
+                    return true;
+            }
             return !String.IsNullOrEmpty(ignoredPaths.Find(delegate(string ignore)
             {
                 if (String.IsNullOrEmpty(ignore)) {
@@ -197,7 +201,7 @@ namespace CmisSync.Lib
                 {
                     return true;
                 }
-                return (path.StartsWith(ignore) && path[ignore.Length] == Path.DirectorySeparatorChar);
+                return (path.StartsWith(ignore) && path[ignore.Length] == '/');
             }));
         }
     }
