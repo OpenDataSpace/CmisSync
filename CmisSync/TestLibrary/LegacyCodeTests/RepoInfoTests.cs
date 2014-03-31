@@ -19,7 +19,7 @@ namespace TestLibrary.LegacyCodeTests
     public class IgnoreLocalFolderTests
     {
         private readonly string CMISSYNCDIR = ConfigManager.CurrentConfig.FoldersPath;
-        private readonly string ignorePath = Path.Combine(Path.GetTempPath(),"test");
+        private readonly string ignorePath = "/tmp/test";
         private RepoInfo info;
 
         [SetUp]
@@ -78,14 +78,14 @@ namespace TestLibrary.LegacyCodeTests
         public void IgnoreChildOfPath()
         {
             info.AddIgnorePath(ignorePath);
-            Assert.IsTrue(info.IsPathIgnored(Path.Combine(ignorePath,"child")));
+            Assert.IsTrue(info.IsPathIgnored(ignorePath +"/child"), ignorePath +"/child");
         }
 
         [Test, Category("Fast")]
         public void DoNotIgnorePathWithSameBeginningButNoChildOfIgnore()
         {
             info.AddIgnorePath(ignorePath);
-            Assert.IsFalse(info.IsPathIgnored(ignorePath + "stuff"));
+            Assert.IsFalse(info.IsPathIgnored(ignorePath + "stuff"), ignorePath + "stuff");
         }
     }
 }

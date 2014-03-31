@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [1.2.0])
+m4_define([cmissync_version], [1.2.1])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
