@@ -164,7 +164,7 @@ namespace CmisSync.Lib
             LocalPath = repoInfo.TargetDirectory;
             Name = repoInfo.Name;
             RemoteUrl = repoInfo.Address;
-            ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths=new List<string>(repoInfo.getIgnoredPaths())};
+            ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths=new List<string>(repoInfo.GetIgnoredPaths())};
             ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(Queue){Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames};
             ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(Queue) {Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames};
             EventManager.AddEventHandler(ignoredFoldersFilter);
@@ -197,7 +197,7 @@ namespace CmisSync.Lib
             if (e is RepoConfigChangedEvent)
             {
                 this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
-                this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.getIgnoredPaths());
+                this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.GetIgnoredPaths());
                 this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
                 this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
                 return true;

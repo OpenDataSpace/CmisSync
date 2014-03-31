@@ -198,7 +198,7 @@ namespace CmisSync.Lib.Sync
                 UpdateCmisParameters();
                 if (Logger.IsInfoEnabled)
                 {
-                    foreach (string ignoredFolder in repoinfo.getIgnoredPaths())
+                    foreach (string ignoredFolder in repoinfo.GetIgnoredPaths())
                     {
                         Logger.Info("The folder \"" + ignoredFolder + "\" will be ignored");
                     }
@@ -528,7 +528,7 @@ namespace CmisSync.Lib.Sync
                         {
                             IFolder remoteSubFolder = (IFolder)cmisObject;
                             string localSubFolder = localFolder + Path.DirectorySeparatorChar.ToString() + cmisObject.Name;
-                            if (!Utils.IsInvalidFolderName(remoteFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
+                            if (!Utils.IsInvalidFolderName(remoteFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(remoteSubFolder.Path))
                             {
                                 // Create local folder.
                                 Logger.Info("Creating local directory: "+ localSubFolder);
@@ -616,7 +616,7 @@ namespace CmisSync.Lib.Sync
                     {
                         Logger.Info("Skipping download of folder with illegal name: " + name);
                     }
-                    else if (repoinfo.isPathIgnored(remotePathname))
+                    else if (repoinfo.IsPathIgnored(remotePathname))
                     {
                         Logger.Info("Skipping dowload of ignored folder: " + remotePathname);
                     }
@@ -1112,7 +1112,7 @@ namespace CmisSync.Lib.Sync
                     {
                         string path = subfolder.Substring(repoinfo.TargetDirectory.Length);
                         path = path.Replace("\\\\","/");
-                        if (!Utils.IsInvalidFolderName(Path.GetFileName(subfolder), ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(path))
+                        if (!Utils.IsInvalidFolderName(Path.GetFileName(subfolder), ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(path))
                         {
                             Logger.Debug("Start recursive upload of folder: " + subfolder);
                             success = UploadFolderRecursively(folder, subfolder) && success;

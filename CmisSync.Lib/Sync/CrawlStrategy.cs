@@ -127,7 +127,7 @@ namespace CmisSync.Lib.Sync
                         // It is a CMIS folder.
                         IFolder remoteSubFolder = (IFolder)node.Item;
                         remoteSubfolders.Add(remoteSubFolder.Name);
-                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
+                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(remoteSubFolder.Path))
                         {
                             string localSubFolder = Path.Combine(localFolder, remoteSubFolder.Name);
 
@@ -180,7 +180,7 @@ namespace CmisSync.Lib.Sync
                     {
                         // It is a CMIS folder.
                         IFolder remoteSubFolder = (IFolder)cmisObject;
-                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
+                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(remoteSubFolder.Path))
                         {
                             if (null != remoteFolders)
                             {
@@ -323,7 +323,7 @@ namespace CmisSync.Lib.Sync
                         }
                         string path = localSubFolder.Substring(repoinfo.TargetDirectory.Length).Replace("\\", "/");
                         string folderName = Path.GetFileName(localSubFolder);
-                        if (!Utils.IsInvalidFolderName(folderName, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(path))
+                        if (!Utils.IsInvalidFolderName(folderName, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(path))
                         {
                             if (!remoteFolders.Contains(folderName))
                             {

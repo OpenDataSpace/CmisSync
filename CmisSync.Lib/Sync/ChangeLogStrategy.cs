@@ -206,7 +206,7 @@ namespace CmisSync.Lib.Sync
                     return true;    // The change is not under the folder we care about.
                 }
 
-                if (this.repoinfo.isPathIgnored(remotePath))
+                if (this.repoinfo.IsPathIgnored(remotePath))
                 {
                     Logger.Info("Change in ignored path: " + remotePath);
                     return true;

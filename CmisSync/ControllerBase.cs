@@ -572,7 +572,7 @@ namespace CmisSync
             repoInfo.PollInterval = 5000;
             repoInfo.MaxUploadRetries = 2;
             foreach (string ignore in ignoredPaths)
-                repoInfo.addIgnorePath(ignore);
+                repoInfo.AddIgnorePath(ignore);
 
             fetcher = new Fetcher(repoInfo, activityListenerAggregator);
             this.FinishFetcher();
