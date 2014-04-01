@@ -235,59 +235,6 @@ namespace TestLibrary.DataTests
             factory.Setup(f => f.CreateFileInfo(It.Is<string>(path => path == localFilePath))).Returns(fileInfo.Object);
             Assert.IsFalse(file.ExistsLocally());
         }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void HasBeenChangeRemotely ()
-        {
-            var factory = createFactoryWithLocalPathInfos();
-            string id = "id";
-            string changeToken = "changeToken";
-            long filesize = 1024;
-            DateTime remoteDate = DateTime.Now;
-            DateTime date = remoteDate.ToUniversalTime();
-
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var file = new MappedFile(rootFolder, factory.Object);
-            file.RemoteObjectId = id;
-            file.Name = localFileName;
-            file.LastRemoteWriteTimeUtc = date;
-            file.LastFileSize = filesize;
-            var remoteDocument = new Mock<IDocument>();
-            remoteDocument.Setup (r => r.Id).Returns(id);
-            remoteDocument.Setup (r => r.ChangeToken).Returns((string)null);
-            remoteDocument.Setup (r => r.ContentStreamLength).Returns(filesize);
-            remoteDocument.Setup (r => r.LastModificationDate).Returns(remoteDate);
-            remoteDocument.Setup (r => r.Name).Returns(localFileName);
-            Assert.IsFalse(file.HasBeenChangeRemotely(remoteDocument.Object));
-            file.Name = "changed";
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object), file.Name.Equals(localFileName).ToString() + " " + localFileName);
-            file.Name = localFileName;
-            file.LastRemoteWriteTimeUtc = DateTime.UtcNow.AddDays(1);
-            Assert.IsFalse(file.HasBeenChangeRemotely(remoteDocument.Object));
-            remoteDocument.Setup(r => r.LastModificationDate).Returns(remoteDate.AddDays(2));
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object));
-            file.LastFileSize = 0;
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object));
-            file.LastFileSize = filesize;
-            file.LastChangeToken = "oldToken";
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object));
-            file.LastChangeToken = changeToken;
-            remoteDocument.Setup(r => r.LastModificationDate).Returns(remoteDate);
-            remoteDocument.Setup (r => r.ChangeToken).Returns(changeToken);
-            file.LastChangeToken = changeToken;
-            Assert.IsFalse(file.HasBeenChangeRemotely(remoteDocument.Object));
-            remoteDocument.Setup (r => r.Id).Returns("wrongID");
-            try{
-                file.HasBeenChangeRemotely(remoteDocument.Object);
-                Assert.Fail();
-            }catch(ArgumentException){}
-        }
-
-        [Ignore]
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void HasBeenChangedLocallyTest() {
-            Assert.Fail ("TODO");
-        }
     }
 }
 

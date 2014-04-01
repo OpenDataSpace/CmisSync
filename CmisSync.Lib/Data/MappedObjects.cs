@@ -44,11 +44,11 @@ namespace CmisSync.Lib.Data
 
         public virtual string ChecksumAlgorithmName { get; set; }
 
-        public virtual string RemoteSyncTargetPath { get; private set; }
+        public string RemoteSyncTargetPath { get; private set; }
 
-        public virtual string LocalSyncTargetPath { get; private set; }
+        public string LocalSyncTargetPath { get; private set; }
 
-        public virtual string Name { get; set; }
+        public string Name { get; set; }
 
         public virtual string Description { get; set; }
 
