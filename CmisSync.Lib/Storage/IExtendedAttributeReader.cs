@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace CmisSync.Lib.Storage
 {
     /// <summary>
@@ -10,6 +12,8 @@ namespace CmisSync.Lib.Storage
         void SetExtendedAttribute(string path, string key, string value);
 
         void RemoveExtendedAttribute(string path, string key);
+
+        List<string> ListAttributeKeys(string path);
     }
 
 }

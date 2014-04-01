@@ -36,6 +36,12 @@ namespace TestLibrary.StorageTests
             new ExtendedAttributeReaderUnix();
         }
 
+        [Test, Category("Fast")]
+        public void SettingPrefixOnConstructorDoesNotFails()
+        {
+            new ExtendedAttributeReaderUnix("system.");
+        }
+
         [Test, Category("Medium")]
         public void GetNullAttributeFromNewFile()
         {
@@ -89,11 +95,10 @@ namespace TestLibrary.StorageTests
             string key = "test";
             string value = "value";
             var reader = new ExtendedAttributeReaderUnix();
-            Assert.That(reader.ListExtendedAttributes(path).Length == 0);
+            Assert.That(reader.ListAttributeKeys(path).Count == 0);
             reader.SetExtendedAttribute(path, key, value);
-            Assert.That(reader.ListExtendedAttributes(path).Length == 1);
-            foreach(string entry in reader.ListExtendedAttributes(path))
-                Console.WriteLine(entry);
+            Assert.That(reader.ListAttributeKeys(path).Count == 1);
+            Assert.Contains("test", reader.ListAttributeKeys(path));
         }
 
         [Test, Category("Medium")]
@@ -149,11 +154,10 @@ namespace TestLibrary.StorageTests
             string key = "test";
             string value = "value";
             var reader = new ExtendedAttributeReaderUnix();
-            Assert.That(reader.ListExtendedAttributes(path).Length == 0);
+            Assert.That(reader.ListAttributeKeys(path).Count == 0);
             reader.SetExtendedAttribute(path, key, value);
-            Assert.That(reader.ListExtendedAttributes(path).Length == 1);
-            foreach(string entry in reader.ListExtendedAttributes(path))
-                Console.WriteLine(entry);
+            Assert.That(reader.ListAttributeKeys(path).Count == 1);
+            Assert.Contains("test", reader.ListAttributeKeys(path));
         }
     }
 }
