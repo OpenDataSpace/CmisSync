@@ -93,41 +93,6 @@ namespace CmisSync.Lib.ContentTasks
             hashAlg.TransformFinalBlock(new byte[0], 0, 0);
             return result;
         }
-
-
-        // TODO implementation
-        public override IDocument AppendFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg)
-        {
-            throw new NotImplementedException();
-            /*
-            IDocument result = remoteDocument;
-            for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += ChunkSize)
-            {
-                bool isFirstChunk = (offset == 0);
-                bool isLastChunk = (offset + ChunkSize) >= localFileStream.Length;
-                using (NonClosingHashStream hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
-                using (ChunkedStream chunkstream = new ChunkedStream(hashstream, ChunkSize))
-                using (OffsetStream offsetstream = new OffsetStream(chunkstream, offset))
-                using (ProgressStream progressstream = new ProgressStream(offsetstream, TransmissionStatus))
-                {
-                    chunkstream.ChunkPosition = offset;
-
-                    ContentStream contentStream = new ContentStream();
-                    contentStream.FileName = remoteDocument.Name;
-                    contentStream.MimeType = Cmis.MimeType.GetMIMEType(remoteDocument.Name);
-                    if (isLastChunk)
-                        contentStream.Length = localFileStream.Length - offset;
-                    else
-                        contentStream.Length = ChunkSize;
-                    contentStream.Stream = chunkstream;
-                    if(isFirstChunk && result.ContentStreamId != null)
-                        result.DeleteContentStream();
-                    result = result.AppendContentStream(contentStream, isLastChunk);
-                }
-            }
-            hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-            return result;*/
-        }
     }
 }
 
