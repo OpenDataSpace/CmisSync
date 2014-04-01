@@ -14,11 +14,15 @@ namespace CmisSync.Lib.Storage
 
         public ExtendedAttributeReaderUnix(string prefix = "user.")
         {
+#if __MonoCS__
             if(String.IsNullOrEmpty(prefix))
             {
                 throw new ArgumentNullException("The given prefix is null or empty");
             }
             this.prefix = prefix;
+#else
+            throw new WrongPlatformException();
+#endif
         }
 
         public string GetExtendedAttribute (string path, string key)
@@ -44,7 +48,7 @@ namespace CmisSync.Lib.Storage
                 return Encoding.UTF8.GetString(value);
             }
 #else
-            throw new NotImplementedException ();
+            throw new WrongPlatformException ();
 #endif
 
         }
@@ -67,7 +71,7 @@ namespace CmisSync.Lib.Storage
                 throw new ExtendedAttributeException(Syscall.GetLastError().ToString());
             }
 #else
-            throw new NotImplementedException ();
+            throw new WrongPlatformException ();
 #endif
 
         }
@@ -81,7 +85,7 @@ namespace CmisSync.Lib.Storage
                 throw new ExtendedAttributeException(Syscall.GetLastError().ToString());
             }
 #else
-            throw new NotImplementedException ();
+            throw new WrongPlatformException ();
 #endif
         }
 
@@ -100,7 +104,7 @@ namespace CmisSync.Lib.Storage
             }
             return result;
 #else
-            throw new NotImplementedException ();
+            throw new WrongPlatformException ();
 #endif
         }
     }

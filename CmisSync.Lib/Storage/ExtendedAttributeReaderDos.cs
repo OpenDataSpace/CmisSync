@@ -56,7 +56,7 @@ namespace CmisSync.Lib.Storage
             // int error = Marshal.GetLastWin32Error();
             return result;
 #else
-            throw new NotImplementedException();
+            throw new WrongPlatformException();
 #endif
         }
 
@@ -73,7 +73,7 @@ namespace CmisSync.Lib.Storage
             writer.Close();
             CloseHandle( fileHandle );
 #else
-            throw new NotImplementedException();
+            throw new WrongPlatformException();
 #endif
         }
 
@@ -86,7 +86,7 @@ namespace CmisSync.Lib.Storage
             }
             DeleteFile(String.Format("{0}:{1}", path, key));
 #else
-            throw new NotImplementedException();
+            throw new WrongPlatformException();
 #endif
         }
 
