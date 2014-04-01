@@ -107,7 +107,6 @@
     <Compile Include="Events\DebugLoggingHandler.cs" />
     <Compile Include="Events\EncapsuledEvent.cs" />
     <Compile Include="Events\EventFilter\AbstractFileFilter.cs" />
-    <Compile Include="Events\EventFilter\FailedOperationsFilter.cs" />
     <Compile Include="Events\EventFilter\IgnoredFileNamesFilter.cs" />
     <Compile Include="Events\EventFilter\IgnoredFilesFilter.cs" />
     <Compile Include="Events\EventFilter\IgnoredFoldersFilter.cs" />
@@ -147,7 +146,6 @@
     <Compile Include="Storage\IFileSystemInfoFactory.cs" />
     <Compile Include="Storage\IFileSystemWatcher.cs" />
     <Compile Include="Storage\IMetaDataStorage.cs" />
-    <Compile Include="Storage\MetaDataStorage.cs" />
     <Compile Include="Storage\PersistentStorage.cs" />
     <Compile Include="Streams\BandwidthLimitedStream.cs" />
     <Compile Include="Streams\ForwardReadingStream.cs" />

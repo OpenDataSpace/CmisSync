@@ -43,7 +43,6 @@ SOURCES =  \
 	Events/DebugLoggingHandler.cs \
 	Events/EncapsuledEvent.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
-	Events/EventFilter/FailedOperationsFilter.cs \
 	Events/EventFilter/GenericHandleDoublicatedEventsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
 	Events/EventFilter/IgnoredFilesFilter.cs \
@@ -98,7 +97,6 @@ SOURCES =  \
 	Storage/IFileSystemInfoFactory.cs \
 	Storage/IFileSystemWatcher.cs \
 	Storage/IMetaDataStorage.cs \
-	Storage/MetaDataStorage.cs \
 	Storage/PersistentStorage.cs \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/ForwardReadingStream.cs \
