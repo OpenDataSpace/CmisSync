@@ -665,7 +665,7 @@ namespace CmisSync {
             UrgencyHint = true;
 
             Header = Properties_Resources.Ready;
-            Description = String.Format(Properties_Resources.YouCanFind, Controller.PreviousPath);
+            Description = String.Format(Properties_Resources.YouCanFind, Controller.saved_local_path);
 
             // A button that opens the synced folder
             Button open_folder_button = new Button (string.Format ("Open {0}",

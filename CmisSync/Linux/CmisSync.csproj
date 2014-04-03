@@ -103,6 +103,7 @@
     </Compile>
     <Compile Include="CmisTree\CmisTreeStore.cs" />
     <Compile Include="CmisTree\StatusCellRenderer.cs" />
+    <Compile Include="Notification\NotificationUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -116,5 +117,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CmisTree\" />
+    <Folder Include="Notification\" />
   </ItemGroup>
 </Project>
