@@ -11,17 +11,17 @@ namespace CmisSync.Lib.Data
 {
 
     [Serializable]
-    public class MappedFile : AbstractMappedObject
+    public class MappedFile : AbstractMappedObject, IMappedFile
     {
-        public List<MappedFolder> Parents { get; set; }
+        public List<IMappedFolder> Parents { get; set; }
 
         [DefaultValue(-1)]
         public long LastFileSize { get; set; }
 
-        public MappedFile (MappedFolder parent, IFileSystemInfoFactory fsFactory = null, params MappedFolder[] parents)
+        public MappedFile (IMappedFolder parent, IFileSystemInfoFactory fsFactory = null, params IMappedFolder[] parents)
             : base(parent.LocalSyncTargetPath, parent.RemoteSyncTargetPath, fsFactory)
         {
-            Parents = new List<MappedFolder>();
+            Parents = new List<IMappedFolder>();
             Parents.Add (parent);
             if (parents != null)
                 Parents.AddRange (parents);
@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Data
             return FsFactory.CreateFileInfo(Path.Combine (Parents [0].GetLocalPath (), Name)).Exists;
         }
 
-        public bool ExistsLocally (MappedFolder parent)
+        public bool ExistsLocally (IMappedFolder parent)
         {
             if (this.Parents.Contains (parent))
                 return FsFactory.CreateFileInfo(parent.GetLocalPath ()).Exists;
@@ -42,14 +42,25 @@ namespace CmisSync.Lib.Data
                 return false;
         }
 
-        public string GetLocalPath (MappedFolder parent)
+        public string GetLocalPath (IMappedFolder parent)
         {
             return Path.Combine (parent.GetLocalPath (), Name);
         }
 
-        public string GetLocalPath ()
+        public virtual string GetLocalPath ()
         {
             return Path.Combine (Parents [0].GetLocalPath (), Name);
+        }
+
+        public virtual string GetRemotePath()
+        {
+            return GetRemotePath(this.Parents[0]);
+        }
+
+        public string GetRemotePath(IMappedFolder parent)
+        {
+            string path = parent.GetRemotePath();
+            return path + (path.EndsWith("/")? "": "/") + Name;
         }
     }
 }

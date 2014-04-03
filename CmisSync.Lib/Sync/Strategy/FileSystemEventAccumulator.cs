@@ -6,6 +6,7 @@ using DotCMIS.Exceptions;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Storage;
+using CmisSync.Lib.Data;
 
 using log4net;
 
@@ -32,12 +33,22 @@ namespace CmisSync.Lib.Sync.Strategy {
         }
 
         private string FetchIdFromStorage(ISyncEvent e) {
+            IFileSystemInfo path = null;
             if(e is FileEvent) {
-                string fileName = (e as FileEvent).LocalFile.FullName;
-                return storage.GetFileId(fileName);
+                path = (e as FileEvent).LocalFile;
             }
-            string folderName = (e as FolderEvent).LocalFolder.FullName;
-            return storage.GetFolderId(folderName);
+            else if( e is FolderEvent)
+            {
+                path = (e as FolderEvent).LocalFolder;
+            }
+            if(path != null)
+            {
+                IMappedObject savedObject = this.storage.GetObjectByLocalPath(path);
+                if(savedObject != null) {
+                    return savedObject.RemoteObjectId;
+                }
+            }
+            return null;
         }
 
         public override bool Handle(ISyncEvent e) {
@@ -51,15 +62,15 @@ namespace CmisSync.Lib.Sync.Strategy {
             }
 
             string id = FetchIdFromStorage(e);
-
-            try {
-                remote = session.GetObject(id);
-            } catch (CmisObjectNotFoundException) {
-                //Deleted on Server, this is ok
-                return false;
+            if(id != null) {
+                try {
+                    remote = session.GetObject(id);
+                } catch (CmisObjectNotFoundException) {
+                    //Deleted on Server, this is ok
+                    return false;
+                }
+                SetRemoteObject(e, remote);
             }
-
-            SetRemoteObject(e, remote);
             return false;
         }
 

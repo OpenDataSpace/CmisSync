@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Sync.Strategy;
+using CmisSync.Lib.Data;
 
 using DotCMIS.Client;
 using DotCMIS.Data;
@@ -27,7 +28,7 @@ namespace TestLibrary.TestUtils
 
         public static Mock<IMetaDataStorage> GetMetaStorageMockWithToken(string token = "lastToken"){
             var storage = new Mock<IMetaDataStorage>();
-            storage.Setup (db => db.GetChangeLogToken ()).Returns (token);
+            storage.Setup (db => db.ChangeLogToken ).Returns (token);
             return storage;
         }
         
@@ -75,16 +76,43 @@ namespace TestLibrary.TestUtils
             return changeList;
         }
 
-        public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id){
-            db.Setup(foo => foo.GetFilePath(id)).Returns(path);
-            db.Setup(foo => foo.ContainsFile(path)).Returns(true);
-            db.Setup(foo => foo.GetFileId(path)).Returns(id);
+        public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id) {
+            var file = Mock.Of<IFileInfo>(f =>
+                                          f.FullName == path &&
+                                          f.Exists == true);
+            db.AddLocalFile(file, id);
         }
 
-        public static void AddLocalFolder(this Mock<IMetaDataStorage> db, string path, string id){
-            db.Setup(foo => foo.GetFolderPath(id)).Returns(path);
-            db.Setup(foo => foo.ContainsFolder(path)).Returns(true);
-            db.Setup(foo => foo.GetFolderId(path)).Returns(id);
+        public static void AddLocalFile(this Mock<IMetaDataStorage> db, IFileInfo path, string id ) {
+            var file = Mock.Of<IMappedFile>( f =>
+                                            f.RemoteObjectId == id &&
+                                            f.GetLocalPath() == path.FullName &&
+                                            f.ExistsLocally() == path.Exists);
+            db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>( s => s == id))).Returns(file);
+            db.Setup(foo => foo.GetObjectByLocalPath(It.Is<IFileInfo>(f => f.FullName == path.FullName))).Returns(file);
+        }
+
+        public static void AddLocalFolder( this Mock<IMetaDataStorage> db, string path, string id) {
+            var folder = Mock.Of<IDirectoryInfo>(d => d.FullName == path);
+            db.AddLocalFolder(folder, id);
+        }
+
+        public static void AddLocalFolder(this Mock<IMetaDataStorage> db, IDirectoryInfo path, string id ) {
+            var folder = new Mock<MappedFolder>("path","/", null) { CallBase = true};
+            folder.Setup(f => f.GetLocalPath()).Returns(path.FullName);
+            folder.Setup (f => f.RemoteObjectId).Returns(id);
+            db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>( s => s == id))).Returns(folder.Object);
+            db.Setup(foo => foo.GetObjectByLocalPath(It.Is<IDirectoryInfo>(dir => dir.FullName == path.FullName))).Returns(folder.Object);
+        }
+
+        public static void AddMappedFile(this Mock<IMetaDataStorage> db, IMappedFile file) {
+            db.Setup( foo => foo.GetObjectByLocalPath(It.Is<IFileInfo>(s => s.FullName == file.GetLocalPath()))).Returns(file);
+            db.Setup( foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == file.RemoteObjectId))).Returns(file);
+        }
+
+        public static void AddMappedFolder(this Mock<IMetaDataStorage> db, IMappedFolder folder) {
+            db.Setup( foo => foo.GetObjectByLocalPath(It.Is<IDirectoryInfo>(s => s.FullName == folder.GetLocalPath()))).Returns(folder);
+            db.Setup( foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == folder.RemoteObjectId))).Returns(folder);
         }
 
         public static Mock<IFolder> CreateCmisFolder(List<string> fileNames = null, List<string> folderNames = null, bool contentStream = false) {

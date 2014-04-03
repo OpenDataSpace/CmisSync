@@ -10,8 +10,6 @@
     <RootNamespace>CmisSync.Lib</RootNamespace>
     <AssemblyName>CmisSync.Lib</AssemblyName>
     <UseMSBuildEngine>False</UseMSBuildEngine>
-    <ReleaseVersion>
-    </ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -188,6 +186,9 @@
     <Compile Include="Storage\IExtendedAttributeReader.cs" />
     <Compile Include="Storage\ExtendedAttributeReaderUnix.cs" />
     <Compile Include="Storage\ExtendedAttributeReaderDos.cs" />
+    <Compile Include="Data\IMappedFolder.cs" />
+    <Compile Include="Data\IMappedObject.cs" />
+    <Compile Include="Data\IMappedFile.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

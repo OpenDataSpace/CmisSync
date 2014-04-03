@@ -2,6 +2,7 @@ using System;
 
 using CmisSync.Lib.Storage;
 using CmisSync.Lib.Sync.Strategy;
+using CmisSync.Lib.Data;
 
 using DotCMIS.Client;
 
@@ -9,6 +10,7 @@ using NUnit.Framework;
 
 using Moq;
 using System.IO;
+using TestLibrary.TestUtils;
 
 namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 {
@@ -52,8 +54,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             fileSystemInfo.Setup(file => file.Exists).Returns(false);
             fileSystemInfo.Setup(file => file.Name).Returns(NonExistingFileOrFolderName);
             fileSystemInfo.Setup(file => file.FullName).Returns(NonExistingFileOrFolderFullName);
-            storage.Setup(s => s.ContainsFile(It.Is<string>(path => path == NonExistingFileOrFolderFullName))).Returns(false);
-            storage.Setup(s => s.ContainsFolder(It.Is<string>(path => path == NonExistingFileOrFolderFullName))).Returns(false);
+            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileSystemInfo>(path => path.FullName == NonExistingFileOrFolderFullName))).Returns((AbstractMappedObject) null);
 
             var detection = new LocalSituationDetection(fsFactory.Object);
             Assert.That(detection.Analyse(storage.Object, fileSystemInfo.Object), Is.EqualTo(SituationType.NOCHANGE));
@@ -70,8 +71,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             fileInfo.Setup(file => file.Exists).Returns(true);
             fileInfo.Setup(file => file.Name).Returns(ExistingFileName);
             fileInfo.Setup(file => file.FullName).Returns(ExistingFileFullName);
-            storage.Setup(s => s.ContainsFile(It.Is<string>(path => path == ExistingFileFullName))).Returns(false);
-            storage.Setup(s => s.ContainsFolder(It.Is<string>(path => path == ExistingFileFullName))).Returns(false);
+            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileSystemInfo>(path => path.FullName == ExistingFileFullName))).Returns((AbstractMappedObject) null);
 
             var detection = new LocalSituationDetection(fsFactory.Object);
             Assert.That(detection.Analyse(storage.Object, fileInfo.Object), Is.EqualTo(SituationType.ADDED));
@@ -130,9 +130,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             fileInfo.Setup(file => file.Exists).Returns(false);
             fileInfo.Setup(file => file.Name).Returns(NonExistingFileOrFolderName);
             fileInfo.Setup(file => file.FullName).Returns(NonExistingFileOrFolderFullName);
-            storage.Setup(s => s.ContainsFile(It.Is<string>(path => path == NonExistingFileOrFolderFullName))).Returns(true);
-            storage.Setup(s => s.ContainsFolder(It.Is<string>(path => path == NonExistingFileOrFolderFullName))).Returns(false);
-
+            storage.AddLocalFile(NonExistingFileOrFolderFullName, "testId");
             var detection = new LocalSituationDetection(fsFactory.Object);
             Assert.That(detection.Analyse(storage.Object, fileInfo.Object), Is.EqualTo(SituationType.REMOVED));
         }

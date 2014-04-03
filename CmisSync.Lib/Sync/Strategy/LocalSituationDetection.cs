@@ -33,7 +33,7 @@ namespace CmisSync.Lib.Sync.Strategy
             if(!actualObject.Exists)
             {
                 // Remove & NoChange are possible
-                if(!storage.ContainsFile(actualObject.FullName) && !storage.ContainsFolder(actualObject.FullName))
+                if(storage.GetObjectByLocalPath(actualObject) == null )
                     // Object has already been removed or wasn't ever in the storage
                     return SituationType.NOCHANGE;
                 else
@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Sync.Strategy
             else
             {
                 // Move & Rename & Added & NoChange are possible
-                if(!storage.ContainsFile(actualObject.FullName) && !storage.ContainsFolder(actualObject.FullName))
+                if(storage.GetObjectByLocalPath(actualObject) == null )
                     return SituationType.ADDED;
             }
             throw new NotImplementedException();

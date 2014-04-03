@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 using CmisSync.Lib.Sync.Strategy;
 using CmisSync.Lib.Storage;
+using CmisSync.Lib.Data;
 
 using DotCMIS.Client;
 using DotCMIS.Exceptions;
@@ -11,6 +12,8 @@ using DotCMIS.Exceptions;
 using NUnit.Framework;
 
 using Moq;
+
+using TestLibrary.TestUtils;
 
 namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 {
@@ -59,8 +62,11 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
             remoteObject.Setup (remote => remote.Paths).Returns(remotePaths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(It.Is<string>(s => s == ObjectId.Id))).Returns("path");
+            var file = Mock.Of<IMappedFile>( f =>
+                                            f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                            f.RemoteObjectId == ObjectId.Id &&
+                                            f.GetLocalPath() == "path");
+            StorageMock.AddMappedFile(file);
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, ObjectId));
         }
@@ -78,8 +84,8 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             paths.Add(this.RemotePath);
             remoteObject.Setup (remote => remote.Paths).Returns(paths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns((DateTime?)null);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns((string) null);
+            StorageMock.Setup( storage => storage.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns((AbstractMappedObject)null);
+            StorageMock.Setup( storage => storage.GetObjectByRemoteId(It.IsAny<string>())).Returns((AbstractMappedObject)null);
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.ADDED, detector.Analyse(StorageMock.Object, ObjectId));
         }
@@ -98,8 +104,8 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             remoteObject.Setup (remote => remote.Paths).Returns(paths);
             remoteObject.Setup (remote => remote.Path).Returns(RemotePath);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns((DateTime?)null);
-            StorageMock.Setup(storage => storage.GetFolderPath(ObjectId.Id)).Returns((string) null);
+            StorageMock.Setup( storage => storage.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns((AbstractMappedObject)null);
+            StorageMock.Setup( storage => storage.GetObjectByRemoteId(It.IsAny<string>())).Returns((AbstractMappedObject)null);
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.ADDED, detector.Analyse(StorageMock.Object, ObjectId));
         }
@@ -121,9 +127,10 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             paths.Add(RemotePath);
             remoteObject.Setup (remote => remote.Paths).Returns(paths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns(RemotePath);
+            var file = Mock.Of<IMappedFile>( f =>
+                                           f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                           f.RemoteObjectId == ObjectId.Id);
+            StorageMock.AddMappedFile(file);
 
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.CHANGED, detector.Analyse(StorageMock.Object, ObjectId));
@@ -148,9 +155,11 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             paths.Add(newPath);
             remoteObject.Setup (remote => remote.Paths).Returns(paths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns(RemotePath);
+            var file = Mock.Of<IMappedFile>( f =>
+                                           f.RemoteSyncTargetPath == RemotePath &&
+                                           f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                           f.RemoteObjectId == ObjectId.Id);
+            StorageMock.AddMappedFile(file);
 
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.CHANGED, detector.Analyse(StorageMock.Object, ObjectId));
@@ -174,8 +183,12 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
                              folder.LastModificationDate == actualModificationDate);
             SessionMock.Setup(s => s.GetObject(ObjectId.Id)).Returns(remoteFolder);
 
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFolderPath(It.Is<string>(id => id == ObjectId.Id))).Returns(RemotePath);
+            var dir = Mock.Of<MappedFolder>( f =>
+                                            f.Name == RemoteName &&
+                                            f.RemoteSyncTargetPath == RemotePath &&
+                                            f.RemoteObjectId == ObjectId.Id &&
+                                            f.LastRemoteWriteTimeUtc == lastModificationDate);
+            StorageMock.AddMappedFolder(dir);
 
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.RENAMED, detector.Analyse(StorageMock.Object, ObjectId));
@@ -197,9 +210,12 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             paths.Add(newPath);
             remoteObject.Setup (remote => remote.Paths).Returns(paths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns(RemotePath);
+            var file = Mock.Of<IMappedFile>( f =>
+                                           f.Name == RemoteName &&
+                                           f.RemoteSyncTargetPath == RemotePath &&
+                                           f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                           f.RemoteObjectId == ObjectId.Id);
+            StorageMock.AddMappedFile(file);
 
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.MOVED, detector.Analyse(StorageMock.Object, ObjectId));
@@ -218,11 +234,12 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
                                                 folder.Path == newPath &&
                                                 folder.Id == ObjectId.Id &&
                                                 folder.LastModificationDate == lastModificationDate);
-
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteFolder);
-
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFolderPath(ObjectId.Id)).Returns(RemotePath);
+            var localFolder = Mock.Of<MappedFolder>( folder =>
+                                                    folder.Name == RemoteName &&
+                                                    folder.RemoteObjectId == ObjectId.Id &&
+                                                    folder.LastRemoteWriteTimeUtc == lastModificationDate);
+            StorageMock.AddMappedFolder(localFolder);
 
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.MOVED, detector.Analyse(StorageMock.Object, ObjectId));
@@ -234,8 +251,11 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var lastModificationDate = DateTime.Now;
             SessionMock.Setup(s => s.GetObject(ObjectId)).Throws(new CmisObjectNotFoundException());
 
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns(RemotePath);
+            var file = Mock.Of<IMappedFile>( f =>
+                                           f.RemoteObjectId == ObjectId.Id &&
+                                           f.GetLocalPath() == "path" &&
+                                           f.LastRemoteWriteTimeUtc == lastModificationDate);
+            StorageMock.AddMappedFile(file);
 
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, ObjectId));
@@ -247,9 +267,12 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var lastModificationDate = DateTime.Now;
             SessionMock.Setup(s => s.GetObject(ObjectId)).Throws(new CmisObjectNotFoundException());
 
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFolderPath(ObjectId.Id)).Returns(RemotePath);
-
+            var folder = Mock.Of<IMappedFolder>( f =>
+                                               f.RemoteObjectId == ObjectId.Id &&
+                                               f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                               f.Name == RemoteName &&
+                                               f.GetRemotePath() == RemotePath);
+            StorageMock.AddMappedFolder(folder);
             var detector = new RemoteSituationDetection(SessionMock.Object);
             Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, ObjectId));
         }

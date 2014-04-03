@@ -39,7 +39,8 @@ namespace CmisSync.Lib.Sync.Strategy
             }
             try {
                 ICmisObject remoteObject = Session.GetObject(objectId);
-                if(storage.GetFilePath(objectId.Id) == null && storage.GetFolderPath(objectId.Id) == null) {
+                if(storage.GetObjectByRemoteId(objectId.Id) == null )
+                {
                     return SituationType.ADDED;
                 }
             }catch(CmisObjectNotFoundException) {

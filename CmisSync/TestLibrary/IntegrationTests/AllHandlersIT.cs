@@ -131,16 +131,17 @@ namespace TestLibrary.IntegrationTests
         public void RunFSEventDeleted ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            string path = "/tmp/a/b";
+            var path = new Mock<IFileInfo>();
+            path.Setup(p => p.FullName ).Returns("/tmp/a/b");
             string id = "id";
-            storage.AddLocalFile(path, id);
+            storage.AddLocalFile(path.Object, id);
             
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
             IDocument remote = MockUtil.CreateRemoteObjectMock(null, id).Object;
             session.Setup(s => s.GetObject(id)).Returns(remote);
-            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path);
+            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName);
             var queue = CreateQueue(session, storage);
             queue.AddEvent(myEvent);
             queue.Run();

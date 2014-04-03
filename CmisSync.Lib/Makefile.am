@@ -28,6 +28,9 @@ SOURCES =  \
 	ContentTasks/SimpleFileUploader.cs \
 	ContentTasks/Utils.cs \
 	Credentials.cs \
+	Data/IMappedFile.cs \
+	Data/IMappedFolder.cs \
+	Data/IMappedObject.cs \
 	Data/MappedFile.cs \
 	Data/MappedFolder.cs \
 	Data/MappedObjects.cs \

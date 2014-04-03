@@ -12,7 +12,7 @@ using DotCMIS.Client;
 namespace CmisSync.Lib.Data
 {
     [Serializable]
-    public abstract class AbstractMappedObject
+    public abstract class AbstractMappedObject : IMappedObject
     {
         public AbstractMappedObject( string localSyncTargetPath, string remoteSyncTargetPath, IFileSystemInfoFactory fsFactory = null) {
             if (String.IsNullOrEmpty(localSyncTargetPath))
@@ -27,13 +27,16 @@ namespace CmisSync.Lib.Data
             RemoteSyncTargetPath = remoteSyncTargetPath;
         }
 
-        [NonSerialized]
-        protected IFileSystemInfoFactory FsFactory;
+        public IFileSystemInfoFactory FsFactory { get; protected set; }
 
         public virtual string RemoteObjectId { get; set; }
 
         public virtual string LastChangeToken { get; set; }
 
+        /// <summary>
+        /// Gets and sets the time at which the object was last modified.
+        /// This is the time on the CMIS server side, in UTC. Client-side time does not matter.
+        /// </summary>
         [DefaultValue(null)]
         public virtual DateTime? LastRemoteWriteTimeUtc { get; set; }
 
@@ -44,11 +47,11 @@ namespace CmisSync.Lib.Data
 
         public virtual string ChecksumAlgorithmName { get; set; }
 
-        public string RemoteSyncTargetPath { get; private set; }
+        public virtual string RemoteSyncTargetPath { get; private set; }
 
-        public string LocalSyncTargetPath { get; private set; }
+        public virtual string LocalSyncTargetPath { get; private set; }
 
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
 
         public virtual string Description { get; set; }
 

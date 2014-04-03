@@ -134,23 +134,17 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void HandleFullSyncCompletedEventTest ()
         {
-            string insertedToken = "";
             var startSyncEvent = new StartNextSyncEvent (false);
             startSyncEvent.SetParam (ContentChanges.FULL_SYNC_PARAM_NAME, changeLogToken);
             var completedEvent = new FullSyncCompletedEvent (startSyncEvent);
-            int handled = 0;
             var storage = new Mock<IMetaDataStorage>();
-            storage.Setup (db => db.SetChangeLogToken ("token")).Callback ((string s) => {
-                insertedToken = s;
-                handled ++;
-            }
-            );
+            storage.SetupProperty(db => db.ChangeLogToken);
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsFalse (changes.Handle (completedEvent));
-            Assert.AreEqual (1, handled);
-            Assert.AreEqual (changeLogToken, insertedToken);
+            storage.VerifySet(db => db.ChangeLogToken = changeLogToken);
+            Assert.AreEqual (changeLogToken, storage.Object.ChangeLogToken);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -161,7 +155,7 @@ namespace TestLibrary.SyncStrategiesTests
             session.SetupSessionDefaultValues();
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             var storage = new Mock<IMetaDataStorage>();
-            storage.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
+            storage.Setup (db => db.ChangeLogToken).Returns (changeLogToken);
             var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsTrue (changes.Handle (startSyncEvent));
@@ -177,7 +171,7 @@ namespace TestLibrary.SyncStrategiesTests
             session.SetupSessionDefaultValues();
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (repoId, null).LatestChangeLogToken).Returns (changeLogToken);
             var storage = new Mock<IMetaDataStorage>();
-            storage.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
+            storage.Setup (db => db.ChangeLogToken).Returns ((string)null);
             int handled = 0;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup (q => q.AddEvent (It.IsAny<ISyncEvent> ())).Callback<ISyncEvent> ((e) => {
@@ -205,7 +199,7 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup (s => s.Binding.GetRepositoryService ()).Returns (repositoryService.Object);
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
             var storage = new Mock<IMetaDataStorage>();
-            storage.Setup (db => db.GetChangeLogToken ()).Returns (changeLogToken);
+            storage.Setup (db => db.ChangeLogToken ).Returns (changeLogToken);
             var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
@@ -226,7 +220,7 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup (s => s.RepositoryInfo.Id).Returns (repoId);
             var manager = new Mock<SyncEventManager> ().Object;
             var storage = new Mock<IMetaDataStorage>();
-            storage.Setup (db => db.GetChangeLogToken ()).Returns ((string)null);
+            storage.Setup (db => db.ChangeLogToken ).Returns ((string)null);
             var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));

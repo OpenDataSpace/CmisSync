@@ -26,7 +26,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage> ();
-            var accumulator = new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
+            new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
         }
 
         [Test, Category("Fast")]

@@ -7,32 +7,29 @@ using CmisSync.Lib.Storage;
 namespace CmisSync.Lib.Data
 {
     [Serializable]
-    public class MappedFolder : AbstractMappedObject
+    public class MappedFolder : AbstractMappedObject, IMappedFolder
     {
 
-        public MappedFolder Parent { get; set; }
+        public IMappedFolder Parent { get; set; }
 
-        private List<AbstractMappedObject> children = new List<AbstractMappedObject> ();
+        private List<IMappedObject> children = new List<IMappedObject> ();
 
-        public List<AbstractMappedObject> Children { get { return children; } set { this.children = value; } }
+        public List<IMappedObject> Children { get { return children; } set { this.children = value; } }
 
         public override bool ExistsLocally ()
         {
             return FsFactory.CreateDirectoryInfo(GetLocalPath ()).Exists;
         }
 
-        public string GetLocalPath ()
+        public virtual string GetLocalPath ()
         {
             if (Parent == null)
+            {
                 return LocalSyncTargetPath;
-            else {
-                string path = Name;
-                MappedFolder p = Parent;
-                while (p.Parent != null) {
-                    path = Path.Combine (p.Name, path);
-                    p = p.Parent;
-                }
-                return Path.Combine (LocalSyncTargetPath, path);
+            }
+            else
+            {
+                return Path.Combine (Parent.GetLocalPath(), Name);
             }
         }
 
@@ -42,7 +39,7 @@ namespace CmisSync.Lib.Data
             Name = FsFactory.CreateDirectoryInfo(LocalSyncTargetPath).Name;
         }
 
-        public MappedFolder ( MappedFolder parent, string name, IFileSystemInfoFactory fsFactory = null)
+        public MappedFolder ( IMappedFolder parent, string name, IFileSystemInfoFactory fsFactory = null)
             : base(parent.LocalSyncTargetPath, parent.RemoteSyncTargetPath, fsFactory)
         {
             if(parent == null)
@@ -54,6 +51,20 @@ namespace CmisSync.Lib.Data
             Parent = parent;
             Name = name;
         }
+
+        public virtual string GetRemotePath ()
+        {
+            if(Parent == null)
+            {
+                return RemoteSyncTargetPath;
+            }
+            else
+            {
+                string path = Parent.GetRemotePath();
+                return path + (path.EndsWith("/")? "" : "/") + Name;
+            }
+        }
+
     }
 
 }

@@ -11,6 +11,7 @@ using NUnit.Framework;
 using Moq;
 
 using TestLibrary.TestUtils;
+using CmisSync.Lib.Data;
 
 namespace TestLibrary.SyncStrategiesTests {
     [TestFixture]
@@ -85,7 +86,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Created, true);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
@@ -102,7 +103,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Created, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
@@ -112,7 +113,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteSecurityChangeOfExistingFile ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile("path",id);
+            storage.AddLocalFile("path", id);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
@@ -122,7 +123,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Security, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
@@ -140,7 +141,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Security, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
@@ -158,7 +159,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Updated, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CREATED));
         }
@@ -167,7 +168,12 @@ namespace TestLibrary.SyncStrategiesTests {
         public void LocallyExistingRemoteDocumentUpdated ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile("path",id);
+            var file = Mock.Of<IMappedFile>( f =>
+                                            f.RemoteObjectId == id &&
+                                            f.GetLocalPath() == "path" &&
+                                            f.GetRemotePath() == "path"
+                );
+            storage.AddMappedFile(file);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
@@ -177,7 +183,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Updated, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CHANGED));
         }
@@ -192,7 +198,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Deleted, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());           
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
 
         }
 
@@ -200,7 +206,7 @@ namespace TestLibrary.SyncStrategiesTests {
         public void RemoteDeletionChangeTest ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile("path",id);
+            storage.AddLocalFile("path", id);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
@@ -210,7 +216,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Deleted, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.DELETED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
@@ -225,7 +231,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Deleted);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());           
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -242,7 +248,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Deleted);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.DELETED));
         }
 
@@ -260,7 +266,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Created);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
         }
 
@@ -278,7 +284,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Updated);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
         }
 
@@ -296,7 +302,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Security);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
-            queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());           
+            queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
         }
     }

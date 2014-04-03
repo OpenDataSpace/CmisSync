@@ -99,6 +99,20 @@ namespace TestLibrary.DataTests
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
+        public void GetRemotePath()
+        {
+            var factory = createFactoryWithLocalPathInfos();
+            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
+            Assert.AreEqual(this.remoteRootPath, rootFolder.GetRemotePath());
+            string child = "child";
+            var childFolder = new MappedFolder(rootFolder, child);
+            Assert.AreEqual(remoteRootPath + child, childFolder.GetRemotePath());
+            string sub = "sub";
+            var subFolder = new MappedFolder(childFolder, sub);
+            Assert.AreEqual(remoteRootPath + child + "/" + sub, subFolder.GetRemotePath());
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
         public void ExistsLocally()
         {
             string childName = "child";
@@ -220,6 +234,19 @@ namespace TestLibrary.DataTests
             file.Parents.Add(subFolder);
             Assert.AreEqual(Path.Combine(this.localRootPath, localFileName), file.GetLocalPath(rootFolder));
             Assert.AreEqual(Path.Combine(this.localRootPath, subFolder.Name , localFileName), file.GetLocalPath(subFolder));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void GetRemotePath () {
+            var factory = createFactoryWithLocalPathInfos();
+            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
+            var subFolder = new MappedFolder(rootFolder, "sub");
+            var file = new MappedFile(rootFolder, factory.Object);
+            file.Name = localFileName;
+            Assert.AreEqual(remoteRootPath + localFileName, file.GetRemotePath());
+            file.Parents.Add(subFolder);
+            Assert.AreEqual(remoteRootPath + localFileName, file.GetRemotePath(rootFolder));
+            Assert.AreEqual(remoteRootPath + subFolder.Name + "/" + localFileName, file.GetRemotePath(subFolder));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]

@@ -86,12 +86,13 @@ namespace TestLibrary.IntegrationTests
         public void RemoteSecurityChangeOfExistingFile ()
         {
             Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
-            storage.AddLocalFile("path", defaultId);
+            var path = Mock.Of<IFileInfo>( f => f.FullName == "path");
+            storage.AddLocalFile(path, defaultId);
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
             ObservableHandler observer = RunQueue(session, storage);
 
-            storage.Verify(s=>s.GetFilePath(defaultId), Times.Once());
+            storage.Verify(s=>s.GetObjectByRemoteId(defaultId), Times.Once());
 
             observer.AssertGotSingleFileEvent(MetaDataChangeType.CHANGED, ContentChangeType.NONE);
 
@@ -128,7 +129,8 @@ namespace TestLibrary.IntegrationTests
         public void RemoteDeletionChangeTest ()
         {
             Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
-            storage.AddLocalFile("path", defaultId);
+            var file = Mock.Of<IFileInfo>(f => f.FullName == "path");
+            storage.AddLocalFile(file, defaultId);
 
             Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
             ObservableHandler observer = RunQueue(session, storage);
