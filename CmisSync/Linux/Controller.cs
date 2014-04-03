@@ -22,6 +22,7 @@ using System.IO;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
+using CmisSync.Notifications;
 
 namespace CmisSync {
 
@@ -38,17 +39,11 @@ namespace CmisSync {
         public override void Initialize(Boolean firstRun)
         {
             this.ProxyAuthReqired += delegate(string reponame) {
-                Process process = new Process();
-                process.StartInfo.FileName  = "notify-send";
-                process.StartInfo.Arguments = String.Format("-i \"/usr/share/icons/hicolor/32x32/apps/app-cmissync.png\" \"{0}\" \"{1}\"", reponame, Properties_Resources.NetworkProxyLogin);
-                process.Start ();
+                NotificationUtils.NotifyAsync(reponame, Properties_Resources.NetworkProxyLogin);
             };
 
             this.ShowChangePassword += delegate(string reponame) {
-                Process process = new Process();
-                process.StartInfo.FileName  = "notify-send";
-                process.StartInfo.Arguments = String.Format("-i \"/usr/share/icons/hicolor/32x32/apps/app-cmissync.png\" \"{0}\" \"{1}\"", reponame, String.Format(Properties_Resources.NotificationCredentialsError, reponame));
-                process.Start ();
+                NotificationUtils.NotifyAsync(reponame, String.Format(Properties_Resources.NotificationCredentialsError, reponame));
             };
             base.Initialize(firstRun);
 
@@ -207,7 +202,7 @@ namespace CmisSync {
         public void ShowLog(string path)
         {
             Process process = new Process();
-            process.StartInfo.FileName  = "xterm";
+            process.StartInfo.FileName  = "x-terminal-emulator";
             process.StartInfo.Arguments = "-title \"DataSpace Sync Log\" -e tail -f \"" + path + "\"";
             process.Start ();
         }
