@@ -414,9 +414,9 @@ namespace CmisSync {
             double? percent = e.Percent;
             long? bitsPerSecond = e.BitsPerSecond;
             if (percent != null && bitsPerSecond != null) {
-                return String.Format ("{0} ({1:###.#}% {2})",
+                return String.Format ("{0} ({1} {2})",
                     System.IO.Path.GetFileName (transmissionEvent.Path),
-                    Math.Round ((double)percent, 1),
+                    CmisSync.Lib.Utils.FormatPercent((double)percent),
                     CmisSync.Lib.Utils.FormatBandwidth ((long)bitsPerSecond));
             } else {
                 return System.IO.Path.GetFileName (transmissionEvent.Path);
