@@ -436,7 +436,7 @@ namespace CmisSync.Lib.Sync
 
                     if (ChangeLogCapability)
                     {
-                        Logger.Debug("Invoke a remote change log sync");
+                        Logger.Debug("Invoke a remote change log sync" + (changesOnFileSystemDetected? "Local Changes detected" : ""));
                         ChangeLogSync(remoteFolder);
                         if(changesOnFileSystemDetected)
                         {
@@ -464,7 +464,7 @@ namespace CmisSync.Lib.Sync
                 lock(bgSyncingLock) {
                     if (backgroundSyncing)
                     {
-                        //Logger.Debug("Already executing a sync process in background");
+                        Logger.Debug("Already executing a sync process in background");
                         return;
                     } else {
                         backgroundSyncing = true;

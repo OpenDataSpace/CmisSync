@@ -73,7 +73,9 @@ namespace CmisSync.Lib.Sync
                 {
                     IList<ITree<IFileableCmisObject>> desc;
                     try{
+                        Logger.Debug("Starting getDescendants");
                         desc = remoteFolder.GetDescendants(-1);
+                        Logger.Debug("Finished getDescendants");
                     }catch (DotCMIS.Exceptions.CmisConnectionException ex) {
                         if(ex.InnerException is System.Xml.XmlException)
                         {
