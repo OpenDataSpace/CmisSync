@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
@@ -27,7 +27,7 @@ namespace TestLibrary.ContentTasksTests
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
         private long fileLength;
-        private MemoryStream remoteStream;
+        private Mock<MemoryStream> mockedMemStream;
         private byte[] localContent;
         private Mock<IDocument> mockedDocument;
         private Mock<IContentStream> mockedStream;
@@ -47,13 +47,11 @@ namespace TestLibrary.ContentTasksTests
             using (RandomNumberGenerator random = RandomNumberGenerator.Create()) {
                 random.GetBytes (localContent);
             }
-            if (remoteStream != null)
-                remoteStream.Dispose ();
-            remoteStream = new MemoryStream ();
+            mockedMemStream = new Mock<MemoryStream>() { CallBase = true };
             mockedDocument = new Mock<IDocument> ();
             mockedStream = new Mock<IContentStream> ();
             mockedStream.Setup (stream => stream.Length).Returns (fileLength);
-            mockedStream.Setup (stream => stream.Stream).Returns (remoteStream);
+            mockedStream.Setup (stream => stream.Stream).Returns (mockedMemStream.Object);
             mockedDocument.Setup (doc => doc.Name).Returns ("test.txt");
         }
 
@@ -68,7 +66,7 @@ namespace TestLibrary.ContentTasksTests
         public void NormalUploadTest ()
         {
             mockedDocument.Setup (doc => doc.SetContentStream (It.IsAny<IContentStream> (), It.Is<bool> (b => b == true), It.Is<bool> (b => b == true)))
-                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (remoteStream))
+                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (mockedMemStream.Object))
                 .Returns (new Mock<IObjectId> ().Object);
             using (IFileUploader uploader = new SimpleFileUploader()) {
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
@@ -88,10 +86,10 @@ namespace TestLibrary.ContentTasksTests
                 };
                 IDocument result = uploader.UploadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
                 Assert.AreEqual (result, mockedDocument.Object);
-                Assert.AreEqual (localContent.Length, remoteStream.Length);
+                Assert.AreEqual (localContent.Length, mockedMemStream.Object.Length);
                 Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localContent), hashAlg.Hash);
-                remoteStream.Seek (0, SeekOrigin.Begin);
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteStream), hashAlg.Hash);
+                mockedMemStream.Object.Seek (0, SeekOrigin.Begin);
+                Assert.AreEqual (SHA1Managed.Create().ComputeHash(mockedMemStream.Object), hashAlg.Hash);
             }
         }
 
@@ -109,6 +107,38 @@ namespace TestLibrary.ContentTasksTests
                     Assert.AreEqual (mockedDocument.Object, e.LastSuccessfulDocument);
                 }
             }
+        }
+
+        [Test, Category("Fast")]
+        public void AbortTest()
+        {
+            mockedDocument.Setup (doc => doc.SetContentStream (It.IsAny<IContentStream> (), It.Is<bool> (b => b == true), It.Is<bool> (b => b == true)))
+                .Callback<IContentStream, bool, bool> ((s, b, r) => s.Stream.CopyTo (mockedMemStream.Object))
+                .Returns (new Mock<IObjectId>().Object);
+            mockedMemStream.Setup (memstream => memstream.Write (It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback (() => Thread.Sleep(100));
+            transmissionEvent.TransmissionStatus += delegate (object sender, TransmissionProgressEventArgs e)
+            {
+                Assert.AreEqual (null, e.Completed);
+            };
+            try
+            {
+                Task t;
+                IFileUploader uploader = new SimpleFileUploader();
+                t = Task.Factory.StartNew (() => uploader.UploadFile(mockedDocument.Object, localFileStream, transmissionEvent, hashAlg));
+                t.Wait(10);
+                transmissionEvent.ReportProgress (new TransmissionProgressEventArgs() { Aborting = true });
+                t.Wait();
+                Assert.Fail();
+            }
+            catch (AggregateException e)
+            {
+                Assert.IsInstanceOf (typeof(UploadFailedException), e.InnerException);
+                Assert.IsInstanceOf (typeof(AbortException), e.InnerException.InnerException);
+                Assert.True (transmissionEvent.Status.Aborted.GetValueOrDefault());
+                Assert.AreEqual (false, transmissionEvent.Status.Aborting);
+                return;
+            }
+            Assert.Fail();
         }
 
         #region boilerplate
@@ -134,8 +164,6 @@ namespace TestLibrary.ContentTasksTests
                 if (!disposed) {
                     if (this.localFileStream != null)
                         this.localFileStream.Dispose ();
-                    if (this.remoteStream != null)
-                        this.remoteStream.Dispose ();
                     if (hashAlg != null)
                         this.hashAlg.Dispose ();
                     disposed = true;
