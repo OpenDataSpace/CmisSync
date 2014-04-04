@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using CmisSync.Lib.Events;
 using System.Timers;
@@ -64,7 +64,11 @@ namespace CmisSync.Lib
 
             public override int Read (byte[] buffer, int offset, int count)
             {
-                int result = this.Stream.Read (buffer, offset, count);
+                if (TransmissionEvent.Status.Aborting.GetValueOrDefault()) {
+                    TransmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = false, Aborted = true });
+                    throw new ContentTasks.AbortException(TransmissionEvent.Path);
+                }
+                int result = this.Stream.Read(buffer, offset, count);
                 CalculateBandwidth(result);
                 return result;
             }
@@ -78,7 +82,11 @@ namespace CmisSync.Lib
 
             public override void Write (byte[] buffer, int offset, int count)
             {
-                this.Stream.Write (buffer, offset, count);
+                if (TransmissionEvent.Status.Aborting.GetValueOrDefault()) {
+                    TransmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = false, Aborted = true });
+                    throw new ContentTasks.AbortException(TransmissionEvent.Path);
+                }
+                this.Stream.Write(buffer, offset, count);
                 CalculateBandwidth(count);
             }
             #endregion

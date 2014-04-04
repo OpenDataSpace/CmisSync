@@ -37,11 +37,7 @@ namespace CmisSync.Lib.ContentTasks
                     lock(DisposeLock){
                         if(this.disposed) {
                             TransmissionStatus.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true});
-                            throw new ObjectDisposedException("Disposed download task while downloading file: " + remoteDocument.Name);
-                        }
-                        if (TransmissionStatus.Status.Aborting.GetValueOrDefault()) {
-                            TransmissionStatus.ReportProgress(new TransmissionProgressEventArgs() { Aborting = false, Aborted = true });
-                            throw new AbortException(TransmissionStatus.Path + " is aborted");
+                            throw new ObjectDisposedException(TransmissionStatus.Path);
                         }
                         hashstream.Write (buffer, 0, len);
                         hashstream.Flush();
