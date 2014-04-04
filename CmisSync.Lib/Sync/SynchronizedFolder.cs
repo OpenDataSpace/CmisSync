@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -802,13 +802,15 @@ namespace CmisSync.Lib.Sync
                         Boolean success = false;
                         byte[] filehash = { };
 
-                        try{
+                        try
+                        {
                             HashAlgorithm hashAlg = new SHA1Managed();
                             Logger.Debug("Creating local download file: " + tmpfilepath);
-                            using (FileStream file = new FileStream(tmpfilepath, (truncate)? FileMode.Create : FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read)){
+                            using (FileStream file = new FileStream(tmpfilepath, (truncate) ? FileMode.Create : FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+                            {
                                 this.Queue.AddEvent(transmissionEvent);
-                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = true});
-                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = false});
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Started = true });
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Started = false });
                                 downloader.DownloadFile(remoteDocument, file, transmissionEvent, hashAlg);
                                 file.Close();
                             }
@@ -817,25 +819,31 @@ namespace CmisSync.Lib.Sync
                         }
                         catch (ObjectDisposedException ex)
                         {
-                            Logger.Error(String.Format("Download aborted: {0}", fileName), ex);
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true, FailedException = ex});
+                            Logger.Error(String.Format("Download aborted by dispose: {0}", fileName), ex);
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true, FailedException = ex });
+                            return false;
+                        }
+                        catch (AbortException ex)
+                        {
+                            Logger.Error(String.Format("Download aborted by user: {0}", fileName), ex);
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true, FailedException = ex });
                             return false;
                         }
                         catch (System.IO.DirectoryNotFoundException ex)
                         {
-                            Logger.Warn(String.Format("Download failed because of a missing folder in the file path: {0}" , ex.Message ));
+                            Logger.Warn(String.Format("Download failed because of a missing folder in the file path: {0}", ex.Message));
                             success = false;
                         }
                         catch (Exception ex)
                         {
                             Logger.Error("Download failed: " + fileName + " " + ex);
                             success = false;
-                            Logger.Debug("Removing temp download file: "+ tmpfilepath);
+                            Logger.Debug("Removing temp download file: " + tmpfilepath);
                             File.Delete(tmpfilepath);
                             success = false;
-                            if(ex is CmisBaseException)
+                            if (ex is CmisBaseException)
                             {
-                                database.SetOperationRetryCounter(filepath,database.GetOperationRetryCounter(filepath,Database.OperationType.DOWNLOAD)+1,Database.OperationType.DOWNLOAD);
+                                database.SetOperationRetryCounter(filepath, database.GetOperationRetryCounter(filepath, Database.OperationType.DOWNLOAD) + 1, Database.OperationType.DOWNLOAD);
                             }
                         }
 
@@ -903,7 +911,15 @@ namespace CmisSync.Lib.Sync
 
                             Logger.Debug("Added to database: " + fileName);
                         }
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Completed = true});
+
+                        if (success)
+                        {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Completed = true });
+                        }
+                        else
+                        {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
+                        }
                         return success;
                     }
                     catch (IOException e)
@@ -1200,7 +1216,7 @@ namespace CmisSync.Lib.Sync
                 {
                     retries++;
                     database.SetOperationRetryCounter(filePath, retries, Database.OperationType.UPLOAD);
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true});
+                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true, FailedException = e });
                     Logger.Warn(String.Format("Updating content of {0} failed {1} times: ", filePath, retries), e);
                     return false;
                 }

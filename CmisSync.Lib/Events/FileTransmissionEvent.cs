@@ -52,6 +52,8 @@ namespace CmisSync.Lib.Events
         /// </value>
         public TransmissionProgressEventArgs Status { get {return this.status;} private set { this.status = value; } }
 
+        private object statusLock = new object();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileTransmissionEvent"/> class.
         /// </summary>
@@ -95,14 +97,18 @@ namespace CmisSync.Lib.Events
         /// </param>
         public void ReportProgress(TransmissionProgressEventArgs status)
         {
+            lock (statusLock)
+            {
+                Status.Aborting = (status.Aborting != null) ? status.Aborting : Status.Aborting;
                 Status.Aborted = (status.Aborted != null) ? status.Aborted : Status.Aborted;
                 Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
                 Status.Length = (status.Length != null) ? status.Length : Status.Length;
                 Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
-				Status.Started = (status.Started != null) ? status.Started : Status.Started;
+                Status.Started = (status.Started != null) ? status.Started : Status.Started;
                 Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
-            if (TransmissionStatus != null)
-                TransmissionStatus(this, Status);
+                if (TransmissionStatus != null)
+                    TransmissionStatus(this, Status);
+            }
         }
     }
 
@@ -164,6 +170,14 @@ namespace CmisSync.Lib.Events
         /// Transmission resumed.
         /// </value>
         public bool? Resumed { get; set; }
+
+        /// <summary>
+        /// Gets or sets if the transmission is aborting.
+        /// </summary>
+        /// <value>
+        /// Transmission aborted.
+        /// </value>
+        public bool? Aborting { get; set; }
 
         /// <summary>
         /// Gets or sets if the transmission is aborted.
@@ -234,6 +248,7 @@ namespace CmisSync.Lib.Events
             ActualPosition = null;
             Paused = null;
             Resumed = null;
+            Aborting = null;
             Aborted = null;
             FailedException = null;
         }
@@ -266,6 +281,7 @@ namespace CmisSync.Lib.Events
                     (ActualPosition == e.ActualPosition) &&
                     (Paused == e.Paused) &&
                     (Resumed == e.Resumed) &&
+                    (Aborting == e.Aborting) &&
                     (Aborted == e.Aborted) &&
                     (FailedException == e.FailedException);
         }
@@ -295,7 +311,9 @@ namespace CmisSync.Lib.Events
                 status += "Paused";
             if(Resumed == true)
                 status += "Resumed";
-            if(Aborted == true)
+            if (Aborting == true)
+                status += "Aborting";
+            if (Aborted == true)
                 status += "Aborted";
             if(Completed == true)
                 status += "Completed";

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
@@ -27,7 +27,6 @@ namespace TestLibrary.ContentTasksTests
         private MemoryStream localFileStream;
         private HashAlgorithm hashAlg;
         private long remoteLength;
-        private Stream remoteStream;
         private byte[] remoteContent;
         private RandomNumberGenerator random;
         private Mock<IDocument> mockedDocument;
@@ -50,14 +49,13 @@ namespace TestLibrary.ContentTasksTests
                 random.Dispose ();
             random = RandomNumberGenerator.Create ();
             random.GetBytes (remoteContent);
-            remoteStream = new MemoryStream (remoteContent);
-            mockedDocument = new Mock<IDocument> ();
+            mockedMemStream = new Mock<MemoryStream>(remoteContent) { CallBase = true };
             mockedStream = new Mock<IContentStream> ();
-            mockedDocument.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
-            mockedDocument.Setup (doc => doc.GetContentStream ()).Returns (mockedStream.Object);
-            mockedMemStream = new Mock<MemoryStream> (remoteContent){CallBase = true};
-            mockedStream.Setup (stream => stream.Length).Returns (remoteLength);
-            mockedStream.Setup (stream => stream.Stream).Returns (mockedMemStream.Object);
+            mockedStream.Setup(stream => stream.Length).Returns(remoteLength);
+            mockedStream.Setup(stream => stream.Stream).Returns(mockedMemStream.Object);
+            mockedDocument = new Mock<IDocument>();
+            mockedDocument.Setup(doc => doc.ContentStreamLength).Returns(remoteLength);
+            mockedDocument.Setup(doc => doc.GetContentStream ()).Returns(mockedStream.Object);
         }
 
         [Test, Category("Fast")]
@@ -80,7 +78,6 @@ namespace TestLibrary.ContentTasksTests
                     Assert.GreaterOrEqual (e.Length, 0);
                     Assert.LessOrEqual (e.Length, remoteLength);
                 }
-
             };
             using (IFileDownloader downloader = new SimpleFileDownloader()) {
                 downloader.DownloadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
@@ -124,9 +121,44 @@ namespace TestLibrary.ContentTasksTests
                 }
                 t.Wait ();
                 Assert.Fail ();
-            } catch (AggregateException e) {
-                Assert.IsInstanceOf (typeof(ObjectDisposedException), e.InnerException);
             }
+            catch (AggregateException e)
+            {
+                Assert.IsInstanceOf(typeof(ObjectDisposedException), e.InnerException);
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void AbortWhileDownloadTest()
+        {
+            //long position = 0;
+            //int ret = 0;
+            //mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
+            //    .Callback((byte[] buffer, int offset, int count) => { Thread.Sleep(1); for (ret = 0; ret < count && position < remoteLength; ++ret, ++position) { buffer[ret] = remoteContent[position]; } })
+            //    .Returns((byte[] buffer, int offset, int count) => ret);
+            mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
+            {
+                Assert.AreEqual(null, e.Completed);
+            };
+            try
+            {
+                Task t;
+                IFileDownloader downloader = new SimpleFileDownloader();
+                t = Task.Factory.StartNew(() => downloader.DownloadFile(mockedDocument.Object, localFileStream, transmissionEvent, hashAlg));
+                t.Wait(100);
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
+                t.Wait();
+                Assert.Fail();
+            }
+            catch (AggregateException e)
+            {
+                Assert.IsInstanceOf(typeof(AbortException), e.InnerException);
+                Assert.True(transmissionEvent.Status.Aborted.GetValueOrDefault());
+                Assert.AreEqual(false, transmissionEvent.Status.Aborting);
+                return;
+            }
+            Assert.Fail();
         }
 
         #region boilerplate
@@ -152,8 +184,6 @@ namespace TestLibrary.ContentTasksTests
                 if (!disposed) {
                     if (this.localFileStream != null)
                         this.localFileStream.Dispose ();
-                    if (this.remoteStream != null)
-                        this.remoteStream.Dispose ();
                     if (hashAlg != null)
                         this.hashAlg.Dispose ();
                     if (this.random != null)

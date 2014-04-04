@@ -56,6 +56,7 @@ namespace CmisSync.Lib.Events
                 if(!activeTransmissions.Contains(transmission)) {
                     transmission.TransmissionStatus += TransmissionFinished;
                     activeTransmissions.Add(transmission);
+                    transmission.ReportProgress(transmission.Status);
                     return true;
                 }
             }
