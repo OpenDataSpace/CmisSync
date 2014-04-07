@@ -21,6 +21,24 @@ namespace TestLibrary.EventsTests
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
 
+        [Test, Category("Fast")]
+        public void DefaultConstructorWithoutParamWorks()
+        {
+            new SyncEventManager();
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorWithNameIsNullFails()
+        {
+            new SyncEventManager(null);
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorTakesNameAsParameter()
+        {
+            new SyncEventManager("");
+        }
 
         [Test, Category("Fast")]
         public void AddHandlerTest() {
