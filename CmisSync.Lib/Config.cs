@@ -387,13 +387,13 @@ namespace CmisSync.Lib
       <maximumFileSize value=""5MB"" />
       <staticLogFileName value=""true"" />
       <layout type=""log4net.Layout.PatternLayout"">
-        <conversionPattern value=""%date [%thread] %-5level %logger - %message%newline"" />
+        <conversionPattern value=""%date [%thread] %-5level %logger [%property{NDC}] - %message%newline"" />
       </layout>
     </appender>
     <appender name=""ConsoleAppender"" type=""log4net.Appender.ConsoleAppender"">
 
       <layout type=""log4net.Layout.PatternLayout"">
-        <conversionPattern value=""%-4timestamp [%thread] %-5level %logger %ndc - %message%newline"" />
+        <conversionPattern value=""%-4timestamp [%thread] %-5level %logger [%property{NDC}] - %message%newline"" />
       </layout>
     </appender>
     <root>
