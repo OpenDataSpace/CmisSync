@@ -32,6 +32,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private void ChangeLogSync(IFolder remoteFolder)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("ChangeLogSync({0})", remoteFolder.Name)))
+                {
                 // Get last change log token on server side.
                 session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
                 string lastTokenOnServer = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
@@ -133,6 +135,7 @@ namespace CmisSync.Lib.Sync
                     }
                 }
                 while (!lastTokenOnServer.Equals(lastTokenOnClient));
+                }
             }
 
 

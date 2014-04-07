@@ -176,6 +176,8 @@ namespace CmisSync.Lib.Sync
             public SynchronizedFolder(RepoInfo repoInfo,
                 IActivityListener listener, RepoBase repoCmis)
             {
+                using(log4net.NDC.Push("Constructor: " + repoInfo.Name))
+                {
                 if (null == repoInfo || null == repoCmis)
                 {
                     throw new ArgumentNullException("repoInfo");
@@ -211,6 +213,7 @@ namespace CmisSync.Lib.Sync
                     this.changesOnFileSystemDetected = true;
                     return true;
                 }));
+                }
             }
 
             /// <summary>
@@ -305,6 +308,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             public void Connect()
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push("Connect"))
+                {
                 try
                 {
                     // Create session factory.
@@ -380,6 +385,8 @@ namespace CmisSync.Lib.Sync
                 {
                     Logger.Error("Failed to create session to remote " + this.repoinfo.Address.ToString() + ": ", e);
                 }
+                }
+
             }
 
             /// <summary>
@@ -407,6 +414,8 @@ namespace CmisSync.Lib.Sync
             public void Sync()
             {
                 lock(syncLock) {
+                    using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("[{0}]Sync()", this.repoinfo.Name)))
+                    {
                     // If not connected, connect.
                     if (session == null || reconnect)
                     {
@@ -435,7 +444,7 @@ namespace CmisSync.Lib.Sync
 
                     if (ChangeLogCapability)
                     {
-                        Logger.Debug("Invoke a remote change log sync");
+                        Logger.Debug("Invoke a remote change log sync" + (changesOnFileSystemDetected? "Local Changes detected" : ""));
                         ChangeLogSync(remoteFolder);
                         if(changesOnFileSystemDetected)
                         {
@@ -451,6 +460,7 @@ namespace CmisSync.Lib.Sync
                         Logger.Debug("Invoke a remote crawl sync");
                         CrawlSync(remoteFolder, localFolder);
                     }
+                    }
                 }
             }
 
@@ -463,7 +473,7 @@ namespace CmisSync.Lib.Sync
                 lock(bgSyncingLock) {
                     if (backgroundSyncing)
                     {
-                        //Logger.Debug("Already executing a sync process in background");
+                        Logger.Debug("Already executing a sync process in background");
                         return;
                     } else {
                         backgroundSyncing = true;

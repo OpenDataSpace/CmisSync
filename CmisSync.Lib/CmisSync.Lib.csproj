@@ -89,6 +89,7 @@
     </Compile>
     <Compile Include="ActivityListenerAggregator.cs" />
     <Compile Include="Cmis\PersistentNtlmAuthenticationProvider.cs" />
+    <Compile Include="Cmis\DotCMISLogListener.cs" />
     <Compile Include="ContentTasks\ChunkedDownloader.cs" />
     <Compile Include="ContentTasks\ChunkedUploader.cs" />
     <Compile Include="ContentTasks\IFileDownloader.cs" />

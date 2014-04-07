@@ -157,7 +157,7 @@ namespace CmisSync.Lib
         /// </summary>
         public RepoBase(RepoInfo repoInfo)
         {
-            EventManager = new SyncEventManager();
+            EventManager = new SyncEventManager(repoInfo.Name);
             EventManager.AddEventHandler(new DebugLoggingHandler());
             Queue = new SyncEventQueue(EventManager);
             RepoInfo = repoInfo;

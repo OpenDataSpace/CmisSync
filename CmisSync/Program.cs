@@ -24,6 +24,7 @@ using log4net;
 using log4net.Config;
 using CmisSync.Lib.Sync;
 using System.Net;
+using System.Diagnostics;
 
 [assembly: CLSCompliant(true)]
 
@@ -82,7 +83,7 @@ namespace CmisSync
             }
 
             Logger.Info("Starting. Version: " + CmisSync.Lib.Backend.Version);
-
+            Trace.Listeners.Add(new CmisSync.Lib.Cmis.DotCMISLogListener());
             if (args.Length != 0 && !args[0].Equals("start") &&
                 Backend.Platform != PlatformID.MacOSX &&
                 Backend.Platform != PlatformID.Win32NT)
