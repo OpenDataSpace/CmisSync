@@ -482,6 +482,7 @@ namespace CmisSync
                 {
                     aRepo.Stopped = true;
                 }
+                Logger.Debug("Start to stop all active file transmissions");
                 do {
                     List<FileTransmissionEvent> activeList = activitiesManager.ActiveTransmissionsAsList();
                     foreach (FileTransmissionEvent transmissionEvent in activeList)
@@ -499,7 +500,12 @@ namespace CmisSync
                     {
                         Thread.Sleep(100);
                     }
+                    else
+                    {
+                        break;
+                    }
                 } while (true);
+                Logger.Debug("Finish to stop all active file transmissions");
             }
         }
 

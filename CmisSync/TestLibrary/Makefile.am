@@ -91,8 +91,7 @@ SOURCES =  \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
 	UtilsTests/CredentialsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
-	WatcherTest.cs \
-    MoqExtensions/MoqExtensions.cs 
+	WatcherTest.cs 
 	
 
 EXTRA_DIST = TestLibrary.csproj \

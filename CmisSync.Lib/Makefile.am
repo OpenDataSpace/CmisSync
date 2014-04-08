@@ -20,6 +20,7 @@ SOURCES =  \
 	Config.cs \
 	ConfigManager.cs \
 	ConfigMigration.cs \
+	ContentTasks/AbortException.cs \
 	ContentTasks/ChunkedDownloader.cs \
 	ContentTasks/ChunkedUploader.cs \
 	ContentTasks/IFileDownloader.cs \

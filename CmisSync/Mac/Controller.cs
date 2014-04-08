@@ -109,6 +109,24 @@ namespace CmisSync {
                 NSApplication.Init ();
             }
 
+            NSWorkspace.SharedWorkspace.NotificationCenter.AddObserver(
+                NSWorkspace.WillSleepNotification,
+                delegate
+                {
+                    Logger.Info (String.Format ("Machine sleep event detected, stop all repositories"));
+                    StopAll();
+                }
+            );
+
+            NSWorkspace.SharedWorkspace.NotificationCenter.AddObserver(
+                NSWorkspace.DidWakeNotification,
+                delegate
+                {
+                    Logger.Info (String.Format ("Machine sleep event detected, start all repositories"));
+                    StartAll();
+                }
+            );
+
             // We get the Default notification Center
             notificationCenter = NSUserNotificationCenter.DefaultUserNotificationCenter;
 
