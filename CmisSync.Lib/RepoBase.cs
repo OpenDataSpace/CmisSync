@@ -1,4 +1,4 @@
-//   CmisSync, a collaboration and sharing tool.
+﻿//   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -83,6 +83,10 @@ namespace CmisSync.Lib
         /// </summary>
         public SyncStatus Status { get; private set; }
 
+        /// <summary>
+        /// Whether stopped, to control for machine sleep/wake power management.
+        /// </summary>
+        public bool Stopped { get; set; }
 
         /// <summary>
         /// Stop syncing momentarily.

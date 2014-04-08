@@ -474,6 +474,46 @@ namespace CmisSync
             }
         }
 
+        public void StopAll()
+        {
+            lock (this.repo_lock)
+            {
+                foreach (RepoBase aRepo in this.repositories)
+                {
+                    aRepo.Stopped = true;
+                }
+                do {
+                    List<FileTransmissionEvent> activeList = activitiesManager.ActiveTransmissionsAsList();
+                    foreach (FileTransmissionEvent transmissionEvent in activeList)
+                    {
+                        if (transmissionEvent.Status.Aborted.GetValueOrDefault())
+                        {
+                            continue;
+                        }
+                        if (!transmissionEvent.Status.Aborting.GetValueOrDefault())
+                        {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborting=true});
+                        }
+                    }
+                    if (activeList.Count > 0)
+                    {
+                        Thread.Sleep(100);
+                    }
+                } while (true);
+            }
+        }
+
+        public void StartAll()
+        {
+            lock (this.repo_lock)
+            {
+                foreach (RepoBase aRepo in this.repositories)
+                {
+                    aRepo.Stopped = false;
+                }
+            }
+        }
+
 
         /// <summary>
         /// Check the configured CmisSync synchronized folders.

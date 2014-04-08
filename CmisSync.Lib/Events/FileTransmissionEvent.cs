@@ -42,6 +42,8 @@ namespace CmisSync.Lib.Events
         /// </summary>
         public event TransmissionEventHandler TransmissionStatus = delegate { };
 
+        private object statusLock = new object();
+
         private TransmissionProgressEventArgs status;
 
         /// <summary>
@@ -50,9 +52,24 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The status.
         /// </value>
-        public TransmissionProgressEventArgs Status { get {return this.status;} private set { this.status = value; } }
-
-        private object statusLock = new object();
+        public TransmissionProgressEventArgs Status
+        {
+            get
+            {
+                lock (statusLock)
+                {
+                    return this.status;
+                }
+            }
+            
+            private set
+            {
+                lock (statusLock)
+                {
+                    this.status = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileTransmissionEvent"/> class.
