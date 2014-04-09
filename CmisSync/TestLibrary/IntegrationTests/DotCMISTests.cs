@@ -22,6 +22,7 @@ using Newtonsoft.Json;
 
 using NUnit.Framework;
 using DotCMIS.Enums;
+using System.Security.Cryptography;
 
 
 
@@ -198,6 +199,46 @@ namespace TestLibrary.IntegrationTests
                 emptyDoc.SetContentStream(contentStream, true, true);
             }
             Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength);
+            emptyDoc.DeleteAllVersions();
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void SetJPEGContentStream(string canonical_name, string localPath, string remoteFolderPath,
+            string url, string user, string password, string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string filename = "testfile.jpg";
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            try{
+                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc!=null) {
+                    doc.Delete(true);
+                    Console.WriteLine("Old file deleted");
+                }
+            }catch(CmisObjectNotFoundException){}
+            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            Assert.That(emptyDoc.ContentStreamLength == null || emptyDoc.ContentStreamLength == 0, "returned document shouldn't got any content");
+            int contentLength = 1024;
+            byte[] content = new byte[contentLength];
+            using(RandomNumberGenerator random = RandomNumberGenerator.Create()){
+                random.GetBytes(content);
+            }
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = filename;
+            contentStream.MimeType = MimeType.GetMIMEType(filename);
+            contentStream.Length = content.Length;
+            using(var memstream = new MemoryStream(content)){
+                contentStream.Stream = memstream;
+                Console.WriteLine("content: " + memstream.Length);
+                emptyDoc.SetContentStream(contentStream, true, true);
+            }
+            Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength, "Setting content failed");
+            IDocument randomDoc = session.GetObjectByPath(emptyDoc.Paths[0]) as IDocument;
+            Assert.That (randomDoc != null);
+            Assert.AreEqual (content.Length, randomDoc.ContentStreamLength, "Getting content on new object failed");
             emptyDoc.DeleteAllVersions();
         }
     }
