@@ -43,6 +43,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void GetNullAttributeFromNewFile()
         {
             using (File.Create(path));
@@ -52,6 +53,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void SetAttributeToFile()
         {
             using (File.Create(path));
@@ -63,6 +65,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void OverwriteAttributeOnFile()
         {
             using (File.Create(path));
@@ -76,6 +79,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void RemoveAttributeFromFile()
         {
             using (File.Create(path));
@@ -89,6 +93,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void ListAttributesOfFile()
         {
             using (File.Create(path));
@@ -102,6 +107,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void GetNullAttributeFromNewFolder()
         {
             Directory.CreateDirectory(path);
@@ -111,6 +117,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void SetAttributeToFolder()
         {
             Directory.CreateDirectory(path);
@@ -122,6 +129,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void OverwriteAttributeOnFolder()
         {
             Directory.CreateDirectory(path);
@@ -135,6 +143,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void RemoveAttributeFromFolder()
         {
             Directory.CreateDirectory(path);
@@ -148,6 +157,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void ListAttributesOfFolder()
         {
             Directory.CreateDirectory(path);
