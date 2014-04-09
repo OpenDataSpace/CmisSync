@@ -11,6 +11,7 @@ using NUnit.Framework;
 using Moq;
 using System.IO;
 using TestLibrary.TestUtils;
+using CmisSync.Lib.Events;
 
 namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 {
@@ -31,7 +32,6 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
         }
 
         // Incomplete
-        [Ignore]
         [Test, Category("Fast"), Category("SituationDetection")]
         public void NoChangeDetectionTest()
         {
@@ -39,7 +39,8 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var storage = new Mock<IMetaDataStorage>();
             IFileInfo fileInfo = new Mock<IFileInfo>().Object;
             var detection = new LocalSituationDetection(fsFactory.Object);
-            detection.Analyse(storage.Object, fileInfo);
+            var fileEvent = new FileEvent(Mock.Of<IFileInfo>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IDocument>());
+            detection.Analyse(storage.Object, fileEvent);
             Assert.Fail ("TODO");
         }
 
@@ -50,14 +51,15 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             string NonExistingFileOrFolderFullName = Path.Combine("testfolder", NonExistingFileOrFolderName);
             var fsFactory = new Mock<IFileSystemInfoFactory>();
             var storage = new Mock<IMetaDataStorage>();
-            var fileSystemInfo = new Mock<IFileSystemInfo>();
-            fileSystemInfo.Setup(file => file.Exists).Returns(false);
-            fileSystemInfo.Setup(file => file.Name).Returns(NonExistingFileOrFolderName);
-            fileSystemInfo.Setup(file => file.FullName).Returns(NonExistingFileOrFolderFullName);
-            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileSystemInfo>(path => path.FullName == NonExistingFileOrFolderFullName))).Returns((AbstractMappedObject) null);
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(file => file.Exists).Returns(false);
+            fileInfo.Setup(file => file.Name).Returns(NonExistingFileOrFolderName);
+            fileInfo.Setup(file => file.FullName).Returns(NonExistingFileOrFolderFullName);
+            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileInfo>(path => path.FullName == NonExistingFileOrFolderFullName))).Returns((AbstractMappedObject) null);
+            var fileEvent = new FileEvent(fileInfo.Object, null, null);
 
             var detection = new LocalSituationDetection(fsFactory.Object);
-            Assert.That(detection.Analyse(storage.Object, fileSystemInfo.Object), Is.EqualTo(SituationType.NOCHANGE));
+            Assert.That(detection.Analyse(storage.Object, fileEvent), Is.EqualTo(SituationType.NOCHANGE));
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
@@ -72,9 +74,10 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             fileInfo.Setup(file => file.Name).Returns(ExistingFileName);
             fileInfo.Setup(file => file.FullName).Returns(ExistingFileFullName);
             storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileSystemInfo>(path => path.FullName == ExistingFileFullName))).Returns((AbstractMappedObject) null);
+            var fileEvent = new FileEvent(fileInfo.Object);
 
             var detection = new LocalSituationDetection(fsFactory.Object);
-            Assert.That(detection.Analyse(storage.Object, fileInfo.Object), Is.EqualTo(SituationType.ADDED));
+            Assert.That(detection.Analyse(storage.Object, fileEvent), Is.EqualTo(SituationType.ADDED));
         }
 
         [Ignore]
@@ -131,8 +134,10 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             fileInfo.Setup(file => file.Name).Returns(NonExistingFileOrFolderName);
             fileInfo.Setup(file => file.FullName).Returns(NonExistingFileOrFolderFullName);
             storage.AddLocalFile(NonExistingFileOrFolderFullName, "testId");
+            var fileEvent = new FileEvent(fileInfo.Object);
+
             var detection = new LocalSituationDetection(fsFactory.Object);
-            Assert.That(detection.Analyse(storage.Object, fileInfo.Object), Is.EqualTo(SituationType.REMOVED));
+            Assert.That(detection.Analyse(storage.Object, fileEvent), Is.EqualTo(SituationType.REMOVED));
         }
 
         [Ignore]

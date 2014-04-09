@@ -7,10 +7,11 @@ using DotCMIS.Exceptions;
 using System.Collections.Generic;
 
 using log4net;
+using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
-    public class RemoteSituationDetection : ISituationDetection<IObjectId>
+    public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
@@ -23,16 +24,17 @@ namespace CmisSync.Lib.Sync.Strategy
             Session = session;
         }
 
-        public SituationType Analyse(IMetaDataStorage storage, IObjectId objectId) 
+        public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            SituationType type = DoAnalyse(storage, objectId);
+            SituationType type = DoAnalyse(storage, actualEvent);
             logger.Debug(String.Format("Remote Situation is: {0}", type));
             return type;
 
         }
 
-        private SituationType DoAnalyse(IMetaDataStorage storage, IObjectId objectId)
+        private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
+            /*
             //Object has never been uploaded
             if(objectId == null) {
                 return SituationType.NOCHANGE;
@@ -47,6 +49,8 @@ namespace CmisSync.Lib.Sync.Strategy
                 return SituationType.REMOVED;
             }
             return SituationType.NOCHANGE;
+            */
+            throw new NotImplementedException();
         }
 
     }

@@ -4,10 +4,11 @@ using System.IO;
 using CmisSync.Lib.Storage;
 
 using log4net;
+using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
-    public class LocalSituationDetection : ISituationDetection<IFileSystemInfo>
+    public class LocalSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(LocalSituationDetection));
 
@@ -20,15 +21,16 @@ namespace CmisSync.Lib.Sync.Strategy
                 FsFactory = fsFactory;
         }
 
-        public SituationType Analyse(IMetaDataStorage storage, IFileSystemInfo actualObject)
+        public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            SituationType type = DoAnalyse(storage, actualObject);
+            SituationType type = DoAnalyse(storage, actualEvent);
             logger.Debug(String.Format("Local Situation is: {0}", type));
             return type;
-                            
         }
-        private SituationType DoAnalyse(IMetaDataStorage storage, IFileSystemInfo actualObject)
+
+        private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
+            /*
             actualObject.Refresh();
             if(!actualObject.Exists)
             {
@@ -44,7 +46,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 // Move & Rename & Added & NoChange are possible
                 if(storage.GetObjectByLocalPath(actualObject) == null )
                     return SituationType.ADDED;
-            }
+            }*/
             throw new NotImplementedException();
         }
     }

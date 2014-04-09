@@ -15,11 +15,11 @@ namespace CmisSync.Lib.Sync.Strategy
         private IMetaDataStorage Storage;
 
         public ISolver[,] Solver;
-        public ISituationDetection<IFileSystemInfo> LocalSituation;
-        public ISituationDetection<IObjectId> RemoteSituation;
+        public ISituationDetection<AbstractFolderEvent> LocalSituation;
+        public ISituationDetection<AbstractFolderEvent> RemoteSituation;
 
-        public SyncMechanism (ISituationDetection<IFileSystemInfo> localSituation,
-                              ISituationDetection<IObjectId> remoteSituation,
+        public SyncMechanism (ISituationDetection<AbstractFolderEvent> localSituation,
+                              ISituationDetection<AbstractFolderEvent> remoteSituation,
                               ISyncEventQueue queue,
                               ISession session,
                               IMetaDataStorage storage,
@@ -92,7 +92,7 @@ namespace CmisSync.Lib.Sync.Strategy
         public override bool Handle (ISyncEvent e)
         {
             if (e is FolderEvent) {
-                HandleMetaData ((e as FolderEvent).LocalFolder,(e as FolderEvent).RemoteFolder);
+                HandleMetaData ((e as FolderEvent));
                 return true;
             }
             if (e is FileEvent) {
@@ -102,28 +102,40 @@ namespace CmisSync.Lib.Sync.Strategy
             return false;
         }
 
-        private void HandleMetaData (IFileSystemInfo localObject, IObjectId remoteObject)
+        private void HandleMetaData (AbstractFolderEvent actualEvent)
         {
-            int localSituation = (int)LocalSituation.Analyse (Storage, localObject);
-            int remoteSituation = (int)RemoteSituation.Analyse (Storage, remoteObject);
+            int localSituation = (int)LocalSituation.Analyse (Storage, actualEvent);
+            int remoteSituation = (int)RemoteSituation.Analyse (Storage, actualEvent);
             ISolver solver = Solver [localSituation, remoteSituation];
             if (solver != null)
             try{
-                solver.Solve(Session, Storage, localObject, remoteObject);
+                Solve (solver, actualEvent);
             }catch(DotCMIS.Exceptions.CmisBaseException) {
-                int newLocalSituation = (int) LocalSituation.Analyse(Storage, localObject);
-                int newRemoteSituation = (int) RemoteSituation.Analyse(Storage, remoteObject);
+                int newLocalSituation = (int) LocalSituation.Analyse(Storage, actualEvent);
+                int newRemoteSituation = (int) RemoteSituation.Analyse(Storage, actualEvent);
                 solver = Solver [newLocalSituation, newRemoteSituation];
                 if(solver != null)
-                    solver.Solve(Session, Storage, localObject, remoteObject);
+                    Solve (solver, actualEvent);
             }
-                
         }
 
         private void HandleFileEvent (FileEvent file)
         {
-            HandleMetaData (file.LocalFile, file.RemoteFile);
+            HandleMetaData (file);
             //TODO Content sync if Situation is 
+        }
+
+        private void Solve(ISolver s, AbstractFolderEvent e)
+        {
+
+            if(e is FolderEvent)
+            {
+                s.Solve(Session, Storage, (e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder);
+            }
+            else if( e is FileEvent)
+            {
+                s.Solve(Session, Storage, (e as FileEvent).LocalFile, (e as FileEvent).RemoteFile);
+            }
         }
     }
 }
