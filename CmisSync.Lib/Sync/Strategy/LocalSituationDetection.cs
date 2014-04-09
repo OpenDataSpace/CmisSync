@@ -30,7 +30,11 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            /*
+            IFileSystemInfo actualObject = null;
+            if(actualEvent is FileEvent)
+                actualObject = (actualEvent as FileEvent).LocalFile;
+            if(actualEvent is FolderEvent)
+                actualObject = (actualEvent as FolderEvent).LocalFolder;
             actualObject.Refresh();
             if(!actualObject.Exists)
             {
@@ -46,7 +50,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 // Move & Rename & Added & NoChange are possible
                 if(storage.GetObjectByLocalPath(actualObject) == null )
                     return SituationType.ADDED;
-            }*/
+            }
             throw new NotImplementedException();
         }
     }

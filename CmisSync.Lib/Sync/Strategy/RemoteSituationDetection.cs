@@ -34,14 +34,18 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            /*
+            string objectId = null;
+            if(actualEvent is FileEvent && (actualEvent as FileEvent).RemoteFile != null)
+                objectId = (actualEvent as FileEvent).RemoteFile.Id;
+            if(actualEvent is FolderEvent && (actualEvent as FolderEvent).RemoteFolder != null)
+                objectId = (actualEvent as FolderEvent).RemoteFolder.Id;
             //Object has never been uploaded
             if(objectId == null) {
                 return SituationType.NOCHANGE;
             }
             try {
                 ICmisObject remoteObject = Session.GetObject(objectId);
-                if(storage.GetObjectByRemoteId(objectId.Id) == null )
+                if(storage.GetObjectByRemoteId(objectId) == null )
                 {
                     return SituationType.ADDED;
                 }
@@ -49,8 +53,6 @@ namespace CmisSync.Lib.Sync.Strategy
                 return SituationType.REMOVED;
             }
             return SituationType.NOCHANGE;
-            */
-            throw new NotImplementedException();
         }
 
     }
