@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using DotCMIS.Client;
-using DotCMIS.Client;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Data;
