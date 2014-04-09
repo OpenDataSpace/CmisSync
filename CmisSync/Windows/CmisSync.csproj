@@ -102,6 +102,7 @@
       <DependentUpon>Properties.Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="CertPolicyWindow.cs" />
+    <Compile Include="CircularProgressBar.xaml.cs" />
     <Compile Include="Edit.cs" />
     <Compile Include="FolderTreeMVC\InvalidPatternConverter.cs" />
     <Compile Include="FolderTreeMVC\NodeLoader.cs" />
@@ -306,6 +307,10 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="CircularProgressBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="SettingWPF.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
