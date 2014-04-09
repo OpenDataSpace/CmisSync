@@ -6,6 +6,7 @@ using System.ComponentModel;
 using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace CmisSync
 {
@@ -79,6 +80,43 @@ namespace CmisSync
             Controller.CloseWindow();
         }
 
+        private TextBlock addressLabel;
+        private TextBox addressBox;
+        private TextBlock userLabel;
+        private TextBox userBox;
+        private TextBlock passwordLabel;
+        private PasswordBox passwordBox;
+        private TextBlock passwordHelp;
+
+        private void CheckPassword()
+        {
+            passwordHelp.Text = "logging in";
+            passwordBox.IsEnabled = false;
+            ServerCredentials cred = new ServerCredentials()
+            {
+                Address = Credentials.Address,
+                UserName = Credentials.UserName,
+                Password = passwordBox.Password
+            };
+            new TaskFactory().StartNew(() =>
+            {
+                string output;
+                try
+                {
+                    CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
+                    output = "login successful";
+                }
+                catch (Exception e)
+                {
+                    output = "login failed: " + e.Message;
+                }
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    passwordHelp.Text = output;
+                    passwordBox.IsEnabled = true;
+                });
+            });
+        }
 
         /// <summary>
         /// Create the UI
@@ -116,39 +154,43 @@ namespace CmisSync
                 }
             }));
 
-            TextBlock addressLabel = new TextBlock()
+            addressLabel = new TextBlock()
             {
                 Text = Properties_Resources.CmisWebAddress + ":",
                 FontWeight = FontWeights.Bold
             };
-            TextBox addressBox = new TextBox()
+            addressBox = new TextBox()
             {
                 Width = 410,
                 Text = this.Credentials.Address.ToString(),
                 IsEnabled = false
             };
-            TextBlock userLabel = new TextBlock()
+            userLabel = new TextBlock()
             {
                 Width = 200,
                 Text = Properties_Resources.User + ":",
                 FontWeight = FontWeights.Bold
             };
-            TextBox userBox = new TextBox()
+            userBox = new TextBox()
             {
                 Width = 200,
                 Text = this.Credentials.UserName,
                 IsEnabled = false
             };
-            TextBlock passwordLabel = new TextBlock()
+            passwordLabel = new TextBlock()
             {
                 Width = 200,
                 Text = Properties_Resources.Password + ":",
                 FontWeight = FontWeights.Bold
             };
-            PasswordBox passwordBox = new PasswordBox()
+            passwordBox = new PasswordBox()
             {
                 Width = 200,
                 Password = this.Credentials.Password.ToString()
+            };
+            passwordHelp = new TextBlock()
+            {
+                Width = 200,
             };
 
             Canvas canvasSelection = new Canvas();
@@ -177,6 +219,12 @@ namespace CmisSync
             canvasCredentials.Children.Add(passwordBox);
             Canvas.SetTop(passwordBox, 120);
             Canvas.SetLeft(passwordBox, 220);
+            canvasCredentials.Children.Add(passwordHelp);
+            Canvas.SetTop(passwordHelp, 140);
+            Canvas.SetLeft(passwordHelp, 220);
+
+            passwordBox.LostFocus += delegate { CheckPassword(); };
+            CheckPassword();
 
             TabControl tab = new TabControl();
 
@@ -215,7 +263,7 @@ namespace CmisSync
             Button finish_button = new Button()
             {
                 Content = Properties_Resources.SaveChanges,
-                IsDefault = true
+                IsDefault = false
             };
 
             Button cancel_button = new Button()
