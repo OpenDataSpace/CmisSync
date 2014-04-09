@@ -88,8 +88,7 @@ namespace TestLibrary.TestUtils
                                             f.RemoteObjectId == id &&
                                             f.GetLocalPath() == path.FullName &&
                                             f.ExistsLocally() == path.Exists);
-            db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>( s => s == id))).Returns(file);
-            db.Setup(foo => foo.GetObjectByLocalPath(It.Is<IFileInfo>(f => f.FullName == path.FullName))).Returns(file);
+            db.AddMappedFile(file);
         }
 
         public static void AddLocalFolder( this Mock<IMetaDataStorage> db, string path, string id) {
@@ -101,8 +100,7 @@ namespace TestLibrary.TestUtils
             var folder = new Mock<MappedFolder>("path","/", null) { CallBase = true};
             folder.Setup(f => f.GetLocalPath()).Returns(path.FullName);
             folder.Setup (f => f.RemoteObjectId).Returns(id);
-            db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>( s => s == id))).Returns(folder.Object);
-            db.Setup(foo => foo.GetObjectByLocalPath(It.Is<IDirectoryInfo>(dir => dir.FullName == path.FullName))).Returns(folder.Object);
+            db.AddMappedFolder(folder.Object);
         }
 
         public static void AddMappedFile(this Mock<IMetaDataStorage> db, IMappedFile file) {
