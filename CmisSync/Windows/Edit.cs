@@ -6,6 +6,7 @@ using System.ComponentModel;
 using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace CmisSync
 {
@@ -150,6 +151,10 @@ namespace CmisSync
                 Width = 200,
                 Password = this.Credentials.Password.ToString()
             };
+            TextBlock passwordHelp = new TextBlock()
+            {
+                Width = 200,
+            };
 
             Canvas canvasSelection = new Canvas();
             canvasSelection.Width = 430;
@@ -177,6 +182,40 @@ namespace CmisSync
             canvasCredentials.Children.Add(passwordBox);
             Canvas.SetTop(passwordBox, 120);
             Canvas.SetLeft(passwordBox, 220);
+            canvasCredentials.Children.Add(passwordHelp);
+            Canvas.SetTop(passwordHelp, 140);
+            Canvas.SetLeft(passwordHelp, 220);
+
+            passwordBox.LostFocus += delegate
+            {
+                passwordHelp.Text = "logging in";
+                passwordBox.IsEnabled = false;
+                ServerCredentials cred = new ServerCredentials()
+                {
+                    Address = Credentials.Address,
+                    UserName = Credentials.UserName,
+                    Password = passwordBox.Password
+                };
+                new TaskFactory().StartNew(() =>
+                {
+                    string output;
+                    try
+                    {
+                        CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
+                        output = "login successful";
+                    }
+                    catch (Exception e)
+                    {
+                        output = "login failed: " + e.Message;
+                    }
+                    Dispatcher.BeginInvoke((Action)delegate
+                    {
+                        passwordHelp.Text = output;
+                        passwordBox.IsEnabled = true;
+                    });
+                });
+            };
+            passwordBox.Focus();
 
             TabControl tab = new TabControl();
 
@@ -215,7 +254,7 @@ namespace CmisSync
             Button finish_button = new Button()
             {
                 Content = Properties_Resources.SaveChanges,
-                IsDefault = true
+                IsDefault = false
             };
 
             Button cancel_button = new Button()
