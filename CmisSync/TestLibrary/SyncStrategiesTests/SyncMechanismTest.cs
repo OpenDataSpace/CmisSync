@@ -5,6 +5,7 @@ using CmisSync.Lib.Storage;
 using CmisSync.Lib.Sync.Strategy;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Sync.Solver;
+using CmisSync.Lib.Data;
 
 using DotCMIS.Client;
 using DotCMIS.Client.Impl;
@@ -12,6 +13,8 @@ using DotCMIS.Client.Impl;
 using NUnit.Framework;
 
 using Moq;
+
+using TestLibrary.TestUtils;
 
 namespace TestLibrary.SyncStrategiesTests
 {
@@ -175,6 +178,53 @@ namespace TestLibrary.SyncStrategiesTests
 
             localDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<IFileSystemInfo>()), Times.Exactly(2));
             remoteDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<IObjectId>()), Times.Exactly(2));
+        }
+
+        [Test, Category("Fast"), Category("IT")]
+        public void LocalFolderMoveAndRemoteFolderRenameSituation()
+        {
+            string remoteId = Guid.NewGuid().ToString();
+            string oldFolderName = "oldName";
+            string newRemoteName = "newName";
+            string oldLocalPath = Path.Combine(Path.GetTempPath(), oldFolderName);
+            string newLocalPath = Path.Combine(Path.GetTempPath(), "new", oldFolderName);
+            string oldRemotePath = "/" + oldFolderName;
+            string newRemotePath = "/" + newRemoteName;
+            string oldLastChangeToken = Guid.NewGuid().ToString();
+            string newLastChangeToken = Guid.NewGuid().ToString();
+            DateTime? oldWriteTime = DateTime.UtcNow;
+            DateTime? newWriteTime = ((DateTime) oldWriteTime).AddMilliseconds(500);
+
+            var oldLocalFolder = Mock.Of<IDirectoryInfo>(d =>
+                                                         d.Name == oldFolderName &&
+                                                         d.FullName == oldLocalPath);
+            var newLocalFolder = Mock.Of<IDirectoryInfo>(d =>
+                                                         d.Name == oldFolderName &&
+                                                         d.FullName == newLocalPath);
+            var oldLocalParent = Mock.Of<IMappedFolder>( p =>
+                                                       p.Name == "/" &&
+                                                       p.Parent == (IMappedFolder) null &&
+                                                       p.LastRemoteWriteTimeUtc == oldWriteTime);
+            Storage.AddMappedFolder(Mock.Of<IMappedFolder>( f =>
+                                                           f.RemoteObjectId == remoteId &&
+                                                           f.Name == oldFolderName &&
+                                                           f.Parent == oldLocalParent &&
+                                                           f.LastChangeToken == oldLastChangeToken &&
+                                                           f.GetLocalPath() == oldLocalPath &&
+                                                           f.GetRemotePath() == oldRemotePath &&
+                                                           f.LastRemoteWriteTimeUtc == oldWriteTime));
+            Session.AddRemoteObject(Mock.Of<IFolder>(f =>
+                                                     f.Id == remoteId &&
+                                                     f.Name == newRemoteName &&
+                                                     f.Path == newRemotePath &&
+                                                     f.ChangeToken == newLastChangeToken &&
+                                                     f.LastModificationDate == ((DateTime) newWriteTime).AddMilliseconds(500)));
+            var localFS = new Mock<IFileSystemInfoFactory>();
+            var localDetection = new LocalSituationDetection(localFS.Object);
+            var remoteDetection = new RemoteSituationDetection(Session.Object);
+            var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
+            var folderEvent = new FolderMovedEvent(oldLocalFolder, newLocalFolder, null, null);
+            mechanism.Handle(folderEvent);
         }
 
         [Ignore]
