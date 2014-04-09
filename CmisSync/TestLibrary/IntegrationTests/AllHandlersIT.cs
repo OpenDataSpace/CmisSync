@@ -54,7 +54,7 @@ namespace TestLibrary.IntegrationTests
             var changes = new ContentChanges (session.Object, storage.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
             manager.AddEventHandler(changes);
 
-            var transformer = new ContentChangeEventTransformer(queue, storage.Object, fsFactory.Object);
+            var transformer = new ContentChangeEventTransformer(queue, storage.Object, (fsFactory == null) ? null : fsFactory.Object);
             manager.AddEventHandler(transformer);
 
             var ccaccumulator = new ContentChangeEventAccumulator(session.Object, queue);
@@ -66,7 +66,7 @@ namespace TestLibrary.IntegrationTests
             var watcher = new Mock<Strategy.Watcher>(queue){CallBase = true};
             manager.AddEventHandler(watcher.Object);
 
-            var localDetection = new LocalSituationDetection();
+            var localDetection = new LocalSituationDetection((fsFactory == null) ? null : fsFactory.Object);
             var remoteDetection = new RemoteSituationDetection(session.Object);
             var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage.Object);
             manager.AddEventHandler(syncMechanism);
