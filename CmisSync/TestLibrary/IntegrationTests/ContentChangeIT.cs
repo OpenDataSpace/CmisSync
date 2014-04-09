@@ -30,13 +30,6 @@ namespace TestLibrary.IntegrationTests
         private readonly bool isPropertyChangesSupported = false;
         private readonly int maxNumberOfContentChanges = 1000;
         
-        private Mock<IFolder> CreateRemoteFolderMock(string folderId){
-            var newRemoteObject = new Mock<IFolder> ();
-            newRemoteObject.Setup(d => d.Id).Returns(folderId);
-            return newRemoteObject;
-        }
-
-
         private static readonly string defaultId = "defaultId";
 
         
@@ -49,13 +42,6 @@ namespace TestLibrary.IntegrationTests
             return session;
         }
 
-        private Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type) {
-            var session = MockUtil.PrepareSessionMockForSingleChange(type);
-            var newRemoteObject =  CreateRemoteFolderMock("folderId");
-            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
-         
-            return session;
-        }
 
 
         private ObservableHandler RunQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage) {
@@ -75,9 +61,7 @@ namespace TestLibrary.IntegrationTests
             var accumulator = new ContentChangeEventAccumulator(session.Object, queue);
             manager.AddEventHandler(accumulator);
 
-            var startSyncEvent = new StartNextSyncEvent (false);
-            queue.AddEvent(startSyncEvent);
-            queue.Run();
+            queue.RunStartSyncEvent();
 
             return observer;
         }
@@ -143,7 +127,7 @@ namespace TestLibrary.IntegrationTests
         {
             Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
-            Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created);
+            Mock<ISession> session = MockUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created);
             ObservableHandler observer = RunQueue(session, storage);
 
             observer.AssertGotSingleFolderEvent(MetaDataChangeType.CREATED);
@@ -154,7 +138,7 @@ namespace TestLibrary.IntegrationTests
         {
             Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
 
-            Mock<ISession> session = GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted);
+            Mock<ISession> session = MockUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted);
             ObservableHandler observer = RunQueue(session, storage);
             Assert.That(observer.list.Count, Is.EqualTo(0));
 

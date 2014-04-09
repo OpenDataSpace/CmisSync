@@ -154,5 +154,18 @@ namespace TestLibrary.StorageTests {
             Assert.That(dirInfo.GetFiles().Length, Is.EqualTo(0));
         }
 
+        [Test, Category("Medium")]
+        public void DeleteTrue() {
+            string fileName = "test1";
+            string fullPath = Path.Combine(testFolder.FullName, fileName);
+            IDirectoryInfo dirInfo = factory.CreateDirectoryInfo(fullPath);
+            dirInfo.Create();
+            Assert.That(dirInfo.Exists, Is.EqualTo(true));
+            dirInfo.Delete(true);
+            dirInfo.Refresh();
+            Assert.That(dirInfo.Exists, Is.EqualTo(false));
+
+        }
+
     }
 }

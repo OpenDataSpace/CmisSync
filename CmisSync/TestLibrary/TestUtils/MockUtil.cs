@@ -139,6 +139,14 @@ namespace TestLibrary.TestUtils
             return remoteFolder;
         }
 
+        public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid") {
+            var session = MockUtil.PrepareSessionMockForSingleChange(type, id);
+            var newRemoteObject =  CreateRemoteFolderMock(id);
+            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
+         
+            return session;
+        }
+
     }
 
 }

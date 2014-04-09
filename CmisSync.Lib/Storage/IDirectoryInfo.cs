@@ -10,5 +10,6 @@ namespace CmisSync.Lib.Storage
         void Create ();
         IDirectoryInfo[] GetDirectories ();
         IFileInfo[] GetFiles ();
+        void Delete (bool recursive);
     }
 }

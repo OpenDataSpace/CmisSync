@@ -18,6 +18,11 @@ namespace CmisSync.Lib.Storage
             original.Create();
         }
 
+        public void Delete (bool recursive) 
+        {
+            original.Delete(true);
+        }
+
         public IDirectoryInfo Parent {
             get { 
                 return new DirectoryInfoWrapper(original.Parent);

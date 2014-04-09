@@ -37,5 +37,11 @@ namespace TestLibrary
                 Step();
             }
         }
+
+        public void RunStartSyncEvent() {
+            var startSyncEvent = new StartNextSyncEvent (false);
+            AddEvent(startSyncEvent);
+            Run();
+        }
     }
 }

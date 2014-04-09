@@ -40,7 +40,11 @@ namespace TestLibrary.IntegrationTests
             return CreateQueue(session, storage, new ObservableHandler());
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage, ObservableHandler observer) {
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage, Mock<IFileSystemInfoFactory> fsFactory){
+            return CreateQueue(session, storage, new ObservableHandler(), fsFactory);
+        }
+
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage, ObservableHandler observer, Mock<IFileSystemInfoFactory> fsFactory = null) {
 
             var manager = new SyncEventManager();
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
@@ -50,7 +54,7 @@ namespace TestLibrary.IntegrationTests
             var changes = new ContentChanges (session.Object, storage.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
             manager.AddEventHandler(changes);
 
-            var transformer = new ContentChangeEventTransformer(queue, storage.Object);
+            var transformer = new ContentChangeEventTransformer(queue, storage.Object, fsFactory.Object);
             manager.AddEventHandler(transformer);
 
             var ccaccumulator = new ContentChangeEventAccumulator(session.Object, queue);
@@ -118,11 +122,9 @@ namespace TestLibrary.IntegrationTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
-            var myEvent = new StartNextSyncEvent();
             var observer = new ObservableHandler();
             var queue = CreateQueue(session, storage, observer);
-            queue.AddEvent(myEvent);
-            queue.Run();
+            queue.RunStartSyncEvent();
             Assert.That(observer.list.Count, Is.EqualTo(1));
             Assert.That(observer.list[0], Is.TypeOf(typeof(FullSyncCompletedEvent)));
         }
@@ -147,6 +149,26 @@ namespace TestLibrary.IntegrationTests
             queue.Run();
 
             session.Verify(f => f.Delete(It.Is<IObjectId>(i=>i.Id==id), true), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void ContentChangeIndicatesFolderDeletionOfExistingFolder ()
+        {
+            string path = "/tmp/a";
+            string id = "1";
+            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
+            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.Exists).Returns(false);
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            fsFactory.Setup(f => f.CreateDirectoryInfo(path)).Returns(dirInfo.Object);
+
+            Mock<ISession> session = MockUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
+            storage.AddLocalFolder(path, id);
+
+            var queue = CreateQueue(session, storage, fsFactory);
+            queue.RunStartSyncEvent();               
+            dirInfo.Verify(d => d.Delete(true), Times.Once());
         }
 
     }

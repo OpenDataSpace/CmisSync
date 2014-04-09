@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Events
                                   Local,
                                   Remote,
                                   LocalFolder != null ? LocalFolder.Name : "",
-                                  RemoteFolder.Name);
+                                  RemoteFolder!= null ? RemoteFolder.Name : "");
         }
     }
 

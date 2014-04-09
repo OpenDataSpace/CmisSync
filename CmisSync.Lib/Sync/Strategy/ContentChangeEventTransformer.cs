@@ -37,6 +37,7 @@ namespace CmisSync.Lib.Sync.Strategy {
         }
 
         private void HandleDeletion(ContentChangeEvent contentChangeEvent) {
+            Logger.Debug(contentChangeEvent.ObjectId);
             IMappedObject savedObject = storage.GetObjectByRemoteId(contentChangeEvent.ObjectId);
             if(savedObject != null)
             {
@@ -55,7 +56,7 @@ namespace CmisSync.Lib.Sync.Strategy {
                     return;
                 }
             }
-            //If nothing found in local storage it has never been synced -> nop
+            Logger.Debug("nothing found in local storage; it has never been synced");
         }
 
         private void HandleAsIDocument(ContentChangeEvent contentChangeEvent){
@@ -124,7 +125,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             Queue.AddEvent(folderEvent);
         }
 
-        public ContentChangeEventTransformer(ISyncEventQueue queue, IMetaDataStorage storage, FileSystemInfoFactory fsFactory = null): base(queue) {
+        public ContentChangeEventTransformer(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null): base(queue) {
             
             if(storage == null)
                 throw new ArgumentNullException("Storage instance is needed for the ContentChangeEventTransformer, but was null");
