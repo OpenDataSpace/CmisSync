@@ -113,6 +113,33 @@ namespace TestLibrary.TestUtils
             db.Setup( foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == folder.RemoteObjectId))).Returns(folder);
         }
 
+        public static void AddRemoteObject(this Mock<ISession> session, ICmisObject remoteObject) {
+            session.Setup( s => s.GetObject(It.Is<string>(id => id == remoteObject.Id))).Returns(remoteObject);
+            HashSet<string> paths = new HashSet<string>();
+            if(remoteObject is IFolder)
+            {
+                paths.Add((remoteObject as IFolder).Path);
+                if((remoteObject as IFolder).Paths != null)
+                {
+                    foreach(string path in (remoteObject as IFolder).Paths)
+                    {
+                        paths.Add(path);
+                    }
+                }
+            }
+            else if (remoteObject is IDocument)
+            {
+                foreach(string path in (remoteObject as IDocument).Paths)
+                {
+                    paths.Add(path);
+                }
+            }
+            foreach(string path in paths)
+            {
+                session.Setup( s => s.GetObjectByPath(It.Is<string>(p => p == path))).Returns(remoteObject);
+            }
+        }
+
         public static Mock<IFolder> CreateCmisFolder(List<string> fileNames = null, List<string> folderNames = null, bool contentStream = false) {
             var remoteFolder = new Mock<IFolder>();
             var remoteChildren = new Mock<IItemEnumerable<ICmisObject>>();
