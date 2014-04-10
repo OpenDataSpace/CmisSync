@@ -91,16 +91,17 @@ namespace TestLibrary.TestUtils
             db.AddMappedFile(file);
         }
 
-        public static void AddLocalFolder( this Mock<IMetaDataStorage> db, string path, string id) {
+        public static Mock<MappedFolder> AddLocalFolder( this Mock<IMetaDataStorage> db, string path, string id) {
             var folder = Mock.Of<IDirectoryInfo>(d => d.FullName == path);
-            db.AddLocalFolder(folder, id);
+            return db.AddLocalFolder(folder, id);
         }
 
-        public static void AddLocalFolder(this Mock<IMetaDataStorage> db, IDirectoryInfo path, string id ) {
+        public static Mock<MappedFolder> AddLocalFolder(this Mock<IMetaDataStorage> db, IDirectoryInfo path, string id ) {
             var folder = new Mock<MappedFolder>("path","/", null) { CallBase = true};
             folder.Setup(f => f.GetLocalPath()).Returns(path.FullName);
             folder.Setup (f => f.RemoteObjectId).Returns(id);
             db.AddMappedFolder(folder.Object);
+            return folder;
         }
 
         public static void AddMappedFile(this Mock<IMetaDataStorage> db, IMappedFile file) {

@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Data;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Storage;
 using Strategy = CmisSync.Lib.Sync.Strategy;
@@ -164,11 +165,12 @@ namespace TestLibrary.IntegrationTests
             fsFactory.Setup(f => f.CreateDirectoryInfo(path)).Returns(dirInfo.Object);
 
             Mock<ISession> session = MockUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
-            storage.AddLocalFolder(path, id);
+            Mock<MappedFolder> folder = storage.AddLocalFolder(path, id);
 
             var queue = CreateQueue(session, storage, fsFactory);
             queue.RunStartSyncEvent();               
             dirInfo.Verify(d => d.Delete(true), Times.Once());
+            folder.Verify(f => f.Remove(), Times.Once());
         }
 
     }

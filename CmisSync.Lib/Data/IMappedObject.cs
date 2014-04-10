@@ -36,6 +36,8 @@ namespace CmisSync.Lib.Data
         bool ExistsLocally ();
 
         IFileSystemInfoFactory FsFactory { get; }
+
+        void Remove ();
     }
 
 }

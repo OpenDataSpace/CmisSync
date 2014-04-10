@@ -56,5 +56,10 @@ namespace CmisSync.Lib.Data
         public virtual string Description { get; set; }
 
         public abstract bool ExistsLocally ();
+
+        public void Remove()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
