@@ -254,7 +254,7 @@ namespace CmisSync.Lib
             list.Add ("*.crdownload");
             list.Add ("*.un~");
             list.Add ("*.swp");
-            list.Add ( "*.swo");
+            list.Add ("*.swo");
             return list;
         }
 
@@ -284,11 +284,27 @@ namespace CmisSync.Lib
             this.configXml.Log4Net = node;
         }
 
+        /// <summary>
+        /// Gets and sets the list of file name wildcards which should be ignored on sync
+        /// </summary>
         public List<string> IgnoreFileNames {
-            get { return this.configXml.IgnoreFileNames; }
+            get {
+                List<string> copy = new List<string>(this.configXml.IgnoreFileNames);
+                if (!copy.Contains("*.sync"))
+                {
+                    copy.Add("*.sync");
+                }
+                if (!copy.Contains("*.cmissync"))
+                {
+                    copy.Add("*.cmissync");
+                }
+                return copy; }
             set { this.configXml.IgnoreFileNames = value; }
         }
 
+        /// <summary>
+        /// Gets and sets the list of folder name wildcards which should be ignored on sync
+        /// </summary>
         public List<string> IgnoreFolderNames {
             get { return this.configXml.IgnoreFolderNames; }
             set { this.configXml.IgnoreFolderNames = value; }
@@ -315,7 +331,7 @@ namespace CmisSync.Lib
                 PollInterval = repoInfo.PollInterval,
                 SupportedFeatures = null
             };
-            foreach (string ignoredFolder in repoInfo.getIgnoredPaths())
+            foreach (string ignoredFolder in repoInfo.GetIgnoredPaths())
             {
                 folder.IgnoredFolders.Add(new IgnoredFolder(){Path = ignoredFolder});
             }
@@ -371,13 +387,13 @@ namespace CmisSync.Lib
       <maximumFileSize value=""5MB"" />
       <staticLogFileName value=""true"" />
       <layout type=""log4net.Layout.PatternLayout"">
-        <conversionPattern value=""%date [%thread] %-5level %logger - %message%newline"" />
+        <conversionPattern value=""%date [%thread] %-5level %logger [%property{NDC}] - %message%newline"" />
       </layout>
     </appender>
     <appender name=""ConsoleAppender"" type=""log4net.Appender.ConsoleAppender"">
 
       <layout type=""log4net.Layout.PatternLayout"">
-        <conversionPattern value=""%-4timestamp [%thread] %-5level %logger %ndc - %message%newline"" />
+        <conversionPattern value=""%-4timestamp [%thread] %-5level %logger [%property{NDC}] - %message%newline"" />
       </layout>
     </appender>
     <root>
@@ -654,7 +670,7 @@ namespace CmisSync.Lib
                         repoInfo.PollInterval = PollInterval;
                     foreach (IgnoredFolder ignoredFolder in IgnoredFolders)
                     {
-                        repoInfo.addIgnorePath(ignoredFolder.Path);
+                        repoInfo.AddIgnorePath(ignoredFolder.Path);
                     }
                     if(SupportedFeatures != null && SupportedFeatures.ChunkedSupport != null && SupportedFeatures.ChunkedSupport == true)
                     {

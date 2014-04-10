@@ -32,6 +32,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private void ChangeLogSync(IFolder remoteFolder)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("ChangeLogSync({0})", remoteFolder.Name)))
+                {
                 // Get last change log token on server side.
                 session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
                 string lastTokenOnServer = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
@@ -73,6 +75,7 @@ namespace CmisSync.Lib.Sync
                     bool success = true;
                     foreach (IChangeEvent change in changes.ChangeEventList)
                     {
+                        sleepWhileSuspended();
                         try
                         {
                             switch (change.ChangeType)
@@ -132,6 +135,7 @@ namespace CmisSync.Lib.Sync
                     }
                 }
                 while (!lastTokenOnServer.Equals(lastTokenOnClient));
+                }
             }
 
 
@@ -173,7 +177,7 @@ namespace CmisSync.Lib.Sync
                 {
                     if (!Utils.WorthSyncing(remoteDocument.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
                     {
-                        Logger.Info("Change in remote unworth syncing file: " + remoteDocument.Paths);
+                        Logger.Info("Change in remote unworth syncing file: " + remoteDocument.Paths[0]);
                         return true;
                     }
                     if (remoteDocument.Paths.Count == 0)
@@ -205,7 +209,7 @@ namespace CmisSync.Lib.Sync
                     return true;    // The change is not under the folder we care about.
                 }
 
-                if (this.repoinfo.isPathIgnored(remotePath))
+                if (this.repoinfo.IsPathIgnored(remotePath))
                 {
                     Logger.Info("Change in ignored path: " + remotePath);
                     return true;

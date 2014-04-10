@@ -28,6 +28,7 @@ using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
 using log4net;
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Events.Filter;
 
 #if __COCOA__
 using Edit = CmisSync.EditWizardController;
@@ -109,10 +110,15 @@ namespace CmisSync
         public event AlertNotificationRaisedEventHandler AlertNotificationRaised = delegate { };
         public delegate void AlertNotificationRaisedEventHandler(string title, string message);
 
-        public event CmisSync.Lib.Events.ShowChangePasswordEventHandler ShowChangePassword = delegate { };
+        public delegate void ShowChangePasswordEventHandler(string reponame);
+        public event ShowChangePasswordEventHandler ShowChangePassword = delegate { };
 
         public delegate void SuccessfulLoginEventHandler (string reponame);
         public event SuccessfulLoginEventHandler SuccessfulLogin = delegate { };
+
+        public delegate void ProxyAuthRequiredEventHandler (string reponame);
+        public event ProxyAuthRequiredEventHandler ProxyAuthReqired = delegate { };
+
 
         /// <summary>
         /// Get the repositories configured in CmisSync.
@@ -215,7 +221,7 @@ namespace CmisSync
         }
 
         public List<FileTransmissionEvent> ActiveTransmissions() {
-            return this.activitiesManager.ActiveTransmissions.ToList<FileTransmissionEvent>();
+            return this.activitiesManager.ActiveTransmissionsAsList();
         }
 
 
@@ -279,9 +285,16 @@ namespace CmisSync
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 return false;
             }));
-            repo.EventManager.AddEventHandler(new PermissionDeniedEventHandler(repositoryInfo.Name, delegate(string reponame) {
-                ShowChangePassword(reponame);
-                }));
+            repo.EventManager.AddEventHandler(new GenericHandleDoublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
+            repo.EventManager.AddEventHandler(new GenericHandleDoublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
+            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<ProxyAuthRequiredEvent>(0, delegate(ISyncEvent e) {
+                ProxyAuthReqired(repositoryInfo.Name);
+                return true;
+            }));
+            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<PermissionDeniedEvent>(0, delegate(ISyncEvent e) {
+                ShowChangePassword(repositoryInfo.Name);
+                return true;
+            }));
             repo.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>( 0, delegate(ISyncEvent e) {
                 SuccessfulLogin(repositoryInfo.Name);
                 return false;
@@ -559,7 +572,7 @@ namespace CmisSync
             repoInfo.PollInterval = 5000;
             repoInfo.MaxUploadRetries = 2;
             foreach (string ignore in ignoredPaths)
-                repoInfo.addIgnorePath(ignore);
+                repoInfo.AddIgnorePath(ignore);
 
             fetcher = new Fetcher(repoInfo, activityListenerAggregator);
             this.FinishFetcher();

@@ -149,7 +149,7 @@ namespace CmisSync.Lib
         /// slash. Path separator must also be a slash.
         /// </summary>
         /// <param name="path"></param>
-        public void addIgnorePath(string path)
+        public void AddIgnorePath(string path)
         {
             if(!this.ignoredPaths.Contains(path) && !String.IsNullOrEmpty(path))
                 this.ignoredPaths.Add(path);
@@ -160,7 +160,7 @@ namespace CmisSync.Lib
         /// will be returned.
         /// </summary>
         /// <returns>all ignored folders</returns>
-        public string[] getIgnoredPaths()
+        public string[] GetIgnoredPaths()
         {
             return ignoredPaths.ToArray();
         }
@@ -184,16 +184,24 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public bool isPathIgnored(string path)
+        public bool IsPathIgnored(string path)
         {
-            if(Utils.IsInvalidFolderName(path.Replace("/", "").Replace("\"",""), new List<string>()))
-                return true;
+            string[] names = path.Split("/".ToCharArray());
+            foreach(string name in names)
+            {
+                if(Utils.IsInvalidFolderName(name, new List<string>()))
+                    return true;
+            }
             return !String.IsNullOrEmpty(ignoredPaths.Find(delegate(string ignore)
             {
                 if (String.IsNullOrEmpty(ignore)) {
                     return false;
                 }
-                return path.StartsWith(ignore);
+                if(path.Equals(ignore))
+                {
+                    return true;
+                }
+                return (path.StartsWith(ignore) && path[ignore.Length] == '/');
             }));
         }
     }

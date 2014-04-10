@@ -14,6 +14,7 @@ SOURCES =  \
 	Cmis/CmisUtils.cs \
 	Cmis/Crypto.cs \
 	Cmis/Database.cs \
+	Cmis/DotCMISLogListener.cs \
 	Cmis/IDatabase.cs \
 	Cmis/MimeType.cs \
 	Cmis/PersistentNtlmAuthenticationProvider.cs \
@@ -43,6 +44,7 @@ SOURCES =  \
 	Events/EncapsuledEvent.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
 	Events/EventFilter/FailedOperationsFilter.cs \
+	Events/EventFilter/GenericHandleDoublicatedEventsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
 	Events/EventFilter/IgnoredFilesFilter.cs \
 	Events/EventFilter/IgnoredFolderNameFilter.cs \
@@ -61,7 +63,7 @@ SOURCES =  \
 	Events/ISyncEvent.cs \
 	Events/ISyncEventQueue.cs \
 	Events/PermissionDeniedEvent.cs \
-	Events/PermissionDeniedEventHandler.cs \
+	Events/ProxyAuthRequiredEvent.cs \
 	Events/RecentChangedEvent.cs \
 	Events/RemoteEvent.cs \
 	Events/ReportingSyncEventHandler.cs \

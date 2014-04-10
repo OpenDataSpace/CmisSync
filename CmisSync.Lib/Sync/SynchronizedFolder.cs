@@ -85,11 +85,19 @@ namespace CmisSync.Lib.Sync
 
 
             /// <summary>
-            /// Syncing lock.
-            /// true if syncing is being performed right now.
-            /// TODO use is_syncing variable in parent
+            /// Backgound syncing flag.
             /// </summary>
-            private bool syncing;
+            private bool backgroundSyncing = false;
+
+            /// <summary>
+            /// The background syncing lock for operations on the flag.
+            /// </summary>
+            private Object bgSyncingLock = new Object();
+
+            /// <summary>
+            /// The sync lock for executing only one sync process per instance
+            /// </summary>
+            private Object syncLock = new Object();
 
 
             /// <summary>
@@ -168,6 +176,8 @@ namespace CmisSync.Lib.Sync
             public SynchronizedFolder(RepoInfo repoInfo,
                 IActivityListener listener, RepoBase repoCmis)
             {
+                using(log4net.NDC.Push("Constructor: " + repoInfo.Name))
+                {
                 if (null == repoInfo || null == repoCmis)
                 {
                     throw new ArgumentNullException("repoInfo");
@@ -190,7 +200,7 @@ namespace CmisSync.Lib.Sync
                 UpdateCmisParameters();
                 if (Logger.IsInfoEnabled)
                 {
-                    foreach (string ignoredFolder in repoinfo.getIgnoredPaths())
+                    foreach (string ignoredFolder in repoinfo.GetIgnoredPaths())
                     {
                         Logger.Info("The folder \"" + ignoredFolder + "\" will be ignored");
                     }
@@ -204,6 +214,7 @@ namespace CmisSync.Lib.Sync
                     this.changesOnFileSystemDetected = true;
                     return true;
                 }));
+                }
             }
 
             /// <summary>
@@ -298,6 +309,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             public void Connect()
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push("Connect"))
+                {
                 try
                 {
                     // Create session factory.
@@ -355,7 +368,15 @@ namespace CmisSync.Lib.Sync
                 }
                 catch (CmisRuntimeException e)
                 {
-                    Logger.Error("Connection to repository failed: ", e);
+                    if(e.Message == "Proxy Authentication Required")
+                    {
+                        Queue.AddEvent(new ProxyAuthRequiredEvent(e));
+                        Logger.Warn("Proxy Settings Problem", e);
+                    }
+                    else
+                    {
+                        Logger.Error("Connection to repository failed: ", e);
+                    }
                 }
                 catch (CmisObjectNotFoundException e)
                 {
@@ -365,6 +386,8 @@ namespace CmisSync.Lib.Sync
                 {
                     Logger.Error("Failed to create session to remote " + this.repoinfo.Address.ToString() + ": ", e);
                 }
+                }
+
             }
 
             /// <summary>
@@ -391,49 +414,54 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             public void Sync()
             {
-                //// If not connected, connect.
-                if (session == null || reconnect)
-                {
-                    Connect();
-                } else {
-                    //  Force to reset the cache for each Sync
-                    session.Clear();
-                }
-                sleepWhileSuspended();
-
-                if (session == null)
-                {
-                    Logger.Error("Could not connect to: " + cmisParameters[SessionParameter.AtomPubUrl]);
-                    return; // Will try again at next sync. 
-                }
-
-                IFolder remoteFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
-                string localFolder = repoinfo.TargetDirectory;
-
-                if (!syncFull)
-                {
-                    Logger.Debug("Invoke a full crawl sync");
-                    syncFull = CrawlSync(remoteFolder, localFolder);
-                    return;
-                }
-
-                if (ChangeLogCapability)
-                {
-                    Logger.Debug("Invoke a remote change log sync");
-                    ChangeLogSync(remoteFolder);
-                    if(changesOnFileSystemDetected)
+                lock(syncLock) {
+                    using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("[{0}]Sync()", this.repoinfo.Name)))
                     {
-                        Logger.Debug("Changes on the local file system detected => starting crawl sync");
-                        changesOnFileSystemDetected = false;
-                        if (!CrawlSync(remoteFolder, localFolder))
-                            changesOnFileSystemDetected = true;
+                    // If not connected, connect.
+                    if (session == null || reconnect)
+                    {
+                        Connect();
+                    } else {
+                        // Force to reset the cache for each Sync
+                        session.Clear();
                     }
-                }
-                else
-                {
-                    //  have to crawl remote
-                    Logger.Debug("Invoke a remote crawl sync");
-                    CrawlSync(remoteFolder, localFolder);
+                    sleepWhileSuspended();
+
+                    if (session == null)
+                    {
+                        Logger.Error("Could not connect to: " + cmisParameters[SessionParameter.AtomPubUrl]);
+                        return; // Will try again at next sync.
+                    }
+
+                    IFolder remoteFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+                    string localFolder = repoinfo.TargetDirectory;
+
+                    if (!syncFull)
+                    {
+                        Logger.Debug("Invoke a full crawl sync");
+                        syncFull = CrawlSync(remoteFolder, localFolder);
+                        return;
+                    }
+
+                    if (ChangeLogCapability)
+                    {
+                        Logger.Debug("Invoke a remote change log sync" + (changesOnFileSystemDetected? "Local Changes detected" : ""));
+                        ChangeLogSync(remoteFolder);
+                        if(changesOnFileSystemDetected)
+                        {
+                            Logger.Debug("Changes on the local file system detected => starting crawl sync");
+                            changesOnFileSystemDetected = false;
+                            if (!CrawlSync(remoteFolder, localFolder))
+                                changesOnFileSystemDetected = true;
+                        }
+                    }
+                    else
+                    {
+                        //  have to crawl remote
+                        Logger.Debug("Invoke a remote crawl sync");
+                        CrawlSync(remoteFolder, localFolder);
+                    }
+                    }
                 }
             }
 
@@ -443,13 +471,15 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             public void SyncInBackground()
             {
-                if (this.syncing)
-                {
-                    //Logger.Debug("Sync already running in background: " + repoinfo.TargetDirectory);
-                    return;
+                lock(bgSyncingLock) {
+                    if (backgroundSyncing)
+                    {
+                        Logger.Debug("Already executing a sync process in background");
+                        return;
+                    } else {
+                        backgroundSyncing = true;
+                    }
                 }
-                this.syncing = true;
-
                 using (BackgroundWorker bw = new BackgroundWorker())
                 {
                     bw.DoWork += new DoWorkEventHandler(
@@ -480,7 +510,10 @@ namespace CmisSync.Lib.Sync
                     bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(
                         delegate(object o, RunWorkerCompletedEventArgs args)
                         {
-                            this.syncing = false;
+                            lock(bgSyncingLock)
+                            {
+                                this.backgroundSyncing = false;
+                            }
                         }
                     );
                     bw.RunWorkerAsync();
@@ -493,49 +526,47 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool RecursiveFolderCopy(IFolder remoteFolder, string localFolder)
             {
-                using (new ActivityListenerResource(activityListener))
+                bool success = true;
+
+                try
                 {
-                    bool success = true;
-
-                    try
+                    // List all children.
+                    foreach (ICmisObject cmisObject in remoteFolder.GetChildren())
                     {
-                        // List all children.
-                        foreach (ICmisObject cmisObject in remoteFolder.GetChildren())
+                        sleepWhileSuspended();
+                        if (cmisObject is DotCMIS.Client.Impl.Folder)
                         {
-                            if (cmisObject is DotCMIS.Client.Impl.Folder)
+                            IFolder remoteSubFolder = (IFolder)cmisObject;
+                            string localSubFolder = localFolder + Path.DirectorySeparatorChar.ToString() + cmisObject.Name;
+                            if (!Utils.IsInvalidFolderName(remoteFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(remoteSubFolder.Path))
                             {
-                                IFolder remoteSubFolder = (IFolder)cmisObject;
-                                string localSubFolder = localFolder + Path.DirectorySeparatorChar.ToString() + cmisObject.Name;
-                                if (!Utils.IsInvalidFolderName(remoteFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
-                                {
-                                    // Create local folder.
-                                    Logger.Info("Creating local directory: "+ localSubFolder);
-                                    Directory.CreateDirectory(localSubFolder);
+                                // Create local folder.
+                                Logger.Info("Creating local directory: "+ localSubFolder);
+                                Directory.CreateDirectory(localSubFolder);
 
-                                    // Create database entry for this folder
+                                // Create database entry for this folder
                                     // TODO Add metadata
-                                    database.AddFolder(localSubFolder, remoteSubFolder.Id, remoteSubFolder.LastModificationDate);
+                                database.AddFolder(localSubFolder, remoteSubFolder.Id, remoteSubFolder.LastModificationDate);
 
-                                    // Recurse into folder.
-                                    success = RecursiveFolderCopy(remoteSubFolder, localSubFolder) && success;
-                                }
-                            }
-                            else
-                            {
-                                if (Utils.WorthSyncing(cmisObject.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
-                                    // It is a file, just download it.
-                                    success = DownloadFile((IDocument)cmisObject, localFolder) && success;
+                                // Recurse into folder.
+                                success = RecursiveFolderCopy(remoteSubFolder, localSubFolder) && success;
                             }
                         }
+                        else
+                        {
+                            if (Utils.WorthSyncing(cmisObject.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
+                                // It is a file, just download it.
+                                success = DownloadFile((IDocument)cmisObject, localFolder) && success;
+                        }
                     }
-                    catch (Exception e)
-                    {
-                        Logger.Warn(String.Format("Exception while download to local folder {0}: {1}", localFolder, Utils.ToLogString(e)));
-                        success = false;
-                    }
-
-                    return success;
                 }
+                catch (Exception e)
+                {
+                    Logger.Warn(String.Format("Exception while download to local folder {0}: {1}", localFolder, Utils.ToLogString(e)));
+                    success = false;
+                }
+
+                return success;
             }
 
             /// <summary>
@@ -543,6 +574,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool SyncDownloadFolder(IFolder remoteSubFolder, string localFolder)
             {
+                sleepWhileSuspended();
+
                 string name = remoteSubFolder.Name;
                 string remotePathname = remoteSubFolder.Path;
                 string localSubFolder = Path.Combine(localFolder, name);
@@ -593,7 +626,7 @@ namespace CmisSync.Lib.Sync
                     {
                         Logger.Info("Skipping download of folder with illegal name: " + name);
                     }
-                    else if (repoinfo.isPathIgnored(remotePathname))
+                    else if (repoinfo.IsPathIgnored(remotePathname))
                     {
                         Logger.Info("Skipping dowload of ignored folder: " + remotePathname);
                     }
@@ -618,17 +651,10 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool SyncDownloadFile(IDocument remoteDocument, string localFolder, IList<string> remoteFiles = null)
             {
+                sleepWhileSuspended();
+
                 string fileName = remoteDocument.Name;
                 string filePath = Path.Combine(localFolder, fileName);
-
-                // If this file does not have a filename, ignore it.
-                // It sometimes happen on IBM P8 CMIS server, not sure why.
-                if (remoteDocument.ContentStreamFileName == null)
-                {
-                    //TODO Possibly the file content has been changed to 0, this case should be handled
-                    Logger.Warn("Skipping download of '" + fileName + "' with null content stream in " + localFolder);
-                    return true;
-                }
 
                 if (null != remoteFiles)
                 {
@@ -725,6 +751,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool DownloadFile(IDocument remoteDocument, string localFolder)
             {
+                sleepWhileSuspended();
+
                 RequestFileDownload(remoteDocument, localFolder);
                 using (new ActivityListenerResource(activityListener))
                 {
@@ -903,6 +931,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool UploadFile(string filePath, IFolder remoteFolder)
             {
+                sleepWhileSuspended();
+
                 using (new ActivityListenerResource(activityListener))
                 {
                     long retries = database.GetOperationRetryCounter(filePath, Database.OperationType.UPLOAD);
@@ -1033,6 +1063,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool UploadFolderRecursively(IFolder remoteBaseFolder, string localFolder)
             {
+                sleepWhileSuspended();
+
                 // Create remote folder.
                 Dictionary<string, object> properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.Name, Path.GetFileName(localFolder));
@@ -1090,7 +1122,7 @@ namespace CmisSync.Lib.Sync
                     {
                         string path = subfolder.Substring(repoinfo.TargetDirectory.Length);
                         path = path.Replace("\\\\","/");
-                        if (!Utils.IsInvalidFolderName(Path.GetFileName(subfolder), ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(path))
+                        if (!Utils.IsInvalidFolderName(Path.GetFileName(subfolder), ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(path))
                         {
                             Logger.Debug("Start recursive upload of folder: " + subfolder);
                             success = UploadFolderRecursively(folder, subfolder) && success;

@@ -72,3 +72,8 @@ T: CmisSync.Lib.Events.Filter.FailedOperationsFilter
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
 M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::FullDownloadTest()
 M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::ResumeDownloadTest()
+
+#Ignore AvoidUnnecessarySpecializationRule for PermissionDeniedEvent and ProxyAuthRequiredEvent
+R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
+T: CmisSync.Lib.Events.ProxyAuthRequiredEvent
+T: CmisSync.Lib.Events.PermissionDeniedEvent

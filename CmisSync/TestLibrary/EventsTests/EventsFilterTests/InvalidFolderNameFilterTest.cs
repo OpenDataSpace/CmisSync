@@ -13,21 +13,19 @@ namespace TestLibrary.EventsTests.EventsFilterTests
     [TestFixture]
     public class InvalidFolderNameFilterTest
     {
-        [Test, Category("Fast")]
-        public void ConstructorTest() {
+        [Test, Category("Fast"), Category("EventFilter")]
+        public void ConstructorWorksWithQueue() {
             var queuemock = new Mock<ISyncEventQueue>();
             new InvalidFolderNameFilter(queuemock.Object);
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorExceptionOnNullQueueTest() {
-            try{
+        [Test, Category("Fast"), Category("EventFilter")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsIfQueueIsNull() {
                 new InvalidFolderNameFilter(null);
-                Assert.Fail();
-            }catch(ArgumentNullException) {}
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("EventFilter")]
         public void HandleAndReportTest()
         {
             var queuemock = new Mock<ISyncEventQueue>();

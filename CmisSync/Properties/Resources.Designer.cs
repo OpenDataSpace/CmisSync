@@ -79,7 +79,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add a remote folder….
+        ///   Looks up a localized string similar to Add a Remote Folder….
         /// </summary>
         internal static string AddARemoteFolder {
             get {
@@ -452,12 +452,39 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to logging in.
+        /// </summary>
+        internal static string LoginCheck {
+            get {
+                return ResourceManager.GetString("LoginCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to login failed: {0}.
+        /// </summary>
+        internal static string LoginFailed {
+            get {
+                return ResourceManager.GetString("LoginFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Login failed!
         ///Please check your user credentials and potentially the server URL..
         /// </summary>
         internal static string LoginFailedForbidden {
             get {
                 return ResourceManager.GetString("LoginFailedForbidden", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to login successful.
+        /// </summary>
+        internal static string LoginSuccess {
+            get {
+                return ResourceManager.GetString("LoginSuccess", resourceCulture);
             }
         }
         

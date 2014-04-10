@@ -485,7 +485,7 @@ namespace CmisSync.Lib.Cmis
             try{
                 if (remoteFolder.LastModificationDate != null)
                 {
-                    File.SetLastWriteTimeUtc(folderpath, (DateTime)remoteFolder.LastModificationDate);
+                    Directory.SetLastWriteTimeUtc(folderpath, (DateTime)remoteFolder.LastModificationDate);
                 }
                 else
                 {
@@ -493,7 +493,7 @@ namespace CmisSync.Lib.Cmis
                     if (metadata.TryGetValue("cmis:lastModificationDate", out cmisModDate) && cmisModDate.Length == 3)
                     {
                         DateTime modDate = DateTime.Parse(cmisModDate[2]);
-                        File.SetLastWriteTimeUtc(folderpath, modDate);
+                        Directory.SetLastWriteTimeUtc(folderpath, modDate);
                     }
                 }
             }

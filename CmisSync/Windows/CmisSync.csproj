@@ -105,6 +105,7 @@
       <DependentUpon>AboutWPF.xaml</DependentUpon>
     </Compile>
     <Compile Include="CertPolicyWindow.cs" />
+    <Compile Include="CircularProgressBar.xaml.cs" />
     <Compile Include="Edit.cs" />
     <Compile Include="EditWPF.xaml.cs">
       <DependentUpon>EditWPF.xaml</DependentUpon>
@@ -346,6 +347,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="EditWPF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CircularProgressBar.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

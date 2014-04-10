@@ -16,6 +16,8 @@
 
 
 using System;
+using System.Diagnostics;
+using CmisSync.Notifications;
 
 #if HAVE_APP_INDICATOR
 using AppIndicator;
@@ -33,7 +35,6 @@ namespace CmisSync {
     public class StatusIcon {
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(StatusIcon));
-
 
         public StatusIconController Controller = new StatusIconController ();
 
@@ -64,7 +65,7 @@ namespace CmisSync {
             this.status_icon        = new Gtk.StatusIcon ();
             this.status_icon.Pixbuf = this.animation_frames [0];
 
-            this.status_icon.Activate  += ShowMenu; // Primary mouse button click
+            this.status_icon.Activate  += OpenFolderDelegate(null); // Primary mouse button click shows default folder
             this.status_icon.PopupMenu += ShowMenu; // Secondary mouse button click
 #endif
 
@@ -388,13 +389,18 @@ namespace CmisSync {
             switch(Type) {
             case FileTransmissionType.DOWNLOAD_NEW_FILE:
                 Image = new Image (UIHelpers.GetIcon ("Downloading", 16));
+                TypeString = Properties_Resources.NotificationFileDownload;
                 break;
             case FileTransmissionType.UPLOAD_NEW_FILE:
                 Image = new Image (UIHelpers.GetIcon ("Uploading", 16));
+                TypeString = Properties_Resources.NotificationFileUpload;
                 break;
             case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
-                goto case FileTransmissionType.UPLOAD_MODIFIED_FILE;
+                TypeString = Properties_Resources.NotificationFileUpdateLocal;
+                Image = new Image (UIHelpers.GetIcon ("Updating", 16));
+                break;
             case FileTransmissionType.UPLOAD_MODIFIED_FILE:
+                TypeString = Properties_Resources.NotificationFileUpdateRemote;
                 Image = new Image (UIHelpers.GetIcon ("Updating", 16));
                 break;
             }
@@ -403,6 +409,7 @@ namespace CmisSync {
             Label text = this.Child as Label;
             if(text != null)
                 text.Text = String.Format("{0}: {1} ({2})", TypeString, System.IO.Path.GetFileName(Path), CmisSync.Lib.Utils.FormatPercent(percent));
+            NotificationUtils.NotifyAsync(String.Format("{0}: {1}", TypeString, System.IO.Path.GetFileName(Path)), Path);
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
                 percent = (status.Percent != null)? (double) status.Percent: 0;
                 long? bitsPerSecond = status.BitsPerSecond;
@@ -413,7 +420,6 @@ namespace CmisSync {
                                                   System.IO.Path.GetFileName(Path),
                                                   CmisSync.Lib.Utils.FormatPercent(percent),
                                                   CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
-                    
                     });
                 }
             };

@@ -24,7 +24,27 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The active transmissions.
         /// </value>
-        public ObservableCollection<FileTransmissionEvent> ActiveTransmissions { get { return activeTransmissions; } }
+        public ObservableCollection<FileTransmissionEvent> ActiveTransmissions
+        {
+            get
+            {
+                return activeTransmissions;
+            }
+        }
+
+        /// <summary>
+        /// Active the transmissions as list.
+        /// </summary>
+        /// <returns>
+        /// The transmissions as list.
+        /// </returns>
+        public List<FileTransmissionEvent> ActiveTransmissionsAsList ()
+        {
+            lock(this.Lock)
+            {
+                return activeTransmissions.ToList<FileTransmissionEvent>();
+            }
+        }
 
         /// <summary>
         /// Add a new Transmission to the active transmission manager

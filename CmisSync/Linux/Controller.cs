@@ -22,6 +22,7 @@ using System.IO;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
+using CmisSync.Notifications;
 
 namespace CmisSync {
 
@@ -37,7 +38,16 @@ namespace CmisSync {
         /// <param name="firstRun">Whether it is the first time that CmisSync is being run.</param>
         public override void Initialize(Boolean firstRun)
         {
+            this.ProxyAuthReqired += delegate(string reponame) {
+                NotificationUtils.NotifyAsync(reponame, Properties_Resources.NetworkProxyLogin);
+            };
+
+            this.ShowChangePassword += delegate(string reponame) {
+                NotificationUtils.NotifyAsync(reponame, String.Format(Properties_Resources.NotificationCredentialsError, reponame));
+            };
             base.Initialize(firstRun);
+
+
         }
 
         // Creates a .desktop entry in autostart folder to
@@ -192,7 +202,7 @@ namespace CmisSync {
         public void ShowLog(string path)
         {
             Process process = new Process();
-            process.StartInfo.FileName  = "xterm";
+            process.StartInfo.FileName  = "x-terminal-emulator";
             process.StartInfo.Arguments = "-title \"DataSpace Sync Log\" -e tail -f \"" + path + "\"";
             process.Start ();
         }

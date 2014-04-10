@@ -67,13 +67,17 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool CrawlSync(IFolder remoteFolder, string localFolder)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("CrawlSync({0})", localFolder)))
+                {
                 sleepWhileSuspended();
 
                 if (IsGetDescendantsSupported)
                 {
                     IList<ITree<IFileableCmisObject>> desc;
                     try{
+                        Logger.Debug("Starting getDescendants");
                         desc = remoteFolder.GetDescendants(-1);
+                        Logger.Debug("Finished getDescendants");
                     }catch (DotCMIS.Exceptions.CmisConnectionException ex) {
                         if(ex.InnerException is System.Xml.XmlException)
                         {
@@ -102,6 +106,7 @@ namespace CmisSync.Lib.Sync
                 success = CrawlLocalFolders(localFolder, remoteFolder, remoteSubfolders) && success;
 
                 return success;
+                }
             }
 
             /// <summary>
@@ -113,6 +118,8 @@ namespace CmisSync.Lib.Sync
             /// <returns></returns>
             private bool CrawlDescendants(IFolder remoteFolder, IList<ITree<IFileableCmisObject>> children, string localFolder)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("CrawlDescendants({0})", localFolder)))
+                {
                 bool success = true;
 
                 // Lists of files/folders, to delete those that have been removed on the server.
@@ -127,7 +134,7 @@ namespace CmisSync.Lib.Sync
                         // It is a CMIS folder.
                         IFolder remoteSubFolder = (IFolder)node.Item;
                         remoteSubfolders.Add(remoteSubFolder.Name);
-                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
+                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(remoteSubFolder.Path))
                         {
                             string localSubFolder = Path.Combine(localFolder, remoteSubFolder.Name);
 
@@ -160,6 +167,7 @@ namespace CmisSync.Lib.Sync
                 success = CrawlLocalFiles(localFolder, remoteFolder, remoteFiles) && success;
                 success = CrawlLocalFolders(localFolder, remoteFolder, remoteSubfolders) && success;
                 return success;
+                }
             }
 
 
@@ -180,7 +188,7 @@ namespace CmisSync.Lib.Sync
                     {
                         // It is a CMIS folder.
                         IFolder remoteSubFolder = (IFolder)cmisObject;
-                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
+                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(remoteSubFolder.Path))
                         {
                             if (null != remoteFolders)
                             {
@@ -225,6 +233,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool CrawlLocalFiles(string localFolder, IFolder remoteFolder, IList<string> remoteFiles)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("CrawlLocalFiles({0})", localFolder)))
+                {
                 bool success = true;
 
                 try
@@ -292,6 +302,7 @@ namespace CmisSync.Lib.Sync
                 }
 
                 return success;
+                }
             }
 
             private void sleepWhileSuspended()
@@ -309,6 +320,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool CrawlLocalFolders(string localFolder, IFolder remoteFolder, IList<string> remoteFolders)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("CrawlLocalFolders({0})", localFolder)))
+                {
                 bool success = true;
 
                 try
@@ -323,7 +336,7 @@ namespace CmisSync.Lib.Sync
                         }
                         string path = localSubFolder.Substring(repoinfo.TargetDirectory.Length).Replace("\\", "/");
                         string folderName = Path.GetFileName(localSubFolder);
-                        if (!Utils.IsInvalidFolderName(folderName, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.isPathIgnored(path))
+                        if (!Utils.IsInvalidFolderName(folderName, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(path))
                         {
                             if (!remoteFolders.Contains(folderName))
                             {
@@ -365,6 +378,7 @@ namespace CmisSync.Lib.Sync
                 }
 
                 return success;
+                }
             }
         }
     }
