@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 using CmisSync.Lib.Storage;
 
@@ -46,6 +47,31 @@ namespace TestLibrary.TestUtils
             file.Setup(f => f.Exists).Returns(exists);
             fsFactory.AddIFileInfo(file.Object);
             return file;
+        }
+
+        public static Mock<IDirectoryInfo> CreateLocalFolder(string path, List<string> fileNames = null, List<string> folderNames = null) {
+            var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.Setup(f => f.FullName).Returns(path);
+            var fileList = new List<IFileInfo>();
+            if(fileNames != null){
+                foreach(var name in fileNames) {
+                    var file = new Mock<IFileInfo>();
+                    file.Setup(d => d.Name).Returns(name);
+                    fileList.Add(file.Object);
+                }
+            }
+            localFolder.Setup(f => f.GetFiles()).Returns(fileList.ToArray());
+            var folderList = new List<IDirectoryInfo>();
+            if(folderNames != null){
+                foreach(var name in folderNames) {
+                    var folder = new Mock<IDirectoryInfo>();
+                    folder.Setup(d => d.Name).Returns(name);
+                    folderList.Add(folder.Object);
+                }
+            }
+            localFolder.Setup(f => f.GetDirectories()).Returns(folderList.ToArray());
+            return localFolder;
+
         }
     }
 }

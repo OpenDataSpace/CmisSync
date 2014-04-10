@@ -83,31 +83,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.False(crawler.Handle(wrongEvent));
         }
 
-        private Mock<IDirectoryInfo> CreateLocalFolder(string path, List<string> fileNames = null, List<string> folderNames = null) {
-            var localFolder = new Mock<IDirectoryInfo>();
-            localFolder.Setup(f => f.FullName).Returns(path);
-            var fileList = new List<IFileInfo>();
-            if(fileNames != null){
-                foreach(var name in fileNames) {
-                    var file = new Mock<IFileInfo>();
-                    file.Setup(d => d.Name).Returns(name);
-                    fileList.Add(file.Object);
-                }
-            }
-            localFolder.Setup(f => f.GetFiles()).Returns(fileList.ToArray());
-            var folderList = new List<IDirectoryInfo>();
-            if(folderNames != null){
-                foreach(var name in folderNames) {
-                    var folder = new Mock<IDirectoryInfo>();
-                    folder.Setup(d => d.Name).Returns(name);
-                    folderList.Add(folder.Object);
-                }
-            }
-            localFolder.Setup(f => f.GetDirectories()).Returns(folderList.ToArray());
-            return localFolder;
-
-        }
-
         private Crawler GetCrawlerWithFakes(Mock<ISyncEventQueue> queue) {
             //these are fakes that throw if they are used
             var localFolder = new Mock<IDirectoryInfo>(MockBehavior.Strict);
@@ -170,7 +145,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name});
 
-            var localFolder = CreateLocalFolder(localPath);
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath);
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
@@ -189,7 +164,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name}, contentStream : true);
 
-            var localFolder = CreateLocalFolder(localPath);
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath);
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
@@ -208,7 +183,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name});
 
-            var localFolder = CreateLocalFolder(localPath, fileNames : new List<string> {name});
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames : new List<string> {name});
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
@@ -228,7 +203,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
-            var localFolder = CreateLocalFolder(localPath, fileNames : new List<string> {name});
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames : new List<string> {name});
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
@@ -256,7 +231,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
-            var localFolder = CreateLocalFolder(localPath, folderNames : new List<string> {name});
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, folderNames : new List<string> {name});
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
@@ -285,7 +260,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames : new List<string> {name});
 
-            var localFolder = CreateLocalFolder(localPath);
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath);
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
@@ -320,7 +295,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames : new List<string> {name});
 
-            var localFolder = CreateLocalFolder(localPath, folderNames : new List<string> {name});
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, folderNames : new List<string> {name});
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
@@ -348,7 +323,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : remoteFiles, folderNames : remoteFolders);
 
-            var localFolder = CreateLocalFolder(localPath, fileNames : localFiles, folderNames : localFolders);
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames : localFiles, folderNames : localFolders);
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
