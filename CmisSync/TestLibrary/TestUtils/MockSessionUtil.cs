@@ -15,7 +15,7 @@ using Moq;
 
 namespace TestLibrary.TestUtils
 {
-    public static class MockUtil {
+    public static class MockSessionUtil {
         public static void SetupSessionDefaultValues(this Mock<ISession> session) {
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfos (null)).Returns ((IList<IRepositoryInfo>)null);
             session.Setup (s => s.RepositoryInfo.Id).Returns ("repoId");
@@ -25,13 +25,6 @@ namespace TestLibrary.TestUtils
             session.Setup (s => s.Binding.GetRepositoryService ().GetRepositoryInfo (It.IsAny<string>(), null).LatestChangeLogToken).Returns (changeLogToken);
         }
 
-
-        public static Mock<IMetaDataStorage> GetMetaStorageMockWithToken(string token = "lastToken"){
-            var storage = new Mock<IMetaDataStorage>();
-            storage.Setup (db => db.ChangeLogToken ).Returns (token);
-            return storage;
-        }
-        
         public static Mock<IChangeEvent> GenerateChangeEvent(DotCMIS.Enums.ChangeType type, string objectId) {
             var changeEvent = new Mock<IChangeEvent> ();
             changeEvent.Setup (ce => ce.ObjectId).Returns (objectId);
@@ -72,46 +65,8 @@ namespace TestLibrary.TestUtils
 
         private static List<IChangeEvent> GenerateSingleChangeListMock (DotCMIS.Enums.ChangeType type, string objectId = "objId") {
             var changeList = new List<IChangeEvent> ();
-            changeList.Add (MockUtil.GenerateChangeEvent(type, objectId).Object);
+            changeList.Add (GenerateChangeEvent(type, objectId).Object);
             return changeList;
-        }
-
-        public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id) {
-            var file = Mock.Of<IFileInfo>(f =>
-                                          f.FullName == path &&
-                                          f.Exists == true);
-            db.AddLocalFile(file, id);
-        }
-
-        public static void AddLocalFile(this Mock<IMetaDataStorage> db, IFileInfo path, string id ) {
-            var file = Mock.Of<IMappedFile>( f =>
-                                            f.RemoteObjectId == id &&
-                                            f.GetLocalPath() == path.FullName &&
-                                            f.ExistsLocally() == path.Exists);
-            db.AddMappedFile(file);
-        }
-
-        public static Mock<IMappedFolder> AddLocalFolder( this Mock<IMetaDataStorage> db, string path, string id) {
-            var folder = Mock.Of<IDirectoryInfo>(d => d.FullName == path);
-            return db.AddLocalFolder(folder, id);
-        }
-
-        public static Mock<IMappedFolder> AddLocalFolder(this Mock<IMetaDataStorage> db, IDirectoryInfo path, string id ) {
-            var folder = new Mock<IMappedFolder>();
-            folder.Setup(f => f.GetLocalPath()).Returns(path.FullName);
-            folder.Setup (f => f.RemoteObjectId).Returns(id);
-            db.AddMappedFolder(folder.Object);
-            return folder;
-        }
-
-        public static void AddMappedFile(this Mock<IMetaDataStorage> db, IMappedFile file) {
-            db.Setup( foo => foo.GetObjectByLocalPath(It.Is<IFileInfo>(s => s.FullName == file.GetLocalPath()))).Returns(file);
-            db.Setup( foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == file.RemoteObjectId))).Returns(file);
-        }
-
-        public static void AddMappedFolder(this Mock<IMetaDataStorage> db, IMappedFolder folder) {
-            db.Setup( foo => foo.GetObjectByLocalPath(It.Is<IDirectoryInfo>(s => s.FullName == folder.GetLocalPath()))).Returns(folder);
-            db.Setup( foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == folder.RemoteObjectId))).Returns(folder);
         }
 
         public static void AddRemoteObject(this Mock<ISession> session, ICmisObject remoteObject) {
@@ -168,7 +123,7 @@ namespace TestLibrary.TestUtils
         }
 
         public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid") {
-            var session = MockUtil.PrepareSessionMockForSingleChange(type, id);
+            var session = PrepareSessionMockForSingleChange(type, id);
             var newRemoteObject =  CreateRemoteFolderMock(id);
             session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
          

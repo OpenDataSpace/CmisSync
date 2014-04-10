@@ -35,7 +35,7 @@ namespace TestLibrary.SyncStrategiesTests {
 
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IDocument remote = MockUtil.CreateRemoteObjectMock(null, id).Object;
+            IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, id).Object;
             session.Setup(s => s.GetObject(id)).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage> ();
@@ -93,7 +93,7 @@ namespace TestLibrary.SyncStrategiesTests {
 
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IFolder remote = MockUtil.CreateRemoteFolderMock(id).Object;
+            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(id).Object;
             session.Setup(s => s.GetObject(id)).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage> ();

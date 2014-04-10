@@ -72,7 +72,7 @@ namespace TestLibrary.IntegrationTests
             var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage.Object);
             manager.AddEventHandler(syncMechanism);
 
-            var remoteFolder = MockUtil.CreateCmisFolder();
+            var remoteFolder = MockSessionUtil.CreateCmisFolder();
             var localFolder = new Mock<IDirectoryInfo>();
             var crawler = new Crawler(queue, remoteFolder.Object, localFolder.Object);
             manager.AddEventHandler(crawler);
@@ -142,7 +142,7 @@ namespace TestLibrary.IntegrationTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
-            IDocument remote = MockUtil.CreateRemoteObjectMock(null, id).Object;
+            IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, id).Object;
             session.Setup(s => s.GetObject(id)).Returns(remote);
             var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName);
             var queue = CreateQueue(session, storage);
@@ -157,14 +157,14 @@ namespace TestLibrary.IntegrationTests
         {
             string path = Path.Combine(Path.GetTempPath(), "a");
             string id = "1";
-            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
+            Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.FullName).Returns(path);
             fsFactory.AddIDirectoryInfo(dirInfo.Object);
 
-            Mock<ISession> session = MockUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
             Mock<IMappedFolder> folder = storage.AddLocalFolder(path, id);
 
             var queue = CreateQueue(session, storage, fsFactory);

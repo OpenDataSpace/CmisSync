@@ -56,7 +56,7 @@ namespace TestLibrary.SyncStrategiesTests {
         private static readonly string id = "myId";
         private ContentChangeEvent prepareEvent(DotCMIS.Enums.ChangeType type, bool hasContentStream) {
             var e = new ContentChangeEvent(type, id);
-            var remoteObject = MockUtil.CreateRemoteObjectMock(hasContentStream ? "streamId" : null, id);
+            var remoteObject = MockSessionUtil.CreateRemoteObjectMock(hasContentStream ? "streamId" : null, id);
             var session = new Mock<ISession>();
             session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (remoteObject.Object);
 

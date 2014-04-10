@@ -143,19 +143,20 @@
     <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
-    <Compile Include="TestUtils\MockUtil.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\GenericHandleDoublicatedEventsFilterTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
+    <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
+    <Compile Include="LegacyCodeTests\RepoInfoTests.cs" />
+    <Compile Include="StorageTests\ExtendedAttributeReaderUnixTest.cs" />
+    <Compile Include="TestUtils\MockMetaDataStorageUtil.cs" />
+    <Compile Include="TestUtils\MockSessionUtil.cs" />
+    <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
     <Compile Include="TestUtils\ObservableHandler.cs" />
     <Compile Include="TestUtils\ObservableHandlerTest.cs" />
     <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
     <Compile Include="UtilsTests\CredentialsTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="WatcherTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\GenericHandleDoublicatedEventsFilterTest.cs" />
-    <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
-    <Compile Include="StorageTests\ExtendedAttributeReaderUnixTest.cs" />
-    <Compile Include="LegacyCodeTests\RepoInfoTests.cs" />
-    <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

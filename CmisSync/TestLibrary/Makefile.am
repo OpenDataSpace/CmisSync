@@ -86,7 +86,8 @@ SOURCES =  \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/WatcherTestUtils.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
-	TestUtils/MockUtil.cs \
+	TestUtils/MockMetaDataStorageUtil.cs \
+	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \

@@ -120,7 +120,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void CrawlingFullSyncEmptyFoldersTest() {
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockUtil.CreateCmisFolder();
+            var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
             var localFolder = new Mock<IDirectoryInfo>();
 
@@ -168,7 +168,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockUtil.CreateCmisFolder(fileNames : new List<string> {name});
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name});
 
             var localFolder = CreateLocalFolder(localPath);
 
@@ -187,7 +187,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockUtil.CreateCmisFolder(fileNames : new List<string> {name}, contentStream : true);
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name}, contentStream : true);
 
             var localFolder = CreateLocalFolder(localPath);
 
@@ -206,7 +206,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockUtil.CreateCmisFolder(fileNames : new List<string> {name});
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name});
 
             var localFolder = CreateLocalFolder(localPath, fileNames : new List<string> {name});
 
@@ -226,7 +226,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockUtil.CreateCmisFolder();
+            var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
             var localFolder = CreateLocalFolder(localPath, fileNames : new List<string> {name});
 
@@ -254,7 +254,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockUtil.CreateCmisFolder();
+            var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
             var localFolder = CreateLocalFolder(localPath, folderNames : new List<string> {name});
 
@@ -283,7 +283,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockUtil.CreateCmisFolder(folderNames : new List<string> {name});
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames : new List<string> {name});
 
             var localFolder = CreateLocalFolder(localPath);
 
@@ -318,7 +318,7 @@ namespace TestLibrary.SyncStrategiesTests
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockUtil.CreateCmisFolder(folderNames : new List<string> {name});
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames : new List<string> {name});
 
             var localFolder = CreateLocalFolder(localPath, folderNames : new List<string> {name});
 
@@ -346,7 +346,7 @@ namespace TestLibrary.SyncStrategiesTests
             var localFolders = new List<string> {"a","c"};
             var remoteFolders = new List<string> {"a","b"};
 
-            var remoteFolder = MockUtil.CreateCmisFolder(fileNames : remoteFiles, folderNames : remoteFolders);
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : remoteFiles, folderNames : remoteFolders);
 
             var localFolder = CreateLocalFolder(localPath, fileNames : localFiles, folderNames : localFolders);
 

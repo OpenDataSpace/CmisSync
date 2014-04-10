@@ -234,9 +234,9 @@ namespace TestLibrary.SyncStrategiesTests
             changeEvents.Setup (ce => ce.HasMoreItems).ReturnsInOrder ((bool?) true, (bool?) false);
             changeEvents.Setup (ce => ce.LatestChangeLogToken).ReturnsInOrder ("A", "B");
             changeEvents.Setup (ce => ce.TotalNumItems).ReturnsInOrder (3, overlapping ? 2 : 1);
-            var event1 = MockUtil.GenerateChangeEvent(type, "one");
-            var event2 = MockUtil.GenerateChangeEvent(type, "two");
-            var event3 = MockUtil.GenerateChangeEvent(type, "three");
+            var event1 = MockSessionUtil.GenerateChangeEvent(type, "one");
+            var event2 = MockSessionUtil.GenerateChangeEvent(type, "two");
+            var event3 = MockSessionUtil.GenerateChangeEvent(type, "three");
             List<IChangeEvent> changeList1 = new List<IChangeEvent>();
             changeList1.Add(event1.Object);
             changeList1.Add(event2.Object);
@@ -266,8 +266,8 @@ namespace TestLibrary.SyncStrategiesTests
             );
             string id = "myId";
 
-            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
-            var session = MockUtil.PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType.Created,id);
+            Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
+            var session = MockSessionUtil.PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType.Created,id);
             var changes = new ContentChanges (session.Object, storage.Object, queue.Object, maxNumberOfContentChanges, isPropertyChangesSupported);
 
             var startSyncEvent = new StartNextSyncEvent (false);
@@ -284,7 +284,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var queue = new Mock<ISyncEventQueue>();
 
-            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
+            Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturning3Changesin2Batches();
 
@@ -300,7 +300,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var queue = new Mock<ISyncEventQueue>();
 
-            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
+            Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType.Created, true);
 
@@ -316,7 +316,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var queue = new Mock<ISyncEventQueue>();
 
-            Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
+            Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
             Mock<ISession> session = GetSessionMockReturning3Changesin2Batches(DotCMIS.Enums.ChangeType.Deleted, true);
 
