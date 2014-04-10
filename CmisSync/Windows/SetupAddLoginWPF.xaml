@@ -13,6 +13,7 @@
         <TextBox x:Name="user_box" TextWrapping="Wrap" Text="TextBox" Margin="10,107,235,130"/>
         <TextBlock x:Name="password_label" TextWrapping="Wrap" Text="TextBlock" FontWeight="Bold" VerticalAlignment="Top" Height="21" Margin="220,91,149,0"/>
         <PasswordBox x:Name="password_box" HorizontalAlignment="Left" Margin="220,107,0,0" VerticalAlignment="Top" Width="200" Height="23"/>
+        <local:CircularProgressBar x:Name="password_progress" HorizontalAlignment="Left" Margin="400,107,0,0" VerticalAlignment="Top" Width="20" Height="23" Visibility="Hidden"/>
         <TextBlock x:Name="user_help_label" TextWrapping="Wrap" Width="200" FontSize="11" Foreground="Blue" Visibility="Hidden" Background="Transparent" Text="TextBlock" Margin="10,135,359,109"/>
         <TextBlock x:Name="password_help_label" TextWrapping="Wrap" Width="200" FontSize="11" Foreground="Blue" Visibility="Hidden" Background="Transparent" Margin="220,135,149,109"/>
         <TextBox x:Name="address_error_label" HorizontalAlignment="Left" Margin="10,151,0,0" TextWrapping="Wrap" Text="TextBox" FontSize="11" Foreground="Red" BorderThickness="0" IsReadOnly="True" Background="Transparent" MaxWidth="420" VerticalAlignment="Top" Visibility="Hidden"/>

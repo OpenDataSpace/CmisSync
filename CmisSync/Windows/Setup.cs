@@ -373,6 +373,7 @@ namespace CmisSync
         private TextBlock user_help_label;
         private TextBlock password_label;
         private PasswordBox password_box;
+        private CircularProgressBar password_progress;
         private TextBlock password_help_label;
         private TextBox address_error_label;
 
@@ -392,6 +393,7 @@ namespace CmisSync
             user_help_label = LoadAddLoginWPF.FindName("user_help_label") as TextBlock;
             password_label = LoadAddLoginWPF.FindName("password_label") as TextBlock;
             password_box = LoadAddLoginWPF.FindName("password_box") as PasswordBox;
+            password_progress = LoadAddLoginWPF.FindName("password_progress") as CircularProgressBar;
             password_help_label = LoadAddLoginWPF.FindName("password_help_label") as TextBlock;
             address_error_label = LoadAddLoginWPF.FindName("address_error_label") as TextBox;
             continue_button = LoadAddLoginWPF.FindName("continue_button") as Button;
@@ -444,6 +446,7 @@ namespace CmisSync
             continue_button.Click += delegate
             {
                 // Show wait cursor
+                password_progress.Visibility = Visibility.Visible;
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
 
                 // Try to find the CMIS server (asynchronously)
@@ -469,6 +472,7 @@ namespace CmisSync
 
                 // Hide wait cursor
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+                password_progress.Visibility = Visibility.Hidden;
 
                 if (Controller.repositories == null)
                 {

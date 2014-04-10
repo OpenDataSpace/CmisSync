@@ -6,6 +6,7 @@ using System.ComponentModel;
 using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace CmisSync
 {
@@ -126,9 +127,53 @@ namespace CmisSync
         private TextBox userBox;
         private TextBlock passwordLabel;
         private PasswordBox passwordBox;
+        private CircularProgressBar passwordProgress;
+        private TextBlock passwordHelp;
+        bool passwordChanged;
         private Button finishButton;
         private Button cancelButton;
 
+
+        private void CheckPassword()
+        {
+            if (!passwordChanged)
+            {
+                return;
+            }
+
+            passwordHelp.Text = Properties_Resources.LoginCheck;
+            passwordBox.IsEnabled = false;
+            ServerCredentials cred = new ServerCredentials()
+            {
+                Address = Credentials.Address,
+                UserName = Credentials.UserName,
+                Password = passwordBox.Password
+            };
+            new TaskFactory().StartNew(() =>
+            {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    passwordProgress.Visibility = Visibility.Visible;
+                });
+                string output;
+                try
+                {
+                    CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
+                    output = Properties_Resources.LoginSuccess;
+                }
+                catch (Exception e)
+                {
+                    output = string.Format(Properties_Resources.LoginFailed, e.Message);
+                }
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    passwordChanged = false;
+                    passwordHelp.Text = output;
+                    passwordBox.IsEnabled = true;
+                    passwordProgress.Visibility = Visibility.Hidden;
+                });
+            });
+        }
 
         private void CreateTreeView()
         {
@@ -179,6 +224,8 @@ namespace CmisSync
             userBox = editWPF.FindName("userBox") as TextBox;
             passwordLabel = editWPF.FindName("passwordLabel") as TextBlock;
             passwordBox = editWPF.FindName("passwordBox") as PasswordBox;
+            passwordProgress = editWPF.FindName("passwordProgress") as CircularProgressBar;
+            passwordHelp = editWPF.FindName("passwordHelp") as TextBlock;
             finishButton = editWPF.FindName("finishButton") as Button;
             cancelButton = editWPF.FindName("cancelButton") as Button;
 
@@ -189,6 +236,11 @@ namespace CmisSync
             passwordBox.Password = Credentials.Password.ToString();
 
             ContentCanvas.Children.Add(editWPF);
+
+            passwordBox.LostFocus += delegate { CheckPassword(); };
+            passwordBox.PasswordChanged += delegate { passwordChanged = true; };
+            passwordChanged = true;
+            CheckPassword();
         }
     }
 }
