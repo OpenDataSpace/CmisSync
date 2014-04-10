@@ -1,7 +1,12 @@
 using System;
+using System.IO;
 
 using CmisSync.Lib.Sync.Solver;
 using CmisSync.Lib.Storage;
+using CmisSync.Lib.Data;
+using TestLibrary.TestUtils;
+
+using DotCMIS.Client;
 
 using Moq;
 
@@ -18,18 +23,20 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new RemoteObjectDeleted();
         }
 
-        [Ignore]
-        [Test, Category("Medium"), Category("Solver")]
-        public void RemoteDocumentDeleted()
-        {
-            Assert.Fail("TODO");
-        }
-
-        [Ignore]
         [Test, Category("Medium"), Category("Solver")]
         public void RemoteFolderDeleted()
         {
-            Assert.Fail("TODO");
+            string path = Path.Combine(Path.GetTempPath(), "a");
+            var session = new Mock<ISession>();
+            var storage = new Mock<IMetaDataStorage>();
+            Mock<IMappedFolder> folder = storage.AddLocalFolder(path, "id");
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            var solver = new RemoteObjectDeleted();
+            solver.Solve(session.Object, storage.Object, dirInfo.Object, null);            
+
+            dirInfo.Verify(d => d.Delete(true), Times.Once());
+            folder.Verify(f => f.Remove(), Times.Once());
         }
     }
 }
