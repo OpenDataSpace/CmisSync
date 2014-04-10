@@ -5,6 +5,7 @@ using DotCMIS.Client;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Storage;
+using CmisSync.Lib.Data;
 
 namespace CmisSync.Lib.Sync.Solver
 {
