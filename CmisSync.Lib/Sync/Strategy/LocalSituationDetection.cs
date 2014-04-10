@@ -30,37 +30,16 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            switch(actualEvent.Local)
+            switch (actualEvent.Local) 
             {
-            case MetaDataChangeType.CREATED:
-                return SituationType.ADDED;
-            case MetaDataChangeType.CHANGED:
-                return SituationType.CHANGED;
-            case MetaDataChangeType.NONE:
-                return SituationType.NOCHANGE;
-            }
-            IFileSystemInfo actualObject = null;
-            if(actualEvent is FileEvent)
-                actualObject = (actualEvent as FileEvent).LocalFile;
-            if(actualEvent is FolderEvent)
-                actualObject = (actualEvent as FolderEvent).LocalFolder;
-            actualObject.Refresh();
-            if(!actualObject.Exists)
-            {
-                // Remove & NoChange are possible
-                if(storage.GetObjectByLocalPath(actualObject) == null )
-                    // Object has already been removed or wasn't ever in the storage
-                    return SituationType.NOCHANGE;
-                else
-                    return SituationType.REMOVED;
-            }
-            else
-            {
-                // Move & Rename & Added & NoChange are possible
-                if(storage.GetObjectByLocalPath(actualObject) == null )
+                case MetaDataChangeType.CREATED:
                     return SituationType.ADDED;
+                case MetaDataChangeType.DELETED:
+                    return SituationType.REMOVED;
+                case MetaDataChangeType.NONE:
+                default:
+                    return SituationType.NOCHANGE;
             }
-            throw new NotImplementedException();
         }
     }
 }
