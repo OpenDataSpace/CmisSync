@@ -97,7 +97,7 @@ namespace CmisSync
                 return;
             }
 
-            passwordHelp.Text = "logging in";
+            passwordHelp.Text = Properties_Resources.LoginCheck;
             passwordBox.IsEnabled = false;
             ServerCredentials cred = new ServerCredentials()
             {
@@ -115,11 +115,11 @@ namespace CmisSync
                 try
                 {
                     CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
-                    output = "login successful";
+                    output = Properties_Resources.LoginSuccess;
                 }
                 catch (Exception e)
                 {
-                    output = "login failed: " + e.Message;
+                    output = string.Format(Properties_Resources.LoginFailed, e.Message);
                 }
                 Dispatcher.BeginInvoke((Action)delegate
                 {
