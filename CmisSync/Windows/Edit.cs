@@ -86,11 +86,18 @@ namespace CmisSync
         private TextBox userBox;
         private TextBlock passwordLabel;
         private PasswordBox passwordBox;
+        private CircularProgressBar loggingProgress;
         private TextBlock passwordHelp;
+        private bool passwordChanged = false;
 
         private void CheckPassword()
         {
-            passwordHelp.Text = "logging in";
+            if (!passwordChanged)
+            {
+                return;
+            }
+
+            passwordHelp.Text = Properties_Resources.LoginCheck;
             passwordBox.IsEnabled = false;
             ServerCredentials cred = new ServerCredentials()
             {
@@ -100,20 +107,26 @@ namespace CmisSync
             };
             new TaskFactory().StartNew(() =>
             {
+                Dispatcher.BeginInvoke((Action)delegate
+                {
+                    loggingProgress.Visibility = Visibility.Visible;
+                });
                 string output;
                 try
                 {
                     CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
-                    output = "login successful";
+                    output = Properties_Resources.LoginSuccess;
                 }
                 catch (Exception e)
                 {
-                    output = "login failed: " + e.Message;
+                    output = string.Format(Properties_Resources.LoginFailed, e.Message);
                 }
                 Dispatcher.BeginInvoke((Action)delegate
                 {
+                    passwordChanged = false;
                     passwordHelp.Text = output;
                     passwordBox.IsEnabled = true;
+                    loggingProgress.Visibility = Visibility.Hidden;
                 });
             });
         }
@@ -188,6 +201,7 @@ namespace CmisSync
                 Width = 200,
                 Password = this.Credentials.Password.ToString()
             };
+            loggingProgress = new CircularProgressBar();
             passwordHelp = new TextBlock()
             {
                 Width = 200,
@@ -219,12 +233,12 @@ namespace CmisSync
             canvasCredentials.Children.Add(passwordBox);
             Canvas.SetTop(passwordBox, 120);
             Canvas.SetLeft(passwordBox, 220);
+            canvasCredentials.Children.Add(loggingProgress);
+            Canvas.SetTop(loggingProgress, 120);
+            Canvas.SetLeft(loggingProgress, 400);
             canvasCredentials.Children.Add(passwordHelp);
             Canvas.SetTop(passwordHelp, 140);
             Canvas.SetLeft(passwordHelp, 220);
-
-            passwordBox.LostFocus += delegate { CheckPassword(); };
-            CheckPassword();
 
             TabControl tab = new TabControl();
 
@@ -253,6 +267,11 @@ namespace CmisSync
             ContentCanvas.Children.Add(tab);
             Canvas.SetTop(tab, 30);
             Canvas.SetLeft(tab, 175);
+
+            passwordBox.LostFocus += delegate { CheckPassword(); };
+            passwordBox.PasswordChanged += delegate { passwordChanged = true; };
+            passwordChanged = true;
+            CheckPassword();
 
             Controller.CloseWindowEvent += delegate
             {

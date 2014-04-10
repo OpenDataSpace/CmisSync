@@ -420,4 +420,13 @@ This could lead to a lot of conflict files!</value>
   <data name="SettingProxy" xml:space="preserve">
     <value>Proxy</value>
   </data>
+  <data name="LoginCheck" xml:space="preserve">
+    <value>logging in</value>
+  </data>
+  <data name="LoginFailed" xml:space="preserve">
+    <value>login failed: {0}</value>
+  </data>
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>login successful</value>
+  </data>
 </root>
