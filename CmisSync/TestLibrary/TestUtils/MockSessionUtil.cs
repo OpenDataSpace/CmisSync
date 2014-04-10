@@ -155,5 +155,14 @@ namespace TestLibrary.TestUtils
 
             return session;            
         }
+
+        public static Mock<ISession> GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType type, string id, string documentContentStreamId = null) {
+            var session = MockSessionUtil.PrepareSessionMockForSingleChange(type, id);
+
+            var newRemoteObject =  MockSessionUtil.CreateRemoteObjectMock(documentContentStreamId, id);
+            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
+         
+            return session;
+        }
     }
 }

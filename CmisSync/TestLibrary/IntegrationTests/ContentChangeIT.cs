@@ -31,18 +31,7 @@ namespace TestLibrary.IntegrationTests
         private readonly int maxNumberOfContentChanges = 1000;
         
         private static readonly string defaultId = "defaultId";
-
         
-        private Mock<ISession> GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType type, string documentContentStreamId = null) {
-            var session = MockSessionUtil.PrepareSessionMockForSingleChange(type, defaultId);
-
-            var newRemoteObject =  MockSessionUtil.CreateRemoteObjectMock(documentContentStreamId, defaultId);
-            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
-         
-            return session;
-        }
-
-
 
         private ObservableHandler RunQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage) {
             var manager = new SyncEventManager();
@@ -73,7 +62,7 @@ namespace TestLibrary.IntegrationTests
             var path = Mock.Of<IFileInfo>( f => f.FullName == "path");
             storage.AddLocalFile(path, defaultId);
 
-            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Security, defaultId);
             ObservableHandler observer = RunQueue(session, storage);
 
             storage.Verify(s=>s.GetObjectByRemoteId(defaultId), Times.Once());
@@ -88,7 +77,7 @@ namespace TestLibrary.IntegrationTests
         {
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
-            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, "someStreamId");
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, defaultId, "someStreamId");
 
             ObservableHandler observer = RunQueue(session, storage);
             
@@ -101,7 +90,7 @@ namespace TestLibrary.IntegrationTests
         {
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
 
-            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Updated, null);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Updated, defaultId, null);
 
             ObservableHandler observer = RunQueue(session, storage);
 
@@ -116,7 +105,7 @@ namespace TestLibrary.IntegrationTests
             var file = Mock.Of<IFileInfo>(f => f.FullName == "path");
             storage.AddLocalFile(file, defaultId);
 
-            Mock<ISession> session = GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, null);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Deleted, defaultId, null);
             ObservableHandler observer = RunQueue(session, storage);
 
             observer.AssertGotSingleFileEvent(MetaDataChangeType.DELETED, ContentChangeType.NONE);
