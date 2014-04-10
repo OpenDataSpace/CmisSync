@@ -85,7 +85,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             fileInfo.Setup(file => file.Name).Returns(ExistingFileName);
             fileInfo.Setup(file => file.FullName).Returns(ExistingFileFullName);
             storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileSystemInfo>(path => path.FullName == ExistingFileFullName))).Returns((AbstractMappedObject) null);
-            var fileEvent = new FileEvent(fileInfo.Object);
+            var fileEvent = new FileEvent(fileInfo.Object) { Local = MetaDataChangeType.CREATED };
 
             var detection = new LocalSituationDetection(fsFactory.Object);
             Assert.That(detection.Analyse(storage.Object, fileEvent), Is.EqualTo(SituationType.ADDED));
@@ -145,7 +145,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             fileInfo.Setup(file => file.Name).Returns(NonExistingFileOrFolderName);
             fileInfo.Setup(file => file.FullName).Returns(NonExistingFileOrFolderFullName);
             storage.AddLocalFile(NonExistingFileOrFolderFullName, "testId");
-            var fileEvent = new FileEvent(fileInfo.Object);
+            var fileEvent = new FileEvent(fileInfo.Object) {Local = MetaDataChangeType.DELETED};
 
             var detection = new LocalSituationDetection(fsFactory.Object);
             Assert.That(detection.Analyse(storage.Object, fileEvent), Is.EqualTo(SituationType.REMOVED));

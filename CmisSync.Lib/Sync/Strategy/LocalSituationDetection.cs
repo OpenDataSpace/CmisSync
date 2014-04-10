@@ -30,6 +30,15 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
+            switch(actualEvent.Local)
+            {
+            case MetaDataChangeType.CREATED:
+                return SituationType.ADDED;
+            case MetaDataChangeType.CHANGED:
+                return SituationType.CHANGED;
+            case MetaDataChangeType.NONE:
+                return SituationType.NOCHANGE;
+            }
             IFileSystemInfo actualObject = null;
             if(actualEvent is FileEvent)
                 actualObject = (actualEvent as FileEvent).LocalFile;
