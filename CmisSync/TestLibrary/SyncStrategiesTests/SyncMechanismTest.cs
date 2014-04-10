@@ -180,6 +180,8 @@ namespace TestLibrary.SyncStrategiesTests
             remoteDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>()), Times.Exactly(2));
         }
 
+        // Ignore until the local situation detection implements local move
+        [Ignore]
         [Test, Category("Fast"), Category("IT")]
         public void LocalFolderMoveAndRemoteFolderRenameSituation()
         {
@@ -251,6 +253,24 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.IsTrue(mechanism.Handle(folderEvent));
 
             remoteFolderAddedSolver.Verify(s => s.Solve(It.Is<ISession>( session => session == Session.Object), It.Is<IMetaDataStorage>(storage => storage == Storage.Object), It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>()), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("IT")]
+        public void LocalFolderAddedSituation()
+        {
+            var localFolder = Mock.Of<IDirectoryInfo>();
+            var localFS = new Mock<IFileSystemInfoFactory>();
+            var localFolderAddedSolver = new Mock<ISolver>();
+            var localDetection = new LocalSituationDetection(localFS.Object);
+            var remoteDetection = new RemoteSituationDetection(Session.Object);
+            var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.CREATED, Remote = MetaDataChangeType.NONE };
+
+            var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
+            mechanism.Solver[(int) SituationType.ADDED, (int) SituationType.NOCHANGE] = localFolderAddedSolver.Object;
+
+            Assert.IsTrue(mechanism.Handle(folderEvent));
+
+            localFolderAddedSolver.Verify(s => s.Solve(It.Is<ISession>( session => session == Session.Object), It.Is<IMetaDataStorage>(storage => storage == Storage.Object), It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>()), Times.Once());
         }
 
         [Ignore]
