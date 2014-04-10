@@ -135,7 +135,7 @@ namespace TestLibrary.IntegrationTests
         {
             var storage = new Mock<IMetaDataStorage>();
             var path = new Mock<IFileInfo>();
-            path.Setup(p => p.FullName ).Returns("/tmp/a/b");
+            path.Setup(p => p.FullName ).Returns(Path.Combine(Path.GetTempPath(), "a", "b"));
             string id = "id";
             storage.AddLocalFile(path.Object, id);
             
@@ -155,21 +155,20 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast")]
         public void ContentChangeIndicatesFolderDeletionOfExistingFolder ()
         {
-            string path = "/tmp/a";
+            string path = Path.Combine(Path.GetTempPath(), "a");
             string id = "1";
             Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.FullName).Returns(path);
-            fsFactory.Setup(f => f.CreateDirectoryInfo(path)).Returns(dirInfo.Object);
+            fsFactory.AddIDirectoryInfo(dirInfo.Object);
 
             Mock<ISession> session = MockUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
             Mock<MappedFolder> folder = storage.AddLocalFolder(path, id);
-            
 
             var queue = CreateQueue(session, storage, fsFactory);
-            queue.RunStartSyncEvent();               
+            queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Delete(true), Times.Once());
             folder.Verify(f => f.Remove(), Times.Once());
         }
