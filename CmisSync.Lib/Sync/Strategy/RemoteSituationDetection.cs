@@ -34,25 +34,16 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            string objectId = null;
-            if(actualEvent is FileEvent && (actualEvent as FileEvent).RemoteFile != null)
-                objectId = (actualEvent as FileEvent).RemoteFile.Id;
-            if(actualEvent is FolderEvent && (actualEvent as FolderEvent).RemoteFolder != null)
-                objectId = (actualEvent as FolderEvent).RemoteFolder.Id;
-            //Object has never been uploaded
-            if(objectId == null) {
-                return SituationType.NOCHANGE;
-            }
-            try {
-                ICmisObject remoteObject = Session.GetObject(objectId);
-                if(storage.GetObjectByRemoteId(objectId) == null )
-                {
+            switch (actualEvent.Remote) 
+            {
+                case MetaDataChangeType.CREATED:
                     return SituationType.ADDED;
-                }
-            }catch(CmisObjectNotFoundException) {
-                return SituationType.REMOVED;
+                case MetaDataChangeType.DELETED:
+                    return SituationType.REMOVED;
+                case MetaDataChangeType.NONE:
+                default:
+                    return SituationType.NOCHANGE;
             }
-            return SituationType.NOCHANGE;
         }
 
     }

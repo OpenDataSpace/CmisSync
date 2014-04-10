@@ -160,12 +160,13 @@ namespace TestLibrary.IntegrationTests
             Mock<IMetaDataStorage> storage = MockUtil.GetMetaStorageMockWithToken();
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
             var dirInfo = new Mock<IDirectoryInfo>();
-            dirInfo.Setup(d => d.Exists).Returns(false);
+            dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.FullName).Returns(path);
             fsFactory.Setup(f => f.CreateDirectoryInfo(path)).Returns(dirInfo.Object);
 
             Mock<ISession> session = MockUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
             Mock<MappedFolder> folder = storage.AddLocalFolder(path, id);
+            
 
             var queue = CreateQueue(session, storage, fsFactory);
             queue.RunStartSyncEvent();               
