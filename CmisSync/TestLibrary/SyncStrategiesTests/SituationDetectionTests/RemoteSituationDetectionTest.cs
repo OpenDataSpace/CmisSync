@@ -216,6 +216,27 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             Assert.AreEqual( SituationType.MOVED, detector.Analyse(StorageMock.Object, folderEvent));
         }
+
+        [Test, Category("Fast")]
+        public void FolderRenameDetectionOnChangeEvent()
+        {
+            string remoteId = "remoteId";
+            string oldName = "old";
+            string newName = "new";
+            var remoteFolder = new Mock<IFolder>();
+            remoteFolder.Setup(f => f.Name).Returns(newName);
+            remoteFolder.Setup(f => f.Id).Returns(remoteId);
+            SessionMock.AddRemoteObject(remoteFolder.Object);
+            var mappedFolder = Mock.Of<IMappedFolder>(f =>
+                                                      f.RemoteObjectId == remoteId &&
+                                                      f.Name == oldName);
+            StorageMock.AddMappedFolder(mappedFolder);
+            var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
+
+            var detector = new RemoteSituationDetection(SessionMock.Object);
+
+            Assert.AreEqual(SituationType.RENAMED, detector.Analyse(StorageMock.Object, folderEvent));
+        }
     }
 }
 

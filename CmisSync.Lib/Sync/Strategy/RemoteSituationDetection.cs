@@ -55,6 +55,10 @@ namespace CmisSync.Lib.Sync.Strategy
                 {
                     return SituationType.MOVED;
                 }
+                if(IsChangeEventAHintForRename(storage, actualEvent))
+                {
+                    return SituationType.RENAMED;
+                }
                 return SituationType.CHANGED;
             case MetaDataChangeType.NONE:
             default:
@@ -89,6 +93,20 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new NotImplementedException();
             }
         }
+        private bool IsChangeEventAHintForRename (IMetaDataStorage storage, AbstractFolderEvent actualEvent)
+        {
+            if(actualEvent is FolderEvent)
+            {
+                var folderEvent = actualEvent as FolderEvent;
+                var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id) as IMappedFolder;
+                return (storedFolder.Name != folderEvent.RemoteFolder.Name);
+            }
+            else
+            {
+                throw new NotImplementedException ();
+            }
+        }
+
 
 
     }
