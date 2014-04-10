@@ -155,6 +155,7 @@
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
     <Compile Include="StorageTests\ExtendedAttributeReaderUnixTest.cs" />
     <Compile Include="LegacyCodeTests\RepoInfoTests.cs" />
+    <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

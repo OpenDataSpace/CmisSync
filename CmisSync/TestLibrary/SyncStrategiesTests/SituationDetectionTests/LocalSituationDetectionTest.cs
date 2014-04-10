@@ -31,17 +31,28 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             new LocalSituationDetection(new Mock<IFileSystemInfoFactory>().Object);
         }
 
-        // Incomplete
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void NoChangeDetectionTest()
+        public void NoChangeOnFileDetection()
         {
+            string localFileName = "file.bin";
+            string localFilePath = Path.Combine(Path.GetTempPath(), localFileName);
+
             var fsFactory = new Mock<IFileSystemInfoFactory>();
             var storage = new Mock<IMetaDataStorage>();
-            IFileInfo fileInfo = new Mock<IFileInfo>().Object;
+            IFileInfo fileInfo = Mock.Of<IFileInfo>( f =>
+                                                    f.FullName == localFilePath &&
+                                                    f.Name == localFileName &&
+                                                    f.Exists == true );
+            IDirectoryInfo parentInfo = Mock.Of<IDirectoryInfo> ( d =>
+                                                                 d.FullName == Path.GetTempPath() &&
+                                                                 d.Exists == true );
+            fsFactory.AddIFileInfo(fileInfo);
+            fsFactory.AddIDirectoryInfo(parentInfo);
+            storage.AddLocalFile(localFilePath, "id");
             var detection = new LocalSituationDetection(fsFactory.Object);
-            var fileEvent = new FileEvent(Mock.Of<IFileInfo>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IDocument>());
-            detection.Analyse(storage.Object, fileEvent);
-            Assert.Fail ("TODO");
+            var fileEvent = new FileEvent(fileInfo, parentInfo, null);
+            fileEvent.Local = MetaDataChangeType.NONE;
+            Assert.AreEqual(SituationType.NOCHANGE, detection.Analyse(storage.Object, fileEvent));
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
