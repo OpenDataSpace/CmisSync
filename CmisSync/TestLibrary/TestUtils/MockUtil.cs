@@ -100,6 +100,7 @@ namespace TestLibrary.TestUtils
             var folder = new Mock<MappedFolder>("path","/", null) { CallBase = true};
             folder.Setup(f => f.GetLocalPath()).Returns(path.FullName);
             folder.Setup (f => f.RemoteObjectId).Returns(id);
+            folder.Setup (f => f.Remove());
             db.AddMappedFolder(folder.Object);
             return folder;
         }

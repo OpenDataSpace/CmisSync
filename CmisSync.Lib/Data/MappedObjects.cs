@@ -57,7 +57,7 @@ namespace CmisSync.Lib.Data
 
         public abstract bool ExistsLocally ();
 
-        public void Remove()
+        public virtual void Remove()
         {
             throw new NotImplementedException();
         }
