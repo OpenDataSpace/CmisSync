@@ -323,7 +323,7 @@ namespace CmisSync.Lib
         {
             if (EnableEvent)
             {
-                https://github.com/spouliot/gendarme/wiki/Gendarme.Rules.Concurrency.ProtectCallToEventDelegatesRule
+                //https://github.com/spouliot/gendarme/wiki/Gendarme.Rules.Concurrency.ProtectCallToEventDelegatesRule
                 EventHandler<FileSystemEventArgs> handler = ChangeEvent;
                 if(handler != null) {
                     handler(this, args);
