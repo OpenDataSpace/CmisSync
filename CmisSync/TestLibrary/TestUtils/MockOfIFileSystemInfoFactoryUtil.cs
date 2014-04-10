@@ -14,11 +14,13 @@ namespace TestLibrary.TestUtils
             fsFactory.Setup(f => f.CreateDirectoryInfo(dirInfo.FullName)).Returns(dirInfo);
         }
 
-        public static void AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true )
+        public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true )
         {
-            fsFactory.AddIDirectoryInfo(Mock.Of<IDirectoryInfo>(d =>
-                                                                d.FullName == path &&
-                                                                d.Exists == exists));
+            Mock<IDirectoryInfo> dir = new Mock<IDirectoryInfo>();
+            dir.Setup(d => d.FullName).Returns(path);
+            dir.Setup(d => d.Exists).Returns(exists);
+            fsFactory.AddIDirectoryInfo(dir.Object);
+            return dir;
         }
 
         public static void AddDirectoryWithParents(this Mock<IFileSystemInfoFactory> fsFactory, string path)
@@ -37,11 +39,13 @@ namespace TestLibrary.TestUtils
             fsFactory.Setup(f => f.CreateFileInfo(fileInfo.FullName)).Returns(fileInfo);
         }
 
-        public static void AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true )
+        public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true )
         {
-            fsFactory.AddIFileInfo(Mock.Of<IFileInfo>(d =>
-                                                                d.FullName == path &&
-                                                                d.Exists == exists));
+            Mock<IFileInfo> file = new Mock<IFileInfo>();
+            file.Setup(f => f.FullName).Returns(path);
+            file.Setup(f => f.Exists).Returns(exists);
+            fsFactory.AddIFileInfo(file.Object);
+            return file;
         }
     }
 }
