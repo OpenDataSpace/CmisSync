@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace CmisSync.Lib.Storage
 {
@@ -59,5 +61,11 @@ namespace CmisSync.Lib.Storage
     /// Wrong platform exception should be thrown if the executing platfom
     /// is not the target platform of the compilation
     /// </summary>
-    public class WrongPlatformException : System.Exception {}
+    [Serializable]
+    public class WrongPlatformException : System.Exception {
+        public WrongPlatformException () { }
+        public WrongPlatformException (string message) : base (message) { }
+        public WrongPlatformException (string message, Exception inner) : base (message, inner) { }
+        protected WrongPlatformException (SerializationInfo info, StreamingContext context) : base (info, context) { }
+    }
 }
