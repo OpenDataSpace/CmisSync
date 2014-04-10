@@ -77,3 +77,11 @@ M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::ResumeDownloadTest(
 R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
 T: CmisSync.Lib.Events.ProxyAuthRequiredEvent
 T: CmisSync.Lib.Events.PermissionDeniedEvent
+
+#Ignore DoNotExposeNestedGenericSignaturesRule where DotCmis forces us
+R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
+T: CmisSync.Lib.Cmis.CmisUtils/NodeTree
+
+#Ignore DoNotHardCodePaths
+R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
+T: TestLibrary.LegacyCodeTests.IgnoreLocalFolderTests

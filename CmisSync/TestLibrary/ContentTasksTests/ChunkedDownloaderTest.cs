@@ -80,37 +80,39 @@ namespace TestLibrary.ContentTasksTests
         public void FullDownloadTest ()
         {
             mockedStream.Setup (stream => stream.Length).Returns (remoteLength);
-            mockedStream.Setup (stream => stream.Stream).Returns (new MemoryStream (remoteContent));
-            mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
-            mock.Setup (doc => doc.ContentStreamId).Returns (ContentStreamId);
-            mock.Setup (doc => doc.GetContentStream (
-                It.Is<string> ((string s) => s.Equals (ContentStreamId)),
-                It.Is<long?> ((long? l) => (l == null || l == 0)),
-                It.Is<long?> ((long? l) => l != null))
-            )
-                .Returns (mockedStream.Object);
-            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-//                Console.WriteLine(e.ToString());
-                if (e.ActualPosition != null) {
-                    Assert.GreaterOrEqual ((long)e.ActualPosition, 0);
-                    Assert.LessOrEqual ((long)e.ActualPosition, remoteLength);
-                }
-                if (e.Percent != null) {
-                    Assert.GreaterOrEqual (e.Percent, 0);
-                    Assert.LessOrEqual (e.Percent, 100);
-                }
-                if (e.Length != null) {
-                    Assert.GreaterOrEqual (e.Length, 0);
-                    Assert.LessOrEqual (e.Length, remoteLength);
-                }
+            using(var memorystream = new MemoryStream (remoteContent)){
+                mockedStream.Setup (stream => stream.Stream).Returns (memorystream);
+                mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
+                mock.Setup (doc => doc.ContentStreamId).Returns (ContentStreamId);
+                mock.Setup (doc => doc.GetContentStream (
+                            It.Is<string> ((string s) => s.Equals (ContentStreamId)),
+                            It.Is<long?> ((long? l) => (l == null || l == 0)),
+                            It.Is<long?> ((long? l) => l != null))
+                        )
+                    .Returns (mockedStream.Object);
+                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                    //                Console.WriteLine(e.ToString());
+                    if (e.ActualPosition != null) {
+                        Assert.GreaterOrEqual ((long)e.ActualPosition, 0);
+                        Assert.LessOrEqual ((long)e.ActualPosition, remoteLength);
+                    }
+                    if (e.Percent != null) {
+                        Assert.GreaterOrEqual (e.Percent, 0);
+                        Assert.LessOrEqual (e.Percent, 100);
+                    }
+                    if (e.Length != null) {
+                        Assert.GreaterOrEqual (e.Length, 0);
+                        Assert.LessOrEqual (e.Length, remoteLength);
+                    }
 
-            };
-            using (IFileDownloader downloader = new ChunkedDownloader(chunkSize)) {
-                downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
-                Assert.AreEqual (remoteContent.Length, localFileStream.Length);
-//                Assert.AreEqual (remoteContent, localFileStream.ToArray());
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteContent), hashAlg.Hash);
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localFileStream.ToArray ()), hashAlg.Hash);
+                };
+                using (IFileDownloader downloader = new ChunkedDownloader(chunkSize)) {
+                    downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
+                    Assert.AreEqual (remoteContent.Length, localFileStream.Length);
+                    //                Assert.AreEqual (remoteContent, localFileStream.ToArray());
+                    Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteContent), hashAlg.Hash);
+                    Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localFileStream.ToArray ()), hashAlg.Hash);
+                }
             }
         }
 
@@ -125,37 +127,39 @@ namespace TestLibrary.ContentTasksTests
             localFileStream.Seek (0, SeekOrigin.Begin);
             Assert.AreEqual (remoteChunk.Length, localFileStream.Length);
             mockedStream.Setup (stream => stream.Length).Returns (remoteChunk.Length);
-            mockedStream.Setup (stream => stream.Stream).Returns (new MemoryStream (remoteChunk));
-            mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
-            mock.Setup (doc => doc.ContentStreamId).Returns (ContentStreamId);
-            mock.Setup (doc => doc.GetContentStream (
-                It.Is<string> ((string s) => s.Equals (ContentStreamId)),
-                It.Is<long?> ((long? l) => (l == startPos)),
-                It.Is<long?> ((long? l) => l == remoteChunk.Length))
-            )
-                .Returns (mockedStream.Object);
-            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-//                Console.WriteLine(e.ToString());
-                if (e.ActualPosition != null) {
-                    Assert.GreaterOrEqual ((long)e.ActualPosition, startPos);
-                    Assert.LessOrEqual ((long)e.ActualPosition, remoteLength);
-                }
-                if (e.Percent != null) {
-                    Assert.GreaterOrEqual (e.Percent, 50);
-                    Assert.LessOrEqual (e.Percent, 100);
-                }
-                if (e.Length != null) {
-                    Assert.GreaterOrEqual (e.Length, startPos);
-                    Assert.LessOrEqual (e.Length, remoteLength);
-                }
+            using(var memorystream = new MemoryStream (remoteChunk)){
+                mockedStream.Setup (stream => stream.Stream).Returns (memorystream);
+                mock.Setup (doc => doc.ContentStreamLength).Returns (remoteLength);
+                mock.Setup (doc => doc.ContentStreamId).Returns (ContentStreamId);
+                mock.Setup (doc => doc.GetContentStream (
+                            It.Is<string> ((string s) => s.Equals (ContentStreamId)),
+                            It.Is<long?> ((long? l) => (l == startPos)),
+                            It.Is<long?> ((long? l) => l == remoteChunk.Length))
+                        )
+                    .Returns (mockedStream.Object);
+                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                    //                Console.WriteLine(e.ToString());
+                    if (e.ActualPosition != null) {
+                        Assert.GreaterOrEqual ((long)e.ActualPosition, startPos);
+                        Assert.LessOrEqual ((long)e.ActualPosition, remoteLength);
+                    }
+                    if (e.Percent != null) {
+                        Assert.GreaterOrEqual (e.Percent, 50);
+                        Assert.LessOrEqual (e.Percent, 100);
+                    }
+                    if (e.Length != null) {
+                        Assert.GreaterOrEqual (e.Length, startPos);
+                        Assert.LessOrEqual (e.Length, remoteLength);
+                    }
 
-            };
-            using (IFileDownloader downloader = new ChunkedDownloader(chunkSize)) {
-                downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
-                Assert.AreEqual (remoteContent.Length, localFileStream.Length);
-//                Assert.AreEqual (remoteContent, localFileStream.ToArray());
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteContent), hashAlg.Hash);
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localFileStream.ToArray ()), hashAlg.Hash);
+                };
+                using (IFileDownloader downloader = new ChunkedDownloader(chunkSize)) {
+                    downloader.DownloadFile (mock.Object, localFileStream, transmissionEvent, hashAlg);
+                    Assert.AreEqual (remoteContent.Length, localFileStream.Length);
+                    //                Assert.AreEqual (remoteContent, localFileStream.ToArray());
+                    Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteContent), hashAlg.Hash);
+                    Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localFileStream.ToArray ()), hashAlg.Hash);
+                }
             }
         }
 

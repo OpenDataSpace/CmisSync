@@ -29,31 +29,31 @@ namespace CmisSync.Lib.Data
 
         public IFileSystemInfoFactory FsFactory { get; protected set; }
 
-        public virtual string RemoteObjectId { get; set; }
+        public string RemoteObjectId { get; set; }
 
-        public virtual string LastChangeToken { get; set; }
+        public string LastChangeToken { get; set; }
 
         /// <summary>
         /// Gets and sets the time at which the object was last modified.
         /// This is the time on the CMIS server side, in UTC. Client-side time does not matter.
         /// </summary>
         [DefaultValue(null)]
-        public virtual DateTime? LastRemoteWriteTimeUtc { get; set; }
+        public DateTime? LastRemoteWriteTimeUtc { get; set; }
 
         [DefaultValue(null)]
-        public virtual DateTime? LastLocalWriteTimeUtc { get; set; }
+        public DateTime? LastLocalWriteTimeUtc { get; set; }
 
-        public virtual byte[] LastChecksum { get; set; }
+        public byte[] LastChecksum { get; set; }
 
-        public virtual string ChecksumAlgorithmName { get; set; }
+        public string ChecksumAlgorithmName { get; set; }
 
-        public virtual string RemoteSyncTargetPath { get; private set; }
+        public string RemoteSyncTargetPath { get; private set; }
 
-        public virtual string LocalSyncTargetPath { get; private set; }
+        public string LocalSyncTargetPath { get; private set; }
 
-        public virtual string Name { get; set; }
+        public string Name { get; set; }
 
-        public virtual string Description { get; set; }
+        public string Description { get; set; }
 
         public abstract bool ExistsLocally ();
 

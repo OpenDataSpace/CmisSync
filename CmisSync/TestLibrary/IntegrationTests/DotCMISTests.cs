@@ -333,7 +333,7 @@ namespace TestLibrary.IntegrationTests
             contentStream.Length = content.Length;
             using(var memstream = new MemoryStream(content)){
                 contentStream.Stream = memstream;
-                Console.WriteLine("content: " + memstream.Length);
+                Console.WriteLine("content: " + memstream.Length.ToString());
                 emptyDoc.SetContentStream(contentStream, true, true);
             }
             Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength, "Setting content failed");

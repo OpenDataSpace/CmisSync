@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Data
         public MappedFolder( string localSyncTargetPath, string remoteSyncTargetPath, IFileSystemInfoFactory fsFactory = null)
             : base(localSyncTargetPath, remoteSyncTargetPath, fsFactory)
         {
-            Name = FsFactory.CreateDirectoryInfo(LocalSyncTargetPath).Name;
+            Name = FsFactory.CreateDirectoryInfo(localSyncTargetPath).Name;
         }
 
         public MappedFolder ( IMappedFolder parent, string name, IFileSystemInfoFactory fsFactory = null)
