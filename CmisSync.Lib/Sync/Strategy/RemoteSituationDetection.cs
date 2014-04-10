@@ -40,7 +40,6 @@ namespace CmisSync.Lib.Sync.Strategy
             case MetaDataChangeType.CREATED:
                 if(actualEvent is FileEvent)
                     return (IsSavedFileEqual(storage, (actualEvent as FileEvent).RemoteFile)) ? SituationType.NOCHANGE : SituationType.ADDED;
-                return SituationType.ADDED;
             case MetaDataChangeType.DELETED:
                 return SituationType.REMOVED;
             case MetaDataChangeType.NONE:
