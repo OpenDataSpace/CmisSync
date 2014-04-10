@@ -62,7 +62,7 @@ namespace CmisSync.Lib.Storage
     /// is not the target platform of the compilation
     /// </summary>
     [Serializable]
-    public class WrongPlatformException : System.Exception {
+    public class WrongPlatformException : Exception {
         public WrongPlatformException () { }
         public WrongPlatformException (string message) : base (message) { }
         public WrongPlatformException (string message, Exception inner) : base (message, inner) { }
