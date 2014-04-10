@@ -33,7 +33,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);
             var solver = new RemoteObjectDeleted();
-            solver.Solve(session.Object, storage.Object, dirInfo.Object, null);            
+            solver.Solve(session.Object, storage.Object, dirInfo.Object, null);
 
             dirInfo.Verify(d => d.Delete(true), Times.Once());
             folder.Verify(f => f.Remove(), Times.Once());

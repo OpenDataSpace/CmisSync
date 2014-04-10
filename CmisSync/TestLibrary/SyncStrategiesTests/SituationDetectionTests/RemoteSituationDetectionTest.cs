@@ -176,6 +176,46 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, folderEvent));
         }
+
+        [Test, Category("Fast")]
+        public void FolderMovedDetectionOnFolderMovedEvent()
+        {
+            var remoteObject = new Mock<IFolder>();
+            var folderEvent = new FolderMovedEvent(null, null, null, remoteObject.Object) { Remote = MetaDataChangeType.MOVED };
+
+            var detector = new RemoteSituationDetection(SessionMock.Object);
+
+            Assert.AreEqual(SituationType.MOVED, detector.Analyse(StorageMock.Object, folderEvent));
+        }
+
+        [Test, Category("Fast")]
+        public void FolderMovedDetectionOnChangeEvent()
+        {
+            string folderName = "old";
+            string oldLocalPath = Path.Combine(Path.GetTempPath(), folderName);
+            string oldRemotePath = "/" + folderName;
+            string remoteId = "remoteId";
+            string oldParentId = "oldParentId";
+            string newParentId = "newParentId";
+            var remoteFolder = new Mock<IFolder>();
+            remoteFolder.Setup(f => f.Name).Returns(folderName);
+            remoteFolder.Setup(f => f.Path).Returns("/new/" + folderName);
+            remoteFolder.Setup(f => f.Id).Returns(remoteId);
+            remoteFolder.Setup(f => f.ParentId).Returns(newParentId);
+            var mappedParentFolder = Mock.Of<IMappedFolder>(p =>
+                                                            p.RemoteObjectId == oldParentId);
+            var mappedFolder = StorageMock.AddLocalFolder(oldLocalPath, remoteId);
+            mappedFolder.Setup( f => f.Name).Returns(folderName);
+            mappedFolder.Setup( f => f.GetRemotePath()).Returns(oldRemotePath);
+            mappedFolder.Setup( f => f.GetLocalPath()).Returns(oldLocalPath);
+            mappedFolder.Setup( f => f.Parent).Returns(mappedParentFolder);
+            SessionMock.AddRemoteObject(remoteFolder.Object);
+            var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
+
+            var detector = new RemoteSituationDetection(SessionMock.Object);
+
+            Assert.AreEqual( SituationType.MOVED, detector.Analyse(StorageMock.Object, folderEvent));
+        }
     }
 }
 
