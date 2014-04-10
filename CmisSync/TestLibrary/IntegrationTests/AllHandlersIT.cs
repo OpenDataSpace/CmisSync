@@ -165,7 +165,7 @@ namespace TestLibrary.IntegrationTests
             fsFactory.AddIDirectoryInfo(dirInfo.Object);
 
             Mock<ISession> session = MockUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
-            Mock<MappedFolder> folder = storage.AddLocalFolder(path, id);
+            Mock<IMappedFolder> folder = storage.AddLocalFolder(path, id);
 
             var queue = CreateQueue(session, storage, fsFactory);
             queue.RunStartSyncEvent();
