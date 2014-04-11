@@ -285,8 +285,8 @@ namespace CmisSync
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 return false;
             }));
-            repo.EventManager.AddEventHandler(new GenericHandleDoublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
-            repo.EventManager.AddEventHandler(new GenericHandleDoublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
+            repo.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
+            repo.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
             repo.EventManager.AddEventHandler(new GenericSyncEventHandler<ProxyAuthRequiredEvent>(0, delegate(ISyncEvent e) {
                 ProxyAuthReqired(repositoryInfo.Name);
                 return true;

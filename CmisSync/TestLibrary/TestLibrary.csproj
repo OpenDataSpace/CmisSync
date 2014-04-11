@@ -143,7 +143,6 @@
     <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\GenericHandleDoublicatedEventsFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
     <Compile Include="LegacyCodeTests\RepoInfoTests.cs" />
@@ -157,6 +156,7 @@
     <Compile Include="UtilsTests\CredentialsTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="WatcherTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

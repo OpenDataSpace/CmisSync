@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Events {
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;
-            map[typeof(GenericHandleDoublicatedEventsFilter<,>)] = FILTER;
+            map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
             map[typeof(CmisSync.Lib.Sync.Strategy.Watcher)] = NORMAL;
             map[typeof(Crawler)] = NORMAL;
             map[typeof(SyncMechanism)] = NORMAL;

@@ -77,7 +77,7 @@ namespace TestLibrary.IntegrationTests
             var crawler = new Crawler(queue, remoteFolder.Object, localFolder.Object);
             manager.AddEventHandler(crawler);
 
-            var permissionDenied = new GenericHandleDoublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();
+            var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();
             manager.AddEventHandler(permissionDenied);
 
             var invalidFolderNameFilter = new InvalidFolderNameFilter(queue);

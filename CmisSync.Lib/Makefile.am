@@ -48,7 +48,7 @@ SOURCES =  \
 	Events/DebugLoggingHandler.cs \
 	Events/EncapsuledEvent.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
-	Events/EventFilter/GenericHandleDoublicatedEventsFilter.cs \
+	Events/EventFilter/GenericHandleDublicatedEventsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
 	Events/EventFilter/IgnoredFilesFilter.cs \
 	Events/EventFilter/IgnoredFolderNameFilter.cs \

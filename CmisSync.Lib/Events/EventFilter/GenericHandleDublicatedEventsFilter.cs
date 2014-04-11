@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Events.Filter
     /// <typeparam name="TReset">
     /// If an ISyncEvent with this type is passed this resets the filter once.
     /// </typeparam>
-    public class GenericHandleDoublicatedEventsFilter<TFilter, TReset> : SyncEventHandler
+    public class GenericHandleDublicatedEventsFilter<TFilter, TReset> : SyncEventHandler
         where TFilter : ISyncEvent
         where TReset : ISyncEvent
     {
@@ -51,7 +51,7 @@ namespace CmisSync.Lib.Events.Filter
         {
             get
             {
-                return EventHandlerPriorities.GetPriority(typeof(GenericHandleDoublicatedEventsFilter<,>));
+                return EventHandlerPriorities.GetPriority(typeof(GenericHandleDublicatedEventsFilter<,>));
             }
         }
 
