@@ -42,8 +42,6 @@ namespace CmisSync.Lib.Events
         /// </summary>
         public event TransmissionEventHandler TransmissionStatus = delegate { };
 
-        private object statusLock = new object();
-
         private TransmissionProgressEventArgs status;
 
         /// <summary>
@@ -54,21 +52,8 @@ namespace CmisSync.Lib.Events
         /// </value>
         public TransmissionProgressEventArgs Status
         {
-            get
-            {
-                lock (statusLock)
-                {
-                    return this.status;
-                }
-            }
-            
-            private set
-            {
-                lock (statusLock)
-                {
-                    this.status = value;
-                }
-            }
+            get { return this.status; }
+            private set { this.status = value; }
         }
 
         /// <summary>
@@ -114,18 +99,15 @@ namespace CmisSync.Lib.Events
         /// </param>
         public void ReportProgress(TransmissionProgressEventArgs status)
         {
-            lock (statusLock)
-            {
-                Status.Aborting = (status.Aborting != null) ? status.Aborting : Status.Aborting;
-                Status.Aborted = (status.Aborted != null) ? status.Aborted : Status.Aborted;
-                Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
-                Status.Length = (status.Length != null) ? status.Length : Status.Length;
-                Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
-                Status.Started = (status.Started != null) ? status.Started : Status.Started;
-                Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
-                if (TransmissionStatus != null)
-                    TransmissionStatus(this, Status);
-            }
+            Status.Aborting = (status.Aborting != null) ? status.Aborting : Status.Aborting;
+            Status.Aborted = (status.Aborted != null) ? status.Aborted : Status.Aborted;
+            Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
+            Status.Length = (status.Length != null) ? status.Length : Status.Length;
+            Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
+            Status.Started = (status.Started != null) ? status.Started : Status.Started;
+            Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
+            if (TransmissionStatus != null)
+                TransmissionStatus(this, Status);
         }
     }
 
