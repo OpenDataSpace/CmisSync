@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -307,7 +307,7 @@ namespace CmisSync.Lib.Sync
 
             private void sleepWhileSuspended()
             {
-                while (repo.Status == SyncStatus.Suspend)
+                while (repo.Status == SyncStatus.Suspend || repo.Stopped)
                 {
                     Logger.Info(String.Format("Sync of {0} is suspend, next retry in {1}ms", repoinfo.Name, repoinfo.PollInterval));
                     System.Threading.Thread.Sleep((int)repoinfo.PollInterval);
