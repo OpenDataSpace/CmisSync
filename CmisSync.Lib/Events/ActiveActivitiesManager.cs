@@ -53,14 +53,15 @@ namespace CmisSync.Lib.Events
         public bool AddTransmission(FileTransmissionEvent transmission) {
             lock (Lock)
             {
-                if(!activeTransmissions.Contains(transmission)) {
-                    transmission.TransmissionStatus += TransmissionFinished;
-                    activeTransmissions.Add(transmission);
-                    transmission.ReportProgress(transmission.Status);
-                    return true;
+                if (activeTransmissions.Contains(transmission))
+                {
+                    return false;
                 }
+                transmission.TransmissionStatus += TransmissionFinished;
+                activeTransmissions.Add(transmission);
             }
-            return false;
+            transmission.ReportProgress(transmission.Status);
+            return true;
         }
 
         /// <summary>
