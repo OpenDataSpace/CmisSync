@@ -13,17 +13,14 @@
 //
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see (http://www.gnu.org/licenses/).
-
-
-using System;
-
-using Gtk;
-using Mono.Unix;
-
-namespace CmisSync {
-
-    public class About : Window {
-
+namespace CmisSync 
+{
+    using System;
+    using Gtk;
+    using Mono.Unix;
+    
+    public class About : Window 
+    {
         public AboutController Controller = new AboutController ();
 
         private Label updates;
@@ -90,7 +87,7 @@ namespace CmisSync {
                         // this.updates.Markup = String.Format ("<span font_size='small' fgcolor='#729fcf'>{0}</span>",
                         //    "Checking for updates...");
 
-                        this.updates.ShowAll ();
+                        this.updates.ShowAll();
                         });
             };
         }

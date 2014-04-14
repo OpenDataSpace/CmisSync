@@ -21,9 +21,11 @@ using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Sync
 {
+    using log4net;
 
-    public partial class CmisRepo : RepoBase
+    public class CmisRepo : RepoBase
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisRepo));
         /// <summary>
         /// Remote folder to synchronize.
         /// </summary>
