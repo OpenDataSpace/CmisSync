@@ -79,9 +79,7 @@
     <Compile Include="LoggingStream.cs" />
     <Compile Include="RepoBase.cs" />
     <Compile Include="RepoInfo.cs" />
-    <Compile Include="Sync\ChangeLogStrategy.cs" />
     <Compile Include="Sync\CmisRepo.cs" />
-    <Compile Include="Sync\CrawlStrategy.cs" />
     <Compile Include="Sync\SynchronizedFolder.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Watcher.cs">

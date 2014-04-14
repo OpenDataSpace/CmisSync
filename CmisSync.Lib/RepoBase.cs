@@ -42,13 +42,6 @@ namespace CmisSync.Lib
         /// </summary>
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RepoBase));
 
-
-        /// <summary>
-        /// Perform a synchronization if one is not running already.
-        /// </summary>
-        public abstract void SyncInBackground();
-
-
         /// <summary>
         /// Local disk size taken by the repository.
         /// </summary>
@@ -174,12 +167,6 @@ namespace CmisSync.Lib
             // start scheduler
             Scheduler = new SyncScheduler(Queue, repoInfo.PollInterval);
             EventManager.AddEventHandler(Scheduler);
-
-            EventManager.AddEventHandler(new GenericSyncEventHandler<StartNextSyncEvent>(0, delegate(ISyncEvent e) {
-                SyncInBackground();
-                return true;
-            }));
-
 
             SyncStatusChanged += delegate(SyncStatus status)
             {

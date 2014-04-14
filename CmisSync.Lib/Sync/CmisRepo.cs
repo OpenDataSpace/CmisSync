@@ -47,12 +47,6 @@ namespace CmisSync.Lib.Sync
 
         public override void Resume()
         {
-            if(this.synchronizedFolder != null)
-            {
-                Logger.Debug("Reset all failed upload counter");
-                this.synchronizedFolder.resetFailedOperationsCounter();
-                this.synchronizedFolder.ForceFullSyncAtNextSync();
-            }
             base.Resume();
         }
 
@@ -80,40 +74,7 @@ namespace CmisSync.Lib.Sync
             base.Dispose(disposing);
         }
 
+        public override double Size {get {throw new NotImplementedException();}}
 
-        /// <summary>
-        /// Sync for the first time.
-        /// This will create a database and download all files.
-        /// </summary>
-        public void DoFirstSync()
-        {
-            Logger.Info("First sync of " + this.Name);
-            if (this.synchronizedFolder != null)
-            {
-                this.synchronizedFolder.Sync();
-            }
-        }
-
-        /// <summary>
-        /// Synchronize.
-        /// The synchronization is performed in the background, so that the UI stays usable.
-        /// </summary>
-        public override void SyncInBackground()
-        {
-            if (this.synchronizedFolder != null) // Because it is sometimes called before the object's constructor has completed.
-                this.synchronizedFolder.SyncInBackground();
-        }
-
-        /// <summary>
-        /// Size of the synchronized folder in bytes.
-        /// Obtained by adding the individual sizes of all files, recursively.
-        /// </summary>
-        public override double Size
-        {
-            get
-            {
-                return 1234567; // TODO
-            }
-        }
     }
 }

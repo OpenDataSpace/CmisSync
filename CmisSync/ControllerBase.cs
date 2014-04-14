@@ -525,7 +525,8 @@ namespace CmisSync
 
             foreach (RepoBase repo in Repositories)
             {
-                repo.SyncInBackground();
+//                repo.SyncInBackground();
+//                TODO
             }
 
             if (has_unsynced_repos)
