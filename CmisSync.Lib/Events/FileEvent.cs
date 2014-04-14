@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="FileDownloadRequest.cs" company="GRAU DATA AG">
+// <copyright file="FileEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -32,6 +32,32 @@ namespace CmisSync.Lib.Events
     public class FileEvent : AbstractFolderEvent
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileEvent"/> class.
+        /// </summary>
+        /// <param name='localFile'>
+        /// Local file.
+        /// </param>
+        /// <param name='localParentDirectory'>
+        /// Local parent directory.
+        /// </param>
+        /// <param name='remoteFile'>
+        /// Remote file.
+        /// </param>
+        public FileEvent(IFileInfo localFile = null, IDirectoryInfo localParentDirectory = null, IDocument remoteFile = null)
+        {
+            if (localFile == null && remoteFile == null)
+            {
+                throw new ArgumentNullException("Given local or remote file must not be null");
+            }
+
+            this.LocalFile = localFile;
+            this.LocalParentDirectory = localParentDirectory;
+            this.RemoteFile = remoteFile;
+            this.LocalContent = ContentChangeType.NONE;
+            this.RemoteContent = ContentChangeType.NONE;
+        }
+
+                /// <summary>
         /// Gets or sets the content of the local.
         /// </summary>
         /// <value>
@@ -72,32 +98,6 @@ namespace CmisSync.Lib.Events
         public IDocument RemoteFile { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileEvent"/> class.
-        /// </summary>
-        /// <param name='localFile'>
-        /// Local file.
-        /// </param>
-        /// <param name='localParentDirectory'>
-        /// Local parent directory.
-        /// </param>
-        /// <param name='remoteFile'>
-        /// Remote file.
-        /// </param>
-        public FileEvent(IFileInfo localFile = null, IDirectoryInfo localParentDirectory = null, IDocument remoteFile = null)
-        {
-            if (localFile == null && remoteFile == null)
-            {
-                throw new ArgumentNullException("Given local or remote file must not be null");
-            }
-
-            this.LocalFile = localFile;
-            this.LocalParentDirectory = localParentDirectory;
-            this.RemoteFile = remoteFile;
-            this.LocalContent = ContentChangeType.NONE;
-            this.RemoteContent = ContentChangeType.NONE;
-        }
-
-        /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FileEvent"/>.
         /// </summary>
         /// <returns>
@@ -105,11 +105,12 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format("[FileEvent: Local={0}, LocalContent={1}, Remote={2}, RemoteContent={3}]",
-                                  this.Local,
-                                  this.LocalContent,
-                                  this.Remote,
-                                  this.RemoteContent);
+            return string.Format(
+                "[FileEvent: Local={0}, LocalContent={1}, Remote={2}, RemoteContent={3}]",
+                this.Local,
+                this.LocalContent,
+                this.Remote,
+                this.RemoteContent);
         }
     }
 
