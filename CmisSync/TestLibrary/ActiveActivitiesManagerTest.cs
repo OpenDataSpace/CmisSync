@@ -52,14 +52,14 @@ namespace TestLibrary
             downloadModifiedTransmission.ReportProgress(new TransmissionProgressEventArgs() { Completed = true });
             Assert.AreEqual(1, manager.ActiveTransmissions.Count);
             Assert.True(manager.AddTransmission(downloadModifiedTransmission), "A completed file transmission event should be able to be readded after, but wasn't");
-            Assert.AreEqual(2, manager.ActiveTransmissions.Count);
+            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
             downloadModifiedTransmission.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
             Assert.AreEqual(1, manager.ActiveTransmissions.Count);
 
             downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { Completed = true });
             Assert.AreEqual(0, manager.ActiveTransmissions.Count);
             Assert.True(manager.AddTransmission(downloadTransmission), "A completed file transmission event should be able to be readded after, but wasn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
+            Assert.AreEqual(0, manager.ActiveTransmissions.Count);
             downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { Completed = true });
 
             Assert.AreEqual(0, manager.ActiveTransmissions.Count);
