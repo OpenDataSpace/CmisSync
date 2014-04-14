@@ -13,6 +13,7 @@ using DotCMIS.Exceptions;
 using Moq;
 
 using NUnit.Framework;
+using TestLibrary.TestUtils;
 
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
@@ -86,7 +87,10 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 var solver = new LocalObjectDeleted();
                 var docId = new Mock<IObjectId>(MockBehavior.Strict);
                 docId.Setup(d => d.Id).Returns(remoteDocumentId);
+                Storage.AddLocalFile(tempFile, remoteDocumentId);
+
                 solver.Solve(Session.Object, Storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
+
                 Assert.IsTrue(remoteObjectDeleted);
             }
             finally
@@ -145,7 +149,10 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 var solver = new LocalObjectDeleted();
                 var docId = new Mock<IObjectId>(MockBehavior.Strict);
                 docId.Setup(d => d.Id).Returns(remoteFolderId);
+                Storage.AddLocalFolder(tempFolder, remoteFolderId);
+
                 solver.Solve(Session.Object, Storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), docId.Object);
+
                 Assert.IsTrue(remoteObjectDeleted);
             }
             finally

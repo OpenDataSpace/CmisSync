@@ -43,7 +43,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FileRemovedDetectionTest()
+        public void FileRemovedDetection()
         {
             var storage = new Mock<IMetaDataStorage>();
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
@@ -54,7 +54,42 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             Assert.That(detection.Analyse(storage.Object, fileEvent), Is.EqualTo(SituationType.REMOVED));
         }
 
+        [Test, Category("Fast"), Category("SituationDetection")]
+        public void FolderAddedDetection()
+        {
+            var storage = new Mock<IMetaDataStorage>();
+            Mock<IDirectoryInfo> dirInfo = new Mock<IDirectoryInfo>();
 
+            var folderEvent = new FolderEvent(dirInfo.Object) {Local = MetaDataChangeType.CREATED};
+
+            var detection = new LocalSituationDetection();
+            Assert.That(detection.Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.ADDED));
+        }
+
+        [Test, Category("Fast"), Category("SituationDetection")]
+        public void FolderRemovedDetection()
+        {
+            var storage = new Mock<IMetaDataStorage>();
+            Mock<IDirectoryInfo> dirInfo = new Mock<IDirectoryInfo>();
+
+            var folderEvent = new FolderEvent(dirInfo.Object) {Local = MetaDataChangeType.DELETED};
+
+            var detection = new LocalSituationDetection();
+            Assert.That(detection.Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.REMOVED));
+        }
+
+        [Ignore]
+        [Test, Category("Fast"), Category("SituationDetection")]
+        public void FolderRenamedDetection()
+        {
+            var storage = new Mock<IMetaDataStorage>();
+            Mock<IDirectoryInfo> dirInfo = new Mock<IDirectoryInfo>();
+
+            var folderEvent = new FolderEvent(dirInfo.Object) {Local = MetaDataChangeType.CHANGED};
+
+            var detection = new LocalSituationDetection();
+            Assert.That(detection.Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.RENAMED));
+        }
     }
 }
 

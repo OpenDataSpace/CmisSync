@@ -438,6 +438,11 @@ namespace CmisSync
                                     Width = 200
                                 };
 
+                                CircularProgressBar logging_check = new CircularProgressBar()
+                                {
+                                    Visibility = System.Windows.Visibility.Hidden
+                                };
+
                                 TextBlock password_help_label = new TextBlock()
                                 {
                                     FontSize = 11,
@@ -493,6 +498,10 @@ namespace CmisSync
                                 ContentCanvas.Children.Add(password_box);
                                 Canvas.SetTop(password_box, 180);
                                 Canvas.SetRight(password_box, 30);
+
+                                ContentCanvas.Children.Add(logging_check);
+                                Canvas.SetTop(logging_check, 180);
+                                Canvas.SetRight(logging_check, 30);
 
                                 ContentCanvas.Children.Add(password_help_label);
                                 Canvas.SetTop(password_help_label, 215);
@@ -573,6 +582,7 @@ namespace CmisSync
                                 continue_button.Click += delegate
                                 {
                                     // Show wait cursor
+                                    logging_check.Visibility = System.Windows.Visibility.Visible;
                                     System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
 
                                     // Try to find the CMIS server (asynchronously)
@@ -597,6 +607,7 @@ namespace CmisSync
 
                                     // Hide wait cursor
                                     System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+                                    logging_check.Visibility = System.Windows.Visibility.Hidden;
 
                                     if (Controller.repositories == null)
                                     {

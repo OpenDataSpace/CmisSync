@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DotCMIS.Client;
 using System.Security.Cryptography;
 using System.IO;
@@ -37,7 +37,7 @@ namespace CmisSync.Lib.ContentTasks
                     lock(DisposeLock){
                         if(this.disposed) {
                             TransmissionStatus.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true});
-                            throw new ObjectDisposedException("Disposed download task while downloading file: " + remoteDocument.Name);
+                            throw new ObjectDisposedException(TransmissionStatus.Path);
                         }
                         hashstream.Write (buffer, 0, len);
                         hashstream.Flush();

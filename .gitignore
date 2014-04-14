@@ -49,3 +49,4 @@ DataSpaceSync.Console/dsscli
 TestResult.xml
 *covdb*
 *covreport*
+StyleCop.Cache

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -66,6 +66,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="ConfigManager.cs" />
     <Compile Include="ConfigMigration.cs" />
+    <Compile Include="ContentTasks\AbortException.cs" />
     <Compile Include="Credentials.cs" />
     <Compile Include="Defines.cs" />
     <Compile Include="Events\ActiveActivitiesManager.cs" />
@@ -180,7 +181,6 @@
     <Compile Include="Sync\Strategy\NetWatcher.cs" />
     <Compile Include="Events\EventFilter\IgnoredFolderNameFilter.cs" />
     <Compile Include="Events\ProxyAuthRequiredEvent.cs" />
-    <Compile Include="Events\EventFilter\GenericHandleDoublicatedEventsFilter.cs" />
     <Compile Include="Storage\ExtendedAttributeException.cs" />
     <Compile Include="Storage\IExtendedAttributeReader.cs" />
     <Compile Include="Storage\ExtendedAttributeReaderUnix.cs" />
@@ -188,6 +188,7 @@
     <Compile Include="Data\IMappedFolder.cs" />
     <Compile Include="Data\IMappedObject.cs" />
     <Compile Include="Data\IMappedFile.cs" />
+    <Compile Include="Events\EventFilter\GenericHandleDublicatedEventsFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -242,13 +243,5 @@
       <Name>log4net.vs2010</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Streams\" />
-    <Folder Include="Events\EventFilter\" />
-    <Folder Include="Sync\Strategy\" />
-    <Folder Include="Storage\" />
-    <Folder Include="Data\" />
-    <Folder Include="Sync\Solver\" />
-    <Folder Include="ContentTasks\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

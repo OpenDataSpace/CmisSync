@@ -4,6 +4,7 @@ using System.IO;
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Streams;
+using CmisSync.Lib.ContentTasks;
 
 using NUnit.Framework;
 
@@ -34,7 +35,11 @@ namespace TestLibrary.StreamTests
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorWorksWithNonNullParams ()
         {
-            using (new ProgressStream(new Mock<Stream> ().Object, new Mock<FileTransmissionEvent> (TransmissionType, Filename, null).Object));
+            Array values = Enum.GetValues(typeof(FileTransmissionType));
+            foreach( FileTransmissionType val in values )
+            {
+                using (new ProgressStream(new Mock<Stream> ().Object, new Mock<FileTransmissionEvent> (val, Filename, null).Object));
+            }
         }
 
         [Test, Category("Fast"), Category("Streams")]
@@ -280,6 +285,33 @@ namespace TestLibrary.StreamTests
                 Assert.That(outputStream.Length == inputContent.Length);
             }
             Assert.Greater(transmission.Status.BitsPerSecond, 0);
+        }
+
+        [Test, Category("Fast"), Category("Streams")]
+        [ExpectedException(typeof(AbortException))]
+        public void AbortReadIfTransmissionEventIsAborting()
+        {
+            byte[] content = new byte[1024];
+            var transmission = new FileTransmissionEvent(TransmissionType, Filename);
+            using (var stream = new MemoryStream(content))
+            using (var progressStream = new ProgressStream(stream, transmission))
+            {
+                transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true});
+                progressStream.ReadByte();
+            }
+        }
+
+        [Test, Category("Fast"), Category("Streams")]
+        [ExpectedException(typeof(AbortException))]
+        public void AbortWriteIfTransmissionEventIsAborting()
+        {
+            var transmission = new FileTransmissionEvent(TransmissionType, Filename);
+            using (var stream = new MemoryStream())
+            using (var progressStream = new ProgressStream(stream, transmission))
+            {
+                transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true});
+                progressStream.WriteByte(new byte());
+            }
         }
     }
 }

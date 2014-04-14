@@ -1,5 +1,5 @@
 ﻿ <!-- from http://www.codeproject.com/Articles/49853/Better-WPF-Circular-Progress-Bar -->
-<UserControl x:Class="WpfApplication1.CircularProgressBar"
+<UserControl x:Class="CmisSync.CircularProgressBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Height="Auto" Width="Auto" Background="Transparent"

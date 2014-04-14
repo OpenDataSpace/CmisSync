@@ -39,7 +39,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [Test, Category("Medium"), Category("Solver")]
         public void LocalFileAdded()
         {
-            string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            string tempFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             bool remoteObjectCreated = false;
             var docId = new Mock<IObjectId>();
@@ -53,7 +53,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 Session.Setup(
                     s => s.CreateDocument(
                     It.IsAny<IDictionary<string,object>>(),
-                    It.IsAny<IObjectId>(),
+                    It.Is<IObjectId>(id => id.Id == remoteParentFolderId),
                     It.IsAny<IContentStream>(),
                     It.IsAny<VersioningState?>())
                     ).Returns(docId.Object).Callback(() => remoteObjectCreated = true);
@@ -74,7 +74,16 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [Test, Category("Medium"), Category("Solver")]
         public void LocalFolderAdded()
         {
-            Assert.Fail("TODO");
+            string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var folderId = new Mock<IObjectId>();
+            folderId.Setup(f => f.Id).Returns("FolderId");
+            string remoteParentFolderId = "parentFolder";
+            try{
+                Directory.CreateDirectory(tempFolder);
+                Assert.Fail("TODO");
+            } finally {
+                Directory.Delete(tempFolder);
+            }
         }
     }
 }

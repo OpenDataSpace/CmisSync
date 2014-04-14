@@ -9,7 +9,7 @@ using System.Windows.Threading;
 using System.Windows.Input;
 using System.Windows.Shapes;
 
-namespace WpfApplication1
+namespace CmisSync
 {
     /// <span class="code-SummaryComment"><summary></span>
     /// A circular type progress bar, that is simliar to popular web based
@@ -43,7 +43,7 @@ namespace WpfApplication1
         private void Stop()
         {
             animationTimer.Stop();
-            Mouse.OverrideCursor = Cursors.Arrow;
+            Mouse.OverrideCursor = null;
             animationTimer.Tick -= HandleAnimationTick;
         }
 

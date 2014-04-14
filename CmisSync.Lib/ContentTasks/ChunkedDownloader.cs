@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DotCMIS.Client;
 using DotCMIS.Data;
 using System.Security.Cryptography;
@@ -28,7 +28,8 @@ namespace CmisSync.Lib.ContentTasks
         {
             lock (DisposeLock) {
                 if (disposed) {
-                    throw new ObjectDisposedException ("Downloading");
+                    TransmissionStatus.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
+                    throw new ObjectDisposedException(TransmissionStatus.Path);
                 }
 
                 IContentStream contentStream = remoteDocument.GetContentStream (remoteDocument.ContentStreamId, offset, remainingBytes);

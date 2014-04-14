@@ -285,8 +285,8 @@ namespace CmisSync
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 return false;
             }));
-            repo.EventManager.AddEventHandler(new GenericHandleDoublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
-            repo.EventManager.AddEventHandler(new GenericHandleDoublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
+            repo.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
+            repo.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
             repo.EventManager.AddEventHandler(new GenericSyncEventHandler<ProxyAuthRequiredEvent>(0, delegate(ISyncEvent e) {
                 ProxyAuthReqired(repositoryInfo.Name);
                 return true;
@@ -470,6 +470,52 @@ namespace CmisSync
                             Logger.Debug("Requested to resume sync of repo " + aRepo.Name);
                         }
                     }
+                }
+            }
+        }
+
+        public void StopAll()
+        {
+            lock (this.repo_lock)
+            {
+                foreach (RepoBase aRepo in this.repositories)
+                {
+                    aRepo.Stopped = true;
+                }
+                Logger.Debug("Start to stop all active file transmissions");
+                do {
+                    List<FileTransmissionEvent> activeList = activitiesManager.ActiveTransmissionsAsList();
+                    foreach (FileTransmissionEvent transmissionEvent in activeList)
+                    {
+                        if (transmissionEvent.Status.Aborted.GetValueOrDefault())
+                        {
+                            continue;
+                        }
+                        if (!transmissionEvent.Status.Aborting.GetValueOrDefault())
+                        {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborting=true});
+                        }
+                    }
+                    if (activeList.Count > 0)
+                    {
+                        Thread.Sleep(100);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                } while (true);
+                Logger.Debug("Finish to stop all active file transmissions");
+            }
+        }
+
+        public void StartAll()
+        {
+            lock (this.repo_lock)
+            {
+                foreach (RepoBase aRepo in this.repositories)
+                {
+                    aRepo.Stopped = false;
                 }
             }
         }
