@@ -30,20 +30,13 @@ namespace CmisSync.Lib.Sync
         // Log.
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisRepo));
 
-
         /// <summary>
         /// Synchronization with a particular CMIS folder.
         /// </summary>
-        public partial class SynchronizedFolder : IDisposable
+        public class SynchronizedFolder : IDisposable
         {
             // Log
             private static readonly ILog Logger = LogManager.GetLogger(typeof(SynchronizedFolder));
-            
-            /// <summary>
-            /// Whether sync is bidirectional or only from server to client.
-            /// TODO make it a CMIS folder - specific setting
-            /// </summary>
-            private bool BIDIRECTIONAL = true;
 
             /// <summary>
             /// At which degree the repository supports Change Logs.
@@ -70,24 +63,16 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool IsPropertyChangesSupported = false;
 
-
             /// <summary>
             /// Session to the CMIS repository.
             /// </summary>
             private ISession session;
-
 
             /// <summary>
             /// Path of the root in the remote repository.
             /// Example: "/User Homes/nicolas.raoul/demos"
             /// </summary>
             private string remoteFolderPath;
-
-
-            /// <summary>
-            /// Backgound syncing flag.
-            /// </summary>
-            private bool backgroundSyncing = false;
 
             /// <summary>
             /// The background syncing lock for operations on the flag.
@@ -99,37 +84,27 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private Object syncLock = new Object();
 
-
             /// <summary>
             /// Parameters to use for all CMIS requests.
             /// </summary>
             private Dictionary<string, string> cmisParameters;
 
             /// <summary>
-            /// A storage to temporary save aborted uploads and its last successful state informations.
-            /// </summary>
-            private Dictionary<string, IDocument> uploadProgresses = new Dictionary<string, IDocument>();
-
-
-            /// <summary>
             /// Track whether <c>Dispose</c> has been called.
             /// </summary>
             private bool disposed = false;
-
 
             /// <summary>
             /// Track whether <c>Dispose</c> has been called.
             /// </summary>
             private Object disposeLock = new Object();
 
-
             /// <summary>
             /// Database to cache remote information from the CMIS server.
             /// </summary>
             private Database database;
 
-
-            /// <summary>
+                        /// <summary>
             /// Listener we inform about activity (used by spinner).
             /// </summary>
             private IActivityListener activityListener;
@@ -146,24 +121,15 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private RepoBase repo;
 
-            //private WatcherSync watcherStrategy;
-
+            /// <summary>
+            /// The auth provider.
+            /// </summary>
             private PersistentStandardAuthenticationProvider authProvider;
 
             /// <summary>
             /// EventQueue
             /// </summary>
             public SyncEventQueue Queue {get; private set;}
-
-            /// <summary>
-            /// Track whether a full sync is done
-            /// </summary>
-            private bool syncFull = false;
-
-            /// <summary>
-            /// Changes on file system detected.
-            /// </summary>
-            private bool changesOnFileSystemDetected = true;
 
             /// <summary>
             /// If set to true, the session should be reconnected on next sync.
@@ -210,7 +176,6 @@ namespace CmisSync.Lib.Sync
                 repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(10, RepoInfoChanged));
                 repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<FSEvent>(0, delegate(ISyncEvent e) {
                     Logger.Debug("FSEvent found on Queue");
-                    this.changesOnFileSystemDetected = true;
                     return true;
                 }));
                 }
@@ -254,7 +219,6 @@ namespace CmisSync.Lib.Sync
                 cmisParameters[SessionParameter.Compression] = Boolean.TrueString;
             }
 
-
             /// <summary>
             /// Destructor.
             /// </summary>
@@ -263,8 +227,7 @@ namespace CmisSync.Lib.Sync
                 Dispose(false);
             }
 
-
-            /// <summary>
+                        /// <summary>
             /// Implement IDisposable interface. 
             /// </summary>
             public void Dispose()
@@ -272,7 +235,6 @@ namespace CmisSync.Lib.Sync
                 Dispose(true);
                 GC.SuppressFinalize(this);
             }
-
 
             /// <summary>
             /// Dispose pattern implementation.
@@ -377,9 +339,7 @@ namespace CmisSync.Lib.Sync
                     Logger.Error("Failed to create session to remote " + this.repoinfo.Address.ToString() + ": ", e);
                 }
                 }
-
             }
-
         }
     }
 }
