@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <summary>
         /// The wild card lock for concurrent access.
         /// </summary>
-        private Object wildCardLock = new Object();
+        private object wildCardLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoredFileNamesFilter"/> class.
@@ -138,7 +138,7 @@ namespace CmisSync.Lib.Events.Filter
                 {
                     if (wildcard.IsMatch(fileName))
                     {
-                        Queue.AddEvent(new RequestIgnoredEvent(e, reason: String.Format("filename matches: {0}", wildcard.ToString()), source: this));
+                        Queue.AddEvent(new RequestIgnoredEvent(e, reason: string.Format("filename matches: {0}", wildcard.ToString()), source: this));
                         return true;
                     }
                 }
