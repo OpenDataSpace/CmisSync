@@ -100,11 +100,6 @@ namespace CmisSync.Lib.Sync
             private Object disposeLock = new Object();
 
             /// <summary>
-            /// Database to cache remote information from the CMIS server.
-            /// </summary>
-            private Database database;
-
-                        /// <summary>
             /// Listener we inform about activity (used by spinner).
             /// </summary>
             private IActivityListener activityListener;
@@ -154,8 +149,6 @@ namespace CmisSync.Lib.Sync
                 this.repoinfo = repoInfo;
 
                 Queue = repoCmis.Queue;
-                // Database is the user's AppData/Roaming
-                database = new Database(repoinfo.CmisDatabase);
                 authProvider = new PersistentStandardAuthenticationProvider(new CmisSync.Lib.Storage.TemporaryCookieStorage(){
                     Cookies = new CookieCollection()
                 }, repoInfo.Address);
@@ -248,7 +241,6 @@ namespace CmisSync.Lib.Sync
                         if (disposing)
                         {
                             this.authProvider.Dispose();
-                            this.database.Dispose();
                         }
                         this.disposed = true;
                     }

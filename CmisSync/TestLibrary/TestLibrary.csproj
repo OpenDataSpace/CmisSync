@@ -78,7 +78,6 @@
     <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
-    <Compile Include="CmisDatabaseTest.cs" />
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedDownloaderTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />

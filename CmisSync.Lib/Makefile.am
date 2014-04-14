@@ -13,7 +13,6 @@ SOURCES =  \
 	Cmis/CmisServerNotFoundException.cs \
 	Cmis/CmisUtils.cs \
 	Cmis/Crypto.cs \
-	Cmis/Database.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/MimeType.cs \
 	Cmis/PersistentNtlmAuthenticationProvider.cs \
