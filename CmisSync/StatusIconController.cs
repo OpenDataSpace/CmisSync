@@ -22,6 +22,7 @@ using System.Timers;
 using Threading = System.Threading;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Sync;
 using System.Globalization;
 
 using System.Diagnostics;
@@ -124,7 +125,7 @@ namespace CmisSync {
             get {
                 double size = 0;
 
-                foreach (RepoBase repo in Program.Controller.Repositories)
+                foreach (CmisRepo repo in Program.Controller.Repositories)
                     size += repo.Size;
 
                 if (size == 0)

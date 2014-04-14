@@ -43,12 +43,6 @@ namespace CmisSync.Lib
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RepoBase));
 
         /// <summary>
-        /// Local disk size taken by the repository.
-        /// </summary>
-        public abstract double Size { get; }
-
-
-        /// <summary>
         /// Affect a new <c>SyncStatus</c> value.
         /// </summary>
         public Action<SyncStatus> SyncStatusChanged { get; set; }

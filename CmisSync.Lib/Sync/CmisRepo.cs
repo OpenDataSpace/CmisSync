@@ -76,7 +76,10 @@ namespace CmisSync.Lib.Sync
             base.Dispose(disposing);
         }
 
-        public override double Size {get {throw new NotImplementedException();}}
+        /// <summary>
+        /// Local disk size taken by the repository.
+        /// </summary>
+        public double Size {get {throw new NotImplementedException();}}
 
     }
 }
