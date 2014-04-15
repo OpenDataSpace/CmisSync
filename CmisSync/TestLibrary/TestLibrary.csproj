@@ -48,6 +48,9 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DBreeze">
+      <HintPath>..\..\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Extras\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -72,9 +75,6 @@
     </Reference>
     <Reference Include="XamMac">
       <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
-    </Reference>
-    <Reference Include="DBreeze">
-      <HintPath>..\Linux\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -176,10 +176,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="test-servers-fuzzy.json" />
     <None Include="test-servers-disabled.json" />
     <None Include="test-servers.json" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--
@@ -194,21 +194,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="StreamTests\" />
-    <Folder Include="IntegrationTests\" />
-    <Folder Include="EventsTests\" />
-    <Folder Include="EventsTests\EventsFilterTests\" />
-    <Folder Include="StorageTests\" />
-    <Folder Include="SyncStrategiesTests\" />
-    <Folder Include="DataTests\" />
-    <Folder Include="SyncStrategiesTests\SituationDetectionTests\" />
-    <Folder Include="ContentTasksTests\" />
-    <Folder Include="AuthenticationProviderTests\" />
-    <Folder Include="UtilsTests\" />
-    <Folder Include="SyncStrategiesTests\SolverTests\" />
-    <Folder Include="LegacyCodeTests\" />
-  </ItemGroup>
+  <ItemGroup />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
