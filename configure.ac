@@ -37,60 +37,20 @@ SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
 ])]
 )
 
-AC_ARG_WITH([nunit],
-            AS_HELP_STRING([--with-nunit=PATH],[Specify path to nunit.framework.dll]),
-            [nunit_dll=${withval}],[nunit_dll=no])
-if test "x$nunit_dll" = "xno" ; then
-    PKG_CHECK_MODULES(NUNIT, nunit >= 2.6.0, have_nunit=yes, have_nunit=no)
-    if test "x$have_nunit" = "xno" ; then
-      dnl On som distro's the package is named mono-nunit
-      PKG_CHECK_MODULES(NUNIT, mono-nunit >= 2.6.0, have_nunit=yes, have_nunit=no)
-      if test "x$have_nunit" = "xno" ; then
-          AC_ERROR("nunit is a required dependency: you need to install the appropriate devel package before you can compile")
-      fi
-    fi
-    AC_SUBST(NUNIT_LIBS)
-else
- if test -f ${nunit_dll} ; then
-        case ${nunit_dll} in
-            /*)
-            AC_SUBST(NUNIT_LIBS,[-r:${nunit_dll}])
-            AC_SUBST(NUNIT_PATH,[${nunit_dll}])
-            ;;
-            *)
-            AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/${nunit_dll}]])
-            AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/${nunit_dll}]])
-            ;;
-        esac
-    else
-        AC_ERROR([${nunit_dll} not found])
-    fi
-fi
+AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
+AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
 
-AC_ARG_WITH([newtonsoft-json],
-            AS_HELP_STRING([--with-newtonsoft-json=PATH],[Specify path to NewtonSoft.Json.dll]),
-            [newtonsoft_json_dll=${withval}],[newtonsoft_json_dll=no])
-if test "x$newtonsoft_json_dll" = "xno" ; then
-    PKG_CHECK_MODULES(JSON, [newtonsoft-json >= 4.5r6], have_newtonsoft_json=yes, have_newtonsoft_json=no)
-    if test "x$have_newtonsoft_json" = "xno" ; then
-        AC_ERROR("newtonsoft-json is a required dependency: you need to install the appropriate devel package before you can compile")
-    fi
-else
-    if test -f ${newtonsoft_json_dll} ; then
-        case ${newtonsoft_json_dll} in
-            /*)
-            AC_SUBST(JSON_LIBS,[-r:${newtonsoft_json_dll}])
-            AC_SUBST(JSON_PATH,[${newtonsoft_json_dll}])
-            ;;
-            *)
-            AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/${newtonsoft_json_dll}]])
-            AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/${newtonsoft_json_dll}]])
-            ;;
-        esac
-    else
-        AC_ERROR([${newtonsoft_json_dll} not found])
-    fi
-fi
+AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
+
+AC_SUBST(LOG4NETLIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
+AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
+
+AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
+AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
+
+AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
 
 CMISSYNC_CHECK_NOTIFY_SHARP
 CMISSYNC_CHECK_GTK_SHARP
@@ -134,21 +94,6 @@ else
     AC_ERROR([${dotcmis_dll} not found])
 fi
 
-AC_ARG_WITH([log4net],
-            AS_HELP_STRING([--with-log4net=PATH],[Specify path to log4net.dll]),
-            [log4net_dll=${withval}],[log4net_dll=no])
-if test ${log4net_dll} != "no" ; then
-    case ${log4net_dll} in
-        /*)
-        AC_SUBST(LOG4NETLIBS,[-r:${log4net_dll}])
-        AC_SUBST(LOG4NETPATH,[${log4net_dll}])
-        ;;
-        *)
-        AC_SUBST(LOG4NETLIBS,[[-r:\$\(top_srcdir\)/${log4net_dll}]])
-        AC_SUBST(LOG4NETPATH,[[\$\(top_srcdir\)/${log4net_dll}]])
-        ;;
-    esac
-fi
 
 TEST_URL="https://devel.dataspace.cc/cmis/atom"
 AC_ARG_WITH([test-url],
@@ -232,7 +177,6 @@ if test "$OSNAME" = "Linux" ; then
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
 
-    AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/CmisSync/Linux/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
 
     AC_SUBST(BUILD_DEFINES,"${BUILD_DEFINES}")
     GUISUBDIRS=CmisSync
@@ -355,6 +299,7 @@ CmisSync/TestLibrary/test-servers.json
 CmisSync/Linux/dataspacesync
 DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli
+debian/Makefile
 CmisSync/Makefile
 Makefile
 ])

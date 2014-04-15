@@ -5,12 +5,10 @@ ASSEMBLY_INFO_SOURCE =  \
 	Properties/AssemblyInfo.cs
 
 LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(MONOMAC_LIBS) \
-	   $(LIBS_CMISSYNCLIB_DEPS) \
-	   $(NUNIT_LIBS) \
-           $(DBREEZE_LIBS) \
-	   -r:$(srcdir)/lib/Moq.dll \
-	   -r:$(srcdir)/lib/xunit.dll \
-	   -r:$(srcdir)/lib/xunit.extensions.dll
+	$(LIBS_CMISSYNCLIB_DEPS) \
+	$(NUNIT_LIBS) \
+	$(DBREEZE_LIBS) \
+	$(MOQ_LIBS)
 
 SOURCES =  \
 	ActiveActivitiesManagerTest.cs \
@@ -97,8 +95,6 @@ SOURCES =  \
 	
 
 EXTRA_DIST = TestLibrary.csproj \
-	lib/Moq.dll \
-	lib/xunit.dll \
-	lib/xunit.extensions.dll
+	$(MOQ_PATH)
 
 include $(top_srcdir)/build/build.mk

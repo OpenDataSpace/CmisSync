@@ -51,13 +51,6 @@
     <Reference Include="DBreeze">
       <HintPath>..\..\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\Extras\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -65,20 +58,20 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="xunit.extensions">
-      <HintPath>lib\xunit.extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Moq">
-      <HintPath>lib\Moq.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\Extras\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="xunit">
-      <HintPath>lib\xunit.dll</HintPath>
-    </Reference>
     <Reference Include="XamMac">
       <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\..\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -116,7 +109,6 @@
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="LocalFilesystemActivityGenerator.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StorageTests\FileSystemWrapperTests.cs" />
     <Compile Include="StorageTests\PersistentStorageTest.cs" />
     <Compile Include="StreamTests\BandwidthLimitedStreamTest.cs" />
