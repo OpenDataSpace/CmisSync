@@ -232,6 +232,8 @@ if test "$OSNAME" = "Linux" ; then
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
 
+    AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/CmisSync/Linux/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
+
     AC_SUBST(BUILD_DEFINES,"${BUILD_DEFINES}")
     GUISUBDIRS=CmisSync
     enable_gtkui=yes

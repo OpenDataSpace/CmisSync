@@ -7,6 +7,7 @@ ASSEMBLY_INFO_SOURCE =  \
 LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(MONOMAC_LIBS) \
 	   $(LIBS_CMISSYNCLIB_DEPS) \
 	   $(NUNIT_LIBS) \
+           $(DBREEZE_LIBS) \
 	   -r:$(srcdir)/lib/Moq.dll \
 	   -r:$(srcdir)/lib/xunit.dll \
 	   -r:$(srcdir)/lib/xunit.extensions.dll
@@ -45,6 +46,7 @@ SOURCES =  \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
+	IntegrationTests/DBreezeTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	LegacyCodeTests/RepoInfoTests.cs \

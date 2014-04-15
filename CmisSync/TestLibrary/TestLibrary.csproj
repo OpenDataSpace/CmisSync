@@ -73,6 +73,9 @@
     <Reference Include="XamMac">
       <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
     </Reference>
+    <Reference Include="DBreeze">
+      <HintPath>..\Linux\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
@@ -156,6 +159,7 @@
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="WatcherTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
+    <Compile Include="IntegrationTests\DBreezeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -175,6 +179,7 @@
     <None Include="test-servers-fuzzy.json" />
     <None Include="test-servers-disabled.json" />
     <None Include="test-servers.json" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--
