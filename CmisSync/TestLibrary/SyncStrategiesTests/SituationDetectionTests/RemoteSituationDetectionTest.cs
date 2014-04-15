@@ -26,9 +26,6 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
         private string RemoteChangeToken = "changeToken";
         private readonly IObjectId ObjectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
         private readonly string RemotePath = "/object/path";
-        private readonly string RemoteName = "path";
-        //private readonly string LocalPath = Path.Combine("object", "path");
-        //private readonly string LocalName = "path";
 
 
         [SetUp]

@@ -190,18 +190,6 @@ namespace CmisSync
 
 
         /// <summary>
-        /// Component to create new CmisSync synchronized folders.
-        /// </summary>
-        private Fetcher fetcher;
-
-
-        /// <summary>
-        /// Watches the local filesystem for modifications.
-        /// </summary>
-        private FileSystemWatcher watcher;
-
-
-        /// <summary>
         /// Concurrency locks.
         /// </summary>
         private Object repo_lock = new Object();
@@ -621,7 +609,6 @@ namespace CmisSync
             foreach (string ignore in ignoredPaths)
                 repoInfo.AddIgnorePath(ignore);
 
-            fetcher = new Fetcher(repoInfo, activityListenerAggregator);
             this.FinishFetcher();
         }
 
@@ -635,11 +622,6 @@ namespace CmisSync
             {
                 // Add folder to XML config file.
                 ConfigManager.CurrentConfig.AddFolder(repoInfo);
-
-                FolderFetched(this.fetcher.RemoteUrl.ToString());
-
-                this.fetcher.Dispose();
-                this.fetcher = null;
 
                 // Initialize in the UI.
                 AddRepository(repoInfo);

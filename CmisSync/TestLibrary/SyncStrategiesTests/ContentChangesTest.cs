@@ -33,15 +33,6 @@ namespace TestLibrary.SyncStrategiesTests
         private readonly string repoId = "repoId";
         private readonly int maxNumberOfContentChanges = 1000;
 
-        [Test, Category("Fast"), Category("ContentChange")]
-        public void CorrectDefaultPriority ()
-        {
-            var storage = new Mock<IMetaDataStorage>();
-            var queue = new Mock<ISyncEventQueue>();
-            var session = new Mock<ISession>();
-            var cc = new ContentChanges (session.Object, storage.Object, queue.Object);
-        }
-
 
         [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorWithVaildEntriesTest ()

@@ -352,7 +352,6 @@ CmisSync/Mac/Info.plist
 CmisSync/Mac/Pixmaps/Makefile
 CmisSync/TestLibrary/Makefile
 CmisSync/TestLibrary/test-servers.json
-CmisSync/TestLibraryRunner/Makefile
 CmisSync/Linux/dataspacesync
 DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli

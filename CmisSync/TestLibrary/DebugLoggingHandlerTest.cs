@@ -12,7 +12,6 @@ namespace TestLibrary
     [TestFixture]
     public class DebugLoggingHandlerTest
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(DebugLoggingHandlerTest));
 
         [TestFixtureSetUp]
         public void ClassInit()

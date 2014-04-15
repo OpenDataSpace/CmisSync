@@ -33,7 +33,6 @@ namespace TestLibrary.IntegrationTests
         }
 
         private readonly bool isPropertyChangesSupported = false;
-        private readonly string repoId = "repoId";
         private readonly int maxNumberOfContentChanges = 1000;
 
         private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage) 

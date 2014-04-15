@@ -33,7 +33,6 @@ namespace CmisSync.Lib
 
     /// <summary>
     /// Synchronizes a remote folder.
-    /// This class contains the loop that synchronizes every X seconds.
     /// </summary>
     public abstract class RepoBase : IDisposable
     {
