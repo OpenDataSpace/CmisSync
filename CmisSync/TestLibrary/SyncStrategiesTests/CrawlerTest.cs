@@ -43,7 +43,7 @@ namespace TestLibrary.SyncStrategiesTests
             var remoteFolder = new Mock<IFolder>().Object;
             var localFolder = new Mock<IDirectoryInfo>();
             var factory = new Mock<IFileSystemInfoFactory>();
-            var crawler = new Crawler(queue, remoteFolder, localFolder.Object, factory.Object);
+            new Crawler(queue, remoteFolder, localFolder.Object, factory.Object);
         }
 
         [Test, Category("Fast")]

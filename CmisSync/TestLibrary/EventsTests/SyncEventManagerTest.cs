@@ -13,8 +13,6 @@ namespace TestLibrary.EventsTests
     [TestFixture]
     public class SyncEventManagerTest
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventManagerTest));
-
         [TestFixtureSetUp]
         public void ClassInit()
         {

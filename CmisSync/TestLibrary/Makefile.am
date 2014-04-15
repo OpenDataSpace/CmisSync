@@ -52,7 +52,6 @@ SOURCES =  \
 	LegacyCodeTests/RepoInfoTests.cs \
 	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
-	Properties/AssemblyInfo.cs \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/PersistentStorageTest.cs \
