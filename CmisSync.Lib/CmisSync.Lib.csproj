@@ -75,7 +75,6 @@
     <Compile Include="Events\GenericSyncEventHandler.cs" />
     <Compile Include="Events\RecentChangedEvent.cs" />
     <Compile Include="Events\SyncEventQueue.cs" />
-    <Compile Include="Fetcher.cs" />
     <Compile Include="LoggingStream.cs" />
     <Compile Include="RepoBase.cs" />
     <Compile Include="RepoInfo.cs" />
