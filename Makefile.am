@@ -11,8 +11,9 @@ EXTRA_DIST = \
 	legal/TRADEMARK.txt \
 	legal/AUTHORS.txt \
 	Extras/DotCMIS.dll \
-	Extras/Newtonsoft.Json.dll \
-	Extras/nunit.framework.dll
+	$(JSON_PATH) \
+	$(NUNIT_PATH) \
+	$(DBREEZE_PATH)
 
 DISTCLEANFILES = \
 	intltool-extract \
