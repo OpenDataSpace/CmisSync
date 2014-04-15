@@ -41,6 +41,7 @@ using Forms = System.Windows.Forms;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Config;
 
 namespace CmisSync
 {
@@ -158,7 +159,7 @@ namespace CmisSync
         /// </summary>
         public void OpenCmisSyncFolder()
         {
-            Utils.OpenFolder(ConfigManager.CurrentConfig.FoldersPath);
+            Utils.OpenFolder(ConfigManager.CurrentConfig.GetFoldersPath());
         }
 
 
@@ -168,7 +169,7 @@ namespace CmisSync
         /// <param name="name">Name of the synchronized folder</param>
         public void OpenCmisSyncFolder(string name)
         {
-            Config.SyncConfig.Folder folder = ConfigManager.CurrentConfig.getFolder(name);
+            RepoInfo folder = ConfigManager.CurrentConfig.GetRepoInfo(name);
             if (folder != null)
                 Utils.OpenFolder(folder.LocalPath);
             else if (String.IsNullOrWhiteSpace(name))
@@ -176,25 +177,6 @@ namespace CmisSync
             else
                 Logger.Warn("Could not find requested config for \"" + name + "\"");
         }
-
-        /// <summary>
-        /// With the default web browser, open the remote folder of a CmisSync synchronized folder.
-        /// </summary>
-        /// <param name="name">Name of the synchronized folder</param>
-        public void OpenRemoteFolder(string name)
-        {
-            Config.SyncConfig.Folder folder = ConfigManager.CurrentConfig.getFolder(name);
-            if (folder != null)
-            {
-                RepoInfo repo = folder.GetRepoInfo();
-                Process.Start(CmisUtils.GetBrowsableURL(repo));
-            }
-            else
-            {
-                Logger.Warn("Could not find requested config for \"" + name + "\"");
-            }
-        }
-
 
         /// <summary>
         /// Quit CmisSync.

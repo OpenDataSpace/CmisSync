@@ -28,6 +28,7 @@ using System.Windows.Controls;
 using System.Windows.Forms.Integration;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 
 
 namespace CmisSync
@@ -82,18 +83,18 @@ namespace CmisSync
 
             FinishButton.Click += delegate
             {
-                Config.ProxySettings proxy = new Config.ProxySettings();
+                ProxySettings proxy = new ProxySettings();
                 if (ProxyNone.IsChecked.GetValueOrDefault())
                 {
-                    proxy.Selection = Config.ProxySelection.NOPROXY;
+                    proxy.Selection = ProxySelection.NOPROXY;
                 }
                 else if (ProxySystem.IsChecked.GetValueOrDefault())
                 {
-                    proxy.Selection = Config.ProxySelection.SYSTEM;
+                    proxy.Selection = ProxySelection.SYSTEM;
                 }
                 else
                 {
-                    proxy.Selection = Config.ProxySelection.CUSTOM;
+                    proxy.Selection = ProxySelection.CUSTOM;
                 }
                 proxy.LoginRequired = LoginCheck.IsChecked.GetValueOrDefault();
                 string server = Controller.GetServer(AddressText.Text);
@@ -143,13 +144,13 @@ namespace CmisSync
 
             switch (ConfigManager.CurrentConfig.Proxy.Selection)
             {
-                case Config.ProxySelection.NOPROXY:
+                case ProxySelection.NOPROXY:
                     Controller.CheckProxyNone();
                     break;
-                case Config.ProxySelection.SYSTEM:
+                case ProxySelection.SYSTEM:
                     Controller.CheckProxySystem();
                     break;
-                case Config.ProxySelection.CUSTOM:
+                case ProxySelection.CUSTOM:
                     Controller.CheckProxyCustom();
                     break;
                 default:

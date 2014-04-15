@@ -25,6 +25,7 @@ using System.Windows;
 using System.Globalization;
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Sync;
 
 namespace CmisSync
 {
@@ -204,7 +205,7 @@ namespace CmisSync
                     {
                         ToolStripMenuItem repoitem = (ToolStripMenuItem)this.traymenu.Items["tsmi" + reponame];
                         ToolStripMenuItem syncitem = (ToolStripMenuItem)repoitem.DropDownItems[2];
-                        foreach (RepoBase aRepo in Program.Controller.Repositories)
+                        foreach (CmisRepo aRepo in Program.Controller.Repositories)
                         {
                             if (aRepo.Name == reponame)
                             {
@@ -331,7 +332,7 @@ namespace CmisSync
                     // Sub-item: suspend sync.
                     ToolStripMenuItem suspendFolderItem = new ToolStripMenuItem();
                     setSyncItemState(suspendFolderItem, SyncStatus.Idle);
-                    foreach (RepoBase aRepo in Program.Controller.Repositories)
+                    foreach (CmisRepo aRepo in Program.Controller.Repositories)
                     {
                         if (aRepo.Name.Equals(folderName))
                         {
