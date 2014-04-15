@@ -77,7 +77,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var folderId = new Mock<IObjectId>();
             folderId.Setup(f => f.Id).Returns("FolderId");
-            string remoteParentFolderId = "parentFolder";
             try{
                 Directory.CreateDirectory(tempFolder);
                 Assert.Fail("TODO");
