@@ -137,6 +137,10 @@ namespace CmisSync {
             // TODO Need to implement this method like the COCOA way to do it
             Controller.UpdateTransmissionMenuEvent += delegate
             {
+                //  Put Program.Controller.ActiveTransmissions() before transmit from managed code to native code
+                //  https://mantis.dataspace.cc/view.php?id=3781
+                List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
+
                 using (var a = new NSAutoreleasePool()) {
                     BeginInvokeOnMainThread(delegate {
                         if(state_item.Submenu!=null){
@@ -147,7 +151,6 @@ namespace CmisSync {
                         } else {
                             state_item.Submenu = new NSMenu();
                         }
-                        List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
                         foreach(FileTransmissionEvent transmission in transmissions) {
                             NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
                             state_item.Submenu.AddItem(transmissionItem);
