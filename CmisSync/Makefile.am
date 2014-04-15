@@ -1,8 +1,8 @@
 
 if HAVE_MAC_OS
-  SUBDIRS = Common Mac TestLibrary TestLibraryRunner
+  SUBDIRS = Common Mac TestLibrary
 else
-  SUBDIRS = Common Linux TestLibrary TestLibraryRunner
+  SUBDIRS = Common Linux TestLibrary
 endif
 
 EXTRA_DIST =  \
