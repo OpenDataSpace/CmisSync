@@ -140,16 +140,40 @@ namespace CmisSync.CmisTree
         {
             foreach (Node newChild in children)
             {
-                try {
+                try
+                {
                     Node equalNode = node.Children.First(x => x.Name.Equals(newChild.Name));
                     MergeFolderTrees(equalNode, newChild.Children.ToList());
                     MergeNewNodeIntoOldNode(equalNode, newChild);
-                } catch ( InvalidOperationException ) {
+                }
+                catch (InvalidOperationException)
+                {
                     if (node.Selected == false)
                         newChild.Selected = false;
                     node.Children.Add(newChild);
                     newChild.Parent = node;
                 }
+            }
+            foreach (Node oldChild in node.Children)
+            {
+                try
+                {
+                    Node newChild = children.First(x => x.Name.Equals(oldChild.Name));
+                }
+                catch (InvalidOperationException)
+                {
+                    /// this node exists locally or is ignored, mark it as <code>LoadingStatus.DONE</code>
+                    SetNodeTreeStatus(oldChild, LoadingStatus.DONE);
+                }
+            }
+        }
+
+        private static void SetNodeTreeStatus(Node node, LoadingStatus status)
+        {
+            node.Status = status;
+            foreach (Node child in node.Children)
+            {
+                SetNodeTreeStatus(child, status);
             }
         }
 
