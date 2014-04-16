@@ -18,6 +18,14 @@ namespace TestLibrary.IntegrationTests
         private DBreezeEngine engine = null;
         private string path = null;
 
+        [TestFixtureSetUp]
+        public void InitCustomSerializator()
+        {
+            // Use Newtonsoft.Json as Serializator
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -49,8 +57,6 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast"), Category("IT")]
         public void InsertTestObject()
         {
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
-            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
             using (var tran = this.engine.GetTransaction())
             {
                 var folder = new TestClass
@@ -64,7 +70,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Medium"), Category("IT")]
-        public void CreateDbOnFs()
+        public void CreateDbOnFsAndInsertAndSelectObject()
         {
             var conf = new DBreezeConfiguration
             {
