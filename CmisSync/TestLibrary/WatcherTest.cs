@@ -370,13 +370,6 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Slow")]
-        [Ignore]
-        public void TestChangeTypeChangedHeavy()
-        {
-            //Assert.Fail("TODO");
-        }
-
         [Test, Category("Medium")]
         public void TestChangeTypeDeleted()
         {
@@ -410,13 +403,6 @@ namespace TestLibrary
                         watcher.GetChangeType(names[i]));
                 }
             }
-        }
-
-        [Test, Category("Slow")]
-        [Ignore]
-        public void TestChangeTypeDeleteHeavy()
-        {
-            //Assert.Fail("TODO");
         }
 
         [Test, Category("Fast")]
@@ -518,27 +504,6 @@ namespace TestLibrary
                 WaitWatcher();
                 Assert.AreEqual(0, watcher.GetChangeList().Count);
             }
-        }
-
-        [Test, Category("Slow")]
-        [Ignore]
-        public void TestChangeTypeForMoveHeavy()
-        {
-            //Assert.Fail("TODO");
-        }
-
-        [Test, Category("Fast")]
-        [Ignore]
-        public void TestChangeTypeMix()
-        {
-            //Assert.Fail("TODO");
-        }
-
-        [Test, Category("Slow")]
-        [Ignore]
-        public void TestChangeTypeMixHeavy()
-        {
-            //Assert.Fail("TODO");
         }
 
         private string GetNextPathname(int level)
