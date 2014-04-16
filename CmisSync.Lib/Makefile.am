@@ -91,7 +91,6 @@ SOURCES =  \
 	Storage/FileInfoWrapper.cs \
 	Storage/FileSystemInfoFactory.cs \
 	Storage/FileSystemInfoWrapper.cs \
-	Storage/GeneralRepoStorage.cs \
 	Storage/ICookieStorage.cs \
 	Storage/IDirectoryInfo.cs \
 	Storage/IExtendedAttributeReader.cs \
@@ -100,7 +99,6 @@ SOURCES =  \
 	Storage/IFileSystemInfoFactory.cs \
 	Storage/IFileSystemWatcher.cs \
 	Storage/IMetaDataStorage.cs \
-	Storage/PersistentStorage.cs \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \

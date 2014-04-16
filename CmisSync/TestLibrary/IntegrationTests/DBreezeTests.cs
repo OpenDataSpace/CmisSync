@@ -1,14 +1,15 @@
 
-using DBreeze.DataTypes;
-using CmisSync.Lib.Data;
-using Newtonsoft.Json;
-
 namespace TestLibrary.IntegrationTests
 {
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
+
     using DBreeze;
+    using DBreeze.DataTypes;
+
+    using Newtonsoft.Json;
 
     using NUnit.Framework;
 
@@ -20,28 +21,28 @@ namespace TestLibrary.IntegrationTests
         [SetUp]
         public void SetUp()
         {
-            path = Path.Combine(Path.GetTempPath(), "DBreeze");
-            engine = new DBreezeEngine(new DBreezeConfiguration(){Storage = DBreezeConfiguration.eStorage.MEMORY});
+            this.path = Path.Combine(Path.GetTempPath(), "DBreeze");
+            this.engine = new DBreezeEngine(new DBreezeConfiguration(){Storage = DBreezeConfiguration.eStorage.MEMORY});
         }
 
         [TearDown]
         public void TearDown()
         {
-            engine.Dispose();
-            if(Directory.Exists(path))
+            this.engine.Dispose();
+            if (Directory.Exists(this.path))
             {
-                Directory.Delete(path, true);
+                Directory.Delete(this.path, true);
             }
         }
 
         [Test, Category("Fast"), Category("IT")]
         public void InsertInteger()
         {
-            using (var tran = engine.GetTransaction())
+            using (var tran = this.engine.GetTransaction())
             {
                 tran.Insert<int, int>("t1", 1, 2);
                 tran.Commit();
-                Assert.AreEqual(2, tran.Select<int, int>("t1",1).Value);
+                Assert.AreEqual(2, tran.Select<int, int>("t1", 1).Value);
             }
         }
 
@@ -50,7 +51,7 @@ namespace TestLibrary.IntegrationTests
         {
             DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
-            using (var tran = engine.GetTransaction())
+            using (var tran = this.engine.GetTransaction())
             {
                 var folder = new TestClass
                 {
@@ -65,13 +66,21 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Medium"), Category("IT")]
         public void CreateDbOnFs()
         {
-            var conf = new DBreezeConfiguration {
-                DBreezeDataFolderName = path,
+            var conf = new DBreezeConfiguration
+            {
+                DBreezeDataFolderName = this.path,
                 Storage = DBreezeConfiguration.eStorage.DISK
             };
             using (var engine = new DBreezeEngine(conf))
+            using (var tran = engine.GetTransaction())
             {
-
+                var folder = new TestClass
+                {
+                    Name = "Name"
+                };
+                tran.Insert<int, DbCustomSerializer<TestClass>>("objects", 1, folder);
+                tran.Commit();
+                Assert.AreEqual("Name", (tran.Select<int, DbCustomSerializer<TestClass>>("objects", 1).Value.Get as TestClass).Name);
             }
         }
 
@@ -82,4 +91,3 @@ namespace TestLibrary.IntegrationTests
         }
     }
 }
-

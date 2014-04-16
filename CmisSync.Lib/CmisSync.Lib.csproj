@@ -140,7 +140,6 @@
     <Compile Include="Storage\FailedOperationsStorage.cs" />
     <Compile Include="Storage\FileSystemInfoFactory.cs" />
     <Compile Include="Storage\FileSystemInfoWrapper.cs" />
-    <Compile Include="Storage\GeneralRepoStorage.cs" />
     <Compile Include="Storage\ICookieStorage.cs" />
     <Compile Include="Storage\IDirectoryInfo.cs" />
     <Compile Include="Storage\IFileInfo.cs" />
@@ -148,7 +147,6 @@
     <Compile Include="Storage\IFileSystemInfoFactory.cs" />
     <Compile Include="Storage\IFileSystemWatcher.cs" />
     <Compile Include="Storage\IMetaDataStorage.cs" />
-    <Compile Include="Storage\PersistentStorage.cs" />
     <Compile Include="Streams\BandwidthLimitedStream.cs" />
     <Compile Include="Streams\ForwardReadingStream.cs" />
     <Compile Include="Streams\NonClosingHashStream.cs" />

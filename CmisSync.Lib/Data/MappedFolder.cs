@@ -1,71 +1,77 @@
-using System;
-using System.IO;
-using System.Collections.Generic;
-
-using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Data
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Storage;
+
     [Serializable]
     public class MappedFolder : AbstractMappedObject, IMappedFolder
     {
-
         public IMappedFolder Parent { get; set; }
 
-        private List<IMappedObject> children = new List<IMappedObject> ();
+        private List<IMappedObject> children = new List<IMappedObject>();
 
         public List<IMappedObject> Children { get { return children; } set { this.children = value; } }
 
-        public override bool ExistsLocally ()
+        public override bool ExistsLocally()
         {
-            return FsFactory.CreateDirectoryInfo(GetLocalPath ()).Exists;
+            return this.FsFactory.CreateDirectoryInfo(this.GetLocalPath()).Exists;
         }
 
-        public virtual string GetLocalPath ()
+        public virtual string GetLocalPath()
         {
-            if (Parent == null)
+            if (this.Parent == null)
             {
-                return LocalSyncTargetPath;
+                return this.LocalSyncTargetPath;
             }
             else
             {
-                return Path.Combine (Parent.GetLocalPath(), Name);
+                return Path.Combine(this.Parent.GetLocalPath(), this.Name);
             }
         }
 
         public MappedFolder( string localSyncTargetPath, string remoteSyncTargetPath, IFileSystemInfoFactory fsFactory = null)
             : base(localSyncTargetPath, remoteSyncTargetPath, fsFactory)
         {
-            Name = FsFactory.CreateDirectoryInfo(localSyncTargetPath).Name;
+            this.Name = this.FsFactory.CreateDirectoryInfo(localSyncTargetPath).Name;
         }
 
-        public MappedFolder ( IMappedFolder parent, string name, IFileSystemInfoFactory fsFactory = null)
+        public MappedFolder( IMappedFolder parent, string name, IFileSystemInfoFactory fsFactory = null)
             : base(parent.LocalSyncTargetPath, parent.RemoteSyncTargetPath, fsFactory)
         {
-            if(parent == null)
+            if (parent == null)
+            {
                 throw new ArgumentNullException("Given parent is null");
-            if(String.IsNullOrEmpty(name))
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
                 throw new ArgumentException("Given name is null or empty");
-            if( fsFactory == null )
-                FsFactory = parent.FsFactory;
-            Parent = parent;
-            Name = name;
+            }
+
+            if (fsFactory == null)
+            {
+                this.FsFactory = parent.FsFactory;
+            }
+
+            this.Parent = parent;
+            this.Name = name;
         }
 
-        public virtual string GetRemotePath ()
+        public virtual string GetRemotePath()
         {
-            if(Parent == null)
+            if (this.Parent == null)
             {
-                return RemoteSyncTargetPath;
+                return this.RemoteSyncTargetPath;
             }
             else
             {
-                string path = Parent.GetRemotePath();
-                return path + (path.EndsWith("/")? "" : "/") + Name;
+                string path = this.Parent.GetRemotePath();
+                return path + (path.EndsWith("/") ? string.Empty : "/") + this.Name;
             }
         }
-
     }
-
 }
-
