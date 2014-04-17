@@ -82,7 +82,5 @@ namespace CmisSync.Lib.Sync.Strategy {
             this.session = session;
             this.storage = storage;
         } 
-
-
     }
 }

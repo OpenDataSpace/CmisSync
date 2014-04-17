@@ -1,19 +1,19 @@
-using System;
-using System.IO;
-
-using CmisSync.Lib.Sync.Solver;
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Data;
-using TestLibrary.TestUtils;
-
-using DotCMIS.Client;
-
-using Moq;
-
-using NUnit.Framework;
-
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Sync.Solver;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Data;
+    using TestLibrary.TestUtils;
+
+    using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class RemoteObjectDeletedTest
     {
@@ -23,7 +23,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new RemoteObjectDeleted();
         }
 
-        [Test, Category("Medium"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver")]
         public void RemoteFolderDeleted()
         {
             string path = Path.Combine(Path.GetTempPath(), "a");
