@@ -15,7 +15,7 @@ using TestLibrary.TestUtils;
 namespace TestLibrary.SyncStrategiesTests {
 
     [TestFixture]
-    public class FileSystemEventAccumulatorTest 
+    public class RemoteObjectFetcherTest 
     {
         private static readonly string path = "/path";
         private static readonly string id = "myId";
