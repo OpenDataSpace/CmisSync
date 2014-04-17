@@ -13,9 +13,22 @@ namespace CmisSync.Lib.Sync.Strategy
         private IPathMatcher matcher;
 
         public override bool Handle(ISyncEvent e) {
-            var folderEvent = e as FolderEvent;
-            string localPath = matcher.CreateLocalPath(folderEvent.RemoteFolder.Path);
-            folderEvent.LocalFolder = fsFactory.CreateDirectoryInfo(localPath);
+            if(e is FolderEvent){
+                var folderEvent = e as FolderEvent;
+                if(folderEvent.LocalFolder != null) {
+                    return false;
+                }
+                string localPath = matcher.CreateLocalPath(folderEvent.RemoteFolder.Path);
+                folderEvent.LocalFolder = fsFactory.CreateDirectoryInfo(localPath);
+            }
+            if(e is FileEvent){
+                var fileEvent = e as FileEvent;
+                if(fileEvent.LocalFile != null) {
+                    return false;
+                }
+                string localPath = matcher.CreateLocalPath(fileEvent.RemoteFile.Paths[0]);
+                fileEvent.LocalFile = fsFactory.CreateFileInfo(localPath);
+            }
             return false;
         }
 

@@ -79,7 +79,7 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The local file.
         /// </value>
-        public IFileInfo LocalFile { get; protected set; }
+        public IFileInfo LocalFile { get; set; }
 
         /// <summary>
         /// Gets or sets the local parent directory.
