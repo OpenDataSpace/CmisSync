@@ -16,12 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace CmisSync.Lib.Data
 {
     using System;
+    using System.ComponentModel;
+
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
     /// <summary>
     /// Mapped object type.
@@ -52,61 +54,121 @@ namespace CmisSync.Lib.Data
     public class MappedObjectData
     {
         /// <summary>
-        /// The parent identifier.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObjectData"/> class.
         /// </summary>
+        public MappedObjectData()
+        {
+            this.LastContentSize = -1;
+        }
+
+        /// <summary>
+        /// Gets or sets the parent identifier.
+        /// </summary>
+        /// <value>
+        /// The parent identifier.
+        /// </value>
         public string ParentId { get; set; }
 
         /// <summary>
-        /// The type.
+        /// Gets or sets the type.
         /// </summary>
+        /// <value>
+        /// The type.
+        /// </value>
         [JsonConverter(typeof(StringEnumConverter))]
         public MappedObjectType Type { get; set; }
 
         /// <summary>
-        /// The remote object identifier.
+        /// Gets or sets the remote object identifier.
         /// </summary>
+        /// <value>
+        /// The remote object identifier.
+        /// </value>
         public string RemoteObjectId { get; set; }
 
         /// <summary>
-        /// The last changeToken of the remote object seen on server.
+        /// Gets or sets the last changeToken of the remote object seen on server.
         /// </summary>
+        /// <value>
+        /// The last change token.
+        /// </value>
         public string LastChangeToken { get; set; }
 
         /// <summary>
-        /// The last remote write time in UTC.
+        /// Gets or sets the last remote write time in UTC.
         /// </summary>
+        /// <value>
+        /// The last remote write time UTC.
+        /// </value>
         public DateTime? LastRemoteWriteTimeUtc { get; set; }
 
         /// <summary>
-        /// The last local write time in UTC.
+        /// Gets or sets the lase local write time in UTC.
         /// </summary>
+        /// <value>
+        /// The last local write time UTC.
+        /// </value>
         public DateTime? LastLocalWriteTimeUtc { get; set; }
 
         /// <summary>
-        /// The last file content checksum.
+        /// Gets or sets the last file content checksum.
         /// </summary>
+        /// <value>
+        /// The last file content checksum.
+        /// </value>
         public byte[] LastChecksum { get; set; }
 
         /// <summary>
-        /// The name of the checksum algorithm.
+        /// Gets or sets the name of the checksum algorithm.
         /// </summary>
+        /// <value>
+        /// The name of the checksum algorithm.
+        /// </value>
         public string ChecksumAlgorithmName { get; set; }
 
         /// <summary>
-        /// The file/folder name.
+        /// Gets or sets the file/folder name.
         /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
         public string Name { get; set; }
 
         /// <summary>
-        /// The description attached to the CmisObject.
+        /// Gets or sets the description attached to the CmisObject.
         /// </summary>
+        /// <value>
+        /// The description.
+        /// </value>
         public string Description { get; set; }
 
         /// <summary>
-        /// The GUID on server and or client side.
+        /// Gets or sets the GUID on server and or client side.
         /// </summary>
+        /// <value>
+        /// The GUID.
+        /// </value>
         public Guid Guid { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last size of the file or the last size of the folder content. Default value is -1.
+        /// </summary>
+        /// <value>
+        /// The last size of the file or folder content.
+        /// </value>
+        [DefaultValue(-1)]
+        public long LastContentSize { get; set; }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Data.MappedObjectData"/>.
+        /// </summary>
+        /// <param name='obj'>
+        /// The <see cref="System.Object"/> to compare with the current <see cref="CmisSync.Lib.Data.MappedObjectData"/>.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the specified <see cref="System.Object"/> is equal to the current
+        /// <see cref="CmisSync.Lib.Data.MappedObjectData"/>; otherwise, <c>false</c>.
+        /// </returns>
         public override bool Equals(object obj)
         {
             // If parameter is null return false.
@@ -123,16 +185,17 @@ namespace CmisSync.Lib.Data
             }
 
             // Return true if the fields match:
-            return (Equals(this.ParentId, p.ParentId)) &&
-                (this.Type.Equals(p.Type)) &&
-                    (Equals(this.RemoteObjectId, p.RemoteObjectId)) &&
-                    (Equals(this.LastChangeToken, p.LastChangeToken)) &&
-                    (Equals(this.LastRemoteWriteTimeUtc, p.LastRemoteWriteTimeUtc)) &&
-                    (Equals(this.LastLocalWriteTimeUtc, p.LastLocalWriteTimeUtc)) &&
-                    (Equals(this.LastChecksum, p.LastChecksum)) &&
-                    (Equals(this.ChecksumAlgorithmName, p.ChecksumAlgorithmName)) &&
-                    (Equals(this.Name, p.Name)) &&
-                    (Equals(this.Guid, p.Guid));
+            return object.Equals(this.ParentId, p.ParentId) &&
+                this.Type.Equals(p.Type) &&
+                    object.Equals(this.RemoteObjectId, p.RemoteObjectId) &&
+                    object.Equals(this.LastChangeToken, p.LastChangeToken) &&
+                    object.Equals(this.LastRemoteWriteTimeUtc, p.LastRemoteWriteTimeUtc) &&
+                    object.Equals(this.LastLocalWriteTimeUtc, p.LastLocalWriteTimeUtc) &&
+                    object.Equals(this.LastChecksum, p.LastChecksum) &&
+                    object.Equals(this.ChecksumAlgorithmName, p.ChecksumAlgorithmName) &&
+                    object.Equals(this.Name, p.Name) &&
+                    object.Equals(this.Guid, p.Guid) &&
+                    object.Equals(this.LastContentSize, p.LastContentSize);
         }
 
         /// <summary>
@@ -144,7 +207,7 @@ namespace CmisSync.Lib.Data
         /// </returns>
         public override int GetHashCode()
         {
-            return (this.RemoteObjectId != null) ? this.RemoteObjectId.GetHashCode(): base.GetHashCode();
+            return (this.RemoteObjectId != null) ? this.RemoteObjectId.GetHashCode() : base.GetHashCode();
         }
     }
 }

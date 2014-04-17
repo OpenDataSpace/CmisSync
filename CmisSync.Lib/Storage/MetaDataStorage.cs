@@ -145,28 +145,27 @@ namespace CmisSync.Lib.Storage
                     return null;
                 }
 
+                switch(data.Type)
+                {
+                case MappedObjectType.File:
+                    var file = new MappedObject(data, this);
+                    break;
+                case MappedObjectType.Folder:
+                    var folder = new MappedFolder(data, this);
+                    break;
+                }
+
                 throw new NotImplementedException();
             }
         }
 
         /// <summary>
-        /// Saves the mapped file.
+        ///  Saves the mapped object.
         /// </summary>
-        /// <param name='file'>
-        /// Mapped File instance.
+        /// <param name='obj'>
+        /// The MappedObject instance.
         /// </param>
-        public void SaveMappedFile(IMappedFile file)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Saves the mapped folder.
-        /// </summary>
-        /// <param name='folder'>
-        /// Mapped Folder instance.
-        /// </param>
-        public void SaveMappedFolder(IMappedFolder folder)
+        public void SaveMappedObject(IMappedObject obj)
         {
             throw new NotImplementedException();
         }
@@ -178,6 +177,34 @@ namespace CmisSync.Lib.Storage
         /// Object to be removed.
         /// </param>
         public void RemoveObject(IMappedObject obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the remote path.
+        /// </summary>
+        /// <returns>
+        /// The remote path.
+        /// </returns>
+        /// <param name='obj'>
+        /// The MappedObject instance.
+        /// </param>
+        public string GetRemotePath(IMappedObject obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the local path. Return null if not exists.
+        /// </summary>
+        /// <returns>
+        /// The local path.
+        /// </returns>
+        /// <param name='mappedObject'>
+        /// Mapped object. Must not be null.
+        /// </param>
+        public string GetLocalPath(IMappedObject mappedObject)
         {
             throw new NotImplementedException();
         }

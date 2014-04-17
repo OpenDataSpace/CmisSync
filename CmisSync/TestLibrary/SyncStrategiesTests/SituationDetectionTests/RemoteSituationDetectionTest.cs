@@ -60,11 +60,12 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
             remoteObject.Setup (remote => remote.Paths).Returns(remotePaths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            var file = Mock.Of<IMappedFile>( f =>
-                                            f.LastRemoteWriteTimeUtc == lastModificationDate &&
-                                            f.RemoteObjectId == ObjectId.Id &&
-                                            f.GetLocalPath() == "path" &&
-                                            f.LastChangeToken == RemoteChangeToken);
+            var file = Mock.Of<IMappedObject>( f =>
+                                              f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                              f.RemoteObjectId == ObjectId.Id &&
+                                              f.LocalSyncTargetPath == "path" &&
+                                              f.LastChangeToken == RemoteChangeToken &&
+                                              f.Type == MappedObjectType.File);
             StorageMock.AddMappedFile(file);
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
 
@@ -85,11 +86,12 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
             remoteObject.Setup (remote => remote.Paths).Returns(remotePaths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            var file = Mock.Of<IMappedFile>( f =>
-                                            f.LastRemoteWriteTimeUtc == lastModificationDate &&
-                                            f.RemoteObjectId == ObjectId.Id &&
-                                            f.GetLocalPath() == "path" &&
-                                            f.LastChangeToken == RemoteChangeToken);
+            var file = Mock.Of<IMappedObject>( f =>
+                                              f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                              f.RemoteObjectId == ObjectId.Id &&
+                                              f.LocalSyncTargetPath == "path" &&
+                                              f.LastChangeToken == RemoteChangeToken &&
+                                              f.Type == MappedObjectType.File);
             StorageMock.AddMappedFile(file);
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object) {Remote = MetaDataChangeType.CREATED};
 
@@ -111,10 +113,11 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             remoteObject.Setup (remote => remote.Paths).Returns(remotePaths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
             var folder = Mock.Of<IMappedFolder>( f =>
-                                            f.LastRemoteWriteTimeUtc == lastModificationDate &&
-                                            f.RemoteObjectId == ObjectId.Id &&
-                                            f.GetLocalPath() == "path" &&
-                                            f.LastChangeToken == RemoteChangeToken);
+                                                f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                                f.RemoteObjectId == ObjectId.Id &&
+                                                f.LocalSyncTargetPath == "path" &&
+                                                f.LastChangeToken == RemoteChangeToken &&
+                                                f.Type == MappedObjectType.Folder);
             StorageMock.AddMappedFolder(folder);
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
 
@@ -203,8 +206,8 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
                                                             p.RemoteObjectId == oldParentId);
             var mappedFolder = StorageMock.AddLocalFolder(oldLocalPath, remoteId);
             mappedFolder.Setup( f => f.Name).Returns(folderName);
-            mappedFolder.Setup( f => f.GetRemotePath()).Returns(oldRemotePath);
-            mappedFolder.Setup( f => f.GetLocalPath()).Returns(oldLocalPath);
+            mappedFolder.Setup( f => f.RemoteSyncTargetPath).Returns(oldRemotePath);
+            mappedFolder.Setup( f => f.LocalSyncTargetPath).Returns(oldLocalPath);
             mappedFolder.Setup( f => f.Parent).Returns(mappedParentFolder);
             SessionMock.AddRemoteObject(remoteFolder.Object);
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };

@@ -71,20 +71,12 @@ namespace CmisSync.Lib.Storage
         IMappedObject GetObjectByRemoteId(string id);
 
         /// <summary>
-        /// Saves the mapped file.
+        /// Saves the mapped object.
         /// </summary>
-        /// <param name='file'>
-        /// Mapped File instance.
+        /// <param name='obj'>
+        /// MappedObject instance.
         /// </param>
-        void SaveMappedFile(IMappedFile file);
-
-        /// <summary>
-        /// Saves the mapped folder.
-        /// </summary>
-        /// <param name='folder'>
-        /// Mapped Folder instance.
-        /// </param>
-        void SaveMappedFolder(IMappedFolder folder);
+        void SaveMappedObject(IMappedObject obj);
 
         /// <summary>
         /// Removes the given object from Db
@@ -93,5 +85,27 @@ namespace CmisSync.Lib.Storage
         /// Object with the Remote object id, which should be removed.
         /// </param>
         void RemoveObject(IMappedObject obj);
+
+        /// <summary>
+        /// Gets the remote path. Returns null if not exists.
+        /// </summary>
+        /// <returns>
+        /// The remote path.
+        /// </returns>
+        /// <param name='mappedObject'>
+        /// Mapped object. Must not be null.
+        /// </param>
+        string GetRemotePath(IMappedObject mappedObject);
+
+        /// <summary>
+        /// Gets the local path. Return null if not exists.
+        /// </summary>
+        /// <returns>
+        /// The local path.
+        /// </returns>
+        /// <param name='mappedObject'>
+        /// Mapped object. Must not be null.
+        /// </param>
+        string GetLocalPath(IMappedObject mappedObject);
     }
 }

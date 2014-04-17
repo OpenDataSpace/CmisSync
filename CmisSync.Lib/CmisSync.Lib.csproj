@@ -100,7 +100,6 @@
     <Compile Include="ContentTasks\SimpleFileDownloader.cs" />
     <Compile Include="ContentTasks\SimpleFileUploader.cs" />
     <Compile Include="ContentTasks\Utils.cs" />
-    <Compile Include="Data\MappedObjects.cs" />
     <Compile Include="Data\PathMatcher.cs" />
     <Compile Include="Events\AbstractEventProducer.cs" />
     <Compile Include="Events\BubbledEvent.cs" />
@@ -175,7 +174,6 @@
     <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
     <Compile Include="Sync\Strategy\SyncMechanism.cs" />
     <Compile Include="Sync\Strategy\Watcher.cs" />
-    <Compile Include="Data\MappedFile.cs" />
     <Compile Include="Data\MappedFolder.cs" />
     <Compile Include="Sync\Strategy\MacWatcher.cs" />
     <Compile Include="Sync\Strategy\NetWatcher.cs" />
@@ -187,13 +185,13 @@
     <Compile Include="Storage\ExtendedAttributeReaderDos.cs" />
     <Compile Include="Data\IMappedFolder.cs" />
     <Compile Include="Data\IMappedObject.cs" />
-    <Compile Include="Data\IMappedFile.cs" />
     <Compile Include="Events\EventFilter\GenericHandleDublicatedEventsFilter.cs" />
     <Compile Include="Storage\DataBaseTableNames.cs" />
     <Compile Include="Storage\MetaDataStorage.cs" />
     <Compile Include="Data\MappedObjectData.cs" />
     <Compile Include="Sync\Strategy\RemoteObjectFetcher.cs" />
     <Compile Include="Sync\Strategy\LocalObjectFetcher.cs" />
+    <Compile Include="Data\MappedObject.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

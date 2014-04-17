@@ -168,11 +168,11 @@ namespace TestLibrary.SyncStrategiesTests {
         public void LocallyExistingRemoteDocumentUpdated ()
         {
             var storage = new Mock<IMetaDataStorage>();
-            var file = Mock.Of<IMappedFile>( f =>
-                                            f.RemoteObjectId == id &&
-                                            f.GetLocalPath() == "path" &&
-                                            f.GetRemotePath() == "path"
-                );
+            var file = Mock.Of<IMappedObject>( f =>
+                                              f.RemoteObjectId == id &&
+                                              f.LocalSyncTargetPath == "path" &&
+                                              f.RemoteSyncTargetPath == "path" &&
+                                              f.Type == MappedObjectType.File);
             storage.AddMappedFile(file);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();

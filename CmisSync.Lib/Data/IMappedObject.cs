@@ -15,6 +15,8 @@ namespace CmisSync.Lib.Data
     {
         string RemoteObjectId { get; set; }
 
+        string ParentId { get; set; }
+
         string LastChangeToken { get; set; }
 
         DateTime? LastRemoteWriteTimeUtc { get; set; }
@@ -38,6 +40,8 @@ namespace CmisSync.Lib.Data
         bool ExistsLocally ();
 
         IFileSystemInfoFactory FsFactory { get; }
+
+        MappedObjectType Type { get; }
     }
 
 }

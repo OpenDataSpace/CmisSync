@@ -68,8 +68,9 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private bool IsSavedFileEqual(IMetaDataStorage storage, IDocument doc)
         {
-            var mappedFile = storage.GetObjectByRemoteId(doc.Id) as IMappedFile;
+            var mappedFile = storage.GetObjectByRemoteId(doc.Id) as IMappedObject;
             if( mappedFile != null &&
+               mappedFile.Type == MappedObjectType.File &&
                mappedFile.LastRemoteWriteTimeUtc == doc.LastModificationDate &&
                mappedFile.Name == doc.Name &&
                mappedFile.LastChangeToken == doc.ChangeToken)

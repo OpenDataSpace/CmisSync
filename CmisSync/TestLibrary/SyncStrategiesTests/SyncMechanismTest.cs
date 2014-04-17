@@ -212,8 +212,8 @@ namespace TestLibrary.SyncStrategiesTests
                                                            f.Name == oldFolderName &&
                                                            f.Parent == oldLocalParent &&
                                                            f.LastChangeToken == oldLastChangeToken &&
-                                                           f.GetLocalPath() == oldLocalPath &&
-                                                           f.GetRemotePath() == oldRemotePath &&
+                                                           f.LocalSyncTargetPath == oldLocalPath &&
+                                                           f.RemoteSyncTargetPath == oldRemotePath &&
                                                            f.LastRemoteWriteTimeUtc == oldWriteTime));
             Session.AddRemoteObject(Mock.Of<IFolder>(f =>
                                                      f.Id == remoteId &&

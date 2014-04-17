@@ -41,18 +41,19 @@ namespace CmisSync.Lib.Sync.Strategy {
             IMappedObject savedObject = storage.GetObjectByRemoteId(contentChangeEvent.ObjectId);
             if(savedObject != null)
             {
-                IMappedFile file = savedObject as IMappedFile;
-                if(file != null)
-                {
-                    var fileInfo = fsFactory.CreateFileInfo(file.GetLocalPath());
-                    Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
-                    return;
-                }
                 IMappedFolder folder = savedObject as IMappedFolder;
                 if(folder != null)
                 {
-                    var dirInfo = fsFactory.CreateDirectoryInfo(folder.GetLocalPath());
+                    var dirInfo = fsFactory.CreateDirectoryInfo(folder.LocalSyncTargetPath);
                     Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = MetaDataChangeType.DELETED});
+                    return;
+                }
+
+                IMappedObject file = savedObject as IMappedObject;
+                if(file != null)
+                {
+                    var fileInfo = fsFactory.CreateFileInfo(file.LocalSyncTargetPath);
+                    Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
                     return;
                 }
             }
@@ -72,8 +73,8 @@ namespace CmisSync.Lib.Sync.Strategy {
                     }
                 case DotCMIS.Enums.ChangeType.Security:
                     {
-                        IMappedFile file = storage.GetObjectByRemoteId(doc.Id) as IMappedFile;
-                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(file.GetLocalPath());
+                        IMappedObject file = storage.GetObjectByRemoteId(doc.Id) as IMappedObject;
+                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(file.LocalSyncTargetPath);
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if( fileInfo != null )
                         {
@@ -87,8 +88,8 @@ namespace CmisSync.Lib.Sync.Strategy {
                     }
                 case DotCMIS.Enums.ChangeType.Updated:
                     {
-                        IMappedFile file = storage.GetObjectByRemoteId(doc.Id) as IMappedFile;
-                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(file.GetLocalPath());
+                        IMappedObject file = storage.GetObjectByRemoteId(doc.Id) as IMappedObject;
+                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(file.LocalSyncTargetPath);
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if(fileInfo != null)
                         {
@@ -108,7 +109,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             IFolder folder = contentChangeEvent.CmisObject as IFolder;
 
             MappedFolder dir = storage.GetObjectByRemoteId(folder.Id) as MappedFolder;
-            IDirectoryInfo dirInfo = (dir == null) ? null : fsFactory.CreateDirectoryInfo(dir.GetLocalPath());
+            IDirectoryInfo dirInfo = (dir == null) ? null : fsFactory.CreateDirectoryInfo(dir.LocalSyncTargetPath);
             var folderEvent = new FolderEvent(dirInfo, folder);
             switch(contentChangeEvent.Type)
             {

@@ -43,93 +43,70 @@ namespace TestLibrary.DataTests
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorFailsIfLocalPathIsNull()
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsIfStorageIsNull()
         {
-            new MappedFolder((string) null, remoteRootPath);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ConstructorFailsIfRemotePathIsNull()
-        {
-            new MappedFolder(localRootPath, null);
+            new MappedFolder(null, null);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorWorksIfFsFactoryIsNull()
         {
-            var rootFolder = new MappedFolder(localRootPath, remoteRootPath, null);
-            Assert.IsNull(rootFolder.Parent);
-            rootFolder = new MappedFolder(localRootPath, remoteRootPath);
-            Assert.IsNull(rootFolder.Parent);
+            var storage = Mock.Of<IMetaDataStorage>();
+            var folder = new MappedFolder(null, storage, null);
+            Assert.IsNull(folder.Name);
+            Assert.IsNull(folder.ParentId);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorTakesFsFactory()
         {
-            var factory = createFactoryWithLocalPathInfos();
-            new MappedFolder(localRootPath, remoteRootPath, factory.Object);
+            var factory = Mock.Of<IFileSystemInfoFactory>();
+            var storage = Mock.Of<IMetaDataStorage>();
+            new MappedFolder(null, storage, factory);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesParentFolder ()
+        public void ConstructorTakesData()
         {
-            var factory = createFactoryWithLocalPathInfos();
-            var rootFolder = new MappedFolder(localRootPath, remoteRootPath, factory.Object);
-            string child = "child";
-            var childFolder = new MappedFolder(rootFolder, child);
-            Assert.AreEqual(rootFolder, childFolder.Parent);
-            Assert.AreEqual(localRootPathName, rootFolder.Name);
-            Assert.AreEqual(child, childFolder.Name);
-        }
+            var factory = Mock.Of<IFileSystemInfoFactory>();
+            var storage = Mock.Of<IMetaDataStorage>();
+            var data = new MappedObjectData
+            {
+                Name = "name",
+                ParentId = null,
+                Description = string.Empty,
+                Guid = Guid.NewGuid(),
+                Type = MappedObjectType.Folder
+            };
 
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void GetLocalPath()
-        {
-            var factory = createFactoryWithLocalPathInfos();
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            Assert.AreEqual(this.localRootPath, rootFolder.GetLocalPath());
-            string child = "child";
-            var childFolder = new MappedFolder(rootFolder, child);
-            Assert.AreEqual(Path.Combine(this.localRootPath, child), childFolder.GetLocalPath());
-            string sub = "sub";
-            var subFolder = new MappedFolder(childFolder, sub);
-            Assert.AreEqual(Path.Combine(this.localRootPath, child, sub), subFolder.GetLocalPath());
-        }
+            var folder = new MappedFolder(data, storage, factory);
 
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void GetRemotePath()
-        {
-            var factory = createFactoryWithLocalPathInfos();
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            Assert.AreEqual(this.remoteRootPath, rootFolder.GetRemotePath());
-            string child = "child";
-            var childFolder = new MappedFolder(rootFolder, child);
-            Assert.AreEqual(remoteRootPath + child, childFolder.GetRemotePath());
-            string sub = "sub";
-            var subFolder = new MappedFolder(childFolder, sub);
-            Assert.AreEqual(remoteRootPath + child + "/" + sub, subFolder.GetRemotePath());
+            Assert.AreEqual(folder as MappedObjectData, data);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ExistsLocally()
         {
             string childName = "child";
+            var storage = new Mock<IMetaDataStorage>();
             var factory = createFactoryWithLocalPathInfos();
             var childInfo = new Mock<IDirectoryInfo>();
             childInfo.Setup(dir => dir.Name).Returns(childName);
             childInfo.Setup(dir => dir.Exists).Returns(false);
+            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Name == localRootPathName))).Returns(localRootPath);
+            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Name == childName))).Returns(Path.Combine(localRootPath, childName));
             factory.Setup(f => f.CreateDirectoryInfo(It.Is<string>(path => path == Path.Combine(localRootPath, childName)))).Returns(childInfo.Object);
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var childFolder = new MappedFolder(rootFolder, childName);
+
+            var rootFolder = new MappedFolder(new MappedObjectData{ Name = localRootPathName}, storage.Object, factory.Object);
+            var childFolder = new MappedFolder(new MappedObjectData {Name = childName}, storage.Object, factory.Object);
             Assert.IsTrue(rootFolder.ExistsLocally());
             Assert.IsFalse(childFolder.ExistsLocally());
         }
     }
 
     [TestFixture]
-    public class MappedFileTest
+    public class MappedObjectTest
     {
         private readonly string localRootPathName = "folder";
         private readonly string localRootPath = Path.Combine("local", "test", "folder");
@@ -143,123 +120,124 @@ namespace TestLibrary.DataTests
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(NullReferenceException))]
-        public void ConstructorFailsWithoutParent ()
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsWithoutStorageInstance()
         {
-            new MappedFile(null);
+            new MappedObject(null, null);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesFsFactory()
+        public void ConstructorTakesStorage()
         {
-            var factory = createFactoryWithLocalPathInfos();
-            var parent = new MappedFolder(this.localRootPath, this.remoteRootPath);
-            new MappedFile(parent, factory.Object);
+            var storage = Mock.Of<IMetaDataStorage>();
+            new MappedObject(null, storage);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTest () {
-            var factory = createFactoryWithLocalPathInfos();
-            var parent = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var file = new MappedFile(parent, factory.Object);
-            Assert.AreEqual(parent, file.Parents[0]);
-            file = new MappedFile(parent, null);
-            Assert.AreEqual(parent, file.Parents[0]);
-            Assert.AreEqual (1, file.Parents.Count);
+        public void ConstructorTakesStorageAndFsFactory()
+        {
+            var factory = Mock.Of<IFileSystemInfoFactory>();
+            var storage = Mock.Of<IMetaDataStorage>();
+            var obj = new MappedObject(null, storage, factory);
+            Assert.AreEqual(factory, obj.FsFactory);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorWithMultipleParents()
-        {
-            var factory = createFactoryWithLocalPathInfos();
-            var parent = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var file = new MappedFile(parent, factory.Object);
-            var secondParent = new MappedFolder(parent, "sub");
-            file = new MappedFile(parent, null, secondParent);
-            Assert.AreEqual(2, file.Parents.Count);
-            Assert.IsTrue(file.Parents.Contains(parent));
-            Assert.IsTrue(file.Parents.Contains(secondParent));
+        public void ConstructorTakesData() {
+            var storage = Mock.Of<IMetaDataStorage>();
+            var data = new MappedObjectData
+            {
+                Name = "name",
+                Description = string.Empty,
+                Guid = Guid.NewGuid(),
+                ParentId = "parentId",
+                Type = MappedObjectType.File
+            };
+
+            var file = new MappedObject(data, storage);
+
+            Assert.AreEqual(data, file as MappedObjectData);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorSetsDefaultParamsToNull()
         {
-            var factory = createFactoryWithLocalPathInfos();
-            var parent = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var file = new MappedFile(parent, factory.Object);
-            Assert.IsNull (file.ChecksumAlgorithmName);
-            Assert.IsNull (file.Description);
-            Assert.IsNull (file.LastChangeToken);
-            Assert.IsNull (file.LastChecksum);
-            Assert.IsNull (file.LastLocalWriteTimeUtc);
-            Assert.IsNull (file.LastRemoteWriteTimeUtc);
-            Assert.IsNull (file.Name);
-            Assert.AreEqual(this.localRootPath, file.LocalSyncTargetPath);
-            Assert.AreEqual(this.remoteRootPath, file.RemoteSyncTargetPath);
+            var file = new MappedObject(null, Mock.Of<IMetaDataStorage>());
+            Assert.IsNull(file.ChecksumAlgorithmName);
+            Assert.IsNull(file.Description);
+            Assert.IsNull(file.LastChangeToken);
+            Assert.IsNull(file.LastChecksum);
+            Assert.IsNull(file.LastLocalWriteTimeUtc);
+            Assert.IsNull(file.LastRemoteWriteTimeUtc);
+            Assert.IsNull(file.Name);
+            Assert.AreEqual(MappedObjectType.Unkown, file.Type);
+            Assert.AreEqual(-1, file.LastContentSize);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void HashAlgorithmProperty()
         {
-            var factory = createFactoryWithLocalPathInfos();
-            var parent = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var file = new MappedFile(parent, factory.Object);
+            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, ChecksumAlgorithmName = "MD5"}, Mock.Of<IMetaDataStorage>());
+            Assert.AreEqual("MD5", file.ChecksumAlgorithmName);
 
-            string checksum = "SHA1";
-            file.ChecksumAlgorithmName = checksum;
-            Assert.AreEqual(checksum, file.ChecksumAlgorithmName);
-
+            file.ChecksumAlgorithmName = "SHA1";
+            Assert.AreEqual("SHA1", file.ChecksumAlgorithmName);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void DescriptionProperty ()
+        public void DescriptionProperty()
+        {
+            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, Description = "desc"}, Mock.Of<IMetaDataStorage>());
+            Assert.AreEqual("desc", file.Description);
+
+            file.Description = "other desc";
+            Assert.AreEqual("other desc", file.Description);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void GetLocalPath()
         {
             var factory = createFactoryWithLocalPathInfos();
-            var parent = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var file = new MappedFile(parent, factory.Object);
+            var storage = new Mock<IMetaDataStorage>();
+            string remoteId = "remoteId";
+            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteId))).Returns(localFilePath);
 
-            string desc = "desc";
-            file.Description = desc;
-            Assert.AreEqual(desc, file.Description);
+            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, RemoteObjectId = remoteId}, storage.Object, factory.Object);
+            file.Name = localFileName;
+
+            Assert.AreEqual(localFilePath, file.LocalSyncTargetPath);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void GetLocalPath () {
+        public void GetRemotePath()
+        {
             var factory = createFactoryWithLocalPathInfos();
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var subFolder = new MappedFolder(rootFolder, "sub");
-            var file = new MappedFile(rootFolder, factory.Object);
+            var storage = new Mock<IMetaDataStorage>();
+            string remoteId = "remoteId";
+            storage.Setup(s => s.GetRemotePath(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteId))).Returns(remoteRootPath + localFileName);
+        
+            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, RemoteObjectId = remoteId}, storage.Object, factory.Object);
             file.Name = localFileName;
-            Assert.AreEqual(localFilePath, file.GetLocalPath());
-            file.Parents.Add(subFolder);
-            Assert.AreEqual(Path.Combine(this.localRootPath, localFileName), file.GetLocalPath(rootFolder));
-            Assert.AreEqual(Path.Combine(this.localRootPath, subFolder.Name , localFileName), file.GetLocalPath(subFolder));
-        }
 
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void GetRemotePath () {
-            var factory = createFactoryWithLocalPathInfos();
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var subFolder = new MappedFolder(rootFolder, "sub");
-            var file = new MappedFile(rootFolder, factory.Object);
-            file.Name = localFileName;
-            Assert.AreEqual(remoteRootPath + localFileName, file.GetRemotePath());
-            file.Parents.Add(subFolder);
-            Assert.AreEqual(remoteRootPath + localFileName, file.GetRemotePath(rootFolder));
-            Assert.AreEqual(remoteRootPath + subFolder.Name + "/" + localFileName, file.GetRemotePath(subFolder));
+            Assert.AreEqual(remoteRootPath + localFileName, file.RemoteSyncTargetPath);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ExistsLocally() {
             var factory = createFactoryWithLocalPathInfos();
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath, factory.Object);
-            var file = new MappedFile(rootFolder,factory.Object);
+            var storage = new Mock<IMetaDataStorage>();
+            string remoteId = "remoteId";
+            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteId))).Returns(localFilePath);
+
+            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, RemoteObjectId = remoteId}, storage.Object, factory.Object);
             file.Name = localFileName;
+
             Assert.IsTrue(file.ExistsLocally());
             var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup (f => f.Name).Returns(localFileName);
             fileInfo.Setup (f => f.Exists).Returns(false);
             factory.Setup(f => f.CreateFileInfo(It.Is<string>(path => path == localFilePath))).Returns(fileInfo.Object);
+
             Assert.IsFalse(file.ExistsLocally());
         }
     }
