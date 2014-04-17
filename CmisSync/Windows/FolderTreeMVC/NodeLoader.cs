@@ -154,16 +154,19 @@ namespace CmisSync.CmisTree
                     newChild.Parent = node;
                 }
             }
-            foreach (Node oldChild in node.Children)
+            if (node.Status == LoadingStatus.DONE)
             {
-                try
+                foreach (Node oldChild in node.Children)
                 {
-                    Node newChild = children.First(x => x.Name.Equals(oldChild.Name));
-                }
-                catch (InvalidOperationException)
-                {
-                    /// this node exists locally or is ignored, mark it as <code>LoadingStatus.DONE</code>
-                    SetNodeTreeStatus(oldChild, LoadingStatus.DONE);
+                    try
+                    {
+                        Node newChild = children.First(x => x.Name.Equals(oldChild.Name));
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // this node exists locally or is ignored, mark it as <code>LoadingStatus.DONE</code>
+                        SetNodeTreeStatus(oldChild, LoadingStatus.DONE);
+                    }
                 }
             }
         }
