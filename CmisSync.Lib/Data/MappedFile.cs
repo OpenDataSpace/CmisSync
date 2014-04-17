@@ -62,10 +62,6 @@ namespace CmisSync.Lib.Data
             string path = parent.GetRemotePath();
             return path + (path.EndsWith("/")? "": "/") + Name;
         }
-
-        public void Remove()
-        {
-        }
     }
 }
 

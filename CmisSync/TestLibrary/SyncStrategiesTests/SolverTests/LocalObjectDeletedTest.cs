@@ -14,6 +14,7 @@ using Moq;
 
 using NUnit.Framework;
 using TestLibrary.TestUtils;
+using CmisSync.Lib.Data;
 
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
@@ -88,9 +89,11 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 var docId = new Mock<IObjectId>(MockBehavior.Strict);
                 docId.Setup(d => d.Id).Returns(remoteDocumentId);
                 Storage.AddLocalFile(tempFile, remoteDocumentId);
+                Storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
 
                 solver.Solve(Session.Object, Storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
 
+                Storage.Verify( s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId)), Times.Once());
                 Assert.IsTrue(remoteObjectDeleted);
             }
             finally
@@ -150,9 +153,11 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 var docId = new Mock<IObjectId>(MockBehavior.Strict);
                 docId.Setup(d => d.Id).Returns(remoteFolderId);
                 Storage.AddLocalFolder(tempFolder, remoteFolderId);
+                Storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
 
                 solver.Solve(Session.Object, Storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), docId.Object);
 
+                Storage.Verify( s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteFolderId)), Times.Once());
                 Assert.IsTrue(remoteObjectDeleted);
             }
             finally

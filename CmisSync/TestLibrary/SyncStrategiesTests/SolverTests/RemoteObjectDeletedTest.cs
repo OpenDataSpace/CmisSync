@@ -36,7 +36,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             solver.Solve(session.Object, storage.Object, dirInfo.Object, null);
 
             dirInfo.Verify(d => d.Delete(true), Times.Once());
-            folder.Verify(f => f.Remove(), Times.Once());
+            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
         }
     }
 }
