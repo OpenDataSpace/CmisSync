@@ -169,7 +169,7 @@ namespace TestLibrary.IntegrationTests
             var queue = CreateQueue(session, storage, fsFactory);
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Delete(true), Times.Once());
-            folder.Verify(f => f.Remove(), Times.Once());
+            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == id)), Times.Once());
         }
 
         [Test, Category("Fast")]

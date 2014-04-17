@@ -17,7 +17,7 @@ namespace CmisSync.Lib.Sync.Solver
                 var localFolder = localFileInfo as IDirectoryInfo;
                 localFolder.Delete(true);
             }
-            storage.GetObjectByLocalPath(localFileInfo).Remove();
+            storage.RemoveObject(storage.GetObjectByLocalPath(localFileInfo));
         }
     }
 }

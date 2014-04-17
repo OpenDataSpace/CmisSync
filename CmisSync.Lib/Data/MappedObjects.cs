@@ -58,10 +58,5 @@ namespace CmisSync.Lib.Data
         public Guid Guid { get; set; }
 
         public abstract bool ExistsLocally ();
-
-        public void Remove()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
