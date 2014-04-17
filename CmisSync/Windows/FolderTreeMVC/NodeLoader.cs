@@ -125,7 +125,20 @@ namespace CmisSync.CmisTree
             else
             {
                 this.actualNode.Status = LoadingStatus.DONE;
-                MergeFolderTrees(this.actualNode, e.Result as List<Node>);
+                List<Node> children = e.Result as List<Node>;
+                MergeFolderTrees(this.actualNode, children);
+                foreach (Node oldChild in this.actualNode.Children)
+                {
+                    try
+                    {
+                        Node newChild = children.First(x => x.Name.Equals(oldChild.Name));
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // this node exists locally or is ignored, mark it as <code>LoadingStatus.DONE</code>
+                        SetNodeTreeStatus(oldChild, LoadingStatus.DONE);
+                    }
+                }
             }
             UpdateNodeEvent ();
             Load();
@@ -152,21 +165,6 @@ namespace CmisSync.CmisTree
                         newChild.Selected = false;
                     node.Children.Add(newChild);
                     newChild.Parent = node;
-                }
-            }
-            if (node.Status == LoadingStatus.DONE)
-            {
-                foreach (Node oldChild in node.Children)
-                {
-                    try
-                    {
-                        Node newChild = children.First(x => x.Name.Equals(oldChild.Name));
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        // this node exists locally or is ignored, mark it as <code>LoadingStatus.DONE</code>
-                        SetNodeTreeStatus(oldChild, LoadingStatus.DONE);
-                    }
                 }
             }
         }
