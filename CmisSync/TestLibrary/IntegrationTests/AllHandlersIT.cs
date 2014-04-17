@@ -192,6 +192,7 @@ namespace TestLibrary.IntegrationTests
             var queue = CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Create(), Times.Once());
+            Assert.Fail("verify that folder goes to db");
         }
     }
 }

@@ -36,6 +36,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             
             solver.Solve(session.Object, storage.Object, dirInfo.Object, null);
             dirInfo.Verify(d => d.Create(), Times.Once());
+            Assert.Fail("verify that folder goes to db");
         }
     }
 }
