@@ -156,6 +156,7 @@
     <Compile Include="WatcherTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\DBreezeTests.cs" />
+    <Compile Include="StorageTests\MetaDataStorageTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -9,6 +9,8 @@ namespace TestLibrary.IntegrationTests
     using DBreeze;
     using DBreeze.DataTypes;
 
+    using Moq;
+
     using Newtonsoft.Json;
 
     using NUnit.Framework;
@@ -89,6 +91,31 @@ namespace TestLibrary.IntegrationTests
                 Assert.AreEqual("Name", (tran.Select<int, DbCustomSerializer<TestClass>>("objects", 1).Value.Get as TestClass).Name);
             }
         }
+
+        [Test, Category("Fast"), Category("IT")]
+        public void InsertAndSelectMockedObject()
+        {
+            using (var tran = engine.GetTransaction())
+            {
+                string key = "key";
+                string name = "name";
+                string path = "path";
+                File file = new File{ Name = name };
+                tran.Insert<string, DbCustomSerializer<Folder>>("objects", key, file);
+                Assert.That((tran.Select<string, DbCustomSerializer<Folder>>("objects", key).Value.Get as File).Name.Equals(name));
+            }
+        }
+
+        public class Folder
+        {
+            public string Name { get; set; }
+        }
+
+        public class File : Folder
+        {
+            public string Path { get; set; }
+        }
+
 
         [Serializable]
         public class TestClass

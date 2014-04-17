@@ -52,6 +52,7 @@ SOURCES =  \
 	MoqExtensions/MoqExtensions.cs \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
+	StorageTests/MetaDataStorageTest.cs \
 	StorageTests/PersistentStorageTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \

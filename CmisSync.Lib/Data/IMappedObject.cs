@@ -33,6 +33,8 @@ namespace CmisSync.Lib.Data
 
         string Description { get; set; }
 
+        Guid Guid { get; set; }
+
         bool ExistsLocally ();
 
         IFileSystemInfoFactory FsFactory { get; }

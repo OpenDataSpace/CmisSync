@@ -82,6 +82,7 @@ SOURCES =  \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
+	Storage/DataBaseTableNames.cs \
 	Storage/DirectoryInfoWrapper.cs \
 	Storage/EventStorage.cs \
 	Storage/ExtendedAttributeException.cs \
@@ -99,6 +100,7 @@ SOURCES =  \
 	Storage/IFileSystemInfoFactory.cs \
 	Storage/IFileSystemWatcher.cs \
 	Storage/IMetaDataStorage.cs \
+	Storage/MetaDataStorage.cs \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \

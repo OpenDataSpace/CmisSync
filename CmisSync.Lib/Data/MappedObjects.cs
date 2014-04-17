@@ -55,6 +55,8 @@ namespace CmisSync.Lib.Data
 
         public string Description { get; set; }
 
+        public Guid Guid { get; set; }
+
         public abstract bool ExistsLocally ();
 
         public void Remove()

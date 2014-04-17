@@ -41,11 +41,14 @@ namespace CmisSync.Lib.Data
         string CreateRemotePath (FileInfo localFile);
 
         string CreateRemotePath (string localPath);
+
+        string LocalTargetRootPath { get; }
+
+        string RemoteTargetRootPath { get; }
     }
 
     public abstract class AbstractPathMatcher : IPathMatcher
     {
-
         public string LocalTargetRootPath { get; private set; }
 
         public string RemoteTargetRootPath { get; private set; }

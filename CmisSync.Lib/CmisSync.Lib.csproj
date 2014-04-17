@@ -191,6 +191,8 @@
     <Compile Include="Data\IMappedObject.cs" />
     <Compile Include="Data\IMappedFile.cs" />
     <Compile Include="Events\EventFilter\GenericHandleDublicatedEventsFilter.cs" />
+    <Compile Include="Storage\DataBaseTableNames.cs" />
+    <Compile Include="Storage\MetaDataStorage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
