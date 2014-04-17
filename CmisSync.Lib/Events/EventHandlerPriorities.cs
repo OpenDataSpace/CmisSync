@@ -76,7 +76,7 @@ namespace CmisSync.Lib.Events
             map[typeof(ContentChangeEventAccumulator)] = HIGH;
 
             // Accumulates events needed for SyncStrategy
-            map[typeof(FileSystemEventAccumulator)] = HIGH;
+            map[typeof(RemoteObjectFetcher)] = HIGH;
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;

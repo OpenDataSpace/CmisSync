@@ -121,7 +121,6 @@
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
     <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
     <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
-    <Compile Include="SyncStrategiesTests\FileSystemEventAccumulatorTest.cs" />
     <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\SingleStepEventQueue.cs" />
@@ -157,6 +156,7 @@
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\DBreezeTests.cs" />
     <Compile Include="StorageTests\MetaDataStorageTest.cs" />
+    <Compile Include="SyncStrategiesTests\RemoteObjectFetcherTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

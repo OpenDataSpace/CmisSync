@@ -170,7 +170,6 @@
     <Compile Include="Sync\Strategy\ContentChanges.cs" />
     <Compile Include="Sync\Strategy\Crawler.cs" />
     <Compile Include="Sync\Strategy\FileSynchronizer.cs" />
-    <Compile Include="Sync\Strategy\FileSystemEventAccumulator.cs" />
     <Compile Include="Sync\Strategy\ISituationDetection.cs" />
     <Compile Include="Sync\Strategy\LocalSituationDetection.cs" />
     <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
@@ -193,6 +192,7 @@
     <Compile Include="Storage\DataBaseTableNames.cs" />
     <Compile Include="Storage\MetaDataStorage.cs" />
     <Compile Include="Data\MappedObjectData.cs" />
+    <Compile Include="Sync\Strategy\RemoteObjectFetcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

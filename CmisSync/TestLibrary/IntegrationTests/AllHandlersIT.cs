@@ -60,7 +60,7 @@ namespace TestLibrary.IntegrationTests
             var ccaccumulator = new ContentChangeEventAccumulator(session.Object, queue);
             manager.AddEventHandler(ccaccumulator);
 
-            var feaccumulator = new FileSystemEventAccumulator(queue, session.Object, storage.Object);
+            var feaccumulator = new RemoteObjectFetcher(session.Object, storage.Object);
             manager.AddEventHandler(feaccumulator);
 
             var watcher = new Mock<Strategy.Watcher>(queue){CallBase = true};

@@ -23,16 +23,13 @@ namespace TestLibrary.SyncStrategiesTests {
 
         [Test, Category("Fast")]
         public void ConstructorTest () {
-            var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage> ();
-            new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
+            new RemoteObjectFetcher (session.Object, storage.Object);
         }
 
         [Test, Category("Fast")]
         public void FileEventWithoutObjectId () {
-            var queue = new Mock<ISyncEventQueue>();
-
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, id).Object;
@@ -42,7 +39,7 @@ namespace TestLibrary.SyncStrategiesTests {
             storage.AddLocalFile(path, id);
 
             var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(path)));
-            var accumulator = new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
+            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
 
             Assert.That(accumulator.Handle(fileEvent), Is.False);
             Assert.That(fileEvent.RemoteFile, Is.Not.Null);
@@ -50,7 +47,6 @@ namespace TestLibrary.SyncStrategiesTests {
 
         [Test, Category("Fast")]
         public void FileEventForRemovedFile () {
-            var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.Setup(s => s.GetObject(id)).Throws(new CmisObjectNotFoundException());
@@ -60,17 +56,16 @@ namespace TestLibrary.SyncStrategiesTests {
 
             var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(path)));
 
-            var accumulator = new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
+            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
             Assert.That(accumulator.Handle(fileEvent), Is.False);
             Assert.That(fileEvent.RemoteFile, Is.Null);
         }
 
         [Test, Category("Fast")]
         public void FileEventWithIDocument () {
-            var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
-            var accumulator = new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
+            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
             var fileEvent = new FileEvent(new Mock<IFileInfo>().Object, null, new Mock<IDocument>().Object); 
             accumulator.Handle(fileEvent);
             session.Verify(s => s.GetObject(It.IsAny<string>()), Times.Never());
@@ -78,10 +73,9 @@ namespace TestLibrary.SyncStrategiesTests {
 
         [Test, Category("Fast")]
         public void FolderEventWithIFolder () {
-            var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
-            var accumulator = new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
+            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
             var fileEvent = new FolderEvent(new Mock<IDirectoryInfo>().Object, new Mock<IFolder>().Object); 
             accumulator.Handle(fileEvent);
             session.Verify(s => s.GetObject(It.IsAny<string>()), Times.Never());
@@ -89,8 +83,6 @@ namespace TestLibrary.SyncStrategiesTests {
 
         [Test, Category("Fast")]
         public void FolderEventWithoutObjectId () {
-            var queue = new Mock<ISyncEventQueue>();
-
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             IFolder remote = MockSessionUtil.CreateRemoteFolderMock(id).Object;
@@ -100,7 +92,7 @@ namespace TestLibrary.SyncStrategiesTests {
             storage.AddLocalFolder(path, id);
 
             var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(path)));
-            var accumulator = new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
+            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
 
             Assert.That(accumulator.Handle(folderEvent), Is.False);
             Assert.That(folderEvent.RemoteFolder, Is.Not.Null);
@@ -108,7 +100,6 @@ namespace TestLibrary.SyncStrategiesTests {
 
         [Test, Category("Fast")]
         public void FolderEventForRemovedFolder () {
-            var queue = new Mock<ISyncEventQueue>();
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.Setup(s => s.GetObject(id)).Throws(new CmisObjectNotFoundException());
@@ -118,7 +109,7 @@ namespace TestLibrary.SyncStrategiesTests {
 
             var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(path)));
 
-            var accumulator = new FileSystemEventAccumulator (queue.Object, session.Object, storage.Object);
+            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
             Assert.That(accumulator.Handle(folderEvent), Is.False);
             Assert.That(folderEvent.RemoteFolder, Is.Null);
         }

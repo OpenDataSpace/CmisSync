@@ -11,8 +11,8 @@ using CmisSync.Lib.Data;
 using log4net;
 
 namespace CmisSync.Lib.Sync.Strategy { 
-    public class FileSystemEventAccumulator : ReportingSyncEventHandler {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(FileSystemEventAccumulator));
+    public class RemoteObjectFetcher : SyncEventHandler {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectFetcher));
 
         private IMetaDataStorage storage;
         private ISession session;
@@ -74,7 +74,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             return false;
         }
 
-        public FileSystemEventAccumulator(ISyncEventQueue queue, ISession session, IMetaDataStorage storage):base(queue) {
+        public RemoteObjectFetcher(ISession session, IMetaDataStorage storage) {
             if(session == null)
                 throw new ArgumentNullException("Session instance is needed , but was null");
             if(storage == null)
