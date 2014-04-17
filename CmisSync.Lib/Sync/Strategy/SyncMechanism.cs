@@ -9,8 +9,11 @@ using DotCMIS.Client;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
+    using log4net;
     public class SyncMechanism : ReportingSyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncMechanism));
+
         private ISession Session;
         private IMetaDataStorage Storage;
 
@@ -92,11 +95,23 @@ namespace CmisSync.Lib.Sync.Strategy
         public override bool Handle (ISyncEvent e)
         {
             if (e is FolderEvent) {
-                HandleMetaData ((e as FolderEvent));
+                var folderEvent = e as FolderEvent;
+
+                if(folderEvent.LocalFolder == null) {
+                    throw new ArgumentException("LocalFolder has to be filled: " + folderEvent);
+                }
+
+                HandleMetaData (folderEvent);
                 return true;
             }
             if (e is FileEvent) {
-                HandleFileEvent ((e as FileEvent));
+                var fileEvent = e as FileEvent;
+
+                if(fileEvent.LocalFile == null) {
+                    throw new ArgumentException("LocalFile has to be filled " + fileEvent);
+                }
+
+                HandleFileEvent (fileEvent);
                 return true;
             }
             return false;
@@ -109,6 +124,7 @@ namespace CmisSync.Lib.Sync.Strategy
             ISolver solver = Solver [localSituation, remoteSituation];
             if (solver != null)
             try{
+                Logger.Debug("Using Solver: " + solver.GetType());
                 Solve (solver, actualEvent);
             }catch(DotCMIS.Exceptions.CmisBaseException) {
                 int newLocalSituation = (int) LocalSituation.Analyse(Storage, actualEvent);

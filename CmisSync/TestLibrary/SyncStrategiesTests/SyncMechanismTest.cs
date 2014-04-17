@@ -170,7 +170,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, Queue.Object, Session.Object, Storage.Object);
             var remoteDocument = new Mock<IDocument>();
-            var remoteEvent = new Mock<FileEvent>(null, null, remoteDocument.Object).Object;
+            var remoteEvent = new Mock<FileEvent>(new Mock<IFileInfo>().Object, null, remoteDocument.Object).Object;
             mechanism.Solver[(int) SituationType.NOCHANGE, (int) SituationType.CHANGED] = failingSolver.Object;
             mechanism.Solver[(int) SituationType.NOCHANGE, (int) SituationType.REMOVED] = successfulSolver.Object;
 
@@ -245,7 +245,7 @@ namespace TestLibrary.SyncStrategiesTests
             var remoteFolderAddedSolver = new Mock<ISolver>();
             var localDetection = new LocalSituationDetection(localFS.Object);
             var remoteDetection = new RemoteSituationDetection(Session.Object);
-            var folderEvent = new FolderEvent(remoteFolder: remoteFolder) { Remote = MetaDataChangeType.CREATED, Local = MetaDataChangeType.NONE };
+            var folderEvent = new FolderEvent(remoteFolder: remoteFolder, localFolder: new Mock<IDirectoryInfo>().Object) { Remote = MetaDataChangeType.CREATED, Local = MetaDataChangeType.NONE };
 
             var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
             mechanism.Solver[(int) SituationType.NOCHANGE, (int) SituationType.ADDED] = remoteFolderAddedSolver.Object;
