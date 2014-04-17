@@ -16,7 +16,9 @@ namespace CmisSync.Lib.Sync.Solver
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId){
-            Logger.Debug(localFile.FullName);
+            if(localFile is IDirectoryInfo) {
+                (localFile as IDirectoryInfo).Create();
+            }
 
         }
     }

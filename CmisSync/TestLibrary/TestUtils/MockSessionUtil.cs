@@ -41,9 +41,10 @@ namespace TestLibrary.TestUtils
             return newRemoteObject;
         }
         
-        public static Mock<IFolder> CreateRemoteFolderMock(string id){
+        public static Mock<IFolder> CreateRemoteFolderMock(string id, string path = "/"){
             var newRemoteObject = new Mock<IFolder> ();
             newRemoteObject.Setup(d => d.Id).Returns(id);
+            newRemoteObject.Setup(d => d.Path).Returns(path);
             return newRemoteObject;
         }
 
@@ -122,9 +123,9 @@ namespace TestLibrary.TestUtils
             return remoteFolder;
         }
 
-        public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid") {
+        public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid", string path = "path") {
             var session = PrepareSessionMockForSingleChange(type, id);
-            var newRemoteObject =  CreateRemoteFolderMock(id);
+            var newRemoteObject =  CreateRemoteFolderMock(id, path);
             session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (newRemoteObject.Object);
          
             return session;

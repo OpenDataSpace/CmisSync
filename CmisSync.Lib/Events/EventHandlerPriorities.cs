@@ -68,6 +68,7 @@ namespace CmisSync.Lib.Events
             map[typeof(IgnoredFolderNameFilter)] = FILTER;
             map[typeof(InvalidFolderNameFilter)] = FILTER;
             map[typeof(IgnoredFoldersFilter)] = FILTER;
+            map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
 
             // Higher than fallback Crawler
             map[typeof(ContentChanges)] = HIGH;
@@ -77,10 +78,10 @@ namespace CmisSync.Lib.Events
 
             // Accumulates events needed for SyncStrategy
             map[typeof(RemoteObjectFetcher)] = HIGH;
+            map[typeof(LocalObjectFetcher)] = HIGH;
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;
-            map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
             map[typeof(CmisSync.Lib.Sync.Strategy.Watcher)] = NORMAL;
             map[typeof(Crawler)] = NORMAL;
             map[typeof(SyncMechanism)] = NORMAL;

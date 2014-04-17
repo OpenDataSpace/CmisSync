@@ -31,6 +31,9 @@ namespace TestLibrary.IntegrationTests
         {
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
+        
+        private readonly string localRoot = Path.GetTempPath();
+        private readonly string remoteRoot = "remoteroot";
 
         private readonly bool isPropertyChangesSupported = false;
         private readonly int maxNumberOfContentChanges = 1000;
@@ -40,11 +43,11 @@ namespace TestLibrary.IntegrationTests
             return CreateQueue(session, storage, new ObservableHandler());
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage, Mock<IFileSystemInfoFactory> fsFactory){
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage, IFileSystemInfoFactory fsFactory){
             return CreateQueue(session, storage, new ObservableHandler(), fsFactory);
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage, ObservableHandler observer, Mock<IFileSystemInfoFactory> fsFactory = null) {
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage, ObservableHandler observer, IFileSystemInfoFactory fsFactory = null) {
 
             var manager = new SyncEventManager();
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
@@ -54,19 +57,23 @@ namespace TestLibrary.IntegrationTests
             var changes = new ContentChanges (session.Object, storage.Object, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
             manager.AddEventHandler(changes);
 
-            var transformer = new ContentChangeEventTransformer(queue, storage.Object, (fsFactory == null) ? null : fsFactory.Object);
+            var transformer = new ContentChangeEventTransformer(queue, storage.Object, fsFactory);
             manager.AddEventHandler(transformer);
 
             var ccaccumulator = new ContentChangeEventAccumulator(session.Object, queue);
             manager.AddEventHandler(ccaccumulator);
 
-            var feaccumulator = new RemoteObjectFetcher(session.Object, storage.Object);
-            manager.AddEventHandler(feaccumulator);
+            var remoteFetcher = new RemoteObjectFetcher(session.Object, storage.Object);
+            manager.AddEventHandler(remoteFetcher);
+
+            IPathMatcher matcher = new PathMatcher(localRoot, remoteRoot);
+            var localFetcher = new LocalObjectFetcher(matcher, fsFactory);
+            manager.AddEventHandler(localFetcher);
 
             var watcher = new Mock<Strategy.Watcher>(queue){CallBase = true};
             manager.AddEventHandler(watcher.Object);
 
-            var localDetection = new LocalSituationDetection((fsFactory == null) ? null : fsFactory.Object);
+            var localDetection = new LocalSituationDetection(fsFactory);
             var remoteDetection = new RemoteSituationDetection(session.Object);
             var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage.Object);
             manager.AddEventHandler(syncMechanism);
@@ -134,7 +141,7 @@ namespace TestLibrary.IntegrationTests
         {
             var storage = new Mock<IMetaDataStorage>();
             var path = new Mock<IFileInfo>();
-            path.Setup(p => p.FullName ).Returns(Path.Combine(Path.GetTempPath(), "a", "b"));
+            path.Setup(p => p.FullName ).Returns(Path.Combine(localRoot, "a", "b"));
             string id = "id";
             storage.AddLocalFile(path.Object, id);
             
@@ -154,7 +161,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast")]
         public void ContentChangeIndicatesFolderDeletionOfExistingFolder ()
         {
-            string path = Path.Combine(Path.GetTempPath(), "a");
+            string path = Path.Combine(localRoot, "a");
             string id = "1";
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
@@ -166,7 +173,7 @@ namespace TestLibrary.IntegrationTests
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
             storage.AddLocalFolder(path, id);
 
-            var queue = CreateQueue(session, storage, fsFactory);
+            var queue = CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Delete(true), Times.Once());
             storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == id)), Times.Once());
@@ -175,10 +182,14 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast")]
         public void ContentChangeIndicatesFolderCreation ()
         {
+            string folderName = "folder";
+            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
+            fsFactory.AddDirectory(Path.Combine(localRoot, folderName));
+
             string id = "1";
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, Path.Combine(remoteRoot, folderName));
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
-            var queue = CreateQueue(session, storage);
+            var queue = CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
 
         }
