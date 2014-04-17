@@ -42,8 +42,7 @@ namespace CmisSync.Lib.Storage
         private IPathMatcher matcher = null;
 
         private static readonly string PropertyTable = "properties";
-        private static readonly string FileTable = "files";
-        private static readonly string FolderTable = "folder";
+        private static readonly string MappedObjectsTable = "objects";
         private static readonly string ChangeLogTokenKey = "ChangeLogToken";
         private static readonly string LocalPathKey = "LocalPath";
         private static readonly string RemotePathKey = "RemotePath";
@@ -140,8 +139,13 @@ namespace CmisSync.Lib.Storage
         {
             using(var tran = this.engine.GetTransaction())
             {
-                AbstractMappedObject obj = tran.Select<string, DbCustomSerializer<MappedFile>>(FileTable, id).Value.Get;
-                return (obj == null) ? tran.Select<string, DbCustomSerializer<MappedFolder>>(FolderTable, id).Value.Get : obj;
+                MappedObjectData data = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value.Get;
+                if (data == null)
+                {
+                    return null;
+                }
+
+                throw new NotImplementedException();
             }
         }
 
@@ -163,6 +167,17 @@ namespace CmisSync.Lib.Storage
         /// Mapped Folder instance.
         /// </param>
         public void SaveMappedFolder(IMappedFolder folder)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Removes the saved object.
+        /// </summary>
+        /// <param name='obj'>
+        /// Object to be removed.
+        /// </param>
+        public void RemoveObject(IMappedObject obj)
         {
             throw new NotImplementedException();
         }

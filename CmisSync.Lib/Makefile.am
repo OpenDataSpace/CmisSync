@@ -34,6 +34,7 @@ SOURCES =  \
 	Data/IMappedObject.cs \
 	Data/MappedFile.cs \
 	Data/MappedFolder.cs \
+	Data/MappedObjectData.cs \
 	Data/MappedObjects.cs \
 	Data/PathMatcher.cs \
 	Defines.cs \

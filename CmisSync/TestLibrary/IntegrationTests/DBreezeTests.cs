@@ -93,29 +93,21 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast"), Category("IT")]
-        public void InsertAndSelectMockedObject()
+        public void InsertAndSelectMappedObjectData()
         {
             using (var tran = engine.GetTransaction())
             {
                 string key = "key";
                 string name = "name";
-                string path = "path";
-                File file = new File{ Name = name };
-                tran.Insert<string, DbCustomSerializer<Folder>>("objects", key, file);
-                Assert.That((tran.Select<string, DbCustomSerializer<Folder>>("objects", key).Value.Get as File).Name.Equals(name));
+                var file = new MappedObjectData{
+                    Name = name,
+                    Type = MappedObjectType.File,
+                    RemoteObjectId = key
+                };
+                tran.Insert<string, DbCustomSerializer<MappedObjectData>>("objects", key, file);
+                Assert.That((tran.Select<string, DbCustomSerializer<MappedObjectData>>("objects", key).Value.Get as MappedObjectData).Equals(file));
             }
         }
-
-        public class Folder
-        {
-            public string Name { get; set; }
-        }
-
-        public class File : Folder
-        {
-            public string Path { get; set; }
-        }
-
 
         [Serializable]
         public class TestClass

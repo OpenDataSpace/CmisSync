@@ -85,5 +85,13 @@ namespace CmisSync.Lib.Storage
         /// Mapped Folder instance.
         /// </param>
         void SaveMappedFolder(IMappedFolder folder);
+
+        /// <summary>
+        /// Removes the given object from Db
+        /// </summary>
+        /// <param name='obj'>
+        /// Object with the Remote object id, which should be removed.
+        /// </param>
+        void RemoveObject(IMappedObject obj);
     }
 }

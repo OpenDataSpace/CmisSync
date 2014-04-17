@@ -192,6 +192,7 @@
     <Compile Include="Events\EventFilter\GenericHandleDublicatedEventsFilter.cs" />
     <Compile Include="Storage\DataBaseTableNames.cs" />
     <Compile Include="Storage\MetaDataStorage.cs" />
+    <Compile Include="Data\MappedObjectData.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
