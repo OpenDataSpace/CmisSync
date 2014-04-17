@@ -184,14 +184,14 @@ namespace TestLibrary.IntegrationTests
         {
             string folderName = "folder";
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
-            fsFactory.AddDirectory(Path.Combine(localRoot, folderName));
+            var dirInfo = fsFactory.AddDirectory(Path.Combine(localRoot, folderName));
 
             string id = "1";
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, Path.Combine(remoteRoot, folderName));
             Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
             var queue = CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
-
+            dirInfo.Verify(d => d.Create(), Times.Once());
         }
     }
 }
