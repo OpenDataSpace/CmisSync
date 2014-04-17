@@ -20,13 +20,6 @@ namespace TestLibrary.EventsTests
         private int priority = 666;
 
         [Test, Category("Fast")]
-        [Ignore]
-        public void ToStringTest ()
-        {
-            Assert.Fail ("TODO");
-        }
-
-        [Test, Category("Fast")]
         public void PriorityTest ()
         {
             var handler = new GenericSyncEventHandler<ISyncEvent> (priority, delegate (ISyncEvent e) {

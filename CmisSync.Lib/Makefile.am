@@ -131,7 +131,6 @@ SOURCES =  \
 	Sync/Strategy/MacWatcher.cs \
 	Sync/Strategy/NetWatcher.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
-	Sync/Strategy/SimpleFileSynchronizer.cs \
 	Sync/Strategy/SyncMechanism.cs \
 	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \

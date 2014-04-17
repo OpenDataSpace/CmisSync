@@ -174,7 +174,6 @@
     <Compile Include="Sync\Strategy\ISituationDetection.cs" />
     <Compile Include="Sync\Strategy\LocalSituationDetection.cs" />
     <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
-    <Compile Include="Sync\Strategy\SimpleFileSynchronizer.cs" />
     <Compile Include="Sync\Strategy\SyncMechanism.cs" />
     <Compile Include="Sync\Strategy\Watcher.cs" />
     <Compile Include="Data\MappedFile.cs" />
