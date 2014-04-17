@@ -172,6 +172,16 @@ namespace TestLibrary.IntegrationTests
             folder.Verify(f => f.Remove(), Times.Once());
         }
 
+        [Test, Category("Fast")]
+        public void ContentChangeIndicatesFolderCreation ()
+        {
+            string id = "1";
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id);
+            Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
+            var queue = CreateQueue(session, storage);
+            queue.RunStartSyncEvent();
+
+        }
     }
 }
 
