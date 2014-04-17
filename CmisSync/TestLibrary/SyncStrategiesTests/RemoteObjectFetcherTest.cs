@@ -39,9 +39,9 @@ namespace TestLibrary.SyncStrategiesTests {
             storage.AddLocalFile(path, id);
 
             var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(path)));
-            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
+            var fetcher = new RemoteObjectFetcher (session.Object, storage.Object);
 
-            Assert.That(accumulator.Handle(fileEvent), Is.False);
+            Assert.That(fetcher.Handle(fileEvent), Is.False);
             Assert.That(fileEvent.RemoteFile, Is.Not.Null);
         }
 
@@ -56,8 +56,8 @@ namespace TestLibrary.SyncStrategiesTests {
 
             var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(path)));
 
-            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
-            Assert.That(accumulator.Handle(fileEvent), Is.False);
+            var fetcher = new RemoteObjectFetcher (session.Object, storage.Object);
+            Assert.That(fetcher.Handle(fileEvent), Is.False);
             Assert.That(fileEvent.RemoteFile, Is.Null);
         }
 
@@ -65,9 +65,9 @@ namespace TestLibrary.SyncStrategiesTests {
         public void FileEventWithIDocument () {
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
-            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
+            var fetcher = new RemoteObjectFetcher (session.Object, storage.Object);
             var fileEvent = new FileEvent(new Mock<IFileInfo>().Object, null, new Mock<IDocument>().Object); 
-            accumulator.Handle(fileEvent);
+            fetcher.Handle(fileEvent);
             session.Verify(s => s.GetObject(It.IsAny<string>()), Times.Never());
         }
 
@@ -75,9 +75,9 @@ namespace TestLibrary.SyncStrategiesTests {
         public void FolderEventWithIFolder () {
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
-            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
+            var fetcher = new RemoteObjectFetcher (session.Object, storage.Object);
             var fileEvent = new FolderEvent(new Mock<IDirectoryInfo>().Object, new Mock<IFolder>().Object); 
-            accumulator.Handle(fileEvent);
+            fetcher.Handle(fileEvent);
             session.Verify(s => s.GetObject(It.IsAny<string>()), Times.Never());
         }
 
@@ -92,9 +92,9 @@ namespace TestLibrary.SyncStrategiesTests {
             storage.AddLocalFolder(path, id);
 
             var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(path)));
-            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
+            var fetcher = new RemoteObjectFetcher (session.Object, storage.Object);
 
-            Assert.That(accumulator.Handle(folderEvent), Is.False);
+            Assert.That(fetcher.Handle(folderEvent), Is.False);
             Assert.That(folderEvent.RemoteFolder, Is.Not.Null);
         }
 
@@ -109,8 +109,8 @@ namespace TestLibrary.SyncStrategiesTests {
 
             var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(path)));
 
-            var accumulator = new RemoteObjectFetcher (session.Object, storage.Object);
-            Assert.That(accumulator.Handle(folderEvent), Is.False);
+            var fetcher = new RemoteObjectFetcher (session.Object, storage.Object);
+            Assert.That(fetcher.Handle(folderEvent), Is.False);
             Assert.That(folderEvent.RemoteFolder, Is.Null);
         }
     }

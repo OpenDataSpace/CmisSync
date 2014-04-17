@@ -157,6 +157,7 @@
     <Compile Include="IntegrationTests\DBreezeTests.cs" />
     <Compile Include="StorageTests\MetaDataStorageTest.cs" />
     <Compile Include="SyncStrategiesTests\RemoteObjectFetcherTest.cs" />
+    <Compile Include="SyncStrategiesTests\LocalObjectFetcherTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

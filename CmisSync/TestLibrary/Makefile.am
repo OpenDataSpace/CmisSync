@@ -64,6 +64,7 @@ SOURCES =  \
 	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/FileSynchronizerTest.cs \
+	SyncStrategiesTests/LocalObjectFetcherTest.cs \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/RemoteObjectFetcherTest.cs \

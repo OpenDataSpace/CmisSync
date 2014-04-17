@@ -193,6 +193,7 @@
     <Compile Include="Storage\MetaDataStorage.cs" />
     <Compile Include="Data\MappedObjectData.cs" />
     <Compile Include="Sync\Strategy\RemoteObjectFetcher.cs" />
+    <Compile Include="Sync\Strategy\LocalObjectFetcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
