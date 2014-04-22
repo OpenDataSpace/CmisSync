@@ -109,6 +109,28 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void GetObjectByPathThrowsExceptionOnNullArgument()
+        {
+            var storage = new MetaDataStorage(this.engine, this.matcher);
+            storage.GetObjectByLocalPath(null);
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void GetObjectByPathThrowsExceptionIfLocalPathDoesNotMatchToSyncPath()
+        {
+            var matcher = new Mock<IPathMatcher>();
+            string localpath = Path.GetTempPath();
+            var folder = Mock.Of<IDirectoryInfo>( f =>
+                                                 f.FullName == localpath);
+            matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == localpath))).Returns(false);
+            var storage = new MetaDataStorage(this.engine, matcher.Object);
+
+            storage.GetObjectByLocalPath(folder);
+        }
+
+        [Test, Category("Fast")]
         public void GetObjectByPathWithNotExistingEntryMustReturnNull()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
@@ -251,8 +273,10 @@ namespace TestLibrary.StorageTests
             {
                 Name = "name",
                 RemoteObjectId = id,
+                ParentId = null,
                 Type = MappedObjectType.Folder
             };
+            storage.SaveMappedObject(rootFolder);
 
             string path = storage.GetLocalPath(rootFolder);
 
