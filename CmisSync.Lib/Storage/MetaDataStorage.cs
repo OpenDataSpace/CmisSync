@@ -16,11 +16,12 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
 
 namespace CmisSync.Lib.Storage
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
 
     using CmisSync.Lib.Data;
 
@@ -157,14 +158,19 @@ namespace CmisSync.Lib.Storage
         }
 
         /// <summary>
-        ///  Saves the mapped object.
+        /// Saves the mapped object.
         /// </summary>
         /// <param name='obj'>
         /// The MappedObject instance.
         /// </param>
         public void SaveMappedObject(IMappedObject obj)
         {
-            throw new NotImplementedException();
+            string id = GetId(obj);
+            using(var tran = this.engine.GetTransaction())
+            {
+                tran.Insert<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id, obj as MappedObject);
+                tran.Commit();
+            }
         }
 
         /// <summary>
@@ -175,7 +181,12 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public void RemoveObject(IMappedObject obj)
         {
-            throw new NotImplementedException();
+            string id = GetId(obj);
+            using(var tran = this.engine.GetTransaction())
+            {
+                tran.RemoveKey<string>(MappedObjectsTable, id);
+                tran.Commit();
+            }
         }
 
         /// <summary>
@@ -189,7 +200,16 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public string GetRemotePath(IMappedObject obj)
         {
-            throw new NotImplementedException();
+            string id = GetId(obj);
+            using(var tran = this.engine.GetTransaction())
+            {
+                string[] segments = GetRelativePathSegments(tran, id);
+                string path = this.matcher.RemoteTargetRootPath;
+                foreach(var name in segments){
+                    path += (name.EndsWith("/")) ? name: name + "/";
+                }
+                return path;
+            }
         }
 
         /// <summary>
@@ -203,7 +223,11 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public string GetLocalPath(IMappedObject mappedObject)
         {
-            throw new NotImplementedException();
+            string id = GetId(mappedObject);
+            using(var tran = this.engine.GetTransaction())
+            {
+                return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(GetRelativePathSegments(tran, id)));
+            }
         }
 
         /// <summary>
@@ -217,7 +241,75 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public List<IMappedObject> GetChildren(IMappedObject parent)
         {
-            throw new NotImplementedException();
+            string parentId = GetId(parent);
+            List<IMappedObject> results = new List<IMappedObject>();
+            bool parentExists = false;
+            using(var tran = this.engine.GetTransaction())
+            {
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable))
+                {
+                    var data = row.Value.Get;
+                    if(data == null)
+                    {
+                        continue;
+                    }
+
+                    if(parentId == data.ParentId)
+                    {
+                        results.Add(new MappedObject(data));
+                    }
+                    else if( data.RemoteObjectId == parentId)
+                    {
+                        parentExists = true;
+                    }
+                }
+            }
+
+            if(!parentExists)
+            {
+                throw new EntryNotFoundException();
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Gets the identifier of the given object and throws Exceptions if object or remote object id is null
+        /// </summary>
+        /// <returns>
+        /// The identifier.
+        /// </returns>
+        /// <param name='obj'>
+        /// Object with the containing remote id.
+        /// </param>
+        private string GetId(IMappedObject obj)
+        {
+            if(obj == null)
+            {
+                throw new ArgumentNullException("The given obj is null");
+            }
+
+            string id = obj.RemoteObjectId;
+            if(id == null)
+            {
+                throw new ArgumentException("The given object has no remote object id");
+            }
+            return id;
+        }
+
+
+        private string[] GetRelativePathSegments(DBreeze.Transactions.Transaction tran, string id)
+        {
+            Stack<string> pathSegments = new Stack<string>();
+            MappedObjectData entry = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value.Get;
+            pathSegments.Push(entry.Name);
+            while(entry.ParentId != null)
+            {
+                id = entry.ParentId;
+                entry = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value.Get;
+                pathSegments.Push(entry.Name);
+            }
+            return pathSegments.ToArray();
         }
     }
 }

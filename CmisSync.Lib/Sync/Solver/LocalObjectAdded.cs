@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Sync.Solver
                 properties.Add(PropertyIds.CreationDate, string.Empty);
                 properties.Add(PropertyIds.LastModificationDate, string.Empty);
                 session.CreateFolder(properties, new ObjectId(mappedParent.RemoteObjectId));
-                IMappedObject mappedFolder = new MappedObject
+                MappedObject mappedFolder = new MappedObject
                 {
                     Name = localDirInfo.Name,
                     ParentId = mappedParent.RemoteObjectId

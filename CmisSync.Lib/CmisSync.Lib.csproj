@@ -190,6 +190,7 @@
     <Compile Include="Sync\Strategy\RemoteObjectFetcher.cs" />
     <Compile Include="Sync\Strategy\LocalObjectFetcher.cs" />
     <Compile Include="Data\MappedObject.cs" />
+    <Compile Include="Storage\EntryNotFoundException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

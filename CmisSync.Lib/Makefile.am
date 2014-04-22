@@ -81,6 +81,7 @@ SOURCES =  \
 	RepoInfo.cs \
 	Storage/DataBaseTableNames.cs \
 	Storage/DirectoryInfoWrapper.cs \
+	Storage/EntryNotFoundException.cs \
 	Storage/EventStorage.cs \
 	Storage/ExtendedAttributeException.cs \
 	Storage/ExtendedAttributeReaderDos.cs \
