@@ -125,6 +125,20 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public IMappedObject GetObjectByLocalPath(IFileSystemInfo path)
         {
+            if(path == null)
+            {
+                throw new ArgumentNullException("Given path is null");
+            }
+
+            if(!this.matcher.CanCreateRemotePath(path.FullName))
+            {
+                throw new ArgumentException("Given path is not able to be matched on remote path");
+            }
+
+            using(var tran = this.engine.GetTransaction())
+            {
+
+            }
             throw new NotImplementedException();
         }
 
