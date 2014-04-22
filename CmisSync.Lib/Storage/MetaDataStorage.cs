@@ -137,7 +137,8 @@ namespace CmisSync.Lib.Storage
 
             using(var tran = this.engine.GetTransaction())
             {
-
+                string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
+                string[] pathSegments = relativePath.Split(Path.DirectorySeparatorChar);
             }
             throw new NotImplementedException();
         }
@@ -220,7 +221,7 @@ namespace CmisSync.Lib.Storage
                 string[] segments = GetRelativePathSegments(tran, id);
                 string path = this.matcher.RemoteTargetRootPath;
                 foreach(var name in segments){
-                    path += (name.StartsWith("/")) ? name: "/" + name ;
+                    path += (name.StartsWith("/")) ? name: "/" + name;
                 }
                 return path;
             }

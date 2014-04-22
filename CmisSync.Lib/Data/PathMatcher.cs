@@ -42,6 +42,8 @@ namespace CmisSync.Lib.Data
 
         string CreateRemotePath (string localPath);
 
+        string GetRelativeLocalPath(string localPath);
+
         string LocalTargetRootPath { get; }
 
         string RemoteTargetRootPath { get; }
@@ -128,6 +130,9 @@ namespace CmisSync.Lib.Data
         }
 
         public abstract string CreateRemotePath (string localPath);
+
+        public abstract string GetRelativeLocalPath(string localPath);
+
     }
 
     public class PathMatcher : AbstractPathMatcher
@@ -167,7 +172,7 @@ namespace CmisSync.Lib.Data
             return localPaths;
         }
 
-        public override string CreateLocalPath (string remotePath)
+        public override string CreateLocalPath(string remotePath)
         {
             if (!CanCreateLocalPath (remotePath))
                 throw new ArgumentOutOfRangeException (String.Format ("Given remote object with Path \"{0}\" is not in the remote target folder \"{1}\"", remotePath, RemoteTargetRootPath));
@@ -176,7 +181,7 @@ namespace CmisSync.Lib.Data
             return Path.Combine (this.LocalTargetRootPath, Path.Combine (relativePath.Split ('/')));
         }
 
-        public override string CreateRemotePath (string localPath)
+        public override string CreateRemotePath(string localPath)
         {
             if (!CanCreateRemotePath (localPath))
                 throw new ArgumentOutOfRangeException (String.Format ("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
@@ -186,6 +191,23 @@ namespace CmisSync.Lib.Data
             relativePath = (relativePath.Length > 0 && relativePath [0] == Path.DirectorySeparatorChar) ? relativePath.Substring (1) : relativePath;
             relativePath = relativePath.Replace (Path.DirectorySeparatorChar, '/');
             return String.Format ("{0}/{1}", this.RemoteTargetRootPath, relativePath);
+        }
+
+        public override string GetRelativeLocalPath(string localPath)
+        {
+            if(!CanCreateRemotePath(localPath))
+            {
+                throw new ArgumentOutOfRangeException(String.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"",localPath, this.LocalTargetRootPath));
+            }
+            string relativePath = localPath.Substring (this.LocalTargetRootPath.Length);
+            if (relativePath.Length == 0)
+            {
+                return ".";
+            }
+            else
+            {
+                return relativePath;
+            }
         }
     }
 }

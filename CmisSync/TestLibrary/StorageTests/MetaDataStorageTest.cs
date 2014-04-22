@@ -140,6 +140,29 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Fast")]
+        public void GetObjectByPath()
+        {
+            var matcher = new Mock<IPathMatcher>();
+            matcher.Setup(m => m.LocalTargetRootPath).Returns(Path.GetTempPath());
+            matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == Path.Combine(Path.GetTempPath(), "a")))).Returns(true);
+            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var folder = Mock.Of<IDirectoryInfo>( f =>
+                                                 f.FullName == Path.Combine(Path.GetTempPath(), "a"));
+            var mappedFolder = new MappedObject{
+                Name = "a",
+                ParentId = null,
+                RemoteObjectId = "remoteId",
+                Guid = Guid.NewGuid(),
+                Type = MappedObjectType.Folder
+            };
+            storage.SaveMappedObject(mappedFolder);
+
+            var obj = storage.GetObjectByLocalPath(folder);
+
+            Assert.That(obj, Is.EqualTo(mappedFolder));
+        }
+
+        [Test, Category("Fast")]
         [ExpectedException(typeof(EntryNotFoundException))]
         public void GetChildrenOfNonExistingParentMustThrowException()
         {

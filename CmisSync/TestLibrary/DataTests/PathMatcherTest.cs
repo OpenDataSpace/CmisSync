@@ -176,6 +176,16 @@ namespace TestLibrary.DataTests
             result = matcher.CreateRemotePath (result);
             Assert.AreEqual(this.remotepath + "/sub", result);
         }
+
+        [Test, Category("Fast")]
+        public void GetRelativePath()
+        {
+            var matcher = new PathMatcher(this.localpath, this.remotepath);
+            string folderName = "new";
+            string newLocalPath = Path.Combine(this.localpath, folderName);
+
+            Assert.That(matcher.GetRelativeLocalPath(newLocalPath), Is.EqualTo(folderName));
+        }
     }
 }
 
