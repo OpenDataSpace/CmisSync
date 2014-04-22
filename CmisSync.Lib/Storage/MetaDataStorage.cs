@@ -220,7 +220,7 @@ namespace CmisSync.Lib.Storage
                 string[] segments = GetRelativePathSegments(tran, id);
                 string path = this.matcher.RemoteTargetRootPath;
                 foreach(var name in segments){
-                    path += (name.EndsWith("/")) ? name: name + "/";
+                    path += (name.StartsWith("/")) ? name: "/" + name ;
                 }
                 return path;
             }
