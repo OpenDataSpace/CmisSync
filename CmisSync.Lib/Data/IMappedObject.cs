@@ -27,19 +27,11 @@ namespace CmisSync.Lib.Data
 
         string ChecksumAlgorithmName { get; set; }
 
-        string RemoteSyncTargetPath { get; }
-
-        string LocalSyncTargetPath { get; }
-
         string Name { get; set; }
 
         string Description { get; set; }
 
         Guid Guid { get; set; }
-
-        bool ExistsLocally ();
-
-        IFileSystemInfoFactory FsFactory { get; }
 
         MappedObjectType Type { get; }
     }

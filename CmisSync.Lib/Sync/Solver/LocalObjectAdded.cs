@@ -43,7 +43,7 @@ namespace CmisSync.Lib.Sync.Solver
             {
                 IDirectoryInfo localDirInfo = localFile as IDirectoryInfo;
                 IDirectoryInfo parent = localDirInfo.Parent;
-                IMappedFolder mappedParent = storage.GetObjectByLocalPath(parent) as IMappedFolder;
+                IMappedObject mappedParent = storage.GetObjectByLocalPath(parent) as IMappedObject;
 
                 // Create remote folder
                 Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Sync.Solver
                 properties.Add(PropertyIds.CreationDate, string.Empty);
                 properties.Add(PropertyIds.LastModificationDate, string.Empty);
                 session.CreateFolder(properties, new ObjectId(mappedParent.RemoteObjectId));
-                IMappedFolder mappedFolder = new MappedFolder(null, storage) 
+                IMappedObject mappedFolder = new MappedObject
                 {
                     Name = localDirInfo.Name,
                     ParentId = mappedParent.RemoteObjectId

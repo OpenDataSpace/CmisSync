@@ -41,20 +41,21 @@ namespace CmisSync.Lib.Sync.Strategy {
             IMappedObject savedObject = storage.GetObjectByRemoteId(contentChangeEvent.ObjectId);
             if(savedObject != null)
             {
-                IMappedFolder folder = savedObject as IMappedFolder;
-                if(folder != null)
+                IMappedObject obj = savedObject as IMappedObject;
+                if(obj != null)
                 {
-                    var dirInfo = fsFactory.CreateDirectoryInfo(folder.LocalSyncTargetPath);
-                    Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = MetaDataChangeType.DELETED});
-                    return;
-                }
-
-                IMappedObject file = savedObject as IMappedObject;
-                if(file != null)
-                {
-                    var fileInfo = fsFactory.CreateFileInfo(file.LocalSyncTargetPath);
-                    Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
-                    return;
+                    if(obj.Type == MappedObjectType.Folder)
+                    {
+                        var dirInfo = fsFactory.CreateDirectoryInfo(storage.GetLocalPath(obj));
+                        Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = MetaDataChangeType.DELETED});
+                        return;
+                    }
+                    else
+                    {
+                        var fileInfo = fsFactory.CreateFileInfo(storage.GetLocalPath(obj));
+                        Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
+                        return;
+                    }
                 }
             }
             Logger.Debug("nothing found in local storage; it has never been synced");
@@ -73,8 +74,8 @@ namespace CmisSync.Lib.Sync.Strategy {
                     }
                 case DotCMIS.Enums.ChangeType.Security:
                     {
-                        IMappedObject file = storage.GetObjectByRemoteId(doc.Id) as IMappedObject;
-                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(file.LocalSyncTargetPath);
+                        IMappedObject file = storage.GetObjectByRemoteId(doc.Id);
+                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(storage.GetLocalPath(file));
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if( fileInfo != null )
                         {
@@ -88,8 +89,8 @@ namespace CmisSync.Lib.Sync.Strategy {
                     }
                 case DotCMIS.Enums.ChangeType.Updated:
                     {
-                        IMappedObject file = storage.GetObjectByRemoteId(doc.Id) as IMappedObject;
-                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(file.LocalSyncTargetPath);
+                        IMappedObject file = storage.GetObjectByRemoteId(doc.Id);
+                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(storage.GetLocalPath(file));
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if(fileInfo != null)
                         {
@@ -108,8 +109,8 @@ namespace CmisSync.Lib.Sync.Strategy {
         private void HandleAsIFolder(ContentChangeEvent contentChangeEvent){
             IFolder folder = contentChangeEvent.CmisObject as IFolder;
 
-            MappedFolder dir = storage.GetObjectByRemoteId(folder.Id) as MappedFolder;
-            IDirectoryInfo dirInfo = (dir == null) ? null : fsFactory.CreateDirectoryInfo(dir.LocalSyncTargetPath);
+            IMappedObject dir = storage.GetObjectByRemoteId(folder.Id);
+            IDirectoryInfo dirInfo = (dir == null) ? null : fsFactory.CreateDirectoryInfo(storage.GetLocalPath(dir));
             var folderEvent = new FolderEvent(dirInfo, folder);
             switch(contentChangeEvent.Type)
             {

@@ -29,9 +29,7 @@ SOURCES =  \
 	ContentTasks/SimpleFileUploader.cs \
 	ContentTasks/Utils.cs \
 	Credentials.cs \
-	Data/IMappedFolder.cs \
 	Data/IMappedObject.cs \
-	Data/MappedFolder.cs \
 	Data/MappedObject.cs \
 	Data/MappedObjectData.cs \
 	Data/PathMatcher.cs \

@@ -29,7 +29,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             string path = Path.Combine(Path.GetTempPath(), "a");
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
-            Mock<IMappedFolder> folder = storage.AddLocalFolder(path, "id");
+            Mock<IMappedObject> folder = storage.AddLocalFolder(path, "id");
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);
             var solver = new RemoteObjectDeleted();

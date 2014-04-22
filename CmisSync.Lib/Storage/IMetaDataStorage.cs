@@ -107,5 +107,16 @@ namespace CmisSync.Lib.Storage
         /// Mapped object. Must not be null.
         /// </param>
         string GetLocalPath(IMappedObject mappedObject);
+
+        /// <summary>
+        /// Gets the children of the given parent object.
+        /// </summary>
+        /// <returns>
+        /// The saved children.
+        /// </returns>
+        /// <param name='parent'>
+        /// Parent.
+        /// </param>
+        List<IMappedObject> GetChildren(IMappedObject parent);
     }
 }

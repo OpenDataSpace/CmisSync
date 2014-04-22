@@ -194,11 +194,12 @@ namespace TestLibrary.IntegrationTests
             var queue = CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Create(), Times.Once());
-            storage.Verify(s => s.SaveMappedObject(It.Is<MappedFolder>(f =>
-                                                                       f.RemoteObjectId == id &&
-                                                                       f.Name == folderName &&
-                                                                       f.ParentId == parentId &&
-                                                                       f.LastChangeToken == lastChangeToken)), Times.Once());
+            storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f =>
+                                                                        f.RemoteObjectId == id &&
+                                                                        f.Name == folderName &&
+                                                                        f.ParentId == parentId &&
+                                                                        f.LastChangeToken == lastChangeToken &&
+                                                                        f.Type == MappedObjectType.Folder)), Times.Once());
             Assert.Fail("verify that folder goes to db");
         }
     }

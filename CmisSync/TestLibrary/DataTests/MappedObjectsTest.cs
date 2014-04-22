@@ -31,81 +31,6 @@ namespace TestLibrary.DataTests
     }
 
     [TestFixture]
-    public class MappedFolderTest
-    {
-        private readonly string localRootPathName = "folder";
-        private readonly string localRootPath = Path.Combine("local", "test", "folder");
-        private readonly string remoteRootPath = "/";
-
-        private Mock<IFileSystemInfoFactory> createFactoryWithLocalPathInfos()
-        {
-            return MappedObjectMockUtils.CreateFsFactory(localRootPath,localRootPathName);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsIfStorageIsNull()
-        {
-            new MappedFolder(null, null);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorWorksIfFsFactoryIsNull()
-        {
-            var storage = Mock.Of<IMetaDataStorage>();
-            var folder = new MappedFolder(null, storage, null);
-            Assert.IsNull(folder.Name);
-            Assert.IsNull(folder.ParentId);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesFsFactory()
-        {
-            var factory = Mock.Of<IFileSystemInfoFactory>();
-            var storage = Mock.Of<IMetaDataStorage>();
-            new MappedFolder(null, storage, factory);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesData()
-        {
-            var factory = Mock.Of<IFileSystemInfoFactory>();
-            var storage = Mock.Of<IMetaDataStorage>();
-            var data = new MappedObjectData
-            {
-                Name = "name",
-                ParentId = null,
-                Description = string.Empty,
-                Guid = Guid.NewGuid(),
-                Type = MappedObjectType.Folder
-            };
-
-            var folder = new MappedFolder(data, storage, factory);
-
-            Assert.AreEqual(folder as MappedObjectData, data);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ExistsLocally()
-        {
-            string childName = "child";
-            var storage = new Mock<IMetaDataStorage>();
-            var factory = createFactoryWithLocalPathInfos();
-            var childInfo = new Mock<IDirectoryInfo>();
-            childInfo.Setup(dir => dir.Name).Returns(childName);
-            childInfo.Setup(dir => dir.Exists).Returns(false);
-            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Name == localRootPathName))).Returns(localRootPath);
-            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Name == childName))).Returns(Path.Combine(localRootPath, childName));
-            factory.Setup(f => f.CreateDirectoryInfo(It.Is<string>(path => path == Path.Combine(localRootPath, childName)))).Returns(childInfo.Object);
-
-            var rootFolder = new MappedFolder(new MappedObjectData{ Name = localRootPathName}, storage.Object, factory.Object);
-            var childFolder = new MappedFolder(new MappedObjectData {Name = childName}, storage.Object, factory.Object);
-            Assert.IsTrue(rootFolder.ExistsLocally());
-            Assert.IsFalse(childFolder.ExistsLocally());
-        }
-    }
-
-    [TestFixture]
     public class MappedObjectTest
     {
         private readonly string localRootPathName = "folder";
@@ -120,31 +45,7 @@ namespace TestLibrary.DataTests
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsWithoutStorageInstance()
-        {
-            new MappedObject(null, null);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesStorage()
-        {
-            var storage = Mock.Of<IMetaDataStorage>();
-            new MappedObject(null, storage);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesStorageAndFsFactory()
-        {
-            var factory = Mock.Of<IFileSystemInfoFactory>();
-            var storage = Mock.Of<IMetaDataStorage>();
-            var obj = new MappedObject(null, storage, factory);
-            Assert.AreEqual(factory, obj.FsFactory);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorTakesData() {
-            var storage = Mock.Of<IMetaDataStorage>();
             var data = new MappedObjectData
             {
                 Name = "name",
@@ -154,7 +55,7 @@ namespace TestLibrary.DataTests
                 Type = MappedObjectType.File
             };
 
-            var file = new MappedObject(data, storage);
+            var file = new MappedObject(data);
 
             Assert.AreEqual(data, file as MappedObjectData);
         }
@@ -162,7 +63,7 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorSetsDefaultParamsToNull()
         {
-            var file = new MappedObject(null, Mock.Of<IMetaDataStorage>());
+            var file = new MappedObject();
             Assert.IsNull(file.ChecksumAlgorithmName);
             Assert.IsNull(file.Description);
             Assert.IsNull(file.LastChangeToken);
@@ -177,7 +78,7 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast"), Category("MappedObjects")]
         public void HashAlgorithmProperty()
         {
-            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, ChecksumAlgorithmName = "MD5"}, Mock.Of<IMetaDataStorage>());
+            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, ChecksumAlgorithmName = "MD5"});
             Assert.AreEqual("MD5", file.ChecksumAlgorithmName);
 
             file.ChecksumAlgorithmName = "SHA1";
@@ -187,58 +88,11 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast"), Category("MappedObjects")]
         public void DescriptionProperty()
         {
-            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, Description = "desc"}, Mock.Of<IMetaDataStorage>());
+            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, Description = "desc"});
             Assert.AreEqual("desc", file.Description);
 
             file.Description = "other desc";
             Assert.AreEqual("other desc", file.Description);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void GetLocalPath()
-        {
-            var factory = createFactoryWithLocalPathInfos();
-            var storage = new Mock<IMetaDataStorage>();
-            string remoteId = "remoteId";
-            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteId))).Returns(localFilePath);
-
-            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, RemoteObjectId = remoteId}, storage.Object, factory.Object);
-            file.Name = localFileName;
-
-            Assert.AreEqual(localFilePath, file.LocalSyncTargetPath);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void GetRemotePath()
-        {
-            var factory = createFactoryWithLocalPathInfos();
-            var storage = new Mock<IMetaDataStorage>();
-            string remoteId = "remoteId";
-            storage.Setup(s => s.GetRemotePath(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteId))).Returns(remoteRootPath + localFileName);
-        
-            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, RemoteObjectId = remoteId}, storage.Object, factory.Object);
-            file.Name = localFileName;
-
-            Assert.AreEqual(remoteRootPath + localFileName, file.RemoteSyncTargetPath);
-        }
-
-        [Test, Category("Fast"), Category("MappedObjects")]
-        public void ExistsLocally() {
-            var factory = createFactoryWithLocalPathInfos();
-            var storage = new Mock<IMetaDataStorage>();
-            string remoteId = "remoteId";
-            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteId))).Returns(localFilePath);
-
-            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, RemoteObjectId = remoteId}, storage.Object, factory.Object);
-            file.Name = localFileName;
-
-            Assert.IsTrue(file.ExistsLocally());
-            var fileInfo = new Mock<IFileInfo>();
-            fileInfo.Setup (f => f.Name).Returns(localFileName);
-            fileInfo.Setup (f => f.Exists).Returns(false);
-            factory.Setup(f => f.CreateFileInfo(It.Is<string>(path => path == localFilePath))).Returns(fileInfo.Object);
-
-            Assert.IsFalse(file.ExistsLocally());
         }
     }
 }

@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using System.Collections.Generic;
 
 namespace CmisSync.Lib.Storage
 {
@@ -139,23 +140,19 @@ namespace CmisSync.Lib.Storage
         {
             using(var tran = this.engine.GetTransaction())
             {
-                MappedObjectData data = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value.Get;
-                if (data == null)
+                DbCustomSerializer<MappedObjectData> value = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value;
+                if(value != null)
                 {
-                    return null;
-                }
+                    MappedObjectData data = value.Get;
 
-                switch(data.Type)
-                {
-                case MappedObjectType.File:
-                    var file = new MappedObject(data, this);
-                    break;
-                case MappedObjectType.Folder:
-                    var folder = new MappedFolder(data, this);
-                    break;
-                }
+                    if (data == null)
+                    {
+                        return null;
+                    }
 
-                throw new NotImplementedException();
+                    return new MappedObject(data);
+                }
+                return null;
             }
         }
 
@@ -205,6 +202,20 @@ namespace CmisSync.Lib.Storage
         /// Mapped object. Must not be null.
         /// </param>
         public string GetLocalPath(IMappedObject mappedObject)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///  Gets the children of the given parent object. 
+        /// </summary>
+        /// <returns>
+        ///  The saved children. 
+        /// </returns>
+        /// <param name='parent'>
+        ///  Parent. 
+        /// </param>
+        public List<IMappedObject> GetChildren(IMappedObject parent)
         {
             throw new NotImplementedException();
         }

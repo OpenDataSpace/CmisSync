@@ -203,17 +203,15 @@ namespace TestLibrary.SyncStrategiesTests
             var newLocalFolder = Mock.Of<IDirectoryInfo>(d =>
                                                          d.Name == oldFolderName &&
                                                          d.FullName == newLocalPath);
-            var oldLocalParent = Mock.Of<IMappedFolder>( p =>
+            var oldLocalParent = Mock.Of<IMappedObject>( p =>
                                                        p.Name == "/" &&
-                                                       p.Parent == (IMappedFolder) null &&
+                                                       p.ParentId == null &&
                                                        p.LastRemoteWriteTimeUtc == oldWriteTime);
-            Storage.AddMappedFolder(Mock.Of<IMappedFolder>( f =>
+            Storage.AddMappedFolder(Mock.Of<IMappedObject>( f =>
                                                            f.RemoteObjectId == remoteId &&
                                                            f.Name == oldFolderName &&
-                                                           f.Parent == oldLocalParent &&
+                                                           f.ParentId == oldLocalParent.RemoteObjectId &&
                                                            f.LastChangeToken == oldLastChangeToken &&
-                                                           f.LocalSyncTargetPath == oldLocalPath &&
-                                                           f.RemoteSyncTargetPath == oldRemotePath &&
                                                            f.LastRemoteWriteTimeUtc == oldWriteTime));
             Session.AddRemoteObject(Mock.Of<IFolder>(f =>
                                                      f.Id == remoteId &&

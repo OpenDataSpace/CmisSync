@@ -167,13 +167,14 @@ namespace TestLibrary.SyncStrategiesTests {
         [Test, Category("Fast"), Category("ContentChange")]
         public void LocallyExistingRemoteDocumentUpdated ()
         {
+            string fileName = "file.bin";
             var storage = new Mock<IMetaDataStorage>();
             var file = Mock.Of<IMappedObject>( f =>
                                               f.RemoteObjectId == id &&
-                                              f.LocalSyncTargetPath == "path" &&
-                                              f.RemoteSyncTargetPath == "path" &&
+                                              f.Name == fileName &&
                                               f.Type == MappedObjectType.File);
             storage.AddMappedFile(file);
+            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>( o => o.Equals(file)))).Returns("path");
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
@@ -203,7 +204,7 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteDeletionChangeTest ()
+        public void RemoteDeletionChangeTest()
         {
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFile("path", id);

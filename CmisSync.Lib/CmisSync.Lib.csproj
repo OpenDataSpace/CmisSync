@@ -174,7 +174,6 @@
     <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
     <Compile Include="Sync\Strategy\SyncMechanism.cs" />
     <Compile Include="Sync\Strategy\Watcher.cs" />
-    <Compile Include="Data\MappedFolder.cs" />
     <Compile Include="Sync\Strategy\MacWatcher.cs" />
     <Compile Include="Sync\Strategy\NetWatcher.cs" />
     <Compile Include="Events\EventFilter\IgnoredFolderNameFilter.cs" />
@@ -183,7 +182,6 @@
     <Compile Include="Storage\IExtendedAttributeReader.cs" />
     <Compile Include="Storage\ExtendedAttributeReaderUnix.cs" />
     <Compile Include="Storage\ExtendedAttributeReaderDos.cs" />
-    <Compile Include="Data\IMappedFolder.cs" />
     <Compile Include="Data\IMappedObject.cs" />
     <Compile Include="Events\EventFilter\GenericHandleDublicatedEventsFilter.cs" />
     <Compile Include="Storage\DataBaseTableNames.cs" />

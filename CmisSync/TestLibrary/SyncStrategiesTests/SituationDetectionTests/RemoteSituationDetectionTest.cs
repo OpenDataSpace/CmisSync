@@ -63,7 +63,6 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var file = Mock.Of<IMappedObject>( f =>
                                               f.LastRemoteWriteTimeUtc == lastModificationDate &&
                                               f.RemoteObjectId == ObjectId.Id &&
-                                              f.LocalSyncTargetPath == "path" &&
                                               f.LastChangeToken == RemoteChangeToken &&
                                               f.Type == MappedObjectType.File);
             StorageMock.AddMappedFile(file);
@@ -89,7 +88,6 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var file = Mock.Of<IMappedObject>( f =>
                                               f.LastRemoteWriteTimeUtc == lastModificationDate &&
                                               f.RemoteObjectId == ObjectId.Id &&
-                                              f.LocalSyncTargetPath == "path" &&
                                               f.LastChangeToken == RemoteChangeToken &&
                                               f.Type == MappedObjectType.File);
             StorageMock.AddMappedFile(file);
@@ -112,10 +110,9 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
             remoteObject.Setup (remote => remote.Paths).Returns(remotePaths);
             SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            var folder = Mock.Of<IMappedFolder>( f =>
+            var folder = Mock.Of<IMappedObject>( f =>
                                                 f.LastRemoteWriteTimeUtc == lastModificationDate &&
                                                 f.RemoteObjectId == ObjectId.Id &&
-                                                f.LocalSyncTargetPath == "path" &&
                                                 f.LastChangeToken == RemoteChangeToken &&
                                                 f.Type == MappedObjectType.Folder);
             StorageMock.AddMappedFolder(folder);
@@ -202,13 +199,12 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             remoteFolder.Setup(f => f.Path).Returns("/new/" + folderName);
             remoteFolder.Setup(f => f.Id).Returns(remoteId);
             remoteFolder.Setup(f => f.ParentId).Returns(newParentId);
-            var mappedParentFolder = Mock.Of<IMappedFolder>(p =>
-                                                            p.RemoteObjectId == oldParentId);
+            var mappedParentFolder = Mock.Of<IMappedObject>(p =>
+                                                            p.RemoteObjectId == oldParentId &&
+                                                            p.Type == MappedObjectType.Folder);
             var mappedFolder = StorageMock.AddLocalFolder(oldLocalPath, remoteId);
             mappedFolder.Setup( f => f.Name).Returns(folderName);
-            mappedFolder.Setup( f => f.RemoteSyncTargetPath).Returns(oldRemotePath);
-            mappedFolder.Setup( f => f.LocalSyncTargetPath).Returns(oldLocalPath);
-            mappedFolder.Setup( f => f.Parent).Returns(mappedParentFolder);
+            mappedFolder.Setup( f => f.ParentId).Returns(mappedParentFolder.RemoteObjectId);
             SessionMock.AddRemoteObject(remoteFolder.Object);
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
 
@@ -227,9 +223,10 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             remoteFolder.Setup(f => f.Name).Returns(newName);
             remoteFolder.Setup(f => f.Id).Returns(remoteId);
             SessionMock.AddRemoteObject(remoteFolder.Object);
-            var mappedFolder = Mock.Of<IMappedFolder>(f =>
+            var mappedFolder = Mock.Of<IMappedObject>(f =>
                                                       f.RemoteObjectId == remoteId &&
-                                                      f.Name == oldName);
+                                                      f.Name == oldName &&
+                                                      f.Type == MappedObjectType.Folder);
             StorageMock.AddMappedFolder(mappedFolder);
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
 

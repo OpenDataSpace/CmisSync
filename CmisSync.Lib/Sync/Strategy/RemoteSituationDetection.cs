@@ -86,8 +86,8 @@ namespace CmisSync.Lib.Sync.Strategy
             if(actualEvent is FolderEvent)
             {
                 var folderEvent = actualEvent as FolderEvent;
-                var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id) as IMappedFolder;
-                return (storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.Parent.RemoteObjectId != folderEvent.RemoteFolder.ParentId);
+                var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
+                return (storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.ParentId != folderEvent.RemoteFolder.ParentId);
             }
             else
             {
@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Sync.Strategy
             if(actualEvent is FolderEvent)
             {
                 var folderEvent = actualEvent as FolderEvent;
-                var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id) as IMappedFolder;
+                var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
                 return (storedFolder.Name != folderEvent.RemoteFolder.Name);
             }
             else
