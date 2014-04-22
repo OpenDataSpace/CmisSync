@@ -70,8 +70,9 @@ namespace TestLibrary.TestUtils
             db.Setup( foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns(remotePath);
         }
 
+        // Don't use this method twice per test
         public static void AddMappedFolder(this Mock<IMetaDataStorage> db, IMappedObject folder, string localPath = null, string remotePath = null) {
-            db.Setup( foo => foo.GetObjectByLocalPath(It.Is<IDirectoryInfo>(s => s.Name == folder.Name))).Returns(folder);
+            db.Setup( foo => foo.GetObjectByLocalPath(It.IsAny<IDirectoryInfo>())).Returns(folder);
             db.Setup( foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == folder.RemoteObjectId))).Returns(folder);
             db.Setup( foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(localPath);
             db.Setup( foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(remotePath);
