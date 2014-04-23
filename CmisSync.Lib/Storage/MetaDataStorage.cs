@@ -140,7 +140,7 @@ namespace CmisSync.Lib.Storage
                 string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
                 List<string> pathSegments = new List<string>(relativePath.Split(Path.DirectorySeparatorChar));
                 List<MappedObject> objects = new List<MappedObject>();
-                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable))
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
                 {
                     var value = row.Value;
                     if(value == null)
