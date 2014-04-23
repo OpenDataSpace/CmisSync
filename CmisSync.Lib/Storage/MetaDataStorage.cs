@@ -36,8 +36,6 @@ namespace CmisSync.Lib.Storage
         private static readonly string PropertyTable = "properties";
         private static readonly string MappedObjectsTable = "objects";
         private static readonly string ChangeLogTokenKey = "ChangeLogToken";
-        private static readonly string LocalPathKey = "LocalPath";
-        private static readonly string RemotePathKey = "RemotePath";
 
         /// <summary>
         /// The db engine.
