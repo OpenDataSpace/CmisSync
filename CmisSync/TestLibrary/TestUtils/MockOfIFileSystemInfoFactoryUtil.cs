@@ -17,8 +17,12 @@ namespace TestLibrary.TestUtils
 
         public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true )
         {
+            if(path.EndsWith("/")){
+                throw new ArgumentException("FileName gives last tuple of path not ending on / so path should not end with /");
+            }
             Mock<IDirectoryInfo> dir = new Mock<IDirectoryInfo>();
             dir.Setup(d => d.FullName).Returns(path);
+            dir.Setup(d => d.Name).Returns(Path.GetFileName(path));
             dir.Setup(d => d.Exists).Returns(exists);
             fsFactory.AddIDirectoryInfo(dir.Object);
             return dir;

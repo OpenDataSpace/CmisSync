@@ -229,22 +229,19 @@ namespace TestLibrary.IntegrationTests
             var dirInfo = fsFactory.AddDirectory(Path.Combine(localRoot, folderName));
 
             string id = "1";
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, Path.Combine(remoteRoot, folderName));
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, Path.Combine(remoteRoot, folderName), parentId, lastChangeToken);
             var storage = GetInitializedStorage();
             storage.ChangeLogToken = "oldtoken";
             var queue = CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Create(), Times.Once());
-            Assert.That(storage.GetObjectByRemoteId(id), Is.Not.Null);
-            /*
-            //storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f =>
-                                                                        f.RemoteObjectId == id &&
-                                                                        f.Name == folderName &&
-                                                                        f.ParentId == parentId &&
-                                                                        f.LastChangeToken == lastChangeToken &&
-                                                                        f.Type == MappedObjectType.Folder)), Times.Once());
-            //Assert.Fail("verify that folder goes to db");
-            //*/
+            var mappedObject = storage.GetObjectByRemoteId(id);
+            Assert.That(mappedObject, Is.Not.Null);
+            Assert.That(mappedObject.RemoteObjectId, Is.EqualTo(id), "RemoteObjectId incorrect");
+            Assert.That(mappedObject.Name, Is.EqualTo(folderName), "Name incorrect");
+            Assert.That(mappedObject.ParentId, Is.EqualTo(parentId), "ParentId incorrect");
+            Assert.That(mappedObject.LastChangeToken, Is.EqualTo(lastChangeToken), "LastChangeToken incorrect");
+            Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
         }
     }
 }
