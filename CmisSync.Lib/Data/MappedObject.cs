@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="MappedObjectData.cs" company="GRAU DATA AG">
+// <copyright file="MappedObject.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -62,6 +62,12 @@ namespace CmisSync.Lib.Data
             this.LastContentSize = -1;
         }       
                
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
+        /// </summary>
+        /// <param name='data'>
+        /// Data to copy.
+        /// </param>
         public MappedObject(MappedObject data)
         {
             if(data != null)
@@ -79,15 +85,20 @@ namespace CmisSync.Lib.Data
                 this.LastContentSize = data.LastContentSize;
             }
         }
-
+  
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
+        /// </summary>
+        /// <param name='remoteFolder'>
+        /// A IFolder fetched via cmis.
+        /// </param>
         public MappedObject(IFolder remoteFolder)
         {
                this.RemoteObjectId = remoteFolder.Id;
                this.ParentId = remoteFolder.ParentId;
                this.LastChangeToken = remoteFolder.ChangeToken;
                this.Name = remoteFolder.Name;
-               this.Type = MappedObjectType.Folder;
-            
+               this.Type = MappedObjectType.Folder;    
         }
 
         /// <summary>
