@@ -99,13 +99,13 @@ namespace TestLibrary.IntegrationTests
             {
                 string key = "key";
                 string name = "name";
-                var file = new MappedObjectData{
+                var file = new MappedObject{
                     Name = name,
                     Type = MappedObjectType.File,
                     RemoteObjectId = key
                 };
-                tran.Insert<string, DbCustomSerializer<MappedObjectData>>("objects", key, file);
-                Assert.That((tran.Select<string, DbCustomSerializer<MappedObjectData>>("objects", key).Value.Get as MappedObjectData).Equals(file));
+                tran.Insert<string, DbCustomSerializer<MappedObject>>("objects", key, file);
+                Assert.That((tran.Select<string, DbCustomSerializer<MappedObject>>("objects", key).Value.Get as MappedObject).Equals(file));
             }
         }
 

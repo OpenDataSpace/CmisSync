@@ -46,7 +46,7 @@ namespace TestLibrary.DataTests
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorTakesData() {
-            var data = new MappedObjectData
+            var data = new MappedObject
             {
                 Name = "name",
                 Description = string.Empty,
@@ -57,7 +57,7 @@ namespace TestLibrary.DataTests
 
             var file = new MappedObject(data);
 
-            Assert.AreEqual(data, file as MappedObjectData);
+            Assert.AreEqual(data, file as MappedObject);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
@@ -78,7 +78,7 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast"), Category("MappedObjects")]
         public void HashAlgorithmProperty()
         {
-            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, ChecksumAlgorithmName = "MD5"});
+            var file = new MappedObject(new MappedObject{Type = MappedObjectType.File, ChecksumAlgorithmName = "MD5"});
             Assert.AreEqual("MD5", file.ChecksumAlgorithmName);
 
             file.ChecksumAlgorithmName = "SHA1";
@@ -88,7 +88,7 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast"), Category("MappedObjects")]
         public void DescriptionProperty()
         {
-            var file = new MappedObject(new MappedObjectData{Type = MappedObjectType.File, Description = "desc"});
+            var file = new MappedObject(new MappedObject{Type = MappedObjectType.File, Description = "desc"});
             Assert.AreEqual("desc", file.Description);
 
             file.Description = "other desc";

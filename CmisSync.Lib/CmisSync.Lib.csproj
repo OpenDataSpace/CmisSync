@@ -186,11 +186,10 @@
     <Compile Include="Events\EventFilter\GenericHandleDublicatedEventsFilter.cs" />
     <Compile Include="Storage\DataBaseTableNames.cs" />
     <Compile Include="Storage\MetaDataStorage.cs" />
-    <Compile Include="Data\MappedObjectData.cs" />
     <Compile Include="Sync\Strategy\RemoteObjectFetcher.cs" />
     <Compile Include="Sync\Strategy\LocalObjectFetcher.cs" />
-    <Compile Include="Data\MappedObject.cs" />
     <Compile Include="Storage\EntryNotFoundException.cs" />
+    <Compile Include="Data\MappedObject.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

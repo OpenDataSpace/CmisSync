@@ -139,8 +139,8 @@ namespace CmisSync.Lib.Storage
             {
                 string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
                 string[] pathSegments = relativePath.Split(Path.DirectorySeparatorChar);
-                List<MappedObjectData> objects = new List<MappedObjectData>();
-                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable))
+                List<MappedObject> objects = new List<MappedObject>();
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
                 {
                     var data = row.Value.Get;
                     if(data == null)
@@ -151,17 +151,17 @@ namespace CmisSync.Lib.Storage
                     objects.Add(data);
                 }
 
-                MappedObjectData root = objects.Find(o => o.ParentId == null);
+                MappedObject root = objects.Find(o => o.ParentId == null);
                 string result = this.matcher.LocalTargetRootPath;
                 if(root.Name != "/")
                 {
                     result = Path.Combine(result, root.Name);
                 }
 
-                MappedObjectData parent = root;
+                MappedObject parent = root;
                 foreach(var name in pathSegments)
                 {
-                    MappedObjectData child = objects.Find(o => o.ParentId == parent.RemoteObjectId && o.Name == name);
+                    MappedObject child = objects.Find(o => o.ParentId == parent.RemoteObjectId && o.Name == name);
                     if(child != null)
                     {
                         parent = child;
@@ -189,10 +189,10 @@ namespace CmisSync.Lib.Storage
         {
             using(var tran = this.engine.GetTransaction())
             {
-                DbCustomSerializer<MappedObjectData> value = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value;
+                DbCustomSerializer<MappedObject> value = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value;
                 if(value != null)
                 {
-                    MappedObjectData data = value.Get;
+                    MappedObject data = value.Get;
 
                     if (data == null)
                     {
@@ -217,7 +217,7 @@ namespace CmisSync.Lib.Storage
             string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
-                tran.Insert<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id, obj as MappedObject);
+                tran.Insert<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id, obj as MappedObject);
                 tran.Commit();
             }
         }
@@ -297,7 +297,7 @@ namespace CmisSync.Lib.Storage
             bool parentExists = false;
             using(var tran = this.engine.GetTransaction())
             {
-                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable))
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
                 {
                     var data = row.Value.Get;
                     if(data == null)
@@ -352,12 +352,12 @@ namespace CmisSync.Lib.Storage
         private string[] GetRelativePathSegments(DBreeze.Transactions.Transaction tran, string id)
         {
             Stack<string> pathSegments = new Stack<string>();
-            MappedObjectData entry = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value.Get;
+            MappedObject entry = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value.Get;
             pathSegments.Push(entry.Name);
             while(entry.ParentId != null)
             {
                 id = entry.ParentId;
-                entry = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value.Get;
+                entry = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value.Get;
                 pathSegments.Push(entry.Name);
             }
 

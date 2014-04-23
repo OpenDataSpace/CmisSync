@@ -31,7 +31,6 @@ SOURCES =  \
 	Credentials.cs \
 	Data/IMappedObject.cs \
 	Data/MappedObject.cs \
-	Data/MappedObjectData.cs \
 	Data/PathMatcher.cs \
 	Defines.cs \
 	Events/AbstractEventProducer.cs \
