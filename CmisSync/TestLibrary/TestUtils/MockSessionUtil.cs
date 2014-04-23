@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 using CmisSync.Lib;
@@ -38,6 +39,7 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
             newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId==null? 0 : 1);
             newRemoteObject.Setup(d => d.Id).Returns(id);
+
             return newRemoteObject;
         }
         
@@ -46,6 +48,7 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.Id).Returns(id);
             newRemoteObject.Setup(d => d.Path).Returns(path);
             newRemoteObject.Setup(d => d.ParentId).Returns(parentId);
+            newRemoteObject.Setup(d => d.Name).Returns(Path.GetFileName(path));
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
             return newRemoteObject;
         }
