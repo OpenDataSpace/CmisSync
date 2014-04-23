@@ -276,7 +276,7 @@ namespace CmisSync.Lib.Storage
                     path += name.StartsWith("/") ? name : "/" + name;
                 }
 
-                return path;
+                return path.Replace("//", "/");
             }
         }
 
