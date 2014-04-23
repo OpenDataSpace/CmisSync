@@ -76,7 +76,6 @@ SOURCES =  \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	LoggingStream.cs \
-	RepoBase.cs \
 	RepoInfo.cs \
 	Storage/DataBaseTableNames.cs \
 	Storage/DirectoryInfoWrapper.cs \

@@ -109,7 +109,7 @@ namespace CmisSync.Lib.Sync
         /// <summary>
         /// Link to parent object.
         /// </summary>
-        private RepoBase repo;
+        private CmisRepo repo;
 
         /// <summary>
         /// The auth provider.
@@ -130,20 +130,20 @@ namespace CmisSync.Lib.Sync
         ///  Constructor for Repo (at every launch of CmisSync)
         /// </summary>
         public SynchronizedFolder(RepoInfo repoInfo,
-                IActivityListener listener, RepoBase repoCmis)
+                IActivityListener listener, CmisRepo cmisRepo)
         {
             using(log4net.NDC.Push("Constructor: " + repoInfo.Name))
             {
-                if (null == repoInfo || null == repoCmis)
+                if (null == repoInfo || null == cmisRepo)
                 {
-                    throw new ArgumentNullException("repoInfo");
+                    throw new ArgumentNullException("cmisRepo");
                 }
 
-                this.repo = repoCmis;
+                this.repo = cmisRepo;
                 this.activityListener = listener;
                 this.repoinfo = repoInfo;
 
-                Queue = repoCmis.Queue;
+                Queue = cmisRepo.Queue;
                 authProvider = new PersistentStandardAuthenticationProvider(new CmisSync.Lib.Storage.TemporaryCookieStorage(){
                         Cookies = new CookieCollection()
                         }, repoInfo.Address);
@@ -161,8 +161,8 @@ namespace CmisSync.Lib.Sync
                 }
                 //this.watcherStrategy = new WatcherSync(repoinfo, session);
                 //repoCmis.EventManager.AddEventHandler(this.watcherStrategy);
-                repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(10, RepoInfoChanged));
-                repoCmis.EventManager.AddEventHandler(new GenericSyncEventHandler<FSEvent>(0, delegate(ISyncEvent e) {
+                cmisRepo.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(10, RepoInfoChanged));
+                cmisRepo.EventManager.AddEventHandler(new GenericSyncEventHandler<FSEvent>(0, delegate(ISyncEvent e) {
                             Logger.Debug("FSEvent found on Queue");
                             return true;
                             }));

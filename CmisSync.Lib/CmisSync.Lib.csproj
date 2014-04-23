@@ -82,7 +82,6 @@
     <Compile Include="Events\RecentChangedEvent.cs" />
     <Compile Include="Events\SyncEventQueue.cs" />
     <Compile Include="LoggingStream.cs" />
-    <Compile Include="RepoBase.cs" />
     <Compile Include="RepoInfo.cs" />
     <Compile Include="Sync\CmisRepo.cs" />
     <Compile Include="Sync\SynchronizedFolder.cs" />

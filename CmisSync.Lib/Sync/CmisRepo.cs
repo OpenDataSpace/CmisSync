@@ -18,38 +18,195 @@ using System;
 using System.IO;
 
 using CmisSync.Lib.Events;
+using System.Collections.Generic;
 
 namespace CmisSync.Lib.Sync
 {
     using log4net;
 
-    public class CmisRepo : RepoBase
+    /// <summary>
+    /// Current status of the synchronization.
+    /// </summary>
+    public enum SyncStatus
+    {
+        /// <summary>
+        /// Normal operation.
+        /// </summary>
+        Idle,
+
+        /// <summary>
+        /// Synchronization is suspended.
+        /// </summary>
+        Suspend,
+
+        /// <summary>
+        /// Any sync conflict or warning happend
+        /// </summary>
+        Warning
+    }
+
+    public class CmisRepo : IDisposable
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisRepo));
+
+        /// <summary>
+        /// Affect a new <c>SyncStatus</c> value.
+        /// </summary>
+        public Action<SyncStatus> SyncStatusChanged { get; set; }
+
+        /// <summary>
+        /// Current status of the synchronization (paused or not).
+        /// </summary>
+        public SyncStatus Status { get; private set; }
+
+        /// <summary>
+        /// Gets the polling scheduler.
+        /// </summary>
+        /// <value>
+        /// The scheduler.
+        /// </value>
+        public SyncScheduler Scheduler { get; private set; }
+
+        /// <summary>
+        /// Event Queue for this repository.
+        /// Use this to notifiy events for this repository.
+        /// </summary>
+        public SyncEventQueue Queue { get; private set; }
+
+        /// <summary>
+        /// Event Manager for this repository.
+        /// Use this for adding and removing SyncEventHandler for this repository.
+        /// </summary>
+        public SyncEventManager EventManager { get; private set; }
+
+        /// <summary>
+        /// Return the synchronized folder's information.
+        /// </summary>
+        protected RepoInfo RepoInfo { get; set; }
+
+        /// <summary>
+        /// Path of the local synchronized folder.
+        /// </summary>
+        public readonly string LocalPath;
+
+
+        /// <summary>
+        /// Name of the synchronized folder, as found in the CmisSync XML configuration file.
+        /// </summary>
+        public readonly string Name;
+
+
+        /// <summary>
+        /// URL of the remote CMIS endpoint.
+        /// </summary>
+        public readonly Uri RemoteUrl;
+
+        
+        /// <summary>
+        /// Whether stopped, to control for machine sleep/wake power management.
+        /// </summary>
+        public bool Stopped { get; set; }
+
+        /// <summary>
+        /// Stop syncing momentarily.
+        /// </summary>
+        public void Suspend()
+        {
+            Status = SyncStatus.Suspend;
+        }
+
+        /// <summary>
+        /// Restart syncing.
+        /// </summary>
+        public void Resume()
+        {
+            Status = SyncStatus.Idle;
+        }
+
         /// <summary>
         /// Remote folder to synchronize.
         /// </summary>
         private SynchronizedFolder synchronizedFolder;
 
         /// <summary>
+        /// Watches the local filesystem for changes.
+        /// </summary>
+        public CmisSync.Lib.Sync.Strategy.Watcher Watcher { get; private set; }
+
+        /// <summary>
+        /// The ignored folders filter.
+        /// </summary>
+        private Events.Filter.IgnoredFoldersFilter ignoredFoldersFilter;
+
+        /// <summary>
+        /// The ignored file name filter.
+        /// </summary>
+        private Events.Filter.IgnoredFileNamesFilter ignoredFileNameFilter;
+
+        /// <summary>
+        /// The ignored folder name filter.
+        /// </summary>
+        private Events.Filter.IgnoredFolderNameFilter ignoredFolderNameFilter;
+
+        /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
         private bool disposed = false;
+
 
         /// <summary>
         /// Constructor.
         /// </summary>
         public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener)
-            : base(repoInfo)
         {
+            EventManager = new SyncEventManager(repoInfo.Name);
+            EventManager.AddEventHandler(new DebugLoggingHandler());
+            Queue = new SyncEventQueue(EventManager);
+            RepoInfo = repoInfo;
+            LocalPath = repoInfo.TargetDirectory;
+            Name = repoInfo.Name;
+            RemoteUrl = repoInfo.Address;
+            ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths= new List<string>(repoInfo.GetIgnoredPaths())};
+            ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(Queue){Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames};
+            ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(Queue) {Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames};
+            EventManager.AddEventHandler(ignoredFoldersFilter);
+            EventManager.AddEventHandler(ignoredFileNameFilter);
+            EventManager.AddEventHandler(ignoredFolderNameFilter);
+            EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
+            // start scheduler
+            Scheduler = new SyncScheduler(Queue, repoInfo.PollInterval);
+            EventManager.AddEventHandler(Scheduler);
+
+            SyncStatusChanged += delegate(SyncStatus status)
+            {
+                Status = status;
+            };
+            #if __COCOA__
+            this.Watcher = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
+            #else
+            this.Watcher = new CmisSync.Lib.Sync.Strategy.NetWatcher( new FileSystemWatcher(LocalPath), Queue);
+            #endif
+
             this.synchronizedFolder = new SynchronizedFolder(repoInfo, activityListener, this);
             this.Watcher.EnableEvents = true;
             Logger.Info(synchronizedFolder);
         }
 
-        public override void Resume()
+        private bool RepoInfoChanged(ISyncEvent e)
         {
-            base.Resume();
+            if (e is RepoConfigChangedEvent)
+            {
+                this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
+                this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.GetIgnoredPaths());
+                this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
+                this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
+                return true;
+            }
+            else
+            {
+                // This should never ever happen!
+                return false;
+            }
         }
 
         /// <summary>
@@ -61,19 +218,44 @@ namespace CmisSync.Lib.Sync
         }
 
         /// <summary>
+        /// Destructor.
+        /// </summary>
+        ~CmisRepo()
+        {
+            Dispose(false);
+        }
+
+
+        /// <summary>
+        /// Implement IDisposable interface. 
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+
+        /// <summary>
         /// Dispose pattern implementation.
         /// </summary>
-        protected override void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (!this.disposed)
             {
                 if (disposing)
                 {
+                    this.Scheduler.Dispose();
+                    this.Watcher.Dispose();
+                    this.Queue.StopListener();
+                    int timeout = 500;
+                    if(!this.Queue.WaitForStopped(timeout))
+                        Logger.Debug(String.Format("Event Queue is of {0} has not been closed in {1} miliseconds", RemoteUrl.ToString(), timeout));
+                    this.Queue.Dispose();
                     this.synchronizedFolder.Dispose();
                 }
                 this.disposed = true;
             }
-            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -81,5 +263,16 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         public double Size {get {throw new NotImplementedException();}}
 
+        /// <summary>
+        /// Initialize the scheduled background sync processes.
+        /// </summary>
+        public void Initialize()
+        {
+            // Sync up everything that changed
+            // since we've been offline
+            // start full crawl sync on beginning
+            Queue.AddEvent(new StartNextSyncEvent(true));
+            Scheduler.Start();
+        }
     }
 }

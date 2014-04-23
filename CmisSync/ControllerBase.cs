@@ -29,6 +29,7 @@ using CmisSync.Lib.Cmis;
 using log4net;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Events.Filter;
+using CmisSync.Lib.Sync;
 
 #if __COCOA__
 using Edit = CmisSync.EditWizardController;
@@ -68,7 +69,7 @@ namespace CmisSync
         /// <summary>
         /// List of the CmisSync synchronized folders.
         /// </summary>
-        private List<RepoBase> repositories = new List<RepoBase>();
+        private List<CmisRepo> repositories = new List<CmisRepo>();
 
 
         /// <summary>
@@ -123,7 +124,7 @@ namespace CmisSync
         /// <summary>
         /// Get the repositories configured in CmisSync.
         /// </summary>
-        public RepoBase[] Repositories
+        public CmisRepo[] Repositories
         {
             get
             {
@@ -260,8 +261,8 @@ namespace CmisSync
         /// <param name="folderPath">Synchronized folder path</param>
         private void AddRepository(RepoInfo repositoryInfo)
         {
-            RepoBase repo = null;
-            repo = new CmisSync.Lib.Sync.CmisRepo(repositoryInfo, activityListenerAggregator);
+            CmisRepo repo = null;
+            repo = new CmisRepo(repositoryInfo, activityListenerAggregator);
 
             repo.SyncStatusChanged += delegate(SyncStatus status)
             {
@@ -378,7 +379,7 @@ namespace CmisSync
                         }
                         folder.ObfuscatedPassword = edit.Credentials.Password.ObfuscatedPassword;
                         ConfigManager.CurrentConfig.Save();
-                        foreach (RepoBase repo in this.repositories)
+                        foreach (CmisRepo repo in this.repositories)
                         {
                             if (repo.Name == reponame)
                             {
@@ -406,7 +407,7 @@ namespace CmisSync
         /// <param name="folder">The synchronized folder to remove</param>
         private void RemoveRepository(Config.SyncConfig.Folder folder)
         {
-            foreach (RepoBase repo in this.repositories)
+            foreach (CmisRepo repo in this.repositories)
             {
                 if (repo.LocalPath.Equals(folder.LocalPath))
                 {
@@ -443,7 +444,7 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
-                foreach (RepoBase aRepo in this.repositories)
+                foreach (CmisRepo aRepo in this.repositories)
                 {
                     if (aRepo.Name == repoName)
                     {
@@ -466,7 +467,7 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
-                foreach (RepoBase aRepo in this.repositories)
+                foreach (CmisRepo aRepo in this.repositories)
                 {
                     aRepo.Stopped = true;
                 }
@@ -501,7 +502,7 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
-                foreach (RepoBase aRepo in this.repositories)
+                foreach (CmisRepo aRepo in this.repositories)
                 {
                     aRepo.Stopped = false;
                 }
@@ -557,7 +558,7 @@ namespace CmisSync
         {
             bool has_unsynced_repos = false;
 
-            foreach (RepoBase repo in Repositories)
+            foreach (CmisRepo repo in Repositories)
             {
 //                repo.SyncInBackground();
 //                TODO
@@ -690,7 +691,7 @@ namespace CmisSync
         /// </summary>
         public virtual void Quit()
         {
-            foreach (RepoBase repo in Repositories)
+            foreach (CmisRepo repo in Repositories)
                 repo.Dispose();
 
             Environment.Exit(0);

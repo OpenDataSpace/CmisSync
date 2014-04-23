@@ -67,7 +67,7 @@ namespace DataSpaceSync.Console
 
             Logger.Info("Starting.");
 
-            List<RepoBase> repositories = new List<RepoBase>();
+            List<CmisRepo> repositories = new List<CmisRepo>();
 
             foreach (Config.SyncConfig.Folder folder in ConfigManager.CurrentConfig.Folder)
             {
@@ -77,7 +77,7 @@ namespace DataSpaceSync.Console
                     Directory.CreateDirectory(path);
                 }
 
-                RepoBase repo = new CmisSync.Lib.Sync.CmisRepo(folder.GetRepoInfo(),new ActivityListener());
+                CmisRepo repo = new CmisSync.Lib.Sync.CmisRepo(folder.GetRepoInfo(),new ActivityListener());
                 repositories.Add(repo);
                 repo.Initialize();
             }

@@ -28,7 +28,9 @@ using System.Globalization;
 using CmisSync.Lib.Events;
 using System.Collections.Generic;
 using log4net;
+
 using CmisSync.Lib;
+using CmisSync.Lib.Sync;
 
 namespace CmisSync {
 
@@ -124,7 +126,7 @@ namespace CmisSync {
                     {
                         if(menuItem is CmisSyncMenuItem && reponame.Equals(((CmisSyncMenuItem)menuItem).RepoName))
                         {
-                            foreach (RepoBase aRepo in Program.Controller.Repositories)
+                            foreach (CmisRepo aRepo in Program.Controller.Repositories)
                             {
                                 if (aRepo.Name.Equals(reponame))
                                 {
@@ -220,7 +222,7 @@ namespace CmisSync {
                             CmisSync.Properties_Resources.PauseSync) {
                         RepoName = folder_name
                     };
-                    foreach (RepoBase aRepo in Program.Controller.Repositories)
+                    foreach (CmisRepo aRepo in Program.Controller.Repositories)
                     {
                         if (aRepo.Name.Equals(folder_name))
                         {
