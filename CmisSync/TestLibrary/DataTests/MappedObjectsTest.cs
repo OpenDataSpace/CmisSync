@@ -12,7 +12,8 @@ using CmisSync.Lib.Storage;
 
 namespace TestLibrary.DataTests
 {
-
+    using TestUtils;
+    
     public class MappedObjectMockUtils
     {
         public static Mock<IFileSystemInfoFactory> CreateFsFactory(string localRootPath, string localRootPathName, string localFilePath = null, string localFileName = null)
@@ -93,6 +94,24 @@ namespace TestLibrary.DataTests
 
             file.Description = "other desc";
             Assert.AreEqual("other desc", file.Description);
+        }
+
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void IFolderConstructor ()
+        {
+            string folderName = "a";
+            string path = Path.Combine(Path.GetTempPath(), folderName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
+            MappedObject mappedObject = new MappedObject(remoteObject.Object);
+            Assert.That(mappedObject.RemoteObjectId, Is.EqualTo(id), "RemoteObjectId incorrect");
+            Assert.That(mappedObject.Name, Is.EqualTo(folderName), "Name incorrect");
+            Assert.That(mappedObject.ParentId, Is.EqualTo(parentId), "ParentId incorrect");
+            Assert.That(mappedObject.LastChangeToken, Is.EqualTo(lastChangeToken), "LastChangeToken incorrect");
+            Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
         }
     }
 }

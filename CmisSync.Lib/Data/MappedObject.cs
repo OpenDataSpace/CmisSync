@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Data
     using System;
     using System.ComponentModel;
 
+    using DotCMIS.Client;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -77,6 +78,16 @@ namespace CmisSync.Lib.Data
                 this.Type = data.Type;
                 this.LastContentSize = data.LastContentSize;
             }
+        }
+
+        public MappedObject(IFolder remoteFolder)
+        {
+               this.RemoteObjectId = remoteFolder.Id;
+               this.ParentId = remoteFolder.ParentId;
+               this.LastChangeToken = remoteFolder.ChangeToken;
+               this.Name = remoteFolder.Name;
+               this.Type = MappedObjectType.Folder;
+            
         }
 
         /// <summary>

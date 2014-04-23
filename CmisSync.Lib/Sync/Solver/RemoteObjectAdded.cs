@@ -24,12 +24,7 @@ namespace CmisSync.Lib.Sync.Solver
                 }
                 var remoteFolder = remoteId as IFolder;
                 (localFile as IDirectoryInfo).Create();
-                var mappedObject = new MappedObject();
-                mappedObject.RemoteObjectId = remoteFolder.Id;
-                mappedObject.ParentId = remoteFolder.ParentId;
-                mappedObject.LastChangeToken = remoteFolder.ChangeToken;
-                mappedObject.Name = remoteFolder.Name;
-                mappedObject.Type = MappedObjectType.Folder;
+                var mappedObject = new MappedObject(remoteFolder);
                 storage.SaveMappedObject(mappedObject);
             }
 
