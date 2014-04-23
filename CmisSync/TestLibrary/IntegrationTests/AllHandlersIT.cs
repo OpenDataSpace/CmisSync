@@ -33,10 +33,6 @@ namespace TestLibrary.IntegrationTests
         [TestFixtureSetUp]
         public void ClassInit()
         {
-            // Use Newtonsoft.Json as Serializator
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
-            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
-
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
             // Use Newtonsoft.Json as Serializator
             DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
@@ -97,9 +93,7 @@ namespace TestLibrary.IntegrationTests
             var remoteFetcher = new RemoteObjectFetcher(session.Object, storage);
             manager.AddEventHandler(remoteFetcher);
 
-            IPathMatcher matcher = new PathMatcher(localRoot, remoteRoot);
-            //TODO remove reduncancy
-            var localFetcher = new LocalObjectFetcher(matcher, fsFactory);
+            var localFetcher = new LocalObjectFetcher(storage.Matcher, fsFactory);
             manager.AddEventHandler(localFetcher);
 
             var watcher = new Mock<Strategy.Watcher>(queue){CallBase = true};
@@ -194,27 +188,35 @@ namespace TestLibrary.IntegrationTests
             queue.Run();
 
             session.Verify(f => f.Delete(It.Is<IObjectId>(i=>i.Id==id), true), Times.Once());
+            Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
+
         }
 
         [Test, Category("Fast")]
         public void ContentChangeIndicatesFolderDeletionOfExistingFolder ()
         {
-            string path = Path.Combine(localRoot, "a");
+            var storage = GetInitializedStorage();
+            var name = "a";
+            string path = Path.Combine(localRoot, name);
             string id = "1";
-            Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.FullName).Returns(path);
             fsFactory.AddIDirectoryInfo(dirInfo.Object);
+            var mappedObject = new MappedObject();
+            mappedObject.Type = MappedObjectType.Folder;
+            mappedObject.RemoteObjectId = id;
+            mappedObject.Name = name;
+            storage.SaveMappedObject(mappedObject);
+            storage.ChangeLogToken = "oldtoken";
 
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
-            storage.AddLocalFolder(path, id);
 
-            var queue = CreateQueue(session, storage.Object, fsFactory.Object);
+            var queue = CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Delete(true), Times.Once());
-            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == id)), Times.Once());
+            Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
 
         [Test, Category("Fast")]
@@ -228,10 +230,12 @@ namespace TestLibrary.IntegrationTests
 
             string id = "1";
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, Path.Combine(remoteRoot, folderName));
-            Mock<IMetaDataStorage> storage = MockMetaDataStorageUtil.GetMetaStorageMockWithToken();
-            var queue = CreateQueue(session, storage.Object, fsFactory.Object);
+            var storage = GetInitializedStorage();
+            storage.ChangeLogToken = "oldtoken";
+            var queue = CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.Create(), Times.Once());
+            Assert.That(storage.GetObjectByRemoteId(id), Is.Not.Null);
             /*
             //storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f =>
                                                                         f.RemoteObjectId == id &&
