@@ -33,6 +33,12 @@ namespace CmisSync.Lib.Storage
     /// </summary>
     public class MetaDataStorage : IMetaDataStorage
     {
+        private static readonly string PropertyTable = "properties";
+        private static readonly string MappedObjectsTable = "objects";
+        private static readonly string ChangeLogTokenKey = "ChangeLogToken";
+        private static readonly string LocalPathKey = "LocalPath";
+        private static readonly string RemotePathKey = "RemotePath";
+
         /// <summary>
         /// The db engine.
         /// </summary>
@@ -42,12 +48,6 @@ namespace CmisSync.Lib.Storage
         /// The path matcher.
         /// </summary>
         private IPathMatcher matcher = null;
-
-        private static readonly string PropertyTable = "properties";
-        private static readonly string MappedObjectsTable = "objects";
-        private static readonly string ChangeLogTokenKey = "ChangeLogToken";
-        private static readonly string LocalPathKey = "LocalPath";
-        private static readonly string RemotePathKey = "RemotePath";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.MetaDataStorage"/> class.
@@ -139,8 +139,41 @@ namespace CmisSync.Lib.Storage
             {
                 string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
                 string[] pathSegments = relativePath.Split(Path.DirectorySeparatorChar);
+                List<MappedObjectData> objects = new List<MappedObjectData>();
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable))
+                {
+                    var data = row.Value.Get;
+                    if(data == null)
+                    {
+                        continue;
+                    }
+
+                    objects.Add(data);
+                }
+
+                MappedObjectData root = objects.Find(o => o.ParentId == null);
+                string result = this.matcher.LocalTargetRootPath;
+                if(root.Name != "/")
+                {
+                    result = Path.Combine(result, root.Name);
+                }
+
+                MappedObjectData parent = root;
+                foreach(var name in pathSegments)
+                {
+                    MappedObjectData child = objects.Find(o => o.ParentId == parent.RemoteObjectId && o.Name == name);
+                    if(child != null)
+                    {
+                        parent = child;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+
+                return new MappedObject(parent);
             }
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -168,6 +201,7 @@ namespace CmisSync.Lib.Storage
 
                     return new MappedObject(data);
                 }
+
                 return null;
             }
         }
@@ -180,7 +214,7 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public void SaveMappedObject(IMappedObject obj)
         {
-            string id = GetId(obj);
+            string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
                 tran.Insert<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id, obj as MappedObject);
@@ -196,7 +230,7 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public void RemoveObject(IMappedObject obj)
         {
-            string id = GetId(obj);
+            string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
                 tran.RemoveKey<string>(MappedObjectsTable, id);
@@ -215,14 +249,16 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public string GetRemotePath(IMappedObject obj)
         {
-            string id = GetId(obj);
+            string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
-                string[] segments = GetRelativePathSegments(tran, id);
+                string[] segments = this.GetRelativePathSegments(tran, id);
                 string path = this.matcher.RemoteTargetRootPath;
-                foreach(var name in segments){
-                    path += (name.StartsWith("/")) ? name: "/" + name;
+                foreach(var name in segments)
+                {
+                    path += name.StartsWith("/") ? name : "/" + name;
                 }
+
                 return path;
             }
         }
@@ -238,10 +274,10 @@ namespace CmisSync.Lib.Storage
         /// </param>
         public string GetLocalPath(IMappedObject mappedObject)
         {
-            string id = GetId(mappedObject);
+            string id = this.GetId(mappedObject);
             using(var tran = this.engine.GetTransaction())
             {
-                return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(GetRelativePathSegments(tran, id)));
+                return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(this.GetRelativePathSegments(tran, id)));
             }
         }
 
@@ -252,11 +288,11 @@ namespace CmisSync.Lib.Storage
         ///  The saved children. 
         /// </returns>
         /// <param name='parent'>
-        ///  Parent. 
+        ///  Parent of the children.
         /// </param>
         public List<IMappedObject> GetChildren(IMappedObject parent)
         {
-            string parentId = GetId(parent);
+            string parentId = this.GetId(parent);
             List<IMappedObject> results = new List<IMappedObject>();
             bool parentExists = false;
             using(var tran = this.engine.GetTransaction())
@@ -273,7 +309,7 @@ namespace CmisSync.Lib.Storage
                     {
                         results.Add(new MappedObject(data));
                     }
-                    else if( data.RemoteObjectId == parentId)
+                    else if(data.RemoteObjectId == parentId)
                     {
                         parentExists = true;
                     }
@@ -309,9 +345,9 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("The given object has no remote object id");
             }
+
             return id;
         }
-
 
         private string[] GetRelativePathSegments(DBreeze.Transactions.Transaction tran, string id)
         {
@@ -324,6 +360,7 @@ namespace CmisSync.Lib.Storage
                 entry = tran.Select<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable, id).Value.Get;
                 pathSegments.Push(entry.Name);
             }
+
             return pathSegments.ToArray();
         }
     }
