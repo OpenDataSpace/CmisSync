@@ -132,7 +132,7 @@ namespace CmisSync.Lib.Storage
 
             if(!this.matcher.CanCreateRemotePath(path.FullName))
             {
-                throw new ArgumentException("Given path is not able to be matched on remote path");
+                throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", path.FullName));
             }
 
             using(var tran = this.engine.GetTransaction())
@@ -158,6 +158,10 @@ namespace CmisSync.Lib.Storage
                 }
 
                 MappedObject root = objects.Find(o => o.ParentId == null);
+                if(root == null)
+                {
+                    return null;
+                }
 
                 if(root.Name != "/")
                 {

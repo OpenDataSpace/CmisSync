@@ -133,9 +133,15 @@ namespace TestLibrary.StorageTests
         [Test, Category("Fast")]
         public void GetObjectByPathWithNotExistingEntryMustReturnNull()
         {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
+            var matcher = new Mock<IPathMatcher>();
+            string testfilename = "test";
+            string testpath = Path.Combine(Path.GetTempPath(), testfilename);
+            matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == testpath))).Returns(true);
+            matcher.Setup(m => m.GetRelativeLocalPath(It.Is<string>(f => f == testpath))).Returns(testfilename);
+            var storage = new MetaDataStorage(this.engine, matcher.Object);
+
             var path = Mock.Of<IFileSystemInfo>( p =>
-                                                p.FullName == Path.Combine(Path.GetTempPath(), "test"));
+                                                p.FullName == testpath);
             Assert.That(storage.GetObjectByLocalPath(path), Is.Null);
         }
 
@@ -145,6 +151,7 @@ namespace TestLibrary.StorageTests
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.LocalTargetRootPath).Returns(Path.GetTempPath());
             matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == Path.Combine(Path.GetTempPath(), "a")))).Returns(true);
+            matcher.Setup(m => m.GetRelativeLocalPath(It.Is<string>(p => p == Path.Combine(Path.GetTempPath(), "a")))).Returns("a");
             var storage = new MetaDataStorage(this.engine, matcher.Object);
             var folder = Mock.Of<IDirectoryInfo>( f =>
                                                  f.FullName == Path.Combine(Path.GetTempPath(), "a"));
