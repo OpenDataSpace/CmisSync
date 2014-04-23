@@ -17,6 +17,8 @@ using DotCMIS.Data;
 using DotCMIS.Data.Extensions;
 using DotCMIS.Binding.Services;
 
+using Newtonsoft.Json;
+
 using NUnit.Framework;
 
 using Moq;
@@ -32,6 +34,9 @@ namespace TestLibrary.IntegrationTests
         public void ClassInit()
         {
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
+            // Use Newtonsoft.Json as Serializator
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
         DBreezeEngine engine;
@@ -162,11 +167,17 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast")]
         public void RunFSEventDeleted ()
         {
-            var storage = new Mock<IMetaDataStorage>();
+            var storage = GetInitializedStorage();
             var path = new Mock<IFileInfo>();
-            path.Setup(p => p.FullName ).Returns(Path.Combine(localRoot, "a", "b"));
+            var name = "a";
+            path.Setup(p => p.FullName ).Returns(Path.Combine(localRoot, name));
             string id = "id";
-            storage.AddLocalFile(path.Object, id);
+            //storage.AddLocalFile(path.Object, id);
+            var mappedObject = new MappedObject();
+            mappedObject.Type = MappedObjectType.Folder;
+            mappedObject.RemoteObjectId = id;
+            mappedObject.Name = name;
+            storage.SaveMappedObject(mappedObject);
             
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -174,7 +185,7 @@ namespace TestLibrary.IntegrationTests
             IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, id).Object;
             session.Setup(s => s.GetObject(id)).Returns(remote);
             var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName);
-            var queue = CreateQueue(session, storage.Object);
+            var queue = CreateQueue(session, storage);
             queue.AddEvent(myEvent);
             queue.Run();
 
