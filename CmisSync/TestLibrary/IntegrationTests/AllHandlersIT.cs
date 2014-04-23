@@ -33,6 +33,10 @@ namespace TestLibrary.IntegrationTests
         [TestFixtureSetUp]
         public void ClassInit()
         {
+            // Use Newtonsoft.Json as Serializator
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
+            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
+
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
             // Use Newtonsoft.Json as Serializator
             DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
