@@ -17,6 +17,8 @@ using DotCMIS.Data;
 using DotCMIS.Data.Extensions;
 using DotCMIS.Binding.Services;
 
+using Newtonsoft.Json;
+
 using NUnit.Framework;
 
 using Moq;
@@ -31,6 +33,10 @@ namespace TestLibrary.IntegrationTests
         [TestFixtureSetUp]
         public void ClassInit()
         {
+            // Use Newtonsoft.Json as Serializator
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
+            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
+
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
 
