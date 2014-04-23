@@ -27,7 +27,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFolderAdded()
         {
-            string path = Path.Combine(Path.GetTempPath(), "a");
+            string folderName = "a";
+            string path = Path.Combine(Path.GetTempPath(), folderName);
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
@@ -37,6 +38,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);
+            dirInfo.Setup(d => d.Name).Returns(folderName);
 
             Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
 
@@ -44,16 +46,14 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             
             solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
-            storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Once());
 
-/*            storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f =>
+            storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f =>
                             f.RemoteObjectId == id &&
                             f.Name == folderName &&
                             f.ParentId == parentId &&
                             f.LastChangeToken == lastChangeToken &&
                             f.Type == MappedObjectType.Folder)
                     ), Times.Once());
- */
         }
     }
 }
