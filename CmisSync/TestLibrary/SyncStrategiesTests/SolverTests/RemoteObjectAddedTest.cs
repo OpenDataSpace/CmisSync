@@ -3,6 +3,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Sync.Solver;
     using CmisSync.Lib.Storage;
 
@@ -44,6 +45,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
             storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Once());
+
 /*            storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f =>
                             f.RemoteObjectId == id &&
                             f.Name == folderName &&
@@ -51,7 +53,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                             f.LastChangeToken == lastChangeToken &&
                             f.Type == MappedObjectType.Folder)
                     ), Times.Once());
-                    */
+ */
         }
     }
 }
