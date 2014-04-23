@@ -138,11 +138,17 @@ namespace CmisSync.Lib.Storage
             using(var tran = this.engine.GetTransaction())
             {
                 string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
-                string[] pathSegments = relativePath.Split(Path.DirectorySeparatorChar);
+                List<string> pathSegments = new List<string>(relativePath.Split(Path.DirectorySeparatorChar));
                 List<MappedObject> objects = new List<MappedObject>();
-                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObjectData>>(MappedObjectsTable))
                 {
-                    var data = row.Value.Get;
+                    var value = row.Value;
+                    if(value == null)
+                    {
+                        continue;
+                    }
+
+                    var data = value.Get;
                     if(data == null)
                     {
                         continue;
@@ -152,10 +158,17 @@ namespace CmisSync.Lib.Storage
                 }
 
                 MappedObject root = objects.Find(o => o.ParentId == null);
-                string result = this.matcher.LocalTargetRootPath;
+
                 if(root.Name != "/")
                 {
-                    result = Path.Combine(result, root.Name);
+                    if(root.Name == pathSegments[0])
+                    {
+                        pathSegments.RemoveAt(0);
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
 
                 MappedObject parent = root;
