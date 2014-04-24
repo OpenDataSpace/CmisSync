@@ -197,7 +197,10 @@ namespace CmisSync.Lib.Cmis
             // Populate the result list with identifier and name of each repository.
             foreach (IRepository repo in repositories)
             {
-                result.Add(repo.Id, repo.Name);
+                if(!Utils.IsRepoNameHidden(repo.Name, ConfigManager.CurrentConfig.HiddenRepos))
+                {
+                    result.Add(repo.Id, repo.Name);
+                }
             }
             
             return result;

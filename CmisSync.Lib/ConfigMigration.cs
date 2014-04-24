@@ -27,6 +27,7 @@ namespace CmisSync.Lib.Sync
             CheckForDoublicatedLog4NetElement();
             ReplaceTrunkByChunk();
             MigrateIgnoredPatterns();
+            MigrateHiddenReposPatterns();
         }
 
         private static void CheckForDoublicatedLog4NetElement()
@@ -89,7 +90,7 @@ namespace CmisSync.Lib.Sync
             }
         }
 
-        private static void MigrateIgnoredPatterns ()
+        private static void MigrateIgnoredPatterns()
         {
             if(ConfigManager.CurrentConfig.Version < 1.0)
             {
@@ -101,5 +102,15 @@ namespace CmisSync.Lib.Sync
             }
         }
 
+        private static void MigrateHiddenReposPatterns()
+        {
+            if(ConfigManager.CurrentConfig.Version < 1.1)
+            {
+                Config conf = ConfigManager.CurrentConfig;
+                conf.Version = 1.1;
+                conf.HiddenRepos = Config.CreateInitialListOfGloballyHiddenRepoNames();
+                conf.Save();
+            }
+        }
     }
 }

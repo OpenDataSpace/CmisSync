@@ -233,6 +233,7 @@ namespace CmisSync.Lib
                 DeviceId = Guid.NewGuid(),
                 IgnoreFileNames = CreateInitialListOfGloballyIgnoredFileNames(),
                 IgnoreFolderNames = CreateInitialListOfGloballyIgnoredFolderNames(),
+                HideRepoNames = CreateInitialListOfGloballyHiddenRepoNames(),
                 Version = 1.0
             };
 
@@ -262,6 +263,13 @@ namespace CmisSync.Lib
         {
             List<string> list = new List<string>();
             list.Add(".*");
+            return list;
+        }
+
+        public static List<string> CreateInitialListOfGloballyHiddenRepoNames()
+        {
+            List<string> list = new List<string>();
+            list.Add("config");
             return list;
         }
 
@@ -308,6 +316,25 @@ namespace CmisSync.Lib
         public List<string> IgnoreFolderNames {
             get { return this.configXml.IgnoreFolderNames; }
             set { this.configXml.IgnoreFolderNames = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the hidden repos.
+        /// </summary>
+        /// <value>
+        /// The hidden repos.
+        /// </value>
+        public List<string> HiddenRepos
+        {
+            get
+            {
+                return this.configXml.HideRepoNames;
+            }
+
+            set
+            {
+                this.configXml.HideRepoNames = value;
+            }
         }
 
         /// <summary>
@@ -464,6 +491,17 @@ namespace CmisSync.Lib
             [XmlArray("ignoreFileNames")]
             [XmlArrayItem("pattern")]
             public List<string> IgnoreFileNames { get; set; }
+
+            /// <summary>
+            /// Gets or sets the hidden repo names.
+            /// </summary>
+            /// <value>
+            /// The hidden repo names.
+            /// </value>
+            [XmlArray("hideRepoNames")]
+            [XmlArrayItem("pattern")]
+            public List<string> HideRepoNames { get; set; }
+
             /// <summary>
             /// Gets or sets the version.
             /// </summary>

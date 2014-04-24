@@ -451,5 +451,18 @@ namespace CmisSync.Lib
                 Replace("\\*", ".*").
                 Replace("\\?", ".") + "$");
         }
+
+        public static bool IsRepoNameHidden(string name, List<string> hiddenRepos)
+        {
+            foreach(string wildcard in hiddenRepos)
+            {
+                if(Utils.IgnoreLineToRegex(wildcard).IsMatch(name))
+                {
+                    Logger.Debug(String.Format("The given repo name \"{0}\" is hidden, because it matches the wildcard \"{1}\"", name, wildcard));
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
