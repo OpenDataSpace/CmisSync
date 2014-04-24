@@ -75,11 +75,8 @@
     <Compile Include="Credentials.cs" />
     <Compile Include="Defines.cs" />
     <Compile Include="Events\ActiveActivitiesManager.cs" />
-    <Compile Include="Events\ConfigChangedEvent.cs" />
-    <Compile Include="Events\ContentChangeEvent.cs" />
     <Compile Include="Events\EventHandlerPriorities.cs" />
     <Compile Include="Events\GenericSyncEventHandler.cs" />
-    <Compile Include="Events\RecentChangedEvent.cs" />
     <Compile Include="Events\SyncEventQueue.cs" />
     <Compile Include="LoggingStream.cs" />
     <Compile Include="RepoInfo.cs" />
@@ -100,32 +97,16 @@
     <Compile Include="ContentTasks\Utils.cs" />
     <Compile Include="Data\PathMatcher.cs" />
     <Compile Include="Events\AbstractEventProducer.cs" />
-    <Compile Include="Events\BubbledEvent.cs" />
     <Compile Include="Events\ChangeEnums.cs" />
-    <Compile Include="Events\CrawlRequestEvent.cs" />
     <Compile Include="Events\DebugLoggingHandler.cs" />
-    <Compile Include="Events\EncapsuledEvent.cs" />
     <Compile Include="Events\EventFilter\AbstractFileFilter.cs" />
     <Compile Include="Events\EventFilter\IgnoredFileNamesFilter.cs" />
     <Compile Include="Events\EventFilter\IgnoredFilesFilter.cs" />
     <Compile Include="Events\EventFilter\IgnoredFoldersFilter.cs" />
     <Compile Include="Events\EventFilter\InvalidFolderNameFilter.cs" />
-    <Compile Include="Events\ExceptionEvent.cs" />
-    <Compile Include="Events\FSEvent.cs" />
-    <Compile Include="Events\FileConflictEvent.cs" />
     <Compile Include="Events\FileDownloadRequest.cs" />
-    <Compile Include="Events\FileEvent.cs" />
-    <Compile Include="Events\FileTransmissionEvent.cs" />
-    <Compile Include="Events\FolderEvent.cs" />
-    <Compile Include="Events\FullSyncCompletedEvent.cs" />
-    <Compile Include="Events\ISyncEvent.cs" />
     <Compile Include="Events\ISyncEventQueue.cs" />
-    <Compile Include="Events\PermissionDeniedEvent.cs" />
-    <Compile Include="Events\RemoteEvent.cs" />
     <Compile Include="Events\ReportingSyncEventHandler.cs" />
-    <Compile Include="Events\RequestIgnoredEvent.cs" />
-    <Compile Include="Events\StartNextSyncEvent.cs" />
-    <Compile Include="Events\SuccessfulLoginEvent.cs" />
     <Compile Include="Events\SyncEventHandler.cs" />
     <Compile Include="Events\SyncEventManager.cs" />
     <Compile Include="Events\SyncScheduler.cs" />
@@ -175,7 +156,6 @@
     <Compile Include="Sync\Strategy\MacWatcher.cs" />
     <Compile Include="Sync\Strategy\NetWatcher.cs" />
     <Compile Include="Events\EventFilter\IgnoredFolderNameFilter.cs" />
-    <Compile Include="Events\ProxyAuthRequiredEvent.cs" />
     <Compile Include="Storage\ExtendedAttributeException.cs" />
     <Compile Include="Storage\IExtendedAttributeReader.cs" />
     <Compile Include="Storage\ExtendedAttributeReaderUnix.cs" />
@@ -192,6 +172,31 @@
     <Compile Include="Cmis\IDisposableAuthProvider.cs" />
     <Compile Include="Storage\PersistentCookieStorage.cs" />
     <Compile Include="Cmis\StandardAuthenticationProvider.cs" />
+    <Compile Include="Data\IPathMatcher.cs" />
+    <Compile Include="Events\EventTypes\AbstractFolderEvent.cs" />
+    <Compile Include="Events\EventTypes\BubbledEvent.cs" />
+    <Compile Include="Events\EventTypes\ConfigChangedEvent.cs" />
+    <Compile Include="Events\EventTypes\ContentChangeEvent.cs" />
+    <Compile Include="Events\EventTypes\CrawlRequestEvent.cs" />
+    <Compile Include="Events\EventTypes\EncapsuledEvent.cs" />
+    <Compile Include="Events\EventTypes\ExceptionEvent.cs" />
+    <Compile Include="Events\EventTypes\FileConflictEvent.cs" />
+    <Compile Include="Events\EventTypes\FileEvent.cs" />
+    <Compile Include="Events\EventTypes\FileMovedEvent.cs" />
+    <Compile Include="Events\EventTypes\FileTransmissionEvent.cs" />
+    <Compile Include="Events\EventTypes\FolderEvent.cs" />
+    <Compile Include="Events\EventTypes\FolderMovedEvent.cs" />
+    <Compile Include="Events\EventTypes\FSEvent.cs" />
+    <Compile Include="Events\EventTypes\FSMovedEvent.cs" />
+    <Compile Include="Events\EventTypes\FullSyncCompletedEvent.cs" />
+    <Compile Include="Events\EventTypes\ISyncEvent.cs" />
+    <Compile Include="Events\EventTypes\PermissionDeniedEvent.cs" />
+    <Compile Include="Events\EventTypes\ProxyAuthRequiredEvent.cs" />
+    <Compile Include="Events\EventTypes\RecentChangedEvent.cs" />
+    <Compile Include="Events\EventTypes\RemoteEvent.cs" />
+    <Compile Include="Events\EventTypes\RequestIgnoredEvent.cs" />
+    <Compile Include="Events\EventTypes\StartNextSyncEvent.cs" />
+    <Compile Include="Events\EventTypes\SuccessfulLoginEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -244,5 +249,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Events\EventTypes\" />
   </ItemGroup>
 </Project>

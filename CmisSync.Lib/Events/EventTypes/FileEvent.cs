@@ -113,32 +113,4 @@ namespace CmisSync.Lib.Events
                 this.RemoteContent);
         }
     }
-
-    /// <summary>
-    /// File moved event.
-    /// </summary>
-    public class FileMovedEvent : FileEvent
-    {
-
-        public IFileInfo OldLocalFile{ get; protected set; }
-
-        public IDirectoryInfo OldParentFolder { get; protected set; }
-
-        public string OldRemoteFilePath { get; protected set; }
-
-        public FileMovedEvent(
-            IFileInfo oldLocalFile = null,
-            IFileInfo newLocalFile = null,
-            IDirectoryInfo oldParentFolder = null,
-            IDirectoryInfo newParentFolder = null,
-            string oldRemoteFilePath = null,
-            IDocument newRemoteFile = null
-        ) : base(newLocalFile, newParentFolder, newRemoteFile)
-        {
-            Local = MetaDataChangeType.MOVED;
-            OldLocalFile = oldLocalFile;
-            OldParentFolder = oldParentFolder;
-            OldRemoteFilePath = oldRemoteFilePath;
-        }
-    }
 }

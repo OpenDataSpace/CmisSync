@@ -33,32 +33,5 @@ namespace CmisSync.Lib.Events
                                   RemoteFolder!= null ? RemoteFolder.Name : "");
         }
     }
-
-    public class FolderMovedEvent : FolderEvent
-    {
-        public IDirectoryInfo OldLocalFolder { get; private set; }
-        public string OldRemoteFolderPath { get; private set; }
-        public FolderMovedEvent(
-            IDirectoryInfo oldLocalFolder,
-            IDirectoryInfo newLocalFolder,
-            string oldRemoteFolderPath,
-            IFolder newRemoteFolder) : base ( newLocalFolder, newRemoteFolder) {
-            OldLocalFolder = oldLocalFolder;
-            OldRemoteFolderPath = oldRemoteFolderPath;
-        }
-    }
-
-    public abstract class AbstractFolderEvent : ISyncEvent
-    {
-        public MetaDataChangeType Local { get; set; }
-
-        public MetaDataChangeType Remote { get; set; }
-
-        public AbstractFolderEvent ()
-        {
-            this.Local = MetaDataChangeType.NONE;
-            this.Remote = MetaDataChangeType.NONE;
-        }
-    }
 }
 

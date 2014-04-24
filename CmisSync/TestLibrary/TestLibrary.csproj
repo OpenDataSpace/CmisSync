@@ -86,7 +86,6 @@
     <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
     <Compile Include="DataTests\MappedObjectsTest.cs" />
     <Compile Include="DataTests\PathMatcherTest.cs" />
-    <Compile Include="DebugLoggingHandlerTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
@@ -123,8 +122,6 @@
     <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
     <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\SingleStepEventQueue.cs" />
-    <Compile Include="SyncStrategiesTests\SingleStepEventQueueTest.cs" />
     <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />
     <Compile Include="SyncStrategiesTests\SituationDetectionTests\RemoteSituationDetectionTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
@@ -142,7 +139,6 @@
     <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
-    <Compile Include="LegacyCodeTests\RepoInfoTests.cs" />
     <Compile Include="StorageTests\ExtendedAttributeReaderUnixTest.cs" />
     <Compile Include="TestUtils\MockMetaDataStorageUtil.cs" />
     <Compile Include="TestUtils\MockSessionUtil.cs" />
@@ -160,6 +156,10 @@
     <Compile Include="SyncStrategiesTests\LocalObjectFetcherTest.cs" />
     <Compile Include="StorageTests\PersistentCookieStorageTest.cs" />
     <Compile Include="AuthenticationProviderTests\AuthProviderFactoryTest.cs" />
+    <Compile Include="TestUtils\SingleStepEventQueue.cs" />
+    <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
+    <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
+    <Compile Include="RepoInfoTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -23,8 +23,8 @@ SOURCES =  \
 	ContentTasksTests/SimpleFileUploaderTest.cs \
 	DataTests/MappedObjectsTest.cs \
 	DataTests/PathMatcherTest.cs \
-	DebugLoggingHandlerTest.cs \
 	EncodingTest.cs \
+	EventsTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/EventsFilterTests/GenericHandleDublicatedEventsFilterTest.cs \
@@ -48,9 +48,9 @@ SOURCES =  \
 	IntegrationTests/DBreezeTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
-	LegacyCodeTests/RepoInfoTests.cs \
 	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
+	RepoInfoTests.cs \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/MetaDataStorageTest.cs \
@@ -70,8 +70,6 @@ SOURCES =  \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/RemoteObjectFetcherTest.cs \
-	SyncStrategiesTests/SingleStepEventQueue.cs \
-	SyncStrategiesTests/SingleStepEventQueueTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
@@ -92,6 +90,8 @@ SOURCES =  \
 	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \
+	TestUtils/SingleStepEventQueue.cs \
+	TestUtils/SingleStepEventQueueTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
 	UtilsTests/CredentialsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
