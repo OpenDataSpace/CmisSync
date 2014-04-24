@@ -9,7 +9,6 @@ SOURCES =  \
 	ActivityListenerAggregator.cs \
 	Backend.cs \
 	ChunkedStream.cs \
-	Cmis/AbstractDisposableAuthProvider.cs \
 	Cmis/AuthProviderFactory.cs \
 	Cmis/CmisPermissionDeniedException.cs \
 	Cmis/CmisServerNotFoundException.cs \
