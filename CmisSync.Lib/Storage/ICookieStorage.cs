@@ -35,19 +35,4 @@ namespace CmisSync.Lib.Storage
         /// </value>
         CookieCollection Cookies { get; set; }
     }
-
-    /// <summary>
-    /// Temporary cookie storage.
-    /// </summary>
-    [Obsolete("Please use this class only until the persistent one is implemented")]
-    public class TemporaryCookieStorage : ICookieStorage
-    {
-        /// <summary>
-        /// Gets or sets the cookie collection.
-        /// </summary>
-        /// <value>
-        /// The cookies.
-        /// </value>
-        public virtual CookieCollection Cookies { get; set; }
-    }
 }

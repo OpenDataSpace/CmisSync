@@ -14,7 +14,6 @@ namespace CmisSync.Lib.Sync.Strategy
 {
     public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-
         private static readonly ILog logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
 
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
@@ -22,7 +21,6 @@ namespace CmisSync.Lib.Sync.Strategy
             SituationType type = DoAnalyse(storage, actualEvent);
             logger.Debug(String.Format("Remote Situation is: {0}", type));
             return type;
-
         }
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
@@ -93,9 +91,6 @@ namespace CmisSync.Lib.Sync.Strategy
             }
             return false;
         }
-
-
-
     }
 }
 
