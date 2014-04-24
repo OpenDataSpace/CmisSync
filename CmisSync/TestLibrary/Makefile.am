@@ -23,8 +23,8 @@ SOURCES =  \
 	ContentTasksTests/SimpleFileUploaderTest.cs \
 	DataTests/MappedObjectsTest.cs \
 	DataTests/PathMatcherTest.cs \
-	DebugLoggingHandlerTest.cs \
 	EncodingTest.cs \
+	EventsTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/EventsFilterTests/GenericHandleDublicatedEventsFilterTest.cs \

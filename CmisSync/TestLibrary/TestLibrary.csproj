@@ -86,7 +86,6 @@
     <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
     <Compile Include="DataTests\MappedObjectsTest.cs" />
     <Compile Include="DataTests\PathMatcherTest.cs" />
-    <Compile Include="DebugLoggingHandlerTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
@@ -160,6 +159,7 @@
     <Compile Include="AuthenticationProviderTests\AuthProviderFactoryTest.cs" />
     <Compile Include="TestUtils\SingleStepEventQueue.cs" />
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
+    <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
