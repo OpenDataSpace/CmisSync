@@ -218,9 +218,8 @@ namespace TestLibrary.SyncStrategiesTests
                                                      f.Path == newRemotePath &&
                                                      f.ChangeToken == newLastChangeToken &&
                                                      f.LastModificationDate == ((DateTime) newWriteTime).AddMilliseconds(500)));
-            var localFS = new Mock<IFileSystemInfoFactory>();
 
-            var localDetection = new LocalSituationDetection(localFS.Object);
+            var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderMovedEvent(oldLocalFolder, newLocalFolder, null, null);
             var localMoveRemoteRenameSolver = new Mock<ISolver>();
@@ -238,9 +237,8 @@ namespace TestLibrary.SyncStrategiesTests
             var remoteFolder = Mock.Of<IFolder>(f =>
                                                 f.Id == "remoteId" &&
                                                 f.Name == "name");
-            var localFS = new Mock<IFileSystemInfoFactory>();
             var remoteFolderAddedSolver = new Mock<ISolver>();
-            var localDetection = new LocalSituationDetection(localFS.Object);
+            var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder, localFolder: new Mock<IDirectoryInfo>().Object) { Remote = MetaDataChangeType.CREATED, Local = MetaDataChangeType.NONE };
 
@@ -256,9 +254,8 @@ namespace TestLibrary.SyncStrategiesTests
         public void LocalFolderAddedSituation()
         {
             var localFolder = Mock.Of<IDirectoryInfo>();
-            var localFS = new Mock<IFileSystemInfoFactory>();
             var localFolderAddedSolver = new Mock<ISolver>();
-            var localDetection = new LocalSituationDetection(localFS.Object);
+            var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.CREATED, Remote = MetaDataChangeType.NONE };
 

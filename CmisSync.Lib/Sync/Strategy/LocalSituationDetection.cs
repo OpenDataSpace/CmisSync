@@ -12,15 +12,6 @@ namespace CmisSync.Lib.Sync.Strategy
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(LocalSituationDetection));
 
-        private IFileSystemInfoFactory FsFactory;
-        public LocalSituationDetection(IFileSystemInfoFactory fsFactory = null)
-        {
-            if(fsFactory == null)
-                FsFactory = new FileSystemInfoFactory();
-            else
-                FsFactory = fsFactory;
-        }
-
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
             SituationType type = DoAnalyse(storage, actualEvent);

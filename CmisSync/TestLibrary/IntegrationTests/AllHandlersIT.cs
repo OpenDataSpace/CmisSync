@@ -99,7 +99,7 @@ namespace TestLibrary.IntegrationTests
             var watcher = new Mock<Strategy.Watcher>(queue){CallBase = true};
             manager.AddEventHandler(watcher.Object);
 
-            var localDetection = new LocalSituationDetection(fsFactory);
+            var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage);
             manager.AddEventHandler(syncMechanism);

@@ -34,8 +34,6 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class RemoteObjectAdded : ISolver
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
-  
         /// <summary>
         /// Adds the Object to Disk and Database
         /// </summary>

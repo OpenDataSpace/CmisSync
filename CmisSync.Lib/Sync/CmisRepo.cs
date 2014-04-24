@@ -345,7 +345,7 @@ namespace CmisSync.Lib.Sync
                         this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
                     this.GetFolderConfig().SupportedFeatures.GetContentChangesSupport != false;
             }
-            catch(NullReferenceException e)
+            catch(NullReferenceException)
             {
                 return false;
             }
@@ -357,7 +357,7 @@ namespace CmisSync.Lib.Sync
             {
                 return this.session.RepositoryInfo.Capabilities.IsGetDescendantsSupported != false && this.GetFolderConfig().SupportedFeatures.GetDescendantsSupport == true;
             }
-            catch(NullReferenceException e)
+            catch(NullReferenceException)
             {
                 return false;
             }

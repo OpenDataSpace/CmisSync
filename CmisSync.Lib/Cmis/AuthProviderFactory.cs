@@ -46,6 +46,7 @@ namespace CmisSync.Lib.Cmis
         /// <param name='db'>
         /// storage engine
         /// </param>
+        [CLSCompliant(false)]
         public static IDisposableAuthProvider CreateAuthProvider(Config.AuthenticationType type, Uri url, DBreezeEngine db)
         {
             ICookieStorage storage = new PersistentCookieStorage(db);

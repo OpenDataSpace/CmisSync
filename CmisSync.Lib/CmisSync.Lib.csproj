@@ -44,9 +44,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="Mono.Data.Sqlite" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.SQLite">
-      <HintPath>..\Extras\sqlite-netFx40-binary-Win32-2010-1.0.84.0\System.Data.SQLite.dll</HintPath>
-    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="XamMac">
       <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>

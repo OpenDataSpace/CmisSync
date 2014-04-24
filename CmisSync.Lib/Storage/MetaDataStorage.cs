@@ -56,6 +56,7 @@ namespace CmisSync.Lib.Storage
         /// <param name='matcher'>
         /// The Path matcher instance. Must not be null.
         /// </param>
+        [CLSCompliant(false)]
         public MetaDataStorage(DBreezeEngine engine, IPathMatcher matcher)
         {
             if (engine == null)
