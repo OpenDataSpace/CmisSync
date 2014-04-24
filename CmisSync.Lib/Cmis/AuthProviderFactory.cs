@@ -46,6 +46,7 @@ namespace CmisSync.Lib.Cmis
         /// <param name='db'>
         /// storage engine
         /// </param>
+        [CLSCompliant(false)]
         public static IDisposableAuthProvider CreateAuthProvider(Config.AuthenticationType type, Uri url, DBreezeEngine db)
         {
             ICookieStorage storage = new PersistentCookieStorage(db);
@@ -59,7 +60,7 @@ namespace CmisSync.Lib.Cmis
             case Config.AuthenticationType.NTLM:
                 return new PersistentNtlmAuthenticationProvider(storage, url);
             default:
-                return new StandardAuthenticationProvider();
+                return new StandardAuthenticationProviderWrapper();
             }
         }
     }

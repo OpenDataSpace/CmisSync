@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="SyncMechanismTest.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 using System;
 using System.IO;
 
@@ -218,9 +236,8 @@ namespace TestLibrary.SyncStrategiesTests
                                                      f.Path == newRemotePath &&
                                                      f.ChangeToken == newLastChangeToken &&
                                                      f.LastModificationDate == ((DateTime) newWriteTime).AddMilliseconds(500)));
-            var localFS = new Mock<IFileSystemInfoFactory>();
 
-            var localDetection = new LocalSituationDetection(localFS.Object);
+            var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderMovedEvent(oldLocalFolder, newLocalFolder, null, null);
             var localMoveRemoteRenameSolver = new Mock<ISolver>();
@@ -238,9 +255,8 @@ namespace TestLibrary.SyncStrategiesTests
             var remoteFolder = Mock.Of<IFolder>(f =>
                                                 f.Id == "remoteId" &&
                                                 f.Name == "name");
-            var localFS = new Mock<IFileSystemInfoFactory>();
             var remoteFolderAddedSolver = new Mock<ISolver>();
-            var localDetection = new LocalSituationDetection(localFS.Object);
+            var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder, localFolder: new Mock<IDirectoryInfo>().Object) { Remote = MetaDataChangeType.CREATED, Local = MetaDataChangeType.NONE };
 
@@ -256,9 +272,8 @@ namespace TestLibrary.SyncStrategiesTests
         public void LocalFolderAddedSituation()
         {
             var localFolder = Mock.Of<IDirectoryInfo>();
-            var localFS = new Mock<IFileSystemInfoFactory>();
             var localFolderAddedSolver = new Mock<ISolver>();
-            var localDetection = new LocalSituationDetection(localFS.Object);
+            var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.CREATED, Remote = MetaDataChangeType.NONE };
 

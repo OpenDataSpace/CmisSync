@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="RemoteSituationDetection.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 using System;
 
 using CmisSync.Lib.Storage;
@@ -14,7 +32,6 @@ namespace CmisSync.Lib.Sync.Strategy
 {
     public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-
         private static readonly ILog logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
 
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
@@ -22,7 +39,6 @@ namespace CmisSync.Lib.Sync.Strategy
             SituationType type = DoAnalyse(storage, actualEvent);
             logger.Debug(String.Format("Remote Situation is: {0}", type));
             return type;
-
         }
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
@@ -93,9 +109,6 @@ namespace CmisSync.Lib.Sync.Strategy
             }
             return false;
         }
-
-
-
     }
 }
 

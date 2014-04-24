@@ -62,7 +62,7 @@ namespace CmisSync.Lib.Sync.Solver
             else if((localFile.Attributes & FileAttributes.Normal) == FileAttributes.Normal)
             {
                 // Create empty remote file
-                string remotePath = storage.Matcher.CreateRemotePath(localFile.FullName);
+                //string remotePath = storage.Matcher.CreateRemotePath(localFile.FullName);
                 //session.CreateDocument();
             }
         }

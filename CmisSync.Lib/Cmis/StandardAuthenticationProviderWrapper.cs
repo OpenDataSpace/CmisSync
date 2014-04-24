@@ -26,7 +26,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Standard authtentication provider.
     /// </summary>
-    public class StandardAuthenticationProvider : DotCMIS.Binding.StandardAuthenticationProvider, IDisposableAuthProvider
+    public class StandardAuthenticationProviderWrapper : DotCMIS.Binding.StandardAuthenticationProvider, IDisposableAuthProvider
     {
         /// <summary>
         /// Releases all resource used by the <see cref="CmisSync.Lib.Cmis.StandardAuthtenticationProvider"/> object.

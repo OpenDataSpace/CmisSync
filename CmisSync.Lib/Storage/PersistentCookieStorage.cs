@@ -39,6 +39,7 @@ namespace CmisSync.Lib.Storage
         /// <param name='db'>
         /// DBreeze engine instance to be used for saving collection.
         /// </param>
+        [CLSCompliant(false)]
         public PersistentCookieStorage(DBreezeEngine db)
         {
             if(db == null)

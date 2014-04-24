@@ -19,7 +19,7 @@ SOURCES =  \
 	Cmis/MimeType.cs \
 	Cmis/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/PersistentStandardAuthenticationProvider.cs \
-	Cmis/StandardAuthenticationProvider.cs \
+	Cmis/StandardAuthenticationProviderWrapper.cs \
 	Config/Config.cs \
 	Config/ConfigManager.cs \
 	Config/ConfigMigration.cs \

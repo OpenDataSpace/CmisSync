@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="SetupWindow.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -27,6 +45,7 @@ using Mono.Unix;
 
 namespace CmisSync {
 
+    [CLSCompliant(false)]
     public class SetupWindow : Window    {
 
         // TODO: capscmi
@@ -121,20 +140,20 @@ namespace CmisSync {
             };
         }
 
-
+        [CLSCompliant(false)]
         public void AddButton (Button button)
         {
             (button.Child as Label).Xpad = 15;
             Buttons.Add (button);
         }
 
-
+        [CLSCompliant(false)]
         public void AddOption (Widget widget)
         {            
             OptionArea.Add (widget);
         }
 
-
+        [CLSCompliant(false)]
         new public void Add (Widget widget)
         {
             Label header = new Label ("<span size='large'><b>" + Header + "</b></span>") {

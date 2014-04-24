@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="CmisRepo.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a CMIS synchronization tool.
 //   Copyright (C) 2012  Nicolas Raoul <nicolas.raoul@aegif.jp>
 //
@@ -341,7 +359,7 @@ namespace CmisSync.Lib.Sync
                         this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
                     this.RepoInfo.SupportedFeatures.GetContentChangesSupport != false;
             }
-            catch(NullReferenceException e)
+            catch(NullReferenceException)
             {
                 return false;
             }
@@ -353,7 +371,7 @@ namespace CmisSync.Lib.Sync
             {
                 return this.session.RepositoryInfo.Capabilities.IsGetDescendantsSupported != false && this.RepoInfo.SupportedFeatures.GetDescendantsSupport == true;
             }
-            catch(NullReferenceException e)
+            catch(NullReferenceException)
             {
                 return false;
             }
