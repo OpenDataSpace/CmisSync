@@ -70,8 +70,6 @@ SOURCES =  \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/RemoteObjectFetcherTest.cs \
-	SyncStrategiesTests/SingleStepEventQueue.cs \
-	SyncStrategiesTests/SingleStepEventQueueTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
@@ -92,6 +90,8 @@ SOURCES =  \
 	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \
+	TestUtils/SingleStepEventQueue.cs \
+	TestUtils/SingleStepEventQueueTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
 	UtilsTests/CredentialsTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \

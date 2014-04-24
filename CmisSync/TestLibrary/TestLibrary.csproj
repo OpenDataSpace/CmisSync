@@ -123,8 +123,6 @@
     <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
     <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\SingleStepEventQueue.cs" />
-    <Compile Include="SyncStrategiesTests\SingleStepEventQueueTest.cs" />
     <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />
     <Compile Include="SyncStrategiesTests\SituationDetectionTests\RemoteSituationDetectionTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
@@ -160,6 +158,8 @@
     <Compile Include="SyncStrategiesTests\LocalObjectFetcherTest.cs" />
     <Compile Include="StorageTests\PersistentCookieStorageTest.cs" />
     <Compile Include="AuthenticationProviderTests\AuthProviderFactoryTest.cs" />
+    <Compile Include="TestUtils\SingleStepEventQueue.cs" />
+    <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
