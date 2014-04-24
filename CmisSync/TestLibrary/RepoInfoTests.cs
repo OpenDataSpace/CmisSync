@@ -39,7 +39,7 @@ namespace TestLibrary.LegacyCodeTests
         [Test, Category("Fast")]
         public void NonAddedPathResultsInEmptyArray()
         {
-            Assert.AreEqual(0, info.GetIgnoredPaths().Length);
+            Assert.That(this.info.GetIgnoredPaths(), Is.Empty);
         }
 
 
