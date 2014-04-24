@@ -222,7 +222,7 @@ namespace TestLibrary.SyncStrategiesTests
             var localFS = new Mock<IFileSystemInfoFactory>();
 
             var localDetection = new LocalSituationDetection(localFS.Object);
-            var remoteDetection = new RemoteSituationDetection(Session.Object);
+            var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderMovedEvent(oldLocalFolder, newLocalFolder, null, null);
             var localMoveRemoteRenameSolver = new Mock<ISolver>();
             var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
@@ -242,7 +242,7 @@ namespace TestLibrary.SyncStrategiesTests
             var localFS = new Mock<IFileSystemInfoFactory>();
             var remoteFolderAddedSolver = new Mock<ISolver>();
             var localDetection = new LocalSituationDetection(localFS.Object);
-            var remoteDetection = new RemoteSituationDetection(Session.Object);
+            var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder, localFolder: new Mock<IDirectoryInfo>().Object) { Remote = MetaDataChangeType.CREATED, Local = MetaDataChangeType.NONE };
 
             var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
@@ -260,7 +260,7 @@ namespace TestLibrary.SyncStrategiesTests
             var localFS = new Mock<IFileSystemInfoFactory>();
             var localFolderAddedSolver = new Mock<ISolver>();
             var localDetection = new LocalSituationDetection(localFS.Object);
-            var remoteDetection = new RemoteSituationDetection(Session.Object);
+            var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.CREATED, Remote = MetaDataChangeType.NONE };
 
             var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
@@ -277,14 +277,6 @@ namespace TestLibrary.SyncStrategiesTests
         {
             // If a solver fails to solve the situation, the situation should be rescanned and if it not changed an Exception Event should be published on Queue
             Assert.Fail("TODO");
-        }
-
-        [Ignore]
-        [Test, Category("Fast")]
-        public void HandleIncompleteEventInformations()
-        {
-            // If a FileEvent doesn't contain all local and remote informations, the MetaDataStorage should be used to determine the missing informations
-            Assert.Fail ("TODO");
         }
     }
 }

@@ -21,7 +21,6 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
     [TestFixture]
     public class RemoteSituationDetectionTest
     {
-        private Mock<ISession> SessionMock;
         private Mock<IMetaDataStorage> StorageMock;
         private string RemoteChangeToken = "changeToken";
         private readonly IObjectId ObjectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
@@ -30,22 +29,13 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
         [SetUp]
         public void SetUp() {
-            this.SessionMock = new Mock<ISession>();
             this.StorageMock = new Mock<IMetaDataStorage>();
 
         }
 
         [Test, Category("Fast")]
-        public void ConstructorFailsOnNullSession() {
-            try{
-                new RemoteSituationDetection(null);
-                Assert.Fail();
-            }catch (ArgumentNullException) {}
-        }
-
-        [Test, Category("Fast")]
         public void ConstructorWithSession() {
-            new RemoteSituationDetection(SessionMock.Object);
+            new RemoteSituationDetection();
         }
 
         [Test, Category("Fast")]
@@ -56,7 +46,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
             fileEvent.Remote = MetaDataChangeType.NONE;
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, fileEvent));
         }
@@ -80,7 +70,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             StorageMock.AddMappedFile(file);
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object) {Remote = MetaDataChangeType.CREATED};
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, fileEvent));
         }
@@ -92,7 +82,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
             folderEvent.Remote = MetaDataChangeType.NONE;
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, folderEvent));
         }
@@ -105,7 +95,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
             fileEvent.Remote = MetaDataChangeType.CREATED;
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.ADDED, detector.Analyse(StorageMock.Object, fileEvent));
         }
@@ -117,7 +107,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
             folderEvent.Remote = MetaDataChangeType.CREATED;
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.ADDED, detector.Analyse(StorageMock.Object, folderEvent));
         }
@@ -131,7 +121,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
             fileEvent.Remote = MetaDataChangeType.DELETED;
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, fileEvent));
         }
@@ -143,7 +133,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
             folderEvent.Remote = MetaDataChangeType.DELETED;
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, folderEvent));
         }
@@ -154,7 +144,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderMovedEvent(null, null, null, remoteObject.Object) { Remote = MetaDataChangeType.MOVED };
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.MOVED, detector.Analyse(StorageMock.Object, folderEvent));
         }
@@ -181,7 +171,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             mappedFolder.Setup( f => f.ParentId).Returns(mappedParentFolder.RemoteObjectId);
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual( SituationType.MOVED, detector.Analyse(StorageMock.Object, folderEvent));
         }
@@ -202,7 +192,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             StorageMock.AddMappedFolder(mappedFolder);
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
+            var detector = new RemoteSituationDetection();
 
             Assert.AreEqual(SituationType.RENAMED, detector.Analyse(StorageMock.Object, folderEvent));
         }

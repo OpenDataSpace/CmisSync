@@ -17,14 +17,6 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private static readonly ILog logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
 
-        private ISession Session;
-        public RemoteSituationDetection(ISession session)
-        {
-            if(session == null)
-                throw new ArgumentNullException("The given session is null");
-            Session = session;
-        }
-
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
             SituationType type = DoAnalyse(storage, actualEvent);

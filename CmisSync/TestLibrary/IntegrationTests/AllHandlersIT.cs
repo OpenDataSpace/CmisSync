@@ -100,7 +100,7 @@ namespace TestLibrary.IntegrationTests
             manager.AddEventHandler(watcher.Object);
 
             var localDetection = new LocalSituationDetection(fsFactory);
-            var remoteDetection = new RemoteSituationDetection(session.Object);
+            var remoteDetection = new RemoteSituationDetection();
             var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage);
             manager.AddEventHandler(syncMechanism);
 
