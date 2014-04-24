@@ -11,3 +11,4 @@ Important
 
 NiceToHave Refactorings:
 - Tear apart Watcher: EventProducer and EventHandler in seperate classes.
+- Config class should be rewritten to enable events by using ObservableCollections and implements the Observable Pattern
