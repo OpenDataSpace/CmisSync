@@ -1,0 +1,9 @@
+This file is to track the open TODO's and their dependencies for the implementation of the event design.
+
+RemoteSituation Detection now assume that IFolder and IDocument are prefetched. If is null it can assume that it is deleted when the event contains this information (set in accumulator). Change interface of RemoteSituation Detection to get Event instead of ID. Check whether it is better to have two situationdetection classes depending on file and folders.
+
+Important
+
+NiceToHave Refactorings:
+- Tear apart Watcher: EventProducer and EventHandler in seperate classes.
+- Config class should be rewritten to enable events by using ObservableCollections and implements the Observable Pattern
