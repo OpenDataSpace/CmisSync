@@ -125,7 +125,20 @@ namespace CmisSync.CmisTree
             else
             {
                 this.actualNode.Status = LoadingStatus.DONE;
-                MergeFolderTrees(this.actualNode, e.Result as List<Node>);
+                List<Node> children = e.Result as List<Node>;
+                MergeFolderTrees(this.actualNode, children);
+                foreach (Node oldChild in this.actualNode.Children)
+                {
+                    try
+                    {
+                        Node newChild = children.First(x => x.Name.Equals(oldChild.Name));
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // this node exists locally or is ignored, mark it as <code>LoadingStatus.DONE</code>
+                        SetNodeTreeStatus(oldChild, LoadingStatus.DONE);
+                    }
+                }
             }
             UpdateNodeEvent ();
             Load();
@@ -140,16 +153,28 @@ namespace CmisSync.CmisTree
         {
             foreach (Node newChild in children)
             {
-                try {
+                try
+                {
                     Node equalNode = node.Children.First(x => x.Name.Equals(newChild.Name));
                     MergeFolderTrees(equalNode, newChild.Children.ToList());
                     MergeNewNodeIntoOldNode(equalNode, newChild);
-                } catch ( InvalidOperationException ) {
+                }
+                catch (InvalidOperationException)
+                {
                     if (node.Selected == false)
                         newChild.Selected = false;
                     node.Children.Add(newChild);
                     newChild.Parent = node;
                 }
+            }
+        }
+
+        private static void SetNodeTreeStatus(Node node, LoadingStatus status)
+        {
+            node.Status = status;
+            foreach (Node child in node.Children)
+            {
+                SetNodeTreeStatus(child, status);
             }
         }
 

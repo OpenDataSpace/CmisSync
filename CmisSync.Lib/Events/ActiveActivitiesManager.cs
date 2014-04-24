@@ -72,6 +72,11 @@ namespace CmisSync.Lib.Events
         /// <param name="transmission"></param>
         public bool AddTransmission(FileTransmissionEvent transmission)
         {
+            if(transmission == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             lock (this.Lock)
             {
                 if (this.activeTransmissions.Contains(transmission))

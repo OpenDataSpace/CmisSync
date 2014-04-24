@@ -145,15 +145,15 @@ namespace CmisSync
                 Id = Credentials.RepoId,
                 Address = Credentials.Address.ToString()
             };
-            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
-            IgnoredFolderLoader.AddIgnoredFolderToRootNode(repo, Ignores);
-            LocalFolderLoader.AddLocalFolderToRootNode(repo, localPath);
-
-            asyncLoader.Load(repo);
 
             ObservableCollection<RootFolder> repos = new ObservableCollection<RootFolder>();
             repos.Add(repo);
             repo.Selected = true;
+
+            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            IgnoredFolderLoader.AddIgnoredFolderToRootNode(repo, Ignores);
+            LocalFolderLoader.AddLocalFolderToRootNode(repo, localPath);
+            asyncLoader.Load(repo);
 
             treeView.DataContext = repos;
 
