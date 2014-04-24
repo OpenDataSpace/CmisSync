@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DotCMIS.Client;
 using System.Security.Cryptography;
 using System.IO;

@@ -1,4 +1,4 @@
-﻿namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Events
 {
     using System;
     using System.Collections.Generic;

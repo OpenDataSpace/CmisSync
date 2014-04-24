@@ -1,4 +1,4 @@
-﻿using CmisSync.Lib.Credentials;
+using CmisSync.Lib.Credentials;
 using CmisSync.Lib.Cmis;
 using System;
 using System.Collections.Generic;

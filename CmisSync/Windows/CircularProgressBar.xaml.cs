@@ -1,4 +1,4 @@
-﻿///
+///
 /// from http://www.codeproject.com/Articles/49853/Better-WPF-Circular-Progress-Bar
 /// 
 

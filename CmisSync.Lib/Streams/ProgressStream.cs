@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // <copyright file="ProgressStream.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify

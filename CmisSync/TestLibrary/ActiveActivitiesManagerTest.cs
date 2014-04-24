@@ -1,4 +1,4 @@
-﻿namespace TestLibrary
+namespace TestLibrary
 {
     using System;
     using System.Collections.Generic;
