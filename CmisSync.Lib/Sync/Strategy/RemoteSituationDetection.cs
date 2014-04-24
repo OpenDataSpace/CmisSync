@@ -89,10 +89,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
                 return (storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.ParentId != folderEvent.RemoteFolder.ParentId);
             }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            return false;
         }
         private bool IsChangeEventAHintForRename (IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
@@ -102,10 +99,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
                 return (storedFolder.Name != folderEvent.RemoteFolder.Name);
             }
-            else
-            {
-                throw new NotImplementedException ();
-            }
+            return false;
         }
 
 
