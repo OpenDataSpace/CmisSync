@@ -193,6 +193,9 @@
     <Compile Include="Storage\PersistentCookieStorage.cs" />
     <Compile Include="Cmis\StandardAuthenticationProvider.cs" />
     <Compile Include="Data\IPathMatcher.cs" />
+    <Compile Include="Events\FileMovedEvent.cs" />
+    <Compile Include="Events\FolderMovedEvent.cs" />
+    <Compile Include="Events\AbstractFolderEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

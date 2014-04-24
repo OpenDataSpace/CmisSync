@@ -38,6 +38,7 @@ SOURCES =  \
 	Data/PathMatcher.cs \
 	Defines.cs \
 	Events/AbstractEventProducer.cs \
+	Events/AbstractFolderEvent.cs \
 	Events/ActiveActivitiesManager.cs \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
@@ -58,8 +59,10 @@ SOURCES =  \
 	Events/FileConflictEvent.cs \
 	Events/FileDownloadRequest.cs \
 	Events/FileEvent.cs \
+	Events/FileMovedEvent.cs \
 	Events/FileTransmissionEvent.cs \
 	Events/FolderEvent.cs \
+	Events/FolderMovedEvent.cs \
 	Events/FSEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
 	Events/GenericSyncEventHandler.cs \
