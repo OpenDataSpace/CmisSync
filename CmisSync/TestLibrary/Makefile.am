@@ -48,9 +48,9 @@ SOURCES =  \
 	IntegrationTests/DBreezeTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
-	LegacyCodeTests/RepoInfoTests.cs \
 	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
+	RepoInfoTests.cs \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/MetaDataStorageTest.cs \
