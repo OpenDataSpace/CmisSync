@@ -59,7 +59,7 @@ namespace CmisSync.Lib.Cmis
             case Config.AuthenticationType.NTLM:
                 return new PersistentNtlmAuthenticationProvider(storage, url);
             default:
-                return new StandardAuthenticationProvider();
+                return new StandardAuthenticationProviderWrapper();
             }
         }
     }

@@ -63,7 +63,7 @@ namespace TestLibrary.AuthenticationProviderTests
         public void CreateUnimplementedAuthTypeReturnDefaultAuthProvider()
         {
             var provider = AuthProviderFactory.CreateAuthProvider(Config.AuthenticationType.SHIBBOLETH, this.url, this.engine);
-            Assert.That(provider, Is.TypeOf<StandardAuthenticationProvider>());
+            Assert.That(provider, Is.TypeOf<StandardAuthenticationProviderWrapper>());
         }
     }
 }
