@@ -33,7 +33,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Persistent standard authentication provider.
     /// </summary>
-    public class PersistentStandardAuthenticationProvider : StandardAuthenticationProvider, IDisposableAuthProvider
+    public class PersistentStandardAuthenticationProvider : DotCMIS.Binding.StandardAuthenticationProvider, IDisposableAuthProvider
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(PersistentStandardAuthenticationProvider));
 
