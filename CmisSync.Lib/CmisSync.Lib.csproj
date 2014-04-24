@@ -192,6 +192,8 @@
     <Compile Include="Cmis\IDisposableAuthProvider.cs" />
     <Compile Include="Storage\PersistentCookieStorage.cs" />
     <Compile Include="Cmis\StandardAuthenticationProvider.cs" />
+    <Compile Include="Data\IPathMatcher.cs" />
+    <Compile Include="Data\AbstractPathMatcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

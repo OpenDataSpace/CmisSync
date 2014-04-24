@@ -32,7 +32,9 @@ SOURCES =  \
 	ContentTasks/SimpleFileUploader.cs \
 	ContentTasks/Utils.cs \
 	Credentials.cs \
+	Data/AbstractPathMatcher.cs \
 	Data/IMappedObject.cs \
+	Data/IPathMatcher.cs \
 	Data/MappedObject.cs \
 	Data/PathMatcher.cs \
 	Defines.cs \

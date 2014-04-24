@@ -154,7 +154,6 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
         {
             string folderName = "old";
             string oldLocalPath = Path.Combine(Path.GetTempPath(), folderName);
-            string oldRemotePath = "/" + folderName;
             string remoteId = "remoteId";
             string oldParentId = "oldParentId";
             string newParentId = "newParentId";

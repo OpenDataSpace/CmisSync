@@ -36,7 +36,6 @@ namespace TestLibrary.DataTests
     {
         private readonly string localRootPathName = "folder";
         private readonly string localRootPath = Path.Combine("local", "test", "folder");
-        private readonly string remoteRootPath = "/";
         private readonly string localFileName = "file.test";
         private readonly string localFilePath = Path.Combine("local", "test", "folder", "file.test");
 

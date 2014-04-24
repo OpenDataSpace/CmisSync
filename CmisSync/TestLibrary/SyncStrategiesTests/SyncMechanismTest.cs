@@ -190,7 +190,6 @@ namespace TestLibrary.SyncStrategiesTests
             string newRemoteName = "newName";
             string oldLocalPath = Path.Combine(Path.GetTempPath(), oldFolderName);
             string newLocalPath = Path.Combine(Path.GetTempPath(), "new", oldFolderName);
-            string oldRemotePath = "/" + oldFolderName;
             string newRemotePath = "/" + newRemoteName;
             string oldLastChangeToken = Guid.NewGuid().ToString();
             string newLastChangeToken = Guid.NewGuid().ToString();
