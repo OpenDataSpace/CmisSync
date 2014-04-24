@@ -2,6 +2,7 @@ using System;
 using System.IO;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 
 using NUnit.Framework;
 
@@ -18,22 +19,23 @@ namespace TestLibrary.LegacyCodeTests
     [TestFixture]
     public class RepoInfoTests
     {
-        private readonly string CMISSYNCDIR = ConfigManager.CurrentConfig.FoldersPath;
+        private readonly string CMISSYNCDIR = ConfigManager.CurrentConfig.GetFoldersPath();
         private readonly string ignorePath = "/tmp/test";
         private RepoInfo info;
 
         [SetUp]
         public void SetUp()
         {
-            info = new RepoInfo(
-                    "name",
-                    CMISSYNCDIR,
-                    Path.GetTempPath(),
-                    "http://example.com",
-                    "user",
-                    "password",
-                    "",
-                    5000);
+            info = new RepoInfo{
+                DisplayName = "name",
+                Address = new Uri("http://example.com"),
+                User = "user",
+                Password = "password",
+                PollInterval = 5000,
+                LocalPath = CMISSYNCDIR,
+                RepositoryId = "repoId",
+                RemotePath = "/"
+            };
         }
 
         [Test, Category("Fast")]
@@ -47,7 +49,7 @@ namespace TestLibrary.LegacyCodeTests
         public void AddIgnorePath()
         {
             info.AddIgnorePath(ignorePath);
-            Assert.AreEqual(1, info.GetIgnoredPaths().Length);
+            Assert.AreEqual(1, info.GetIgnoredPaths().Count);
             Assert.Contains(ignorePath, info.GetIgnoredPaths());
         }
 
@@ -55,16 +57,8 @@ namespace TestLibrary.LegacyCodeTests
         public void ResetIgnorePaths()
         {
             info.AddIgnorePath(ignorePath);
-            info.SetIgnoredPaths(new string[]{});
-            Assert.AreEqual(0, info.GetIgnoredPaths().Length);
-        }
-
-        [Test, Category("Fast")]
-        public void SetIgnorePaths()
-        {
-            info.SetIgnoredPaths(new string[]{ignorePath});
-            Assert.AreEqual(1, info.GetIgnoredPaths().Length);
-            Assert.Contains(ignorePath, info.GetIgnoredPaths());
+            info.IgnoredFolders.Clear();
+            Assert.AreEqual(0, info.GetIgnoredPaths().Count);
         }
 
         [Test, Category("Fast")]
@@ -91,7 +85,7 @@ namespace TestLibrary.LegacyCodeTests
         [Test, Category("Fast")]
         public void DefaultAuthTypeIsBasicAuthentication()
         {
-            Assert.That(info.AuthType, Is.EqualTo(Config.AuthenticationType.BASIC));
+            Assert.That(info.AuthenticationType, Is.EqualTo(AuthenticationType.BASIC));
         }
     }
 }

@@ -25,6 +25,7 @@ using log4net.Config;
 using CmisSync.Lib.Sync;
 using System.Net;
 using System.Diagnostics;
+using CmisSync.Lib.Config;
 
 [assembly: CLSCompliant(true)]
 

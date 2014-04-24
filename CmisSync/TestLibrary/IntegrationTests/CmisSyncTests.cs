@@ -16,8 +16,6 @@ using DotCMIS.Data.Impl;
 
 using Newtonsoft.Json;
 
-using NUnit.Framework;
-
 using Moq;
 
 /**
@@ -46,18 +44,21 @@ using Moq;
     ]
 ]
  */
+
+
 namespace TestLibrary.IntegrationTests
 {
     using NUnit.Framework;
-    using CmisSync.Lib.Cmis;
     using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.Sync;
 
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000)]
     public class CmisSyncTests
     {
-        private readonly string CMISSYNCDIR = ConfigManager.CurrentConfig.FoldersPath;
+        private readonly string CMISSYNCDIR = ConfigManager.CurrentConfig.GetFoldersPath();
         private readonly int HeavyNumber = 10;
         private readonly int HeavyFileSize = 1024;
 
@@ -170,7 +171,7 @@ namespace TestLibrary.IntegrationTests
             cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
             cmisParameters[SessionParameter.User] = repoInfo.User;
             cmisParameters[SessionParameter.Password] = repoInfo.Password.ToString();
-            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepoID;
+            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
             cmisParameters[SessionParameter.ConnectTimeout] = "-1";
 
             return SessionFactory.NewInstance().CreateSession(cmisParameters);

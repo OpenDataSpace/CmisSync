@@ -1,21 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
-using System.IO;
-
-using DotCMIS;
-using DotCMIS.Data;
-using DotCMIS.Enums;
-using DotCMIS.Exceptions;
-using DotCMIS.Client;
-using DotCMIS.Client.Impl;
-
-using log4net;
 
 namespace CmisSync.Lib.Cmis
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Web;
+    using System.IO;
+
+    using CmisSync.Lib.Config;
+
+    using DotCMIS;
+    using DotCMIS.Data;
+    using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
+
+    using log4net;
+
     /// <summary>
     /// Data object representing a CMIS server.
     /// </summary>
@@ -197,7 +200,7 @@ namespace CmisSync.Lib.Cmis
             // Populate the result list with identifier and name of each repository.
             foreach (IRepository repo in repositories)
             {
-                if(!Utils.IsRepoNameHidden(repo.Name, ConfigManager.CurrentConfig.HiddenRepos))
+                if(!Utils.IsRepoNameHidden(repo.Name, ConfigManager.CurrentConfig.HiddenRepoNames))
                 {
                     result.Add(repo.Id, repo.Name);
                 }
@@ -325,76 +328,6 @@ namespace CmisSync.Lib.Cmis
             {
                 Logger.Info("CmisUtils getSubFolderTree | Exception " + e.Message, e);
                 throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Guess the web address where files can be seen using a browser.
-        /// Not bulletproof. It depends on the server, and there is no web UI at all.
-        /// </summary>
-        static public string GetBrowsableURL(RepoInfo repo)
-        {
-            if (null == repo)
-            {
-                throw new ArgumentNullException("repo");
-            }
-            
-            // Case of Alfresco.
-            if (repo.Address.AbsoluteUri.EndsWith("alfresco/cmisatom"))
-            {
-                string root = repo.Address.AbsoluteUri.Substring(0, repo.Address.AbsoluteUri.Length - "alfresco/cmisatom".Length);
-                if (repo.RemotePath.StartsWith("/Sites"))
-                {
-                    // Case of Alfresco Share.
-
-                    // Example RemotePath: /Sites/thesite
-                    // Result: http://server/share/page/site/thesite/documentlibrary
-                    // Example RemotePath: /Sites/thesite/documentLibrary/somefolder/anotherfolder
-                    // Result: http://server/share/page/site/thesite/documentlibrary#filter=path|%2Fsomefolder%2Fanotherfolder
-                    // Example RemotePath: /Sites/s1/documentLibrary/éß和ệ
-                    // Result: http://server/share/page/site/s1/documentlibrary#filter=path|%2F%25E9%25DF%25u548C%25u1EC7
-                    // Example RemotePath: /Sites/s1/documentLibrary/a#bc/éß和ệ
-                    // Result: http://server/share/page/site/thesite/documentlibrary#filter=path%7C%2Fa%2523bc%2F%25E9%25DF%25u548C%25u1EC7%7C
-
-                    string path = repo.RemotePath.Substring("/Sites/".Length);
-                    if (path.Contains("documentLibrary"))
-                    {
-                        int firstSlashPosition = path.IndexOf('/');
-                        string siteName = path.Substring(0, firstSlashPosition);
-                        string pathWithinSite = path.Substring(firstSlashPosition + "/documentLibrary".Length);
-                        string escapedPathWithinSite = HttpUtility.UrlEncode(pathWithinSite);
-                        string reescapedPathWithinSite = HttpUtility.UrlEncode(escapedPathWithinSite);
-                        string sharePath = reescapedPathWithinSite.Replace("%252f", "%2F");
-                        return root + "share/page/site/" + siteName + "/documentlibrary#filter=path|" + sharePath;
-                    }
-                    else
-                    {
-                        // Site name only.
-                        return root + "share/page/site/" + path + "/documentlibrary";
-                    }
-                }
-                else
-                {
-                    // Case of Alfresco Web Client.
-                    return root;
-                }
-            }
-            else
-            {
-                // If GRAU DATA AG server was detected, try to open the thinclient url, otherwise try to open the repo path
-                Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-                cmisParameters[SessionParameter.AtomPubUrl] = repo.Address.ToString();
-                cmisParameters[SessionParameter.User] = repo.User;
-                cmisParameters[SessionParameter.Password] = repo.Password.ToString();
-                cmisParameters[SessionParameter.RepositoryId] = repo.RepoID;
-                SessionFactory factory = SessionFactory.NewInstance();
-                ISession session = factory.CreateSession(cmisParameters);
-                if (!String.IsNullOrEmpty(session.RepositoryInfo.ThinClientUri.ToString()))
-                    return session.RepositoryInfo.ThinClientUri;
-                else
-                    return repo.Address.AbsoluteUri + repo.RemotePath;
             }
         }
 

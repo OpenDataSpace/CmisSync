@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml;
 using System.IO;
 
-namespace CmisSync.Lib.Sync
+namespace CmisSync.Lib.Config
 {
     /// <summary>
     /// Migrate config.xml from past versions.
@@ -108,7 +108,7 @@ namespace CmisSync.Lib.Sync
             {
                 Config conf = ConfigManager.CurrentConfig;
                 conf.Version = 1.1;
-                conf.HiddenRepos = Config.CreateInitialListOfGloballyHiddenRepoNames();
+                conf.HiddenRepoNames = Config.CreateInitialListOfGloballyHiddenRepoNames();
                 conf.Save();
             }
         }

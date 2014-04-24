@@ -20,9 +20,13 @@ SOURCES =  \
 	Cmis/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/PersistentStandardAuthenticationProvider.cs \
 	Cmis/StandardAuthenticationProvider.cs \
-	Config.cs \
-	ConfigManager.cs \
-	ConfigMigration.cs \
+	Config/Config.cs \
+	Config/ConfigManager.cs \
+	Config/ConfigMigration.cs \
+	Config/Feature.cs \
+	Config/ProxySettings.cs \
+	Config/RepoInfo.cs \
+	Config/XmlUri.cs \
 	ContentTasks/AbortException.cs \
 	ContentTasks/ChunkedDownloader.cs \
 	ContentTasks/ChunkedUploader.cs \
@@ -84,7 +88,6 @@ SOURCES =  \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	LoggingStream.cs \
-	RepoInfo.cs \
 	Storage/DataBaseTableNames.cs \
 	Storage/DirectoryInfoWrapper.cs \
 	Storage/EntryNotFoundException.cs \

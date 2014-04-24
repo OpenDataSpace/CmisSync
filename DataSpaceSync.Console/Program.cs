@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-
-using log4net;
-using log4net.Config;
-using CmisSync.Lib;
-using CmisSync.Lib.Sync;
-
-
+﻿
 namespace DataSpaceSync.Console
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Sync;
+
+    using log4net;
+    using log4net.Config;
+
+
     class ActivityListener : IActivityListener
     {
         public void ActivityStarted()
@@ -69,15 +72,15 @@ namespace DataSpaceSync.Console
 
             List<CmisRepo> repositories = new List<CmisRepo>();
 
-            foreach (Config.SyncConfig.Folder folder in ConfigManager.CurrentConfig.Folder)
+            foreach (RepoInfo repoInfo in ConfigManager.CurrentConfig.Folders)
             {
-                string path = folder.LocalPath;
+                string path = repoInfo.LocalPath;
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
                 }
 
-                CmisRepo repo = new CmisRepo(folder.GetRepoInfo(), new ActivityListener());
+                CmisRepo repo = new CmisRepo(repoInfo, new ActivityListener());
                 repositories.Add(repo);
                 repo.Initialize();
             }

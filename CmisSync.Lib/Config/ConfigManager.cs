@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace CmisSync.Lib
+namespace CmisSync.Lib.Config
 {
     /// <summary>
     /// A static class that allows easy access to the configuration of CmisSync.
@@ -37,7 +37,7 @@ namespace CmisSync.Lib
                         // If no configuration file exists, it will create a default one.
                         if (config == null)
                         {
-                            config = new Config(CurrentConfigFile);
+                            config = Config.CreateOrLoadByPath(CurrentConfigFile);
                         }
                     }
                 }

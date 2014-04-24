@@ -8,6 +8,7 @@ using System.Text;
 //using System.Diagnostics;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Sync;
 using CmisSync.Lib.Credentials;

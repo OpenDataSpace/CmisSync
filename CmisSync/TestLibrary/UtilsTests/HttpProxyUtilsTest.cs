@@ -1,6 +1,7 @@
 using System;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 
 using Moq;
 
@@ -12,11 +13,11 @@ namespace TestLibrary.UtilsTests
     [TestFixture]
     public class HttpProxyUtilsTest
     {
-        private Config.ProxySettings Settings;
+        private ProxySettings Settings;
         [SetUp]
         public void SetUp()
         {
-            Settings = new Config.ProxySettings();
+            Settings = new ProxySettings();
         }
 
         [Ignore]
@@ -31,13 +32,13 @@ namespace TestLibrary.UtilsTests
         public void SetDefaultProxyToAuto()
         {
             // Prepare with false settings
-            Settings.Selection = Config.ProxySelection.CUSTOM;
+            Settings.Selection = ProxySelection.CUSTOM;
             Settings.LoginRequired = false;
             Settings.Server = new Uri("http://example-false.com:8080/");
             HttpProxyUtils.SetDefaultProxy(Settings);
 
             //Set correct ones
-            Settings.Selection = Config.ProxySelection.SYSTEM;
+            Settings.Selection = ProxySelection.SYSTEM;
             HttpProxyUtils.SetDefaultProxy(Settings);
             Assert.AreEqual(WebRequest.DefaultWebProxy, WebRequest.GetSystemWebProxy() );
         }
@@ -47,19 +48,19 @@ namespace TestLibrary.UtilsTests
         public void SetDefaultProxyToAutoOnNullInput()
         {
             // Prepare with false settings
-            Settings.Selection = Config.ProxySelection.CUSTOM;
+            Settings.Selection = ProxySelection.CUSTOM;
             Settings.LoginRequired = false;
             Settings.Server = new Uri("http://example-false.com:8080/");
             HttpProxyUtils.SetDefaultProxy(Settings);
 
-            HttpProxyUtils.SetDefaultProxy(new Config.ProxySettings{Selection = Config.ProxySelection.SYSTEM});
+            HttpProxyUtils.SetDefaultProxy(new ProxySettings{Selection = ProxySelection.SYSTEM});
             Assert.AreEqual(WebRequest.DefaultWebProxy, WebRequest.GetSystemWebProxy() );
         }
 
         [Test, Category("Fast")]
         public void SetDefaultProxyToHTTPWithoutCredentials()
         {
-            Settings.Selection = Config.ProxySelection.CUSTOM;
+            Settings.Selection = ProxySelection.CUSTOM;
             Settings.LoginRequired = false;
             Settings.Server = new Uri("http://example.com:8080/");
             HttpProxyUtils.SetDefaultProxy(Settings);
@@ -71,7 +72,7 @@ namespace TestLibrary.UtilsTests
         [Test, Category("Fast")]
         public void SetDefaultProxyToHTTPWithCredentials()
         {
-            Settings.Selection = Config.ProxySelection.CUSTOM;
+            Settings.Selection = ProxySelection.CUSTOM;
             Settings.Server = new Uri("http://example.com:8080/");
             Settings.LoginRequired = true;
             Settings.Username = "testuser";
@@ -84,11 +85,11 @@ namespace TestLibrary.UtilsTests
         [Test, Category("Fast")]
         public void SetDefaultProxyToBeIgnored()
         {
-            Settings.Selection = Config.ProxySelection.CUSTOM;
+            Settings.Selection = ProxySelection.CUSTOM;
             Settings.LoginRequired = false;
             Settings.Server = new Uri("http://example.com:8080/");
             HttpProxyUtils.SetDefaultProxy(Settings);
-            Settings.Selection = Config.ProxySelection.NOPROXY;
+            Settings.Selection = ProxySelection.NOPROXY;
             HttpProxyUtils.SetDefaultProxy(Settings);
             Assert.IsNull (HttpWebRequest.DefaultWebProxy);
         }

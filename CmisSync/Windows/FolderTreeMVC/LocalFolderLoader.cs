@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 
 namespace CmisSync.CmisTree
 {

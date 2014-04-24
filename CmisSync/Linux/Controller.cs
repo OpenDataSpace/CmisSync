@@ -23,6 +23,7 @@ using System.IO;
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
 using CmisSync.Notifications;
+using CmisSync.Lib.Config;
 
 namespace CmisSync {
 
@@ -173,29 +174,23 @@ namespace CmisSync {
         
         public void OpenCmisSyncFolder()
         {
-            Utils.OpenFolder(ConfigManager.CurrentConfig.FoldersPath);
+            Utils.OpenFolder(ConfigManager.CurrentConfig.GetFoldersPath());
         }
 
         public void OpenCmisSyncFolder(string name)
         {
-            Config.SyncConfig.Folder f = ConfigManager.CurrentConfig.getFolder(name);
-            if(f!=null)
+            var f = ConfigManager.CurrentConfig.GetRepoInfo(name);
+            if (f != null)
+            {
                 Utils.OpenFolder(f.LocalPath);
-            else if(String.IsNullOrWhiteSpace(name)){
-                OpenCmisSyncFolder();
-            }else{
-                Logger.Warn("Folder not found: "+name);
             }
-        }
-
-        public void OpenRemoteFolder(string name)
-        {
-            Config.SyncConfig.Folder f = ConfigManager.CurrentConfig.getFolder(name);
-            if(f!=null){
-                RepoInfo repo = f.GetRepoInfo();
-                Process.Start(CmisUtils.GetBrowsableURL(repo));
-            } else {
-                Logger.Warn("Repo not found: "+name);
+            else if (string.IsNullOrWhiteSpace(name))
+            {
+                OpenCmisSyncFolder();
+            }
+            else
+            {
+                Logger.Warn("Folder not found: " + name);
             }
         }
 
@@ -206,7 +201,5 @@ namespace CmisSync {
             process.StartInfo.Arguments = "-title \"DataSpace Sync Log\" -e tail -f \"" + path + "\"";
             process.Start ();
         }
-
-
     }
 }

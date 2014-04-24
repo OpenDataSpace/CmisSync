@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 
 
 namespace TestLibrary

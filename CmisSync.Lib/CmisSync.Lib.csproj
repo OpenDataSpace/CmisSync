@@ -68,9 +68,6 @@
     <Compile Include="Cmis\Crypto.cs" />
     <Compile Include="Cmis\MimeType.cs" />
     <Compile Include="Cmis\PersistentStandardAuthenticationProvider.cs" />
-    <Compile Include="Config.cs" />
-    <Compile Include="ConfigManager.cs" />
-    <Compile Include="ConfigMigration.cs" />
     <Compile Include="ContentTasks\AbortException.cs" />
     <Compile Include="Credentials.cs" />
     <Compile Include="Defines.cs" />
@@ -79,7 +76,6 @@
     <Compile Include="Events\GenericSyncEventHandler.cs" />
     <Compile Include="Events\SyncEventQueue.cs" />
     <Compile Include="LoggingStream.cs" />
-    <Compile Include="RepoInfo.cs" />
     <Compile Include="Sync\CmisRepo.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Watcher.cs">
@@ -197,6 +193,13 @@
     <Compile Include="Events\EventTypes\RequestIgnoredEvent.cs" />
     <Compile Include="Events\EventTypes\StartNextSyncEvent.cs" />
     <Compile Include="Events\EventTypes\SuccessfulLoginEvent.cs" />
+    <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\ConfigManager.cs" />
+    <Compile Include="Config\ConfigMigration.cs" />
+    <Compile Include="Config\XmlUri.cs" />
+    <Compile Include="Config\ProxySettings.cs" />
+    <Compile Include="Config\RepoInfo.cs" />
+    <Compile Include="Config\Feature.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -252,5 +255,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Events\EventTypes\" />
+    <Folder Include="Config\" />
   </ItemGroup>
 </Project>

@@ -3,11 +3,14 @@ using log4net.Config;
 
 using System;
 using System.IO;
+
+
 namespace TestLibrary.EventsTests
 {
     using NUnit.Framework;
     using Moq;
     using CmisSync.Lib;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
 
     [TestFixture]

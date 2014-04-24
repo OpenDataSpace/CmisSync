@@ -26,6 +26,7 @@ using CmisSync.Lib.Sync;
 using System.Globalization;
 
 using System.Diagnostics;
+using CmisSync.Lib.Config;
 
 namespace CmisSync {
 

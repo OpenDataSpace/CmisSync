@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Sync
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Events;
 
@@ -177,13 +178,13 @@ namespace CmisSync.Lib.Sync
         {
             this.sessionFactory = SessionFactory.NewInstance();
 
-            this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthType, repoInfo.Address, null);
-            EventManager = new SyncEventManager(repoInfo.Name);
+            this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, null);
+            EventManager = new SyncEventManager(repoInfo.DisplayName);
             EventManager.AddEventHandler(new DebugLoggingHandler());
             Queue = new SyncEventQueue(EventManager);
             RepoInfo = repoInfo;
-            LocalPath = repoInfo.TargetDirectory;
-            Name = repoInfo.Name;
+            LocalPath = repoInfo.LocalPath;
+            Name = repoInfo.DisplayName;
             RemoteUrl = repoInfo.Address;
             ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths= new List<string>(repoInfo.GetIgnoredPaths())};
             ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(Queue){Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames};
@@ -300,7 +301,7 @@ namespace CmisSync.Lib.Sync
                 }
                 catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
                 {
-                    Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.AbsoluteUri), e);
+                    Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
                     this.Queue.AddEvent(new PermissionDeniedEvent(e));
                 }
                 catch (CmisRuntimeException e)
@@ -326,11 +327,6 @@ namespace CmisSync.Lib.Sync
             }
         }
 
-        private Config.SyncConfig.Folder GetFolderConfig()
-        {
-            return ConfigManager.CurrentConfig.getFolder(this.RepoInfo.Name);
-        }
-
         /// <summary>
         /// Detect whether the repository has the ChangeLog capability.
         /// </summary>
@@ -343,7 +339,7 @@ namespace CmisSync.Lib.Sync
             {
                 return (this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
                         this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
-                    this.GetFolderConfig().SupportedFeatures.GetContentChangesSupport != false;
+                    this.RepoInfo.SupportedFeatures.GetContentChangesSupport != false;
             }
             catch(NullReferenceException e)
             {
@@ -355,7 +351,7 @@ namespace CmisSync.Lib.Sync
         {
             try
             {
-                return this.session.RepositoryInfo.Capabilities.IsGetDescendantsSupported != false && this.GetFolderConfig().SupportedFeatures.GetDescendantsSupport == true;
+                return this.session.RepositoryInfo.Capabilities.IsGetDescendantsSupported != false && this.RepoInfo.SupportedFeatures.GetDescendantsSupport == true;
             }
             catch(NullReferenceException e)
             {
@@ -394,7 +390,7 @@ namespace CmisSync.Lib.Sync
             cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
             cmisParameters[SessionParameter.User] = repoInfo.User;
             cmisParameters[SessionParameter.Password] = repoInfo.Password.ToString();
-            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepoID;
+            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
 
             // Sets the Connect Timeout to infinite
             cmisParameters[SessionParameter.ConnectTimeout] = "-1";

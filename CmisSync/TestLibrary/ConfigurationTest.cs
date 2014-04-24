@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CmisSync.Lib.Config;
 
 namespace TestLibrary
 {
@@ -19,12 +20,14 @@ namespace TestLibrary
             try
             {
                 //Create new config file with default values
-                Config config = new Config(configpath);
+                Config config = Config.CreateInitialConfig(configpath);
                 //Notifications should be switched on by default
                 Assert.IsTrue(config.Notifications);
-                Assert.AreEqual(config.Folder.Count, 0);
+                Assert.AreEqual(config.Folders.Count, 0);
+                Assert.That(config.Log4Net, Is.Not.Null);
+                Assert.That(config.GetLog4NetConfig(), Is.Not.Null);
                 config.Save();
-                config = new Config(configpath);
+                config = Config.CreateOrLoadByPath(configpath);
             }
             catch (Exception)
             {

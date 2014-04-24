@@ -24,6 +24,8 @@ namespace CmisSync.Lib.Events
     using System.Linq;
     using System.Text;
 
+    using CmisSync.Lib.Config;
+
     /// <summary>
     /// Config changed event.
     /// </summary>
@@ -70,7 +72,7 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format("RepoConfigChangedEvent: {0}", this.RepoInfo.Name);
+            return string.Format("RepoConfigChangedEvent: {0}", this.RepoInfo.DisplayName);
         }
     }
 }

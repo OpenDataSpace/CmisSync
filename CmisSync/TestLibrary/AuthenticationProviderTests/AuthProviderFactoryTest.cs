@@ -4,6 +4,7 @@ namespace TestLibrary.AuthenticationProviderTests
     using System;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
 
     using DBreeze;
@@ -41,28 +42,28 @@ namespace TestLibrary.AuthenticationProviderTests
         [Test, Category("Fast")]
         public void CreateBasicAuthProvider()
         {
-            var provider = AuthProviderFactory.CreateAuthProvider(Config.AuthenticationType.BASIC, this.url, this.engine);
+            var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.BASIC, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentStandardAuthenticationProvider>());
         }
 
         [Test, Category("Fast")]
         public void CreateNtlmAuthProvider()
         {
-            var provider = AuthProviderFactory.CreateAuthProvider(Config.AuthenticationType.NTLM, this.url, this.engine);
+            var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.NTLM, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentNtlmAuthenticationProvider>());
         }
 
         [Test, Category("Fast")]
         public void CreateKerberosAuthProvider()
         {
-            var provider = AuthProviderFactory.CreateAuthProvider(Config.AuthenticationType.KERBEROS, this.url, this.engine);
+            var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.KERBEROS, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentNtlmAuthenticationProvider>());
         }
 
         [Test, Category("Fast")]
         public void CreateUnimplementedAuthTypeReturnDefaultAuthProvider()
         {
-            var provider = AuthProviderFactory.CreateAuthProvider(Config.AuthenticationType.SHIBBOLETH, this.url, this.engine);
+            var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.SHIBBOLETH, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<StandardAuthenticationProvider>());
         }
     }

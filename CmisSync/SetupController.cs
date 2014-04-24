@@ -25,6 +25,7 @@ using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
 using log4net;
 using CmisSync.Lib.Credentials;
+using CmisSync.Lib.Config;
 
 namespace CmisSync
 {
@@ -508,27 +509,31 @@ namespace CmisSync
             }
             else
             {
-                RepoInfo repoInfo = new RepoInfo(repoName, ConfigManager.CurrentConfig.ConfigPath);
-                repoInfo.Address = saved_address;
-                repoInfo.User = saved_user.TrimEnd ();
-                repoInfo.Password = saved_password.TrimEnd ();
-                repoInfo.RepoID = PreviousRepository;
-                repoInfo.RemotePath = PreviousPath;
-                repoInfo.TargetDirectory = localrepopath;
-                repoInfo.PollInterval = 5000;
-                repoInfo.MaxUploadRetries = 2;
+                RepoInfo repoInfo = new RepoInfo
+                {
+                    DisplayName = repoName,
+                    Address = saved_address,
+                    User = saved_user.TrimEnd(),
+                    Password = saved_password.TrimEnd(),
+                    RepositoryId = PreviousRepository,
+                    RemotePath = PreviousPath,
+                    LocalPath = localrepopath
+                };
+
                 foreach (string ignore in ignoredPaths)
+                {
                     repoInfo.AddIgnorePath(ignore);
+                }
 
                 // Check that the folder exists.
-                if (Directory.Exists(repoInfo.TargetDirectory))
+                if (Directory.Exists(repoInfo.LocalPath))
                 {
-                    Logger.Info(String.Format("DataSpace Repository Folder {0} already exist, this could lead to sync conflicts", repoInfo.TargetDirectory));
+                    Logger.Info(String.Format("DataSpace Repository Folder {0} already exist, this could lead to sync conflicts", repoInfo.LocalPath));
                 }
                 else
                 {
                     // Create the local folder.
-                    Directory.CreateDirectory(repoInfo.TargetDirectory);
+                    Directory.CreateDirectory(repoInfo.LocalPath);
                 }
 
                 try

@@ -1,13 +1,17 @@
-using log4net;
-using log4net.Config;
 
-using System;
-using System.IO;
 namespace TestLibrary
 {
-    using NUnit.Framework;
+    using System;
+    using System.IO;
+
     using CmisSync.Lib;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+
+    using log4net;
+    using log4net.Config;
+
+    using NUnit.Framework;
 
     [TestFixture]
     public class DebugLoggingHandlerTest

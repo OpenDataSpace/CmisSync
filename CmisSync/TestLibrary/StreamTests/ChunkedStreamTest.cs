@@ -2,6 +2,7 @@ using System;
 using System.IO;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 using CmisSync.Lib.Cmis;
 
 using NUnit.Framework;
@@ -12,8 +13,8 @@ namespace TestLibrary.StreamTests
     [TestFixture]
     class ChunkedStreamTest
     {
-        private readonly string TestFilePath = Path.Combine(ConfigManager.CurrentConfig.FoldersPath, "ChunkedStreamTest.txt");
-        private readonly string DatabasePath = Path.Combine(ConfigManager.CurrentConfig.FoldersPath, "ChunkedStreamTest.cmissync");
+        private readonly string TestFilePath = Path.Combine(ConfigManager.CurrentConfig.GetFoldersPath(), "ChunkedStreamTest.txt");
+        private readonly string DatabasePath = Path.Combine(ConfigManager.CurrentConfig.GetFoldersPath(), "ChunkedStreamTest.cmissync");
         private readonly int ChunkSize = 1024;
 
         [TestFixtureSetUp]
