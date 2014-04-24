@@ -35,9 +35,6 @@ using CmisSync.Lib.Sync;
 namespace CmisSync {
 
     public class StatusIcon {
-
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(StatusIcon));
-
         public StatusIconController Controller = new StatusIconController ();
 
         private Gdk.Pixbuf [] animation_frames;
@@ -370,7 +367,7 @@ namespace CmisSync {
 #endif
     }
 
-
+    [CLSCompliant(false)]
     public class CmisSyncMenuItem : ImageMenuItem {
         public string RepoName {get;set;}
         public CmisSyncMenuItem (string text) : base (text)
@@ -378,7 +375,8 @@ namespace CmisSync {
             SetProperty ("always-show-image", new GLib.Value (true));
         }
     }
-
+ 
+    [CLSCompliant(false)]
     public class TransmissionMenuItem : ImageMenuItem {
 
         public FileTransmissionType Type { get; private set; }

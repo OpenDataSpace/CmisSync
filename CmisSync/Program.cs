@@ -31,6 +31,7 @@ using System.Diagnostics;
 namespace CmisSync
 {
     // The CmisSync main class.
+    [CLSCompliant(false)]
     public class Program
     {
         /// <summary>

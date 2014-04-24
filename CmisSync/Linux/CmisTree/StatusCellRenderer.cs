@@ -7,6 +7,7 @@ namespace CmisSync.CmisTree
     /// <summary>
     /// LoadingStatus cell renderer.
     /// </summary>
+    [CLSCompliant(false)]
     public class StatusCellRenderer : Gtk.CellRendererText
     {
         /// <summary>

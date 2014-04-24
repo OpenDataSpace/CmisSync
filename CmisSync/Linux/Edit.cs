@@ -13,6 +13,7 @@ namespace CmisSync
     /// Edit folder diaglog
     /// It allows user to edit the selected and ignored folders
     /// </summary>
+    [CLSCompliant(false)]
     public class Edit : SetupWindow
     {
         /// <summary>
@@ -120,7 +121,6 @@ namespace CmisSync
                 Close();
             };
 
-            Gtk.TreeIter iter;
             treeView.HeadersVisible = false;
             treeView.Selection.Mode = SelectionMode.Single;
 

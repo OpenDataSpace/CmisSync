@@ -21,7 +21,8 @@ using Gtk;
 using CmisSync.Lib;
 
 namespace CmisSync {
-
+    
+    [CLSCompliant(false)]
     public class UI {
 
         public StatusIcon StatusIcon;

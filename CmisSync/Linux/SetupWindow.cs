@@ -27,6 +27,7 @@ using Mono.Unix;
 
 namespace CmisSync {
 
+    [CLSCompliant(false)]
     public class SetupWindow : Window    {
 
         // TODO: capscmi
@@ -121,20 +122,20 @@ namespace CmisSync {
             };
         }
 
-
+        [CLSCompliant(false)]
         public void AddButton (Button button)
         {
             (button.Child as Label).Xpad = 15;
             Buttons.Add (button);
         }
 
-
+        [CLSCompliant(false)]
         public void AddOption (Widget widget)
         {            
             OptionArea.Add (widget);
         }
 
-
+        [CLSCompliant(false)]
         new public void Add (Widget widget)
         {
             Label header = new Label ("<span size='large'><b>" + Header + "</b></span>") {

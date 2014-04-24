@@ -19,6 +19,7 @@ namespace CmisSync
     using Gtk;
     using Mono.Unix;
     
+    [CLSCompliant(false)]
     public class About : Window 
     {
         public AboutController Controller = new AboutController ();

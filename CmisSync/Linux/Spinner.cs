@@ -14,13 +14,15 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+using System;
 using System.Timers;
+
 using Gtk;
 
 namespace CmisSync {
         
     // This is a close implementation of GtkSpinner
+    [CLSCompliant(false)]
     public class Spinner : Image {
 
         public bool Active;
@@ -31,7 +33,6 @@ namespace CmisSync {
         private int CurrentStep;
         private int NumSteps;
         private int Size;
-
 
         public Spinner (int size) : base ()
         {

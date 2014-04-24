@@ -24,6 +24,7 @@ namespace CmisSync {
     public static class UIHelpers {
 
         // Looks up an icon from the system's theme
+        [CLSCompliant(false)]
         public static Gdk.Pixbuf GetIcon (string name, int size)
         {
             IconTheme icon_theme = new IconTheme ();
@@ -42,7 +43,7 @@ namespace CmisSync {
             }
         }
 
-
+        [CLSCompliant(false)]
         public static Image GetImage (string name)
         {
             string image_path = Path.Combine (UI.AssetsPath, "pixmaps", name);
@@ -52,6 +53,7 @@ namespace CmisSync {
 
         // Converts a Gdk RGB color to a hex value.
         // Example: from "rgb:0,0,0" to "#000000"
+        [CLSCompliant(false)]
         public static string GdkColorToHex (Gdk.Color color)
         {
             return String.Format ("#{0:X2}{1:X2}{2:X2}",

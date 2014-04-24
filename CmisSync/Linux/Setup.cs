@@ -31,7 +31,8 @@ using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
 
 namespace CmisSync {
-
+ 
+    [CLSCompliant(false)]
     public class Setup : SetupWindow {
 
         public SetupController Controller = new SetupController ();
@@ -394,7 +395,6 @@ namespace CmisSync {
                 Controller.BackToPage1();
             };
 
-            Gtk.TreeIter iter;
             treeView.HeadersVisible = false;
             treeView.Selection.Mode = SelectionMode.Single;
 

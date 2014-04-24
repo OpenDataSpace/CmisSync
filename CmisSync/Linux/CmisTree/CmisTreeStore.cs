@@ -16,7 +16,8 @@ namespace CmisSync.CmisTree
             ColumnStatus = 5,
             NumberColumn = 6,
         };
-
+  
+        [CLSCompliant(false)]
         public TreeStore CmisStore { get; set; }
 
         private object lockCmisStore = new object();
