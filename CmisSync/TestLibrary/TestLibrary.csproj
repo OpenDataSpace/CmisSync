@@ -158,6 +158,8 @@
     <Compile Include="StorageTests\MetaDataStorageTest.cs" />
     <Compile Include="SyncStrategiesTests\RemoteObjectFetcherTest.cs" />
     <Compile Include="SyncStrategiesTests\LocalObjectFetcherTest.cs" />
+    <Compile Include="StorageTests\PersistentCookieStorageTest.cs" />
+    <Compile Include="AuthenticationProviderTests\AuthProviderFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -16,7 +16,7 @@ namespace TestLibrary.LegacyCodeTests
     }*/
 
     [TestFixture]
-    public class IgnoreLocalFolderTests
+    public class RepoInfoTests
     {
         private readonly string CMISSYNCDIR = ConfigManager.CurrentConfig.FoldersPath;
         private readonly string ignorePath = "/tmp/test";
@@ -86,6 +86,12 @@ namespace TestLibrary.LegacyCodeTests
         {
             info.AddIgnorePath(ignorePath);
             Assert.IsFalse(info.IsPathIgnored(ignorePath + "stuff"), ignorePath + "stuff");
+        }
+
+        [Test, Category("Fast")]
+        public void DefaultAuthTypeIsBasicAuthentication()
+        {
+            Assert.That(info.AuthType, Is.EqualTo(Config.AuthenticationType.BASIC));
         }
     }
 }

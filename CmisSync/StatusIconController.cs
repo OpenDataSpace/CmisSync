@@ -117,25 +117,6 @@ namespace CmisSync {
             }
         }
 
-
-        /// <summary>
-        /// Total disk space taken by the sum of the remote folders.
-        /// </summary>
-        public string FolderSize {
-            get {
-                double size = 0;
-
-                foreach (CmisRepo repo in Program.Controller.Repositories)
-                    size += repo.Size;
-
-                if (size == 0)
-                    return "";
-                else
-                    return "— " + CmisSync.Lib.Utils.FormatSize(size);
-            }
-        }
-
-
         /// <summary>
         /// Timer for the animation that appears when downloading/uploading a file.
         /// </summary>

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ICookieStorage.cs" company="GRAU DATA AG">
+// <copyright file="IDisposableAuthProvider.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,37 +17,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage
+namespace CmisSync.Lib.Cmis
 {
     using System;
-    using System.Net;
+
+    using DotCMIS.Binding;
 
     /// <summary>
-    /// Cookie storage.
+    /// Interface of a disposable auth provider.
     /// </summary>
-    public interface ICookieStorage
+    public interface IDisposableAuthProvider : IAuthenticationProvider, IDisposable
     {
-        /// <summary>
-        /// Gets or sets the cookie collection.
-        /// </summary>
-        /// <value>
-        /// The cookies.
-        /// </value>
-        CookieCollection Cookies { get; set; }
-    }
-
-    /// <summary>
-    /// Temporary cookie storage.
-    /// </summary>
-    [Obsolete("Please use this class only until the persistent one is implemented")]
-    public class TemporaryCookieStorage : ICookieStorage
-    {
-        /// <summary>
-        /// Gets or sets the cookie collection.
-        /// </summary>
-        /// <value>
-        /// The cookies.
-        /// </value>
-        public virtual CookieCollection Cookies { get; set; }
     }
 }

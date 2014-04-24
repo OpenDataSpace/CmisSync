@@ -85,6 +85,7 @@ namespace CmisSync.Lib.Events
             map[typeof(CmisSync.Lib.Sync.Strategy.Watcher)] = NORMAL;
             map[typeof(Crawler)] = NORMAL;
             map[typeof(SyncMechanism)] = NORMAL;
+            map[typeof(GenericSyncEventHandler<>)] = NORMAL;
         }
 
         /// <summary>

@@ -84,7 +84,6 @@
     <Compile Include="LoggingStream.cs" />
     <Compile Include="RepoInfo.cs" />
     <Compile Include="Sync\CmisRepo.cs" />
-    <Compile Include="Sync\SynchronizedFolder.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Watcher.cs">
       <SubType>Component</SubType>
@@ -189,6 +188,11 @@
     <Compile Include="Sync\Strategy\LocalObjectFetcher.cs" />
     <Compile Include="Storage\EntryNotFoundException.cs" />
     <Compile Include="Data\MappedObject.cs" />
+    <Compile Include="Cmis\AuthProviderFactory.cs" />
+    <Compile Include="Cmis\IDisposableAuthProvider.cs" />
+    <Compile Include="Cmis\AbstractDisposableAuthProvider.cs" />
+    <Compile Include="Storage\PersistentCookieStorage.cs" />
+    <Compile Include="Cmis\StandardAuthenticationProvider.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

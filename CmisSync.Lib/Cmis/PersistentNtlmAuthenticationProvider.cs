@@ -1,14 +1,32 @@
-using System;
-using System.Net;
-
-using CmisSync.Lib.Storage;
-
-using DotCMIS.Binding;
-
-using log4net;
+//-----------------------------------------------------------------------
+// <copyright file="PersistentNtlmAuthenticationProvider.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace CmisSync.Lib.Cmis
 {
+    using System;
+    using System.Net;
+
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Binding;
+
+    using log4net;
 
     // TODO Refactore this class because it is a simple copy of PersistentStandardAuthenticationProvider
     // => Extract methods and call them instead of the duplicated code
@@ -16,13 +34,13 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Persistent ntlm authentication provider.
     /// </summary>
-    public class PersistentNtlmAuthenticationProvider : NtlmAuthenticationProvider, IDisposable
+    public class PersistentNtlmAuthenticationProvider : NtlmAuthenticationProvider, IDisposableAuthProvider
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(PersistentStandardAuthenticationProvider));
 
-        private ICookieStorage Storage;
+        private ICookieStorage storage;
         private bool disposed = false;
-        private Uri Url;
+        private Uri url;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.PersistentNtlmAuthenticationProvider"/> class.
@@ -33,16 +51,24 @@ namespace CmisSync.Lib.Cmis
         /// <param name='url'>
         /// URL of the cookies.
         /// </param>
-        public PersistentNtlmAuthenticationProvider (ICookieStorage storage, Uri url)
+        public PersistentNtlmAuthenticationProvider(ICookieStorage storage, Uri url)
         {
-            if(storage == null)
+            if (storage == null)
+            {
                 throw new ArgumentNullException("Given db is null");
-            if(url == null)
+            }
+
+            if (url == null)
+            {
                 throw new ArgumentNullException("Given URL is null");
-            Storage = storage;
-            Url = url;
-            foreach(Cookie c in Storage.Cookies)
+            }
+
+            this.storage = storage;
+            this.url = url;
+            foreach (Cookie c in storage.Cookies)
+            {
                 this.Cookies.Add(c);
+            }
         }
 
         /// <summary>
@@ -75,7 +101,7 @@ namespace CmisSync.Lib.Cmis
         /// </remarks>
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -92,15 +118,18 @@ namespace CmisSync.Lib.Cmis
                 if(disposing)
                 {
                     // Dispose managed resources.
-                    try{
-                        Storage.Cookies = Cookies.GetCookies(Url);
-                    }catch(Exception e) {
-                        Logger.Debug(String.Format("Failed to save session cookies of \"{0}\" in db", Url.AbsolutePath), e);
+                    try
+                    {
+                        this.storage.Cookies = this.Cookies.GetCookies(this.url);
+                    }
+                    catch(Exception e)
+                    {
+                        Logger.Debug(string.Format("Failed to save session cookies of \"{0}\" in db", this.url.AbsolutePath), e);
                     }
                 }
-                disposed = true;
+
+                this.disposed = true;
             }
         }
     }
 }
-

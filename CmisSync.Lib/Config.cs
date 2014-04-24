@@ -666,6 +666,7 @@ namespace CmisSync.Lib
                     repoInfo.MaxUploadRetries = uploadRetries;
                     repoInfo.MaxDownloadRetries = downloadRetries;
                     repoInfo.MaxDeletionRetries = deletionRetries;
+                    repoInfo.AuthType = this.authType;
                     if (PollInterval < 1) PollInterval = DefaultPollInterval;
                         repoInfo.PollInterval = PollInterval;
                     foreach (IgnoredFolder ignoredFolder in IgnoredFolders)

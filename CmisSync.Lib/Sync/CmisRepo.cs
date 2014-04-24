@@ -13,15 +13,21 @@
 //
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-using System;
-using System.IO;
-
-using CmisSync.Lib.Events;
-using System.Collections.Generic;
+using DotCMIS.Client;
+using DotCMIS.Client.Impl;
+using DotCMIS;
+using DotCMIS.Enums;
+using DotCMIS.Exceptions;
 
 namespace CmisSync.Lib.Sync
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Events;
+
     using log4net;
 
     /// <summary>
@@ -124,11 +130,6 @@ namespace CmisSync.Lib.Sync
         }
 
         /// <summary>
-        /// Remote folder to synchronize.
-        /// </summary>
-        private SynchronizedFolder synchronizedFolder;
-
-        /// <summary>
         /// Watches the local filesystem for changes.
         /// </summary>
         public CmisSync.Lib.Sync.Strategy.Watcher Watcher { get; private set; }
@@ -153,12 +154,30 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         private bool disposed = false;
 
+        /// <summary>
+        /// The auth provider.
+        /// </summary>
+        private IDisposableAuthProvider authProvider;
+
+        /// <summary>
+        /// Session to the CMIS repository.
+        /// </summary>
+        private ISession session;
+
+        /// <summary>
+        /// The session factory.
+        /// </summary>
+        private SessionFactory sessionFactory;
+
 
         /// <summary>
         /// Constructor.
         /// </summary>
         public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener)
         {
+            this.sessionFactory = SessionFactory.NewInstance();
+
+            this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthType, repoInfo.Address, null);
             EventManager = new SyncEventManager(repoInfo.Name);
             EventManager.AddEventHandler(new DebugLoggingHandler());
             Queue = new SyncEventQueue(EventManager);
@@ -173,7 +192,6 @@ namespace CmisSync.Lib.Sync
             EventManager.AddEventHandler(ignoredFileNameFilter);
             EventManager.AddEventHandler(ignoredFolderNameFilter);
             EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
-            // start scheduler
             Scheduler = new SyncScheduler(Queue, repoInfo.PollInterval);
             EventManager.AddEventHandler(Scheduler);
 
@@ -187,9 +205,7 @@ namespace CmisSync.Lib.Sync
             this.Watcher = new CmisSync.Lib.Sync.Strategy.NetWatcher( new FileSystemWatcher(LocalPath), Queue);
             #endif
 
-            this.synchronizedFolder = new SynchronizedFolder(repoInfo, activityListener, this);
             this.Watcher.EnableEvents = true;
-            Logger.Info(synchronizedFolder);
         }
 
         private bool RepoInfoChanged(ISyncEvent e)
@@ -207,14 +223,6 @@ namespace CmisSync.Lib.Sync
                 // This should never ever happen!
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Some file activity has been detected, add to queue
-        /// </summary>
-        public void OnFileActivity(object sender, FileSystemEventArgs args)
-        {
-            synchronizedFolder.Queue.AddEvent(new FSEvent(args.ChangeType, args.FullPath));
         }
 
         /// <summary>
@@ -252,27 +260,151 @@ namespace CmisSync.Lib.Sync
                     if(!this.Queue.WaitForStopped(timeout))
                         Logger.Debug(String.Format("Event Queue is of {0} has not been closed in {1} miliseconds", RemoteUrl.ToString(), timeout));
                     this.Queue.Dispose();
-                    this.synchronizedFolder.Dispose();
                 }
                 this.disposed = true;
             }
         }
 
         /// <summary>
-        /// Local disk size taken by the repository.
-        /// </summary>
-        public double Size {get {throw new NotImplementedException();}}
-
-        /// <summary>
         /// Initialize the scheduled background sync processes.
         /// </summary>
         public void Initialize()
         {
+            this.Connect();
+
+
             // Sync up everything that changed
             // since we've been offline
             // start full crawl sync on beginning
-            Queue.AddEvent(new StartNextSyncEvent(true));
-            Scheduler.Start();
+            this.Queue.AddEvent(new StartNextSyncEvent(true));
+
+            // start scheduler for event based sync mechanisms
+            this.Scheduler.Start();
+        }
+
+        /// <summary>
+        /// Connect to the CMIS repository.
+        /// </summary>
+        private void Connect()
+        {
+            using(log4net.ThreadContext.Stacks["NDC"].Push("Connect"))
+            {
+                try
+                {
+                    // Create session.
+                    this.session = this.sessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.authProvider, null);
+
+                    this.session.DefaultContext = this.CreateDefaultContext();
+                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address));
+                    //reconnect = false;
+                }
+                catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
+                {
+                    Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.AbsoluteUri), e);
+                    this.Queue.AddEvent(new PermissionDeniedEvent(e));
+                }
+                catch (CmisRuntimeException e)
+                {
+                    if(e.Message == "Proxy Authentication Required")
+                    {
+                        this.Queue.AddEvent(new ProxyAuthRequiredEvent(e));
+                        Logger.Warn("Proxy Settings Problem", e);
+                    }
+                    else
+                    {
+                        Logger.Error("Connection to repository failed: ", e);
+                    }
+                }
+                catch (CmisObjectNotFoundException e)
+                {
+                    Logger.Error("Failed to find cmis object: ", e);
+                }
+                catch (CmisBaseException e)
+                {
+                    Logger.Error("Failed to create session to remote " + this.RepoInfo.Address.ToString() + ": ", e);
+                }
+            }
+        }
+
+        private Config.SyncConfig.Folder GetFolderConfig()
+        {
+            return ConfigManager.CurrentConfig.getFolder(this.RepoInfo.Name);
+        }
+
+        /// <summary>
+        /// Detect whether the repository has the ChangeLog capability.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if this feature is available, otherwise <c>false</c>
+        /// </returns>
+        private bool AreChangeEventsSupported()
+        {
+            try
+            {
+                return (this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
+                        this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
+                    this.GetFolderConfig().SupportedFeatures.GetContentChangesSupport != false;
+            }
+            catch(NullReferenceException e)
+            {
+                return false;
+            }
+        }
+
+        private bool IsGetDescendantsSupported()
+        {
+            try
+            {
+                return this.session.RepositoryInfo.Capabilities.IsGetDescendantsSupported != false && this.GetFolderConfig().SupportedFeatures.GetDescendantsSupport == true;
+            }
+            catch(NullReferenceException e)
+            {
+                return false;
+            }
+        }
+
+        private IOperationContext CreateDefaultContext()
+        {
+            HashSet<string> filters = new HashSet<string>();
+            filters.Add("cmis:objectId");
+            filters.Add("cmis:name");
+            filters.Add("cmis:contentStreamFileName");
+            filters.Add("cmis:contentStreamLength");
+            filters.Add("cmis:lastModificationDate");
+            filters.Add("cmis:path");
+            filters.Add("cmis:changeToken");
+            HashSet<string> renditions = new HashSet<string>();
+            renditions.Add("cmis:none");
+            return this.session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
+        }
+
+        /// <summary>
+        /// Parameter to use for all CMIS requests.
+        /// </summary>
+        /// <returns>
+        /// The cmis parameter.
+        /// </returns>
+        /// <param name='repoInfo'>
+        /// The repository infos.
+        /// </param>
+        private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo)
+        {
+            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+            cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
+            cmisParameters[SessionParameter.User] = repoInfo.User;
+            cmisParameters[SessionParameter.Password] = repoInfo.Password.ToString();
+            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepoID;
+
+            // Sets the Connect Timeout to infinite
+            cmisParameters[SessionParameter.ConnectTimeout] = "-1";
+
+            // Sets the Read Timeout to infinite
+            cmisParameters[SessionParameter.ReadTimeout] = "-1";
+            cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
+            cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
+            cmisParameters[SessionParameter.Compression] = bool.TrueString;
+            return cmisParameters;
         }
     }
 }

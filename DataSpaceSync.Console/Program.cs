@@ -77,7 +77,7 @@ namespace DataSpaceSync.Console
                     Directory.CreateDirectory(path);
                 }
 
-                CmisRepo repo = new CmisSync.Lib.Sync.CmisRepo(folder.GetRepoInfo(),new ActivityListener());
+                CmisRepo repo = new CmisRepo(folder.GetRepoInfo(), new ActivityListener());
                 repositories.Add(repo);
                 repo.Initialize();
             }

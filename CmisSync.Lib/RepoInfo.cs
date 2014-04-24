@@ -54,6 +54,7 @@ namespace CmisSync.Lib
         /// </summary>
         public Credentials.Password Password { get { return credentials.Password; } set { credentials.Password = value; } }
 
+        public Config.AuthenticationType AuthType {get; set; }
 
         /// <summary>
         /// Identifier of the CMIS repository within the CMIS server.

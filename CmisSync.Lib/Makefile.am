@@ -9,14 +9,18 @@ SOURCES =  \
 	ActivityListenerAggregator.cs \
 	Backend.cs \
 	ChunkedStream.cs \
+	Cmis/AbstractDisposableAuthProvider.cs \
+	Cmis/AuthProviderFactory.cs \
 	Cmis/CmisPermissionDeniedException.cs \
 	Cmis/CmisServerNotFoundException.cs \
 	Cmis/CmisUtils.cs \
 	Cmis/Crypto.cs \
 	Cmis/DotCMISLogListener.cs \
+	Cmis/IDisposableAuthProvider.cs \
 	Cmis/MimeType.cs \
 	Cmis/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/PersistentStandardAuthenticationProvider.cs \
+	Cmis/StandardAuthenticationProvider.cs \
 	Config.cs \
 	ConfigManager.cs \
 	ConfigMigration.cs \
@@ -97,6 +101,7 @@ SOURCES =  \
 	Storage/IFileSystemWatcher.cs \
 	Storage/IMetaDataStorage.cs \
 	Storage/MetaDataStorage.cs \
+	Storage/PersistentCookieStorage.cs \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \
@@ -130,7 +135,6 @@ SOURCES =  \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SyncMechanism.cs \
 	Sync/Strategy/Watcher.cs \
-	Sync/SynchronizedFolder.cs \
 	Utils.cs \
 	Watcher.cs
 

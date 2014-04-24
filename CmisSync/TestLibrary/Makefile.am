@@ -12,6 +12,7 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(MONOMAC_LIBS) \
 
 SOURCES =  \
 	ActiveActivitiesManagerTest.cs \
+	AuthenticationProviderTests/AuthProviderFactoryTest.cs \
 	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
 	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
 	ConfigurationTest.cs \
@@ -53,6 +54,7 @@ SOURCES =  \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/MetaDataStorageTest.cs \
+	StorageTests/PersistentCookieStorageTest.cs \
 	StorageTests/PersistentStorageTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \
