@@ -38,15 +38,9 @@ SOURCES =  \
 	Data/PathMatcher.cs \
 	Defines.cs \
 	Events/AbstractEventProducer.cs \
-	Events/AbstractFolderEvent.cs \
 	Events/ActiveActivitiesManager.cs \
-	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
-	Events/ConfigChangedEvent.cs \
-	Events/ContentChangeEvent.cs \
-	Events/CrawlRequestEvent.cs \
 	Events/DebugLoggingHandler.cs \
-	Events/EncapsuledEvent.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
 	Events/EventFilter/GenericHandleDublicatedEventsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
@@ -55,27 +49,34 @@ SOURCES =  \
 	Events/EventFilter/IgnoredFoldersFilter.cs \
 	Events/EventFilter/InvalidFolderNameFilter.cs \
 	Events/EventHandlerPriorities.cs \
-	Events/ExceptionEvent.cs \
-	Events/FileConflictEvent.cs \
+	Events/EventTypes/AbstractFolderEvent.cs \
+	Events/EventTypes/BubbledEvent.cs \
+	Events/EventTypes/ConfigChangedEvent.cs \
+	Events/EventTypes/ContentChangeEvent.cs \
+	Events/EventTypes/CrawlRequestEvent.cs \
+	Events/EventTypes/EncapsuledEvent.cs \
+	Events/EventTypes/ExceptionEvent.cs \
+	Events/EventTypes/FileConflictEvent.cs \
+	Events/EventTypes/FileEvent.cs \
+	Events/EventTypes/FileMovedEvent.cs \
+	Events/EventTypes/FileTransmissionEvent.cs \
+	Events/EventTypes/FolderEvent.cs \
+	Events/EventTypes/FolderMovedEvent.cs \
+	Events/EventTypes/FSEvent.cs \
+	Events/EventTypes/FSMovedEvent.cs \
+	Events/EventTypes/FullSyncCompletedEvent.cs \
+	Events/EventTypes/ISyncEvent.cs \
+	Events/EventTypes/PermissionDeniedEvent.cs \
+	Events/EventTypes/ProxyAuthRequiredEvent.cs \
+	Events/EventTypes/RecentChangedEvent.cs \
+	Events/EventTypes/RemoteEvent.cs \
+	Events/EventTypes/RequestIgnoredEvent.cs \
+	Events/EventTypes/StartNextSyncEvent.cs \
+	Events/EventTypes/SuccessfulLoginEvent.cs \
 	Events/FileDownloadRequest.cs \
-	Events/FileEvent.cs \
-	Events/FileMovedEvent.cs \
-	Events/FileTransmissionEvent.cs \
-	Events/FolderEvent.cs \
-	Events/FolderMovedEvent.cs \
-	Events/FSEvent.cs \
-	Events/FullSyncCompletedEvent.cs \
 	Events/GenericSyncEventHandler.cs \
-	Events/ISyncEvent.cs \
 	Events/ISyncEventQueue.cs \
-	Events/PermissionDeniedEvent.cs \
-	Events/ProxyAuthRequiredEvent.cs \
-	Events/RecentChangedEvent.cs \
-	Events/RemoteEvent.cs \
 	Events/ReportingSyncEventHandler.cs \
-	Events/RequestIgnoredEvent.cs \
-	Events/StartNextSyncEvent.cs \
-	Events/SuccessfulLoginEvent.cs \
 	Events/SyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \
