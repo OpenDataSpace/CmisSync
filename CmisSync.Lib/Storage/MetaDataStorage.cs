@@ -47,6 +47,11 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         private IPathMatcher matcher = null;
 
+        static MetaDataStorage()
+        {
+            DBreezeInitializerSingleton.Init();
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.MetaDataStorage"/> class.
         /// </summary>

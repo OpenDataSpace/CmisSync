@@ -89,6 +89,7 @@ SOURCES =  \
 	IActivityListener.cs \
 	LoggingStream.cs \
 	Storage/DataBaseTableNames.cs \
+	Storage/DBreezeInitializerSingleton.cs \
 	Storage/DirectoryInfoWrapper.cs \
 	Storage/EntryNotFoundException.cs \
 	Storage/EventStorage.cs \

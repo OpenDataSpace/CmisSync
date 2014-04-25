@@ -43,7 +43,7 @@ AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.
 AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
 AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
 
-AC_SUBST(LOG4NETLIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
+AC_SUBST(LOG4NET_LIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
 AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
 
 AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
@@ -145,17 +145,7 @@ if test "$OSNAME" = "Linux" ; then
 	fi
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
-    dnl check for log4net
-	PKG_CHECK_MODULES(LOG4NET, log4net, have_log4net=yes, have_log4net=no)
-	if test "x$have_log4net" = "xno" ; then
-        if test "$log4net_dll" != "no" ; then
-            LOG4NET_LIBS=['[$](LOG4NETLIBS)']
-        else
-		    AC_ERROR([log4net is a required dependency: you need to install the appropriate devel package before you can compile])
-        fi
-	fi
-	AC_SUBST(LOG4NET_LIBS)
-
+	dnl check for appindicator
 	APPINDICATOR_REQUIRED=0.0.7
 	if test x$enable_appindicator = xauto ; then
 			PKG_CHECK_EXISTS([appindicator-sharp-0.1 >= $APPINDICATOR_REQUIRED],
@@ -192,18 +182,6 @@ if test "$OSNAME" = "Darwin" ; then
 
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
-	dnl check for log4net
-        LOG4NET_LIBS=
-	PKG_CHECK_MODULES(LOG4NET, log4net, have_log4net=yes, have_log4net=no)
-	if test "x$have_log4net" = "xno" ; then
-        if test "x$log4net_dll" != "xno" ; then
-            LOG4NET_LIBS=$LOG4NETLIBS
-        else
-            AC_ERROR([log4net is a required dependency: you need to install the appropriate devel package before you can compile])
-        fi
-	fi
-	AC_SUBST(LOG4NET_LIBS)
-	
 
     AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])

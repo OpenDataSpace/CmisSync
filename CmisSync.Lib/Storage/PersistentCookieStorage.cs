@@ -33,6 +33,11 @@ namespace CmisSync.Lib.Storage
         private static readonly string CookieTable = "cookies";
         private DBreezeEngine db;
 
+        static PersistentCookieStorage()
+        {
+            DBreezeInitializerSingleton.Init();
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.PersistentCookieStorage"/> class.
         /// </summary>

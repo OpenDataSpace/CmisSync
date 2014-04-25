@@ -34,16 +34,17 @@
 
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Threading;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
+using CmisSync.Lib.Sync;
+
 using log4net;
 using log4net.Config;
-using CmisSync.Lib.Sync;
-using System.Net;
-using System.Diagnostics;
-using CmisSync.Lib.Config;
 
 [assembly: CLSCompliant(true)]
 
@@ -137,11 +138,12 @@ namespace CmisSync
                 CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
             } catch(Exception e)
             {
-                string message = String.Format("Missing Dependency: {0}{1}{2}", e.Message, Environment.NewLine, e.StackTrace);
+                string message = string.Format("Missing Dependency: {0}{1}{2}", e.Message, Environment.NewLine, e.StackTrace);
                 Logger.Error(message);
                 Console.Error.WriteLine(message);
                 Environment.Exit(-1);
             }
+
             // Increase the number of concurrent requests to each server,
             // as an unsatisfying workaround until this DotCMIS bug 632 is solved.
             // See https://github.com/nicolas-raoul/CmisSync/issues/140

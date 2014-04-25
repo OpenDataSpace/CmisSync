@@ -460,7 +460,8 @@ namespace CmisSync.Lib
         {
             Type[] types = new Type[]{
                 typeof(Newtonsoft.Json.JsonConvert),
-                typeof(DotCMIS.Client.Impl.Session)
+                typeof(DotCMIS.Client.Impl.Session),
+                typeof(DBreeze.DBreezeEngine)
             };
             foreach (var type in types)
             {
