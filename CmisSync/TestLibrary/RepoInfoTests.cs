@@ -21,6 +21,7 @@ using System.IO;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Config;
+using CmisSync.Lib.Credentials;
 
 using NUnit.Framework;
 
@@ -28,12 +29,6 @@ using Moq;
 
 namespace TestLibrary.LegacyCodeTests
 {
-/*    [TestFixture]
-    public class RepoInfoTests
-    {
-
-    }*/
-
     [TestFixture]
     public class RepoInfoTests
     {
@@ -48,7 +43,7 @@ namespace TestLibrary.LegacyCodeTests
                 DisplayName = "name",
                 Address = new Uri("http://example.com"),
                 User = "user",
-                Password = "password",
+                ObfuscatedPassword = new Password("password").ObfuscatedPassword,
                 PollInterval = 5000,
                 LocalPath = CMISSYNCDIR,
                 RepositoryId = "repoId",

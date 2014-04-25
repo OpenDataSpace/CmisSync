@@ -95,7 +95,7 @@ namespace CmisSync.Lib.Config
     /// Configuration of a CmisSync synchronized folder.
     /// It can be found in the XML configuration file.
     /// </summary>
-    [XmlRoot("CmisSync", Namespace=null)]
+    [XmlRoot("CmisSync", Namespace = null)]
     public class Config
     {
         /// <summary>
@@ -176,7 +176,7 @@ namespace CmisSync.Lib.Config
         public ProxySettings Proxy { get; set; }
 
         /// <summary>
-        /// Gets and sets the list of folder name wildcards which should be ignored on sync
+        /// Gets or sets the list of folder name wildcards which should be ignored on sync
         /// </summary>
         /// <value>
         /// The ignored folder names.
@@ -353,7 +353,6 @@ namespace CmisSync.Lib.Config
                 {
                     throw new XmlException(fullPath + " does not contain a valid config XML structure.");
                 }
-
             }
             finally
             {
@@ -513,6 +512,7 @@ namespace CmisSync.Lib.Config
                 config = (Config)deserializer.Deserialize(textReader);
             }
 
+            config.configPath = Path.GetDirectoryName(fullPath);
             HttpProxyUtils.SetDefaultProxy(config.Proxy);
             return config;
         }

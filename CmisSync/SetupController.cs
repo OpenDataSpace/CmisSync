@@ -532,7 +532,7 @@ namespace CmisSync
                     DisplayName = repoName,
                     Address = saved_address,
                     User = saved_user.TrimEnd(),
-                    Password = saved_password.TrimEnd(),
+                    ObfuscatedPassword = new Password(saved_password.TrimEnd()).ObfuscatedPassword,
                     RepositoryId = PreviousRepository,
                     RemotePath = PreviousPath,
                     LocalPath = localrepopath

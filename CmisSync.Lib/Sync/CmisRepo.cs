@@ -118,6 +118,13 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         private SessionFactory sessionFactory;
 
+        private DBreezeEngine db;
+
+        static CmisRepo()
+        {
+            DBreezeInitializerSingleton.Init();
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class.
         /// </summary>
@@ -126,9 +133,14 @@ namespace CmisSync.Lib.Sync
         /// <param name="inMemory">If set to <c>true</c>, creates in memory db.</param>
         public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory = false)
         {
+            this.db = new DBreezeEngine(new DBreezeConfiguration {
+                DBreezeDataFolderName = inMemory ? null : repoInfo.GetDatabasePath(),
+                Storage = inMemory ? DBreezeConfiguration.eStorage.MEMORY : DBreezeConfiguration.eStorage.DISK
+            });
+
             this.sessionFactory = SessionFactory.NewInstance();
 
-            this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, null);
+            this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
             this.EventManager = new SyncEventManager(repoInfo.DisplayName);
             this.EventManager.AddEventHandler(new DebugLoggingHandler());
             this.Queue = new SyncEventQueue(this.EventManager);
@@ -269,6 +281,10 @@ namespace CmisSync.Lib.Sync
                     }
 
                     this.Queue.Dispose();
+                    if(this.db != null)
+                    {
+                        this.db.Dispose();
+                    }
                 }
 
                 this.disposed = true;
@@ -407,7 +423,7 @@ namespace CmisSync.Lib.Sync
             cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
             cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
             cmisParameters[SessionParameter.User] = repoInfo.User;
-            cmisParameters[SessionParameter.Password] = repoInfo.Password.ToString();
+            cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
 
             // Sets the Connect Timeout to infinite

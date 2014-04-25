@@ -113,16 +113,16 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The obfuscated password.</value>
         [XmlElement("password")]
-        public Credentials.Password Password
+        public string ObfuscatedPassword
         {
             get
             {
-                return this.credentials.Password;
+                return this.credentials.Password.ObfuscatedPassword;
             }
 
             set
             {
-                this.credentials.Password = value;
+                this.credentials.Password = new CmisSync.Lib.Credentials.Password { ObfuscatedPassword = value };
             }
         }
 
@@ -259,10 +259,14 @@ namespace CmisSync.Lib.Config
         [XmlElement("ignoreFolder")]
         public List<IgnoredFolder> IgnoredFolders { get; set; }
 
+        /// <summary>
+        /// Gets the ignored paths.
+        /// </summary>
+        /// <returns>The ignored paths.</returns>
         public List<string> GetIgnoredPaths()
         {
             List<string> list = new List<string>();
-            foreach(IgnoredFolder folder in IgnoredFolders)
+            foreach(IgnoredFolder folder in this.IgnoredFolders)
             {
                 list.Add(folder.Path);
             }
@@ -278,7 +282,7 @@ namespace CmisSync.Lib.Config
         /// </param>
         public void AddIgnorePath(string ignorePath)
         {
-            this.IgnoredFolders.Add(new IgnoredFolder{Path = ignorePath});
+            this.IgnoredFolders.Add(new IgnoredFolder { Path = ignorePath });
         }
 
         /// <summary>
@@ -287,19 +291,29 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// Full path
         /// </returns>
-        /// <param name='basePath'>
-        /// Path on which the database folder should base on
-        /// </param>
-        public string CreateDatabasePath(DirectoryInfo basePath)
+        public virtual string GetDatabasePath()
         {
-            if (basePath == null)
-            {
-                throw new ArgumentNullException("Given basePath parameter is null");
-            }
-
             string name = this.DisplayName.Replace("\\", "_");
             name = name.Replace("/", "_");
-            return Path.Combine(basePath.FullName, name + "_DB");
+            return Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), name + "_DB");
+        }
+
+        /// <summary>
+        /// Gets the password.
+        /// </summary>
+        /// <returns>The password.</returns>
+        public virtual Credentials.Password GetPassword()
+        {
+            return new Credentials.Password { ObfuscatedPassword = this.credentials.Password.ObfuscatedPassword };
+        }
+
+        /// <summary>
+        /// Sets the password.
+        /// </summary>
+        /// <param name="password">Password.</param>
+        public virtual void SetPassword(Credentials.Password password)
+        {
+            this.credentials.Password = new Credentials.Password { ObfuscatedPassword = password.ObfuscatedPassword };
         }
 
         /// <summary>

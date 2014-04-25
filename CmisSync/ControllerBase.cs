@@ -374,7 +374,7 @@ namespace CmisSync
                     Address = folder.Address,
                     UserName = folder.User,
                     Password = new Lib.Credentials.Password(){
-                        ObfuscatedPassword = folder.Password.ObfuscatedPassword
+                        ObfuscatedPassword = folder.ObfuscatedPassword
                     },
                     RepoId = folder.RepositoryId
                 };
@@ -397,7 +397,7 @@ namespace CmisSync
                         {
                             folder.AddIgnorePath(ignore);
                         }
-                        folder.Password = edit.Credentials.Password;
+                        folder.SetPassword(edit.Credentials.Password);
                         ConfigManager.CurrentConfig.Save();
                         foreach (CmisRepo repo in this.repositories)
                         {
@@ -622,7 +622,7 @@ namespace CmisSync
             repoInfo.DisplayName = name;
             repoInfo.Address = address;
             repoInfo.User = user;
-            repoInfo.Password = password;
+            repoInfo.SetPassword(new CmisSync.Lib.Credentials.Password(password));
             repoInfo.RepositoryId = repository;
             repoInfo.RemotePath = remote_path;
             repoInfo.LocalPath = local_path;

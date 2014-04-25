@@ -188,7 +188,7 @@ namespace TestLibrary.IntegrationTests
             cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
             cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
             cmisParameters[SessionParameter.User] = repoInfo.User;
-            cmisParameters[SessionParameter.Password] = repoInfo.Password.ToString();
+            cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
             cmisParameters[SessionParameter.ConnectTimeout] = "-1";
 
