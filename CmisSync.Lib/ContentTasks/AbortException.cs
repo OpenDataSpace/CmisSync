@@ -16,19 +16,51 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.Serialization;
 
 namespace CmisSync.Lib.ContentTasks
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Runtime.Serialization;
+    using System.Text;
+
+    /// <summary>
+    /// Abort exception.
+    /// </summary>
     [Serializable]
     public class AbortException : Exception
     {
-        public AbortException() : base("Abort exception") { }
-        public AbortException(string msg) : base(msg) { }
-        public AbortException (string message, Exception inner) : base (message, inner) { }
-        protected AbortException (SerializationInfo info, StreamingContext context) : base (info, context) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.AbortException"/> class.
+        /// </summary>
+        public AbortException() : base("Abort exception")
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.AbortException"/> class.
+        /// </summary>
+        /// <param name="msg">Abortion message.</param>
+        public AbortException(string msg) : base(msg)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.AbortException"/> class.
+        /// </summary>
+        /// <param name="message">Abortion Message.</param>
+        /// <param name="inner">Inner exception.</param>
+        public AbortException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.AbortException"/> class.
+        /// </summary>
+        /// <param name="info">Serializaction info.</param>
+        /// <param name="context">Streaming context.</param>
+        protected AbortException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
     }
 }
