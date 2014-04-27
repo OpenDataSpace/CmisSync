@@ -198,6 +198,7 @@
     <Compile Include="Config\Feature.cs" />
     <Compile Include="Cmis\StandardAuthenticationProviderWrapper.cs" />
     <Compile Include="Storage\DBreezeInitializerSingleton.cs" />
+    <Compile Include="ContentTasks\UploadFailedException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

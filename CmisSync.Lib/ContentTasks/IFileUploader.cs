@@ -16,15 +16,17 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Runtime.Serialization;
-using System.IO;
-using DotCMIS.Client;
-using CmisSync.Lib.Events;
-using System.Security.Cryptography;
 
 namespace CmisSync.Lib.ContentTasks
 {
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+
+    using CmisSync.Lib.Events;
+
+    using DotCMIS.Client;
+
     /// <summary>
     /// I file Upload Module must implement this interface.
     /// </summary>
@@ -42,7 +44,7 @@ namespace CmisSync.Lib.ContentTasks
         /// <param name='localFileStream'>
         /// Local file stream.
         /// </param>
-        /// <param name='TransmissionStatus'>
+        /// <param name='status'>
         /// Transmission status where the uploader should report its uploading status.
         /// </param>
         /// <param name='hashAlg'>
@@ -51,7 +53,8 @@ namespace CmisSync.Lib.ContentTasks
         /// <param name='overwrite'>
         /// If true, the local content will overwrite the existing content.
         /// </param>
-        IDocument UploadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg, bool overwrite = true);
+        IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true);
+
         /// <summary>
         /// Appends the localFileStream to the remoteDocument.
         /// </summary>
@@ -64,61 +67,12 @@ namespace CmisSync.Lib.ContentTasks
         /// <param name='localFileStream'>
         /// Local file stream.
         /// </param>
-        /// <param name='TransmissionStatus'>
+        /// <param name='status'>
         /// Transmission status where the uploader should report its appending status.
         /// </param>
         /// <param name='hashAlg'>
         /// Hash alg which should be used to calculate a checksum over the appended content.
         /// </param>
-        IDocument AppendFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg);
-    }
-
-    /// <summary>
-    /// Upload failed exception.
-    /// </summary>
-    [Serializable]
-    public class UploadFailedException : Exception
-    {
-        private IDocument doc;
-        /// <summary>
-        /// Gets the last successful uploaded document state.
-        /// </summary>
-        /// <value>
-        /// The last successful uploaded document state.
-        /// </value>
-        public IDocument LastSuccessfulDocument { get { return this.doc; } }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Tasks.UploadFailedException"/> class.
-        /// </summary>
-        /// <param name='inner'>
-        /// Inner exception cause the upload failure.
-        /// </param>
-        /// <param name='lastSuccessfulDocumentState'>
-        /// Last successful uploaded document state.
-        /// </param>
-        public UploadFailedException (Exception inner, IDocument lastSuccessfulDocumentState) : base("Upload Failed", inner)
-        {
-            doc = lastSuccessfulDocumentState;
-        }
-
-        public UploadFailedException () : this("Upload Failed")
-        {
-        }
-
-        public UploadFailedException (string message) : base(message)
-        {
-            doc = null;
-        }
-
-        public UploadFailedException (string message, Exception innerException) : base(message, innerException)
-        {
-            doc = null;
-        }
-
-        protected UploadFailedException (SerializationInfo info, StreamingContext context) : base (info, context)
-        {
-            doc = null;
-        }
+        IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg);
     }
 }
-

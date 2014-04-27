@@ -34,6 +34,7 @@ SOURCES =  \
 	ContentTasks/IFileUploader.cs \
 	ContentTasks/SimpleFileDownloader.cs \
 	ContentTasks/SimpleFileUploader.cs \
+	ContentTasks/UploadFailedException.cs \
 	ContentTasks/Utils.cs \
 	Credentials.cs \
 	Data/IMappedObject.cs \
