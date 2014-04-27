@@ -32,18 +32,19 @@ namespace CmisSync.Lib.Data
     /// </summary>
     public class PathMatcher : IPathMatcher
     {
-        public string LocalTargetRootPath { get; private set; }
-
-        public string RemoteTargetRootPath { get; private set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.PathMatcher"/> class.
+        /// </summary>
+        /// <param name="localTargetRootPath">Local target root path.</param>
+        /// <param name="remoteTargetRootPath">Remote target root path.</param>
         public PathMatcher(string localTargetRootPath, string remoteTargetRootPath)
         {
-            if (String.IsNullOrEmpty(localTargetRootPath))
+            if (string.IsNullOrEmpty(localTargetRootPath))
             {
                 throw new ArgumentException("Given local path is null or empty");
             }
 
-            if (String.IsNullOrEmpty(remoteTargetRootPath))
+            if (string.IsNullOrEmpty(remoteTargetRootPath))
             {
                 throw new ArgumentException("Given remote path is null or empty");
             }
@@ -51,12 +52,34 @@ namespace CmisSync.Lib.Data
             this.LocalTargetRootPath = localTargetRootPath;
             this.RemoteTargetRootPath = remoteTargetRootPath;
         }
-        
+
+        /// <summary>
+        /// Gets the local target root path.
+        /// </summary>
+        /// <value>The local target root path.</value>
+        public string LocalTargetRootPath { get; private set; }
+
+        /// <summary>
+        /// Gets the remote target root path.
+        /// </summary>
+        /// <value>The remote target root path.</value>
+        public string RemoteTargetRootPath { get; private set; }
+
+        /// <summary>
+        /// Determines whether this instance can create local path for specified remotePath.
+        /// </summary>
+        /// <returns>true if possible</returns>
+        /// <param name="remoteFolder">Remote folder.</param>
         public bool CanCreateLocalPath(IFolder remoteFolder)
         {
             return this.CanCreateLocalPath(remoteFolder.Path);
         }
 
+        /// <summary>
+        /// Determines whether this instance can create local path for specified remotePath.
+        /// </summary>
+        /// <returns>true if possible</returns>
+        /// <param name="remoteDocument">Remote document.</param>
         public bool CanCreateLocalPath(IDocument remoteDocument)
         {
             foreach (string remotePath in remoteDocument.Paths)
@@ -70,56 +93,114 @@ namespace CmisSync.Lib.Data
             return false;
         }
 
+        /// <summary>
+        /// Determines whether this instance can create remote path for specified localFile.
+        /// </summary>
+        /// <returns>true if possible</returns>
+        /// <param name="localFile">Local file.</param>
         public bool CanCreateRemotePath(FileInfo localFile)
         {
             return this.CanCreateRemotePath(localFile.FullName);
         }
 
+        /// <summary>
+        /// Determines whether this instance can create remote path for specified localFile.
+        /// </summary>
+        /// <returns>true if possible</returns>
+        /// <param name="localDirectory">Local directory.</param>
         public bool CanCreateRemotePath(DirectoryInfo localDirectory)
         {
             return this.CanCreateRemotePath(localDirectory.FullName);
         }
 
+        /// <summary>
+        /// Matches the specified localPath and remotePath.
+        /// </summary>
+        /// <param name="localPath">Local path.</param>
+        /// <returns>true if matches</returns>
+        /// <param name="remoteFolder">Remote folder.</param>
         public bool Matches(string localPath, IFolder remoteFolder)
         {
             return this.Matches(localPath, remoteFolder.Path);
         }
 
+        /// <summary>
+        /// Matches the specified localPath and remotePath.
+        /// </summary>
+        /// <returns>true if matches</returns>
+        /// <param name="localFolder">Local folder.</param>
+        /// <param name="remoteFolder">Remote folder.</param>
         public bool Matches(IDirectoryInfo localFolder, IFolder remoteFolder)
         {
             return this.Matches(localFolder.FullName, remoteFolder.Path);
         }
 
+        /// <summary>
+        /// Creates the corresponding local path.
+        /// </summary>
+        /// <returns>The local path.</returns>
+        /// <param name="remoteFolder">Remote folder.</param>
         public string CreateLocalPath(IFolder remoteFolder)
         {
             return this.CreateLocalPath(remoteFolder.Path);
         }
 
+        /// <summary>
+        /// Creates the corresponding local path.
+        /// </summary>
+        /// <returns>The local path.</returns>
+        /// <param name="remoteDocument">Remote document.</param>
         public string CreateLocalPath(IDocument remoteDocument)
         {
             return this.CreateLocalPaths(remoteDocument)[0];
         }
 
-        public string CreateRemotePat(DirectoryInfo localDirectory)
+        /// <summary>
+        /// Creates the remote pat.
+        /// </summary>
+        /// <returns>The remote pat.</returns>
+        /// <param name="localDirectory">Local directory.</param>
+        public string CreateRemotePath(DirectoryInfo localDirectory)
         {
             return this.CreateRemotePath(localDirectory.FullName);
         }
 
+        /// <summary>
+        /// Creates the corresponding remote path.
+        /// </summary>
+        /// <returns>The remote path.</returns>
+        /// <param name="localFile">Local file.</param>
         public string CreateRemotePath(FileInfo localFile)
         {
             return this.CreateRemotePath(localFile.FullName);
         }
 
+        /// <summary>
+        /// Determines whether this instance can create local path for specified remotePath.
+        /// </summary>
+        /// <returns>true if possible</returns>
+        /// <param name="remotePath">Remote path.</param>
         public bool CanCreateLocalPath(string remotePath)
         {
             return remotePath.StartsWith(this.RemoteTargetRootPath);
         }
 
+        /// <summary>
+        /// Determines whether this instance can create remote path for specified localFile.
+        /// </summary>
+        /// <returns>true if possible</returns>
+        /// <param name="localPath">Local path.</param>
         public bool CanCreateRemotePath(string localPath)
         {
             return localPath.StartsWith(this.LocalTargetRootPath);
         }
 
+        /// <summary>
+        /// Matches the specified localPath and remotePath.
+        /// </summary>
+        /// <param name="localPath">Local path.</param>
+        /// <param name="remotePath">Remote path.</param>
+        /// <returns>true if the paths matches</returns>
         public bool Matches(string localPath, string remotePath)
         {
             if (!localPath.StartsWith(this.LocalTargetRootPath))
@@ -127,9 +208,14 @@ namespace CmisSync.Lib.Data
                 throw new ArgumentOutOfRangeException(string.Format("The given local path \"{0}\"does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
 
-            return localPath.Equals(CreateLocalPath(remotePath));
+            return localPath.Equals(this.CreateLocalPath(remotePath));
         }
 
+        /// <summary>
+        /// Creates the corresponding local paths.
+        /// </summary>
+        /// <returns>The local paths.</returns>
+        /// <param name="remoteDocument">Remote document.</param>
         public List<string> CreateLocalPaths(IDocument remoteDocument)
         {
             if (!this.CanCreateLocalPath(remoteDocument))
@@ -151,6 +237,11 @@ namespace CmisSync.Lib.Data
             return localPaths;
         }
 
+        /// <summary>
+        /// Creates the corresponding local path.
+        /// </summary>
+        /// <returns>The local path.</returns>
+        /// <param name="remotePath">Remote path.</param>
         public string CreateLocalPath(string remotePath)
         {
             if (!this.CanCreateLocalPath(remotePath))
@@ -163,6 +254,11 @@ namespace CmisSync.Lib.Data
             return Path.Combine(this.LocalTargetRootPath, Path.Combine(relativePath.Split('/')));
         }
 
+        /// <summary>
+        /// Creates the corresponding remote path.
+        /// </summary>
+        /// <returns>The remote path.</returns>
+        /// <param name="localPath">Local path.</param>
         public string CreateRemotePath(string localPath)
         {
             if (!this.CanCreateRemotePath(localPath))
@@ -176,11 +272,16 @@ namespace CmisSync.Lib.Data
                 return this.RemoteTargetRootPath;
             }
 
-            relativePath = (relativePath.Length > 0 && relativePath [0] == Path.DirectorySeparatorChar) ? relativePath.Substring(1) : relativePath;
+            relativePath = (relativePath.Length > 0 && relativePath[0] == Path.DirectorySeparatorChar) ? relativePath.Substring(1) : relativePath;
             relativePath = relativePath.Replace(Path.DirectorySeparatorChar, '/');
             return string.Format("{0}/{1}", this.RemoteTargetRootPath, relativePath);
         }
 
+        /// <summary>
+        /// Gets the relative local path.
+        /// </summary>
+        /// <returns>The relative local path.</returns>
+        /// <param name="localPath">Local path.</param>
         public string GetRelativeLocalPath(string localPath)
         {
             if(!this.CanCreateRemotePath(localPath))

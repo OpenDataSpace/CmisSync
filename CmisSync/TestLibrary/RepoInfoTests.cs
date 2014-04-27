@@ -26,6 +26,7 @@ using CmisSync.Lib.Credentials;
 using NUnit.Framework;
 
 using Moq;
+using System.Collections.Generic;
 
 namespace TestLibrary.LegacyCodeTests
 {
@@ -47,7 +48,8 @@ namespace TestLibrary.LegacyCodeTests
                 PollInterval = 5000,
                 LocalPath = CMISSYNCDIR,
                 RepositoryId = "repoId",
-                RemotePath = "/"
+                RemotePath = "/",
+                IgnoredFolders = new List<CmisSync.Lib.Config.RepoInfo.IgnoredFolder>()
             };
         }
 
