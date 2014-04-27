@@ -16,117 +16,176 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using DotCMIS.Client;
-using DotCMIS.Data;
-using System.Security.Cryptography;
-using System.IO;
-using CmisSync.Lib.Streams;
-using CmisSync.Lib.Events;
-using log4net;
 
 namespace CmisSync.Lib.ContentTasks
 {
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Streams;
+
+    using DotCMIS.Client;
+    using DotCMIS.Data;
+
+    using log4net;
+
+    /// <summary>
+    /// Chunked downloader.
+    /// </summary>
     public class ChunkedDownloader : IFileDownloader
     {
         private bool disposed = false;
-        private object DisposeLock = new object ();
+        private object disposeLock = new object();
         private long chunkSize;
 
-        public long ChunkSize { get { return this.chunkSize; } }
-
-        public ChunkedDownloader (long ChunkSize = 1024 * 1024)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> class.
+        /// </summary>
+        /// <param name="chunkSize">Chunk size.</param>
+        public ChunkedDownloader(long chunkSize = 1024 * 1024)
         {
-            if (ChunkSize <= 0)
-                throw new ArgumentException ("The chunk size must be a positive number and cannot be zero or less");
-            this.chunkSize = ChunkSize;
+            if (chunkSize <= 0)
+            {
+                throw new ArgumentException("The chunk size must be a positive number and cannot be zero or less");
+            }
+
+            this.chunkSize = chunkSize;
         }
 
-        private int DownloadNextChunk (IDocument remoteDocument, long offset, long remainingBytes, FileTransmissionEvent TransmissionStatus, Stream outputstream, HashAlgorithm hashAlg)
+        /// <summary>
+        /// Gets the size of the chunk.
+        /// </summary>
+        /// <value>The size of the chunk.</value>
+        public long ChunkSize
         {
-            lock (DisposeLock) {
-                if (disposed) {
-                    TransmissionStatus.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
-                    throw new ObjectDisposedException(TransmissionStatus.Path);
-                }
-
-                IContentStream contentStream = remoteDocument.GetContentStream (remoteDocument.ContentStreamId, offset, remainingBytes);
-                TransmissionStatus.ReportProgress (new TransmissionProgressEventArgs () {
-                    Length = remoteDocument.ContentStreamLength,
-                    ActualPosition = offset,
-                    Resumed = offset > 0
-                }
-                );
-
-                using (Stream remoteStream = contentStream.Stream)
-                using (ForwardReadingStream forwardstream = new ForwardReadingStream(remoteStream))
-                using (OffsetStream offsetstream = new OffsetStream(forwardstream, offset))
-                using (ProgressStream progress = new ProgressStream(offsetstream, TransmissionStatus)) {
-                    byte[] buffer = new byte[8 * 1024];
-                    int result = 0;
-                    int len;
-                    while ((len = progress.Read (buffer, 0, buffer.Length)) > 0) {
-                        outputstream.Write (buffer, 0, len);
-                        hashAlg.TransformBlock (buffer, 0, len, buffer, 0);
-                        result += len;
-                        outputstream.Flush();
-                    }
-                    return result;
-                }
+            get
+            {
+                return this.chunkSize;
             }
         }
 
-        public void DownloadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg)
+        /// <summary>
+        /// Downloads the file and returns the SHA1 hash of the content of the saved file
+        /// </summary>
+        /// <param name="remoteDocument">Remote document.</param>
+        /// <param name="localFileStream">Local taget file stream.</param>
+        /// <param name="status">Transmission status.</param>
+        /// <param name="hashAlg">Hash algoritm, which should be used to calculate hash of the uploaded stream content</param>
+        /// <exception cref="IOException">On any disc or network io exception</exception>
+        /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
+        /// <exception cref="AbortException">If download is aborted</exception>
+        /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
         {
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
                 while ((len = localFileStream.Read(buffer, 0, buffer.Length)) > 0) {
-                    hashAlg.TransformBlock (buffer, 0, len, buffer, 0);
+                    hashAlg.TransformBlock(buffer, 0, len, buffer, 0);
                 }
             }
 
             long? fileLength = remoteDocument.ContentStreamLength;
+
             // Skip downloading empty content, just go on with an empty file
-            if (null == fileLength || fileLength == 0) {
-                hashAlg.TransformFinalBlock (new byte[0], 0, 0);
+            if (null == fileLength || fileLength == 0)
+            {
+                hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 return;
             }
+
             long offset = localFileStream.Position;
-            long remainingBytes = (fileLength != null) ? (long)fileLength - offset : chunkSize;
-            try {
-                do {
-                    offset += DownloadNextChunk (remoteDocument, offset, remainingBytes, TransmissionStatus, localFileStream, hashAlg);
-                } while(fileLength == null);
-            } catch (DotCMIS.Exceptions.CmisConstraintException) {
+            long remainingBytes = (fileLength != null) ? (long)fileLength - offset : this.chunkSize;
+            try
+            {
+                do
+                {
+                    offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, status, localFileStream, hashAlg);
+                }
+                while(fileLength == null);
             }
-            hashAlg.TransformFinalBlock (new byte[0], 0, 0);
+            catch (DotCMIS.Exceptions.CmisConstraintException)
+            {
+            }
+
+            hashAlg.TransformFinalBlock(new byte[0], 0, 0);
         }
 
-        // Implement IDisposable.
-        // Do not make this method virtual.
-        // A derived class should not be able to override this method.
-        public void Dispose ()
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the
+        /// <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/>. The <see cref="Dispose"/> method leaves the
+        /// <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> in an unusable state. After calling
+        /// <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> so the garbage collector can reclaim the memory
+        /// that the <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> was occupying.</remarks>
+        public void Dispose()
         {
-            Dispose (true);
+            this.Dispose(true);
         }
 
-        // Dispose(bool disposing) executes in two distinct scenarios.
-        // If disposing equals true, the method has been called directly
-        // or indirectly by a user's code. Managed and unmanaged resources
-        // can be disposed.
-        // If disposing equals false, the method has been called by the
-        // runtime from inside the finalizer and you should not reference
-        // other objects. Only unmanaged resources can be disposed.
-        protected virtual void Dispose (bool disposing)
+        /// <summary>
+        /// Dispose(bool disposing) executes in two distinct scenarios.
+        /// If disposing equals true, the method has been called directly
+        /// or indirectly by a user's code. Managed and unmanaged resources
+        /// can be disposed.
+        /// If disposing equals false, the method has been called by the
+        /// runtime from inside the finalizer and you should not reference
+        /// other objects. Only unmanaged resources can be disposed.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing.</param>
+        protected virtual void Dispose(bool disposing)
         {
-            lock (DisposeLock) {
+            lock (this.disposeLock)
+            {
                 // Check to see if Dispose has already been called.
                 if (!this.disposed)
-                // Note disposing has been done.
-                    disposed = true;
+                {
+                    // Note disposing has been done.
+                    this.disposed = true;
+                }
+            }
+        }
+
+        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, FileTransmissionEvent status, Stream outputstream, HashAlgorithm hashAlg)
+        {
+            lock(this.disposeLock)
+            {
+                if (this.disposed)
+                {
+                    status.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
+                    throw new ObjectDisposedException(status.Path);
+                }
+
+                IContentStream contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, remainingBytes);
+                status.ReportProgress(new TransmissionProgressEventArgs {
+                    Length = remoteDocument.ContentStreamLength,
+                    ActualPosition = offset,
+                    Resumed = offset > 0
+                });
+
+                using (Stream remoteStream = contentStream.Stream)
+                    using (ForwardReadingStream forwardstream = new ForwardReadingStream(remoteStream))
+                        using (OffsetStream offsetstream = new OffsetStream(forwardstream, offset))
+                        using (ProgressStream progress = new ProgressStream(offsetstream, status))
+                {
+                    byte[] buffer = new byte[8 * 1024];
+                    int result = 0;
+                    int len;
+                    while ((len = progress.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        outputstream.Write(buffer, 0, len);
+                        hashAlg.TransformBlock(buffer, 0, len, buffer, 0);
+                        result += len;
+                        outputstream.Flush();
+                    }
+
+                    return result;
+                }
             }
         }
     }
 }
-
