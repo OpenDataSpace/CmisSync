@@ -16,13 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace CmisSync.Lib.Config
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
+
     /// <summary>
     /// A static class that allows easy access to the configuration of CmisSync.
     /// </summary>
@@ -37,17 +38,17 @@ namespace CmisSync.Lib.Config
         /// <summary>
         /// Lock to provide threadsafe singleton creation
         /// </summary>
-        private static Object configlock = new Object();
+        private static object configlock = new object();
 
         /// <summary>
-        /// The CmisSync configuration.
+        /// Gets the CmisSync configuration.
         /// Following the singleton design pattern.
         /// </summary>
         public static Config CurrentConfig
         {
             get
             {
-                if( config == null)
+                if (config == null)
                 {
                     lock (configlock)
                     {
@@ -59,15 +60,18 @@ namespace CmisSync.Lib.Config
                         }
                     }
                 }
+
                 // return the loaded configuration.
                 return config;
             }
         }
 
-
         /// <summary>
-        /// Get the filesystem path to the XML configuration file.
+        /// Gets the filesystem path to the XML configuration file.
         /// </summary>
+        /// <returns>
+        /// Platform specific absolut path to config file
+        /// </returns>
         public static string CurrentConfigFile
         {
             get

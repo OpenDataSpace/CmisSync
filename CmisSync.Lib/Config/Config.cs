@@ -75,7 +75,8 @@ namespace CmisSync.Lib.Config
     /// User informations.
     /// </summary>
     [Serializable]
-    public struct User {
+    public struct User
+    {
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
@@ -114,11 +115,26 @@ namespace CmisSync.Lib.Config
         private List<string> ignoreFileNames = new List<string>();
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Config.Config"/> class.
+        /// This constructor should only be called by the serializer.
+        /// </summary>
+        [Obsolete]
+        public Config()
+        {
+        }
+
+        private Config(string fullPath)
+        {
+            this.fullpath = fullPath;
+            this.configPath = Path.GetDirectoryName(this.fullpath);
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether notifications are enabled or not.
         /// </summary>
         /// <value><c>true</c> if notifications; otherwise, <c>false</c>.</value>
         [XmlElement("notifications")]
-        public Boolean Notifications { get; set; }
+        public bool Notifications { get; set; }
 
         /// <summary>
         /// Gets or sets the log4net config.
@@ -237,69 +253,6 @@ namespace CmisSync.Lib.Config
         public double Version { get; set; }
 
         /// <summary>
-        /// Gets the full path to this config file.
-        /// </summary>
-        /// <returns>
-        /// The full path.
-        /// </returns>
-        public string GetFullPath()
-        {
-            return this.fullpath;
-        }
-
-        /// <summary>
-        /// Path of the folder where configuration files are.
-        /// These files are in particular the XML configuration file, the database files, and the log file.
-        /// </summary>
-        public string GetConfigPath()
-        {
-            return this.configPath;
-        }
-
-        /// <summary>
-        /// Gets the configured folder with the given name or null if no folder with this name exists.
-        /// </summary>
-        /// <returns>The folder.</returns>
-        /// <param name="displayName">Name.</param>
-        public RepoInfo GetRepoInfo(string displayName)
-        {
-            foreach (RepoInfo repo in Folders)
-            {
-                if( repo.DisplayName.Equals(displayName))
-                    return repo;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Path to the user's home folder.
-        /// </summary>
-        /// <returns>
-        /// The path to the user's home folder
-        /// </returns>
-        public string GetHomePath()
-        {
-            if (Backend.Platform == PlatformID.Win32NT)
-            {
-                return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            }
-            else
-            {
-                return Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            }
-        }
-
-
-        /// <summary>
-        /// Path where the synchronized folders are stored by default.
-        /// </summary>
-        public string GetFoldersPath()
-        {
-            return Path.Combine(GetHomePath(), "DataSpace");
-        }
-
-
-        /// <summary>
         /// Creates the config or loads the config by path.
         /// </summary>
         /// <returns>
@@ -362,21 +315,13 @@ namespace CmisSync.Lib.Config
             return config;
         }
 
-        [Obsolete]
-        public Config()
-        {
-        }
-
-        private Config(string fullPath)
-        {
-            this.fullpath = fullPath;
-            this.configPath = Path.GetDirectoryName(fullpath);
-        }
-
         /// <summary>
         /// Create an initial XML configuration file with default settings and zero remote folders.
         /// </summary>
-        /// 
+        /// <param name="fullPath">
+        /// Absolute full path to config file
+        /// </param>
+        /// <returns>the newly created config instance</returns>
         public static Config CreateInitialConfig(string fullPath)
         {
             // Get the user name.
@@ -422,6 +367,10 @@ namespace CmisSync.Lib.Config
             };
         }
 
+        /// <summary>
+        /// Creates the initial list of globally ignored file names.
+        /// </summary>
+        /// <returns>The initial list of globally ignored file names.</returns>
         public static List<string> CreateInitialListOfGloballyIgnoredFileNames()
         {
             List<string> list = new List<string>();
@@ -440,6 +389,10 @@ namespace CmisSync.Lib.Config
             return list;
         }
 
+        /// <summary>
+        /// Creates the initial list of globally ignored folder names.
+        /// </summary>
+        /// <returns>The initial list of globally ignored folder names.</returns>
         public static List<string> CreateInitialListOfGloballyIgnoredFolderNames()
         {
             List<string> list = new List<string>();
@@ -447,6 +400,10 @@ namespace CmisSync.Lib.Config
             return list;
         }
 
+        /// <summary>
+        /// Creates the initial list of globally hidden repo names.
+        /// </summary>
+        /// <returns>The initial list of globally hidden repo names.</returns>
         public static List<string> CreateInitialListOfGloballyHiddenRepoNames()
         {
             List<string> list = new List<string>();
@@ -454,11 +411,88 @@ namespace CmisSync.Lib.Config
             return list;
         }
 
+        /// <summary>
+        /// Gets the log file path.
+        /// </summary>
+        /// <returns>The log file path.</returns>
+        /// <param name="configPath">Config path.</param>
+        public static string GetLogFilePath(string configPath)
+        {
+            return Path.Combine(configPath, "debug_log.txt");
+        }
+
+        /// <summary>
+        /// Gets the full path to this config file.
+        /// </summary>
+        /// <returns>
+        /// The full path.
+        /// </returns>
+        public string GetFullPath()
+        {
+            return this.fullpath;
+        }
+
+        /// <summary>
+        /// Path of the folder where configuration files are.
+        /// These files are in particular the XML configuration file, the database files, and the log file.
+        /// </summary>
+        /// <returns>Absolute path</returns>
+        public string GetConfigPath()
+        {
+            return this.configPath;
+        }
+
+        /// <summary>
+        /// Gets the configured folder with the given name or null if no folder with this name exists.
+        /// </summary>
+        /// <returns>The folder.</returns>
+        /// <param name="displayName">The name of the repoInfo Name.</param>
+        public RepoInfo GetRepoInfo(string displayName)
+        {
+            foreach (RepoInfo repo in this.Folders)
+            {
+                if (repo.DisplayName.Equals(displayName))
+                {
+                    return repo;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Path to the user's home folder.
+        /// </summary>
+        /// <returns>
+        /// The path to the user's home folder
+        /// </returns>
+        public string GetHomePath()
+        {
+            if (Backend.Platform == PlatformID.Win32NT)
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            }
+            else
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            }
+        }
+
+        /// <summary>
+        /// Path where the synchronized folders are stored by default.
+        /// </summary>
+        /// <returns>
+        /// platform depending absolute path
+        /// </returns>
+        public string GetFoldersPath()
+        {
+            return Path.Combine(this.GetHomePath(), "DataSpace");
+        }
 
         /// <summary>
         /// Log4net configuration, as an XML tree readily usable by Log4net.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>the log4net xml section</returns>
         public XmlElement GetLog4NetConfig()
         {
             return this.Log4Net as XmlElement;
@@ -467,27 +501,22 @@ namespace CmisSync.Lib.Config
         /// <summary>
         /// Sets a new XmlNode as Log4NetConfig. Is useful for config migration
         /// </summary>
-        /// <param name="node"></param>
+        /// <param name="node">log4net xml config section</param>
         public void SetLog4NetConfig(XmlNode node)
         {
             this.Log4Net = node;
         }
 
-
-
         /// <summary>
         /// Get the configured path to the log file.
         /// </summary>
+        /// <returns>
+        /// The default path to the log file.
+        /// </returns>
         public string GetLogFilePath()
         {
             return GetLogFilePath(this.configPath);
         }
-
-        public static string GetLogFilePath(string configPath)
-        {
-            return Path.Combine(configPath, "debug_log.txt");
-        }
-
 
         /// <summary>
         /// Save the currently loaded (in memory) configuration back to the XML file.
