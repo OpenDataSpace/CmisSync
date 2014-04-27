@@ -71,7 +71,6 @@ namespace CmisSync.Lib.Cmis
                     this.Cookies.Add(c);
                 }
             }
-
         }
 
         /// <summary>
@@ -79,7 +78,7 @@ namespace CmisSync.Lib.Cmis
         /// Takes all cookies of the response and saves them at the local <see cref="System.Net.CookieContainer"/>.
         /// </summary>
         /// <param name='connection'>
-        /// Connection.
+        /// <see cref="System.Net.HttpWebResponse"/> should be passed.
         /// </param>
         public override void HandleResponse(object connection)
         {
@@ -112,7 +111,7 @@ namespace CmisSync.Lib.Cmis
         /// Dispose the specified disposing.
         /// </summary>
         /// <param name='disposing'>
-        /// Disposing.
+        /// Dispose managed resources if <c>true</c>
         /// </param>
         protected virtual void Dispose(bool disposing)
         {

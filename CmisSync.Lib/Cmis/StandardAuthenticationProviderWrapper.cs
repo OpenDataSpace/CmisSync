@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="StandardAuthtenticationProvider.cs" company="GRAU DATA AG">
+// <copyright file="StandardAuthenticationProviderWrapper.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
