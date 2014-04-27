@@ -16,11 +16,12 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Runtime.Serialization;
 
 namespace CmisSync.Lib.Cmis
 {
+    using System;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// Exception launched when the CMIS repository denies an action.
     /// </summary>
@@ -28,23 +29,36 @@ namespace CmisSync.Lib.Cmis
     public class CmisPermissionDeniedException : Exception
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisPermissionDeniedException"/> class.
         /// </summary>
-        public CmisPermissionDeniedException() { }
+        public CmisPermissionDeniedException()
+        {
+        }
         
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisPermissionDeniedException"/> class.
         /// </summary>
-        public CmisPermissionDeniedException(string message) : base(message) { }
+        /// <param name="message">Message of the exception.</param>
+        public CmisPermissionDeniedException(string message) : base(message)
+        {
+        }
         
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisPermissionDeniedException"/> class.
         /// </summary>
-        public CmisPermissionDeniedException(string message, Exception inner) : base(message, inner) { }
+        /// <param name="message">Message of the exception.</param>
+        /// <param name="inner">Inner exception.</param>
+        public CmisPermissionDeniedException(string message, Exception inner) : base(message, inner)
+        {
+        }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisPermissionDeniedException"/> class.
         /// </summary>
-        protected CmisPermissionDeniedException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        /// <param name="info">Serialization info.</param>
+        /// <param name="context">Streaming context.</param>
+        protected CmisPermissionDeniedException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
     }
 }
