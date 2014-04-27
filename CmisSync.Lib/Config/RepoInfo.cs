@@ -310,7 +310,7 @@ namespace CmisSync.Lib.Config
         /// <summary>
         /// Sets the password.
         /// </summary>
-        /// <param name="password">Password.</param>
+        /// <param name="password">Password instance.</param>
         public virtual void SetPassword(Credentials.Password password)
         {
             this.credentials.Password = new Credentials.Password { ObfuscatedPassword = password.ObfuscatedPassword };
@@ -353,6 +353,9 @@ namespace CmisSync.Lib.Config
             }));
         }
 
+        /// <summary>
+        /// Ignored folder
+        /// </summary>
         [Serializable]
         public struct IgnoredFolder
         {

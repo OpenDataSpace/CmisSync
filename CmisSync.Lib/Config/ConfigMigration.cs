@@ -16,15 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
-using System.IO;
 
 namespace CmisSync.Lib.Config
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Xml;
+
     /// <summary>
     /// Migrate config.xml from past versions.
     /// </summary>
@@ -37,9 +38,13 @@ namespace CmisSync.Lib.Config
         {
             // If file does not exist yet, no need for migration.
             if (!File.Exists(ConfigManager.CurrentConfigFile))
+            {
                 return;
+            }
+
             // Replace uppercase notification boolean to lower case
             ReplaceCaseSensitiveNotification();
+
             // Replace XML root element from <sparkleshare> to <CmisSync>
             ReplaceXMLRootElement();
             CheckForDoublicatedLog4NetElement();
@@ -61,7 +66,7 @@ namespace CmisSync.Lib.Config
         private static void ReplaceTrunkByChunk()
         {
             var fileContents = System.IO.File.ReadAllText(ConfigManager.CurrentConfigFile);
-            if (fileContents.Contains("<trunkSize>") || fileContents.Contains("</trunkSize>") )
+            if (fileContents.Contains("<trunkSize>") || fileContents.Contains("</trunkSize>"))
             {
                 fileContents = fileContents.Replace("<trunkSize>", "<chunkSize>");
                 fileContents = fileContents.Replace("</trunkSize>", "</chunkSize>");
@@ -69,7 +74,6 @@ namespace CmisSync.Lib.Config
                 System.Console.Out.WriteLine("Migrated old trunkSize to chunkSize");
             }
         }
-
 
         /// <summary>
         /// Replace XML root element name from sparkleshare to CmisSync
@@ -81,7 +85,9 @@ namespace CmisSync.Lib.Config
                 // If log4net element is found, it means that the root element is already correct.
                 XmlElement element = ConfigManager.CurrentConfig.GetLog4NetConfig();
                 if (element != null)
+                {
                     return;
+                }
             }
             catch (Exception)
             {
@@ -93,6 +99,7 @@ namespace CmisSync.Lib.Config
                 System.IO.File.WriteAllText(ConfigManager.CurrentConfigFile, fileContents);
             }
         }
+
         /// <summary>
         /// Replaces True by true in the notification to make it possible to deserialize
         /// Xml Config to C# Objects
