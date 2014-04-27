@@ -16,11 +16,12 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Runtime.Serialization;
 
 namespace CmisSync.Lib.Cmis
 {
+    using System;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// Exception launched when the CMIS server can not be found.
     /// </summary>
@@ -28,27 +29,36 @@ namespace CmisSync.Lib.Cmis
     public class CmisServerNotFoundException : Exception
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisServerNotFoundException"/> class.
         /// </summary>
-        public CmisServerNotFoundException() { }
-
+        public CmisServerNotFoundException()
+        {
+        }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisServerNotFoundException"/> class.
         /// </summary>
-        public CmisServerNotFoundException(string message) : base(message) { }
-
+        /// <param name="message">Exception message.</param>
+        public CmisServerNotFoundException(string message) : base(message)
+        {
+        }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisServerNotFoundException"/> class.
         /// </summary>
-        public CmisServerNotFoundException(string message, Exception inner) : base(message, inner) { }
-
+        /// <param name="message">Exception message.</param>
+        /// <param name="inner">Inner exception.</param>
+        public CmisServerNotFoundException(string message, Exception inner) : base(message, inner)
+        {
+        }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisServerNotFoundException"/> class.
         /// </summary>
-        protected CmisServerNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        /// <param name="info">Serialization info.</param>
+        /// <param name="context">Streaming context.</param>
+        protected CmisServerNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
     }
-
 }
