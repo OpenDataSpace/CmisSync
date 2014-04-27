@@ -16,148 +16,179 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Collections.Generic;
-
-using CmisSync.Lib.Storage;
-
-using DotCMIS.Client;
 
 namespace CmisSync.Lib.Data
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// Path matcher.
+    /// </summary>
     public class PathMatcher : IPathMatcher
     {
-                
         public string LocalTargetRootPath { get; private set; }
 
         public string RemoteTargetRootPath { get; private set; }
 
-        public PathMatcher (string localTargetRootPath, string remoteTargetRootPath)
+        public PathMatcher(string localTargetRootPath, string remoteTargetRootPath)
         {
-            if (String.IsNullOrEmpty (localTargetRootPath))
-                throw new ArgumentException ("Given local path is null or empty");
-            if (String.IsNullOrEmpty (remoteTargetRootPath))
-                throw new ArgumentException ("Given remote path is null or empty");
-            LocalTargetRootPath = localTargetRootPath;
-            RemoteTargetRootPath = remoteTargetRootPath;
+            if (String.IsNullOrEmpty(localTargetRootPath))
+            {
+                throw new ArgumentException("Given local path is null or empty");
+            }
+
+            if (String.IsNullOrEmpty(remoteTargetRootPath))
+            {
+                throw new ArgumentException("Given remote path is null or empty");
+            }
+
+            this.LocalTargetRootPath = localTargetRootPath;
+            this.RemoteTargetRootPath = remoteTargetRootPath;
         }
         
-                public bool CanCreateLocalPath (IFolder remoteFolder)
+        public bool CanCreateLocalPath(IFolder remoteFolder)
         {
-            return CanCreateLocalPath (remoteFolder.Path);
+            return this.CanCreateLocalPath(remoteFolder.Path);
         }
 
-        public bool CanCreateLocalPath (IDocument remoteDocument)
+        public bool CanCreateLocalPath(IDocument remoteDocument)
         {
-            foreach (string remotePath in remoteDocument.Paths) {
-                if (CanCreateLocalPath (remotePath))
+            foreach (string remotePath in remoteDocument.Paths)
+            {
+                if (this.CanCreateLocalPath(remotePath))
+                {
                     return true;
+                }
             }
+
             return false;
         }
 
-        public bool CanCreateRemotePath (FileInfo localFile)
+        public bool CanCreateRemotePath(FileInfo localFile)
         {
-            return CanCreateRemotePath (localFile.FullName);
+            return this.CanCreateRemotePath(localFile.FullName);
         }
 
-        public bool CanCreateRemotePath (DirectoryInfo localDirectory)
+        public bool CanCreateRemotePath(DirectoryInfo localDirectory)
         {
-            return CanCreateRemotePath (localDirectory.FullName);
+            return this.CanCreateRemotePath(localDirectory.FullName);
         }
 
-
-        public bool Matches (string localPath, IFolder remoteFolder)
+        public bool Matches(string localPath, IFolder remoteFolder)
         {
-            return Matches (localPath, remoteFolder.Path);
+            return this.Matches(localPath, remoteFolder.Path);
         }
 
-        public bool Matches (IDirectoryInfo localFolder, IFolder remoteFolder)
+        public bool Matches(IDirectoryInfo localFolder, IFolder remoteFolder)
         {
-            return Matches (localFolder.FullName, remoteFolder.Path);
+            return this.Matches(localFolder.FullName, remoteFolder.Path);
         }
 
-        public string CreateLocalPath (IFolder remoteFolder)
+        public string CreateLocalPath(IFolder remoteFolder)
         {
-            return CreateLocalPath (remoteFolder.Path);
+            return this.CreateLocalPath(remoteFolder.Path);
         }
 
-        public string CreateLocalPath (IDocument remoteDocument)
+        public string CreateLocalPath(IDocument remoteDocument)
         {
-            return CreateLocalPaths (remoteDocument) [0];
+            return this.CreateLocalPaths(remoteDocument)[0];
         }
 
-
-        public string CreateRemotePath (DirectoryInfo localDirectory)
+        public string CreateRemotePat(DirectoryInfo localDirectory)
         {
-            return CreateRemotePath (localDirectory.FullName);
+            return this.CreateRemotePath(localDirectory.FullName);
         }
 
-        public string CreateRemotePath (FileInfo localFile)
+        public string CreateRemotePath(FileInfo localFile)
         {
-            return CreateRemotePath (localFile.FullName);
+            return this.CreateRemotePath(localFile.FullName);
         }
 
-        public bool CanCreateLocalPath (string remotePath)
+        public bool CanCreateLocalPath(string remotePath)
         {
-            return remotePath.StartsWith (RemoteTargetRootPath);
+            return remotePath.StartsWith(this.RemoteTargetRootPath);
         }
 
-        public bool CanCreateRemotePath (string localPath)
+        public bool CanCreateRemotePath(string localPath)
         {
-            return localPath.StartsWith (this.LocalTargetRootPath);
+            return localPath.StartsWith(this.LocalTargetRootPath);
         }
 
-        public bool Matches (string localPath, string remotePath)
+        public bool Matches(string localPath, string remotePath)
         {
-            if (!localPath.StartsWith (this.LocalTargetRootPath))
-                throw new ArgumentOutOfRangeException (String.Format ("The given local path \"{0}\"does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
-            return localPath.Equals (CreateLocalPath (remotePath));
+            if (!localPath.StartsWith(this.LocalTargetRootPath))
+            {
+                throw new ArgumentOutOfRangeException(string.Format("The given local path \"{0}\"does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
+            }
+
+            return localPath.Equals(CreateLocalPath(remotePath));
         }
 
-        public List<string> CreateLocalPaths (IDocument remoteDocument)
+        public List<string> CreateLocalPaths(IDocument remoteDocument)
         {
-            if (!CanCreateLocalPath (remoteDocument)) 
-                throw new ArgumentOutOfRangeException (String.Format ("Given remote document with Paths \"{0}\" has no path in the remote target folder \"{1}\"", remoteDocument.Paths, RemoteTargetRootPath));
-            List<string> localPaths = new List<string> ();
-            foreach (string remotePath in remoteDocument.Paths) {
-                try {
-                    localPaths.Add (CreateLocalPath (remotePath));
-                } catch (ArgumentException) {
+            if (!this.CanCreateLocalPath(remoteDocument))
+            {
+                throw new ArgumentOutOfRangeException(string.Format("Given remote document with Paths \"{0}\" has no path in the remote target folder \"{1}\"", remoteDocument.Paths, this.RemoteTargetRootPath));
+            }
+
+            List<string> localPaths = new List<string>();
+            foreach (string remotePath in remoteDocument.Paths)
+            {
+                try
+                {
+                    localPaths.Add(this.CreateLocalPath(remotePath));
+                }
+                catch (ArgumentException) {
                 }
             }
+
             return localPaths;
         }
 
         public string CreateLocalPath(string remotePath)
         {
-            if (!CanCreateLocalPath (remotePath))
-                throw new ArgumentOutOfRangeException (String.Format ("Given remote object with Path \"{0}\" is not in the remote target folder \"{1}\"", remotePath, RemoteTargetRootPath));
-            string relativePath = remotePath.Substring (this.RemoteTargetRootPath.Length);
-            relativePath = (relativePath.Length > 0 && relativePath [0] == '/') ? relativePath.Substring (1) : relativePath;
-            return Path.Combine (this.LocalTargetRootPath, Path.Combine (relativePath.Split ('/')));
+            if (!this.CanCreateLocalPath(remotePath))
+            {
+                throw new ArgumentOutOfRangeException(string.Format("Given remote object with Path \"{0}\" is not in the remote target folder \"{1}\"", remotePath, this.RemoteTargetRootPath));
+            }
+                
+            string relativePath = remotePath.Substring(this.RemoteTargetRootPath.Length);
+            relativePath = (relativePath.Length > 0 && relativePath[0] == '/') ? relativePath.Substring(1) : relativePath;
+            return Path.Combine(this.LocalTargetRootPath, Path.Combine(relativePath.Split('/')));
         }
 
         public string CreateRemotePath(string localPath)
         {
-            if (!CanCreateRemotePath (localPath))
-                throw new ArgumentOutOfRangeException (String.Format ("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
-            string relativePath = localPath.Substring (this.LocalTargetRootPath.Length);
+            if (!this.CanCreateRemotePath(localPath))
+            {
+                throw new ArgumentOutOfRangeException(string.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
+            }
+                
+            string relativePath = localPath.Substring(this.LocalTargetRootPath.Length);
             if (relativePath.Length == 0)
+            {
                 return this.RemoteTargetRootPath;
-            relativePath = (relativePath.Length > 0 && relativePath [0] == Path.DirectorySeparatorChar) ? relativePath.Substring (1) : relativePath;
-            relativePath = relativePath.Replace (Path.DirectorySeparatorChar, '/');
-            return String.Format ("{0}/{1}", this.RemoteTargetRootPath, relativePath);
+            }
+
+            relativePath = (relativePath.Length > 0 && relativePath [0] == Path.DirectorySeparatorChar) ? relativePath.Substring(1) : relativePath;
+            relativePath = relativePath.Replace(Path.DirectorySeparatorChar, '/');
+            return string.Format("{0}/{1}", this.RemoteTargetRootPath, relativePath);
         }
 
         public string GetRelativeLocalPath(string localPath)
         {
-            if(!CanCreateRemotePath(localPath))
+            if(!this.CanCreateRemotePath(localPath))
             {
-                throw new ArgumentOutOfRangeException(String.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"",localPath, this.LocalTargetRootPath));
+                throw new ArgumentOutOfRangeException(string.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
-            string relativePath = localPath.Substring (this.LocalTargetRootPath.Length);
+
+            string relativePath = localPath.Substring(this.LocalTargetRootPath.Length);
             if (relativePath.Length == 0)
             {
                 return ".";
@@ -169,4 +200,3 @@ namespace CmisSync.Lib.Data
         }
     }
 }
-

@@ -16,42 +16,89 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.ComponentModel;
-using System.Text;
-using System.IO;
-using System.Collections.Generic;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Storage;
-
-using DotCMIS.Client;
 
 namespace CmisSync.Lib.Data
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.IO;
+    using System.Text;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// Interface for a mapped object. A mapped object is a metadata representation of a local file, corresponding to a remote file.
+    /// </summary>
     public interface IMappedObject
     {
+        /// <summary>
+        /// Gets or sets the CMIS remote object identifier.
+        /// </summary>
+        /// <value>The remote object identifier.</value>
         string RemoteObjectId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the CMIS parent identifier.
+        /// </summary>
+        /// <value>The parent identifier.</value>
         string ParentId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last change token of last action made on CMIS server.
+        /// </summary>
+        /// <value>The last change token.</value>
         string LastChangeToken { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last remote write time in UTC.
+        /// </summary>
+        /// <value>The last remote write time.</value>
         DateTime? LastRemoteWriteTimeUtc { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last local write time in UTC.
+        /// </summary>
+        /// <value>The last local write time.</value>
         DateTime? LastLocalWriteTimeUtc { get; set; }
 
+        /// <summary>
+        /// Gets or sets the last file content checksum.
+        /// </summary>
+        /// <value>The last checksum.</value>
         byte[] LastChecksum { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name of the checksum algorithm.
+        /// </summary>
+        /// <value>The name of the checksum algorithm.</value>
         string ChecksumAlgorithmName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>The name.</value>
         string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
         string Description { get; set; }
 
+        /// <summary>
+        /// Gets or sets the GUID.
+        /// </summary>
+        /// <value>The GUID.</value>
         Guid Guid { get; set; }
 
+        /// <summary>
+        /// Gets the type.
+        /// </summary>
+        /// <value>The type.</value>
         MappedObjectType Type { get; }
     }
-
 }
