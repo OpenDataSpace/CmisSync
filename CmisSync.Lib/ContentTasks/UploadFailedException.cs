@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IFileUploader.cs" company="GRAU DATA AG">
+// <copyright file="UploadFailedException.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -33,21 +33,7 @@ namespace CmisSync.Lib.ContentTasks
         private IDocument doc;
 
         /// <summary>
-        /// Gets the last successful uploaded document state.
-        /// </summary>
-        /// <value>
-        /// The last successful uploaded document state.
-        /// </value>
-        public IDocument LastSuccessfulDocument 
-        {
-            get
-            {
-                return this.doc;
-            }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Tasks.UploadFailedException"/> class.
+        /// Initializes a new instance of the <see cref="UploadFailedException"/> class.
         /// </summary>
         /// <param name='inner'>
         /// Inner exception cause the upload failure.
@@ -60,23 +46,54 @@ namespace CmisSync.Lib.ContentTasks
             this.doc = lastSuccessfulDocumentState;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/> class.
+        /// </summary>
         public UploadFailedException() : this("Upload Failed")
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/> class.
+        /// </summary>
+        /// <param name="message">Upload failing reason message.</param>
         public UploadFailedException(string message) : base(message)
         {
             this.doc = null;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/> class.
+        /// </summary>
+        /// <param name="message">Upload failing reason message.</param>
+        /// <param name="innerException">Inner exception.</param>
         public UploadFailedException(string message, Exception innerException) : base(message, innerException)
         {
             this.doc = null;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/> class.
+        /// </summary>
+        /// <param name="info">Serialization info.</param>
+        /// <param name="context">Streaming context.</param>
         protected UploadFailedException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             this.doc = null;
+        }
+
+        /// <summary>
+        /// Gets the last successful uploaded document state.
+        /// </summary>
+        /// <value>
+        /// The last successful uploaded document state.
+        /// </value>
+        public IDocument LastSuccessfulDocument 
+        {
+            get
+            {
+                return this.doc;
+            }
         }
     }
 }
