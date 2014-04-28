@@ -16,52 +16,87 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.IO;
+
 namespace CmisSync.Lib.Storage 
 {
-    ///
-    ///<summary>Wrapper for DirectoryInfo<summary>
-    ///
+    using System.IO;
+
+    /// <summary>
+    /// Wrapper for DirectoryInfo
+    /// </summary>
     public class DirectoryInfoWrapper : FileSystemInfoWrapper, IDirectoryInfo
     {
         private DirectoryInfo original; 
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.DirectoryInfoWrapper"/> class.
+        /// Uses the given real instance and passes every future call to this instance.
+        /// </summary>
+        /// <param name="directoryInfo">Directory info.</param>
         public DirectoryInfoWrapper(DirectoryInfo directoryInfo) 
             : base(directoryInfo)
         {
             this.original = directoryInfo;
         }
 
-        public void Create() {
-            original.Create();
-        }
-
-        public void Delete (bool recursive) 
+        /// <summary>
+        /// Gets the Parent property of the original instance.
+        /// </summary>
+        /// <value>The parent.</value>
+        public IDirectoryInfo Parent
         {
-            original.Delete(true);
-        }
-
-        public IDirectoryInfo Parent {
-            get { 
-                return new DirectoryInfoWrapper(original.Parent);
+            get
+            { 
+                return new DirectoryInfoWrapper(this.original.Parent);
             } 
         }
 
-        public IDirectoryInfo[] GetDirectories() {
-            DirectoryInfo[] originalDirs = original.GetDirectories();
+        /// <summary>
+        /// Passes the Create call to the original instance.
+        /// </summary>
+        public void Create()
+        {
+            this.original.Create();
+        }
+
+        /// <summary>
+        /// Passes the Delete call to the originial instance.
+        /// </summary>
+        /// <param name="recursive">If set to <c>true</c> recursive.</param>
+        public void Delete(bool recursive) 
+        {
+            this.original.Delete(true);
+        }
+
+        /// <summary>
+        /// Gets the directories of the original instance wrapped by new DirectoryInfoWrapper instances.
+        /// </summary>
+        /// <returns>The directories.</returns>
+        public IDirectoryInfo[] GetDirectories()
+        {
+            DirectoryInfo[] originalDirs = this.original.GetDirectories();
             IDirectoryInfo[] wrappedDirs = new IDirectoryInfo[originalDirs.Length];
-            for(int i = 0; i < originalDirs.Length; i++){
+            for (int i = 0; i < originalDirs.Length; i++)
+            {
                 wrappedDirs[i] = new DirectoryInfoWrapper(originalDirs[i]);
             }
+
             return wrappedDirs;
         }
 
-        public IFileInfo[] GetFiles() {
-            FileInfo[] originalFiles = original.GetFiles();
+        /// <summary>
+        /// Gets the files of the original instance wrapped by new FileInfoWrapper instances.
+        /// </summary>
+        /// <returns>The files.</returns>
+        public IFileInfo[] GetFiles()
+        {
+            FileInfo[] originalFiles = this.original.GetFiles();
             IFileInfo[] wrappedFiles = new IFileInfo[originalFiles.Length];
-            for(int i = 0; i < originalFiles.Length; i++){
+            for(int i = 0; i < originalFiles.Length; i++)
+            {
                 wrappedFiles[i] = new FileInfoWrapper(originalFiles[i]);
             }
+
             return wrappedFiles;
         }
     }

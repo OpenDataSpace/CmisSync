@@ -118,7 +118,7 @@ namespace CmisSync.Lib.Config
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Config.Config"/> class.
         /// This constructor should only be called by the serializer.
         /// </summary>
-        [Obsolete]
+        [Obsolete("This constructor should only be called by the serializer.", true)]
         public Config()
         {
         }
