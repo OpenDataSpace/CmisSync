@@ -35,20 +35,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         {
             new RemoteObjectRenamed();
         }
-
-        [Ignore]
-        [Test, Category("Medium"), Category("Solver")]
-        public void RemoteDocumentRenamed()
-        {
-            Assert.Fail("TODO");
-        }
-
-        [Ignore]
-        [Test, Category("Medium"), Category("Solver")]
-        public void RemoteFolderRenamed()
-        {
-            Assert.Fail("TODO");
-        }
     }
 }
 

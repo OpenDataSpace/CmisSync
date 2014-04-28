@@ -35,20 +35,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         {
             new LocalObjectMoved();
         }
-
-        [Ignore]
-        [Test, Category("Medium"), Category("Solver")]
-        public void LocalFileMoved()
-        {
-            Assert.Fail ("TODO");
-        }
-
-        [Ignore]
-        [Test, Category("Medium"), Category("Solver")]
-        public void LocalFolderMoved()
-        {
-            Assert.Fail ("TODO");
-        }
     }
 }
 
