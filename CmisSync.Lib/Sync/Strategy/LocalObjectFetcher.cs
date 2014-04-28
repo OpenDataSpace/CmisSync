@@ -23,7 +23,7 @@ namespace CmisSync.Lib.Sync.Strategy
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
-    
+
     /// <summary>
     /// Local object fetcher. I generates IFileSystemInfo if none found in FileEvent or FolderEvent
     /// </summary>
@@ -35,7 +35,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private IFileSystemInfoFactory fsFactory;
 
         private IPathMatcher matcher;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.LocalObjectFetcher"/> class.
         /// </summary>
@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Sync.Strategy
             if(matcher == null) {
                 throw new ArgumentNullException("matcher can not be null");
             }
-            
+
             this.matcher = matcher;
             if(fsFactory == null) {
                 this.fsFactory = new FileSystemInfoFactory();
@@ -60,7 +60,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 this.fsFactory = fsFactory;
             }
         }
-  
+
         /// <summary>
         /// Handle the specified e if FolderEvent of FileEvent.
         /// </summary>
@@ -74,21 +74,21 @@ namespace CmisSync.Lib.Sync.Strategy
                 if(folderEvent.LocalFolder != null) {
                     return false;
                 }
-                
+
                 string localPath = this.matcher.CreateLocalPath(folderEvent.RemoteFolder.Path);
                 folderEvent.LocalFolder = this.fsFactory.CreateDirectoryInfo(localPath);
             }
-            
+
             if(e is FileEvent) {
                 var fileEvent = e as FileEvent;
                 if(fileEvent.LocalFile != null) {
                     return false;
                 }
-                
+
                 string localPath = this.matcher.CreateLocalPath(fileEvent.RemoteFile.Paths[0]);
                 fileEvent.LocalFile = this.fsFactory.CreateFileInfo(localPath);
             }
-            
+
             return false;
         }
     }
