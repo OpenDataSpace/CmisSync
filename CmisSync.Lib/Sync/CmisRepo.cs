@@ -19,6 +19,9 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using CmisSync.Lib.Sync.Strategy;
+using CmisSync.Lib.Storage;
+using CmisSync.Lib.Data;
 
 namespace CmisSync.Lib.Sync
 {
@@ -118,7 +121,25 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         private SessionFactory sessionFactory;
 
+        private ContentChangeEventTransformer transformer;
+
+        private ContentChangeEventAccumulator ccaccumulator;
+
+        private LocalSituationDetection localDetection = new LocalSituationDetection();
+
+        private RemoteSituationDetection remoteDetection = new RemoteSituationDetection();
+
+        private RemoteObjectFetcher remoteFetcher;
+
+        Crawler crawler;
+
+        private ContentChanges contentChanges;
+
+        private SyncMechanism mechanism;
+
         private DBreezeEngine db;
+
+        private MetaDataStorage storage;
 
         static CmisRepo()
         {
@@ -133,42 +154,77 @@ namespace CmisSync.Lib.Sync
         /// <param name="inMemory">If set to <c>true</c>, creates in memory db.</param>
         public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory = false)
         {
+            if(repoInfo == null)
+            {
+                throw new ArgumentNullException("Given repoInfo is null");
+            }
+
+            if(activityListener == null)
+            {
+                throw new ArgumentNullException("Given activityListener is null");
+            }
+
+            // Initialize local variables
+            this.RepoInfo = repoInfo;
+            this.LocalPath = repoInfo.LocalPath;
+            this.Name = repoInfo.DisplayName;
+            this.RemoteUrl = repoInfo.Address;
+
+            // Create Queue
+            this.EventManager = new SyncEventManager(repoInfo.DisplayName);
+            this.EventManager.AddEventHandler(new DebugLoggingHandler());
+            this.Queue = new SyncEventQueue(this.EventManager);
+
+            // Create Database connection
             this.db = new DBreezeEngine(new DBreezeConfiguration {
                 DBreezeDataFolderName = inMemory ? null : repoInfo.GetDatabasePath(),
                 Storage = inMemory ? DBreezeConfiguration.eStorage.MEMORY : DBreezeConfiguration.eStorage.DISK
             });
 
+            // Create session dependencies
             this.sessionFactory = SessionFactory.NewInstance();
-
             this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
-            this.EventManager = new SyncEventManager(repoInfo.DisplayName);
-            this.EventManager.AddEventHandler(new DebugLoggingHandler());
-            this.Queue = new SyncEventQueue(this.EventManager);
-            RepoInfo = repoInfo;
-            this.LocalPath = repoInfo.LocalPath;
-            this.Name = repoInfo.DisplayName;
-            this.RemoteUrl = repoInfo.Address;
+
+            // Add ignore file/folder filter
             this.ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(this.Queue) { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
             this.ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
             this.ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
             this.EventManager.AddEventHandler(this.ignoredFoldersFilter);
             this.EventManager.AddEventHandler(this.ignoredFileNameFilter);
             this.EventManager.AddEventHandler(this.ignoredFolderNameFilter);
+
+            // Add handler for repo config changes
             this.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, this.RepoInfoChanged));
+
+            // Add periodic sync procedures scheduler
             this.Scheduler = new SyncScheduler(this.Queue, repoInfo.PollInterval);
             this.EventManager.AddEventHandler(this.Scheduler);
+
+            // Add File System Watcher
+            #if __COCOA__
+            this.Watcher = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
+            #else
+            this.Watcher = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue);
+            #endif
+            this.EventManager.AddEventHandler(this.Watcher);
+
+            // Add transformer
+            this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage);
+            this.EventManager.AddEventHandler(transformer);
+
+            // Add local fetcher
+            var localFetcher = new LocalObjectFetcher(this.storage.Matcher);
+            this.EventManager.AddEventHandler(localFetcher);
+
+            // Initialize sync mechonism
+            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+            this.mechanism = new SyncMechanism(this.localDetection, this.remoteDetection, this.Queue, this.session, this.storage);
+            this.EventManager.AddEventHandler(this.mechanism);
 
             this.SyncStatusChanged += delegate(SyncStatus status)
             {
                 this.Status = status;
             };
-            #if __COCOA__
-            this.Watcher = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
-            #else
-            this.Watcher = new CmisSync.Lib.Sync.Strategy.NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue);
-            #endif
-
-            this.Watcher.EnableEvents = true;
         }
 
         /// <summary>
@@ -250,7 +306,8 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         public void Initialize()
         {
-            this.Connect();
+            // Enable FS Watcher events
+            this.Watcher.EnableEvents = true;
 
             // Sync up everything that changed
             // since we've been offline
@@ -281,6 +338,7 @@ namespace CmisSync.Lib.Sync
                     }
 
                     this.Queue.Dispose();
+                    this.authProvider.Dispose();
                     if(this.db != null)
                     {
                         this.db.Dispose();
@@ -320,8 +378,16 @@ namespace CmisSync.Lib.Sync
         /// <summary>
         /// Connect to the CMIS repository.
         /// </summary>
-        private void Connect()
+        /// <param name="reconnect">
+        /// Forces a reconnect if set to <c>true</c>
+        /// </param>
+        private void Connect(bool reconnect = false)
         {
+            if (this.session != null && !reconnect)
+            {
+                return;
+            }
+
             using(log4net.ThreadContext.Stacks["NDC"].Push("Connect"))
             {
                 try
@@ -331,7 +397,6 @@ namespace CmisSync.Lib.Sync
 
                     this.session.DefaultContext = this.CreateDefaultContext();
                     this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address));
-                    //reconnect = false;
                 }
                 catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
                 {
@@ -435,6 +500,59 @@ namespace CmisSync.Lib.Sync
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             cmisParameters[SessionParameter.Compression] = bool.TrueString;
             return cmisParameters;
+        }
+
+        private void NewSessionCreated()
+        {
+            if (this.AreChangeEventsSupported())
+            {
+                // Remove former added instances from event manager
+                if (this.ccaccumulator != null)
+                {
+                    this.EventManager.RemoveEventHandler(this.ccaccumulator);
+                }
+                if (this.contentChanges != null)
+                {
+                    this.EventManager.RemoveEventHandler(this.contentChanges);
+                }
+
+                // Add Accumulator
+                this.ccaccumulator = new ContentChangeEventAccumulator(session, this.Queue);
+                this.EventManager.AddEventHandler(this.ccaccumulator);
+
+                // Add Content Change sync algorithm
+                this.contentChanges = new ContentChanges(this.session, this.storage, this.Queue);
+                this.EventManager.AddEventHandler(this.contentChanges);
+            }
+            else
+            {
+                if (this.ccaccumulator != null)
+                {
+                    this.EventManager.RemoveEventHandler(this.ccaccumulator);
+                }
+                if (this.contentChanges != null)
+                {
+                    this.EventManager.RemoveEventHandler(this.contentChanges);
+                }
+            }
+
+            // Add remote object fetcher
+            if(this.remoteFetcher != null)
+            {
+                this.EventManager.RemoveEventHandler(remoteFetcher);
+            }
+
+            this.remoteFetcher = new RemoteObjectFetcher(this.session, this.storage);
+            this.EventManager.AddEventHandler(this.remoteFetcher);
+
+            // Add crawler
+            if (this.crawler != null)
+            {
+                this.EventManager.RemoveEventHandler(this.crawler);
+            }
+
+            this.crawler = new Crawler(this.Queue, this.session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder, new DirectoryInfoWrapper(new DirectoryInfo(this.LocalPath)));
+            this.EventManager.AddEventHandler(crawler);
         }
     }
 }
