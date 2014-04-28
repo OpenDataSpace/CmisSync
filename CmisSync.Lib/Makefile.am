@@ -88,7 +88,6 @@ SOURCES =  \
 	Events/SyncScheduler.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
-	LoggingStream.cs \
 	Storage/DataBaseTableNames.cs \
 	Storage/DBreezeInitializerSingleton.cs \
 	Storage/DirectoryInfoWrapper.cs \
