@@ -17,6 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 using System;
+using System.IO;
 using System.Text;
 using System.Collections.Generic;
 
@@ -28,17 +29,11 @@ namespace CmisSync.Lib.Storage
 {
     public class ExtendedAttributeReaderUnix : IExtendedAttributeReader
     {
-        private readonly string prefix;
+        private readonly string prefix = "user.";
 
-        public ExtendedAttributeReaderUnix(string prefix = "user.")
+        public ExtendedAttributeReaderUnix()
         {
-#if __MonoCS__
-            if(String.IsNullOrEmpty(prefix))
-            {
-                throw new ArgumentNullException("The given prefix is null or empty");
-            }
-            this.prefix = prefix;
-#else
+#if (__MonoCS__ != true)
             throw new WrongPlatformException();
 #endif
         }
@@ -121,6 +116,31 @@ namespace CmisSync.Lib.Storage
                 }
             }
             return result;
+#else
+            throw new WrongPlatformException ();
+#endif
+        }
+      
+        public bool IsFeatureAvaillable()
+        {
+#if __MonoCS__
+            byte[] value;
+            string key = "test";
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            File.Create(path);
+            long ret = Syscall.getxattr(path, prefix + key, out value);
+            bool retValue = true;
+            if(ret != 0)
+            {
+                Errno error = Syscall.GetLastError();
+                if(error.ToString().Equals("EOPNOTSUPP")) {
+                    retValue = false;
+                }
+            }
+            if(File.Exists(path)) {
+                File.Delete(path);
+            }
+            return retValue;
 #else
             throw new WrongPlatformException ();
 #endif
