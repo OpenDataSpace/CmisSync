@@ -261,12 +261,11 @@ namespace TestLibrary.SyncStrategiesTests
                         ), Times.Once());
         } 
 
-        private bool VerifyRemoteFolderEventCreation(FolderEvent e, string folder, string name) {
-            Assert.That(e.LocalFolder.FullName, Is.EqualTo(folder));
+        private bool VerifyRemoteFolderEventCreation(FolderEvent e, string name) {
+            Assert.That(e.LocalFolder, Is.Null);
             Assert.That(e.RemoteFolder.Name, Is.EqualTo(name));
             Assert.That(e.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.NONE));           
-            Assert.That(e.Recursive, Is.EqualTo(true));
+            Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.NONE));
             return true;
         }
 
@@ -286,7 +285,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
             queue.Verify(q => q.AddEvent(
-                        It.Is<FolderEvent>(e => VerifyRemoteFolderEventCreation(e, localPath, name))
+                        It.Is<FolderEvent>(e => VerifyRemoteFolderEventCreation(e, name))
                         ), Times.Once());
         } 
 
@@ -294,8 +293,7 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.That(e.LocalFolder.FullName, Is.EqualTo(Path.Combine(folder, name)));
             Assert.That(e.RemoteFolder.Name, Is.EqualTo(name));
             Assert.That(e.Remote, Is.EqualTo(MetaDataChangeType.NONE));
-            Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.NONE));           
-            Assert.That(e.Recursive, Is.EqualTo(false));
+            Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.NONE));
             return true;
         }
 

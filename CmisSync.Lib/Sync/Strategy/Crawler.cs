@@ -135,13 +135,13 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Synchronize metadata if different
                         Queue.AddEvent(new FolderEvent(
                             localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
-                            remoteFolder: folder) { Recursive = false });
-                        
+                            remoteFolder: folder));
+
                         // Recursive crawl the content of the folder
                         Queue.AddEvent(new CrawlRequestEvent(
                             localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
                             remoteFolder: folder));
-                        
+
                         // Remove handled folder from set to get only the local only folders back from set if done
                         localDirNames.Remove(folder.Name);
                     } else {
@@ -149,7 +149,6 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Figure out, what to do with it
                         Queue.AddEvent(new FolderEvent(
                             remoteFolder: folder) {
-                            Recursive = true,
                             Remote = MetaDataChangeType.CREATED });
                     }
                 } else if(cmisObject is IDocument) {
