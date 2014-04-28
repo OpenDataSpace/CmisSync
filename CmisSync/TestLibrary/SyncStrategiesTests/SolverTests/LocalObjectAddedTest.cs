@@ -53,55 +53,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new LocalObjectAdded();
         }
 
-        [Ignore]
-        [Test, Category("Medium"), Category("Solver")]
-        public void LocalFileAdded()
-        {
-            string tempFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-
-            bool remoteObjectCreated = false;
-            var docId = new Mock<IObjectId>();
-            docId.Setup(d => d.Id).Returns("DocumentId");
-            string remoteParentFolderId = "parentFolder";
-            var remoteParentFolder = new Mock<ICmisObject>();
-            try{
-                using(File.Create(tempFile));
-                var solver = new LocalObjectAdded();
-                remoteParentFolder.Setup( f => f.Id).Returns(remoteParentFolderId);
-                Session.Setup(
-                    s => s.CreateDocument(
-                    It.IsAny<IDictionary<string,object>>(),
-                    It.Is<IObjectId>(id => id.Id == remoteParentFolderId),
-                    It.IsAny<IContentStream>(),
-                    It.IsAny<VersioningState?>())
-                    ).Returns(docId.Object).Callback(() => remoteObjectCreated = true);
-                Session.Setup(
-                    s => s.GetObject(
-                    It.Is<IObjectId>((id) => id.Equals(remoteParentFolderId)))
-                    ).Returns(remoteParentFolder.Object);
-
-                solver.Solve(Session.Object, Storage.Object, new Mock<IFileInfo>().Object, null);
-                Assert.IsTrue(remoteObjectCreated);
-                Assert.Fail("TODO");
-            }finally{
-                File.Delete(tempFile);
-            }
-        }
-
-        [Ignore]
-        [Test, Category("Medium"), Category("Solver")]
-        public void LocalFolderAdded()
-        {
-            string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            var folderId = new Mock<IObjectId>();
-            folderId.Setup(f => f.Id).Returns("FolderId");
-            try{
-                Directory.CreateDirectory(tempFolder);
-                Assert.Fail("TODO");
-            } finally {
-                Directory.Delete(tempFolder);
-            }
-        }
     }
 }
 
