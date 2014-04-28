@@ -13,7 +13,8 @@ EXTRA_DIST = \
 	Extras/DotCMIS.dll \
 	$(JSON_PATH) \
 	$(NUNIT_PATH) \
-	$(DBREEZE_PATH)
+	$(DBREEZE_PATH) \
+	$(LOG4NET_PATH)
 
 DISTCLEANFILES = \
 	intltool-extract \
