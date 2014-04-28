@@ -144,8 +144,7 @@ SOURCES =  \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SyncMechanism.cs \
 	Sync/Strategy/Watcher.cs \
-	Utils.cs \
-	Watcher.cs
+	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs
 
