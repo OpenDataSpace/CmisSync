@@ -36,6 +36,11 @@ namespace TestLibrary.StorageTests
         public void SetUp()
         {
             path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var reader = new ExtendedAttributeReaderUnix();
+            if(!reader.IsFeatureAvaillable()) {
+                Assert.Ignore("Extended Attribute not availlable on this machine");
+            }
+
         }
 
         [TearDown]
@@ -52,12 +57,6 @@ namespace TestLibrary.StorageTests
         public void DefaultConstructorWorks()
         {
             new ExtendedAttributeReaderUnix();
-        }
-
-        [Test, Category("Fast")]
-        public void SettingPrefixOnConstructorDoesNotFails()
-        {
-            new ExtendedAttributeReaderUnix("system.");
         }
 
         [Test, Category("Medium")]
@@ -187,6 +186,18 @@ namespace TestLibrary.StorageTests
             Assert.That(reader.ListAttributeKeys(path).Count == 1);
             Assert.Contains("test", reader.ListAttributeKeys(path));
         }
+
+        [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
+        public void CheckAvaillable()
+        {
+            Directory.CreateDirectory(path);
+            string key = "test";
+            string value = "value";
+            var reader = new ExtendedAttributeReaderUnix();
+            reader.IsFeatureAvaillable();
+        }
+
     }
 }
 #endif
