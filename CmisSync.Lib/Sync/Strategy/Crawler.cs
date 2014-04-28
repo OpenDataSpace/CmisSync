@@ -148,7 +148,6 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Remote folder detected, which is not available locally
                         // Figure out, what to do with it
                         Queue.AddEvent(new FolderEvent(
-                            localFolder: localFolder,
                             remoteFolder: folder) {
                             Recursive = true,
                             Remote = MetaDataChangeType.CREATED });
