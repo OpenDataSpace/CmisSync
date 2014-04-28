@@ -72,7 +72,6 @@
     <Compile Include="Events\EventHandlerPriorities.cs" />
     <Compile Include="Events\GenericSyncEventHandler.cs" />
     <Compile Include="Events\SyncEventQueue.cs" />
-    <Compile Include="LoggingStream.cs" />
     <Compile Include="Sync\CmisRepo.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />
