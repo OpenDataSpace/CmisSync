@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Sync.Solver
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
             // Create new remote object
-            if((localFile.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+            if(localFile is IDirectoryInfo)
             {
                 IDirectoryInfo localDirInfo = localFile as IDirectoryInfo;
                 IDirectoryInfo parent = localDirInfo.Parent;
@@ -59,7 +59,7 @@ namespace CmisSync.Lib.Sync.Solver
                 };
                 storage.SaveMappedObject(mappedFolder);
             }
-            else if((localFile.Attributes & FileAttributes.Normal) == FileAttributes.Normal)
+            else if(localFile is IFileInfo)
             {
                 // Create empty remote file
                 //string remotePath = storage.Matcher.CreateRemotePath(localFile.FullName);
