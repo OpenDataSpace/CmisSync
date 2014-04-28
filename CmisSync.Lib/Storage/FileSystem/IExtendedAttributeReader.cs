@@ -73,6 +73,13 @@ namespace CmisSync.Lib.Storage
         /// Path.
         /// </param>
         List<string> ListAttributeKeys(string path);
+        /// <summary>
+        /// Determines whether Extended Attributes are active on the filesystem.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if Extended Attributes are active on the filesystem; otherwise, <c>false</c>.
+        /// </returns>
+        bool IsFeatureAvaillable();
     }
 
     /// <summary>

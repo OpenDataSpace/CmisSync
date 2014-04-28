@@ -101,18 +101,9 @@
     <Compile Include="Events\SyncScheduler.cs" />
     <Compile Include="HttpProxyUtils.cs" />
     <Compile Include="IActivityListener.cs" />
-    <Compile Include="Storage\DirectoryInfoWrapper.cs" />
-    <Compile Include="Storage\FileInfoWrapper.cs" />
     <Compile Include="Storage\EventStorage.cs" />
     <Compile Include="Storage\FailedOperationsStorage.cs" />
-    <Compile Include="Storage\FileSystemInfoFactory.cs" />
-    <Compile Include="Storage\FileSystemInfoWrapper.cs" />
     <Compile Include="Storage\ICookieStorage.cs" />
-    <Compile Include="Storage\IDirectoryInfo.cs" />
-    <Compile Include="Storage\IFileInfo.cs" />
-    <Compile Include="Storage\IFileSystemInfo.cs" />
-    <Compile Include="Storage\IFileSystemInfoFactory.cs" />
-    <Compile Include="Storage\IFileSystemWatcher.cs" />
     <Compile Include="Storage\IMetaDataStorage.cs" />
     <Compile Include="Streams\BandwidthLimitedStream.cs" />
     <Compile Include="Streams\ForwardReadingStream.cs" />
@@ -141,14 +132,7 @@
     <Compile Include="Sync\Strategy\LocalSituationDetection.cs" />
     <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
     <Compile Include="Sync\Strategy\SyncMechanism.cs" />
-    <Compile Include="Sync\Strategy\Watcher.cs" />
-    <Compile Include="Sync\Strategy\MacWatcher.cs" />
-    <Compile Include="Sync\Strategy\NetWatcher.cs" />
     <Compile Include="Events\EventFilter\IgnoredFolderNameFilter.cs" />
-    <Compile Include="Storage\ExtendedAttributeException.cs" />
-    <Compile Include="Storage\IExtendedAttributeReader.cs" />
-    <Compile Include="Storage\ExtendedAttributeReaderUnix.cs" />
-    <Compile Include="Storage\ExtendedAttributeReaderDos.cs" />
     <Compile Include="Data\IMappedObject.cs" />
     <Compile Include="Events\EventFilter\GenericHandleDublicatedEventsFilter.cs" />
     <Compile Include="Storage\DataBaseTableNames.cs" />
@@ -195,13 +179,29 @@
     <Compile Include="Cmis\StandardAuthenticationProviderWrapper.cs" />
     <Compile Include="Storage\DBreezeInitializerSingleton.cs" />
     <Compile Include="ContentTasks\UploadFailedException.cs" />
+    <Compile Include="Storage\FileSystem\DirectoryInfoWrapper.cs" />
+    <Compile Include="Storage\FileSystem\ExtendedAttributeException.cs" />
+    <Compile Include="Storage\FileSystem\ExtendedAttributeReaderDos.cs" />
+    <Compile Include="Storage\FileSystem\ExtendedAttributeReaderUnix.cs" />
+    <Compile Include="Storage\FileSystem\FileInfoWrapper.cs" />
+    <Compile Include="Storage\FileSystem\FileSystemInfoFactory.cs" />
+    <Compile Include="Storage\FileSystem\FileSystemInfoWrapper.cs" />
+    <Compile Include="Storage\FileSystem\IDirectoryInfo.cs" />
+    <Compile Include="Storage\FileSystem\IExtendedAttributeReader.cs" />
+    <Compile Include="Storage\FileSystem\IFileInfo.cs" />
+    <Compile Include="Storage\FileSystem\IFileSystemInfo.cs" />
+    <Compile Include="Storage\FileSystem\IFileSystemInfoFactory.cs" />
+    <Compile Include="Storage\FileSystem\IFileSystemWatcher.cs" />
+    <Compile Include="Sync\Strategy\Watcher\MacWatcher.cs" />
+    <Compile Include="Sync\Strategy\Watcher\NetWatcher.cs" />
+    <Compile Include="Sync\Strategy\Watcher\Watcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
@@ -251,5 +251,7 @@
   <ItemGroup>
     <Folder Include="Events\EventTypes\" />
     <Folder Include="Config\" />
+    <Folder Include="Storage\FileSystem\" />
+    <Folder Include="Sync\Strategy\Watcher\" />
   </ItemGroup>
 </Project>

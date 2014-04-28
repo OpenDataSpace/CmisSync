@@ -112,6 +112,12 @@ namespace CmisSync.Lib.Storage
         {
             throw new NotImplementedException ();
         }
+        
+        public bool IsFeatureAvaillable()
+        {
+            //TODO implement check (for FAT32)
+            return true;
+        }
 
     }
 
