@@ -90,23 +90,23 @@ SOURCES =  \
 	IActivityListener.cs \
 	Storage/DataBaseTableNames.cs \
 	Storage/DBreezeInitializerSingleton.cs \
-	Storage/DirectoryInfoWrapper.cs \
 	Storage/EntryNotFoundException.cs \
 	Storage/EventStorage.cs \
-	Storage/ExtendedAttributeException.cs \
-	Storage/ExtendedAttributeReaderDos.cs \
-	Storage/ExtendedAttributeReaderUnix.cs \
 	Storage/FailedOperationsStorage.cs \
-	Storage/FileInfoWrapper.cs \
-	Storage/FileSystemInfoFactory.cs \
-	Storage/FileSystemInfoWrapper.cs \
+	Storage/FileSystem/DirectoryInfoWrapper.cs \
+	Storage/FileSystem/ExtendedAttributeException.cs \
+	Storage/FileSystem/ExtendedAttributeReaderDos.cs \
+	Storage/FileSystem/ExtendedAttributeReaderUnix.cs \
+	Storage/FileSystem/FileInfoWrapper.cs \
+	Storage/FileSystem/FileSystemInfoFactory.cs \
+	Storage/FileSystem/FileSystemInfoWrapper.cs \
+	Storage/FileSystem/IDirectoryInfo.cs \
+	Storage/FileSystem/IExtendedAttributeReader.cs \
+	Storage/FileSystem/IFileInfo.cs \
+	Storage/FileSystem/IFileSystemInfo.cs \
+	Storage/FileSystem/IFileSystemInfoFactory.cs \
+	Storage/FileSystem/IFileSystemWatcher.cs \
 	Storage/ICookieStorage.cs \
-	Storage/IDirectoryInfo.cs \
-	Storage/IExtendedAttributeReader.cs \
-	Storage/IFileInfo.cs \
-	Storage/IFileSystemInfo.cs \
-	Storage/IFileSystemInfoFactory.cs \
-	Storage/IFileSystemWatcher.cs \
 	Storage/IMetaDataStorage.cs \
 	Storage/MetaDataStorage.cs \
 	Storage/PersistentCookieStorage.cs \
@@ -137,12 +137,12 @@ SOURCES =  \
 	Sync/Strategy/ISituationDetection.cs \
 	Sync/Strategy/LocalObjectFetcher.cs \
 	Sync/Strategy/LocalSituationDetection.cs \
-	Sync/Strategy/MacWatcher.cs \
-	Sync/Strategy/NetWatcher.cs \
 	Sync/Strategy/RemoteObjectFetcher.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SyncMechanism.cs \
-	Sync/Strategy/Watcher.cs \
+	Sync/Strategy/Watcher/MacWatcher.cs \
+	Sync/Strategy/Watcher/NetWatcher.cs \
+	Sync/Strategy/Watcher/Watcher.cs \
 	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs
