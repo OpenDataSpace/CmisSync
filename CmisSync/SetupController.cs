@@ -58,7 +58,6 @@ namespace CmisSync
         Add1,
         Add2,
         Customize,
-        Syncing,
         Finished,
         Tutorial // This particular one contains sub-steps that are tracked via a number.
     }
@@ -221,8 +220,7 @@ namespace CmisSync
 
             Program.Controller.ShowSetupWindowEvent += delegate(PageType page)
             {
-                if (this.FolderAdditionWizardCurrentPage == PageType.Syncing ||
-                    this.FolderAdditionWizardCurrentPage == PageType.Finished)
+                if (this.FolderAdditionWizardCurrentPage == PageType.Finished)
                 {
                     ShowWindowEvent();
                     return;
@@ -496,78 +494,45 @@ namespace CmisSync
             SyncingReponame = repoName;
             saved_local_path = localrepopath;
 
-            bool enableFetch = false;
-
-            if (enableFetch)
+            RepoInfo repoInfo = new RepoInfo
             {
-                ChangePageEvent (PageType.Syncing);
+                DisplayName = repoName,
+                Address = saved_address,
+                User = saved_user.TrimEnd(),
+                ObfuscatedPassword = new Password(saved_password.TrimEnd()).ObfuscatedPassword,
+                RepositoryId = PreviousRepository,
+                RemotePath = PreviousPath,
+                LocalPath = localrepopath
+            };
 
-                Program.Controller.FolderFetched += AddPageFetchedDelegate;
+            foreach (string ignore in ignoredPaths)
+            {
+                repoInfo.AddIgnorePath(ignore);
+            }
 
-                // Add the remote folder to the configuration and start syncing.
-                try
-                {
-                    new Thread (() =>
-                    {
-                        Program.Controller.StartFetcher (
-                            repoName,
-                            saved_address,
-                            saved_user.TrimEnd (),
-                            saved_password.TrimEnd (),
-                            PreviousRepository,
-                            PreviousPath,
-                            localrepopath,
-                            ignoredPaths);
-                    }).Start ();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Fatal (ex.ToString ());
-                }
+            // Check that the folder exists.
+            if (Directory.Exists(repoInfo.LocalPath))
+            {
+                Logger.Info(String.Format("DataSpace Repository Folder {0} already exist, this could lead to sync conflicts", repoInfo.LocalPath));
             }
             else
             {
-                RepoInfo repoInfo = new RepoInfo
-                {
-                    DisplayName = repoName,
-                    Address = saved_address,
-                    User = saved_user.TrimEnd(),
-                    ObfuscatedPassword = new Password(saved_password.TrimEnd()).ObfuscatedPassword,
-                    RepositoryId = PreviousRepository,
-                    RemotePath = PreviousPath,
-                    LocalPath = localrepopath
-                };
-
-                foreach (string ignore in ignoredPaths)
-                {
-                    repoInfo.AddIgnorePath(ignore);
-                }
-
-                // Check that the folder exists.
-                if (Directory.Exists(repoInfo.LocalPath))
-                {
-                    Logger.Info(String.Format("DataSpace Repository Folder {0} already exist, this could lead to sync conflicts", repoInfo.LocalPath));
-                }
-                else
-                {
-                    // Create the local folder.
-                    Directory.CreateDirectory(repoInfo.LocalPath);
-                }
-
-                try
-                {
-                    new Thread (() =>
-                    {
-                        Program.Controller.AddRepo (repoInfo);
-                    }).Start ();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Fatal (ex.ToString ());
-                }
-
-                ChangePageEvent (PageType.Finished);
+                // Create the local folder.
+                Directory.CreateDirectory(repoInfo.LocalPath);
             }
+
+            try
+            {
+                new Thread (() => {
+                    Program.Controller.AddRepo(repoInfo);
+                }).Start ();
+            }
+            catch (Exception ex)
+            {
+                Logger.Fatal (ex.ToString ());
+            }
+
+            ChangePageEvent (PageType.Finished);
         }
 
 

@@ -612,48 +612,6 @@ namespace CmisSync
                     File.SetAttributes(file, FileAttributes.Normal);
         }
 
-        /// <summary>
-        /// Create a new CmisSync synchronized folder.
-        /// </summary>
-        public void StartFetcher(string name, Uri address, string user, string password, string repository, string remote_path, string local_path,
-            List<string> ignoredPaths)
-        {
-            repoInfo = new RepoInfo();
-            repoInfo.DisplayName = name;
-            repoInfo.Address = address;
-            repoInfo.User = user;
-            repoInfo.SetPassword(new CmisSync.Lib.Credentials.Password(password));
-            repoInfo.RepositoryId = repository;
-            repoInfo.RemotePath = remote_path;
-            repoInfo.LocalPath = local_path;
-            repoInfo.PollInterval = 5000;
-            repoInfo.MaxUploadRetries = 2;
-            foreach (string ignore in ignoredPaths)
-                repoInfo.AddIgnorePath(ignore);
-
-            this.FinishFetcher();
-        }
-
-
-        /// <summary>
-        /// Finalize the creation of a new CmisSync synchronized folder.
-        /// </summary>
-        public void FinishFetcher()
-        {
-            lock (this.repo_lock)
-            {
-                // Add folder to XML config file.
-                ConfigManager.CurrentConfig.Folders.Add(repoInfo);
-                ConfigManager.CurrentConfig.Save();
-                // Initialize in the UI.
-                AddRepository(repoInfo);
-            }
-
-            // Update UI.
-            FolderListChanged();
-        }
-
-
         public void AddRepo(RepoInfo info)
         {
             lock (this.repo_lock)

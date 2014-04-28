@@ -40,6 +40,7 @@ namespace CmisSync.Lib.Config
         private int uploadRetries = 2;
         private int downloadRetries = 2;
         private int deletionRetries = 2;
+        private List<IgnoredFolder> ignoredFolders;
 
         /// <summary>
         /// Gets or sets the display name.
@@ -257,7 +258,25 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The ignored folders.</value>
         [XmlElement("ignoreFolder")]
-        public List<IgnoredFolder> IgnoredFolders { get; set; }
+        public List<IgnoredFolder> IgnoredFolders
+        {
+            get
+            {
+                if (this.ignoredFolders == null)
+                {
+                    return new List<IgnoredFolder>();
+                }
+                else
+                {
+                    return this.ignoredFolders;
+                }
+            }
+            set
+            {
+                this.ignoredFolders = value;
+            }
+        }
+
 
         /// <summary>
         /// Gets the ignored paths.
@@ -266,6 +285,7 @@ namespace CmisSync.Lib.Config
         public List<string> GetIgnoredPaths()
         {
             List<string> list = new List<string>();
+
             foreach(IgnoredFolder folder in this.IgnoredFolders)
             {
                 list.Add(folder.Path);

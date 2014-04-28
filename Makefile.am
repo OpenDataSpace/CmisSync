@@ -43,10 +43,6 @@ apple-package:
 
 none:
 
-System.Data.SQLite.dll:
-	xbuild Extras/OpenDataSpace.System.Data.SQLite/System.Data.SQLite/System.Data.SQLite.2012.csproj /p:UseInteropDll=false /p:UseSqliteStandard=true /p:InteropLog=false /t:Rebuild
-	cp -f Extras/OpenDataSpace.System.Data.SQLite/bin/2012/Debug/bin/System.Data.SQLite.* Extras
-
 DotCMIS.dll:
 	xbuild Extras/OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
 	cp -f Extras/OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* Extras

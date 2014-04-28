@@ -363,7 +363,8 @@ namespace CmisSync.Lib.Config
                 IgnoreFileNames = CreateInitialListOfGloballyIgnoredFileNames(),
                 IgnoreFolderNames = CreateInitialListOfGloballyIgnoredFolderNames(),
                 HiddenRepoNames = CreateInitialListOfGloballyHiddenRepoNames(),
-                Version = 1.1
+                Version = 1.1,
+                fullpath = fullPath
             };
         }
 
@@ -540,7 +541,7 @@ namespace CmisSync.Lib.Config
             {
                 config = (Config)deserializer.Deserialize(textReader);
             }
-
+            config.fullpath = fullPath;
             config.configPath = Path.GetDirectoryName(fullPath);
             HttpProxyUtils.SetDefaultProxy(config.Proxy);
             return config;

@@ -19,9 +19,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Data;
 
 namespace CmisSync.Lib.Sync
 {
@@ -31,7 +28,10 @@ namespace CmisSync.Lib.Sync
 
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
 
     using DBreeze;
 
@@ -131,7 +131,7 @@ namespace CmisSync.Lib.Sync
 
         private RemoteObjectFetcher remoteFetcher;
 
-        Crawler crawler;
+        private Crawler crawler;
 
         private ContentChanges contentChanges;
 
@@ -208,23 +208,26 @@ namespace CmisSync.Lib.Sync
             #endif
             this.EventManager.AddEventHandler(this.Watcher);
 
+            // Initialize storage
+            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+
             // Add transformer
             this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage);
-            this.EventManager.AddEventHandler(transformer);
+            this.EventManager.AddEventHandler(this.transformer);
 
             // Add local fetcher
             var localFetcher = new LocalObjectFetcher(this.storage.Matcher);
             this.EventManager.AddEventHandler(localFetcher);
 
-            // Initialize sync mechonism
-            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
-            this.mechanism = new SyncMechanism(this.localDetection, this.remoteDetection, this.Queue, this.session, this.storage);
-            this.EventManager.AddEventHandler(this.mechanism);
-
             this.SyncStatusChanged += delegate(SyncStatus status)
             {
                 this.Status = status;
             };
+
+            this.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>(delegate {
+                this.NewSessionCreated();
+                return false;
+            }));
         }
 
         /// <summary>
@@ -306,6 +309,8 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         public void Initialize()
         {
+            this.Connect();
+
             // Enable FS Watcher events
             this.Watcher.EnableEvents = true;
 
@@ -511,13 +516,14 @@ namespace CmisSync.Lib.Sync
                 {
                     this.EventManager.RemoveEventHandler(this.ccaccumulator);
                 }
+
                 if (this.contentChanges != null)
                 {
                     this.EventManager.RemoveEventHandler(this.contentChanges);
                 }
 
                 // Add Accumulator
-                this.ccaccumulator = new ContentChangeEventAccumulator(session, this.Queue);
+                this.ccaccumulator = new ContentChangeEventAccumulator(this.session, this.Queue);
                 this.EventManager.AddEventHandler(this.ccaccumulator);
 
                 // Add Content Change sync algorithm
@@ -530,6 +536,7 @@ namespace CmisSync.Lib.Sync
                 {
                     this.EventManager.RemoveEventHandler(this.ccaccumulator);
                 }
+
                 if (this.contentChanges != null)
                 {
                     this.EventManager.RemoveEventHandler(this.contentChanges);
@@ -539,7 +546,7 @@ namespace CmisSync.Lib.Sync
             // Add remote object fetcher
             if(this.remoteFetcher != null)
             {
-                this.EventManager.RemoveEventHandler(remoteFetcher);
+                this.EventManager.RemoveEventHandler(this.remoteFetcher);
             }
 
             this.remoteFetcher = new RemoteObjectFetcher(this.session, this.storage);
@@ -552,7 +559,15 @@ namespace CmisSync.Lib.Sync
             }
 
             this.crawler = new Crawler(this.Queue, this.session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder, new DirectoryInfoWrapper(new DirectoryInfo(this.LocalPath)));
-            this.EventManager.AddEventHandler(crawler);
+            this.EventManager.AddEventHandler(this.crawler);
+
+            if(this.mechanism != null)
+            {
+                this.EventManager.RemoveEventHandler(this.mechanism);
+            }
+
+            this.mechanism = new SyncMechanism(this.localDetection, this.remoteDetection, this.Queue, this.session, this.storage);
+            this.EventManager.AddEventHandler(this.mechanism);
         }
     }
 }

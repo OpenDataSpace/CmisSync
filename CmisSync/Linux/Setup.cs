@@ -837,10 +837,6 @@ namespace CmisSync {
                         ShowCustomizePage();
                         break;
 
-                        case PageType.Syncing:
-                        ShowSyncingPage();
-                        break;
-
                         case PageType.Finished:
                         ShowFinishedPage();
                         break;
