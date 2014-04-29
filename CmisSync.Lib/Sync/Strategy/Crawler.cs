@@ -151,7 +151,6 @@ namespace CmisSync.Lib.Sync.Strategy
                     Queue.AddEvent(new CrawlRequestEvent(
                         localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
                         remoteFolder: folder));
-
                 } else if(cmisObject is IDocument) {
                     IDocument doc = cmisObject as IDocument;
                     var fileEvent = new FileEvent(
@@ -181,9 +180,7 @@ namespace CmisSync.Lib.Sync.Strategy
             foreach(string folder in localDirNames) {
                 Queue.AddEvent(new FolderEvent(
                     localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder))) { Local = MetaDataChangeType.CREATED });
-                // TODO Add CrawlEvent to Queue
-                /*Queue.AddEvent(new CrawlRequestEvent(localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)),
-                                                     remoteFolder: remoteFolder));*/
+                Queue.AddEvent(new CrawlRequestEvent(localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)), remoteFolder: null));
             }
 
             // Only local files are available, inform synchronizer about them

@@ -288,7 +288,7 @@ namespace TestLibrary.SyncStrategiesTests
                 It.Is<FolderEvent>(e => this.VerifyLocalFolderEvent(e, localPath, name))
                 ), Times.Once());
             queue.Verify(q => q.AddEvent(
-                It.Is<CrawlRequestEvent>(e => e.LocalFolder.Name == name && e.RemoteFolder.Name == name)
+                It.Is<CrawlRequestEvent>(e => e.LocalFolder.Name == name && e.RemoteFolder == null)
                 ), Times.Once());
         }
 

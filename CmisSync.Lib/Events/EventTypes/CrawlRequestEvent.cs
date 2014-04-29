@@ -47,11 +47,6 @@ namespace CmisSync.Lib.Events
                 throw new ArgumentNullException("Given path is null");
             }
 
-            if (remoteFolder == null)
-            {
-                throw new ArgumentNullException("Given remote folder is null");
-            }
-
             this.RemoteFolder = remoteFolder;
             this.LocalFolder = localFolder;
         }
@@ -62,7 +57,7 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The remote folder.
         /// </value>
-        public IFolder RemoteFolder { get; private set; }
+        public IFolder RemoteFolder { get; set; }
 
         /// <summary>
         /// Gets the local folder.
@@ -78,7 +73,10 @@ namespace CmisSync.Lib.Events
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.CrawlRequestEvent"/>.</returns>
         public override string ToString()
         {
-            return string.Format("[CrawlRequestEvent: RemoteFolder={0}, LocalFolder={1}]", this.RemoteFolder.Name, this.LocalFolder.Name);
+            return string.Format(
+                "[CrawlRequestEvent: RemoteFolder={0}, LocalFolder={1}]",
+                this.RemoteFolder == null ? string.Empty : this.RemoteFolder.Name,
+                this.LocalFolder.Name);
         }
     }
 }
