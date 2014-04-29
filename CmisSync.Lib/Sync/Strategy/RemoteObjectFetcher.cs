@@ -33,6 +33,7 @@ namespace CmisSync.Lib.Sync.Strategy {
     /// </summary>
     public class RemoteObjectFetcher : SyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectFetcher));
         private IMetaDataStorage storage;
         private ISession session;
 
@@ -73,7 +74,8 @@ namespace CmisSync.Lib.Sync.Strategy {
             if (remote != null) {
                 return false;
             }
-
+   
+            Logger.Debug("Fetching remote Object for " + e);
             string id = this.FetchIdFromStorage(e);
             if(id != null) {
                 try {

@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Sync.Strategy
     /// </exception>
     public class LocalObjectFetcher : SyncEventHandler
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(Crawler));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectFetcher));
         
         private IFileSystemInfoFactory fsFactory;
 
