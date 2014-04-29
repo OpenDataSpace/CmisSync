@@ -45,12 +45,18 @@ namespace CmisSync.Lib.Sync.Strategy
         private IChangeEvent lastChange;
 
         public ContentChanges(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base (queue) {
-            if(session == null)
+            if(session == null) {
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
-            if(storage == null)
+            }
+                
+            if(storage == null) {
                 throw new ArgumentNullException("MetaDataStorage instance is needed for the ChangeLogStrategy, but was null");
-            if(maxNumberOfContentChanges <= 1)
+            }
+            
+            if(maxNumberOfContentChanges <= 1) {
                 throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
+            }
+            
             this.session = session;
             this.storage = storage;
             this.maxNumberOfContentChanges = maxNumberOfContentChanges;
@@ -62,20 +68,22 @@ namespace CmisSync.Lib.Sync.Strategy
             StartNextSyncEvent syncEvent = e as StartNextSyncEvent;
             if(syncEvent != null)
             {
-                if( syncEvent.FullSyncRequested)
+                if(syncEvent.FullSyncRequested)
                 {
                     // Get last change log token on server side.
-                    session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
-                    string lastRemoteChangeLogTokenBeforeFullCrawlSync = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
-                    if(storage.ChangeLogToken == null) {
+                    this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);    // refresh
+                    string lastRemoteChangeLogTokenBeforeFullCrawlSync = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
+                    if(this.storage.ChangeLogToken == null) {
                         syncEvent.LastTokenOnServer = lastRemoteChangeLogTokenBeforeFullCrawlSync;
                     }
+                    
                     // Use fallback sync algorithm
                     return false;
                 }
                 else
                 {
-                    return startSync();
+                    Logger.Debug("Starting ContentChange Sync");
+                    return this.StartSync();
                 }
             }
 
@@ -83,9 +91,9 @@ namespace CmisSync.Lib.Sync.Strategy
             FullSyncCompletedEvent syncCompleted = e as FullSyncCompletedEvent;
             if(syncCompleted != null) {
                 string lastTokenOnServer = syncCompleted.StartEvent.LastTokenOnServer;
-                if(!String.IsNullOrEmpty(lastTokenOnServer))
+                if(!string.IsNullOrEmpty(lastTokenOnServer))
                 {
-                    storage.ChangeLogToken = lastTokenOnServer;
+                    this.storage.ChangeLogToken = lastTokenOnServer;
                 }
             }
 
@@ -98,34 +106,25 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <returns>
         /// True if requested folder is available, otherwise false
         /// </returns>
-        private bool startSync() {
+        private bool StartSync() {
             try {
-                string lastTokenOnClient = storage.ChangeLogToken;
+                string lastTokenOnClient = this.storage.ChangeLogToken;
 
                 // Get last change log token on server side.
-                session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
-                string lastTokenOnServer = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
+                this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);    // refresh
+                string lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
 
                 if(lastTokenOnClient != lastTokenOnServer)
                 {
-//                    using(var syncTask = new Task((Action) delegate() {
-//                        if(Monitor.TryEnter(syncLock)) {
-//                            try{
-                                Sync();
-//                            }finally {
-//                                Monitor.Exit(syncLock);
-//                            }
-//                        }
-//                    })) {
-//                        syncTask.Start();
-//                    }
+                                this.Sync();
                 }
-                // No changes or background process started
+                
                 return true;
-            }catch(CmisRuntimeException e) {
+            } catch(CmisRuntimeException e) {
                 Logger.Warn("ContentChangeSync not successfull, fallback to CrawlSync");
                 Logger.Debug(e.Message);
                 Logger.Debug(e.StackTrace);
+                
                 // Use fallback sync algorithm
                 return false;
             }
@@ -134,11 +133,11 @@ namespace CmisSync.Lib.Sync.Strategy
         private void Sync()
         {
             // Get last change log token on server side.
-            session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
-            string lastTokenOnServer = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
+            this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);    // refresh
+            string lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
 
             // Get last change token that had been saved on client side.
-            string lastTokenOnClient = storage.ChangeLogToken;
+            string lastTokenOnClient = this.storage.ChangeLogToken;
 
             if (lastTokenOnClient == null)
             {
@@ -152,7 +151,8 @@ namespace CmisSync.Lib.Sync.Strategy
             do
             {
                 // Check which files/folders have changed.
-                IChangeEvents changes = session.GetContentChanges(lastTokenOnClient, isPropertyChangesSupported, maxNumberOfContentChanges);
+                IChangeEvents changes = this.session.GetContentChanges(lastTokenOnClient, this.isPropertyChangesSupported, this.maxNumberOfContentChanges);
+                
                 // Replicate each change to the local side.
                 bool first = true;
                 foreach (IChangeEvent change in changes.ChangeEventList)
@@ -160,16 +160,17 @@ namespace CmisSync.Lib.Sync.Strategy
                     // ignore first event when lists overlapp
                     if(first) {
                         first = false;
-                        if(lastChange != null && 
-                                (lastChange.ChangeType == DotCMIS.Enums.ChangeType.Created
-                                 || lastChange.ChangeType == DotCMIS.Enums.ChangeType.Deleted)
+                        if(this.lastChange != null && 
+                                (this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Created
+                                 || this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Deleted)
                           ) {
-                            if (change != null && change.ChangeType == lastChange.ChangeType && change.ObjectId == lastChange.ObjectId) {
+                            if (change != null && change.ChangeType == this.lastChange.ChangeType && change.ObjectId == this.lastChange.ObjectId) {
                                 continue;
                             }
                         }
                     }
-                    lastChange = change;
+                    
+                    this.lastChange = change;
 
                     Queue.AddEvent(new ContentChangeEvent(change.ChangeType, change.ObjectId));
                 }
