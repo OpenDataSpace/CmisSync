@@ -33,6 +33,8 @@ namespace CmisSync.Lib.Sync.Strategy
     /// </summary>
     public class Crawler : ReportingSyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(Crawler));
+        
         private IFolder remoteFolder;
         private IDirectoryInfo localFolder;
         private IFileSystemInfoFactory fsFactory;
@@ -84,12 +86,14 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             if(e is CrawlRequestEvent) {
                 var request = e as CrawlRequestEvent;
+                Logger.Debug("Starting CrawlSync upon " + request);
                 this.CrawlSync(request.RemoteFolder, request.LocalFolder);
                 return true;
             }
             
             if(e is StartNextSyncEvent)
             {
+                Logger.Debug("Starting CrawlSync upon " + e);
                 this.CrawlSync(this.remoteFolder, this.localFolder);
                 Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
                 return true;
