@@ -436,8 +436,10 @@ namespace CmisSync
                     break;
                 }
             }
+            // Remove DBreeze DB folder
+            Directory.Delete(folder.GetDatabasePath(), true);
 
-            // Remove Cmis Database File
+            // Remove Legacy Cmis Database File
             string dbfilename = folder.DisplayName;
             dbfilename = dbfilename.Replace("\\", "_");
             dbfilename = dbfilename.Replace("/", "_");
