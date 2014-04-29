@@ -32,6 +32,8 @@ namespace CmisSync.Lib.Sync.Strategy
     /// </exception>
     public class LocalObjectFetcher : SyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(Crawler));
+        
         private IFileSystemInfoFactory fsFactory;
 
         private IPathMatcher matcher;
@@ -74,7 +76,8 @@ namespace CmisSync.Lib.Sync.Strategy
                 if(folderEvent.LocalFolder != null) {
                     return false;
                 }
-
+                
+                Logger.Debug("Fetching local object for " + folderEvent);
                 string localPath = this.matcher.CreateLocalPath(folderEvent.RemoteFolder.Path);
                 folderEvent.LocalFolder = this.fsFactory.CreateDirectoryInfo(localPath);
             }
@@ -84,7 +87,8 @@ namespace CmisSync.Lib.Sync.Strategy
                 if(fileEvent.LocalFile != null) {
                     return false;
                 }
-
+                
+                Logger.Debug("Fetching local object for " + fileEvent);
                 string localPath = this.matcher.CreateLocalPath(fileEvent.RemoteFile.Paths[0]);
                 fileEvent.LocalFile = this.fsFactory.CreateFileInfo(localPath);
             }
