@@ -57,6 +57,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);
             dirInfo.Setup(d => d.Name).Returns(folderName);
+            dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
 
             Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
 

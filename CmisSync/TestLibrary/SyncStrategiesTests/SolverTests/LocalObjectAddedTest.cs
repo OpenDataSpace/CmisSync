@@ -16,35 +16,37 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-
-using CmisSync.Lib.Sync.Solver;
-using CmisSync.Lib.Storage;
-
-using DotCMIS.Client;
-
-using Moq;
-
-using NUnit.Framework;
-using DotCMIS.Data;
-using DotCMIS.Enums;
 
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Solver;
+
+    using DotCMIS.Client;
+    using DotCMIS.Data;
+    using DotCMIS.Enums;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class LocalObjectAddedTest
     {
-        private Mock<ISession> Session;
-        private Mock<IMetaDataStorage> Storage;
+        private Mock<ISession> session;
+        private Mock<IMetaDataStorage> storage;
 
         [SetUp]
         public void SetUp()
         {
-            Session = new Mock<ISession>();
-            Storage = new Mock<IMetaDataStorage>();
+            this.session = new Mock<ISession>();
+            this.storage = new Mock<IMetaDataStorage>();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -53,6 +55,46 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new LocalObjectAdded();
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFolderAdded()
+        {
+            string folderName = "a";
+            string path = Path.Combine(Path.GetTempPath(), folderName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+
+            var futureRemoteFolder = Mock.Of<IFolder>(f =>
+                                                      f.Name == folderName &&
+                                                      f.Id == id &&
+                                                      f.ParentId == parentId);
+
+            this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolder);
+
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            dirInfo.Setup(d => d.Name).Returns(folderName);
+            dirInfo.Setup(d => d.Exists).Returns(true);
+
+            var parentDirInfo = Mock.Of<IDirectoryInfo>(d =>
+                                                        d.FullName == Path.GetTempPath() &&
+                                                        d.Name == Path.GetFileName(Path.GetTempPath()));
+            dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == Path.GetTempPath()))).Returns(
+                Mock.Of<IMappedObject>(o =>
+                                   o.RemoteObjectId == parentId));
+            var solver = new LocalObjectAdded();
+
+            solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
+
+            this.storage.Verify(s => s.SaveMappedObject(It.Is<MappedObject>(f =>
+                                                                        f.RemoteObjectId == id &&
+                                                                        f.Name == folderName &&
+                                                                        f.ParentId == parentId &&
+                                                                        f.LastChangeToken == lastChangeToken &&
+                                                                        f.Type == MappedObjectType.Folder)
+                                                   ), Times.Once());
+            this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)),Times.Once());
+        }
     }
 }
-
