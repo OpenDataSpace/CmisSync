@@ -16,51 +16,82 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using DotCMIS.Client;
-using DotCMIS.Exceptions;
-
-using CmisSync.Lib.Events;
-
-using log4net;
-
 namespace CmisSync.Lib.Sync.Strategy
 {
+    using System;
+ 
+    using CmisSync.Lib.Events;
+    
+    using DotCMIS.Client;
+    using DotCMIS.Exceptions;
+
+    using log4net;
+      
+    /// <summary>
+    /// Content change event accumulator, fetches Cmis Object for CS Event
+    /// </summary>
+    /// <exception cref='ArgumentNullException'>
+    /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+    /// </exception>
     public class ContentChangeEventAccumulator : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChangeEventAccumulator));
 
         private ISession session;
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.ContentChangeEventAccumulator"/> class.
+        /// </summary>
+        /// <param name='session'>
+        /// Cmis Session.
+        /// </param>
+        /// <param name='queue'>
+        /// The ISyncEventQueue.
+        /// </param>
+        /// <exception cref='ArgumentNullException'>
+        /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+        /// </exception>
+        public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) : base(queue) {
+            if(session == null) {
+                throw new ArgumentNullException("Session instance is needed for the ContentChangeEventAccumulator, but was null");
+            }
+            
+            this.session = session;
+        }
 
-        public override bool Handle (ISyncEvent e) {
-            if(!(e is ContentChangeEvent)){
+        /// <summary>
+        /// Handle the specified e.
+        /// </summary>
+        /// <param name='e'>
+        /// The ISyncEvent.
+        /// </param>
+        /// <returns>
+        /// true if the CS Event is not valid any longer
+        /// </returns>
+        public override bool Handle(ISyncEvent e) {
+            if(!(e is ContentChangeEvent)) {
                 return false;
             }
 
             var contentChangeEvent = e as ContentChangeEvent;
             if(contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted) {
-                try{
-                    contentChangeEvent.UpdateObject(session);
-                }catch(CmisObjectNotFoundException){
+                try {
+                    contentChangeEvent.UpdateObject(this.session);
+                    Logger.Debug("Updated Object in contentChangeEvent" + contentChangeEvent.ToString());
+                } catch(CmisObjectNotFoundException) {
                     Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " has been deleted - ignore"); 
                     return true;
-                }catch(CmisPermissionDeniedException){
+                } catch(CmisPermissionDeniedException) {
                     Logger.Debug("Object with id " + contentChangeEvent.ObjectId + " gives Access Denied: ACL changed - ignore"); 
                     return true;
-                }catch(Exception ex){
+                } catch(Exception ex) {
                     Logger.Warn("Unable to fetch object " + contentChangeEvent.ObjectId + " starting CrawlSync");
                     Logger.Debug(ex.StackTrace);
                     Queue.AddEvent(new StartNextSyncEvent(true));
                     return true;
                 }
             }
+            
             return false;
-        }
-
-        public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) : base(queue) {
-            if(session == null)
-                throw new ArgumentNullException("Session instance is needed for the ContentChangeEventAccumulator, but was null");
-            this.session = session;
         }
     }
 }

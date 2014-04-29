@@ -16,7 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
 namespace CmisSync.Lib.Events.Filter
 {
     using System;
