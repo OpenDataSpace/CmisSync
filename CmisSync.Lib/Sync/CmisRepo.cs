@@ -443,7 +443,8 @@ namespace CmisSync.Lib.Sync
             {
                 return (this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
                         this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
-                    this.RepoInfo.SupportedFeatures.GetContentChangesSupport != false;
+                    (this.RepoInfo.SupportedFeatures == null ||
+                    this.RepoInfo.SupportedFeatures.GetContentChangesSupport != false);
             }
             catch(NullReferenceException)
             {
