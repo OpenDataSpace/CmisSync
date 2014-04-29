@@ -27,6 +27,8 @@ namespace CmisSync.Lib.Sync.Strategy {
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
+    
+    using log4net;
 
     /// <summary>
     /// Remote object fetcher.

@@ -23,6 +23,8 @@ namespace CmisSync.Lib.Sync.Strategy
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
+    
+    using log4net;
 
     /// <summary>
     /// Local object fetcher. I generates IFileSystemInfo if none found in FileEvent or FolderEvent

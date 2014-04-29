@@ -27,6 +27,8 @@ namespace CmisSync.Lib.Sync.Strategy
     using CmisSync.Lib.Storage;
     
     using DotCMIS.Client;
+    
+    using log4net;
  
     /// <summary>
     /// Crawler Strategy which crawls local and remote directories for finding differences between them.
