@@ -16,31 +16,32 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using DotCMIS.Client;
-using DotCMIS.Exceptions;
-using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Storage;
-
-using log4net;
-
 namespace CmisSync.Lib.Sync.Strategy
 {
+    using System;
+    using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    
+    using DotCMIS.Client;
+    using DotCMIS.Exceptions;
+
+    using log4net;
+
     public class ContentChanges : ReportingSyncEventHandler
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChanges));
         private ISession session;
         private IMetaDataStorage storage;
-        private int MaxNumberOfContentChanges;
-        private bool IsPropertyChangesSupported;
+        private int maxNumberOfContentChanges;
+        private bool isPropertyChangesSupported;
 
         private object syncLock = new object();
 
-        public static readonly string FULL_SYNC_PARAM_NAME = "lastTokenOnServer";
         private IChangeEvent lastChange;
 
         public ContentChanges(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base (queue) {
@@ -52,8 +53,8 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
             this.session = session;
             this.storage = storage;
-            this.MaxNumberOfContentChanges = maxNumberOfContentChanges;
-            this.IsPropertyChangesSupported = isPropertyChangesSupported;
+            this.maxNumberOfContentChanges = maxNumberOfContentChanges;
+            this.isPropertyChangesSupported = isPropertyChangesSupported;
         }
 
         public override bool Handle (ISyncEvent e)
@@ -67,7 +68,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
                     string lastRemoteChangeLogTokenBeforeFullCrawlSync = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
                     if(storage.ChangeLogToken == null) {
-                        syncEvent.SetParam(FULL_SYNC_PARAM_NAME, lastRemoteChangeLogTokenBeforeFullCrawlSync);
+                        syncEvent.LastTokenOnServer = lastRemoteChangeLogTokenBeforeFullCrawlSync;
                     }
                     // Use fallback sync algorithm
                     return false;
@@ -81,8 +82,8 @@ namespace CmisSync.Lib.Sync.Strategy
             // The above started full sync is finished.
             FullSyncCompletedEvent syncCompleted = e as FullSyncCompletedEvent;
             if(syncCompleted != null) {
-                string lastTokenOnServer;
-                if(syncCompleted.StartEvent.TryGetParam(FULL_SYNC_PARAM_NAME, out lastTokenOnServer))
+                string lastTokenOnServer = syncCompleted.StartEvent.LastTokenOnServer;
+                if(!String.IsNullOrEmpty(lastTokenOnServer))
                 {
                     storage.ChangeLogToken = lastTokenOnServer;
                 }
@@ -151,7 +152,7 @@ namespace CmisSync.Lib.Sync.Strategy
             do
             {
                 // Check which files/folders have changed.
-                IChangeEvents changes = session.GetContentChanges(lastTokenOnClient, IsPropertyChangesSupported, MaxNumberOfContentChanges);
+                IChangeEvents changes = session.GetContentChanges(lastTokenOnClient, isPropertyChangesSupported, maxNumberOfContentChanges);
                 // Replicate each change to the local side.
                 bool first = true;
                 foreach (IChangeEvent change in changes.ChangeEventList)

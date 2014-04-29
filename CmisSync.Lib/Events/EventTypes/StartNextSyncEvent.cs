@@ -36,19 +36,12 @@ namespace CmisSync.Lib.Events
         /// <c>true</c> if full sync requested; otherwise, <c>false</c>.
         /// </value>
         public bool FullSyncRequested { get {return this.fullSyncRequested; }}
+        
+        public string LastTokenOnServer {get; set;}
 
-        private Dictionary<string, string> parameters = new Dictionary<string, string>();
         public StartNextSyncEvent (bool fullSyncRequested = false)
         {
             this.fullSyncRequested = fullSyncRequested;
-        }
-
-        public void SetParam(string key, string value) {
-            this.parameters.Add(key, value);
-        }
-
-        public virtual bool TryGetParam(string key, out string value) {
-            return this.parameters.TryGetValue(key, out value);
         }
 
         /// <summary>

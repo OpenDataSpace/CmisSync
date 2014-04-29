@@ -145,7 +145,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void HandleFullSyncCompletedEventTest ()
         {
             var startSyncEvent = new StartNextSyncEvent (false);
-            startSyncEvent.SetParam (ContentChanges.FULL_SYNC_PARAM_NAME, changeLogToken);
+            startSyncEvent.LastTokenOnServer = changeLogToken;
             var completedEvent = new FullSyncCompletedEvent (startSyncEvent);
             var storage = new Mock<IMetaDataStorage>();
             storage.SetupProperty(db => db.ChangeLogToken);
@@ -213,9 +213,7 @@ namespace TestLibrary.SyncStrategiesTests
             var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
-            string result;
-            Assert.IsFalse (start.TryGetParam (ContentChanges.FULL_SYNC_PARAM_NAME, out result));
-            Assert.IsNull (result);
+            Assert.IsNull (start.LastTokenOnServer);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -234,9 +232,7 @@ namespace TestLibrary.SyncStrategiesTests
             var queue = new Mock<ISyncEventQueue>();
             var changes = new ContentChanges (session.Object, storage.Object, queue.Object);
             Assert.IsFalse (changes.Handle (start));
-            string result;
-            Assert.IsTrue (start.TryGetParam (ContentChanges.FULL_SYNC_PARAM_NAME, out result));
-            Assert.AreEqual (latestChangeLogToken, result);
+            Assert.AreEqual (latestChangeLogToken, start.LastTokenOnServer);
         }
 
         [Test, Category("Fast"), Category("ContentChange")]

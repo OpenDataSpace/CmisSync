@@ -43,18 +43,6 @@ namespace TestLibrary.EventsTests
                 Assert.Fail();
             }catch(ArgumentNullException) {}
         }
-
-        [Test, Category("Fast")]
-        public void ParamTest () {
-            string key = "key";
-            string value = "value";
-            string result;
-            var start = new StartNextSyncEvent(false);
-            start.SetParam(key, value);
-            var complete = new FullSyncCompletedEvent(start);
-            Assert.IsTrue(complete.StartEvent.TryGetParam(key, out result));
-            Assert.AreEqual(value, result);
-        }
     }
 }
 
