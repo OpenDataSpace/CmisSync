@@ -16,22 +16,64 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
 
 namespace CmisSync.Lib.Storage
 {
-    ///
-    ///<summary>Interface to enable mocking of FileSystemInfo<summary>
-    ///
+    using System;
+    using System.IO;
+
+    /// <summary>
+    /// Interface to enable mocking of FileSystemInfo
+    /// </summary>
     public interface IFileSystemInfo
     {
-        String FullName { get; }
-        String Name { get; }
+        /// <summary>
+        /// Gets the full name/path.
+        /// </summary>
+        /// <value>The full name.</value>
+        string FullName { get; }
+
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
+        string Name { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="CmisSync.Lib.Storage.IFileSystemInfo"/> is exists.
+        /// </summary>
+        /// <value><c>true</c> if exists; otherwise, <c>false</c>.</value>
         bool Exists { get; }
+
+        /// <summary>
+        /// Gets or sets the last write time in UTC.
+        /// </summary>
+        /// <value>The last write time in UTC.</value>
+        DateTime LastWriteTimeUtc { get; set; }
+
+        /// <summary>
+        /// Gets the file attributes.
+        /// </summary>
+        /// <value>The attributes.</value>
         FileAttributes Attributes { get; }
-        void Refresh ();
+
+        /// <summary>
+        /// Refresh the loaded information of this instance.
+        /// </summary>
+        void Refresh();
+
+        /// <summary>
+        /// Sets the extended attribute.
+        /// </summary>
+        /// <param name="key">Attribute name.</param>
+        /// <param name="value">Attribute value.</param>
         void SetExtendedAttribute(string key, string value);
+
+        /// <summary>
+        /// Gets the extended attribute.
+        /// </summary>
+        /// <returns>The extended attribute value.</returns>
+        /// <param name="key">Attribute name.</param>
         string GetExtendedAttribute(string key);
     }
 }

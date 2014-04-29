@@ -16,18 +16,41 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Storage
 {
-    ///
-    ///<summary>Interface to enable mocking of DirectoryInfo<summary>
-    ///
+    /// <summary>
+    /// Interface to enable mocking of DirectoryInfo
+    /// </summary>
     public interface IDirectoryInfo : IFileSystemInfo
     {
+        /// <summary>
+        /// Gets the parent.
+        /// </summary>
+        /// <value>The parent.</value>
         IDirectoryInfo Parent { get; }
 
-        void Create ();
-        IDirectoryInfo[] GetDirectories ();
-        IFileInfo[] GetFiles ();
-        void Delete (bool recursive);
+        /// <summary>
+        /// Creates a directory.
+        /// </summary>
+        void Create();
+
+        /// <summary>
+        /// Gets the child directories.
+        /// </summary>
+        /// <returns>The directories.</returns>
+        IDirectoryInfo[] GetDirectories();
+
+        /// <summary>
+        /// Gets the containing files.
+        /// </summary>
+        /// <returns>The files.</returns>
+        IFileInfo[] GetFiles();
+
+        /// <summary>
+        /// Delete the specified directory recursive if <c>true</c>.
+        /// </summary>
+        /// <param name="recursive">Deletes recursive if set to <c>true</c>.</param>
+        void Delete(bool recursive);
     }
 }

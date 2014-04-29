@@ -16,19 +16,20 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
 
 namespace CmisSync.Lib.Storage
 {
-    ///
-    ///<summary>Wrapper for DirectoryInfo<summary>
-    ///
+    using System;
+    using System.IO;
+
+    /// <summary>
+    /// Wrapper for DirectoryInfo
+    /// </summary>
     public abstract class FileSystemInfoWrapper : IFileSystemInfo
     {
-        private FileSystemInfo original;
-
         private static IExtendedAttributeReader reader = null;
+
+        private FileSystemInfo original;
 
         static FileSystemInfoWrapper()
         {
@@ -45,29 +46,81 @@ namespace CmisSync.Lib.Storage
             }
         }
 
-        protected FileSystemInfoWrapper (FileSystemInfo original)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystemInfoWrapper"/> class.
+        /// </summary>
+        /// <param name="original">original internal instance.</param>
+        protected FileSystemInfoWrapper(FileSystemInfo original)
         {
             this.original = original;
         }
 
-        public string FullName { get { return original.FullName; } }
+        /// <summary>
+        /// Gets or sets the last write time in UTC.
+        /// </summary>
+        /// <value>The last write time in UTC.</value>
+        public DateTime LastWriteTimeUtc {
+            get
+            {
+                return this.original.LastWriteTimeUtc;
+            }
 
-        public string Name { get { return original.Name; } }
-
-        public bool Exists { get { return original.Exists; } }
-
-        public FileAttributes Attributes { get { return original.Attributes; } }
-
-        public void Refresh ()
-        {
-            original.Refresh ();
+            set
+            {
+                this.original.LastWriteTimeUtc = value;
+            }
         }
 
+        /// <summary>
+        /// Gets the full name/path.
+        /// </summary>
+        /// <value>The full name.</value>
+        public string FullName {
+            get { return this.original.FullName; } 
+        }
+
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
+        public string Name {
+            get { return this.original.Name; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="CmisSync.Lib.Storage.FileSystemInfoWrapper"/> is exists.
+        /// </summary>
+        /// <value><c>true</c> if exists; otherwise, <c>false</c>.</value>
+        public bool Exists {
+            get { return this.original.Exists; }
+        }
+
+        /// <summary>
+        /// Gets the file attributes.
+        /// </summary>
+        /// <value>The attributes.</value>
+        public FileAttributes Attributes {
+            get { return this.original.Attributes; }
+        }
+
+        /// <summary>
+        /// Refresh the loaded information of this instance.
+        /// </summary>
+        public void Refresh()
+        {
+            this.original.Refresh();
+        }
+
+        /// <summary>
+        /// Gets the extended attribute.
+        /// </summary>
+        /// <returns>The extended attribute value.</returns>
+        /// <param name="key">Attribute name.</param>
         public string GetExtendedAttribute(string key)
         {
             if(reader != null)
             {
-                return reader.GetExtendedAttribute(original.FullName, key);
+                return reader.GetExtendedAttribute(this.original.FullName, key);
             }
             else
             {
@@ -75,11 +128,16 @@ namespace CmisSync.Lib.Storage
             }
         }
 
+        /// <summary>
+        /// Sets the extended attribute.
+        /// </summary>
+        /// <param name="key">Attribute name.</param>
+        /// <param name="value">Attribute value.</param>
         public void SetExtendedAttribute(string key, string value)
         {
-            if(reader!=null)
+            if(reader != null)
             {
-                reader.SetExtendedAttribute(original.FullName, key, value);
+                reader.SetExtendedAttribute(this.original.FullName, key, value);
             }
             else
             {
