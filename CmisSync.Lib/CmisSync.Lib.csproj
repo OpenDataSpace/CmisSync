@@ -58,7 +58,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Backend.cs" />
-    <Compile Include="ChunkedStream.cs" />
     <Compile Include="Cmis\CmisPermissionDeniedException.cs" />
     <Compile Include="Cmis\CmisServerNotFoundException.cs" />
     <Compile Include="Cmis\CmisUtils.cs" />
@@ -195,13 +194,14 @@
     <Compile Include="Sync\Strategy\Watcher\MacWatcher.cs" />
     <Compile Include="Sync\Strategy\Watcher\NetWatcher.cs" />
     <Compile Include="Sync\Strategy\Watcher\Watcher.cs" />
+    <Compile Include="Streams\ChunkedStream.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="true" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="True" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />

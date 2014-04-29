@@ -8,7 +8,6 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(WEBLIBS) $(MONO
 SOURCES =  \
 	ActivityListenerAggregator.cs \
 	Backend.cs \
-	ChunkedStream.cs \
 	Cmis/AuthProviderFactory.cs \
 	Cmis/CmisPermissionDeniedException.cs \
 	Cmis/CmisServerNotFoundException.cs \
@@ -111,6 +110,7 @@ SOURCES =  \
 	Storage/MetaDataStorage.cs \
 	Storage/PersistentCookieStorage.cs \
 	Streams/BandwidthLimitedStream.cs \
+	Streams/ChunkedStream.cs \
 	Streams/ForwardReadingStream.cs \
 	Streams/NonClosingHashStream.cs \
 	Streams/OffsetStream.cs \
