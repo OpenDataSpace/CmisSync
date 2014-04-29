@@ -16,40 +16,61 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// Folder event. Should be added to the Queue if anything on a folder could have been changed.
+    /// </summary>
     public class FolderEvent : AbstractFolderEvent
     {
-        public bool Recursive { get; set; }
-
-        public IDirectoryInfo LocalFolder { get; set; }
-
-        public IFolder RemoteFolder { get; set; }
-
-        public FolderEvent (IDirectoryInfo localFolder = null, IFolder remoteFolder = null)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FolderEvent"/> class.
+        /// </summary>
+        /// <param name="localFolder">Local folder.</param>
+        /// <param name="remoteFolder">Remote folder.</param>
+        public FolderEvent(IDirectoryInfo localFolder = null, IFolder remoteFolder = null)
         {
             if(localFolder == null && remoteFolder == null)
+            {
                 throw new ArgumentNullException("One of the given folders must not be null");
-            Recursive = false;
-            LocalFolder = localFolder;
-            RemoteFolder = remoteFolder;
+            }
+
+            this.LocalFolder = localFolder;
+            this.RemoteFolder = remoteFolder;
         }
 
-        public override string ToString ()
+        /// <summary>
+        /// Gets or sets the local folder.
+        /// </summary>
+        /// <value>The local folder.</value>
+        public IDirectoryInfo LocalFolder { get; set; }
+
+        /// <summary>
+        /// Gets or sets the remote folder.
+        /// </summary>
+        /// <value>The remote folder.</value>
+        public IFolder RemoteFolder { get; set; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderEvent"/>.</returns>
+        public override string ToString()
         {
-            return string.Format ("[FolderEvent: Local={0} on {2}, Remote={1} on {3}]",
-                                  Local,
-                                  Remote,
-                                  LocalFolder != null ? LocalFolder.Name : "",
-                                  RemoteFolder!= null ? RemoteFolder.Name : "");
+            return string.Format(
+                "[FolderEvent: Local={0} on {2}, Remote={1} on {3}]",
+                this.Local,
+                this.Remote,
+                this.LocalFolder != null ? this.LocalFolder.Name : string.Empty,
+                this.RemoteFolder != null ? this.RemoteFolder.Name : string.Empty);
         }
     }
 }
-

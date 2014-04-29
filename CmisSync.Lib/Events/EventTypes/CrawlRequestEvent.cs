@@ -71,5 +71,14 @@ namespace CmisSync.Lib.Events
         /// The local folder.
         /// </value>
         public IDirectoryInfo LocalFolder { get; private set; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.CrawlRequestEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.CrawlRequestEvent"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format("[CrawlRequestEvent: RemoteFolder={0}, LocalFolder={1}]", this.RemoteFolder.Name, this.LocalFolder.Name);
+        }
     }
 }

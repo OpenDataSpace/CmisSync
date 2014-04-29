@@ -16,47 +16,48 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Storage;
-
-using DotCMIS.Client;
-
-using NUnit.Framework;
-
-using Moq;
-
-using TestLibrary.TestUtils;
 
 namespace TestLibrary.SyncStrategiesTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
+
     [TestFixture]
     public class CrawlerTest
     {
-        private string localPath; 
+        private string localPath;
         private IDirectoryInfo localFolder;
         private DirectoryInfo realLocalFolder;
 
         [SetUp]
         public void SetUp() {
-            localPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            realLocalFolder = new DirectoryInfo(localPath);
-            localFolder = new DirectoryInfoWrapper(realLocalFolder);
-            localFolder.Create();
+            this.localPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            this.realLocalFolder = new DirectoryInfo(this.localPath);
+            this.localFolder = new DirectoryInfoWrapper(this.realLocalFolder);
+            this.localFolder.Create();
         }
 
         [TearDown]
         public void TearDown() {
-            localFolder.Refresh();
-            realLocalFolder.Delete();
+            this.localFolder.Refresh();
+            this.realLocalFolder.Delete();
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWithValidInputTest () {
+        public void ConstructorWithValidInputTest() {
             var queue = new Mock<ISyncEventQueue>().Object;
             var remoteFolder = new Mock<IFolder>().Object;
             var localFolder = new Mock<IDirectoryInfo>();
@@ -66,7 +67,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnNullQueueTest ()
+        public void ConstructorFailsOnNullQueueTest()
         {
             var remoteFolder = new Mock<IFolder>().Object;
             var localFolder = new Mock<IDirectoryInfo>();
@@ -76,7 +77,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnNullLocalFolderTest ()
+        public void ConstructorFailsOnNullLocalFolderTest()
         {
             var queue = new Mock<ISyncEventQueue>().Object;
             var remoteFolder = new Mock<IFolder>().Object;
@@ -85,10 +86,10 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnNullRemoteFolderTest ()
+        public void ConstructorFailsOnNullRemoteFolderTest()
         {
             var queue = new Mock<ISyncEventQueue>().Object;
-            new Crawler(queue, null, localFolder);
+            new Crawler(queue, null, this.localFolder);
         }
 
         [Test, Category("Fast")]
@@ -106,7 +107,6 @@ namespace TestLibrary.SyncStrategiesTests
             var localFolder = new Mock<IDirectoryInfo>(MockBehavior.Strict);
             var remoteFolder = new Mock<IFolder>(MockBehavior.Strict);
             return new Crawler(queue.Object, remoteFolder.Object, localFolder.Object);
-
         }
 
         [Test, Category("Fast")]
@@ -121,14 +121,13 @@ namespace TestLibrary.SyncStrategiesTests
             var startEvent = new StartNextSyncEvent(true);
             Assert.True(crawler.Handle(startEvent));
 
-            queue.Verify(q => q.AddEvent(It.IsAny<FullSyncCompletedEvent>()),Times.Once());
-            //this and only this should be added
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()),Times.Once());
-
+            queue.Verify(q => q.AddEvent(It.IsAny<FullSyncCompletedEvent>()), Times.Once());
+            // this and only this should be added
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
         }
 
-        private bool VerifyRemoteFileEvent(FileEvent e, string folder, string file, MetaDataChangeType metaType, ContentChangeType changeType){
-            VerifyFileEvent(e, folder, file);
+        private bool VerifyRemoteFileEvent(FileEvent e, string folder, string file, MetaDataChangeType metaType, ContentChangeType changeType) {
+            this.VerifyFileEvent(e, folder, file);
             Assert.That(e.RemoteFile, Is.Not.Null);
             Assert.That(e.Remote, Is.EqualTo(metaType));
             Assert.That(e.RemoteContent, Is.EqualTo(changeType));
@@ -138,7 +137,7 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         private bool VerifyLocalFileEventCreated(FileEvent e, string folder, string file) {
-            VerifyFileEvent(e, folder, file);
+            this.VerifyFileEvent(e, folder, file);
             Assert.That(e.RemoteFile, Is.Null);
             Assert.That(e.Remote, Is.EqualTo(MetaDataChangeType.NONE));
             Assert.That(e.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
@@ -146,156 +145,189 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.That(e.LocalContent, Is.EqualTo(ContentChangeType.CREATED));
             return true;
         }
-      
 
-        private bool VerifyFileEvent(FileEvent e, string folder, string file){
+        private bool VerifyFileEvent(FileEvent e, string folder, string file) {
             Assert.That(e.LocalFile.FullName, Is.EqualTo(Path.Combine(folder, file)));
             Assert.That(e.LocalParentDirectory.FullName, Is.EqualTo(folder));
                     
             return true;
         }
 
+        private bool VerifyRemoteFolderEvent(FolderEvent e, string name)
+        {
+            Assert.That(e.RemoteFolder, Is.Not.Null);
+            Assert.That(e.RemoteFolder.Name, Is.EqualTo(name));
+            Assert.That(e.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
+            return true;
+        }
+
         [Test, Category("Fast")]
-        public void CrawlingRemoteFolderWith1FileEmptyLocal () {
+        public void CrawlingRemoteFolderWith1FileEmptyLocal() {
             string localPath = "/";
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name});
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames: new List<string> { name });
 
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath);
 
-            var crawler = GetCrawlerWithFakes(queue);
+            var crawler = this.GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
             Assert.True(crawler.Handle(crawlEvent));
 
             queue.Verify(q => q.AddEvent(
-                        It.Is<FileEvent>(e => VerifyRemoteFileEvent(e, localPath, name, MetaDataChangeType.CREATED, ContentChangeType.NONE))
-                        ), Times.Once());
+                It.Is<FileEvent>(e => this.VerifyRemoteFileEvent(e, localPath, name, MetaDataChangeType.CREATED, ContentChangeType.NONE))
+                ), Times.Once());
         } 
         
         [Test, Category("Fast")]
-        public void CrawlingRemoteFolderWith1FileWithContentEmptyLocal () {
+        public void CrawlingRemoteFolderWith1FileWithContentEmptyLocal() {
             string localPath = "/";
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name}, contentStream : true);
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames: new List<string> { name }, contentStream: true);
 
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath);
 
-            var crawler = GetCrawlerWithFakes(queue);
+            var crawler = this.GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
             Assert.True(crawler.Handle(crawlEvent));
 
             queue.Verify(q => q.AddEvent(
-                        It.Is<FileEvent>(e => VerifyRemoteFileEvent(e, localPath, name, MetaDataChangeType.CREATED, ContentChangeType.CREATED))
-                        ), Times.Once());
-        } 
+                It.Is<FileEvent>(e => this.VerifyRemoteFileEvent(e, localPath, name, MetaDataChangeType.CREATED, ContentChangeType.CREATED))
+                ), Times.Once());
+        }
 
         [Test, Category("Fast")]
-        public void CrawlingFolderWith1FileRemoteAndLocal () {
+        public void CrawlingRemoteFolderWith1ChildFolder() {
+            string localPath = "/";
+            string name = "folder";
+            var queue = new Mock<ISyncEventQueue>();
+
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames: new List<string> { name });
+
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath);
+
+            var crawler = this.GetCrawlerWithFakes(queue);
+            var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
+            Assert.That(crawler.Handle(crawlEvent), Is.True);
+
+            queue.Verify(q => q.AddEvent(
+                It.Is<FolderEvent>(e => this.VerifyRemoteFolderEvent(e, name))
+                ), Times.Once());
+            queue.Verify(q => q.AddEvent(
+                It.Is<CrawlRequestEvent>(e => e.RemoteFolder.Name == name && e.LocalFolder.Name == name)
+                ), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void CrawlingFolderWith1FileRemoteAndLocal() {
             string localPath = "/";
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : new List<string> {name});
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames: new List<string> { name });
 
-            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames : new List<string> {name});
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames: new List<string> { name });
 
-            var crawler = GetCrawlerWithFakes(queue);
+            var crawler = this.GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
             Assert.True(crawler.Handle(crawlEvent));
 
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
             queue.Verify(q => q.AddEvent(
-                        It.Is<FileEvent>(e => VerifyRemoteFileEvent(e, localPath, name, MetaDataChangeType.NONE, ContentChangeType.NONE))
+                It.Is<FileEvent>(e => this.VerifyRemoteFileEvent(e, localPath, name, MetaDataChangeType.NONE, ContentChangeType.NONE))
                         ), Times.Once());
-        } 
+        }
 
         [Test, Category("Fast")]
-        public void CrawlingFolderWith1FileOnlyLocal () {
+        public void CrawlingFolderWith1FileOnlyLocal() {
             string localPath = "/";
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
-            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames : new List<string> {name});
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames: new List<string> { name });
 
-            var crawler = GetCrawlerWithFakes(queue);
+            var crawler = this.GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
             Assert.True(crawler.Handle(crawlEvent));
 
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
             queue.Verify(q => q.AddEvent(
-                        It.Is<FileEvent>(e => VerifyLocalFileEventCreated(e, localPath, name))
-                        ), Times.Once());
-        } 
+                It.Is<FileEvent>(e => this.VerifyLocalFileEventCreated(e, localPath, name))
+                ), Times.Once());
+        }
 
-        private bool VerifyLocalFolderEvent(FolderEvent e, string folder, string file, IFolder remoteFolder) {
+        private bool VerifyLocalFolderEvent(FolderEvent e, string folder, string file) {
             Assert.That(e.LocalFolder.FullName, Is.EqualTo(Path.Combine(folder, file)));
-            Assert.That(e.RemoteFolder, Is.EqualTo(remoteFolder));
+            Assert.That(e.RemoteFolder, Is.Null);
             Assert.That(e.Remote, Is.EqualTo(MetaDataChangeType.NONE));
             Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.CREATED));
             return true;
         }
 
         [Test, Category("Fast")]
-        public void CrawlingFolderWith1LocalFolder () {
+        public void CrawlingFolderWith1LocalFolder() {
             string localPath = "/";
-            string name = "file";
+            string name = "folder";
             var queue = new Mock<ISyncEventQueue>();
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
-            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, folderNames : new List<string> {name});
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, folderNames: new List<string> { name });
 
-            var crawler = GetCrawlerWithFakes(queue);
+            var crawler = this.GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
             Assert.True(crawler.Handle(crawlEvent));
 
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
             queue.Verify(q => q.AddEvent(
-                        It.Is<FolderEvent>(e => VerifyLocalFolderEvent(e, localPath, name, remoteFolder.Object))
-                        ), Times.Once());
-        } 
+                It.Is<FolderEvent>(e => this.VerifyLocalFolderEvent(e, localPath, name))
+                ), Times.Once());
+            queue.Verify(q => q.AddEvent(
+                It.Is<CrawlRequestEvent>(e => e.LocalFolder.Name == name && e.RemoteFolder.Name == name)
+                ), Times.Once());
+        }
 
-        private bool VerifyRemoteFolderEventCreation(FolderEvent e, string folder, string name) {
-            Assert.That(e.LocalFolder.FullName, Is.EqualTo(folder));
+        private bool VerifyRemoteFolderEventCreation(FolderEvent e, string name) {
+            Assert.That(e.LocalFolder, Is.Null);
             Assert.That(e.RemoteFolder.Name, Is.EqualTo(name));
             Assert.That(e.Remote, Is.EqualTo(MetaDataChangeType.CREATED));
-            Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.NONE));           
-            Assert.That(e.Recursive, Is.EqualTo(true));
+            Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.NONE));
             return true;
         }
 
         [Test, Category("Fast")]
-        public void CrawlingFolderWith1RemoteFolder () {
+        public void CrawlingFolderWith1RemoteFolder() {
             string localPath = "/";
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames : new List<string> {name});
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames: new List<string> { name });
 
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath);
 
-            var crawler = GetCrawlerWithFakes(queue);
+            var crawler = this.GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
             Assert.True(crawler.Handle(crawlEvent));
 
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
             queue.Verify(q => q.AddEvent(
-                        It.Is<FolderEvent>(e => VerifyRemoteFolderEventCreation(e, localPath, name))
-                        ), Times.Once());
-        } 
+                It.Is<FolderEvent>(e => this.VerifyRemoteFolderEventCreation(e, name))
+                ), Times.Once());
+            queue.Verify(q => q.AddEvent(
+                It.Is<CrawlRequestEvent>(e => e.LocalFolder.Name == name && e.RemoteFolder.Name == name)
+                ), Times.Once());
+        }
 
         private bool VerifyRemoteFolderEventUpdate(FolderEvent e, string folder, string name) {
             Assert.That(e.LocalFolder.FullName, Is.EqualTo(Path.Combine(folder, name)));
             Assert.That(e.RemoteFolder.Name, Is.EqualTo(name));
             Assert.That(e.Remote, Is.EqualTo(MetaDataChangeType.NONE));
-            Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.NONE));           
-            Assert.That(e.Recursive, Is.EqualTo(false));
+            Assert.That(e.Local, Is.EqualTo(MetaDataChangeType.NONE));
             return true;
         }
 
@@ -306,14 +338,14 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
-        public void CrawlingFolderWith1RemoteoAndLocalFolder () {
+        public void CrawlingFolderWith1RemoteoAndLocalFolder() {
             string localPath = "/";
             string name = "file";
             var queue = new Mock<ISyncEventQueue>();
 
-            var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames : new List<string> {name});
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(folderNames: new List<string> { name });
 
-            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, folderNames : new List<string> {name});
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, folderNames: new List<string> { name });
 
             var crawler = GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
@@ -321,37 +353,35 @@ namespace TestLibrary.SyncStrategiesTests
 
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
             queue.Verify(q => q.AddEvent(
-                        It.Is<FolderEvent>(e => VerifyRemoteFolderEventUpdate(e, localPath, name))
-                        ), Times.Once());
+                It.Is<FolderEvent>(e => this.VerifyRemoteFolderEventUpdate(e, localPath, name))
+                ), Times.Once());
             queue.Verify(q => q.AddEvent(
-                        It.Is<CrawlRequestEvent>(e => VerifyCrawlRequest(e, localPath, name))
-                        ), Times.Once());
-        } 
-
+                It.Is<CrawlRequestEvent>(e => this.VerifyCrawlRequest(e, localPath, name))
+                ), Times.Once());
+        }
 
         [Test, Category("Fast")]
-        public void ParallelEventsTest () {
+        public void ParallelEventsTest() {
             string localPath = "/";
             var queue = new Mock<ISyncEventQueue>();
 
-            var localFiles = new List<string> {"1","3"};
-            var remoteFiles = new List<string> {"1","2"};
-            var localFolders = new List<string> {"a","c"};
-            var remoteFolders = new List<string> {"a","b"};
+            var localFiles = new List<string> { "1", "3" };
+            var remoteFiles = new List<string> { "1", "2" };
+            var localFolders = new List<string> { "a", "c" };
+            var remoteFolders = new List<string> { "a", "b" };
 
-            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames : remoteFiles, folderNames : remoteFolders);
+            var remoteFolder = MockSessionUtil.CreateCmisFolder(fileNames: remoteFiles, folderNames: remoteFolders);
 
-            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames : localFiles, folderNames : localFolders);
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(localPath, fileNames: localFiles, folderNames: localFolders);
 
-            var crawler = GetCrawlerWithFakes(queue);
+            var crawler = this.GetCrawlerWithFakes(queue);
             var crawlEvent = new CrawlRequestEvent(localFolder.Object, remoteFolder.Object);
             Assert.True(crawler.Handle(crawlEvent));
 
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(7));
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(9));
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Exactly(3));
             queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Exactly(3));
-            queue.Verify(q => q.AddEvent(It.IsAny<CrawlRequestEvent>()), Times.Exactly(1));
+            queue.Verify(q => q.AddEvent(It.IsAny<CrawlRequestEvent>()), Times.Exactly(3));
         }
     }
 }
-
