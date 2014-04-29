@@ -16,39 +16,93 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Data;
-
-using log4net;
-
 namespace CmisSync.Lib.Sync.Strategy { 
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    using log4net;
+    
+    /// <summary>
+    /// Content change event transformer. Produces Folder and FileEvents from ContentChange Events.
+    /// </summary>
+    /// <exception cref='ArgumentNullException'>
+    /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+    /// </exception>
+    /// <exception cref='InvalidOperationException'>
+    /// Is thrown when an operation cannot be performed.
+    /// </exception>
     public class ContentChangeEventTransformer : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChangeEventTransformer));
 
         private IMetaDataStorage storage;
 
         private IFileSystemInfoFactory fsFactory;
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.ContentChangeEventTransformer"/> class.
+        /// </summary>
+        /// <param name='queue'>
+        /// The ISyncEventQueue.
+        /// </param>
+        /// <param name='storage'>
+        /// The MetaDataStorage.
+        /// </param>
+        /// <param name='fsFactory'>
+        /// Fs factory can be null.
+        /// </param>
+        /// <exception cref='ArgumentNullException'>
+        /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+        /// </exception>
+        public ContentChangeEventTransformer(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue) {
+            if(storage == null) {
+                throw new ArgumentNullException("Storage instance is needed for the ContentChangeEventTransformer, but was null");
+            }
+                
+            this.storage = storage;
 
+            if(fsFactory == null) {
+                this.fsFactory = new FileSystemInfoFactory();
+            } else {
+                this.fsFactory = fsFactory;
+            }
+        }
+
+        /// <summary>
+        /// Handle the specified e.
+        /// </summary>
+        /// <param name='e'>
+        /// The ISyncEvent only handled when ContentChangeEvent
+        /// </param>
+        /// <returns>
+        /// true if handled.
+        /// </returns>
+        /// <exception cref='InvalidOperationException'>
+        /// Is thrown when an operation cannot be performed.
+        /// </exception>
         public override bool Handle(ISyncEvent e) {
-            if(! (e is ContentChangeEvent)) {
+            if(!(e is ContentChangeEvent)) {
                 return false;
             }
+            
+            Logger.Debug("Handling ContentChangeEvent");
+            
             var contentChangeEvent = e as ContentChangeEvent;
             if(contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted && contentChangeEvent.CmisObject == null) {
                 throw new InvalidOperationException("ERROR, ContentChangeEventAccumulator Missing");
             }
+            
             if(contentChangeEvent.Type == DotCMIS.Enums.ChangeType.Deleted) {
-                HandleDeletion(contentChangeEvent);
-            }else if(contentChangeEvent.CmisObject is IFolder) {
-                HandleAsIFolder(contentChangeEvent);
-            }else if(contentChangeEvent.CmisObject is IDocument) {
-                HandleAsIDocument(contentChangeEvent);
+                this.HandleDeletion(contentChangeEvent);
+            } else if(contentChangeEvent.CmisObject is IFolder) {
+                this.HandleAsIFolder(contentChangeEvent);
+            } else if(contentChangeEvent.CmisObject is IDocument) {
+                this.HandleAsIDocument(contentChangeEvent);
             }
 
             return true;
@@ -56,7 +110,7 @@ namespace CmisSync.Lib.Sync.Strategy {
 
         private void HandleDeletion(ContentChangeEvent contentChangeEvent) {
             Logger.Debug(contentChangeEvent.ObjectId);
-            IMappedObject savedObject = storage.GetObjectByRemoteId(contentChangeEvent.ObjectId);
+            IMappedObject savedObject = this.storage.GetObjectByRemoteId(contentChangeEvent.ObjectId);
             if(savedObject != null)
             {
                 IMappedObject obj = savedObject as IMappedObject;
@@ -64,51 +118,55 @@ namespace CmisSync.Lib.Sync.Strategy {
                 {
                     if(obj.Type == MappedObjectType.Folder)
                     {
-                        var dirInfo = fsFactory.CreateDirectoryInfo(storage.GetLocalPath(obj));
-                        Queue.AddEvent(new FolderEvent(dirInfo, null) {Remote = MetaDataChangeType.DELETED});
+                        var dirInfo = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(obj));
+                        Queue.AddEvent(new FolderEvent(dirInfo, null) { Remote = MetaDataChangeType.DELETED });
                         return;
                     }
                     else
                     {
-                        var fileInfo = fsFactory.CreateFileInfo(storage.GetLocalPath(obj));
-                        Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) {Remote = MetaDataChangeType.DELETED});
+                        var fileInfo = this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(obj));
+                        Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) { Remote = MetaDataChangeType.DELETED });
                         return;
                     }
                 }
             }
+            
             Logger.Debug("nothing found in local storage; it has never been synced");
         }
 
-        private void HandleAsIDocument(ContentChangeEvent contentChangeEvent){
+        private void HandleAsIDocument(ContentChangeEvent contentChangeEvent) {
             IDocument doc = contentChangeEvent.CmisObject as IDocument;
             switch(contentChangeEvent.Type)
             {
                 case DotCMIS.Enums.ChangeType.Created:
                     {
-                        var fileEvent = new FileEvent(null, null, doc) {Remote = MetaDataChangeType.CREATED};
+                        var fileEvent = new FileEvent(null, null, doc) { Remote = MetaDataChangeType.CREATED };
                         fileEvent.RemoteContent = doc.ContentStreamId == null ? ContentChangeType.NONE : ContentChangeType.CREATED;
                         Queue.AddEvent(fileEvent);
                         break;
                     }
+                
                 case DotCMIS.Enums.ChangeType.Security:
                     {
-                        IMappedObject file = storage.GetObjectByRemoteId(doc.Id);
-                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(storage.GetLocalPath(file));
+                        IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
+                        var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
-                        if( fileInfo != null )
+                        if(fileInfo != null)
                         {
                             fileEvent.Remote = MetaDataChangeType.CHANGED;
                         } else {
                             fileEvent.Remote = MetaDataChangeType.CREATED;
                             fileEvent.RemoteContent = ContentChangeType.CREATED;
                         }
+                
                         Queue.AddEvent(fileEvent);
                         break;
                     }
+                
                 case DotCMIS.Enums.ChangeType.Updated:
                     {
-                        IMappedObject file = storage.GetObjectByRemoteId(doc.Id);
-                        var fileInfo = (file == null) ? null : fsFactory.CreateFileInfo(storage.GetLocalPath(file));
+                        IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
+                        var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
                         var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
                         if(fileInfo != null)
                         {
@@ -118,17 +176,18 @@ namespace CmisSync.Lib.Sync.Strategy {
                             fileEvent.Remote = MetaDataChangeType.CREATED;
                             fileEvent.RemoteContent = ContentChangeType.CREATED;
                         }
+                
                         Queue.AddEvent(fileEvent);
                         break;
                     }
             }
         }
 
-        private void HandleAsIFolder(ContentChangeEvent contentChangeEvent){
+        private void HandleAsIFolder(ContentChangeEvent contentChangeEvent) {
             IFolder folder = contentChangeEvent.CmisObject as IFolder;
 
-            IMappedObject dir = storage.GetObjectByRemoteId(folder.Id);
-            IDirectoryInfo dirInfo = (dir == null) ? null : fsFactory.CreateDirectoryInfo(storage.GetLocalPath(dir));
+            IMappedObject dir = this.storage.GetObjectByRemoteId(folder.Id);
+            IDirectoryInfo dirInfo = (dir == null) ? null : this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(dir));
             var folderEvent = new FolderEvent(dirInfo, folder);
             switch(contentChangeEvent.Type)
             {
@@ -142,21 +201,8 @@ namespace CmisSync.Lib.Sync.Strategy {
                     folderEvent.Remote = MetaDataChangeType.CHANGED;
                     break;
             }
+            
             Queue.AddEvent(folderEvent);
         }
-
-        public ContentChangeEventTransformer(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null): base(queue) {
-            
-            if(storage == null)
-                throw new ArgumentNullException("Storage instance is needed for the ContentChangeEventTransformer, but was null");
-            this.storage = storage;
-
-            if(fsFactory == null){
-                this.fsFactory = new FileSystemInfoFactory();
-            }else{
-                this.fsFactory = fsFactory;
-            }
-        }
-
     }
 }
