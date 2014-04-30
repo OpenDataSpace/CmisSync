@@ -16,56 +16,79 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.IO;
-using System;
-
 
 namespace CmisSync.Lib.Storage
 {
-    ///
-    ///<summary>Wrapper for FileInfo<summary>
-    ///
+    using System;
+    using System.IO;
+
+    /// <summary>
+    /// Wrapper for FileInfo
+    /// </summary>
     public class FileInfoWrapper : FileSystemInfoWrapper, IFileInfo
     {
         private FileInfo original;
 
-        public FileInfoWrapper(FileInfo fileInfo)
-            : base(fileInfo)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileInfoWrapper"/> class.
+        /// </summary>
+        /// <param name="fileInfo">File info.</param>
+        public FileInfoWrapper(FileInfo fileInfo) : base(fileInfo)
         {
-            original = fileInfo;
+            this.original = fileInfo;
         }
 
+        /// <summary>
+        /// Gets the parent directory.
+        /// </summary>
+        /// <value>The parent directory.</value>
         public IDirectoryInfo Directory {
             get {
-                return new DirectoryInfoWrapper(original.Directory);
+                return new DirectoryInfoWrapper(this.original.Directory);
             }
         }
 
+        /// <summary>
+        /// Gets the file content length.
+        /// </summary>
+        /// <value>The length.</value>
         public long Length {
             get {
-                return original.Length;
+                return this.original.Length;
             }
         }
 
-        public DateTime LastWriteTime {
-            get {
-                return original.LastWriteTime;
-            }
-        }
-
+        /// <summary>
+        /// Open the specified file.
+        /// </summary>
+        /// <param name="mode">Open mode.</param>
+        /// <returns>Stream of the content.</returns>
         public Stream Open(FileMode mode)
         {
-            return original.Open(mode);
+            return this.original.Open(mode);
         }
 
+        /// <summary>
+        /// Open the specified file with the open and access mode.
+        /// </summary>
+        /// <param name="mode">Open mode.</param>
+        /// <param name="access">Access Mode.</param>
+        /// <returns>Stream of the content</returns>
         public Stream Open(FileMode mode, FileAccess access)
         {
-            return original.Open(mode, access);
+            return this.original.Open(mode, access);
         }
 
+        /// <summary>
+        /// Open the specified file with given open, access and share mode.
+        /// </summary>
+        /// <param name="mode">Open mode.</param>
+        /// <param name="access">Access mode.</param>
+        /// <param name="share">Share mode.</param>
+        /// <returns>Stream of the content</returns>
         public Stream Open(FileMode mode, FileAccess access, FileShare share)
         {
-            return original.Open(mode, access, share);
+            return this.original.Open(mode, access, share);
         }
     }
 }
