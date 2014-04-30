@@ -16,55 +16,57 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using CmisSync.Lib.Cmis;
-
-using DotCMIS.Binding;
-
-using NUnit.Framework;
-
-using Moq;
-using System.Net;
 
 namespace TestLibrary.AuthenticationProviderTests
 {
+    using System;
+    using System.Net;
+
+    using CmisSync.Lib.Cmis;
+
+    using DotCMIS.Binding;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class KerberosAuthenticationProviderTest
     {
-        private HttpWebRequest Request;
-        private IBindingSession Session;
+        private HttpWebRequest request;
+        private IBindingSession session;
 
         [SetUp]
         public void SetUp()
         {
-            Request = (HttpWebRequest)WebRequest.Create(new Uri("https://example.com/"));
-            Session = new Mock<IBindingSession>().Object;
+            this.request = (HttpWebRequest)WebRequest.Create(new Uri("https://example.com/"));
+            this.session = new Mock<IBindingSession>().Object;
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTest(){
-            var auth = new NtlmAuthenticationProvider(){Session = Session};
-            Assert.AreEqual(Session, auth.Session);
+        public void ConstructorTest()
+        {
+            var auth = new NtlmAuthenticationProvider { Session = this.session };
+            Assert.AreEqual(this.session, auth.Session);
         }
 
         [Test, Category("Fast")]
-        public void AddCredentialsToWebRequest(){
-            var auth = new NtlmAuthenticationProvider(){Session = Session};
-            Assert.IsNull(Request.Credentials);
-            auth.Authenticate(Request);
-            Assert.IsNotNull(Request.Credentials);
-            Assert.AreEqual(CredentialCache.DefaultCredentials, Request.Credentials);
+        public void AddCredentialsToWebRequest()
+        {
+            var auth = new NtlmAuthenticationProvider { Session = this.session };
+            Assert.IsNull(this.request.Credentials);
+            auth.Authenticate(this.request);
+            Assert.IsNotNull(this.request.Credentials);
+            Assert.AreEqual(CredentialCache.DefaultCredentials, this.request.Credentials);
         }
 
         [Test, Category("Fast")]
         public void EnableCookies()
         {
-            var auth = new NtlmAuthenticationProvider(){Session = Session};
-            Assert.IsNull(Request.CookieContainer);
-            auth.Authenticate(Request);
-            Assert.IsNotNull(Request.CookieContainer);
+            var auth = new NtlmAuthenticationProvider { Session = this.session };
+            Assert.IsNull(this.request.CookieContainer);
+            auth.Authenticate(this.request);
+            Assert.IsNotNull(this.request.CookieContainer);
         }
     }
 }
-

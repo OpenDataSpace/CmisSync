@@ -14,7 +14,7 @@ SOURCES =  \
 	ActiveActivitiesManagerTest.cs \
 	AuthenticationProviderTests/AuthProviderFactoryTest.cs \
 	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
-	AuthenticationProviderTests/PersistentAuthenticationProviderTest.cs \
+	AuthenticationProviderTests/PersistentStandardAuthenticationProviderTest.cs \
 	ConfigurationTest.cs \
 	ContentTasksTests/ChunkedDownloaderTest.cs \
 	ContentTasksTests/ChunkedFileUploaderTest.cs \

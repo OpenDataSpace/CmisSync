@@ -77,7 +77,6 @@
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
-    <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedDownloaderTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
@@ -160,6 +159,7 @@
     <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
     <Compile Include="RepoInfoTests.cs" />
     <Compile Include="IntegrationTests\CmisRepoTest.cs" />
+    <Compile Include="AuthenticationProviderTests\PersistentStandardAuthenticationProviderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -194,8 +194,8 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="true" RelativeConfigureInPath="../..">
-          <BuildFilesVar Sync="true" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="True" RelativeConfigureInPath="../..">
+          <BuildFilesVar Sync="True" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />

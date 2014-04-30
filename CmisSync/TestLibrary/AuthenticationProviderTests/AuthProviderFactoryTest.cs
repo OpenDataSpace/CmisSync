@@ -22,8 +22,8 @@ namespace TestLibrary.AuthenticationProviderTests
     using System;
 
     using CmisSync.Lib;
-    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
 
     using DBreeze;
 
@@ -34,8 +34,8 @@ namespace TestLibrary.AuthenticationProviderTests
     [TestFixture]
     public class AuthProviderFactoryTest
     {
-        private DBreezeEngine engine;
         private readonly Uri url = new Uri("https://example.com");
+        private DBreezeEngine engine;
 
         [TestFixtureSetUp]
         public void InitCustomSerializator()
@@ -48,7 +48,7 @@ namespace TestLibrary.AuthenticationProviderTests
         [SetUp]
         public void SetUp()
         {
-            this.engine = new DBreezeEngine(new DBreezeConfiguration{ Storage = DBreezeConfiguration.eStorage.MEMORY });
+            this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
         }
 
         [TearDown]

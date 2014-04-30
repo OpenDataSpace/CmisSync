@@ -16,27 +16,28 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Threading;
-using System.Threading.Tasks;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Cmis;
-using CmisSync.Lib.ContentTasks;
-using CmisSync.Lib.Events;
-
-using DotCMIS.Client;
-using DotCMIS.Data;
-using DotCMIS.Exceptions;
-
-using Moq;
-
-using NUnit.Framework;
 
 namespace TestLibrary.ContentTasksTests
 {
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.ContentTasks;
+    using CmisSync.Lib.Events;
+
+    using DotCMIS.Client;
+    using DotCMIS.Data;
+    using DotCMIS.Exceptions;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class SimpleFileDownloaderTest : IDisposable
     {
@@ -52,93 +53,101 @@ namespace TestLibrary.ContentTasksTests
         private Mock<MemoryStream> mockedMemStream;
 
         [SetUp]
-        public void SetUp ()
+        public void SetUp()
         {
-            transmissionEvent = new FileTransmissionEvent (FileTransmissionType.DOWNLOAD_NEW_FILE, "testfile");
-            if (localFileStream != null)
-                localFileStream.Dispose ();
-            localFileStream = new MemoryStream ();
-            if (hashAlg != null)
-                hashAlg.Dispose ();
-            hashAlg = new SHA1Managed ();
-            remoteLength = 1024 * 1024;
-            remoteContent = new byte[remoteLength];
-            if (random != null)
-                random.Dispose ();
-            random = RandomNumberGenerator.Create ();
-            random.GetBytes (remoteContent);
-            mockedMemStream = new Mock<MemoryStream>(remoteContent) { CallBase = true };
-            mockedStream = new Mock<IContentStream> ();
-            mockedStream.Setup(stream => stream.Length).Returns(remoteLength);
-            mockedStream.Setup(stream => stream.Stream).Returns(mockedMemStream.Object);
-            mockedDocument = new Mock<IDocument>();
-            mockedDocument.Setup(doc => doc.ContentStreamLength).Returns(remoteLength);
-            mockedDocument.Setup(doc => doc.GetContentStream ()).Returns(mockedStream.Object);
+            this.transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            if (this.localFileStream != null) {
+                this.localFileStream.Dispose();
+            }
+
+            this.localFileStream = new MemoryStream();
+            if (this.hashAlg != null) {
+                this.hashAlg.Dispose();
+            }
+
+            this.hashAlg = new SHA1Managed();
+            this.remoteLength = 1024 * 1024;
+            this.remoteContent = new byte[this.remoteLength];
+            if (this.random != null) {
+                this.random.Dispose();
+            }
+
+            this.random = RandomNumberGenerator.Create();
+            this.random.GetBytes(this.remoteContent);
+            this.mockedMemStream = new Mock<MemoryStream>(this.remoteContent) { CallBase = true };
+            this.mockedStream = new Mock<IContentStream>();
+            this.mockedStream.Setup(stream => stream.Length).Returns(this.remoteLength);
+            this.mockedStream.Setup(stream => stream.Stream).Returns(this.mockedMemStream.Object);
+            this.mockedDocument = new Mock<IDocument>();
+            this.mockedDocument.Setup(doc => doc.ContentStreamLength).Returns(this.remoteLength);
+            this.mockedDocument.Setup(doc => doc.GetContentStream()).Returns(this.mockedStream.Object);
         }
 
         [Test, Category("Fast")]
-        public void NormalDownloadTest ()
+        public void NormalDownloadTest()
         {
             double lastPercent = 0;
-            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
-//                Console.WriteLine(e);
+            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
                 if (e.ActualPosition != null) {
-                    Assert.GreaterOrEqual ((long)e.ActualPosition, 0);
-                    Assert.LessOrEqual ((long)e.ActualPosition, remoteLength);
+                    Assert.GreaterOrEqual((long)e.ActualPosition, 0);
+                    Assert.LessOrEqual((long)e.ActualPosition, this.remoteLength);
                 }
+
                 if (e.Percent != null) {
-                    Assert.GreaterOrEqual (e.Percent, 0);
-                    Assert.LessOrEqual (e.Percent, 100);
-                    Assert.GreaterOrEqual (e.Percent, lastPercent);
+                    Assert.GreaterOrEqual(e.Percent, 0);
+                    Assert.LessOrEqual(e.Percent, 100);
+                    Assert.GreaterOrEqual(e.Percent, lastPercent);
                     lastPercent = (double)e.Percent;
                 }
+
                 if (e.Length != null) {
-                    Assert.GreaterOrEqual (e.Length, 0);
-                    Assert.LessOrEqual (e.Length, remoteLength);
+                    Assert.GreaterOrEqual(e.Length, 0);
+                    Assert.LessOrEqual(e.Length, this.remoteLength);
                 }
             };
-            using (IFileDownloader downloader = new SimpleFileDownloader()) {
-                downloader.DownloadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
-                Assert.AreEqual (remoteContent.Length, localFileStream.Length);
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (remoteContent), hashAlg.Hash);
-                Assert.AreEqual (SHA1Managed.Create ().ComputeHash (localFileStream.ToArray ()), hashAlg.Hash);
+
+            using (IFileDownloader downloader = new SimpleFileDownloader())
+            {
+                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                Assert.AreEqual(this.remoteContent.Length, this.localFileStream.Length);
+                Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
+                Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
             }
         }
 
         [Test, Category("Fast")]
-        public void ServerFailedExceptionTest ()
+        [ExpectedException(typeof(CmisConnectionException))]
+        public void ServerFailedExceptionTest()
         {
-            mockedMemStream.Setup (memstream => memstream.Read (It.IsAny<byte[]> (), It.IsAny<int> (), It.IsAny<int> ())).Throws<CmisConnectionException> ();
-            using (IFileDownloader downloader = new SimpleFileDownloader()) {
-                try {
-                    downloader.DownloadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
-                    Assert.Fail ();
-                } catch (CmisConnectionException) {
-                }
+            this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Throws<CmisConnectionException>();
+            using (IFileDownloader downloader = new SimpleFileDownloader())
+            {
+                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
             }
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(IOException))]
-        public void IOExceptionTest ()
+        public void IOExceptionTest()
         {
-            mockedMemStream.Setup (memstream => memstream.Read (It.IsAny<byte[]> (), It.IsAny<int> (), It.IsAny<int> ())).Throws<IOException> ();
+            this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Throws<IOException>();
             using (IFileDownloader downloader = new SimpleFileDownloader()) {
-                downloader.DownloadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg);
+                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
             }
         }
 
         [Test, Category("Fast")]
-        public void DisposeWhileDownloadTest ()
+        public void DisposeWhileDownloadTest()
         {
-            mockedMemStream.Setup (memstream => memstream.Read (It.IsAny<byte[]> (), It.IsAny<int> (), It.IsAny<int> ())).Callback (() => Thread.Sleep (1)).Returns (1);
+            this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
             try {
                 Task t;
                 using (IFileDownloader downloader = new SimpleFileDownloader()) {
-                    t = Task.Factory.StartNew (() => downloader.DownloadFile (mockedDocument.Object, localFileStream, transmissionEvent, hashAlg));
+                    t = Task.Factory.StartNew(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
                 }
-                t.Wait ();
-                Assert.Fail ();
+
+                t.Wait();
+                Assert.Fail();
             }
             catch (AggregateException e)
             {
@@ -149,13 +158,8 @@ namespace TestLibrary.ContentTasksTests
         [Test, Category("Fast")]
         public void AbortWhileDownloadTest()
         {
-            //long position = 0;
-            //int ret = 0;
-            //mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
-            //    .Callback((byte[] buffer, int offset, int count) => { Thread.Sleep(1); for (ret = 0; ret < count && position < remoteLength; ++ret, ++position) { buffer[ret] = remoteContent[position]; } })
-            //    .Returns((byte[] buffer, int offset, int count) => ret);
-            mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
-            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
+            this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
+            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
             {
                 Assert.AreEqual(null, e.Completed);
             };
@@ -163,19 +167,20 @@ namespace TestLibrary.ContentTasksTests
             {
                 Task t;
                 IFileDownloader downloader = new SimpleFileDownloader();
-                t = Task.Factory.StartNew(() => downloader.DownloadFile(mockedDocument.Object, localFileStream, transmissionEvent, hashAlg));
+                t = Task.Factory.StartNew(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
                 t.Wait(100);
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
+                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
                 t.Wait();
                 Assert.Fail();
             }
             catch (AggregateException e)
             {
                 Assert.IsInstanceOf(typeof(AbortException), e.InnerException);
-                Assert.True(transmissionEvent.Status.Aborted.GetValueOrDefault());
-                Assert.AreEqual(false, transmissionEvent.Status.Aborting);
+                Assert.True(this.transmissionEvent.Status.Aborted.GetValueOrDefault());
+                Assert.AreEqual(false, this.transmissionEvent.Status.Aborting);
                 return;
             }
+
             Assert.Fail();
         }
 
@@ -184,9 +189,9 @@ namespace TestLibrary.ContentTasksTests
         // Implement IDisposable.
         // Do not make this method virtual.
         // A derived class should not be able to override this method.
-        public void Dispose ()
+        public void Dispose()
         {
-            Dispose (true);
+            this.Dispose(true);
         }
 
         // Dispose(bool disposing) executes in two distinct scenarios.
@@ -196,21 +201,26 @@ namespace TestLibrary.ContentTasksTests
         // If disposing equals false, the method has been called by the
         // runtime from inside the finalizer and you should not reference
         // other objects. Only unmanaged resources can be disposed.
-        protected virtual void Dispose (bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (disposing) {
-                if (!disposed) {
-                    if (this.localFileStream != null)
-                        this.localFileStream.Dispose ();
-                    if (hashAlg != null)
-                        this.hashAlg.Dispose ();
-                    if (this.random != null)
-                        this.random.Dispose ();
-                    disposed = true;
+                if (!this.disposed) {
+                    if (this.localFileStream != null) {
+                        this.localFileStream.Dispose();
+                    }
+
+                    if (this.hashAlg != null) {
+                        this.hashAlg.Dispose();
+                    }
+
+                    if (this.random != null) {
+                        this.random.Dispose();
+                    }
+
+                    this.disposed = true;
                 }
             }
         }
         #endregion
     }
 }
-
