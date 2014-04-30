@@ -16,13 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace CmisSync.Lib
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
     /// <summary>
     /// Listen to activity/inactivity.
     /// Typically used by a status spinner:
@@ -36,13 +37,11 @@ namespace CmisSync.Lib
         /// </summary>
         void ActivityStarted();
 
-
         /// <summary>
         /// Call this method to indicate that activity has stopped.
         /// </summary>
         void ActivityStopped();
     }
-
 
     /// <summary>
     /// RAII class for IActivityListener
@@ -58,8 +57,8 @@ namespace CmisSync.Lib
         /// </summary>
         public ActivityListenerResource(IActivityListener listener)
         {
-            activityListener = listener;
-            activityListener.ActivityStarted();
+            this.activityListener = listener;
+            this.activityListener.ActivityStarted();
         }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace CmisSync.Lib
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -76,10 +75,10 @@ namespace CmisSync.Lib
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if(!disposed)
+            if(!this.disposed)
             {
-                activityListener.ActivityStopped();
-                disposed = true;
+                this.activityListener.ActivityStopped();
+                this.disposed = true;
             }
         }
 
@@ -88,7 +87,7 @@ namespace CmisSync.Lib
         /// </summary>
         ~ActivityListenerResource()
         {
-            Dispose(false);
+            this.Dispose(false);
         }
     }
 }

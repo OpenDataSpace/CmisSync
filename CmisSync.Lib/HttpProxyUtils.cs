@@ -16,12 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Net;
-using log4net;
 
 namespace CmisSync.Lib
 {
+    using System;
+    using System.Net;
+    using log4net;
+
     /// <summary>
     /// Http proxy utils.
     /// </summary>
@@ -33,7 +34,7 @@ namespace CmisSync.Lib
         /// Sets the default proxy for every HTTP request.
         /// If the caller would like to know if the call throws any exception, the second parameter should be set to true
         /// </summary>
-        /// <param name="settings">Settings.</param>
+        /// <param name="settings">proxy settings.</param>
         /// <param name="throwExceptions">If set to <c>true</c> throw exceptions.</param>
         public static void SetDefaultProxy(Config.ProxySettings settings, bool throwExceptions = false)
         {
@@ -49,17 +50,21 @@ namespace CmisSync.Lib
                         (proxy as WebProxy).Address = settings.Server;
                         break;
                 }
-                if (settings.LoginRequired && proxy != null)
+
+                if (settings.LoginRequired && proxy != null) {
                     proxy.Credentials = new NetworkCredential(settings.Username, Crypto.Deobfuscate(settings.ObfuscatedPassword));
+                }
+
                 WebRequest.DefaultWebProxy = proxy;
             }
             catch (Exception e)
             {
-                if (throwExceptions)
+                if (throwExceptions) {
                     throw;
+                }
+
                 Logger.Warn("Failed to set the default proxy, please check your proxy config: ", e);
             }
         }
     }
 }
-

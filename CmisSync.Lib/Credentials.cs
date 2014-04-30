@@ -103,6 +103,11 @@ namespace CmisSync.Lib.Credentials
         }
 
         /// <summary>
+        /// Gets and sets the internal saved and obfuscated password
+        /// </summary>
+        public string ObfuscatedPassword { get { return this.password; } set { this.password = value; } }
+
+        /// <summary>
         /// Returns the password as plain text
         /// </summary>
         /// <returns>plain text password</returns>
@@ -110,10 +115,5 @@ namespace CmisSync.Lib.Credentials
         {
             return this.password == null ? null : Crypto.Deobfuscate(this.password);
         }
-
-        /// <summary>
-        /// Gets and sets the internal saved and obfuscated password
-        /// </summary>
-        public string ObfuscatedPassword { get { return this.password; } set { this.password = value; } }
     }
 }
