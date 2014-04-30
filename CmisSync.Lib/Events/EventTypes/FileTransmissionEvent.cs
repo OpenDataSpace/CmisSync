@@ -16,19 +16,79 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
+    /// <summary>
+    /// File transmission types.
+    /// </summary>
+    public enum FileTransmissionType
+    {
+        /// <summary>
+        /// A new file is uploaded
+        /// </summary>
+        UPLOAD_NEW_FILE,
+
+        /// <summary>
+        /// A locally modified file is uploaded
+        /// </summary>
+        UPLOAD_MODIFIED_FILE,
+
+        /// <summary>
+        /// A new remote file is downloaded
+        /// </summary>
+        DOWNLOAD_NEW_FILE,
+
+        /// <summary>
+        /// A remotely modified file is downloaded
+        /// </summary>
+        DOWNLOAD_MODIFIED_FILE
+    }
+
     /// <summary>
     /// File transmission event.
     /// This event should be queued only once. The progress will not be reported on the queue.
     /// Interested entities should add themselfs as TransmissionEventHandler on the event TransmissionStatus to get informed about the progress.
     /// </summary>
-    public class FileTransmissionEvent: ISyncEvent
+    public class FileTransmissionEvent : ISyncEvent
     {
+        private TransmissionProgressEventArgs status;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileTransmissionEvent"/> class.
+        /// </summary>
+        /// <param name='type'>
+        /// Type of the transmission.
+        /// </param>
+        /// <param name='path'>
+        /// Path to the file of the transmission.
+        /// </param>
+        /// <param name='cachePath'>
+        /// If a download runs and a cache file is used, this should be the path to the cache file
+        /// </param>
+        public FileTransmissionEvent(FileTransmissionType type, string path, string cachePath = null)
+        {
+            if (path == null) {
+                throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
+            }
+
+            this.Type = type;
+            this.Path = path;
+            this.status = new TransmissionProgressEventArgs();
+            this.CachePath = cachePath;
+        }
+
+        public delegate void TransmissionEventHandler(object sender, TransmissionProgressEventArgs e);
+
+        /// <summary>
+        /// Occurs when transmission status changes.
+        /// </summary>
+        public event TransmissionEventHandler TransmissionStatus = delegate { };
+
         /// <summary>
         /// Gets the type of the transmission.
         /// </summary>
@@ -46,21 +106,12 @@ namespace CmisSync.Lib.Events
         public string Path { get; private set; }
 
         /// <summary>
-        /// If a download happens, a cache file could be used. If the cache is used, this should be the path.
+        /// Gets download cache file. If a download happens, a cache file could be used. If the cache is used, this should be the path.
         /// </summary>
         /// <value>
         /// The cache path.
         /// </value>
         public string CachePath { get; private set; }
-
-        public delegate void TransmissionEventHandler(object sender, TransmissionProgressEventArgs e);
-
-        /// <summary>
-        /// Occurs when transmission status changes.
-        /// </summary>
-        public event TransmissionEventHandler TransmissionStatus = delegate { };
-
-        private TransmissionProgressEventArgs status;
 
         /// <summary>
         /// Gets the actual status of the transmission.
@@ -75,29 +126,6 @@ namespace CmisSync.Lib.Events
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileTransmissionEvent"/> class.
-        /// </summary>
-        /// <param name='type'>
-        /// Type of the transmission.
-        /// </param>
-        /// <param name='path'>
-        /// Path to the file of the transmission.
-        /// </param>
-        /// <param name='cachePath'>
-        /// If a download runs and a cache file is used, this should be the path to the cache file
-        /// </param>
-        public FileTransmissionEvent(FileTransmissionType type, string path, string cachePath = null)
-        {
-            if(path == null) {
-                throw new ArgumentNullException("Argument null in FSEvent Constructor","path");
-            }
-            Type = type;
-            Path = path;
-            status = new TransmissionProgressEventArgs();
-            CachePath = cachePath;
-        }
-
-        /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FileTransmissionEvent"/>.
         /// </summary>
         /// <returns>
@@ -105,7 +133,7 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format("FileTransmissionEvent with type \"{0}\" on path \"{1}\"", Type, Path);
+            return string.Format("FileTransmissionEvent with type \"{0}\" on path \"{1}\"", this.Type, this.Path);
         }
 
         /// <summary>
@@ -117,15 +145,16 @@ namespace CmisSync.Lib.Events
         /// </param>
         public void ReportProgress(TransmissionProgressEventArgs status)
         {
-            Status.Aborting = (status.Aborting != null) ? status.Aborting : Status.Aborting;
-            Status.Aborted = (status.Aborted != null) ? status.Aborted : Status.Aborted;
-            Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
-            Status.Length = (status.Length != null) ? status.Length : Status.Length;
-            Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
-            Status.Started = (status.Started != null) ? status.Started : Status.Started;
-            Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
-            if (TransmissionStatus != null)
-                TransmissionStatus(this, Status);
+            this.Status.Aborting = (status.Aborting != null) ? status.Aborting : this.Status.Aborting;
+            this.Status.Aborted = (status.Aborted != null) ? status.Aborted : this.Status.Aborted;
+            this.Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : this.Status.ActualPosition;
+            this.Status.Length = (status.Length != null) ? status.Length : this.Status.Length;
+            this.Status.Completed = (status.Completed != null) ? status.Completed : this.Status.Completed;
+            this.Status.Started = (status.Started != null) ? status.Started : this.Status.Started;
+            this.Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : this.Status.BitsPerSecond;
+            if (this.TransmissionStatus != null) {
+                this.TransmissionStatus(this, this.Status);
+            }
         }
     }
 
@@ -134,6 +163,21 @@ namespace CmisSync.Lib.Events
     /// </summary>
     public class TransmissionProgressEventArgs
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.TransmissionProgressEventArgs"/> class.
+        /// </summary>
+        public TransmissionProgressEventArgs()
+        {
+            this.BitsPerSecond = null;
+            this.Length = null;
+            this.ActualPosition = null;
+            this.Paused = null;
+            this.Resumed = null;
+            this.Aborting = null;
+            this.Aborted = null;
+            this.FailedException = null;
+        }
+
         /// <summary>
         /// Gets or sets the bits per second. Can be null if its unknown.
         /// </summary>
@@ -148,12 +192,17 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The percentage of the transmission progress.
         /// </value>
-        public double? Percent { get{
-                if(Length==null || ActualPosition == null || ActualPosition < 0 || Length < 0)
+        public double? Percent { get {
+                if (this.Length == null || this.ActualPosition == null || this.ActualPosition < 0 || this.Length < 0) {
                     return null;
-                if(Length == 0)
+                }
+
+                if (this.Length == 0)
+                {
                     return 100d;
-                return ((double) ActualPosition * 100d) / (double) Length;
+                }
+
+                return ((double)this.ActualPosition * 100d) / (double)this.Length;
             } }
 
         /// <summary>
@@ -202,15 +251,15 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// Transmission aborted.
         /// </value>
-        public bool? Aborted{ get; set; }
+        public bool? Aborted { get; set; }
 
-		/// <summary>
-		/// Gets or sets if the transmission is started.
-		/// </summary>
-		/// <value>
-		/// Transmission started.
-		/// </value>
-		public bool? Started { get; set; }
+        /// <summary>
+        /// Gets or sets if the transmission is started.
+        /// </summary>
+        /// <value>
+        /// Transmission started.
+        /// </value>
+        public bool? Started { get; set; }
 
         /// <summary>
         /// Gets or sets if the transmission is completed.
@@ -226,7 +275,7 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// Transmission failed exception.
         /// </value>
-        public Exception FailedException { get; set;}
+        public Exception FailedException { get; set; }
 
         /// <summary>
         /// Calculates the bits per second.
@@ -243,31 +292,19 @@ namespace CmisSync.Lib.Events
         /// <param name='bytes'>
         /// Bytes in period between start end end.
         /// </param>
-        public static long? CalcBitsPerSecond(DateTime start, DateTime end, long bytes){
-            if(end < start)
+        public static long? CalcBitsPerSecond(DateTime start, DateTime end, long bytes) {
+            if (end < start) {
                 throw new ArgumentException("The end of a transmission must be higher than the start");
-            if(start == end){
+            }
+
+            if (start == end) {
                 return null;
             }
+
             TimeSpan difference = end - start;
             double seconds = difference.TotalMilliseconds / 1000d;
             double dbytes = bytes;
-            return (long) ((dbytes * 8) / seconds);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.TransmissionProgressEventArgs"/> class.
-        /// </summary>
-        public TransmissionProgressEventArgs()
-        {
-            BitsPerSecond = null;
-            Length = null;
-            ActualPosition = null;
-            Paused = null;
-            Resumed = null;
-            Aborting = null;
-            Aborted = null;
-            FailedException = null;
+            return (long)((dbytes * 8) / seconds);
         }
 
         /// <summary>
@@ -280,27 +317,28 @@ namespace CmisSync.Lib.Events
         /// <c>true</c> if the specified <see cref="System.Object"/> is equal to the current
         /// <see cref="CmisSync.Lib.Events.TransmissionProgressEventArgs"/>; otherwise, <c>false</c>.
         /// </returns>
-        public  override bool Equals(System.Object obj) {
+        public override bool Equals(object obj) {
             // If parameter is null return false.
             if (obj == null)
             {
                 return false;
             }
+
             TransmissionProgressEventArgs e = obj as TransmissionProgressEventArgs;
-            if ((System.Object)e == null)
+            if ((object)e == null)
             {
                 return false;
             }
 
             // Return true if the fields match:
-            return (Length == e.Length) &&
-                (BitsPerSecond == e.BitsPerSecond || BitsPerSecond==null || e.BitsPerSecond==null) &&
-                    (ActualPosition == e.ActualPosition) &&
-                    (Paused == e.Paused) &&
-                    (Resumed == e.Resumed) &&
-                    (Aborting == e.Aborting) &&
-                    (Aborted == e.Aborted) &&
-                    (FailedException == e.FailedException);
+            return (this.Length == e.Length) &&
+                (this.BitsPerSecond == e.BitsPerSecond || this.BitsPerSecond == null || e.BitsPerSecond == null) &&
+                    (this.ActualPosition == e.ActualPosition) &&
+                    (this.Paused == e.Paused) &&
+                    (this.Resumed == e.Resumed) &&
+                    (this.Aborting == e.Aborting) &&
+                    (this.Aborted == e.Aborted) &&
+                    (this.FailedException == e.FailedException);
         }
 
         /// <summary>
@@ -310,9 +348,9 @@ namespace CmisSync.Lib.Events
         /// A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.
         /// </returns>
-        public override int GetHashCode ()
+        public override int GetHashCode()
         {
-            return base.GetHashCode ();
+            return base.GetHashCode();
         }
 
         /// <summary>
@@ -323,42 +361,18 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public override string ToString()
         {
-            string status = "";
-            if(Paused == true)
-                status += "Paused";
-            if(Resumed == true)
-                status += "Resumed";
-            if (Aborting == true)
-                status += "Aborting";
-            if (Aborted == true)
-                status += "Aborted";
-            if(Completed == true)
-                status += "Completed";
-            return String.Format("[TransmissionProgressEventArgs: [Length: {0}] [ActualPosition: {1}] [Percent: {2}] [Status: {3}]] [Exception: {4}]",
-                                 Length, ActualPosition, Percent, status, FailedException);
+            string status = this.Paused == true ? "Paused" : string.Empty;
+            status += this.Resumed == true ? "Resumed" : string.Empty;
+            status += this.Aborting == true ? "Aborting" : string.Empty;
+            status += this.Aborted == true ? "Aborted" : string.Empty;
+            status += this.Completed == true ? "Completed" : string.Empty;
+            return string.Format(
+                "[TransmissionProgressEventArgs: [Length: {0}] [ActualPosition: {1}] [Percent: {2}] [Status: {3}]] [Exception: {4}]",
+                this.Length,
+                this.ActualPosition,
+                this.Percent,
+                status,
+                this.FailedException);
         }
-    }
-
-    /// <summary>
-    /// File transmission types.
-    /// </summary>
-    public enum FileTransmissionType
-    {
-        /// <summary>
-        /// A new file is uploaded
-        /// </summary>
-        UPLOAD_NEW_FILE,
-        /// <summary>
-        /// A locally modified file is uploaded
-        /// </summary>
-        UPLOAD_MODIFIED_FILE,
-        /// <summary>
-        /// A new remote file is downloaded
-        /// </summary>
-        DOWNLOAD_NEW_FILE,
-        /// <summary>
-        /// A remotely modified file is downloaded
-        /// </summary>
-        DOWNLOAD_MODIFIED_FILE
     }
 }
