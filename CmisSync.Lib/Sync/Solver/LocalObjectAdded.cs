@@ -36,6 +36,13 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class LocalObjectAdded : ISolver
     {
+        /// <summary>
+        /// Solve the situation of a local object added and should be uploaded by using the session, storage, localFile and remoteId.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="remoteId">Remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
             // Create new remote object

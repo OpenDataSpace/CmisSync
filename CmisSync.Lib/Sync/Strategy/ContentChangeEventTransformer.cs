@@ -16,7 +16,9 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Sync.Strategy { 
+
+namespace CmisSync.Lib.Sync.Strategy
+{ 
     using System;
     using System.IO;
 

@@ -16,19 +16,30 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using DotCMIS.Client;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Data;
-using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Solver
 {
-    public interface ISolver 
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// I solver implements a mechanism to resolve one specific sync situation.
+    /// </summary>
+    public interface ISolver
     {
+        /// <summary>
+        /// Solve the specified situation by using the session, storage, localFile and remoteId.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="remoteId">Remote identifier.</param>
         void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId);
     }
 }
-

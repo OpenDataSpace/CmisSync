@@ -26,7 +26,7 @@ namespace CmisSync.Lib.Sync.Strategy
     using DotCMIS.Exceptions;
 
     using log4net;
-      
+
     /// <summary>
     /// Content change event accumulator, fetches Cmis Object for CS Event
     /// </summary>
@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChangeEventAccumulator));
 
         private ISession session;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.ContentChangeEventAccumulator"/> class.
         /// </summary>
@@ -54,7 +54,7 @@ namespace CmisSync.Lib.Sync.Strategy
             if(session == null) {
                 throw new ArgumentNullException("Session instance is needed for the ContentChangeEventAccumulator, but was null");
             }
-            
+
             this.session = session;
         }
 
@@ -90,7 +90,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     return true;
                 }
             }
-            
+
             return false;
         }
     }

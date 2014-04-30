@@ -16,22 +16,26 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Solver
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// Remote object has been moved. => Move the corresponding local object.
+    /// </summary>
     public class RemoteObjectMoved : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId){
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        {
             // Move local object
             throw new NotImplementedException();
         }
     }
 }
-

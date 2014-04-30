@@ -16,22 +16,26 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Sync.Solver
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// Local object has been renamed. => Rename the corresponding object on the server.
+    /// </summary>
     public class LocalObjectRenamed : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId){
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        {
             // Rename remote object
             throw new NotImplementedException();
         }
     }
 }
-
