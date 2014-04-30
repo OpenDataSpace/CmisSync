@@ -16,25 +16,26 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Collections.Generic;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Events.Filter;
-
-using NUnit.Framework;
-
-using Moq;
 
 namespace TestLibrary.EventsTests.EventsFilterTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
+
+    using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class GenericHandleDublicatedEventsFilterTest
     {
-        private readonly DotCMIS.Exceptions.CmisPermissionDeniedException DeniedException = new DotCMIS.Exceptions.CmisPermissionDeniedException();
+        private readonly DotCMIS.Exceptions.CmisPermissionDeniedException deniedException = new DotCMIS.Exceptions.CmisPermissionDeniedException();
         private readonly Uri url = new Uri("http://example.com");
 
         [Test, Category("Fast"), Category("EventFilter")]
@@ -56,37 +57,36 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         public void FilterLetsResetTypePassingThrough()
         {
             var filter = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>();
-            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(url).Object));
-            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(url).Object));
+            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(this.url).Object));
+            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(this.url).Object));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
         public void FilterLetsFirstFilterTypePassing()
         {
             var filter = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>();
-            Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
+            Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
         public void FilterHandlesSecondMatchingFilterType()
         {
             var filter = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>();
-            Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
-            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
-            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
+            Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
+            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
+            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
         public void FilterLetMatchingFilterTypePassAfterResetTypeOccured()
         {
             var filter = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>();
-            Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
-            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
-            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
-            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(url).Object));
-            Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
-            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(DeniedException).Object));
+            Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
+            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
+            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
+            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(this.url).Object));
+            Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
+            Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
         }
     }
 }
-
