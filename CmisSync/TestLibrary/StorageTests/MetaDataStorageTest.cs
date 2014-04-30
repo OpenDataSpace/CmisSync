@@ -16,11 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.IO;
 
 namespace TestLibrary.StorageTests
 {
     using System;
+    using System.IO;
 
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
@@ -35,6 +35,9 @@ namespace TestLibrary.StorageTests
 
     public class MetaDataStorageTest
     {
+        private readonly IPathMatcher matcher = Mock.Of<IPathMatcher>();
+        private DBreezeEngine engine;
+
         [TestFixtureSetUp]
         public void InitCustomSerializator()
         {
@@ -43,19 +46,16 @@ namespace TestLibrary.StorageTests
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
-        private DBreezeEngine engine;
-        private readonly IPathMatcher matcher = Mock.Of<IPathMatcher>();
-
         [SetUp]
         public void SetUp()
         {
-            engine = new DBreezeEngine(new DBreezeConfiguration{ Storage = DBreezeConfiguration.eStorage.MEMORY });
+            this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
         }
 
         [TearDown]
         public void TearDown()
         {
-            engine.Dispose();
+            this.engine.Dispose();
         }
 
         [Test, Category("Fast")]
@@ -122,7 +122,7 @@ namespace TestLibrary.StorageTests
         {
             var matcher = new Mock<IPathMatcher>();
             string localpath = Path.GetTempPath();
-            var folder = Mock.Of<IDirectoryInfo>( f =>
+            var folder = Mock.Of<IDirectoryInfo>(f =>
                                                  f.FullName == localpath);
             matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == localpath))).Returns(false);
             var storage = new MetaDataStorage(this.engine, matcher.Object);
@@ -140,7 +140,7 @@ namespace TestLibrary.StorageTests
             matcher.Setup(m => m.GetRelativeLocalPath(It.Is<string>(f => f == testpath))).Returns(testfilename);
             var storage = new MetaDataStorage(this.engine, matcher.Object);
 
-            var path = Mock.Of<IFileSystemInfo>( p =>
+            var path = Mock.Of<IFileSystemInfo>(p =>
                                                 p.FullName == testpath);
             Assert.That(storage.GetObjectByLocalPath(path), Is.Null);
         }
@@ -153,7 +153,7 @@ namespace TestLibrary.StorageTests
             matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == Path.Combine(Path.GetTempPath(), "a")))).Returns(true);
             matcher.Setup(m => m.GetRelativeLocalPath(It.Is<string>(p => p == Path.Combine(Path.GetTempPath(), "a")))).Returns("a");
             var storage = new MetaDataStorage(this.engine, matcher.Object);
-            var folder = Mock.Of<IDirectoryInfo>( f =>
+            var folder = Mock.Of<IDirectoryInfo>(f =>
                                                  f.FullName == Path.Combine(Path.GetTempPath(), "a"));
             var mappedFolder = new MappedObject("a", "remoteId", MappedObjectType.Folder, null, null)
             {

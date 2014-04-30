@@ -40,7 +40,9 @@ namespace TestLibrary.EventsTests
         [Test, Category("Fast")]
         public void PriorityTest()
         {
-            var handler = new GenericSyncEventHandler<ISyncEvent>(this.priority, delegate(ISyncEvent e) {
+            var handler = new GenericSyncEventHandler<ISyncEvent>(
+                this.priority,
+                delegate(ISyncEvent e) {
                 return false;
             });
             Assert.AreEqual(this.priority, handler.Priority);
@@ -50,7 +52,9 @@ namespace TestLibrary.EventsTests
         public void IgnoresUnexpectedEvents()
         {
             bool eventPassed = false;
-            var handler = new GenericSyncEventHandler<FSEvent>(this.priority, delegate(ISyncEvent e) {
+            var handler = new GenericSyncEventHandler<FSEvent>(
+                this.priority,
+                delegate(ISyncEvent e) {
                 eventPassed = true;
                 return true;
             });
@@ -63,7 +67,9 @@ namespace TestLibrary.EventsTests
         public void HandleExpectedEvents()
         {
             bool eventPassed = false;
-            var handler = new GenericSyncEventHandler<ConfigChangedEvent>(this.priority, delegate(ISyncEvent e) {
+            var handler = new GenericSyncEventHandler<ConfigChangedEvent>(
+                this.priority,
+                delegate(ISyncEvent e) {
                 eventPassed = true;
                 return true;
             });

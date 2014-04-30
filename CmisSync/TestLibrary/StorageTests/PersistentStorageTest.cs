@@ -16,20 +16,19 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using CmisSync.Lib.Storage;
-
-using NUnit.Framework;
-
-using Moq;
 
 namespace TestLibrary.StorageTests
 {
+    using System;
+
+    using CmisSync.Lib.Storage;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class PersistentStorageTest
     {
-
     }
 }
-

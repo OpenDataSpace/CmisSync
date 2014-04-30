@@ -25,11 +25,11 @@ namespace TestLibrary.StorageTests
 
     using DBreeze;
 
+    using Moq;
+
     using Newtonsoft.Json;
 
     using NUnit.Framework;
-
-    using Moq;
 
     [TestFixture]
     public class PersistentCookieStorageTest
@@ -47,7 +47,7 @@ namespace TestLibrary.StorageTests
         [SetUp]
         public void SetUp()
         {
-            this.engine = new DBreezeEngine(new DBreezeConfiguration{ Storage = DBreezeConfiguration.eStorage.MEMORY });
+            this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
         }
 
         [TearDown]
@@ -85,7 +85,7 @@ namespace TestLibrary.StorageTests
         {
             var storage = new PersistentCookieStorage(this.engine);
             var collection = new CookieCollection();
-            collection.Add(new Cookie{
+            collection.Add(new Cookie {
                 Name = "test",
                 Expired = false,
                 Expires = DateTime.Now.AddDays(1)
@@ -102,7 +102,7 @@ namespace TestLibrary.StorageTests
         {
             var storage = new PersistentCookieStorage(this.engine);
             var collection = new CookieCollection();
-            collection.Add(new Cookie{
+            collection.Add(new Cookie {
                 Name = "test",
                 Expired = false,
                 Expires = DateTime.Now.AddDays(1)
@@ -113,4 +113,3 @@ namespace TestLibrary.StorageTests
         }
     }
 }
-
