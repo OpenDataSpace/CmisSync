@@ -16,25 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
-using System.Threading.Tasks;
-
-using DotCMIS;
-using DotCMIS.Client;
-using DotCMIS.Client.Impl;
-using DotCMIS.Data.Impl;
-
-using Newtonsoft.Json;
-
-using Moq;
 
 /**
  * Unit Tests for CmisSync.
@@ -63,138 +44,100 @@ using Moq;
 ]
  */
 
-
 namespace TestLibrary.IntegrationTests
 {
-    using NUnit.Framework;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Sync;
 
+    using DotCMIS;
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
+    using DotCMIS.Data.Impl;
+
+    using Moq;
+
+    using Newtonsoft.Json;
+
+    using NUnit.Framework;
+
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000)]
     public class CmisSyncTests
     {
-        private readonly string CMISSYNCDIR = ConfigManager.CurrentConfig.GetFoldersPath();
-        private readonly int HeavyNumber = 10;
-        private readonly int HeavyFileSize = 1024;
+        private readonly string cmisSyncDir = ConfigManager.CurrentConfig.GetFoldersPath();
+        private readonly int heavyNumber = 10;
+        private readonly int heavyFileSize = 1024;
+
+        /// <summary>
+        /// Waits until checkStop is true or waiting duration is reached.
+        /// </summary>
+        /// <returns>
+        /// True if checkStop is true, otherwise waits for pollInterval miliseconds and checks again until the wait threshold is reached.
+        /// </returns>
+        /// <param name='checkStop'>
+        /// Checks if the condition, which is waited for is <c>true</c>.
+        /// </param>
+        /// <param name='wait'>
+        /// Waiting threshold. If this is reached, <c>false</c> will be returned.
+        /// </param>
+        /// <param name='pollInterval'>
+        /// Sleep duration between two condition validations by calling checkStop.
+        /// </param>
+        public static bool WaitUntilDone(Func<bool> checkStop, int wait = 300000, int pollInterval = 1000)
+        {
+            while (wait > 0)
+            {
+                System.Threading.Thread.Sleep(pollInterval);
+                wait -= pollInterval;
+                if (checkStop()) {
+                    return true;
+                }
+
+                Console.WriteLine(string.Format("Retry Wait in {0}ms", pollInterval));
+            }
+
+            Console.WriteLine("Wait was not successful");
+            return false;
+        }
 
         [TestFixtureSetUp]
         public void ClassInit()
         {
             // Disable HTTPS Verification
-            ServicePointManager.ServerCertificateValidationCallback = delegate {return true;};
-            try{
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            try {
                 File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
-            }catch(IOException){}
+            } catch (IOException) {
+            }
+
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
 
         [TearDown]
         public void TearDown()
         {
-            foreach( string file in Directory.GetFiles(CMISSYNCDIR)) {
-                if(file.EndsWith(".cmissync"))
+            foreach (string file in Directory.GetFiles(this.cmisSyncDir)) {
+                if (file.EndsWith(".cmissync"))
                 {
                     File.Delete(file);
                 }
             }
+
             // Reanable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
-
-
-        private void DeleteDirectoryIfExists(string path)
-        {
-            if (Directory.Exists(path))
-            {
-                Directory.Delete(path, true);
-            }
-        }
-
-
-        private void CleanDirectory(string path)
-        {
-            // Delete recursively.
-            DeleteDirectoryIfExists(path);
-
-            // Delete database.
-            string database = path + ".cmissync";
-            if (File.Exists(database))
-            {
-                try
-                {
-                    File.Delete(database);
-                }
-                catch (IOException ex)
-                {
-                    Console.WriteLine("Exception on testing side, ignoring " + database + ":" + ex);
-                }
-            }
-
-            // Prepare empty directory.
-            Directory.CreateDirectory(path);
-        }
-
-
-        private void CleanAll(string path)
-        {
-            DirectoryInfo directory = new DirectoryInfo(path);
-
-            try
-            {
-                // Delete all local files/folders.
-                foreach (FileInfo file in directory.GetFiles())
-                {
-                    if (file.Name.EndsWith(".sync"))
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        file.Delete();
-                    }
-                    catch (IOException ex)
-                    {
-                        Console.WriteLine("Exception on testing side, ignoring " + file.FullName + ":" + ex);
-                    }
-                }
-                foreach (DirectoryInfo dir in directory.GetDirectories())
-                {
-                    CleanAll(dir.FullName);
-
-                    try
-                    {
-                        dir.Delete();
-                    }
-                    catch (IOException ex)
-                    {
-                        Console.WriteLine("Exception on testing side, ignoring " + dir.FullName + ":" + ex);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception on testing side, ignoring " + ex);
-            }
-        }
-
-
-        private ISession CreateSession(RepoInfo repoInfo)
-        {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
-            cmisParameters[SessionParameter.User] = repoInfo.User;
-            cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
-            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
-            cmisParameters[SessionParameter.ConnectTimeout] = "-1";
-
-            return SessionFactory.NewInstance().CreateSession(cmisParameters);
-        }
-
 
         public IDocument CreateDocument(IFolder folder, string name, string content)
         {
@@ -211,7 +154,6 @@ namespace TestLibrary.IntegrationTests
             return folder.CreateDocument(properties, contentStream, null);
         }
 
-
         public IFolder CreateFolder(IFolder folder, string name)
         {
             Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -220,7 +162,6 @@ namespace TestLibrary.IntegrationTests
 
             return folder.CreateFolder(properties);
         }
-
 
         public IDocument CopyDocument(IFolder folder, IDocument source, string name)
         {
@@ -231,7 +172,6 @@ namespace TestLibrary.IntegrationTests
             return folder.CreateDocumentFromSource(source, properties, null);
         }
 
-
         public IDocument RenameDocument(IDocument source, string name)
         {
             Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -239,7 +179,6 @@ namespace TestLibrary.IntegrationTests
 
             return (IDocument)source.UpdateProperties(properties);
         }
-
 
         public IFolder RenameFolder(IFolder source, string name)
         {
@@ -249,56 +188,57 @@ namespace TestLibrary.IntegrationTests
             return (IFolder)source.UpdateProperties(properties);
         }
 
-
         public void CreateHeavyFolder(string root)
         {
-            for (int iFolder = 0; iFolder < HeavyNumber; ++iFolder)
+            for (int folderNumber = 0; folderNumber < this.heavyNumber; ++folderNumber)
             {
-                string folder = Path.Combine(root, iFolder.ToString());
+                string folder = Path.Combine(root, folderNumber.ToString());
                 Directory.CreateDirectory(folder);
-                for (int iFile = 0; iFile < HeavyNumber; ++iFile)
+                for (int fileNumber = 0; fileNumber < this.heavyNumber; ++fileNumber)
                 {
-                    string file = Path.Combine(folder, iFile.ToString());
+                    string file = Path.Combine(folder, fileNumber.ToString());
                     using (Stream stream = File.OpenWrite(file))
                     {
-                        byte[] content = new byte[HeavyFileSize];
-                        for (int i = 0; i < HeavyFileSize; ++i)
+                        byte[] content = new byte[this.heavyFileSize];
+                        for (int i = 0; i < this.heavyFileSize; ++i)
                         {
-                            content[i] = (byte)('A'+iFile%10);
+                            content[i] = (byte)('A' + (fileNumber % 10));
                         }
+
                         stream.Write(content, 0, content.Length);
                     }
                 }
             }
         }
 
-
         public bool CheckHeavyFolder(string root)
         {
-            for (int iFolder = 0; iFolder < HeavyNumber; ++iFolder)
+            for (int folderNumber = 0; folderNumber < this.heavyNumber; ++folderNumber)
             {
-                string folder = Path.Combine(root, iFolder.ToString());
+                string folder = Path.Combine(root, folderNumber.ToString());
                 if (!Directory.Exists(folder))
                 {
                     return false;
                 }
-                for (int iFile = 0; iFile < HeavyNumber; ++iFile)
+
+                for (int fileNumber = 0; fileNumber < this.heavyNumber; ++fileNumber)
                 {
-                    string file = Path.Combine(folder, iFile.ToString());
+                    string file = Path.Combine(folder, fileNumber.ToString());
                     FileInfo info = new FileInfo(file);
-                    if(!info.Exists || info.Length != HeavyFileSize)
+                    if (!info.Exists || info.Length != this.heavyFileSize)
                     {
                         return false;
                     }
+
                     try
                     {
                         using (Stream stream = File.OpenRead(file))
                         {
-                            byte[] content = new byte[HeavyFileSize];
-                            stream.Read(content, 0, HeavyFileSize);
-                            for (int i = 0; i < HeavyFileSize; ++i)
+                            byte[] content = new byte[this.heavyFileSize];
+                            stream.Read(content, 0, this.heavyFileSize);
+                            for (int i = 0; i < this.heavyFileSize; ++i)
                             {
-                                if (content[i] != (byte)('A' + iFile % 10))
+                                if (content[i] != (byte)('A' + (fileNumber % 10)))
                                 {
                                     return false;
                                 }
@@ -311,63 +251,34 @@ namespace TestLibrary.IntegrationTests
                     }
                 }
             }
+
             return true;
         }
 
-
         public void CreateHeavyFolderRemote(IFolder root)
         {
-            for (int iFolder = 0; iFolder < HeavyNumber; ++iFolder)
+            for (int folderNumber = 0; folderNumber < this.heavyNumber; ++folderNumber)
             {
-                IFolder folder = CreateFolder(root, iFolder.ToString());
-                for (int iFile = 0; iFile < HeavyNumber; ++iFile)
+                IFolder folder = this.CreateFolder(root, folderNumber.ToString());
+                for (int fileNumber = 0; fileNumber < this.heavyNumber; ++fileNumber)
                 {
-                    string content = new string((char)('A' + iFile % 10), HeavyFileSize);
-                    CreateDocument(folder, iFile.ToString(), content);
+                    string content = new string((char)('A' + (fileNumber % 10)), this.heavyFileSize);
+                    this.CreateDocument(folder, fileNumber.ToString(), content);
                 }
             }
         }
 
-        private string ListAllFiles(string folder) {
-            StringBuilder builder = new StringBuilder();
-            foreach(string f in Directory.GetFiles(folder)) {
-                builder.Append(f);
-                builder.Append('\t');
-                builder.Append(new FileInfo(f).Length);
-                builder.Append(Environment.NewLine);
-            }
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// Creates or modifies binary file.
-        /// </summary>
-        /// <returns>
-        /// Path of the created or modified binary file
-        /// </returns>
-        /// <param name='file'>
-        /// File path
-        /// </param>
-        /// <param name='length'>
-        /// Length (default is 1024)
-        /// </param>
-        private string createOrModifyBinaryFile(string file, int length = 1024)
-        {
-            using (Stream stream = File.Open(file, FileMode.Create))
-            {
-                byte[] content = new byte[length];
-                stream.Write(content, 0, content.Length);
-            }
-            return file;
-        }
-
-
-
-        // /////////////////////////// TESTS ///////////////////////////
+        /* /////////////////////////// TESTS /////////////////////////// */
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Timeout(20000)]
-        public void GetRepositories(string canonical_name, string localPath, string remoteFolderPath,
-            string url, string user, string password, string repositoryId)
+        public void GetRepositories(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
         {
             CmisSync.Lib.Credentials.ServerCredentials credentials = new CmisSync.Lib.Credentials.ServerCredentials()
             {
@@ -382,17 +293,21 @@ namespace TestLibrary.IntegrationTests
             {
                 Console.WriteLine(pair.Key + " : " + pair.Value);
             }
+
             Assert.NotNull(repos);
         }
-
-
-
 
         // Write a file and immediately check whether it has been created.
         // Should help to find out whether CMIS servers are synchronous or not.
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
-        public void WriteThenRead(string canonical_name, string localPath, string remoteFolderPath,
-            string url, string user, string password, string repositoryId)
+        public void WriteThenRead(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
         {
             string fileName = "test.txt";
             var cmisParameters = new Dictionary<string, string>();
@@ -425,7 +340,9 @@ namespace TestLibrary.IntegrationTests
             {
                 state = DotCMIS.Enums.VersioningState.None;
             }
+
             session.CreateDocument(properties, root, contentStream, state);
+
             // Check whether file is present.
             IItemEnumerable<ICmisObject> children = root.GetChildren();
             bool found = false;
@@ -438,6 +355,7 @@ namespace TestLibrary.IntegrationTests
                     found = true;
                 }
             }
+
             Assert.True(found);
 
             // Clean.
@@ -445,11 +363,16 @@ namespace TestLibrary.IntegrationTests
             doc.DeleteAllVersions();
         }
 
-
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         [Ignore]
-        public void DotCmisToIBMConnections(string canonical_name, string localPath, string remoteFolderPath,
-            string url, string user, string password, string repositoryId)
+        public void DotCmisToIBMConnections(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
         {
             var cmisParameters = new Dictionary<string, string>();
             cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
@@ -476,13 +399,14 @@ namespace TestLibrary.IntegrationTests
             {
                 Console.WriteLine(folder.Path);
                 IItemEnumerable<ICmisObject> subChildren = folder.GetChildren();
-                foreach (var subFolder in subChildren.OfType<IFolder>()) // Exception happens here, see https://issues.apache.org/jira/browse/CMIS-593
+
+                // Exception happens here, see https://issues.apache.org/jira/browse/CMIS-593
+                foreach (var subFolder in subChildren.OfType<IFolder>()) 
                 {
                     Console.WriteLine(subFolder.Path);
                 }
             }
         }
-
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(60000)]
         public void GetRepositoriesFuzzy(string url, string user, string password)
@@ -497,35 +421,129 @@ namespace TestLibrary.IntegrationTests
             Assert.NotNull(server.Item1);
         }
 
+        /* /////////////////////////// HELPER METHODS /////////////////////////// */
 
-        /// <summary>
-        /// Waits until checkStop is true or waiting duration is reached.
-        /// </summary>
-        /// <returns>
-        /// True if checkStop is true, otherwise waits for pollInterval miliseconds and checks again until the wait threshold is reached.
-        /// </returns>
-        /// <param name='checkStop'>
-        /// Checks if the condition, which is waited for is <c>true</c>.
-        /// </param>
-        /// <param name='wait'>
-        /// Waiting threshold. If this is reached, <c>false</c> will be returned.
-        /// </param>
-        /// <param name='pollInterval'>
-        /// Sleep duration between two condition validations by calling checkStop.
-        /// </param>
-        public static bool WaitUntilDone(Func<bool> checkStop, int wait = 300000, int pollInterval = 1000)
+        private void DeleteDirectoryIfExists(string path)
         {
-            while (wait > 0)
+            if (Directory.Exists(path))
             {
-                System.Threading.Thread.Sleep(pollInterval);
-                wait -= pollInterval;
-                if (checkStop())
-                    return true;
-                Console.WriteLine(String.Format("Retry Wait in {0}ms", pollInterval));
+                Directory.Delete(path, true);
             }
-            Console.WriteLine("Wait was not successful");
-            return false;
         }
 
+        private void CleanDirectory(string path)
+        {
+            // Delete recursively.
+            this.DeleteDirectoryIfExists(path);
+
+            // Delete database.
+            string database = path + ".cmissync";
+            if (File.Exists(database))
+            {
+                try
+                {
+                    File.Delete(database);
+                }
+                catch (IOException ex)
+                {
+                    Console.WriteLine("Exception on testing side, ignoring " + database + ":" + ex);
+                }
+            }
+
+            // Prepare empty directory.
+            Directory.CreateDirectory(path);
+        }
+
+        private void CleanAll(string path)
+        {
+            DirectoryInfo directory = new DirectoryInfo(path);
+
+            try
+            {
+                // Delete all local files/folders.
+                foreach (FileInfo file in directory.GetFiles())
+                {
+                    if (file.Name.EndsWith(".sync"))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        file.Delete();
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.WriteLine("Exception on testing side, ignoring " + file.FullName + ":" + ex);
+                    }
+                }
+
+                foreach (DirectoryInfo dir in directory.GetDirectories())
+                {
+                    this.CleanAll(dir.FullName);
+
+                    try
+                    {
+                        dir.Delete();
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.WriteLine("Exception on testing side, ignoring " + dir.FullName + ":" + ex);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception on testing side, ignoring " + ex);
+            }
+        }
+
+        private ISession CreateSession(RepoInfo repoInfo)
+        {
+            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+            cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
+            cmisParameters[SessionParameter.User] = repoInfo.User;
+            cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
+            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
+            cmisParameters[SessionParameter.ConnectTimeout] = "-1";
+
+            return SessionFactory.NewInstance().CreateSession(cmisParameters);
+        }
+
+        private string ListAllFiles(string folder) {
+            StringBuilder builder = new StringBuilder();
+            foreach (string f in Directory.GetFiles(folder)) {
+                builder.Append(f);
+                builder.Append('\t');
+                builder.Append(new FileInfo(f).Length);
+                builder.Append(Environment.NewLine);
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Creates or modifies binary file.
+        /// </summary>
+        /// <returns>
+        /// Path of the created or modified binary file
+        /// </returns>
+        /// <param name='file'>
+        /// File path
+        /// </param>
+        /// <param name='length'>
+        /// Length (default is 1024)
+        /// </param>
+        private string CreateOrModifyBinaryFile(string file, int length = 1024)
+        {
+            using (Stream stream = File.Open(file, FileMode.Create))
+            {
+                byte[] content = new byte[length];
+                stream.Write(content, 0, content.Length);
+            }
+
+            return file;
+        }
     }
 }

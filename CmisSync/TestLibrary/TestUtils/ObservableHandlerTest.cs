@@ -16,17 +16,19 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib.Events;
-
-using NUnit.Framework;
-using Moq;
 
 namespace TestLibrary.TestUtils
 {
+    using CmisSync.Lib.Events;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class ObservableHandlerTest {
         [Test, Category("Fast")]
-        public void TestFetch(){
+        public void TestFetch() {
             var handler = new ObservableHandler();
             var event1 = new Mock<ISyncEvent>().Object;
             var event2 = new Mock<ISyncEvent>().Object;

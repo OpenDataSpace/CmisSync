@@ -16,30 +16,33 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
-using DotCMIS.Client;
-using DotCMIS.Exceptions;
+namespace TestLibrary.SyncStrategiesTests
+{
+    using System;
+    using System.IO;
 
-using CmisSync.Lib.Data;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
 
-using NUnit.Framework;
+    using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
-using Moq;
-using System.IO;
-using TestLibrary.TestUtils;
-namespace TestLibrary.SyncStrategiesTests {
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture]
     public class LocalObjectFetcherTest 
     {
         [Test, Category("Fast")]
-        public void ConstructorTest () {
+        public void ConstructorTest() {
             var matcher = new Mock<IPathMatcher>();
-            new LocalObjectFetcher (matcher.Object);
+            new LocalObjectFetcher(matcher.Object);
         }
 
         [Test, Category("Fast")]
@@ -47,13 +50,13 @@ namespace TestLibrary.SyncStrategiesTests {
             var matcher = new Mock<IPathMatcher>();
 
             var syncEvent = new Mock<ISyncEvent>();
-            var fetcher = new LocalObjectFetcher (matcher.Object);
+            var fetcher = new LocalObjectFetcher(matcher.Object);
 
             Assert.That(fetcher.Handle(syncEvent.Object), Is.False);
         }
 
         [Test, Category("Fast")]
-        public void FetchLocalFolder () {
+        public void FetchLocalFolder() {
             var localPath = Path.GetTempPath();
             var remotePath = Path.Combine(Path.GetTempPath(), "a");
 
@@ -64,7 +67,7 @@ namespace TestLibrary.SyncStrategiesTests {
             remoteFolder.Setup(f => f.Path).Returns(remotePath);
 
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object);
-            var fetcher = new LocalObjectFetcher (matcher.Object);
+            var fetcher = new LocalObjectFetcher(matcher.Object);
 
             Assert.That(fetcher.Handle(folderEvent), Is.False);
             Assert.That(folderEvent.LocalFolder, Is.Not.Null);
@@ -80,14 +83,14 @@ namespace TestLibrary.SyncStrategiesTests {
             var folder = new Mock<IDirectoryInfo>();
 
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object, localFolder: folder.Object);
-            var fetcher = new LocalObjectFetcher (matcher.Object);
+            var fetcher = new LocalObjectFetcher(matcher.Object);
 
             Assert.That(fetcher.Handle(folderEvent), Is.False);
             Assert.That(folderEvent.LocalFolder, Is.EqualTo(folder.Object));
         }
 
         [Test, Category("Fast")]
-        public void FetchLocalFile () {
+        public void FetchLocalFile() {
             var localPath = Path.GetTempPath();
             var remotePath = Path.Combine(Path.GetTempPath(), "a");
 
@@ -95,10 +98,10 @@ namespace TestLibrary.SyncStrategiesTests {
             matcher.Setup(m => m.CreateLocalPath(remotePath)).Returns(localPath);
 
             var remoteFile = new Mock<IDocument>();
-            remoteFile.Setup(f => f.Paths).Returns(new string[] {remotePath});
+            remoteFile.Setup(f => f.Paths).Returns(new string[] { remotePath });
 
             var fileEvent = new FileEvent(remoteFile: remoteFile.Object);
-            var fetcher = new LocalObjectFetcher (matcher.Object);
+            var fetcher = new LocalObjectFetcher(matcher.Object);
 
             Assert.That(fetcher.Handle(fileEvent), Is.False);
             Assert.That(fileEvent.LocalFile, Is.Not.Null);
@@ -114,7 +117,7 @@ namespace TestLibrary.SyncStrategiesTests {
             var file = new Mock<IFileInfo>();
 
             var fileEvent = new FileEvent(remoteFile: remoteFile.Object, localFile: file.Object);
-            var fetcher = new LocalObjectFetcher (matcher.Object);
+            var fetcher = new LocalObjectFetcher(matcher.Object);
 
             Assert.That(fetcher.Handle(fileEvent), Is.False);
             Assert.That(fileEvent.LocalFile, Is.EqualTo(file.Object));

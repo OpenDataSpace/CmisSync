@@ -16,19 +16,20 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
 
 namespace TestLibrary.IntegrationTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using Newtonsoft.Json;
+
     /// <summary>
     /// Helper functions for integration tests
     /// </summary>
     public class ITUtils
     {
-
         /// <summary>
         /// Gets the test servers configuration with repository id in json file "test-servers.json".
         /// </summary>
@@ -77,4 +78,3 @@ namespace TestLibrary.IntegrationTests
         }
     }
 }
-

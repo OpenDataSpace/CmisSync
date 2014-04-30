@@ -50,7 +50,7 @@ namespace TestLibrary.IntegrationTests
         public void SetUp()
         {
             this.path = Path.Combine(Path.GetTempPath(), "DBreeze");
-            this.engine = new DBreezeEngine(new DBreezeConfiguration(){Storage = DBreezeConfiguration.eStorage.MEMORY});
+            this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
         }
 
         [TearDown]
@@ -113,7 +113,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast"), Category("IT")]
         public void InsertAndSelectMappedObjectData()
         {
-            using (var tran = engine.GetTransaction())
+            using (var tran = this.engine.GetTransaction())
             {
                 string key = "key";
                 string name = "name";

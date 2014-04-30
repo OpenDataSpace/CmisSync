@@ -16,24 +16,29 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using DotCMIS.Client;
 
-using CmisSync.Lib;
-using CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Events;
+namespace TestLibrary.SyncStrategiesTests
+{
+    using System;
 
-using NUnit.Framework;
+    using CmisSync.Lib;
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
 
-using Moq;
+    using DotCMIS.Client;
 
-using TestLibrary.TestUtils;
-using CmisSync.Lib.Data;
+    using Moq;
 
-namespace TestLibrary.SyncStrategiesTests {
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
+
     [TestFixture]
-    public class ContentChangeEventTransformerTest {
+    public class ContentChangeEventTransformerTest
+    {
+        private static readonly string Id = "myId";
 
         [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorTest() {
@@ -66,30 +71,9 @@ namespace TestLibrary.SyncStrategiesTests {
         {
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
-            var e = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, id);
+            var e = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, Id);
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
             transformer.Handle(e);
-        }
-
-        private static readonly string id = "myId";
-        private ContentChangeEvent prepareEvent(DotCMIS.Enums.ChangeType type, bool hasContentStream) {
-            var e = new ContentChangeEvent(type, id);
-            var remoteObject = MockSessionUtil.CreateRemoteObjectMock(hasContentStream ? "streamId" : null, id);
-            var session = new Mock<ISession>();
-            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (remoteObject.Object);
-
-            e.UpdateObject(session.Object);
-            return e;
-        }
-
-        private ContentChangeEvent prepareFolderEvent(DotCMIS.Enums.ChangeType type) {
-            var e = new ContentChangeEvent(type, id);
-            var remoteObject = new Mock<IFolder>();
-            var session = new Mock<ISession>();
-            session.Setup (s => s.GetObject (It.IsAny<string>())).Returns (remoteObject.Object);
-
-            e.UpdateObject(session.Object);
-            return e;
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -101,7 +85,7 @@ namespace TestLibrary.SyncStrategiesTests {
                     .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Created, true);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Created, true);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
@@ -118,7 +102,7 @@ namespace TestLibrary.SyncStrategiesTests {
                     .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Created, false);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Created, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
@@ -126,19 +110,18 @@ namespace TestLibrary.SyncStrategiesTests {
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
-
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteSecurityChangeOfExistingFile ()
+        public void RemoteSecurityChangeOfExistingFile()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile("path", id);
+            storage.AddLocalFile("path", Id);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
                     .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Security, false);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Security, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
@@ -147,7 +130,7 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteSecurityChangeOfNonExistingFile ()
+        public void RemoteSecurityChangeOfNonExistingFile()
         {
             var storage = new Mock<IMetaDataStorage>();
             FileEvent fileEvent = null;
@@ -156,7 +139,7 @@ namespace TestLibrary.SyncStrategiesTests {
                     .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Security, false);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Security, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
@@ -165,7 +148,7 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void LocallyNotExistingRemoteDocumentUpdated ()
+        public void LocallyNotExistingRemoteDocumentUpdated()
         {
             var storage = new Mock<IMetaDataStorage>();
             FileEvent fileEvent = null;
@@ -174,7 +157,7 @@ namespace TestLibrary.SyncStrategiesTests {
                     .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Updated, false);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Updated, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
@@ -183,23 +166,23 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void LocallyExistingRemoteDocumentUpdated ()
+        public void LocallyExistingRemoteDocumentUpdated()
         {
             string fileName = "file.bin";
             var storage = new Mock<IMetaDataStorage>();
-            var file = Mock.Of<IMappedObject>( f =>
-                                              f.RemoteObjectId == id &&
+            var file = Mock.Of<IMappedObject>(f =>
+                                              f.RemoteObjectId == Id &&
                                               f.Name == fileName &&
                                               f.Type == MappedObjectType.File);
             storage.AddMappedFile(file);
-            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>( o => o.Equals(file)))).Returns("path");
+            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns("path");
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
                     .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Updated, false);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Updated, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
@@ -208,31 +191,30 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteDeletionChangeWithoutLocalFile ()
+        public void RemoteDeletionChangeWithoutLocalFile()
         {
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Deleted, false);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Deleted, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
-
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteDeletionChangeTest()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile("path", id);
+            storage.AddLocalFile("path", Id);
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
                     .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareEvent(DotCMIS.Enums.ChangeType.Deleted, false);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Deleted, false);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
@@ -241,30 +223,30 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteFolderDeletionWithoutLocalFolder ()
+        public void RemoteFolderDeletionWithoutLocalFolder()
         {
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Deleted);
+            var contentChangeEvent = this.PrepareFolderEvent(DotCMIS.Enums.ChangeType.Deleted);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteFolderDeletion ()
+        public void RemoteFolderDeletion()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder("path", id);
+            storage.AddLocalFolder("path", Id);
             FolderEvent folderEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FolderEvent>()))
                     .Callback<ISyncEvent>(e => folderEvent = e as FolderEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Deleted);
+            var contentChangeEvent = this.PrepareFolderEvent(DotCMIS.Enums.ChangeType.Deleted);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
@@ -272,17 +254,17 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteFolderCreation ()
+        public void RemoteFolderCreation()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder("path", id);
+            storage.AddLocalFolder("path", Id);
             FolderEvent folderEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FolderEvent>()))
                     .Callback<ISyncEvent>(e => folderEvent = e as FolderEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Created);
+            var contentChangeEvent = this.PrepareFolderEvent(DotCMIS.Enums.ChangeType.Created);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
@@ -290,17 +272,17 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteFolderUpdate ()
+        public void RemoteFolderUpdate()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder("path", id);
+            storage.AddLocalFolder("path", Id);
             FolderEvent folderEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FolderEvent>()))
                     .Callback<ISyncEvent>(e => folderEvent = e as FolderEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Updated);
+            var contentChangeEvent = this.PrepareFolderEvent(DotCMIS.Enums.ChangeType.Updated);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
@@ -308,21 +290,41 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
-        public void RemoteFolderSecurity ()
+        public void RemoteFolderSecurity()
         {
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder("path", id);
+            storage.AddLocalFolder("path", Id);
             FolderEvent folderEvent = null;
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(h => h.AddEvent(It.IsAny<FolderEvent>()))
                     .Callback<ISyncEvent>(e => folderEvent = e as FolderEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
-            var contentChangeEvent = prepareFolderEvent(DotCMIS.Enums.ChangeType.Security);
+            var contentChangeEvent = this.PrepareFolderEvent(DotCMIS.Enums.ChangeType.Security);
 
             Assert.That(transformer.Handle(contentChangeEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<FolderEvent>()), Times.Once());
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
+        }
+
+        private ContentChangeEvent PrepareEvent(DotCMIS.Enums.ChangeType type, bool hasContentStream) {
+            var e = new ContentChangeEvent(type, Id);
+            var remoteObject = MockSessionUtil.CreateRemoteObjectMock(hasContentStream ? "streamId" : null, Id);
+            var session = new Mock<ISession>();
+            session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(remoteObject.Object);
+
+            e.UpdateObject(session.Object);
+            return e;
+        }
+
+        private ContentChangeEvent PrepareFolderEvent(DotCMIS.Enums.ChangeType type) {
+            var e = new ContentChangeEvent(type, Id);
+            var remoteObject = new Mock<IFolder>();
+            var session = new Mock<ISession>();
+            session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(remoteObject.Object);
+
+            e.UpdateObject(session.Object);
+            return e;
         }
     }
 }

@@ -16,14 +16,17 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using CmisSync.Lib;
-using NUnit.Framework;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TestLibrary
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
+    using CmisSync.Lib;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class EncodingTest
     {
@@ -97,4 +100,3 @@ namespace TestLibrary
         }
     }
 }
-

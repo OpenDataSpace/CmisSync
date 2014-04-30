@@ -29,30 +29,9 @@ namespace TestLibrary.StreamTests
     using NUnit.Framework;
 
     [TestFixture]
-    class ChunkedStreamTest
+    public class ChunkedStreamTest
     {
         private readonly int chunkSize = 1024;
-
-        private void FillArray<T>(T[] array, T value)
-        {
-            for (int i = 0; i < array.Length; ++i)
-            {
-                array[i] = value;
-            }
-        }
-
-        private bool EqualArray<T>(T[] array1, T[] array2, int size)
-        {
-            for (int i = 0; i < size && i < array1.Length && i < array2.Length; ++i)
-            {
-                if (!array1[i].Equals(array2[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
 
         [Test, Category("Fast"), Category("Streams")]
         public void TestWrite()
@@ -219,6 +198,27 @@ namespace TestLibrary.StreamTests
                 Assert.AreEqual(this.chunkSize, chunked.Position);
                 Assert.AreEqual(this.chunkSize, chunked.Length);
             }
+        }
+
+        private void FillArray<T>(T[] array, T value)
+        {
+            for (int i = 0; i < array.Length; ++i)
+            {
+                array[i] = value;
+            }
+        }
+
+        private bool EqualArray<T>(T[] array1, T[] array2, int size)
+        {
+            for (int i = 0; i < size && i < array1.Length && i < array2.Length; ++i)
+            {
+                if (!array1[i].Equals(array2[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

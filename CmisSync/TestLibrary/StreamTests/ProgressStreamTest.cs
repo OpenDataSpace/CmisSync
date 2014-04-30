@@ -16,47 +16,52 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Streams;
-using CmisSync.Lib.ContentTasks;
-
-using NUnit.Framework;
 
 namespace TestLibrary.StreamTests
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.ContentTasks;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Streams;
+
     using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class ProgressStreamTest
     {
-        private int LengthCalls;
-        private int PositionCalls;
-        private long Length;
-        private readonly string Filename = "filename";
-        private readonly FileTransmissionType TransmissionType = FileTransmissionType.DOWNLOAD_NEW_FILE;
-        private long Position;
-        private double Percent;
+        private readonly string filename = "filename";
+        private readonly FileTransmissionType transmissionType = FileTransmissionType.DOWNLOAD_NEW_FILE;
+
+        private int lengthCalls;
+        private int positionCalls;
+        private long length;
+        private long position;
+        private double percent;
 
         [SetUp]
-        public void Setup ()
+        public void Setup()
         {
-            LengthCalls = 0;
-            PositionCalls = 0;
-            Length = 0;
-            Position = 0;
-            Percent = 0;
+            this.lengthCalls = 0;
+            this.positionCalls = 0;
+            this.length = 0;
+            this.position = 0;
+            this.percent = 0;
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ConstructorWorksWithNonNullParams ()
+        public void ConstructorWorksWithNonNullParams()
         {
             Array values = Enum.GetValues(typeof(FileTransmissionType));
-            foreach( FileTransmissionType val in values )
+            foreach (FileTransmissionType val in values)
             {
-                using (new ProgressStream(new Mock<Stream> ().Object, new Mock<FileTransmissionEvent> (val, Filename, null).Object));
+                using (new ProgressStream(new Mock<Stream>().Object, new Mock<FileTransmissionEvent>(val, this.filename, null).Object))
+                {
+                }
             }
         }
 
@@ -64,191 +69,199 @@ namespace TestLibrary.StreamTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnAllParameterNull()
         {
-            using (new ProgressStream(null, null));
+            using (new ProgressStream(null, null))
+            {
+            }
         }
 
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnStreamIsNull()
         {
-            using (new ProgressStream(null, new Mock<FileTransmissionEvent> (TransmissionType, Filename, null).Object));
+            using (new ProgressStream(null, new Mock<FileTransmissionEvent>(this.transmissionType, this.filename, null).Object))
+            {
+            }
         }
 
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnTransmissionEventIsNull()
         {
-            using (new ProgressStream(new Mock<Stream> ().Object, null));
-        }
-
-
-        [Test, Category("Fast"), Category("Streams")]
-        public void SetLengthTest ()
-        {
-            var mockedStream = new Mock<Stream> ();
-            FileTransmissionEvent TransmissionEvent = new FileTransmissionEvent (TransmissionType, Filename);
-            TransmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
-                if (args.Length != null)
-                    LengthCalls++;
-            };
-            mockedStream.Setup (s => s.SetLength (It.IsAny<long> ()));
-            using (ProgressStream progress = new ProgressStream(mockedStream.Object, TransmissionEvent)) {
-                progress.SetLength (100);
-                progress.SetLength (100);
-                Assert.AreEqual (1, LengthCalls);
+            using (new ProgressStream(new Mock<Stream>().Object, null))
+            {
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void PositionTest ()
+        public void SetLengthTest()
         {
-            var mockedStream = new Mock<Stream> ();
-            FileTransmissionEvent TransmissionEvent = new FileTransmissionEvent (TransmissionType, Filename);
-            TransmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
-                if (args.Length != null && args.Length != Length) {
-                    LengthCalls++;
-                    Length = (long)args.Length;
+            var mockedStream = new Mock<Stream>();
+            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
+                if (args.Length != null) {
+                    this.lengthCalls++;
                 }
-                if (args.ActualPosition != null)
-                    PositionCalls++;
             };
-            mockedStream.Setup (s => s.SetLength (It.IsAny<long> ()));
-            mockedStream.SetupProperty (s => s.Position);
-            using (ProgressStream progress = new ProgressStream(mockedStream.Object, TransmissionEvent)) {
-                progress.SetLength (100);
-                Assert.AreEqual (1, LengthCalls);
-                Assert.AreEqual (0, PositionCalls);
+            mockedStream.Setup(s => s.SetLength(It.IsAny<long>()));
+            using (ProgressStream progress = new ProgressStream(mockedStream.Object, transmissionEvent)) {
+                progress.SetLength(100);
+                progress.SetLength(100);
+                Assert.AreEqual(1, this.lengthCalls);
+            }
+        }
+
+        [Test, Category("Fast"), Category("Streams")]
+        public void PositionTest()
+        {
+            var mockedStream = new Mock<Stream>();
+            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+            transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
+                if (args.Length != null && args.Length != this.length) {
+                    this.lengthCalls++;
+                    this.length = (long)args.Length;
+                }
+
+                if (args.ActualPosition != null) {
+                    this.positionCalls++;
+                }
+            };
+            mockedStream.Setup(s => s.SetLength(It.IsAny<long>()));
+            mockedStream.SetupProperty(s => s.Position);
+            using (ProgressStream progress = new ProgressStream(mockedStream.Object, transmissionEvent)) {
+                progress.SetLength(100);
+                Assert.AreEqual(1, this.lengthCalls);
+                Assert.AreEqual(0, this.positionCalls);
                 progress.Position = 50;
                 progress.Position = 50;
-                Assert.AreEqual (1, PositionCalls);
+                Assert.AreEqual(1, this.positionCalls);
                 progress.Position = 55;
-                Assert.AreEqual (2, PositionCalls);
-                Assert.AreEqual (1, LengthCalls);
+                Assert.AreEqual(2, this.positionCalls);
+                Assert.AreEqual(1, this.lengthCalls);
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ReadTest ()
+        public void ReadTest()
         {
             using (Stream stream = new MemoryStream()) {
-                FileTransmissionEvent TransmissionEvent = new FileTransmissionEvent (TransmissionType, Filename);
-                TransmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null) {
-                        PositionCalls ++;
-                        Position = (long)args.ActualPosition;
-                        Percent = (double)args.Percent;
+                        this.positionCalls++;
+                        this.position = (long)args.ActualPosition;
+                        this.percent = (double)args.Percent;
                     }
                 };
                 byte[] buffer = new byte[10];
-                using (ProgressStream progress = new ProgressStream(stream, TransmissionEvent)) {
-                    progress.SetLength (buffer.Length * 10);
-                    progress.Read (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length, Position);
-                    Assert.AreEqual (10, Percent);
-                    progress.Read (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 2, Position);
-                    Assert.AreEqual (20, Percent);
-                    progress.Read (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 3, Position);
-                    Assert.AreEqual (30, Percent);
-                    progress.Read (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 4, Position);
-                    Assert.AreEqual (40, Percent);
-                    progress.Read (buffer, 0, buffer.Length / 2);
-                    Assert.AreEqual (buffer.Length * 4 + buffer.Length / 2, Position);
-                    Assert.AreEqual (45, Percent);
-                    progress.Read (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 5 + buffer.Length / 2, Position);
-                    Assert.AreEqual (55, Percent);
-                    progress.SetLength (buffer.Length * 100);
-                    progress.Read (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 6 + buffer.Length / 2, Position);
-                    Assert.AreEqual (6.5, Percent);
+                using (ProgressStream progress = new ProgressStream(stream, transmissionEvent)) {
+                    progress.SetLength(buffer.Length * 10);
+                    progress.Read(buffer, 0, buffer.Length);
+                    Assert.AreEqual(buffer.Length, this.position);
+                    Assert.AreEqual(10, this.percent);
+                    progress.Read(buffer, 0, buffer.Length);
+                    Assert.AreEqual(buffer.Length * 2, this.position);
+                    Assert.AreEqual(20, this.percent);
+                    progress.Read(buffer, 0, buffer.Length);
+                    Assert.AreEqual(buffer.Length * 3, this.position);
+                    Assert.AreEqual(30, this.percent);
+                    progress.Read(buffer, 0, buffer.Length);
+                    Assert.AreEqual(buffer.Length * 4, this.position);
+                    Assert.AreEqual(40, this.percent);
+                    progress.Read(buffer, 0, buffer.Length / 2);
+                    Assert.AreEqual((buffer.Length * 4) + (buffer.Length / 2), this.position);
+                    Assert.AreEqual(45, this.percent);
+                    progress.Read(buffer, 0, buffer.Length);
+                    Assert.AreEqual((buffer.Length * 5) + (buffer.Length / 2), this.position);
+                    Assert.AreEqual(55, this.percent);
+                    progress.SetLength(buffer.Length * 100);
+                    progress.Read(buffer, 0, buffer.Length);
+                    Assert.AreEqual((buffer.Length * 6) + (buffer.Length / 2), this.position);
+                    Assert.AreEqual(6.5, this.percent);
                 }
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void WriteTest ()
+        public void WriteTest()
         {
             using (Stream stream = new MemoryStream()) {
-                FileTransmissionEvent TransmissionEvent = new FileTransmissionEvent (TransmissionType, Filename);
-                TransmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null) {
-                        PositionCalls ++;
-                        Position = (long)args.ActualPosition;
-                        Percent = (double)args.Percent;
+                        this.positionCalls++;
+                        this.position = (long)args.ActualPosition;
+                        this.percent = (double)args.Percent;
                     }
                 };
                 byte[] buffer = new byte[10];
-                using (ProgressStream progress = new ProgressStream(stream, TransmissionEvent)) {
-                    progress.SetLength (buffer.Length * 10);
-                    progress.Write (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length, Position);
-                    Assert.AreEqual (10, Percent);
-                    progress.Write (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 2, Position);
-                    Assert.AreEqual (20, Percent);
-                    progress.Write (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 3, Position);
-                    Assert.AreEqual (30, Percent);
-                    progress.Write (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 4, Position);
-                    Assert.AreEqual (40, Percent);
-                    progress.Write (buffer, 0, buffer.Length / 2);
-                    Assert.AreEqual (buffer.Length * 4 + buffer.Length / 2, Position);
-                    Assert.AreEqual (45, Percent);
-                    progress.Write (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 5 + buffer.Length / 2, Position);
-                    Assert.AreEqual (55, Percent);
-                    progress.SetLength (buffer.Length * 100);
-                    progress.Write (buffer, 0, buffer.Length);
-                    Assert.AreEqual (buffer.Length * 6 + buffer.Length / 2, Position);
-                    Assert.AreEqual (6.5, Percent);
+                using (ProgressStream progress = new ProgressStream(stream, transmissionEvent)) {
+                    progress.SetLength(buffer.Length * 10);
+                    progress.Write(buffer, 0, buffer.Length);
+                    Assert.AreEqual(buffer.Length, this.position);
+                    Assert.AreEqual(10, this.percent);
+                    progress.Write(buffer, 0, buffer.Length);
+                    Assert.AreEqual(buffer.Length * 2, this.position);
+                    Assert.AreEqual(20, this.percent);
+                    progress.Write(buffer, 0, buffer.Length);
+                    Assert.AreEqual(buffer.Length * 3, this.position);
+                    Assert.AreEqual(30, this.percent);
+                    progress.Write(buffer, 0, buffer.Length);
+                    Assert.AreEqual(buffer.Length * 4, this.position);
+                    Assert.AreEqual(40, this.percent);
+                    progress.Write(buffer, 0, buffer.Length / 2);
+                    Assert.AreEqual((buffer.Length * 4) + (buffer.Length / 2), this.position);
+                    Assert.AreEqual(45, this.percent);
+                    progress.Write(buffer, 0, buffer.Length);
+                    Assert.AreEqual((buffer.Length * 5) + (buffer.Length / 2), this.position);
+                    Assert.AreEqual(55, this.percent);
+                    progress.SetLength(buffer.Length * 100);
+                    progress.Write(buffer, 0, buffer.Length);
+                    Assert.AreEqual((buffer.Length * 6) + (buffer.Length / 2), this.position);
+                    Assert.AreEqual(6.5, this.percent);
                 }
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void SeekTest ()
+        public void SeekTest()
         {
             using (Stream stream = new MemoryStream()) {
-                FileTransmissionEvent TransmissionEvent = new FileTransmissionEvent (TransmissionType, Filename);
-                TransmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null) {
-                        PositionCalls ++;
-                        Position = (long)args.ActualPosition;
-                        Percent = (double)args.Percent;
+                        this.positionCalls++;
+                        this.position = (long)args.ActualPosition;
+                        this.percent = (double)args.Percent;
                     }
                 };
-                using (ProgressStream progress = new ProgressStream(stream, TransmissionEvent)) {
-                    progress.SetLength (100);
-                    progress.Seek (10, SeekOrigin.Begin);
-                    Assert.AreEqual (10, Position);
-                    Assert.AreEqual (10, Percent);
-                    progress.Seek (10, SeekOrigin.Current);
-                    Assert.AreEqual (20, Position);
-                    Assert.AreEqual (20, Percent);
-                    progress.Seek (10, SeekOrigin.Current);
-                    Assert.AreEqual (30, Position);
-                    Assert.AreEqual (30, Percent);
-                    progress.Seek (10, SeekOrigin.Current);
-                    Assert.AreEqual (40, Position);
-                    Assert.AreEqual (40, Percent);
-                    progress.Seek (5, SeekOrigin.Current);
-                    Assert.AreEqual (45, Position);
-                    Assert.AreEqual (45, Percent);
-                    progress.Seek (10, SeekOrigin.Current);
-                    Assert.AreEqual (55, Position);
-                    Assert.AreEqual (55, Percent);
-                    progress.SetLength (1000);
-                    progress.Seek (10, SeekOrigin.Current);
-                    Assert.AreEqual (65, Position);
-                    Assert.AreEqual (6.5, Percent);
+                using (ProgressStream progress = new ProgressStream(stream, transmissionEvent)) {
+                    progress.SetLength(100);
+                    progress.Seek(10, SeekOrigin.Begin);
+                    Assert.AreEqual(10, this.position);
+                    Assert.AreEqual(10, this.percent);
+                    progress.Seek(10, SeekOrigin.Current);
+                    Assert.AreEqual(20, this.position);
+                    Assert.AreEqual(20, this.percent);
+                    progress.Seek(10, SeekOrigin.Current);
+                    Assert.AreEqual(30, this.position);
+                    Assert.AreEqual(30, this.percent);
+                    progress.Seek(10, SeekOrigin.Current);
+                    Assert.AreEqual(40, this.position);
+                    Assert.AreEqual(40, this.percent);
+                    progress.Seek(5, SeekOrigin.Current);
+                    Assert.AreEqual(45, this.position);
+                    Assert.AreEqual(45, this.percent);
+                    progress.Seek(10, SeekOrigin.Current);
+                    Assert.AreEqual(55, this.position);
+                    Assert.AreEqual(55, this.percent);
+                    progress.SetLength(1000);
+                    progress.Seek(10, SeekOrigin.Current);
+                    Assert.AreEqual(65, this.position);
+                    Assert.AreEqual(6.5, this.percent);
 
                     progress.Seek(0, SeekOrigin.End);
-                    Assert.AreEqual(100, Percent);
-                    Assert.AreEqual(1000, Position);
+                    Assert.AreEqual(100, this.percent);
+                    Assert.AreEqual(1000, this.position);
                 }
             }
         }
@@ -259,33 +272,33 @@ namespace TestLibrary.StreamTests
             byte[] inputContent = new byte[100];
             long offset = 100;
             using (Stream stream = new MemoryStream(inputContent)) 
-            using(OffsetStream offsetstream = new OffsetStream(stream, offset))
+            using (OffsetStream offsetstream = new OffsetStream(stream, offset))
             {
-                FileTransmissionEvent TransmissionEvent = new FileTransmissionEvent (TransmissionType, Filename);
-                TransmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null && args.Percent != null) {
-                        Position = (long)args.ActualPosition;
-                        Percent = (double)args.Percent;
+                        this.position = (long)args.ActualPosition;
+                        this.percent = (double)args.Percent;
                     }
                 };
-                using (ProgressStream progress = new ProgressStream(offsetstream, TransmissionEvent)) {
+                using (ProgressStream progress = new ProgressStream(offsetstream, transmissionEvent)) {
                     progress.Seek(0, SeekOrigin.Begin);
-                    Assert.AreEqual (offset, Position);
-                    Assert.AreEqual (50, Percent);
-                    progress.Seek (10, SeekOrigin.Current);
-                    Assert.AreEqual (offset + 10, Position);
+                    Assert.AreEqual(offset, this.position);
+                    Assert.AreEqual(50, this.percent);
+                    progress.Seek(10, SeekOrigin.Current);
+                    Assert.AreEqual(offset + 10, this.position);
                     progress.Seek(0, SeekOrigin.End);
-                    Assert.AreEqual(100, Percent);
-                    Assert.AreEqual(offset + inputContent.Length, Position);
+                    Assert.AreEqual(100, this.percent);
+                    Assert.AreEqual(offset + inputContent.Length, this.position);
                     progress.Seek(0, SeekOrigin.Begin);
                     progress.WriteByte(0);
-                    Assert.AreEqual (offset + 1, Position);
-                    Assert.AreEqual (50.5, Percent);
+                    Assert.AreEqual(offset + 1, this.position);
+                    Assert.AreEqual(50.5, this.percent);
                     progress.WriteByte(0);
-                    Assert.AreEqual (offset + 2, Position);
-                    Assert.AreEqual (51, Percent);
-                    progress.Write(new byte[10],0,10);
-                    Assert.AreEqual (56, Percent);
+                    Assert.AreEqual(offset + 2, this.position);
+                    Assert.AreEqual(51, this.percent);
+                    progress.Write(new byte[10], 0, 10);
+                    Assert.AreEqual(56, this.percent);
                 }
             }
         }
@@ -294,7 +307,7 @@ namespace TestLibrary.StreamTests
         public void EnsureBandwidthIsReportedIfProgressIsShorterThanOneSecond()
         {
             byte[] inputContent = new byte[1024];
-            FileTransmissionEvent transmission = new FileTransmissionEvent(TransmissionType, Filename);
+            FileTransmissionEvent transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
             using (var inputStream = new MemoryStream(inputContent))
             using (var outputStream = new MemoryStream())
             using (var progressStream = new ProgressStream(inputStream, transmission))
@@ -302,6 +315,7 @@ namespace TestLibrary.StreamTests
                 progressStream.CopyTo(outputStream);
                 Assert.That(outputStream.Length == inputContent.Length);
             }
+
             Assert.Greater(transmission.Status.BitsPerSecond, 0);
         }
 
@@ -310,11 +324,11 @@ namespace TestLibrary.StreamTests
         public void AbortReadIfTransmissionEventIsAborting()
         {
             byte[] content = new byte[1024];
-            var transmission = new FileTransmissionEvent(TransmissionType, Filename);
+            var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
             using (var stream = new MemoryStream(content))
             using (var progressStream = new ProgressStream(stream, transmission))
             {
-                transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true});
+                transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
                 progressStream.ReadByte();
             }
         }
@@ -323,14 +337,13 @@ namespace TestLibrary.StreamTests
         [ExpectedException(typeof(AbortException))]
         public void AbortWriteIfTransmissionEventIsAborting()
         {
-            var transmission = new FileTransmissionEvent(TransmissionType, Filename);
+            var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
             using (var stream = new MemoryStream())
             using (var progressStream = new ProgressStream(stream, transmission))
             {
-                transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true});
+                transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
                 progressStream.WriteByte(new byte());
             }
         }
     }
 }
-

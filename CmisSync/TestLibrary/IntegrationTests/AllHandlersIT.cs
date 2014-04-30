@@ -16,91 +16,197 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Collections.Generic;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Config;
-using CmisSync.Lib.Data;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Storage;
-using Strategy = CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Events.Filter;
-
-using DBreeze;
-
-using DotCMIS.Client;
-using DotCMIS.Data;
-using DotCMIS.Data.Extensions;
-using DotCMIS.Binding.Services;
-
-using Newtonsoft.Json;
-
-using NUnit.Framework;
-
-using Moq;
-
-using TestLibrary.TestUtils;
 
 namespace TestLibrary.IntegrationTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using DBreeze;
+
+    using DotCMIS.Binding.Services;
+    using DotCMIS.Client;
+    using DotCMIS.Data;
+    using DotCMIS.Data.Extensions;
+
+    using Moq;
+
+    using Newtonsoft.Json;
+
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
+
+    using Strategy = CmisSync.Lib.Sync.Strategy;
+
     [TestFixture]
     public class AllHandlersIT
     {
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-            // Use Newtonsoft.Json as Serializator
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
-            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
-        }
-
-        DBreezeEngine engine;
-
-        [SetUp]
-        public void SetupEngine()
-        {
-            engine = new DBreezeEngine(new DBreezeConfiguration{ Storage = DBreezeConfiguration.eStorage.MEMORY });
-        }
-        
-        [TearDown]
-        public void DestroyEngine() 
-        {
-            engine.Dispose();
-        }
-        
         private readonly string localRoot = Path.GetTempPath();
         private readonly string remoteRoot = "remoteroot";
 
         private readonly bool isPropertyChangesSupported = false;
         private readonly int maxNumberOfContentChanges = 1000;
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage) 
+        private DBreezeEngine engine;
+
+        [TestFixtureSetUp]
+        public void ClassInit()
         {
-            return CreateQueue(session, storage, new ObservableHandler());
+            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
+
+            // Use Newtonsoft.Json as Serializator
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory){
-            return CreateQueue(session, storage, new ObservableHandler(), fsFactory);
+        [SetUp]
+        public void SetupEngine()
+        {
+            this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
+        }
+        
+        [TearDown]
+        public void DestroyEngine() 
+        {
+            this.engine.Dispose();
+        }
+
+        [Test, Category("Fast")]
+        public void RunFakeEvent()
+        {
+            var session = new Mock<ISession>();
+            var observer = new ObservableHandler();
+            var storage = this.GetInitializedStorage();
+            var queue = this.CreateQueue(session, storage, observer);
+            var myEvent = new Mock<ISyncEvent>();
+            queue.AddEvent(myEvent.Object);
+            queue.Run();
+            Assert.That(observer.list.Count, Is.EqualTo(1));
+        }
+
+        [Test, Category("Fast")]
+        public void RunStartNewSyncEvent()
+        {
+            var storage = this.GetInitializedStorage();
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            session.SetupChangeLogToken("default");
+            var observer = new ObservableHandler();
+            var queue = this.CreateQueue(session, storage, observer);
+            queue.RunStartSyncEvent();
+            Assert.That(observer.list.Count, Is.EqualTo(1));
+            Assert.That(observer.list[0], Is.TypeOf(typeof(FullSyncCompletedEvent)));
+        }
+
+        [Test, Category("Fast")]
+        public void RunFSEventDeleted()
+        {
+            var storage = this.GetInitializedStorage();
+            var path = new Mock<IFileInfo>();
+            var name = "a";
+            path.Setup(p => p.FullName).Returns(Path.Combine(this.localRoot, name));
+            string id = "id";
+
+            // storage.AddLocalFile(path.Object, id);
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
+            storage.SaveMappedObject(mappedObject);
+            
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            session.SetupChangeLogToken("default");
+            IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, id).Object;
+            session.Setup(s => s.GetObject(id)).Returns(remote);
+            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName);
+            var queue = this.CreateQueue(session, storage);
+            queue.AddEvent(myEvent);
+            queue.Run();
+
+            session.Verify(f => f.Delete(It.Is<IObjectId>(i => i.Id == id), true), Times.Once());
+            Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void ContentChangeIndicatesFolderDeletionOfExistingFolder()
+        {
+            var storage = this.GetInitializedStorage();
+            var name = "a";
+            string path = Path.Combine(this.localRoot, name);
+            string id = "1";
+            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.Exists).Returns(true);
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            fsFactory.AddIDirectoryInfo(dirInfo.Object);
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
+            storage.SaveMappedObject(mappedObject);
+            storage.ChangeLogToken = "oldtoken";
+
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
+
+            var queue = this.CreateQueue(session, storage, fsFactory.Object);
+            queue.RunStartSyncEvent();
+            dirInfo.Verify(d => d.Delete(true), Times.Once());
+            Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void ContentChangeIndicatesFolderCreation()
+        {
+            string folderName = "folder";
+            string parentId = "blafasel";
+            string lastChangeToken = "changeToken";
+            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
+            var dirInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName));
+
+            string id = "1";
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, Path.Combine(this.remoteRoot, folderName), parentId, lastChangeToken);
+            var storage = this.GetInitializedStorage();
+            storage.ChangeLogToken = "oldtoken";
+            var queue = this.CreateQueue(session, storage, fsFactory.Object);
+            queue.RunStartSyncEvent();
+            dirInfo.Verify(d => d.Create(), Times.Once());
+            var mappedObject = storage.GetObjectByRemoteId(id);
+            Assert.That(mappedObject, Is.Not.Null);
+            Assert.That(mappedObject.RemoteObjectId, Is.EqualTo(id), "RemoteObjectId incorrect");
+            Assert.That(mappedObject.Name, Is.EqualTo(folderName), "Name incorrect");
+            Assert.That(mappedObject.ParentId, Is.EqualTo(parentId), "ParentId incorrect");
+            Assert.That(mappedObject.LastChangeToken, Is.EqualTo(lastChangeToken), "LastChangeToken incorrect");
+            Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
+        }
+
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage) 
+        {
+            return this.CreateQueue(session, storage, new ObservableHandler());
+        }
+
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory) {
+            return this.CreateQueue(session, storage, new ObservableHandler(), fsFactory);
         }
 
         private IMetaDataStorage GetInitializedStorage()
         {
-            IPathMatcher matcher = new PathMatcher(localRoot, remoteRoot);
-            return new MetaDataStorage(engine, matcher);
+            IPathMatcher matcher = new PathMatcher(this.localRoot, this.remoteRoot);
+            return new MetaDataStorage(this.engine, matcher);
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, ObservableHandler observer, IFileSystemInfoFactory fsFactory = null) {
-
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage, ObservableHandler observer, IFileSystemInfoFactory fsFactory = null)
+        {
             var manager = new SyncEventManager();
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
 
             manager.AddEventHandler(observer);
 
-            var changes = new ContentChanges (session.Object, storage, queue, maxNumberOfContentChanges, isPropertyChangesSupported);
+            var changes = new ContentChanges(session.Object, storage, queue, this.maxNumberOfContentChanges, this.isPropertyChangesSupported);
             manager.AddEventHandler(changes);
 
             var transformer = new ContentChangeEventTransformer(queue, storage, fsFactory);
@@ -115,7 +221,7 @@ namespace TestLibrary.IntegrationTests
             var localFetcher = new LocalObjectFetcher(storage.Matcher, fsFactory);
             manager.AddEventHandler(localFetcher);
 
-            var watcher = new Mock<Strategy.Watcher>(queue){CallBase = true};
+            var watcher = new Mock<Strategy.Watcher>(queue) { CallBase = true };
             manager.AddEventHandler(watcher.Object);
 
             var localDetection = new LocalSituationDetection();
@@ -147,115 +253,10 @@ namespace TestLibrary.IntegrationTests
             var ignoreFileNamesFilter = new IgnoredFileNamesFilter(queue);
             manager.AddEventHandler(ignoreFileNamesFilter);
 
-
             var debugHandler = new DebugLoggingHandler();
             manager.AddEventHandler(debugHandler);
 
             return queue;
         }
-        
-        [Test, Category("Fast")]
-        public void RunFakeEvent ()
-        {
-            var session = new Mock<ISession>();
-            var observer = new ObservableHandler();
-            var storage = GetInitializedStorage();
-            var queue = CreateQueue(session, storage, observer);
-            var myEvent = new Mock<ISyncEvent>();
-            queue.AddEvent(myEvent.Object);
-            queue.Run();
-            Assert.That(observer.list.Count, Is.EqualTo(1));
-        }
-
-        [Test, Category("Fast")]
-        public void RunStartNewSyncEvent ()
-        {
-            var storage = GetInitializedStorage();
-            var session = new Mock<ISession>();
-            session.SetupSessionDefaultValues();
-            session.SetupChangeLogToken("default");
-            var observer = new ObservableHandler();
-            var queue = CreateQueue(session, storage, observer);
-            queue.RunStartSyncEvent();
-            Assert.That(observer.list.Count, Is.EqualTo(1));
-            Assert.That(observer.list[0], Is.TypeOf(typeof(FullSyncCompletedEvent)));
-        }
-
-        [Test, Category("Fast")]
-        public void RunFSEventDeleted ()
-        {
-            var storage = GetInitializedStorage();
-            var path = new Mock<IFileInfo>();
-            var name = "a";
-            path.Setup(p => p.FullName ).Returns(Path.Combine(localRoot, name));
-            string id = "id";
-            //storage.AddLocalFile(path.Object, id);
-            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
-            storage.SaveMappedObject(mappedObject);
-            
-            var session = new Mock<ISession>();
-            session.SetupSessionDefaultValues();
-            session.SetupChangeLogToken("default");
-            IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, id).Object;
-            session.Setup(s => s.GetObject(id)).Returns(remote);
-            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName);
-            var queue = CreateQueue(session, storage);
-            queue.AddEvent(myEvent);
-            queue.Run();
-
-            session.Verify(f => f.Delete(It.Is<IObjectId>(i=>i.Id==id), true), Times.Once());
-            Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
-
-        }
-
-        [Test, Category("Fast")]
-        public void ContentChangeIndicatesFolderDeletionOfExistingFolder ()
-        {
-            var storage = GetInitializedStorage();
-            var name = "a";
-            string path = Path.Combine(localRoot, name);
-            string id = "1";
-            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
-            var dirInfo = new Mock<IDirectoryInfo>();
-            dirInfo.Setup(d => d.Exists).Returns(true);
-            dirInfo.Setup(d => d.FullName).Returns(path);
-            fsFactory.AddIDirectoryInfo(dirInfo.Object);
-            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
-            storage.SaveMappedObject(mappedObject);
-            storage.ChangeLogToken = "oldtoken";
-
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted, id);
-
-            var queue = CreateQueue(session, storage, fsFactory.Object);
-            queue.RunStartSyncEvent();
-            dirInfo.Verify(d => d.Delete(true), Times.Once());
-            Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
-        }
-
-        [Test, Category("Fast")]
-        public void ContentChangeIndicatesFolderCreation ()
-        {
-            string folderName = "folder";
-            string parentId = "blafasel";
-            string lastChangeToken = "changeToken";
-            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
-            var dirInfo = fsFactory.AddDirectory(Path.Combine(localRoot, folderName));
-
-            string id = "1";
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, Path.Combine(remoteRoot, folderName), parentId, lastChangeToken);
-            var storage = GetInitializedStorage();
-            storage.ChangeLogToken = "oldtoken";
-            var queue = CreateQueue(session, storage, fsFactory.Object);
-            queue.RunStartSyncEvent();
-            dirInfo.Verify(d => d.Create(), Times.Once());
-            var mappedObject = storage.GetObjectByRemoteId(id);
-            Assert.That(mappedObject, Is.Not.Null);
-            Assert.That(mappedObject.RemoteObjectId, Is.EqualTo(id), "RemoteObjectId incorrect");
-            Assert.That(mappedObject.Name, Is.EqualTo(folderName), "Name incorrect");
-            Assert.That(mappedObject.ParentId, Is.EqualTo(parentId), "ParentId incorrect");
-            Assert.That(mappedObject.LastChangeToken, Is.EqualTo(lastChangeToken), "LastChangeToken incorrect");
-            Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
-        }
     }
 }
-

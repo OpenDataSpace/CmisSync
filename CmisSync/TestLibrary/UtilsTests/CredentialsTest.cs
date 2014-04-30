@@ -16,29 +16,30 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using CmisSync.Lib.Credentials;
-
-using NUnit.Framework;
-
-using Moq;
-using CmisSync.Lib;
-using System.Xml.Serialization;
-using System.IO;
 
 namespace TestLibrary.UtilsTests.CredentialsTests
 {
+    using System;
+    using System.IO;
+    using System.Xml.Serialization;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Credentials;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class CryptoTest
     {
         [Test, Category("Fast")]
         public void EncryptAndDecryptStrings()
         {
-            String[] test_pws = { "", "test", "Whatever", "Something to try" };
-            foreach (String pass in test_pws)
+            string[] test_pws = { string.Empty, "test", "Whatever", "Something to try" };
+            foreach (string pass in test_pws)
             {
-                String crypted = Crypto.Obfuscate(pass);
+                string crypted = Crypto.Obfuscate(pass);
                 Assert.AreEqual(Crypto.Deobfuscate(crypted), pass);
             }
         }
@@ -46,7 +47,7 @@ namespace TestLibrary.UtilsTests.CredentialsTests
         [Test, Category("Fast")]
         public void EncryptedIsDifferentToPlaintext()
         {
-            String plain = "Testtesttest";
+            string plain = "Testtesttest";
             string encrypted = Crypto.Obfuscate(plain);
             Assert.IsFalse(encrypted.Contains(plain));
         }
@@ -59,8 +60,8 @@ namespace TestLibrary.UtilsTests.CredentialsTests
         public void DefaultConstructor()
         {
             var password = new Password();
-            Assert.IsNull (password.ObfuscatedPassword);
-            Assert.IsNull (password.ToString());
+            Assert.IsNull(password.ObfuscatedPassword);
+            Assert.IsNull(password.ToString());
         }
 
         [Test, Category("Fast")]
@@ -86,7 +87,7 @@ namespace TestLibrary.UtilsTests.CredentialsTests
         {
             string passwd = "Test";
             string obfuscated = new Password(passwd).ObfuscatedPassword;
-            Password password = new Password(){ObfuscatedPassword = obfuscated};
+            Password password = new Password { ObfuscatedPassword = obfuscated };
             Assert.NotNull(password.ObfuscatedPassword);
             Assert.AreEqual(obfuscated, password.ObfuscatedPassword);
             Assert.AreEqual(passwd, password.ToString());
@@ -114,8 +115,8 @@ namespace TestLibrary.UtilsTests.CredentialsTests
         public void DefaultConstructor()
         {
             var cred = new UserCredentials();
-            Assert.IsNull (cred.UserName);
-            Assert.IsNull (cred.Password);
+            Assert.IsNull(cred.UserName);
+            Assert.IsNull(cred.Password);
         }
 
         [Test, Category("Fast")]
@@ -165,7 +166,7 @@ namespace TestLibrary.UtilsTests.CredentialsTests
         public void SetServerAddress()
         {
             string url = "http://example.com/";
-            var cred = new ServerCredentials(){
+            var cred = new ServerCredentials {
                 Address = new Uri(url)
             };
             Assert.AreEqual(url, cred.Address.ToString());
@@ -196,4 +197,3 @@ namespace TestLibrary.UtilsTests.CredentialsTests
         }
     }
 }
-

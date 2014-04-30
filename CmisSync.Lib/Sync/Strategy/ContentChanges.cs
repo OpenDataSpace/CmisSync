@@ -41,8 +41,6 @@ namespace CmisSync.Lib.Sync.Strategy
         private int maxNumberOfContentChanges;
         private bool isPropertyChangesSupported;
 
-        private object syncLock = new object();
-
         private IChangeEvent lastChange;
 
         public ContentChanges(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base(queue) {
@@ -117,7 +115,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
                 if(lastTokenOnClient != lastTokenOnServer)
                 {
-                                this.Sync();
+                    this.Sync();
                 }
                 
                 return true;

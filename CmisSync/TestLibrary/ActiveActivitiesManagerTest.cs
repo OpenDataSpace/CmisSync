@@ -25,9 +25,9 @@ namespace TestLibrary
     using CmisSync.Lib;
     using CmisSync.Lib.Events;
 
-    using NUnit.Framework;
-
     using Moq;
+
+    using NUnit.Framework;
 
     [TestFixture]
     public class ActiveActivitiesManagerTest
@@ -52,7 +52,7 @@ namespace TestLibrary
         {
             var manager = new ActiveActivitiesManager();
 
-            Assert.IsTrue(manager.AddTransmission(new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE,"path")));
+            Assert.IsTrue(manager.AddTransmission(new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path")));
 
             Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(1));
         }
@@ -76,7 +76,7 @@ namespace TestLibrary
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
             manager.AddTransmission(trans);
 
-            trans.ReportProgress(new TransmissionProgressEventArgs{Completed = true});
+            trans.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
 
             Assert.That(manager.ActiveTransmissions, Is.Empty);
         }
@@ -102,7 +102,7 @@ namespace TestLibrary
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
             manager.AddTransmission(trans);
 
-            trans.ReportProgress(new TransmissionProgressEventArgs{Aborted = true});
+            trans.ReportProgress(new TransmissionProgressEventArgs { Aborted = true });
 
             Assert.That(manager.ActiveTransmissions, Is.Empty);
         }
@@ -129,7 +129,7 @@ namespace TestLibrary
 
             manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
             {
-                eventCounter ++;
+                eventCounter++;
                 Assert.That(e.NewItems.Count, Is.EqualTo(1));
                 Assert.That(e.NewItems[0], Is.EqualTo(trans));
             };
@@ -148,12 +148,12 @@ namespace TestLibrary
 
             manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
             {
-                eventCounter ++;
+                eventCounter++;
                 Assert.That(e.NewItems, Is.Null);
                 Assert.That(e.OldItems.Count, Is.EqualTo(1));
                 Assert.That(e.OldItems[0], Is.EqualTo(trans));
             };
-            trans.ReportProgress(new TransmissionProgressEventArgs{Completed = true});
+            trans.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
 
             Assert.That(eventCounter, Is.EqualTo(1));
         }

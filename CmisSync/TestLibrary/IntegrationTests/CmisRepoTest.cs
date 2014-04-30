@@ -70,7 +70,8 @@ namespace TestLibrary.IntegrationTests
             var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
             Thread.Sleep(1000);
             Assert.That(repo.DB.GetObjectByRemoteId("id"), Is.Not.Null);
-            //TODO the pathmatcher does  not match
+
+            // TODO the pathmatcher does  not match
             Assert.That(repo.DB.GetObjectByLocalPath(fsInfo), Is.Not.Null);
         }
         
@@ -90,9 +91,9 @@ namespace TestLibrary.IntegrationTests
             {
                 var session = new Mock<ISession>();
                 var remoteObject = new Mock<IFolder>();
-                remoteObject.Setup( r => r.Id).Returns("id");
-                
-                session.Setup( s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
+                remoteObject.Setup(r => r.Id).Returns("id");
+
+                session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
                 this.session = session.Object;
             }
             

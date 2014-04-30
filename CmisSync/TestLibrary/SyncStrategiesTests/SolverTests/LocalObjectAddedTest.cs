@@ -55,16 +55,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new LocalObjectAdded();
         }
 
-        private bool VerifySavedMappedObject(IMappedObject o, string remoteId, string name, string parentId ,string changeToken)
-        {
-            Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId));
-            Assert.That(o.Name, Is.EqualTo(name));
-            Assert.That(o.ParentId, Is.EqualTo(parentId));
-            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken));
-            Assert.That(o.Type, Is.EqualTo(MappedObjectType.Folder));
-            return true;
-        }
-
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFolderAdded()
         {
@@ -98,8 +88,18 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
 
-            this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f => VerifySavedMappedObject(f, id, folderName, parentId, lastChangeToken))), Times.Once());
-            this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)),Times.Once());
+            this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f => this.VerifySavedMappedObject(f, id, folderName, parentId, lastChangeToken))), Times.Once());
+            this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
+        }
+
+        private bool VerifySavedMappedObject(IMappedObject o, string remoteId, string name, string parentId, string changeToken)
+        {
+            Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId));
+            Assert.That(o.Name, Is.EqualTo(name));
+            Assert.That(o.ParentId, Is.EqualTo(parentId));
+            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken));
+            Assert.That(o.Type, Is.EqualTo(MappedObjectType.Folder));
+            return true;
         }
     }
 }

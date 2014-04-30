@@ -18,23 +18,23 @@
 //-----------------------------------------------------------------------
 #if __COCOA__
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-
-using MonoMac.Foundation;
-using MonoMac.AppKit;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Sync.Strategy;
-
-using NUnit.Framework;
-
-using Moq;
-
 namespace TestLibrary.SyncStrategiesTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using MonoMac.Foundation;
+    using MonoMac.AppKit;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class MacWatcherTest : BaseWatcherTest
     {

@@ -16,27 +16,30 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
-using DotCMIS.Client;
-using DotCMIS.Exceptions;
+namespace TestLibrary.SyncStrategiesTests
+{
+    using System;
+    using System.IO;
 
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
 
-using NUnit.Framework;
+    using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
-using Moq;
-using System.IO;
-using TestLibrary.TestUtils;
-namespace TestLibrary.SyncStrategiesTests {
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture]
     public class RemoteObjectFetcherTest 
     {
-        private static readonly string path = "/path";
-        private static readonly string id = "myId";
+        private static readonly string Path = "/path";
+        private static readonly string Id = "myId";
 
         [Test, Category("Fast")]
         public void ConstructorTest() {
@@ -46,16 +49,16 @@ namespace TestLibrary.SyncStrategiesTests {
         }
 
         [Test, Category("Fast")]
-        public void FileEventWithoutObjectId () {
+        public void FileEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, id).Object;
-            session.Setup(s => s.GetObject(id)).Returns(remote);
+            IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, Id).Object;
+            session.Setup(s => s.GetObject(Id)).Returns(remote);
 
-            var storage = new Mock<IMetaDataStorage> ();
-            storage.AddLocalFile(path, id);
+            var storage = new Mock<IMetaDataStorage>();
+            storage.AddLocalFile(Path, Id);
 
-            var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(path)));
+            var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(Path)));
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(fileEvent), Is.False);
@@ -66,12 +69,12 @@ namespace TestLibrary.SyncStrategiesTests {
         public void FileEventForRemovedFile() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            session.Setup(s => s.GetObject(id)).Throws(new CmisObjectNotFoundException());
+            session.Setup(s => s.GetObject(Id)).Throws(new CmisObjectNotFoundException());
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile(path, id);
+            storage.AddLocalFile(Path, Id);
 
-            var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(path)));
+            var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(Path)));
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             Assert.That(fetcher.Handle(fileEvent), Is.False);
@@ -102,13 +105,13 @@ namespace TestLibrary.SyncStrategiesTests {
         public void FolderEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(id).Object;
-            session.Setup(s => s.GetObject(id)).Returns(remote);
+            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(Id).Object;
+            session.Setup(s => s.GetObject(Id)).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder(path, id);
+            storage.AddLocalFolder(Path, Id);
 
-            var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(path)));
+            var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(Path)));
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(folderEvent), Is.False);
@@ -119,12 +122,12 @@ namespace TestLibrary.SyncStrategiesTests {
         public void FolderEventForRemovedFolder() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            session.Setup(s => s.GetObject(id)).Throws(new CmisObjectNotFoundException());
+            session.Setup(s => s.GetObject(Id)).Throws(new CmisObjectNotFoundException());
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder(path, id);
+            storage.AddLocalFolder(Path, Id);
 
-            var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(path)));
+            var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(Path)));
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             Assert.That(fetcher.Handle(folderEvent), Is.False);
@@ -135,13 +138,13 @@ namespace TestLibrary.SyncStrategiesTests {
         public void CrawlRequestedEventWithNewRemoteFolder() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(id).Object;
-            session.Setup(s => s.GetObject(id)).Returns(remote);
+            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(Id).Object;
+            session.Setup(s => s.GetObject(Id)).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder(path, id);
+            storage.AddLocalFolder(Path, Id);
 
-            var crawlEvent = new CrawlRequestEvent(localFolder: new DirectoryInfoWrapper(new DirectoryInfo(path)), remoteFolder: null);
+            var crawlEvent = new CrawlRequestEvent(localFolder: new DirectoryInfoWrapper(new DirectoryInfo(Path)), remoteFolder: null);
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             Assert.That(fetcher.Handle(crawlEvent), Is.False);

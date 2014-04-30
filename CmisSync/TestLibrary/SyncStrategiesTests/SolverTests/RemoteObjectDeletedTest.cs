@@ -21,16 +21,17 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Sync.Solver;
-    using CmisSync.Lib.Storage;
     using CmisSync.Lib.Data;
-    using TestLibrary.TestUtils;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Solver;
 
     using DotCMIS.Client;
 
     using Moq;
 
     using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture]
     public class RemoteObjectDeletedTest
@@ -58,4 +59,3 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
     }
 }
-

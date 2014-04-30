@@ -16,17 +16,18 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 
 namespace TestLibrary
 {
-    class LocalFilesystemActivityGenerator
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+
+    public class LocalFilesystemActivityGenerator
     {
-        public static int id = 1;
+        private static int id = 1;
 
         public static void CreateDirectoriesAndFiles(string path)
         {
@@ -42,6 +43,7 @@ namespace TestLibrary
                 {
                     Directory.CreateDirectory(path1);
                 }
+
                 CreateRandomFile(path1, 3);
                 CreateRandomFile(path1, 3);
                 CreateRandomFile(path1, 3);
@@ -52,6 +54,7 @@ namespace TestLibrary
                 {
                     Directory.CreateDirectory(path2);
                 }
+
                 CreateRandomFile(path2, 3);
             }
             catch (IOException ex)
@@ -77,7 +80,7 @@ namespace TestLibrary
         {
             Random rng = new Random();
             string filename = GetNextFileName();
-            ++ id;
+            ++id;
             byte[] data = new byte[1024];
 
             try

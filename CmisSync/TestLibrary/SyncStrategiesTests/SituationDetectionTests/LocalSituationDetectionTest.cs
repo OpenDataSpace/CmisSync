@@ -16,27 +16,28 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Data;
-
-using DotCMIS.Client;
-
-using NUnit.Framework;
-
-using Moq;
-using System.IO;
-using TestLibrary.TestUtils;
-using CmisSync.Lib.Events;
 
 namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
+
     [TestFixture]
     public class LocalSituationDetectionTest
     {
-
         [Test, Category("Fast"), Category("SituationDetection")]
         public void NoChangeOnFileDetection()
         {
@@ -66,7 +67,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var storage = new Mock<IMetaDataStorage>();
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(file => file.Exists).Returns(false);
-            var fileEvent = new FileEvent(fileInfo.Object) {Local = MetaDataChangeType.DELETED};
+            var fileEvent = new FileEvent(fileInfo.Object) { Local = MetaDataChangeType.DELETED };
 
             var detection = new LocalSituationDetection();
             Assert.That(detection.Analyse(storage.Object, fileEvent), Is.EqualTo(SituationType.REMOVED));
@@ -78,7 +79,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var storage = new Mock<IMetaDataStorage>();
             Mock<IDirectoryInfo> dirInfo = new Mock<IDirectoryInfo>();
 
-            var folderEvent = new FolderEvent(dirInfo.Object) {Local = MetaDataChangeType.CREATED};
+            var folderEvent = new FolderEvent(dirInfo.Object) { Local = MetaDataChangeType.CREATED };
 
             var detection = new LocalSituationDetection();
             Assert.That(detection.Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.ADDED));
@@ -90,7 +91,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var storage = new Mock<IMetaDataStorage>();
             Mock<IDirectoryInfo> dirInfo = new Mock<IDirectoryInfo>();
 
-            var folderEvent = new FolderEvent(dirInfo.Object) {Local = MetaDataChangeType.DELETED};
+            var folderEvent = new FolderEvent(dirInfo.Object) { Local = MetaDataChangeType.DELETED };
 
             var detection = new LocalSituationDetection();
             Assert.That(detection.Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.REMOVED));
@@ -103,11 +104,10 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var storage = new Mock<IMetaDataStorage>();
             Mock<IDirectoryInfo> dirInfo = new Mock<IDirectoryInfo>();
 
-            var folderEvent = new FolderEvent(dirInfo.Object) {Local = MetaDataChangeType.CHANGED};
+            var folderEvent = new FolderEvent(dirInfo.Object) { Local = MetaDataChangeType.CHANGED };
 
             var detection = new LocalSituationDetection();
             Assert.That(detection.Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.RENAMED));
         }
     }
 }
-

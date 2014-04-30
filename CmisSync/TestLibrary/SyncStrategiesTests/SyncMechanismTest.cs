@@ -16,52 +16,51 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Sync.Solver;
-using CmisSync.Lib.Data;
-
-using DotCMIS.Client;
-using DotCMIS.Client.Impl;
-
-using NUnit.Framework;
-
-using Moq;
-
-using TestLibrary.TestUtils;
 
 namespace TestLibrary.SyncStrategiesTests
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Solver;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
+
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
+
     [TestFixture]
     public class SyncMechanismTest
     {
-
-        private Mock<ISession> Session;
-        private Mock<ISyncEventQueue> Queue;
-        private Mock<IMetaDataStorage> Storage;
+        private Mock<ISession> session;
+        private Mock<ISyncEventQueue> queue;
+        private Mock<IMetaDataStorage> storage;
 
         [SetUp]
         public void SetUp()
         {
-            Session = new Mock<ISession>();
-            Queue = new Mock<ISyncEventQueue>();
-            Storage = new Mock<IMetaDataStorage>();
+            this.session = new Mock<ISession>();
+            this.queue = new Mock<ISyncEventQueue>();
+            this.storage = new Mock<IMetaDataStorage>();
         }
-
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithValidInput()
         {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, Queue.Object, Session.Object, Storage.Object);
+            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object);
             Assert.AreEqual(localDetection.Object, mechanism.LocalSituation);
             Assert.AreEqual(remoteDetection.Object, mechanism.RemoteSituation);
-            Assert.AreEqual(Math.Pow(Enum.GetNames(typeof(SituationType)).Length,2), mechanism.Solver.Length);
+            Assert.AreEqual(Math.Pow(Enum.GetNames(typeof(SituationType)).Length, 2), mechanism.Solver.Length);
         }
 
         [Test, Category("Fast")]
@@ -69,7 +68,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void ConstructorFailsWithLocalDetectionNull()
         {
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            new SyncMechanism(null, remoteDetection.Object, Queue.Object, Session.Object, Storage.Object);
+            new SyncMechanism(null, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast")]
@@ -77,7 +76,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void ConstructorFailsWithRemoteDetectionNull()
         {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            new SyncMechanism(localDetection.Object, null, Queue.Object, Session.Object, Storage.Object);
+            new SyncMechanism(localDetection.Object, null, this.queue.Object, this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast")]
@@ -86,11 +85,11 @@ namespace TestLibrary.SyncStrategiesTests
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
-            ISolver[,] solver = new ISolver[numberOfSolver,numberOfSolver];
-            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, Queue.Object, Session.Object, Storage.Object, solver);
+            ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
+            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, solver);
             Assert.AreEqual(localDetection.Object, mechanism.LocalSituation);
             Assert.AreEqual(remoteDetection.Object, mechanism.RemoteSituation);
-            Assert.AreEqual(Math.Pow(Enum.GetNames(typeof(SituationType)).Length,2), mechanism.Solver.Length);
+            Assert.AreEqual(Math.Pow(Enum.GetNames(typeof(SituationType)).Length, 2), mechanism.Solver.Length);
             Assert.AreEqual(solver, mechanism.Solver);
         }
 
@@ -103,7 +102,7 @@ namespace TestLibrary.SyncStrategiesTests
             IObjectId remoteId = new ObjectId("RemoteId");
             string path = "path";
             string parentPath = ".";
-            ISolver[,] solver = new ISolver[numberOfSolver,numberOfSolver];
+            ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
             var noChangeSolver = new Mock<ISolver>();
             noChangeSolver.Setup(s => s.Solve(
                 It.IsAny<ISession>(),
@@ -111,28 +110,30 @@ namespace TestLibrary.SyncStrategiesTests
                 It.IsAny<IFileSystemInfo>(),
                 It.Is<IObjectId>(id => id == remoteId)));
             localDetection.Setup(d => d.Analyse(
-                It.Is<IMetaDataStorage>(db => db == Storage.Object),
+                It.Is<IMetaDataStorage>(db => db == this.storage.Object),
                 It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             remoteDetection.Setup(d => d.Analyse(
-                It.Is<IMetaDataStorage>(db => db == Storage.Object),
+                It.Is<IMetaDataStorage>(db => db == this.storage.Object),
                 It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
-            solver [(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = noChangeSolver.Object;
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = noChangeSolver.Object;
             var mechanism = new SyncMechanism(
                 localDetection.Object,
                 remoteDetection.Object,
-                Queue.Object,
-                Session.Object,
-                Storage.Object,
+                this.queue.Object,
+                this.session.Object,
+                this.storage.Object,
                 solver);
             var remoteDoc = new Mock<IDocument>();
             remoteDoc.Setup(doc => doc.Id).Returns(remoteId.Id);
-            var noChangeEvent = new Mock<FileEvent>(new FileInfoWrapper(new FileInfo(path)), new DirectoryInfoWrapper(new DirectoryInfo(parentPath)), remoteDoc.Object){CallBase=true}.Object;
+            var noChangeEvent = new Mock<FileEvent>(new FileInfoWrapper(new FileInfo(path)), new DirectoryInfoWrapper(new DirectoryInfo(parentPath)), remoteDoc.Object) { CallBase = true }.Object;
             Assert.True(mechanism.Handle(noChangeEvent));
-            noChangeSolver.Verify(s => s.Solve(
-                It.Is<ISession>(se => se == Session.Object),
+            noChangeSolver.Verify(
+                s => s.Solve(
+                It.Is<ISession>(se => se == this.session.Object),
                 It.IsAny<IMetaDataStorage>(),
                 It.IsAny<IFileSystemInfo>(),
-                It.Is<IObjectId>(id => id.Id == remoteId.Id)), Times.Once());
+                It.Is<IObjectId>(id => id.Id == remoteId.Id)),
+                Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -140,7 +141,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, Queue.Object, Session.Object, Storage.Object);
+            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object);
             var invalidEvent = new Mock<ISyncEvent>().Object;
             Assert.IsFalse(mechanism.Handle(invalidEvent));
             localDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>()), Times.Never());
@@ -154,14 +155,16 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, Queue.Object, Session.Object, Storage.Object);
+            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object);
             int solverCount = 0;
             foreach (ISolver s in mechanism.Solver)
             {
-                if(s != null)
-                    solverCount ++;
+                if (s != null) {
+                    solverCount++;
+                } 
             }
-            Assert.AreEqual((int)Math.Pow(Enum.GetNames(typeof(SituationType)).Length,2), solverCount);
+
+            Assert.AreEqual((int)Math.Pow(Enum.GetNames(typeof(SituationType)).Length, 2), solverCount);
         }
 
         // If a solver fails to solve the situation, the situation should be rescanned and if it changed, the new situation should be handled
@@ -173,24 +176,26 @@ namespace TestLibrary.SyncStrategiesTests
             localDetection.Setup(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
             remoteDetection.Setup(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>())).ReturnsInOrder(SituationType.CHANGED, SituationType.REMOVED);
             var failingSolver = new Mock<ISolver>();
-            failingSolver.Setup(s => s.Solve(
-                It.Is<ISession>((se) => se == Session.Object),
+            failingSolver.Setup(
+                s => s.Solve(
+                It.Is<ISession>((se) => se == this.session.Object),
                 It.IsAny<IMetaDataStorage>(),
                 It.IsAny<IFileSystemInfo>(),
                 It.IsAny<IObjectId>()))
                 .Throws(new DotCMIS.Exceptions.CmisObjectNotFoundException());
             var successfulSolver = new Mock<ISolver>();
-            successfulSolver.Setup( s => s.Solve(
-                It.Is<ISession>((se) => se == Session.Object),
+            successfulSolver.Setup(
+                s => s.Solve(
+                It.Is<ISession>((se) => se == this.session.Object),
                 It.IsAny<IMetaDataStorage>(),
                 It.IsAny<IFileSystemInfo>(),
                 It.IsAny<IObjectId>()));
 
-            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, Queue.Object, Session.Object, Storage.Object);
+            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object);
             var remoteDocument = new Mock<IDocument>();
             var remoteEvent = new Mock<FileEvent>(new Mock<IFileInfo>().Object, null, remoteDocument.Object).Object;
-            mechanism.Solver[(int) SituationType.NOCHANGE, (int) SituationType.CHANGED] = failingSolver.Object;
-            mechanism.Solver[(int) SituationType.NOCHANGE, (int) SituationType.REMOVED] = successfulSolver.Object;
+            mechanism.Solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = failingSolver.Object;
+            mechanism.Solver[(int)SituationType.NOCHANGE, (int)SituationType.REMOVED] = successfulSolver.Object;
 
             Assert.IsTrue(mechanism.Handle(remoteEvent));
 
@@ -212,7 +217,7 @@ namespace TestLibrary.SyncStrategiesTests
             string oldLastChangeToken = Guid.NewGuid().ToString();
             string newLastChangeToken = Guid.NewGuid().ToString();
             DateTime? oldWriteTime = DateTime.UtcNow;
-            DateTime? newWriteTime = ((DateTime) oldWriteTime).AddMilliseconds(500);
+            DateTime? newWriteTime = ((DateTime)oldWriteTime).AddMilliseconds(500);
 
             var oldLocalFolder = Mock.Of<IDirectoryInfo>(d =>
                                                          d.Name == oldFolderName &&
@@ -220,33 +225,39 @@ namespace TestLibrary.SyncStrategiesTests
             var newLocalFolder = Mock.Of<IDirectoryInfo>(d =>
                                                          d.Name == oldFolderName &&
                                                          d.FullName == newLocalPath);
-            var oldLocalParent = Mock.Of<IMappedObject>( p =>
-                                                       p.Name == "/" &&
-                                                       p.ParentId == null &&
-                                                       p.LastRemoteWriteTimeUtc == oldWriteTime);
-            Storage.AddMappedFolder(Mock.Of<IMappedObject>( f =>
-                                                           f.RemoteObjectId == remoteId &&
-                                                           f.Name == oldFolderName &&
-                                                           f.ParentId == oldLocalParent.RemoteObjectId &&
-                                                           f.LastChangeToken == oldLastChangeToken &&
-                                                           f.LastRemoteWriteTimeUtc == oldWriteTime));
-            Session.AddRemoteObject(Mock.Of<IFolder>(f =>
-                                                     f.Id == remoteId &&
-                                                     f.Name == newRemoteName &&
-                                                     f.Path == newRemotePath &&
-                                                     f.ChangeToken == newLastChangeToken &&
-                                                     f.LastModificationDate == ((DateTime) newWriteTime).AddMilliseconds(500)));
+            var oldLocalParent = Mock.Of<IMappedObject>(p =>
+                                                        p.Name == "/" &&
+                                                        p.ParentId == null &&
+                                                        p.LastRemoteWriteTimeUtc == oldWriteTime);
+            this.storage.AddMappedFolder(Mock.Of<IMappedObject>(f =>
+                                                                f.RemoteObjectId == remoteId &&
+                                                                f.Name == oldFolderName &&
+                                                                f.ParentId == oldLocalParent.RemoteObjectId &&
+                                                                f.LastChangeToken == oldLastChangeToken &&
+                                                                f.LastRemoteWriteTimeUtc == oldWriteTime));
+            this.session.AddRemoteObject(Mock.Of<IFolder>(f =>
+                                                          f.Id == remoteId &&
+                                                          f.Name == newRemoteName &&
+                                                          f.Path == newRemotePath &&
+                                                          f.ChangeToken == newLastChangeToken &&
+                                                          f.LastModificationDate == ((DateTime)newWriteTime).AddMilliseconds(500)));
 
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderMovedEvent(oldLocalFolder, newLocalFolder, null, null);
             var localMoveRemoteRenameSolver = new Mock<ISolver>();
-            var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
-            mechanism.Solver[(int) SituationType.MOVED, (int) SituationType.RENAMED] = localMoveRemoteRenameSolver.Object;
+            var mechanism = new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object);
+            mechanism.Solver[(int)SituationType.MOVED, (int)SituationType.RENAMED] = localMoveRemoteRenameSolver.Object;
 
             Assert.IsTrue(mechanism.Handle(folderEvent));
 
-            localMoveRemoteRenameSolver.Verify(s => s.Solve(It.Is<ISession>( session => session == Session.Object), It.Is<IMetaDataStorage>(storage => storage == Storage.Object), It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>()), Times.Once());
+            localMoveRemoteRenameSolver.Verify(
+                s => s.Solve(
+                It.Is<ISession>(session => session == this.session.Object),
+                It.Is<IMetaDataStorage>(storage => storage == this.storage.Object),
+                It.IsAny<IFileSystemInfo>(),
+                It.IsAny<IObjectId>()),
+                Times.Once());
         }
 
         [Test, Category("Fast"), Category("IT")]
@@ -258,14 +269,24 @@ namespace TestLibrary.SyncStrategiesTests
             var remoteFolderAddedSolver = new Mock<ISolver>();
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
-            var folderEvent = new FolderEvent(remoteFolder: remoteFolder, localFolder: new Mock<IDirectoryInfo>().Object) { Remote = MetaDataChangeType.CREATED, Local = MetaDataChangeType.NONE };
+            var folderEvent = new FolderEvent(remoteFolder: remoteFolder, localFolder: new Mock<IDirectoryInfo>().Object)
+            {
+                Remote = MetaDataChangeType.CREATED,
+                Local = MetaDataChangeType.NONE
+            };
 
-            var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
-            mechanism.Solver[(int) SituationType.NOCHANGE, (int) SituationType.ADDED] = remoteFolderAddedSolver.Object;
+            var mechanism = new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object);
+            mechanism.Solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = remoteFolderAddedSolver.Object;
 
             Assert.IsTrue(mechanism.Handle(folderEvent));
 
-            remoteFolderAddedSolver.Verify(s => s.Solve(It.Is<ISession>( session => session == Session.Object), It.Is<IMetaDataStorage>(storage => storage == Storage.Object), It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>()), Times.Once());
+            remoteFolderAddedSolver.Verify(
+                s => s.Solve(
+                It.Is<ISession>(session => session == this.session.Object),
+                It.Is<IMetaDataStorage>(storage => storage == this.storage.Object),
+                It.IsAny<IFileSystemInfo>(),
+                It.IsAny<IObjectId>()),
+                Times.Once());
         }
 
         [Test, Category("Fast"), Category("IT")]
@@ -277,12 +298,18 @@ namespace TestLibrary.SyncStrategiesTests
             var remoteDetection = new RemoteSituationDetection();
             var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.CREATED, Remote = MetaDataChangeType.NONE };
 
-            var mechanism = new SyncMechanism(localDetection, remoteDetection, Queue.Object, Session.Object, Storage.Object);
-            mechanism.Solver[(int) SituationType.ADDED, (int) SituationType.NOCHANGE] = localFolderAddedSolver.Object;
+            var mechanism = new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object);
+            mechanism.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = localFolderAddedSolver.Object;
 
             Assert.IsTrue(mechanism.Handle(folderEvent));
 
-            localFolderAddedSolver.Verify(s => s.Solve(It.Is<ISession>( session => session == Session.Object), It.Is<IMetaDataStorage>(storage => storage == Storage.Object), It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>()), Times.Once());
+            localFolderAddedSolver.Verify(
+                s => s.Solve(
+                It.Is<ISession>(session => session == this.session.Object),
+                It.Is<IMetaDataStorage>(storage => storage == this.storage.Object),
+                It.IsAny<IFileSystemInfo>(),
+                It.IsAny<IObjectId>()),
+                Times.Once());
         }
 
         [Ignore]
@@ -294,4 +321,3 @@ namespace TestLibrary.SyncStrategiesTests
         }
     }
 }
-

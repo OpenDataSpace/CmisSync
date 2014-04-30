@@ -16,10 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
 namespace TestLibrary.SyncStrategiesTests
 {
-
+    using System;
 }
-

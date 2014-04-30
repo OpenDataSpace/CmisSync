@@ -16,39 +16,38 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Collections.Generic;
-
-using CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Data;
-
-using DotCMIS.Client;
-using DotCMIS.Exceptions;
-
-using NUnit.Framework;
-
-using Moq;
-
-using TestLibrary.TestUtils;
-using CmisSync.Lib.Events;
 
 namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using DotCMIS.Client;
+    using DotCMIS.Exceptions;
+
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
+
     [TestFixture]
     public class RemoteSituationDetectionTest
     {
-        private Mock<IMetaDataStorage> StorageMock;
-        private string RemoteChangeToken = "changeToken";
-        private readonly IObjectId ObjectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
-        private readonly string RemotePath = "/object/path";
-
+        private readonly IObjectId objectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
+        private readonly string remotePath = "/object/path";
+        private Mock<IMetaDataStorage> storageMock;
+        private string remoteChangeToken = "changeToken";
 
         [SetUp]
         public void SetUp() {
-            this.StorageMock = new Mock<IMetaDataStorage>();
-
+            this.storageMock = new Mock<IMetaDataStorage>();
         }
 
         [Test, Category("Fast")]
@@ -66,7 +65,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, fileEvent));
+            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(this.storageMock.Object, fileEvent));
         }
 
         [Test, Category("Fast")]
@@ -75,22 +74,22 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var lastModificationDate = DateTime.Now;
             var remoteObject = new Mock<IDocument>();
             var remotePaths = new List<string>();
-            remotePaths.Add(RemotePath);
-            remoteObject.Setup (remote => remote.ChangeToken).Returns(RemoteChangeToken);
-            remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
-            remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
-            remoteObject.Setup (remote => remote.Paths).Returns(remotePaths);
-            var file = Mock.Of<IMappedObject>( f =>
+            remotePaths.Add(this.remotePath);
+            remoteObject.Setup(remote => remote.ChangeToken).Returns(this.remoteChangeToken);
+            remoteObject.Setup(remote => remote.Id).Returns(this.objectId.Id);
+            remoteObject.Setup(remote => remote.LastModificationDate).Returns(lastModificationDate);
+            remoteObject.Setup(remote => remote.Paths).Returns(remotePaths);
+            var file = Mock.Of<IMappedObject>(f =>
                                               f.LastRemoteWriteTimeUtc == lastModificationDate &&
-                                              f.RemoteObjectId == ObjectId.Id &&
-                                              f.LastChangeToken == RemoteChangeToken &&
+                                              f.RemoteObjectId == this.objectId.Id &&
+                                              f.LastChangeToken == this.remoteChangeToken &&
                                               f.Type == MappedObjectType.File);
-            StorageMock.AddMappedFile(file);
-            var fileEvent = new FileEvent(remoteFile: remoteObject.Object) {Remote = MetaDataChangeType.CREATED};
+            this.storageMock.AddMappedFile(file);
+            var fileEvent = new FileEvent(remoteFile: remoteObject.Object) { Remote = MetaDataChangeType.CREATED };
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, fileEvent));
+            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(this.storageMock.Object, fileEvent));
         }
 
         [Test, Category("Fast")]
@@ -102,7 +101,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, folderEvent));
+            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(this.storageMock.Object, folderEvent));
         }
 
         [Test, Category("Fast")]
@@ -115,7 +114,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.ADDED, detector.Analyse(StorageMock.Object, fileEvent));
+            Assert.AreEqual(SituationType.ADDED, detector.Analyse(this.storageMock.Object, fileEvent));
         }
 
         [Test, Category("Fast")]
@@ -127,9 +126,8 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.ADDED, detector.Analyse(StorageMock.Object, folderEvent));
+            Assert.AreEqual(SituationType.ADDED, detector.Analyse(this.storageMock.Object, folderEvent));
         }
-
 
         [Test, Category("Fast")]
         public void FileRemovedDetection()
@@ -141,7 +139,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, fileEvent));
+            Assert.AreEqual(SituationType.REMOVED, detector.Analyse(this.storageMock.Object, fileEvent));
         }
 
         [Test, Category("Fast")]
@@ -153,7 +151,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, folderEvent));
+            Assert.AreEqual(SituationType.REMOVED, detector.Analyse(this.storageMock.Object, folderEvent));
         }
 
         [Test, Category("Fast")]
@@ -164,7 +162,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.MOVED, detector.Analyse(StorageMock.Object, folderEvent));
+            Assert.AreEqual(SituationType.MOVED, detector.Analyse(this.storageMock.Object, folderEvent));
         }
 
         [Test, Category("Fast")]
@@ -183,14 +181,14 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
             var mappedParentFolder = Mock.Of<IMappedObject>(p =>
                                                             p.RemoteObjectId == oldParentId &&
                                                             p.Type == MappedObjectType.Folder);
-            var mappedFolder = StorageMock.AddLocalFolder(oldLocalPath, remoteId);
-            mappedFolder.Setup( f => f.Name).Returns(folderName);
-            mappedFolder.Setup( f => f.ParentId).Returns(mappedParentFolder.RemoteObjectId);
+            var mappedFolder = this.storageMock.AddLocalFolder(oldLocalPath, remoteId);
+            mappedFolder.Setup(f => f.Name).Returns(folderName);
+            mappedFolder.Setup(f => f.ParentId).Returns(mappedParentFolder.RemoteObjectId);
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual( SituationType.MOVED, detector.Analyse(StorageMock.Object, folderEvent));
+            Assert.AreEqual(SituationType.MOVED, detector.Analyse(this.storageMock.Object, folderEvent));
         }
 
         [Test, Category("Fast")]
@@ -206,13 +204,12 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
                                                       f.RemoteObjectId == remoteId &&
                                                       f.Name == oldName &&
                                                       f.Type == MappedObjectType.Folder);
-            StorageMock.AddMappedFolder(mappedFolder);
+            this.storageMock.AddMappedFolder(mappedFolder);
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
 
             var detector = new RemoteSituationDetection();
 
-            Assert.AreEqual(SituationType.RENAMED, detector.Analyse(StorageMock.Object, folderEvent));
+            Assert.AreEqual(SituationType.RENAMED, detector.Analyse(this.storageMock.Object, folderEvent));
         }
     }
 }
-

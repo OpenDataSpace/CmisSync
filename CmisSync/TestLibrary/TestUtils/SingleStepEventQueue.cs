@@ -16,12 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
-
-using CmisSync.Lib.Events;
 
 namespace TestLibrary
-{   
+{
+    using System.Collections.Generic;
+
+    using CmisSync.Lib.Events;
+
     /// <summary>
     /// This is a synchronous test-replacement for SyncEventQueue
     /// </summary>
@@ -35,31 +36,31 @@ namespace TestLibrary
             this.manager = manager;
         }
 
-        public void AddEvent(ISyncEvent e) {
-            queue.Enqueue(e);
-        }
-
         public bool IsStopped {
             get {
-                return queue.Count == 0; 
+                return this.queue.Count == 0; 
             }
         }
 
+        public void AddEvent(ISyncEvent e) {
+            this.queue.Enqueue(e);
+        }
+
         public void Step() {
-            ISyncEvent e = queue.Dequeue();
-            manager.Handle(e);
+            ISyncEvent e = this.queue.Dequeue();
+            this.manager.Handle(e);
         }
 
         public void Run() {
-            while(!IsStopped) {
-                Step();
+            while (!this.IsStopped) {
+                this.Step();
             }
         }
 
         public void RunStartSyncEvent() {
-            var startSyncEvent = new StartNextSyncEvent (false);
-            AddEvent(startSyncEvent);
-            Run();
+            var startSyncEvent = new StartNextSyncEvent(false);
+            this.AddEvent(startSyncEvent);
+            this.Run();
         }
     }
 }

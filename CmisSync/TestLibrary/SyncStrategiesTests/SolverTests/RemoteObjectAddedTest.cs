@@ -22,16 +22,16 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System.IO;
 
     using CmisSync.Lib.Data;
-    using CmisSync.Lib.Sync.Solver;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Solver;
 
     using DotCMIS.Client;
+
+    using Moq;
 
     using NUnit.Framework;
 
     using TestLibrary.TestUtils;
-
-    using Moq;
 
     [TestFixture]
     public class RemoteObjectAddedTest
@@ -66,13 +66,15 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
 
-            storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f =>
-                            f.RemoteObjectId == id &&
-                            f.Name == folderName &&
-                            f.ParentId == parentId &&
-                            f.LastChangeToken == lastChangeToken &&
-                            f.Type == MappedObjectType.Folder)
-                    ), Times.Once());
+            storage.Verify(
+                s => s.SaveMappedObject(
+                It.Is<IMappedObject>(f =>
+                                 f.RemoteObjectId == id &&
+                                 f.Name == folderName &&
+                                 f.ParentId == parentId &&
+                                 f.LastChangeToken == lastChangeToken &&
+                                 f.Type == MappedObjectType.Folder)),
+                Times.Once());
         }
     }
 }

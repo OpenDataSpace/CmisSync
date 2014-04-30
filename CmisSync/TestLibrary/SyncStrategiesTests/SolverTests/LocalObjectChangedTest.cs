@@ -16,17 +16,18 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using CmisSync.Lib.Sync.Solver;
-using CmisSync.Lib.Storage;
-
-using Moq;
-
-using NUnit.Framework;
 
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
+    using System;
+
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Solver;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class LocalObjectChangedTest
     {
@@ -37,4 +38,3 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
     }
 }
-
