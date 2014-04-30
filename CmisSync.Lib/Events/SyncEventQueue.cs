@@ -60,6 +60,7 @@ namespace CmisSync.Lib.Events
                     }catch(Exception e) {
                         Logger.Error("Exception in EventHandler");
                         Logger.Error(e);
+                        Logger.Error(e.StackTrace);
                     }
                 }
             }

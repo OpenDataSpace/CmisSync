@@ -114,7 +114,7 @@ namespace CmisSync.Lib.Sync
         /// <summary>
         /// Session to the CMIS repository.
         /// </summary>
-        private ISession session;
+        protected ISession session;
 
         /// <summary>
         /// The session factory.
@@ -139,7 +139,7 @@ namespace CmisSync.Lib.Sync
 
         private DBreezeEngine db;
 
-        private MetaDataStorage storage;
+        protected MetaDataStorage storage;
 
         private IFileSystemInfoFactory fileSystemFactory;
 
@@ -573,8 +573,10 @@ namespace CmisSync.Lib.Sync
             {
                 this.EventManager.RemoveEventHandler(this.crawler);
             }
+            
+            var remoteRoot = this.session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder;
 
-            this.crawler = new Crawler(this.Queue, this.session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder, this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath), this.fileSystemFactory);
+            this.crawler = new Crawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath), this.fileSystemFactory);
             this.EventManager.AddEventHandler(this.crawler);
 
             if(this.mechanism != null)
@@ -584,6 +586,12 @@ namespace CmisSync.Lib.Sync
 
             this.mechanism = new SyncMechanism(this.localDetection, this.remoteDetection, this.Queue, this.session, this.storage);
             this.EventManager.AddEventHandler(this.mechanism);
+            Logger.Debug("Before");
+            
+            var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken);
+            
+            Logger.Debug("Saving Root Folder to DataBase");
+            this.storage.SaveMappedObject(rootFolder);
         }
     }
 }

@@ -19,41 +19,86 @@
 namespace TestLibrary.IntegrationTests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
     
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync;
     
+    using DBreeze;
+    
+    using DotCMIS.Binding;
     using DotCMIS.Client;
     
     using Moq;
     
     using NUnit.Framework;
     
+    using TestLibrary.TestUtils;
+    
     [TestFixture]
     public class CmisRepoTest
     {
+        [TestFixtureSetUp]
+        public void ClassInit()
+        {
+            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
+        }
+        
+        [Test]
+        public void CmisRepoCanBeConstructed() {
+            string path = Path.GetTempPath();
+            RepoInfo repoInfo = this.CreateRepoInfo(path);
+            var activityListener = new Mock<IActivityListener>().Object;
+            var sessionFact = new Mock<ISessionFactory>();
+            new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
+        }
+        
+        [Test]
+        public void RootFolderGetsAddedToStorage() {
+            string path = Path.GetTempPath();
+            RepoInfo repoInfo = this.CreateRepoInfo(path);
+            var activityListener = new Mock<IActivityListener>().Object;
+            var sessionFact = new Mock<ISessionFactory>();
+            
+            var repo = new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
+            repo.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("http://example.com")));
+            var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
+            Thread.Sleep(1000);
+            Assert.That(repo.DB.GetObjectByRemoteId("id"), Is.Not.Null);
+            //TODO the pathmatcher does  not match
+            Assert.That(repo.DB.GetObjectByLocalPath(fsInfo), Is.Not.Null);
+        }
+        
+        private RepoInfo CreateRepoInfo(string path) {
+            return new RepoInfo
+            {
+                DisplayName = "name",
+                Address = new Uri("http://example.com"),
+                LocalPath = path,
+                RemotePath = "/"
+            };
+        }
+        
         private class CmisRepoWrapper : CmisRepo {
             public CmisRepoWrapper(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory = false, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null) :
                 base(repoInfo, activityListener, inMemory, sessionFactory, fileSystemInfoFactory)
             {
+                var session = new Mock<ISession>();
+                var remoteObject = new Mock<IFolder>();
+                remoteObject.Setup( r => r.Id).Returns("id");
+                
+                session.Setup( s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
+                this.session = session.Object;
             }
-        }
-        
-        [Test]
-        public void CmisRepoCanBeConstructed (){
-            RepoInfo repoInfo = new RepoInfo
-            {
-                DisplayName = "name",
-                Address = new Uri("http://example.com"),
-                LocalPath = Path.GetTempPath(),
-                RemotePath = "/"
-            };
-            var activityListener = new Mock<IActivityListener>().Object;
-            var sessionFact = new Mock<ISessionFactory>();
-            new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
+            
+            public IMetaDataStorage DB { 
+                get { return this.storage; }
+            }
         }
     }
 }
