@@ -57,7 +57,7 @@ namespace CmisSync.Lib.Sync.Solver
                 if(!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
                 }
-                
+
                 var remoteFolder = remoteId as IFolder;
                 (localFile as IDirectoryInfo).Create();
                 var mappedObject = new MappedObject(remoteFolder);

@@ -119,7 +119,7 @@ namespace CmisSync.Lib.Sync
         /// <summary>
         /// The session factory.
         /// </summary>
-        private SessionFactory sessionFactory;
+        private ISessionFactory sessionFactory;
 
         private ContentChangeEventTransformer transformer;
 
@@ -141,6 +141,8 @@ namespace CmisSync.Lib.Sync
 
         private MetaDataStorage storage;
 
+        private IFileSystemInfoFactory fileSystemFactory;
+
         static CmisRepo()
         {
             DBreezeInitializerSingleton.Init();
@@ -151,18 +153,22 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
-        /// <param name="inMemory">If set to <c>true</c>, creates in memory db.</param>
-        public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory = false)
+        /// <param name="inMemory">If set to <c>true</c> in memory.</param>
+        /// <param name="sessionFactory">Session factory.</param>
+        /// <param name="fileSystemInfoFactory">File system info factory.</param>
+        protected CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory = false, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null)
         {
-            if(repoInfo == null)
+            if (repoInfo == null)
             {
                 throw new ArgumentNullException("Given repoInfo is null");
             }
 
-            if(activityListener == null)
+            if (activityListener == null)
             {
                 throw new ArgumentNullException("Given activityListener is null");
             }
+
+            this.fileSystemFactory = fileSystemInfoFactory == null ? new FileSystemInfoFactory() : fileSystemInfoFactory;
 
             // Initialize local variables
             this.RepoInfo = repoInfo;
@@ -182,7 +188,7 @@ namespace CmisSync.Lib.Sync
             });
 
             // Create session dependencies
-            this.sessionFactory = SessionFactory.NewInstance();
+            this.sessionFactory = sessionFactory == null ? SessionFactory.NewInstance() : sessionFactory;
             this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
 
             // Add ignore file/folder filter
@@ -212,11 +218,11 @@ namespace CmisSync.Lib.Sync
             this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
 
             // Add transformer
-            this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage);
+            this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage, this.fileSystemFactory);
             this.EventManager.AddEventHandler(this.transformer);
 
             // Add local fetcher
-            var localFetcher = new LocalObjectFetcher(this.storage.Matcher);
+            var localFetcher = new LocalObjectFetcher(this.storage.Matcher, this.fileSystemFactory);
             this.EventManager.AddEventHandler(localFetcher);
 
             this.SyncStatusChanged += delegate(SyncStatus status)
@@ -228,6 +234,24 @@ namespace CmisSync.Lib.Sync
                 this.NewSessionCreated();
                 return false;
             }));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class.
+        /// </summary>
+        /// <param name="repoInfo">Repo info.</param>
+        /// <param name="activityListener">Activity listener.</param>
+        public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener) : this(repoInfo, activityListener, false, null, null)
+        {
+        }
+
+        /// <summary>
+        /// Finalizes and releases unmanaged resources and performs other cleanup operations before the
+        /// <see cref="CmisSync.Lib.Sync.CmisRepo"/> is reclaimed by garbage collection.
+        /// </summary>
+        ~CmisRepo()
+        {
+            this.Dispose(false);
         }
 
         /// <summary>
@@ -352,15 +376,6 @@ namespace CmisSync.Lib.Sync
 
                 this.disposed = true;
             }
-        }
-
-        /// <summary>
-        /// Finalizes and releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="CmisSync.Lib.Sync.CmisRepo"/> is reclaimed by garbage collection.
-        /// </summary>
-        ~CmisRepo()
-        {
-            this.Dispose(false);
         }
 
         private bool RepoInfoChanged(ISyncEvent e)
@@ -559,7 +574,7 @@ namespace CmisSync.Lib.Sync
                 this.EventManager.RemoveEventHandler(this.crawler);
             }
 
-            this.crawler = new Crawler(this.Queue, this.session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder, new DirectoryInfoWrapper(new DirectoryInfo(this.LocalPath)));
+            this.crawler = new Crawler(this.Queue, this.session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder, this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath), this.fileSystemFactory);
             this.EventManager.AddEventHandler(this.crawler);
 
             if(this.mechanism != null)
