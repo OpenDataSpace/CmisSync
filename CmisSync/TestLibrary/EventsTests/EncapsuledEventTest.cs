@@ -16,28 +16,33 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
-using CmisSync.Lib.Events;
-
-using NUnit.Framework;
-
-using Moq;
 namespace TestLibrary.EventsTests
-{ 
+{
+    using System;
+
+    using CmisSync.Lib.Events;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class EncapsuledEventTest
     {
         [Test, Category("Fast")]
-        public void ContructorTest() {
+        public void ContructorTest()
+        {
             var inner = new Mock<ISyncEvent>().Object;
             var outer = new EncapsuledEvent(inner);
             Assert.AreEqual(inner, outer.Event);
-            try{
-                new EncapsuledEvent(null);
-                Assert.Fail();
-            }catch(ArgumentNullException) {}
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfEncapsuledEventIsNull()
+        {
+            new EncapsuledEvent(null);
         }
     }
 }
-

@@ -16,21 +16,23 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using log4net;
-using log4net.Config;
-
-using System;
-using System.Threading.Tasks;
-using System.Threading;
-
 
 namespace TestLibrary.EventsTests
 {
-    using NUnit.Framework;
-    using Moq;
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+
+    using log4net;
+    using log4net.Config;
+
+    using Moq;
+
+    using NUnit.Framework;
 
     [TestFixture]
     public class SyncEventQueueTest
@@ -43,84 +45,105 @@ namespace TestLibrary.EventsTests
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
 
-        private static void WaitFor<T>(T obj, Func<T,bool> check){
-            for(int i = 0; i < 50; i++){
-                if (check(obj)) {
-                    return;
-                }
-                Thread.Sleep(100);
-            }
-            Logger.Error("Timeout exceeded!");
-        }
-
         [Test, Category("Fast")]
-        public void EventlessStartStop() {
-            using(SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>("").Object)){
-                WaitFor(queue, (q) => { return !q.IsStopped; } );
+        public void EventlessStartStop()
+        {
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>(string.Empty).Object))
+            {
+                WaitFor(queue, (q) => { return !q.IsStopped; });
                 Assert.False(queue.IsStopped);
                 queue.StopListener();
-                WaitFor(queue, (q) => { return q.IsStopped; } );
+                WaitFor(queue, (q) => { return q.IsStopped; });
                 Assert.True(queue.IsStopped);
             }
         }
 
         [Test, Category("Fast")]
-        public void AddEvent() {
-            var managerMock = new Mock<SyncEventManager>("");
+        public void AddEvent()
+        {
+            var managerMock = new Mock<SyncEventManager>(string.Empty);
             var eventMock = new Mock<ISyncEvent>();
-            using(SyncEventQueue queue = new SyncEventQueue(managerMock.Object)){
+            using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object))
+            {
                 queue.AddEvent(eventMock.Object);
                 queue.AddEvent(eventMock.Object);
                 queue.StopListener();
-                WaitFor(queue, (q) => { return q.IsStopped; } );
+                WaitFor(queue, (q) => { return q.IsStopped; });
                 Assert.True(queue.IsStopped);
             }
+
             managerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Exactly(2));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException( typeof( InvalidOperationException ) )]
-        public void AddEventToStoppedQueue() {
-            using(SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>("").Object)){
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void AddEventToStoppedQueue()
+        {
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>(string.Empty).Object))
+            {
                 queue.StopListener();
-                WaitFor(queue, (q) => { return q.IsStopped; } );
+                WaitFor(queue, (q) => { return q.IsStopped; });
                 queue.AddEvent(new Mock<ISyncEvent>().Object);
             }
         }
 
         [Test, Category("Fast")]
-        public void WaitForStop() {
+        public void WaitForStop()
+        {
             Task t;
-            using(SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>("").Object)) {
-                t = Task.Factory.StartNew(()=>{Thread.Sleep(100); queue.StopListener();});
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>(string.Empty).Object))
+            {
+                t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
                 queue.WaitForStopped();
                 Assert.True(queue.IsStopped);
             }
+
             t.Wait();
         }
 
         [Test, Category("Fast")]
-        public void WaitForStopWithTimeout() {
+        public void WaitForStopWithTimeout()
+        {
             Task t;
-            using(SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>("").Object)) {
-                t = Task.Factory.StartNew(()=>{Thread.Sleep(100); queue.StopListener();});
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>(string.Empty).Object))
+            {
+                t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
                 Assert.False(queue.WaitForStopped(10));
                 Assert.True(queue.WaitForStopped(10000));
                 Assert.True(queue.IsStopped);
             }
+
             t.Wait();
         }
 
         [Test, Category("Fast")]
-        public void WaitForStopWithTimeSpan() {
+        public void WaitForStopWithTimeSpan()
+        {
             Task t;
-            using(SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>("").Object)) {
-                t = Task.Factory.StartNew(()=>{Thread.Sleep(100); queue.StopListener();});
-                Assert.False(queue.WaitForStopped(new TimeSpan(0,0,0,0,10)));
-                Assert.True(queue.WaitForStopped(new TimeSpan(0,0,0,0,500)));
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>(string.Empty).Object))
+            {
+                t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
+                Assert.False(queue.WaitForStopped(new TimeSpan(0, 0, 0, 0, 10)));
+                Assert.True(queue.WaitForStopped(new TimeSpan(0, 0, 0, 0, 500)));
                 Assert.True(queue.IsStopped);
             }
+
             t.Wait();
+        }
+
+        private static void WaitFor<T>(T obj, Func<T, bool> check)
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                if (check(obj))
+                {
+                    return;
+                }
+
+                Thread.Sleep(100);
+            }
+
+            Logger.Error("Timeout exceeded!");
         }
     }
 }

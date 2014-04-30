@@ -16,15 +16,21 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using NUnit.Framework;
-using Moq;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Storage;
 
-namespace TestLibrary.EventsTests {
+namespace TestLibrary.EventsTests
+{
+    using System;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
-    public class FileEventTest {
+    public class FileEventTest
+    {
         [Test, Category("Fast")]
         public void ConstructorTakesIFileInfoInstance()
         {
@@ -39,7 +45,8 @@ namespace TestLibrary.EventsTests {
         }
 
         [Test, Category("Fast")]
-        public void EqualityNull() {
+        public void EqualityNull()
+        {
             var localFile = new Mock<IFileInfo>();
             localFile.Setup(f => f.FullName).Returns("bla");
             var fe = new FileEvent(localFile.Object);
@@ -47,7 +54,8 @@ namespace TestLibrary.EventsTests {
         }
 
         [Test, Category("Fast")]
-        public void EqualitySame() {
+        public void EqualitySame()
+        {
             var localFile = new Mock<IFileInfo>();
             localFile.Setup(f => f.FullName).Returns("bla");
             var fe = new FileEvent(localFile.Object);

@@ -16,19 +16,20 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Events;
-
-using DotCMIS.Exceptions;
-
-using NUnit.Framework;
-
-using Moq;
 
 namespace TestLibrary.EventsTests
 {
+    using System;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Events;
+
+    using DotCMIS.Exceptions;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class ProxyAuthRequiredEventTest
     {
@@ -51,4 +52,3 @@ namespace TestLibrary.EventsTests
         }
     }
 }
-

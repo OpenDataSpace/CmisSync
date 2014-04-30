@@ -16,63 +16,60 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using log4net;
-using log4net.Config;
-
-using System;
-using System.IO;
 
 namespace TestLibrary.EventsTests
 {
-    using NUnit.Framework;
-    using Moq;
+    using System;
+    using System.IO;
+
     using CmisSync.Lib;
-    using CmisSync.Lib.Events;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Events;
+
     using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
 
     [TestFixture]
     public class GenericSyncEventHandlerTest
     {
-
         private int priority = 666;
 
         [Test, Category("Fast")]
-        public void PriorityTest ()
+        public void PriorityTest()
         {
-            var handler = new GenericSyncEventHandler<ISyncEvent> (priority, delegate (ISyncEvent e) {
+            var handler = new GenericSyncEventHandler<ISyncEvent>(this.priority, delegate(ISyncEvent e) {
                 return false;
-            }
-            );
-            Assert.AreEqual (priority, handler.Priority);
+            });
+            Assert.AreEqual(this.priority, handler.Priority);
         }
 
         [Test, Category("Fast")]
-        public void IgnoresUnexpectedEvents ()
+        public void IgnoresUnexpectedEvents()
         {
             bool eventPassed = false;
-            var handler = new GenericSyncEventHandler<FSEvent> (priority, delegate (ISyncEvent e) {
+            var handler = new GenericSyncEventHandler<FSEvent>(this.priority, delegate(ISyncEvent e) {
                 eventPassed = true;
                 return true;
-            }
-            );
-            var wrongEvent = new Mock<ISyncEvent> (MockBehavior.Strict);
-            Assert.IsFalse (handler.Handle (wrongEvent.Object));
-            Assert.IsFalse (eventPassed);
+            });
+            var wrongEvent = new Mock<ISyncEvent>(MockBehavior.Strict);
+            Assert.IsFalse(handler.Handle(wrongEvent.Object));
+            Assert.IsFalse(eventPassed);
         }
 
         [Test, Category("Fast")]
-        public void HandleExpectedEvents ()
+        public void HandleExpectedEvents()
         {
             bool eventPassed = false;
-            var handler = new GenericSyncEventHandler<ConfigChangedEvent> (priority, delegate (ISyncEvent e) {
+            var handler = new GenericSyncEventHandler<ConfigChangedEvent>(this.priority, delegate(ISyncEvent e) {
                 eventPassed = true;
                 return true;
-            }
-            );
-            var correctEvent = new Mock<ConfigChangedEvent> ();
-            Assert.IsTrue (handler.Handle (correctEvent.Object));
-            Assert.IsTrue (eventPassed);
+            });
+            var correctEvent = new Mock<ConfigChangedEvent>();
+            Assert.IsTrue(handler.Handle(correctEvent.Object));
+            Assert.IsTrue(eventPassed);
         }
     }
 }

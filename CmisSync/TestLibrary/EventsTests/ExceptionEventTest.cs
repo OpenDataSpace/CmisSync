@@ -16,16 +16,17 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using CmisSync.Lib.Events;
-
-using NUnit.Framework;
-
-using Moq;
 
 namespace TestLibrary.EventsTests.ExceptionEventsTests
 {
+    using System;
+
+    using CmisSync.Lib.Events;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class BaseExceptionEventTest
     {
@@ -47,7 +48,7 @@ namespace TestLibrary.EventsTests.ExceptionEventsTests
         [Test, Category("Fast")]
         public void ToStringIsImplemented()
         {
-            var exception = new Mock<Exception>(""){CallBase=true}.Object;
+            var exception = new Mock<Exception>(string.Empty) { CallBase = true }.Object;
             var ev = new ExceptionEvent(exception);
             Assert.IsNotNull(ev.ToString());
         }
@@ -65,4 +66,3 @@ namespace TestLibrary.EventsTests.ExceptionEventsTests
         }
     }
 }
-
