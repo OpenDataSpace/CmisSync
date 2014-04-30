@@ -153,6 +153,15 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
+        public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener) : this(repoInfo, activityListener, false, null, null)
+        {
+        }
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class.
+        /// </summary>
+        /// <param name="repoInfo">Repo info.</param>
+        /// <param name="activityListener">Activity listener.</param>
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="sessionFactory">Session factory.</param>
         /// <param name="fileSystemInfoFactory">File system info factory.</param>
@@ -237,17 +246,8 @@ namespace CmisSync.Lib.Sync
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class.
-        /// </summary>
-        /// <param name="repoInfo">Repo info.</param>
-        /// <param name="activityListener">Activity listener.</param>
-        public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener) : this(repoInfo, activityListener, false, null, null)
-        {
-        }
-
-        /// <summary>
-        /// Finalizes and releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="CmisSync.Lib.Sync.CmisRepo"/> is reclaimed by garbage collection.
+        /// Finalizes an instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class and releases unmanaged 
+        /// resources and performs other cleanup operations before the is reclaimed by garbage collection.
         /// </summary>
         ~CmisRepo()
         {
@@ -289,7 +289,7 @@ namespace CmisSync.Lib.Sync
         public SyncEventManager EventManager { get; private set; }
 
         /// <summary>
-        /// Gets or sets whether stopped, to control for machine sleep/wake power management.
+        /// Gets or sets a value indicating whether this Repo is stopped, to control for machine sleep/wake power management.
         /// </summary>
         public bool Stopped { get; set; }
 
