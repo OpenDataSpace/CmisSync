@@ -16,30 +16,34 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using DotCMIS.Client;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Events.Filter;
-
-using NUnit.Framework;
-
-using Moq;
 
 namespace TestLibrary.EventsTests.EventsFilterTests
 {
+    using System;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
+
+    using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class InvalidFolderNameFilterTest
     {
         [Test, Category("Fast"), Category("EventFilter")]
-        public void ConstructorWorksWithQueue() {
+        public void ConstructorWorksWithQueue()
+        {
             var queuemock = new Mock<ISyncEventQueue>();
             new InvalidFolderNameFilter(queuemock.Object);
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsIfQueueIsNull() {
+        public void ConstructorFailsIfQueueIsNull()
+        {
                 new InvalidFolderNameFilter(null);
         }
 
@@ -49,7 +53,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             var queuemock = new Mock<ISyncEventQueue>();
             var documentmock = new Mock<IDocument>();
             int called = 0;
-            queuemock.Setup( q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback( () => called++);
+            queuemock.Setup(q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback(() => called++);
             InvalidFolderNameFilter filter = new InvalidFolderNameFilter(queuemock.Object);
             bool handled = filter.Handle(new FileDownloadRequest(documentmock.Object, "*"));
             Assert.True(handled, "*");
@@ -72,4 +76,3 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         }
     }
 }
-
