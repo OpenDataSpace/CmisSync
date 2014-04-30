@@ -47,12 +47,6 @@ namespace CmisSync.Lib.Storage
             }
         }
 
-        public DateTime LastWriteTimeUtc {
-            get {
-                return original.LastWriteTimeUtc;
-            }
-        }
-
         public DateTime LastWriteTime {
             get {
                 return original.LastWriteTime;
