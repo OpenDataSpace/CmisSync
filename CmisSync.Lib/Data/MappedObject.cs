@@ -57,10 +57,51 @@ namespace CmisSync.Lib.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
         /// </summary>
+        [Obsolete("Must not be used manually. This constructor should be used for serialization only.", true)]
         public MappedObject()
         {
             this.LastContentSize = -1;
-        }       
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
+        /// </summary>
+        /// <param name="name">Name.</param>
+        /// <param name="remoteId">Remote identifier.</param>
+        /// <param name="Type">Object type.</param>
+        /// <param name="parentId">Parent identifier.</param>
+        /// <param name="changeToken">Change token.</param>
+        /// <param name="guid">GUID.</param>
+        /// <param name="desc">The description</param>
+        public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1)
+        {
+            if(string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException("Given name is null or empty");
+            }
+
+            if(string.IsNullOrEmpty(remoteId))
+            {
+                throw new ArgumentNullException("Given remote ID is null");
+            }
+
+            if(type == MappedObjectType.Unkown)
+            {
+                throw new ArgumentException("Given type is unknown but must be set to a known type");
+            }
+            else
+            {
+                this.Type = type;
+            }
+
+            this.Name = name;
+            this.RemoteObjectId = remoteId;
+            this.ParentId = parentId;
+            this.LastChangeToken = changeToken;
+            this.LastContentSize = contentSize;
+        }
+
+      
                
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.

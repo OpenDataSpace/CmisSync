@@ -190,10 +190,7 @@ namespace TestLibrary.IntegrationTests
             path.Setup(p => p.FullName ).Returns(Path.Combine(localRoot, name));
             string id = "id";
             //storage.AddLocalFile(path.Object, id);
-            var mappedObject = new MappedObject();
-            mappedObject.Type = MappedObjectType.Folder;
-            mappedObject.RemoteObjectId = id;
-            mappedObject.Name = name;
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(mappedObject);
             
             var session = new Mock<ISession>();
@@ -223,10 +220,7 @@ namespace TestLibrary.IntegrationTests
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.FullName).Returns(path);
             fsFactory.AddIDirectoryInfo(dirInfo.Object);
-            var mappedObject = new MappedObject();
-            mappedObject.Type = MappedObjectType.Folder;
-            mappedObject.RemoteObjectId = id;
-            mappedObject.Name = name;
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(mappedObject);
             storage.ChangeLogToken = "oldtoken";
 

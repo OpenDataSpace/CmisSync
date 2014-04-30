@@ -52,14 +52,12 @@ namespace CmisSync.Lib.Sync.Solver
                 properties.Add(PropertyIds.CreationDate, string.Empty);
                 properties.Add(PropertyIds.LastModificationDate, string.Empty);
                 IFolder folder = session.CreateFolder(properties, new ObjectId(mappedParent.RemoteObjectId)) as IFolder;
-                MappedObject mappedFolder = new MappedObject
-                {
-                    Name = localDirInfo.Name,
-                    ParentId = mappedParent.RemoteObjectId,
-                    RemoteObjectId = folder.Id,
-                    LastChangeToken = folder.ChangeToken,
-                    Type = MappedObjectType.Folder
-                };
+                MappedObject mappedFolder = new MappedObject(
+                    localDirInfo.Name,
+                    folder.Id,
+                    MappedObjectType.Folder,
+                    mappedParent.RemoteObjectId,
+                    folder.ChangeToken);
                 storage.SaveMappedObject(mappedFolder);
             }
             else if(localFile is IFileInfo)

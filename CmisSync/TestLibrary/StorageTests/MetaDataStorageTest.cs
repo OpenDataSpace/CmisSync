@@ -155,12 +155,9 @@ namespace TestLibrary.StorageTests
             var storage = new MetaDataStorage(this.engine, matcher.Object);
             var folder = Mock.Of<IDirectoryInfo>( f =>
                                                  f.FullName == Path.Combine(Path.GetTempPath(), "a"));
-            var mappedFolder = new MappedObject{
-                Name = "a",
-                ParentId = null,
-                RemoteObjectId = "remoteId",
+            var mappedFolder = new MappedObject("a", "remoteId", MappedObjectType.Folder, null, null)
+            {
                 Guid = Guid.NewGuid(),
-                Type = MappedObjectType.Folder
             };
             storage.SaveMappedObject(mappedFolder);
 
@@ -197,11 +194,7 @@ namespace TestLibrary.StorageTests
         public void GetChildrenReturnsEmptyListIfNoChildrenAreAvailable()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            var folder = new MappedObject{
-                RemoteObjectId = "id",
-                Type = MappedObjectType.Folder,
-                Name = "name"
-            };
+            var folder = new MappedObject("name", "id", MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(folder);
 
             Assert.That(storage.GetChildren(folder).Count == 0);
@@ -228,13 +221,10 @@ namespace TestLibrary.StorageTests
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
             string remoteId = "remoteId";
-            var folder = new MappedObject{
-                ParentId = null,
-                Name = "folder",
+            var folder = new MappedObject("folder", remoteId, MappedObjectType.Folder, null, null)
+            {
                 Description = "desc",
-                RemoteObjectId = remoteId,
                 Guid = Guid.NewGuid(),
-                Type = MappedObjectType.Folder
             };
 
             storage.SaveMappedObject(folder);
@@ -264,11 +254,7 @@ namespace TestLibrary.StorageTests
         {
             string remoteId = "remoteId";
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            var obj = new MappedObject{
-                RemoteObjectId = remoteId,
-                Name = "name",
-                Type = MappedObjectType.Folder
-            };
+            var obj = new MappedObject("name", remoteId, MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(obj);
 
             storage.RemoveObject(obj);
@@ -299,13 +285,7 @@ namespace TestLibrary.StorageTests
             matcher.Setup(m => m.LocalTargetRootPath).Returns(Path.GetTempPath());
             var storage = new MetaDataStorage(this.engine, matcher.Object);
             string id = "remoteId";
-            var rootFolder = new MappedObject
-            {
-                Name = "name",
-                RemoteObjectId = id,
-                ParentId = null,
-                Type = MappedObjectType.Folder
-            };
+            var rootFolder = new MappedObject("name", id, MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(rootFolder);
 
             string path = storage.GetLocalPath(rootFolder);
@@ -335,13 +315,7 @@ namespace TestLibrary.StorageTests
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.RemoteTargetRootPath).Returns("/");
             var storage = new MetaDataStorage(this.engine, matcher.Object);
-            var remoteFolder = new MappedObject
-            {
-                Name = "remoteFolder",
-                RemoteObjectId = "remoteId",
-                ParentId = null,
-                Type = MappedObjectType.Folder
-            };
+            var remoteFolder = new MappedObject("remoteFolder", "remoteId", MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(remoteFolder);
 
             string remotePath = storage.GetRemotePath(remoteFolder);

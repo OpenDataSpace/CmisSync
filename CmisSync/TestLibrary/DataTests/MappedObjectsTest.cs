@@ -16,20 +16,21 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using CmisSync.Lib.Data;
-
-using DotCMIS.Client;
-
-using NUnit.Framework;
-
-using Moq;
-using CmisSync.Lib.Storage;
 
 namespace TestLibrary.DataTests
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     using TestUtils;
     
     public class MappedObjectMockUtils
@@ -59,19 +60,12 @@ namespace TestLibrary.DataTests
 
         private Mock<IFileSystemInfoFactory> createFactoryWithLocalPathInfos()
         {
-            return MappedObjectMockUtils.CreateFsFactory(localRootPath,localRootPathName, localFilePath, localFileName);
+            return MappedObjectMockUtils.CreateFsFactory(this.localRootPath, this.localRootPathName, this.localFilePath, this.localFileName);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorTakesData() {
-            var data = new MappedObject
-            {
-                Name = "name",
-                Description = string.Empty,
-                Guid = Guid.NewGuid(),
-                ParentId = "parentId",
-                Type = MappedObjectType.File
-            };
+            var data = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
 
             var file = new MappedObject(data);
 
@@ -81,22 +75,103 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorSetsDefaultParamsToNull()
         {
-            var file = new MappedObject();
+            var file = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
             Assert.IsNull(file.ChecksumAlgorithmName);
             Assert.IsNull(file.Description);
-            Assert.IsNull(file.LastChangeToken);
             Assert.IsNull(file.LastChecksum);
             Assert.IsNull(file.LastLocalWriteTimeUtc);
             Assert.IsNull(file.LastRemoteWriteTimeUtc);
-            Assert.IsNull(file.Name);
-            Assert.AreEqual(MappedObjectType.Unkown, file.Type);
             Assert.AreEqual(-1, file.LastContentSize);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesName()
+        {
+            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
+            Assert.That(obj.Name, Is.EqualTo("name"));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionOnEmptyName()
+        {
+            new MappedObject(string.Empty, "remoteId", MappedObjectType.File, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfNameIsNull()
+        {
+            new MappedObject(null, "remoteId", MappedObjectType.File, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesRemoteId()
+        {
+            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
+            Assert.That(obj.RemoteObjectId, Is.EqualTo("remoteId"));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionOnEmptyRemoteId()
+        {
+            new MappedObject("name", string.Empty, MappedObjectType.File, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfRemoteIdIsNull()
+        {
+            new MappedObject("name", null, MappedObjectType.File, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void ConstructorThrowsExceptionIfTypeIsUnknown()
+        {
+            new MappedObject("name", "remoteId", MappedObjectType.Unkown, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesFileType()
+        {
+            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
+            Assert.That(obj.Type, Is.EqualTo(MappedObjectType.File));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesFolderType()
+        {
+            var obj = new MappedObject("name", "remoteId", MappedObjectType.Folder, null, null);
+            Assert.That(obj.Type, Is.EqualTo(MappedObjectType.Folder));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesNullParentId()
+        {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null);
+            Assert.That(obj.ParentId, Is.Null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesParentId()
+        {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, "parentId", null);
+            Assert.That(obj.ParentId, Is.EqualTo("parentId"));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesChangeLogToken()
+        {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, "parentId", "changes");
+            Assert.That(obj.LastChangeToken, Is.EqualTo("changes"));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
         public void HashAlgorithmProperty()
         {
-            var file = new MappedObject(new MappedObject{Type = MappedObjectType.File, ChecksumAlgorithmName = "MD5"});
+            var file = new MappedObject("name", "remoteId", MappedObjectType.File, null, null) { ChecksumAlgorithmName = "MD5" };
             Assert.AreEqual("MD5", file.ChecksumAlgorithmName);
 
             file.ChecksumAlgorithmName = "SHA1";
@@ -106,16 +181,15 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast"), Category("MappedObjects")]
         public void DescriptionProperty()
         {
-            var file = new MappedObject(new MappedObject{Type = MappedObjectType.File, Description = "desc"});
+            var file = new MappedObject("name", "remoteId", MappedObjectType.File, null, null) { Description = "desc" };
             Assert.AreEqual("desc", file.Description);
 
             file.Description = "other desc";
             Assert.AreEqual("other desc", file.Description);
         }
 
-
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void IFolderConstructor ()
+        public void IFolderConstructor()
         {
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
@@ -132,4 +206,3 @@ namespace TestLibrary.DataTests
         }
     }
 }
-

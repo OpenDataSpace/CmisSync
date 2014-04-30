@@ -117,11 +117,7 @@ namespace TestLibrary.IntegrationTests
             {
                 string key = "key";
                 string name = "name";
-                var file = new MappedObject{
-                    Name = name,
-                    Type = MappedObjectType.File,
-                    RemoteObjectId = key
-                };
+                var file = new MappedObject(name, key, MappedObjectType.File, null, null);
                 tran.Insert<string, DbCustomSerializer<MappedObject>>("objects", key, file);
                 Assert.That((tran.Select<string, DbCustomSerializer<MappedObject>>("objects", key).Value.Get as MappedObject).Equals(file));
             }
