@@ -16,39 +16,42 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Collections.Generic;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Events.Filter;
-
-using NUnit.Framework;
-
-using Moq;
 
 namespace TestLibrary.EventsTests.EventsFilterTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
+
+    using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class IgnoredFoldersFilterTest
     {
-
         [Test, Category("Fast"), Category("EventFilter")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorExceptionOnNullQueue() {
+        public void ConstructorExceptionOnNullQueue()
+        {
             new IgnoredFoldersFilter(null);
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void NormalConstructor() {
+        public void NormalConstructor()
+        {
             var queue = new Mock<ISyncEventQueue>().Object;
             new IgnoredFoldersFilter(queue);
         }
 
-        [Test,Category("Medium"), Category("EventFilter")]
-        public void AllowCorrectFSEvents() {
+        [Test, Category("Medium"), Category("EventFilter")]
+        public void AllowCorrectFSEvents()
+        {
             var queue = new Mock<ISyncEventQueue>();
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var filter = new IgnoredFoldersFilter(queue.Object);
@@ -60,7 +63,8 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         }
 
         [Test, Category("Medium"), Category("EventFilter")]
-        public void HandleIgnoredFolderNames() {
+        public void HandleIgnoredFolderNames()
+        {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFoldersFilter(queue.Object);
             var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, Path.GetTempPath());
@@ -75,41 +79,43 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void IgnoreFileFSEvents() {
+        public void IgnoreFileFSEvents()
+        {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFoldersFilter(queue.Object);
-            var fileEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, "");
+            var fileEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, string.Empty);
             fileEvent.Setup(e => e.IsDirectory()).Returns(false);
 
             Assert.IsFalse(filter.Handle(fileEvent.Object));
-            fileEvent.VerifyGet( e => e.Path, Times.Once());
+            fileEvent.VerifyGet(e => e.Path, Times.Once());
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void IgnoreNonExsitingFileOrFolderFSEvents() {
+        public void IgnoreNonExsitingFileOrFolderFSEvents()
+        {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFoldersFilter(queue.Object);
             var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, Path.Combine(Path.GetTempPath(), Path.GetTempFileName()));
             folderEvent.Setup(e => e.IsDirectory()).Throws(new FileNotFoundException());
 
             Assert.IsFalse(filter.Handle(folderEvent.Object));
-            folderEvent.VerifyGet( e => e.Path, Times.Once());
+            folderEvent.VerifyGet(e => e.Path, Times.Once());
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void IgnoreFolderMovedFSEvents() {
+        public void IgnoreFolderMovedFSEvents()
+        {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFoldersFilter(queue.Object);
             var moveEvent = new Mock<FSMovedEvent>(" ", " ");
             moveEvent.Setup(e => e.IsDirectory()).Returns(false);
 
             Assert.IsFalse(filter.Handle(moveEvent.Object));
-            moveEvent.VerifyGet( m => m.Path, Times.Once());
-            moveEvent.VerifyGet( m => m.OldPath, Times.Never());
+            moveEvent.VerifyGet(m => m.Path, Times.Once());
+            moveEvent.VerifyGet(m => m.OldPath, Times.Never());
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
     }
 }
-

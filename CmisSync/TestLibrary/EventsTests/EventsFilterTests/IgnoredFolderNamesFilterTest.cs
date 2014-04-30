@@ -16,19 +16,20 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Events.Filter;
-
-using NUnit.Framework;
-
-using Moq;
-using System.IO;
-using System.Collections.Generic;
 
 namespace TestLibrary.EventsTests.EventsFilterTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class IgnoredFolderNamesFilterTest
     {
@@ -59,7 +60,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         [Test, Category("Fast"), Category("EventFilter")]
         public void FilterLetsFSEventsPassIfNoWildcardsAreSet()
         {
-            var fsEvent = new Mock<FSEvent>(WatcherChangeTypes.Created , ".test").Object;
+            var fsEvent = new Mock<FSEvent>(WatcherChangeTypes.Created, ".test").Object;
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
 
@@ -94,7 +95,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         [Test, Category("Fast"), Category("EventFilter")]
         public void FilterFiltersDirectoryFSEventsMatchingWildcard()
         {
-            string path = Path.Combine(Path.GetTempPath() , ".test");
+            string path = Path.Combine(Path.GetTempPath(), ".test");
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
             var fsEvent = new Mock<FSEvent>(WatcherChangeTypes.Deleted, path);
