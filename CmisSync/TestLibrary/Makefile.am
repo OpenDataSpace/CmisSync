@@ -43,6 +43,7 @@ SOURCES =  \
 	EventsTests/SyncEventManagerTest.cs \
 	EventsTests/SyncEventQueueTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
+	IntegrationTests/CmisRepoTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DBreezeTests.cs \

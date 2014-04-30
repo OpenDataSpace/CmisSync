@@ -192,7 +192,7 @@ namespace CmisSync.Lib.Sync
 
             // Create Database connection
             this.db = new DBreezeEngine(new DBreezeConfiguration {
-                DBreezeDataFolderName = inMemory ? null : repoInfo.GetDatabasePath(),
+                DBreezeDataFolderName = inMemory ? "" : repoInfo.GetDatabasePath(),
                 Storage = inMemory ? DBreezeConfiguration.eStorage.MEMORY : DBreezeConfiguration.eStorage.DISK
             });
 
