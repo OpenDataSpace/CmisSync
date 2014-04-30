@@ -49,6 +49,16 @@ namespace CmisSync.Lib
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Utils));
 
         /// <summary>
+        /// Regular expression to check whether a file name is valid or not.
+        /// </summary>
+        private static Regex invalidFileNameRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars()) + "\"?:/\\|<>*") + "]");
+
+        /// <summary>
+        /// Regular expression to check whether a filename is valid or not.
+        /// </summary>
+        private static Regex invalidFolderNameRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidPathChars()) + "\"?:/\\|<>*") + "]");
+
+        /// <summary>
         /// Check whether the current user has write permission to the specified path.
         /// </summary>
         /// <param name="path">Absolut path to be checked for permissions</param>
@@ -179,6 +189,9 @@ namespace CmisSync.Lib
         /// Check whether the file is worth syncing or not.
         /// Files that are not worth syncing include temp files, locks, etc.
         /// </summary>
+        /// <param name="filename"></param>
+        /// <param name="ignoreWildcards"></param>
+        /// <returns></returns>
         public static bool WorthSyncing(string filename, List<string> ignoreWildcards)
         {
             if (null == filename) {
@@ -237,11 +250,6 @@ namespace CmisSync.Lib
             return ret;
         }
 
-        /// <summary>
-        /// Regular expression to check whether a file name is valid or not.
-        /// </summary>
-        private static Regex invalidFileNameRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars()) + "\"?:/\\|<>*") + "]");
-
         public static bool IsInvalidFolderName(string name) 
         {
             return IsInvalidFolderName(name, new List<string>());
@@ -278,11 +286,6 @@ namespace CmisSync.Lib
 
             return ret;
         }
-
-        /// <summary>
-        /// Regular expression to check whether a filename is valid or not.
-        /// </summary>
-        private static Regex invalidFolderNameRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidPathChars()) + "\"?:/\\|<>*") + "]");
 
         /// <summary>
         /// Find an available conflict free filename for this file.
@@ -327,6 +330,8 @@ namespace CmisSync.Lib
         /// Format a file size nicely.
         /// Example: 1048576 becomes "1 MB"
         /// </summary>
+        /// <param name="byteCount">byte count</param>
+        /// <returns>Formatted file size</returns>
         public static string FormatSize(double byteCount)
         {
             if (byteCount >= 1099511627776) {
@@ -370,10 +375,10 @@ namespace CmisSync.Lib
         /// Formats the given double with a leading and tailing zero and appends percent char
         /// </summary>
         /// <returns>
-        /// The percent.
+        /// The formatted percent.
         /// </returns>
         /// <param name='p'>
-        /// P.
+        /// the percentage
         /// </param>
         public static string FormatPercent(double p)
         {
@@ -384,7 +389,7 @@ namespace CmisSync.Lib
         /// Format a file size nicely.
         /// Example: 1048576 becomes "1 MB"
         /// </summary>
-        /// <param name="></param>">
+        /// <param name="byteCount">byte count</param>
         /// <returns>The formatted size</returns>
         public static string FormatSize(long byteCount)
         {
