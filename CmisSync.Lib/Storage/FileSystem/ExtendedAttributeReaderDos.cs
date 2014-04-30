@@ -16,26 +16,34 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Microsoft.Win32.SafeHandles;
 
 namespace CmisSync.Lib.Storage
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Runtime.InteropServices;
+
+    using Microsoft.Win32.SafeHandles;
+
     class ExtendedAttributeReaderDos : IExtendedAttributeReader
     {
 #if ! __MonoCS__
-        [DllImport( "kernel32.dll", SetLastError=true )]
-        private static extern IntPtr CreateFile( string fileName, FILE_ACCESS_RIGHTS access, FileShare share, int securityAttributes,
-                                                FileMode creation, FILE_FLAGS flags, IntPtr templateFile );
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr CreateFile(
+            string fileName,
+            FILE_ACCESS_RIGHTS access,
+            FileShare share,
+            int securityAttributes,
+            FileMode creation,
+            FILE_FLAGS flags,
+            IntPtr templateFile);
 
-        [DllImport( "kernel32.dll", SetLastError=true )]
-        private static extern bool CloseHandle( IntPtr handle );
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CloseHandle(IntPtr handle);
 
-        [DllImport( "kernel32.dll", SetLastError=true )]
-        private static extern bool DeleteFile( string fileName );
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool DeleteFile(string fileName);
 
         private enum FILE_ACCESS_RIGHTS : uint
         {
@@ -58,19 +66,21 @@ namespace CmisSync.Lib.Storage
         }
 #endif
 
-        public string GetExtendedAttribute (string path, string key)
+        public string GetExtendedAttribute(string path, string key)
         {
 #if ! __MonoCS__
-            if(String.IsNullOrEmpty(key))
+            if(string.IsNullOrEmpty(key))
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-            IntPtr fileHandle = CreateFile( String.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_READ, FileShare.Read, 0, FileMode.Open, 0, IntPtr.Zero );
-            TextReader reader = new StreamReader( new FileStream( new SafeFileHandle( fileHandle, true ), FileAccess.Read ));
+
+            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_READ, FileShare.Read, 0, FileMode.Open, 0, IntPtr.Zero);
+            TextReader reader = new StreamReader(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Read));
 
             string result = reader.ReadToEnd();
             reader.Close();
-            CloseHandle( fileHandle );
+            CloseHandle(fileHandle);
+
             // int error = Marshal.GetLastWin32Error();
             return result;
 #else
@@ -78,47 +88,47 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
-        public void SetExtendedAttribute (string path, string key, string value)
+        public void SetExtendedAttribute(string path, string key, string value)
         {
 #if ! __MonoCS__
-            if(String.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(key))
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-            IntPtr fileHandle = CreateFile( String.Format ("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, 0, FileMode.Create, 0, IntPtr.Zero );
-            TextWriter writer = new StreamWriter( new FileStream( new SafeFileHandle( fileHandle, true ), FileAccess.Write ));
+
+            IntPtr fileHandle = CreateFile(string.Format ("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, 0, FileMode.Create, 0, IntPtr.Zero);
+            TextWriter writer = new StreamWriter(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Write));
             writer.Write(value);
             writer.Close();
-            CloseHandle( fileHandle );
+            CloseHandle(fileHandle);
 #else
             throw new WrongPlatformException();
 #endif
         }
 
-        public void RemoveExtendedAttribute (string path, string key)
+        public void RemoveExtendedAttribute(string path, string key)
         {
 #if ! __MonoCS__
-            if(String.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(key))
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-            DeleteFile(String.Format("{0}:{1}", path, key));
+
+            DeleteFile(string.Format("{0}:{1}", path, key));
 #else
             throw new WrongPlatformException();
 #endif
         }
 
-        public List<string> ListAttributeKeys (string path)
+        public List<string> ListAttributeKeys(string path)
         {
-            throw new NotImplementedException ();
+            throw new NotImplementedException();
         }
         
         public bool IsFeatureAvaillable()
         {
-            //TODO implement check (for FAT32)
+            // TODO implement check (for FAT32)
             return true;
         }
-
     }
-
 }

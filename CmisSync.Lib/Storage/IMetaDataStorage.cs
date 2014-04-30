@@ -115,7 +115,7 @@ namespace CmisSync.Lib.Storage
         /// The saved children.
         /// </returns>
         /// <param name='parent'>
-        /// Parent.
+        /// Parent, which should be used to request its children.
         /// </param>
         List<IMappedObject> GetChildren(IMappedObject parent);
     }

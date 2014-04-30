@@ -21,6 +21,9 @@ namespace CmisSync.Lib.Storage
 {
     using System;
 
+    /// <summary>
+    /// Db requeted Entry not found exception.
+    /// </summary>
     public class EntryNotFoundException : Exception
     {
     }

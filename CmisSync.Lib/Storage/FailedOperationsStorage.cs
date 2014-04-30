@@ -16,15 +16,15 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
 namespace CmisSync.Lib.Storage
 {
+    using System;
+
     public class FailedOperationsStorage
     {
-        public FailedOperationsStorage ()
+        public FailedOperationsStorage()
         {
         }
     }
 }
-
