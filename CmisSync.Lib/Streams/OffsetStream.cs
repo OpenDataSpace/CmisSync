@@ -117,7 +117,7 @@ namespace CmisSync.Lib.Streams
         {
             if (length < this.Offset)
             {
-                throw new ArgumentOutOfRangeException(String.Format("Given length {0} is smaller than Offset {1}", length, this.Offset));
+                throw new ArgumentOutOfRangeException(string.Format("Given length {0} is smaller than Offset {1}", length, this.Offset));
             }
 
             this.Stream.SetLength(length - this.Offset);

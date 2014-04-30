@@ -128,7 +128,7 @@ namespace CmisSync.Lib.Streams
                 long pos = this.Stream.Position;
                 if (pos != this.transmissionEvent.Status.ActualPosition)
                 {
-                    this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs () {ActualPosition = pos});
+                    this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos });
                 }
 
                 return pos;
@@ -139,7 +139,7 @@ namespace CmisSync.Lib.Streams
                 this.Stream.Position = value;
                 if (value != this.transmissionEvent.Status.ActualPosition)
                 {
-                    this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs () {ActualPosition = value});
+                    this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = value });
                 }
             }
         }
@@ -156,7 +156,7 @@ namespace CmisSync.Lib.Streams
         public override long Seek(long offset, SeekOrigin origin)
         {
             long result = this.Stream.Seek(offset, origin);
-            this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs () {ActualPosition = this.Stream.Position});
+            this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = this.Stream.Position });
             return result;
         }
 
@@ -176,7 +176,7 @@ namespace CmisSync.Lib.Streams
         {
             if (this.transmissionEvent.Status.Aborting.GetValueOrDefault())
             {
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs{ Aborting = false, Aborted = true });
+                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = false, Aborted = true });
                 throw new ContentTasks.AbortException(this.transmissionEvent.Path);
             }
 
@@ -196,7 +196,7 @@ namespace CmisSync.Lib.Streams
             this.Stream.SetLength(value);
             if (this.transmissionEvent.Status.Length == null || value > (long)this.transmissionEvent.Status.Length)
             {
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs{Length = value});
+                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Length = value });
             }
         }
 
@@ -258,7 +258,7 @@ namespace CmisSync.Lib.Streams
             if (diff.Seconds >= 1)
             {
                 long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs{ActualPosition = pos, BitsPerSecond = result});
+                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos, BitsPerSecond = result });
                 this.bytesTransmittedSinceLastSecond = 0;
                 this.start = this.start + diff;
                 this.blockingDetectionTimer.Stop();
@@ -266,7 +266,7 @@ namespace CmisSync.Lib.Streams
             }
             else
             {
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs{ActualPosition = pos});
+                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos });
             }
         }
     }
