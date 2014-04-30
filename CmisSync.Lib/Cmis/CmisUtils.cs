@@ -21,19 +21,19 @@ namespace CmisSync.Lib.Cmis
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Web;
-    using System.IO;
 
     using CmisSync.Lib.Config;
 
     using DotCMIS;
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
     using DotCMIS.Data;
     using DotCMIS.Enums;
     using DotCMIS.Exceptions;
-    using DotCMIS.Client;
-    using DotCMIS.Client.Impl;
 
     using log4net;
 
@@ -57,11 +57,10 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         public CmisServer(Uri url, Dictionary<string, string> repositories)
         {
-            Url = url;
-            Repositories = repositories;
+            this.Url = url;
+            this.Repositories = repositories;
         }
     }
-
 
     /// <summary>
     /// Useful CMIS methods.
@@ -70,7 +69,6 @@ namespace CmisSync.Lib.Cmis
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisUtils));
 
-        
         /// <summary>
         /// Try to find the CMIS server associated to any URL.
         /// Users can provide the URL of the web interface, and we have to return the CMIS URL
@@ -88,8 +86,10 @@ namespace CmisSync.Lib.Cmis
             }
             catch (DotCMIS.Exceptions.CmisRuntimeException e)
             {
-                if (e.Message == "ConnectFailure")
+                if (e.Message == "ConnectFailure") {
                     return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, null), new CmisServerNotFoundException(e.Message, e));
+                }
+
                 firstException = e;
             }
             catch (Exception e)
@@ -97,6 +97,7 @@ namespace CmisSync.Lib.Cmis
                 // Save first Exception and try other possibilities.
                 firstException = e;
             }
+
             if (repositories != null)
             {
                 // Found!
@@ -123,8 +124,9 @@ namespace CmisSync.Lib.Cmis
                 "/cmis/atom"
             };
             string bestUrl = null;
+
             // Try all suffixes
-            for (int i=0; i < suffixes.Length; i++)
+            for (int i = 0; i < suffixes.Length; i++)
             {
                 string fuzzyUrl = prefix + suffixes[i];
                 Logger.Info("Sync | Trying with " + fuzzyUrl);
@@ -148,29 +150,29 @@ namespace CmisSync.Lib.Cmis
                     // Do nothing, try other possibilities.
                     Logger.Debug(e.Message);
                 }
+
                 if (repositories != null)
                 {
                     // Found!
-                    return new Tuple<CmisServer, Exception>( new CmisServer(new Uri(fuzzyUrl), repositories), null);
+                    return new Tuple<CmisServer, Exception>(new CmisServer(new Uri(fuzzyUrl), repositories), null);
                 }
             }
 
             // Not found. Return also the first exception to inform the user correctly
-            return new Tuple<CmisServer,Exception>(new CmisServer(bestUrl==null?credentials.Address:new Uri(bestUrl), null), firstException);
+            return new Tuple<CmisServer, Exception>(new CmisServer(bestUrl == null ? credentials.Address : new Uri(bestUrl), null), firstException);
         }
-
 
         /// <summary>
         /// Get the list of repositories of a CMIS server
         /// Each item contains id + 
         /// </summary>
         /// <returns>The list of repositories. Each item contains the identifier and the human-readable name of the repository.</returns>
-        static public Dictionary<string,string> GetRepositories(Credentials.ServerCredentials credentials)
+        static public Dictionary<string, string> GetRepositories(Credentials.ServerCredentials credentials)
         {
-            Dictionary<string,string> result = new Dictionary<string,string>();
+            Dictionary<string, string> result = new Dictionary<string, string>();
 
             // If no URL was provided, return empty result.
-            if (credentials.Address == null )
+            if (credentials.Address == null)
             {
                 return result;
             }
@@ -227,13 +229,16 @@ namespace CmisSync.Lib.Cmis
             return result;
         }
 
-
         /// <summary>
         /// Get the sub-folders of a particular CMIS folder.
         /// </summary>
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
-        static public string[] GetSubfolders(string repositoryId, string path,
-            string address, string user, string password)
+        static public string[] GetSubfolders(
+            string repositoryId,
+            string path,
+            string address,
+            string user,
+            string password)
         {
             List<string> result = new List<string>();
 
@@ -255,7 +260,7 @@ namespace CmisSync.Lib.Cmis
             }
             catch (Exception ex)
             {
-                Logger.Warn(String.Format("CmisUtils | exception when session GetObjectByPath for {0}: {1}", path, Utils.ToLogString(ex)));
+                Logger.Warn(string.Format("CmisUtils | exception when session GetObjectByPath for {0}: {1}", path, Utils.ToLogString(ex)));
                 return result.ToArray();
             }
 
@@ -271,9 +276,9 @@ namespace CmisSync.Lib.Cmis
             {
                 result.Add(subfolder.Path);
             }
+
             return result.ToArray();
         }
-
 
         public class NodeTree
         {
@@ -286,22 +291,17 @@ namespace CmisSync.Lib.Cmis
             {
                 this.Path = folder.Path;
                 this.Name = folder.Name;
-                if (depth == 0)
-                {
-                    this.Finished = false;
-                }
-                else
-                {
-                    this.Finished = true;
-                }
+                this.Finished = !(depth == 0);
 
-                if(trees != null)
+                if(trees != null) {
                     foreach (ITree<IFileableCmisObject> tree in trees)
                     {
                         Folder f = tree.Item as Folder;
-                        if (f != null)
+                        if (f != null) {
                             this.Children.Add(new NodeTree(tree.Children, f, depth - 1));
+                        }
                     }
+                }
             }
         }
 
@@ -311,7 +311,6 @@ namespace CmisSync.Lib.Cmis
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
         static public NodeTree GetSubfolderTree(Credentials.CmisRepoCredentials credentials, string path, int depth)
         {
-
             // Connect to the CMIS repository.
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
             cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
@@ -330,7 +329,7 @@ namespace CmisSync.Lib.Cmis
             }
             catch (Exception ex)
             {
-                Logger.Warn(String.Format("CmisUtils | exception when session GetObjectByPath for {0}: {1}", path, Utils.ToLogString(ex)));
+                Logger.Warn(string.Format("CmisUtils | exception when session GetObjectByPath for {0}: {1}", path, Utils.ToLogString(ex)));
                 throw;
             }
 
@@ -383,6 +382,7 @@ namespace CmisSync.Lib.Cmis
                     metadata.Add(property.Id, new string[] { property.DisplayName, mode, property.ValueAsString });
                 }
             }
+
             return metadata;
         }
 
@@ -418,7 +418,7 @@ namespace CmisSync.Lib.Cmis
             }
             catch (Exception e)
             {
-                Logger.Debug(String.Format("Failed to set last modified date for the local file: {0}", filepath), e);
+                Logger.Debug(string.Format("Failed to set last modified date for the local file: {0}", filepath), e);
             }
         }
 
@@ -436,7 +436,8 @@ namespace CmisSync.Lib.Cmis
         /// </param>
         public static void SetLastModifiedDate(IFolder remoteFolder, string folderpath, Dictionary<string, string[]> metadata)
         {
-            try{
+            try
+            {
                 if (remoteFolder.LastModificationDate != null)
                 {
                     Directory.SetLastWriteTimeUtc(folderpath, (DateTime)remoteFolder.LastModificationDate);
@@ -453,24 +454,26 @@ namespace CmisSync.Lib.Cmis
             }
             catch(Exception e)
             {
-                Logger.Debug(String.Format("Failed to set last modified date for the local folder: {0}", folderpath), e);
+                Logger.Debug(string.Format("Failed to set last modified date for the local folder: {0}", folderpath), e);
             }
         }
-
 
         public static List<string> GetLocalPaths(IDocument remoteDococument, string remoteTargetFolder, string localTargetFolder) {
             List<string> results = new List<string>();
             foreach (string remotePath in remoteDococument.Paths) {
-                if(remotePath.Length <= remoteTargetFolder.Length)
+                if(remotePath.Length <= remoteTargetFolder.Length) {
                     continue;
+                }
+
                 string relativePath = remotePath.Substring(remoteTargetFolder.Length);
-                if (relativePath[0] == '/')
-                {
+                if (relativePath[0] == '/') {
                     relativePath = relativePath.Substring(1);
                 }
+
                 string localPath = Path.Combine(remoteTargetFolder, relativePath).Replace('/', Path.DirectorySeparatorChar);
                 results.Add(localPath);
             }
+
             return results;
         }
     }
