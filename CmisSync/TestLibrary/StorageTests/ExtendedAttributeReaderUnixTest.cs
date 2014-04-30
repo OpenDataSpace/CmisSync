@@ -192,8 +192,6 @@ namespace TestLibrary.StorageTests
         public void CheckAvaillable()
         {
             Directory.CreateDirectory(path);
-            string key = "test";
-            string value = "value";
             var reader = new ExtendedAttributeReaderUnix();
             reader.IsFeatureAvaillable();
         }
