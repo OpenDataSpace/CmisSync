@@ -33,38 +33,17 @@ namespace TestLibrary.DataTests
 
     using TestUtils;
     
-    public class MappedObjectMockUtils
-    {
-        public static Mock<IFileSystemInfoFactory> CreateFsFactory(string localRootPath, string localRootPathName, string localFilePath = null, string localFileName = null)
-        {
-            var factory = new Mock<IFileSystemInfoFactory>();
-            var dirinfo = new Mock<IDirectoryInfo>();
-            dirinfo.Setup(dir => dir.Name).Returns(localRootPathName);
-            dirinfo.Setup(dir => dir.Exists).Returns(true);
-            factory.Setup(f => f.CreateDirectoryInfo(It.Is<string>(path => path == localRootPath))).Returns(dirinfo.Object);
-            var fileInfo = new Mock<IFileInfo>();
-            fileInfo.Setup (file => file.Name).Returns(localFileName);
-            fileInfo.Setup (file => file.Exists).Returns(true);
-            factory.Setup(f => f.CreateFileInfo(It.Is<string>(path => path == localFilePath))).Returns(fileInfo.Object);
-            return factory;
-        }
-    }
-
     [TestFixture]
-    public class MappedObjectTest
+    public class MappedObjectsTest
     {
         private readonly string localRootPathName = "folder";
         private readonly string localRootPath = Path.Combine("local", "test", "folder");
         private readonly string localFileName = "file.test";
         private readonly string localFilePath = Path.Combine("local", "test", "folder", "file.test");
 
-        private Mock<IFileSystemInfoFactory> createFactoryWithLocalPathInfos()
-        {
-            return MappedObjectMockUtils.CreateFsFactory(this.localRootPath, this.localRootPathName, this.localFilePath, this.localFileName);
-        }
-
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesData() {
+        public void ConstructorTakesData()
+        {
             var data = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
 
             var file = new MappedObject(data);
@@ -203,6 +182,28 @@ namespace TestLibrary.DataTests
             Assert.That(mappedObject.ParentId, Is.EqualTo(parentId), "ParentId incorrect");
             Assert.That(mappedObject.LastChangeToken, Is.EqualTo(lastChangeToken), "LastChangeToken incorrect");
             Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
+        }
+
+        private Mock<IFileSystemInfoFactory> CreateFactoryWithLocalPathInfos()
+        {
+            return MappedObjectMockUtils.CreateFsFactory(this.localRootPath, this.localRootPathName, this.localFilePath, this.localFileName);
+        }
+
+        public class MappedObjectMockUtils
+        {
+            public static Mock<IFileSystemInfoFactory> CreateFsFactory(string localRootPath, string localRootPathName, string localFilePath = null, string localFileName = null)
+            {
+                var factory = new Mock<IFileSystemInfoFactory>();
+                var dirinfo = new Mock<IDirectoryInfo>();
+                dirinfo.Setup(dir => dir.Name).Returns(localRootPathName);
+                dirinfo.Setup(dir => dir.Exists).Returns(true);
+                factory.Setup(f => f.CreateDirectoryInfo(It.Is<string>(path => path == localRootPath))).Returns(dirinfo.Object);
+                var fileInfo = new Mock<IFileInfo>();
+                fileInfo.Setup(file => file.Name).Returns(localFileName);
+                fileInfo.Setup(file => file.Exists).Returns(true);
+                factory.Setup(f => f.CreateFileInfo(It.Is<string>(path => path == localFilePath))).Returns(fileInfo.Object);
+                return factory;
+            }
         }
     }
 }
