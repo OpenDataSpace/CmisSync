@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Sync.Solver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -34,8 +35,22 @@ namespace CmisSync.Lib.Sync.Solver
     {
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
-            // Rename local object
-            throw new NotImplementedException();
+            // Rename local folder
+            if(remoteId is IFolder)
+            {
+                IFolder remoteFolder = remoteId as IFolder;
+                IDirectoryInfo dirInfo = localFile as IDirectoryInfo;
+                IMappedObject obj = storage.GetObjectByRemoteId(remoteFolder.Id);
+                dirInfo.MoveTo(Path.Combine(dirInfo.Parent.FullName, remoteFolder.Name));
+                obj.Name = remoteFolder.Name;
+                obj.LastChangeToken = remoteFolder.ChangeToken;
+                obj.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
+                storage.SaveMappedObject(obj);
+            }
+            else if(remoteId is IDocument)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
