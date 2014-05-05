@@ -69,9 +69,8 @@ namespace TestLibrary.IntegrationTests
             repo.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("http://example.com")));
             var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
             Thread.Sleep(1000);
-            Assert.That(repo.DB.GetObjectByRemoteId("id"), Is.Not.Null);
 
-            // TODO the pathmatcher does  not match
+            Assert.That(repo.DB.GetObjectByRemoteId("id"), Is.Not.Null);
             Assert.That(repo.DB.GetObjectByLocalPath(fsInfo), Is.Not.Null);
         }
         
