@@ -16,11 +16,18 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Events
 {
+    /// <summary>
+    /// Every sync event must implement this interface
+    /// </summary>
     public interface ISyncEvent
     {
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.ISyncEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.ISyncEvent"/>.</returns>
         string ToString(); 
     }
 }
-

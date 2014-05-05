@@ -16,16 +16,24 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using DotCMIS.Exceptions;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+
+    using DotCMIS.Exceptions;
+
+    /// <summary>
+    /// Permission denied event.
+    /// </summary>
     public class PermissionDeniedEvent : ExceptionEvent
     {
-        public PermissionDeniedEvent (DotCMIS.Exceptions.CmisPermissionDeniedException e) : base(e)
-        {}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.PermissionDeniedEvent"/> class.
+        /// </summary>
+        /// <param name="e">thrown permission denied exception</param>
+        public PermissionDeniedEvent(DotCMIS.Exceptions.CmisPermissionDeniedException e) : base(e)
+        {
+        }
     }
-
 }

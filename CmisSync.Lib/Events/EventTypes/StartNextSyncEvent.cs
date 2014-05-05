@@ -16,11 +16,12 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// This event should be used by scheduler to periodically start sync processes.
     /// If any inconsitancy is detected, it could also be used by the algorithm itself to force a full sync on the next sync execution.
@@ -35,11 +36,13 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// <c>true</c> if full sync requested; otherwise, <c>false</c>.
         /// </value>
-        public bool FullSyncRequested { get {return this.fullSyncRequested; }}
-        
-        public string LastTokenOnServer {get; set;}
+        public bool FullSyncRequested {
+            get { return this.fullSyncRequested; }
+        }
 
-        public StartNextSyncEvent (bool fullSyncRequested = false)
+        public string LastTokenOnServer { get; set; }
+
+        public StartNextSyncEvent(bool fullSyncRequested = false)
         {
             this.fullSyncRequested = fullSyncRequested;
         }
@@ -50,10 +53,9 @@ namespace CmisSync.Lib.Events
         /// <returns>
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.StartNextSyncEvent"/>.
         /// </returns>
-        public override string ToString ()
+        public override string ToString()
         {
-            return string.Format ("[StartNextSyncEvent: FullSyncRequested={0}]", FullSyncRequested);
+            return string.Format("[StartNextSyncEvent: FullSyncRequested={0}]", this.fullSyncRequested);
         }
     }
 }
-

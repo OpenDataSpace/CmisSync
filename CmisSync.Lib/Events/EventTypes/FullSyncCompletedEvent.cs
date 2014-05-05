@@ -16,14 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+
     public class FullSyncCompletedEvent : EncapsuledEvent
     {
-        public FullSyncCompletedEvent (StartNextSyncEvent startEvent) : base (startEvent)
-        { }
+        public FullSyncCompletedEvent(StartNextSyncEvent startEvent) : base(startEvent)
+        {
+        }
 
         /// <summary>
         /// Completed sync requested event
@@ -35,4 +37,3 @@ namespace CmisSync.Lib.Events
         }
     }
 }
-

@@ -16,13 +16,17 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using DotCMIS.Client;
-using DotCMIS.Enums;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+
+    using DotCMIS.Client;
+    using DotCMIS.Enums;
+
+    /// <summary>
+    /// Remote event.
+    /// </summary>
     public class RemoteEvent : ISyncEvent
     {
         private IChangeEvent change;
@@ -33,17 +37,22 @@ namespace CmisSync.Lib.Events
 
         public DotCMIS.Enums.ChangeType? Type { get { return this.change.ChangeType; } }
 
-        public RemoteEvent (IChangeEvent change)
+        public RemoteEvent(IChangeEvent change)
         {
-            if(change == null)
+            if(change == null) {
                 throw new ArgumentNullException("The given change event must not be null");
+            }
+
             this.change = change;
         }
 
-        public override string ToString ()
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RemoteEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RemoteEvent"/>.</returns>
+        public override string ToString()
         {
-            return string.Format ("[RemoteEvent: ChangeType={0} ObjectId={1}]", Type, ObjectId);
+            return string.Format("[RemoteEvent: ChangeType={0} ObjectId={1}]", this.Type, this.ObjectId);
         }
     }
 }
-
