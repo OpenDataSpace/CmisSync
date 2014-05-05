@@ -68,7 +68,7 @@ namespace TestLibrary.IntegrationTests
             var repo = new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
             repo.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("http://example.com")));
             var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
-            Thread.Sleep(1000);
+            repo.singleStepQueue.Run();
 
             Assert.That(repo.DB.GetObjectByRemoteId("id"), Is.Not.Null);
             Assert.That(repo.DB.GetObjectByLocalPath(fsInfo), Is.Not.Null);
@@ -94,7 +94,11 @@ namespace TestLibrary.IntegrationTests
 
                 session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
                 this.session = session.Object;
+                this.singleStepQueue = new SingleStepEventQueue(this.EventManager);
+                this.Queue = singleStepQueue;
             }
+
+            public SingleStepEventQueue singleStepQueue;
             
             public IMetaDataStorage DB { 
                 get { return this.storage; }

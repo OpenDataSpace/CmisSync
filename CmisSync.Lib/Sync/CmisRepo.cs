@@ -279,7 +279,7 @@ namespace CmisSync.Lib.Sync
         /// Use this to notifiy events for this repository.
         /// </summary>
         /// <value>The queue.</value>
-        public IDisposableSyncEventQueue Queue { get; private set; }
+        public IDisposableSyncEventQueue Queue { get; protected set; }
 
         /// <summary>
         /// Gets the event manager for this repository.
