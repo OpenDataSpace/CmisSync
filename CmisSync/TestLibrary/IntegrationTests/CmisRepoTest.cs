@@ -49,7 +49,7 @@ namespace TestLibrary.IntegrationTests
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
         
-        [Test]
+        [Test, Category("Fast")]
         public void CmisRepoCanBeConstructed() {
             string path = Path.GetTempPath();
             RepoInfo repoInfo = this.CreateRepoInfo(path);
@@ -58,7 +58,7 @@ namespace TestLibrary.IntegrationTests
             new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
         }
         
-        [Test]
+        [Test, Category("Fast")]
         public void RootFolderGetsAddedToStorage() {
             string path = Path.GetTempPath();
             RepoInfo repoInfo = this.CreateRepoInfo(path);
