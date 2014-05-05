@@ -10,8 +10,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TestLibrary</RootNamespace>
     <AssemblyName>TestLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <UseMSBuildEngine>False</UseMSBuildEngine>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,17 +30,26 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug_MonoMac|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;__COCOA__</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_MonoMac|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;__COCOA__</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\Moq.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\Extras\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Extras\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,35 +58,92 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\xunit.dll</HintPath>
-    </Reference>
     <Reference Include="xunit.extensions">
       <HintPath>lib\xunit.extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Moq">
+      <HintPath>lib\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\Extras\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit">
+      <HintPath>lib\xunit.dll</HintPath>
+    </Reference>
+    <Reference Include="XamMac">
+      <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="CmisDatabaseTest.cs" />
-    <Compile Include="CmisSyncLibUtilsTest.cs" />
-    <Compile Include="CmisSyncTests.cs" />
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="EncodingTest.cs" />
     <Compile Include="LocalFilesystemActivityGenerator.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WatcherTest.cs" />
-    <Compile Include="ChunkedStreamTest.cs" />
-    <Compile Include="SyncEventQueueTest.cs" />
-    <Compile Include="SyncEventManagerTest.cs" />
-    <Compile Include="EventTypesTest.cs" />
     <Compile Include="DebugLoggingHandlerTest.cs" />
     <Compile Include="FSDeletionHandlerTest.cs" />
+    <Compile Include="StreamTests\OffsetStreamTest.cs" />
+    <Compile Include="StreamTests\ChunkedStreamTest.cs" />
+    <Compile Include="StreamTests\BandwidthLimitedStreamTest.cs" />
+    <Compile Include="StreamTests\ProgressStreamTest.cs" />
+    <Compile Include="EventsTests\EventTypesTest.cs" />
+    <Compile Include="EventsTests\SyncEventManagerTest.cs" />
+    <Compile Include="EventsTests\SyncEventQueueTest.cs" />
+    <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\InvalidFolderNameFilterTest.cs" />
+    <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
+    <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
+    <Compile Include="StorageTests\PersistentStorageTest.cs" />
+    <Compile Include="IntegrationTests\CmisSyncTests.cs" />
+    <Compile Include="IntegrationTests\DotCMISTests.cs" />
+    <Compile Include="IntegrationTests\ContentChangeIT.cs" />
+    <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
+    <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
+    <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
+    <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
+    <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
+    <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
+    <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
+    <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
+    <Compile Include="SyncStrategiesTests\ContentChangeEventAccumulatorTest.cs" />
+    <Compile Include="SyncStrategiesTests\ContentChangeEventTransformerTest.cs" />
+    <Compile Include="SyncStrategiesTests\SingleStepEventQueue.cs" />
+    <Compile Include="SyncStrategiesTests\SingleStepEventQueueTest.cs" />
+    <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
+    <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
+    <Compile Include="EventsTests\EncapsuledEventTest.cs" />
+    <Compile Include="DataTests\PathMatcherTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
+    <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />
+    <Compile Include="SyncStrategiesTests\SituationDetectionTests\RemoteSituationDetectionTest.cs" />
+    <Compile Include="DataTests\MappedObjectsTest.cs" />
+    <Compile Include="ContentTasksTests\ChunkedDownloaderTest.cs" />
+    <Compile Include="ContentTasksTests\SimpleFileDownloaderTest.cs" />
+    <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
+    <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
+    <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
+    <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
+    <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
+    <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
+    <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
+    <Compile Include="EventsTests\ExceptionEventTest.cs" />
+    <Compile Include="TestUtils\MockUtil.cs" />
+    <Compile Include="TestUtils\ObservableHandler.cs" />
+    <Compile Include="TestUtils\ObservableHandlerTest.cs" />
+    <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
+    <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
+    <Compile Include="MoqExtensions\MoqExtensions.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectAddedTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\GenericHandleDoublicatedEventsFilterTest.cs" />
+    <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
+    <Compile Include="LegacyCodeTests\RepoInfoTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
-      <Project>{2C914413-B31C-4362-93C7-1AE34F09112A}</Project>
-      <Name>CmisSync.Lib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
       <Project>{2C914413-B31C-4362-93C7-1AE34F09112A}</Project>
       <Name>CmisSync.Lib</Name>
@@ -87,7 +153,7 @@
       <Name>log4net.vs2010</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Extras\OpenDataSpaceDotCMIS\DotCMIS\DotCMIS.csproj">
-      <Project>{529ef90f-a34c-4426-a4f9-65113ac23841}</Project>
+      <Project>{529EF90F-A34C-4426-A4F9-65113AC23841}</Project>
       <Name>DotCMIS</Name>
     </ProjectReference>
   </ItemGroup>
@@ -97,9 +163,11 @@
     <None Include="test-servers.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!--
   <PropertyGroup>
     <PreBuildEvent>Copy "$(SolutionDir)..\..\extras\sqlite-netFx40-binary-Win32-2010-1.0.84.0\SQLite.Interop.dll" "$(ProjectDir)$(OutDir)SQLite.Interop.dll"</PreBuildEvent>
   </PropertyGroup>
+  -->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -107,4 +175,34 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="StreamTests\" />
+    <Folder Include="IntegrationTests\" />
+    <Folder Include="EventsTests\" />
+    <Folder Include="EventsTests\EventsFilterTests\" />
+    <Folder Include="StorageTests\" />
+    <Folder Include="SyncStrategiesTests\" />
+    <Folder Include="DataTests\" />
+    <Folder Include="SyncStrategiesTests\SituationDetectionTests\" />
+    <Folder Include="ContentTasksTests\" />
+    <Folder Include="AuthenticationProviderTests\" />
+    <Folder Include="UtilsTests\" />
+    <Folder Include="SyncStrategiesTests\SolverTests\" />
+    <Folder Include="LegacyCodeTests\" />
+  </ItemGroup>
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="true" RelativeConfigureInPath="../..">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
+          <DeployFilesVar />
+          <ResourcesVar />
+          <OthersVar />
+          <GacRefVar Name="LIBS" Prefix="-r:" />
+          <AsmRefVar Name="LIBS" Prefix="-r:" />
+          <ProjectRefVar Name="LIBS" Prefix="-r:" />
+        </MonoDevelop.Autotools.MakefileInfo>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>

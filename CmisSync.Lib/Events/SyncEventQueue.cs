@@ -6,7 +6,7 @@ using log4net;
 
 namespace CmisSync.Lib.Events
 {
-    public class SyncEventQueue : IDisposable {
+    public class SyncEventQueue : ISyncEventQueue, IDisposable {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
 
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
@@ -49,12 +49,12 @@ namespace CmisSync.Lib.Events
         }
 
         /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
-        public void AddEvent(ISyncEvent newEvent) {
+        public virtual void AddEvent(ISyncEvent newEvent) {
             if(alreadyDisposed) {
                 throw new ObjectDisposedException("SyncEventQueue", "Called AddEvent on Disposed object");
             }
             this.queue.Add(newEvent);
-        } 
+        }
 
         public SyncEventQueue(SyncEventManager manager) {
             if(manager == null) {
@@ -70,12 +70,24 @@ namespace CmisSync.Lib.Events
                 return;
             }
             this.queue.CompleteAdding();
-        }            
+        }
         
         public bool IsStopped {
-            get { 
+            get {
                 return this.consumer.IsCompleted; 
             }
+        }
+
+        public void WaitForStopped() {
+            this.consumer.Wait();
+        }
+
+        public bool WaitForStopped(TimeSpan timeout) {
+            return this.consumer.Wait(timeout);
+        }
+
+        public bool WaitForStopped(int milisecondsTimeout) {
+            return this.consumer.Wait(milisecondsTimeout);
         }
 
         public void Dispose() {

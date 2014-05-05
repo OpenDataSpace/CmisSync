@@ -43,14 +43,13 @@ namespace TestLibrary
             if (Directory.Exists(TestFolder))
             {
                 Directory.Delete(TestFolder, true);
-                Console.WriteLine("Deleted TestFolder");
             }
             File.Delete(oldnameOut);
             File.Delete(newnameOut);
         }
 
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestEnableRaisingEvents()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -99,7 +98,7 @@ namespace TestLibrary
             }
         };
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestEnableEvent()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -159,7 +158,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestRemove()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -251,7 +250,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeCreated()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -313,7 +312,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeChanged()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -378,8 +377,7 @@ namespace TestLibrary
             //Assert.Fail("TODO");
         }
 
-        [Ignore]
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeDeleted()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -408,8 +406,8 @@ namespace TestLibrary
                 {
                     Assert.Contains(names[i], changeList);
                     Assert.AreEqual(
-                        watcher.GetChangeType(names[i]),
-                        Watcher.ChangeTypes.Deleted);
+                        Watcher.ChangeTypes.Deleted,
+                        watcher.GetChangeType(names[i]));
                 }
             }
         }
@@ -437,7 +435,7 @@ namespace TestLibrary
         private static readonly string oldname = Path.Combine(TestFolder, "test.old");
         private static readonly string newname = Path.Combine(TestFolder, "test.new");
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeForMoveInsideSyncedFolder()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -460,7 +458,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeForMoveIntoSyncedFolder()
         {
             using (Watcher watcher = new Watcher(TestFolder))
@@ -476,7 +474,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeForMoveOutOfSyncedFolder()
         {
 
@@ -507,7 +505,7 @@ namespace TestLibrary
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestChangeTypeForMoveInNotSyncedFolder()
         {
 

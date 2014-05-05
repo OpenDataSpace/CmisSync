@@ -22,7 +22,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using log4net;
-using CmisSync.Lib.Cmis;
+
 using CmisSync.Lib.Sync;
 
 namespace CmisSync.Lib

@@ -16,6 +16,8 @@
 
 
 using System;
+using System.Diagnostics;
+using CmisSync.Notifications;
 
 #if HAVE_APP_INDICATOR
 using AppIndicator;
@@ -23,12 +25,16 @@ using AppIndicator;
 using Gtk;
 using Mono.Unix;
 using System.Globalization;
-
+using CmisSync.Lib.Events;
+using System.Collections.Generic;
+using log4net;
 using CmisSync.Lib;
 
 namespace CmisSync {
 
     public class StatusIcon {
+
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(StatusIcon));
 
         public StatusIconController Controller = new StatusIconController ();
 
@@ -59,7 +65,7 @@ namespace CmisSync {
             this.status_icon        = new Gtk.StatusIcon ();
             this.status_icon.Pixbuf = this.animation_frames [0];
 
-            this.status_icon.Activate  += ShowMenu; // Primary mouse button click
+            this.status_icon.Activate  += OpenFolderDelegate(null); // Primary mouse button click shows default folder
             this.status_icon.PopupMenu += ShowMenu; // Secondary mouse button click
 #endif
 
@@ -113,26 +119,47 @@ namespace CmisSync {
 
             Controller.UpdateSuspendSyncFolderEvent += delegate (string reponame) {
                 if(!IsHandleCreated) return;
-                Application.Invoke(delegate
+                Application.Invoke(delegate {
+                    foreach (var menuItem in this.menu.Children) 
                     {
-                        foreach (var menuItem in this.menu.Children) 
+                        if(menuItem is CmisSyncMenuItem && reponame.Equals(((CmisSyncMenuItem)menuItem).RepoName))
                         {
-                            if(menuItem is CmisSyncMenuItem && reponame.Equals(((CmisSyncMenuItem)menuItem).RepoName))
+                            foreach (RepoBase aRepo in Program.Controller.Repositories)
                             {
-                                foreach (RepoBase aRepo in Program.Controller.Repositories)
+                                if (aRepo.Name.Equals(reponame))
                                 {
-                                    if (aRepo.Name.Equals(reponame))
-                                    {
-                                        Menu submenu = (Menu)((CmisSyncMenuItem)menuItem).Submenu;
-                                        CmisSyncMenuItem pauseItem = (CmisSyncMenuItem)submenu.Children[1];
-                                        setSyncItemState(pauseItem, aRepo.Status);
-                                        break;
-                                    }
+                                    Menu submenu = (Menu)((CmisSyncMenuItem)menuItem).Submenu;
+                                    CmisSyncMenuItem pauseItem = (CmisSyncMenuItem)submenu.Children[1];
+                                    setSyncItemState(pauseItem, aRepo.Status);
+                                    break;
                                 }
-                                break;
                             }
+                            break;
                         }
-                    });
+                    }
+                });
+            };
+
+            Controller.UpdateTransmissionMenuEvent += delegate {
+                if(!IsHandleCreated) return;
+                Application.Invoke( delegate {
+                    List<FileTransmissionEvent> transmissionEvents = Program.Controller.ActiveTransmissions();
+                    if(transmissionEvents.Count != 0) {
+                        this.state_item.Sensitive = true;
+
+                        Menu submenu = new Menu();
+                        this.state_item.Submenu = submenu;
+
+                        foreach(FileTransmissionEvent e in transmissionEvents) {
+                            ImageMenuItem transmission_sub_menu_item = new TransmissionMenuItem(e);
+                            submenu.Add(transmission_sub_menu_item);
+                            state_item.ShowAll();
+                        }
+                    } else {
+                        this.state_item.Submenu = null;
+                        this.state_item.Sensitive = false;
+                    }
+                });
             };
         }
 
@@ -160,8 +187,7 @@ namespace CmisSync {
                 Sensitive = false
             };
             this.menu.Add (this.state_item);
-
-            this.menu.Add (new SeparatorMenuItem ());
+            this.menu.Add (new SeparatorMenuItem());
 
             // Folders Menu
             if (Controller.Folders.Length > 0) {
@@ -211,7 +237,6 @@ namespace CmisSync {
                     remove_folder_from_sync_item.Activated += RemoveFolderFromSyncDelegate(folder_name);
 
                     submenu.Add(open_localfolder_item);
-                    //submenu.Add(browse_remotefolder_item);
                     submenu.Add(suspend_folder_item);
                     submenu.Add(edit_folder_item);
                     submenu.Add(new SeparatorMenuItem());
@@ -244,7 +269,7 @@ namespace CmisSync {
 
             // About Menu
             MenuItem about_item = new MenuItem (
-                    CmisSync.Properties_Resources.About);
+                    String.Format(CmisSync.Properties_Resources.About, Properties_Resources.ApplicationName));
             about_item.Activated += delegate {
                 Controller.AboutClicked ();
             };
@@ -352,5 +377,56 @@ namespace CmisSync {
         }
     }
 
+    public class TransmissionMenuItem : ImageMenuItem {
 
+        public FileTransmissionType Type { get; private set; }
+        public string Path { get; private set; }
+        private string TypeString;
+        public TransmissionMenuItem (FileTransmissionEvent e) : base(e.Type.ToString()){
+            Path = e.Path;
+            Type = e.Type;
+            TypeString = Type.ToString();
+            switch(Type) {
+            case FileTransmissionType.DOWNLOAD_NEW_FILE:
+                Image = new Image (UIHelpers.GetIcon ("Downloading", 16));
+                TypeString = Properties_Resources.NotificationFileDownload;
+                break;
+            case FileTransmissionType.UPLOAD_NEW_FILE:
+                Image = new Image (UIHelpers.GetIcon ("Uploading", 16));
+                TypeString = Properties_Resources.NotificationFileUpload;
+                break;
+            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
+                TypeString = Properties_Resources.NotificationFileUpdateLocal;
+                Image = new Image (UIHelpers.GetIcon ("Updating", 16));
+                break;
+            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
+                TypeString = Properties_Resources.NotificationFileUpdateRemote;
+                Image = new Image (UIHelpers.GetIcon ("Updating", 16));
+                break;
+            }
+
+            double percent = (e.Status.Percent==null)? 0:(double) e.Status.Percent;
+            Label text = this.Child as Label;
+            if(text != null)
+                text.Text = String.Format("{0}: {1} ({2})", TypeString, System.IO.Path.GetFileName(Path), CmisSync.Lib.Utils.FormatPercent(percent));
+            NotificationUtils.NotifyAsync(String.Format("{0}: {1}", TypeString, System.IO.Path.GetFileName(Path)), Path);
+            e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
+                percent = (status.Percent != null)? (double) status.Percent: 0;
+                long? bitsPerSecond = status.BitsPerSecond;
+                if( status.Percent != null && bitsPerSecond != null && text != null) {
+                    Application.Invoke(delegate {
+                        text.Text = String.Format("{0}: {1} ({2} {3})",
+                                                  TypeString,
+                                                  System.IO.Path.GetFileName(Path),
+                                                  CmisSync.Lib.Utils.FormatPercent(percent),
+                                                  CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
+                    });
+                }
+            };
+            this.Activated += delegate(object sender, EventArgs args) {
+                Utils.OpenFolder(System.IO.Directory.GetParent(Path).FullName);
+            };
+            Sensitive = true;
+        }
+    }
 }

@@ -28,6 +28,7 @@ SOURCES =  \
 	CmisTree/StatusCellRenderer.cs \
 	Controller.cs \
 	Edit.cs \
+	Notification/NotificationUtils.cs \
 	Setup.cs \
 	SetupWindow.cs \
 	Spinner.cs \

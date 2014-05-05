@@ -121,10 +121,10 @@
     <value>Add</value>
   </data>
   <data name="AddARemoteFolder" xml:space="preserve">
-    <value>Add a remote folder…</value>
+    <value>Add a Remote Folder…</value>
   </data>
   <data name="AddFolders" xml:space="preserve">
-    <value>Adding synchronized folders to DataSpace Sync</value>
+    <value>Adding synchronized folders to {0}</value>
   </data>
   <data name="AddingFolder" xml:space="preserve">
     <value>Adding Folder</value>
@@ -136,7 +136,7 @@
     <value>Cancel</value>
   </data>
   <data name="CmisSyncCreates" xml:space="preserve">
-    <value>DataSpace Sync creates a special folder on your computer where the documents are synchronized.</value>
+    <value>{0} creates a special folder on your computer where the documents are synchronized.</value>
   </data>
   <data name="Continue" xml:space="preserve">
     <value>Continue</value>
@@ -169,13 +169,13 @@
     <value>Finish</value>
   </data>
   <data name="FolderAlreadyExist" xml:space="preserve">
-    <value>A folder already in the DataSpace Sync root folder</value>
+    <value>A folder already in the {0} root folder</value>
   </data>
   <data name="Help" xml:space="preserve">
     <value>Help</value>
   </data>
   <data name="Intro" xml:space="preserve">
-    <value>DataSpace Sync allows you to keep in sync with any CMIS-compliant enterprise server, and use your documents even when offline.</value>
+    <value>{0} allows you to keep in sync with any CMIS-compliant enterprise server, and use your documents even when offline.</value>
   </data>
   <data name="InvalidFolderName" xml:space="preserve">
     <value>The folder name {0} is invalid. Special characters are not allowed.</value>
@@ -208,19 +208,19 @@
     <value>Skip Tutorial</value>
   </data>
   <data name="Sorry" xml:space="preserve">
-    <value>Sorry, DataSpace Sync can not find a CMIS server at this address.
+    <value>Sorry, {0} can not find a CMIS server at this address.
 Please ask your server administrator for the CMIS endpoint URL.
-If you are sure about the address, open it in a browser and post
-the resulting XML on the cmissync forum.</value>
+If you are sure about the address, open it in a browser and send us 
+the resulting XML.</value>
   </data>
   <data name="Startup" xml:space="preserve">
-    <value>Add DataSpace Sync to startup items</value>
+    <value>Add {0} to startup items</value>
   </data>
   <data name="StatusIcon" xml:space="preserve">
     <value>The status icon is here to help</value>
   </data>
   <data name="StatusIconShows" xml:space="preserve">
-    <value>DataSpace Sync's status icon shows the syncing progress, and provides easy access to your folders.</value>
+    <value>{0}'s status icon shows the syncing progress, and provides easy access to your folders.</value>
   </data>
   <data name="Synchronization" xml:space="preserve">
     <value>Synchronization</value>
@@ -232,7 +232,7 @@ the resulting XML on the cmissync forum.</value>
     <value>User</value>
   </data>
   <data name="Welcome" xml:space="preserve">
-    <value>Welcome to DataSpace Sync!</value>
+    <value>Welcome to {0}!</value>
   </data>
   <data name="WhatsNext" xml:space="preserve">
     <value>What's happening next?</value>
@@ -250,7 +250,7 @@ the resulting XML on the cmissync forum.</value>
     <value>You can easily add a new CMIS folder at any time.</value>
   </data>
   <data name="YouCanFind" xml:space="preserve">
-    <value>You can find them in your DataSpace Sync folder.</value>
+    <value>You can find them in your {0} folder.</value>
   </data>
   <data name="ChangeRepoPath" xml:space="preserve">
     <value>Change the local path of this repository:</value>
@@ -271,7 +271,7 @@ the resulting XML on the cmissync forum.</value>
     <value>Open local folder</value>
   </data>
   <data name="About" xml:space="preserve">
-    <value>About DataSpace Sync</value>
+    <value>About {0}</value>
   </data>
   <data name="ViewLog" xml:space="preserve">
     <value>View Log</value>
@@ -320,8 +320,8 @@ Please check the protocol part of the given URL. Maybe your server is not capabl
   <data name="RemoveSyncTitle" xml:space="preserve">
     <value>Remove folder from sync</value>
   </data>
-  <data name="Credits" xml:space="preserve">
-    <value>Credits</value>
+  <data name="Credentials" xml:space="preserve">
+    <value>Credentials</value>
   </data>
   <data name="NewVersionAvailable" xml:space="preserve">
     <value>A newer version ({0}) is available!</value>
@@ -365,5 +365,68 @@ This could lead to a lot of conflict files!</value>
   </data>
   <data name="ConfirmExistingLocalFolderTitle" xml:space="preserve">
     <value>Selected folder "{0}" as sync target</value>
+  </data>
+  <data name="NotificationChangeCredentials" xml:space="preserve">
+    <value>Click to update the credentials</value>
+  </data>
+  <data name="NotificationCredentialsError" xml:space="preserve">
+    <value>Failed to log in on {0}</value>
+  </data>
+  <data name="NotificationFileDownload" xml:space="preserve">
+    <value>Download file</value>
+  </data>
+  <data name="NotificationFileStatusAborted" xml:space="preserve">
+    <value>aborted</value>
+  </data>
+  <data name="NotificationFileStatusCompleted" xml:space="preserve">
+    <value>completed</value>
+  </data>
+  <data name="NotificationFileStatusFailed" xml:space="preserve">
+    <value>failed</value>
+  </data>
+  <data name="NotificationFileUpdateLocal" xml:space="preserve">
+    <value>Update local file</value>
+  </data>
+  <data name="NotificationFileUpdateRemote" xml:space="preserve">
+    <value>Update remote file</value>
+  </data>
+  <data name="NotificationFileUpload" xml:space="preserve">
+    <value>Upload file</value>
+  </data>
+  <data name="NetworkProxyLogin" xml:space="preserve">
+    <value>Require Login</value>
+  </data>
+  <data name="NetworkProxySelectCustom" xml:space="preserve">
+    <value>Custom Proxy</value>
+  </data>
+  <data name="NetworkProxySelectNone" xml:space="preserve">
+    <value>No Proxy</value>
+  </data>
+  <data name="NetworkProxySelectSystem" xml:space="preserve">
+    <value>System Default Proxy</value>
+  </data>
+  <data name="NetworkProxyServer" xml:space="preserve">
+    <value>Proxy Server</value>
+  </data>
+  <data name="ApplicationName" xml:space="preserve">
+    <value>DataSpace Sync</value>
+  </data>
+  <data name="CmisWebAddress" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Credits" xml:space="preserve">
+    <value>Credits</value>
+  </data>
+  <data name="SettingProxy" xml:space="preserve">
+    <value>Proxy</value>
+  </data>
+  <data name="LoginCheck" xml:space="preserve">
+    <value>logging in</value>
+  </data>
+  <data name="LoginFailed" xml:space="preserve">
+    <value>login failed: {0}</value>
+  </data>
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>login successful</value>
   </data>
 </root>

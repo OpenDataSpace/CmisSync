@@ -28,6 +28,7 @@ using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
 using log4net;
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Events.Filter;
 
 #if __COCOA__
 using Edit = CmisSync.EditWizardController;
@@ -87,6 +88,8 @@ namespace CmisSync
         public event ShowSetupWindowEventHandler ShowSetupWindowEvent = delegate { };
         public delegate void ShowSetupWindowEventHandler(PageType page_type);
 
+        public event Action ShowSettingWindowEvent = delegate { };
+
         public event Action ShowAboutWindowEvent = delegate { };
 
         public event FolderFetchedEventHandler FolderFetched = delegate { };
@@ -106,6 +109,15 @@ namespace CmisSync
 
         public event AlertNotificationRaisedEventHandler AlertNotificationRaised = delegate { };
         public delegate void AlertNotificationRaisedEventHandler(string title, string message);
+
+        public delegate void ShowChangePasswordEventHandler(string reponame);
+        public event ShowChangePasswordEventHandler ShowChangePassword = delegate { };
+
+        public delegate void SuccessfulLoginEventHandler (string reponame);
+        public event SuccessfulLoginEventHandler SuccessfulLogin = delegate { };
+
+        public delegate void ProxyAuthRequiredEventHandler (string reponame);
+        public event ProxyAuthRequiredEventHandler ProxyAuthReqired = delegate { };
 
 
         /// <summary>
@@ -209,7 +221,7 @@ namespace CmisSync
         }
 
         public List<FileTransmissionEvent> ActiveTransmissions() {
-            return this.activitiesManager.ActiveTransmissions.ToList<FileTransmissionEvent>();
+            return this.activitiesManager.ActiveTransmissionsAsList();
         }
 
 
@@ -229,20 +241,6 @@ namespace CmisSync
             {
                 ConfigManager.CurrentConfig.Notifications = true;
             }
-
-            // Watch the CmisSync folder
-            this.watcher = new FileSystemWatcher()
-            {
-                Filter = "*",
-                IncludeSubdirectories = false,
-                Path = FoldersPath
-            };
-
-            watcher.Deleted += OnFolderActivity;
-            watcher.Created += OnFolderActivity;
-            watcher.Renamed += OnFolderActivity;
-
-            watcher.EnableRaisingEvents = true;
         }
 
 
@@ -254,7 +252,6 @@ namespace CmisSync
             if (firstRun)
             {
                 ShowSetupWindow(PageType.Setup);
-
             }
             else
             {
@@ -288,6 +285,20 @@ namespace CmisSync
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 return false;
             }));
+            repo.EventManager.AddEventHandler(new GenericHandleDoublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
+            repo.EventManager.AddEventHandler(new GenericHandleDoublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
+            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<ProxyAuthRequiredEvent>(0, delegate(ISyncEvent e) {
+                ProxyAuthReqired(repositoryInfo.Name);
+                return true;
+            }));
+            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<PermissionDeniedEvent>(0, delegate(ISyncEvent e) {
+                ShowChangePassword(repositoryInfo.Name);
+                return true;
+            }));
+            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>( 0, delegate(ISyncEvent e) {
+                SuccessfulLogin(repositoryInfo.Name);
+                return false;
+            }));
             this.repositories.Add(repo);
             repo.Initialize();
         }
@@ -319,6 +330,16 @@ namespace CmisSync
         }
 
         public void EditRepositoryFolder(string reponame)
+        {
+            EditRepository (reponame, Edit.EditType.EditFolder);
+        }
+
+        public void EditRepositoryCredentials(string reponame)
+        {
+            EditRepository (reponame, Edit.EditType.EditCredentials);
+        }
+
+        private void EditRepository(string reponame,Edit.EditType type)
         {
             Config.SyncConfig.Folder folder;
 
@@ -355,7 +376,7 @@ namespace CmisSync
                         oldIgnores.Add(ignore.Path);
                     }
                 }
-                edit = new Edit(credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
+                edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
                 edits.Add(reponame, edit);
 
                 edit.Controller.SaveFolderEvent += delegate
@@ -367,34 +388,13 @@ namespace CmisSync
                         {
                             folder.IgnoredFolders.Add(new Config.IgnoredFolder() { Path = ignore });
                         }
+                        folder.ObfuscatedPassword = edit.Credentials.Password.ObfuscatedPassword;
                         ConfigManager.CurrentConfig.Save();
-                        foreach (string oldIgnore in oldIgnores)
+                        foreach (RepoBase repo in this.repositories)
                         {
-                            if (String.IsNullOrEmpty(edit.Ignores.Find(
-                                delegate(string ignore)
-                                {
-                                    if (ignore == oldIgnore || oldIgnore.StartsWith(ignore + "/"))
-                                    {
-                                        return true;
-                                    }
-                                    else
-                                    {
-                                        return false;
-                                    }
-                                })))
+                            if (repo.Name == reponame)
                             {
-                                Logger.Info(String.Format("The remote folder {0} should be synced after editing ignore folders", oldIgnore));
-                                lock (this.repo_lock)
-                                {
-                                    foreach (RepoBase repo in this.repositories)
-                                    {
-                                        if (repo.Name == reponame)
-                                        {
-                                            repo.Queue.AddEvent(new RepoConfigChangedEvent(folder.GetRepoInfo()));
-                                        }
-                                    }
-                                }
-                                break;
+                                repo.Queue.AddEvent(new RepoConfigChangedEvent(folder.GetRepoInfo()));
                             }
                         }
                     }
@@ -470,6 +470,52 @@ namespace CmisSync
                             Logger.Debug("Requested to resume sync of repo " + aRepo.Name);
                         }
                     }
+                }
+            }
+        }
+
+        public void StopAll()
+        {
+            lock (this.repo_lock)
+            {
+                foreach (RepoBase aRepo in this.repositories)
+                {
+                    aRepo.Stopped = true;
+                }
+                Logger.Debug("Start to stop all active file transmissions");
+                do {
+                    List<FileTransmissionEvent> activeList = activitiesManager.ActiveTransmissionsAsList();
+                    foreach (FileTransmissionEvent transmissionEvent in activeList)
+                    {
+                        if (transmissionEvent.Status.Aborted.GetValueOrDefault())
+                        {
+                            continue;
+                        }
+                        if (!transmissionEvent.Status.Aborting.GetValueOrDefault())
+                        {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborting=true});
+                        }
+                    }
+                    if (activeList.Count > 0)
+                    {
+                        Thread.Sleep(100);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                } while (true);
+                Logger.Debug("Finish to stop all active file transmissions");
+            }
+        }
+
+        public void StartAll()
+        {
+            lock (this.repo_lock)
+            {
+                foreach (RepoBase aRepo in this.repositories)
+                {
+                    aRepo.Stopped = false;
                 }
             }
         }
@@ -557,20 +603,6 @@ namespace CmisSync
         }
 
         /// <summary>
-        /// Reacts when a local change occurs.
-        /// Not implemented yet, see https://github.com/nicolas-raoul/CmisSync/issues/122
-        /// </summary>
-        /// <param name="o">File that has changed</param>
-        /// <param name="args">Nature of the change</param>
-        public void OnFolderActivity(object o, FileSystemEventArgs args)
-        {
-            // TODO
-            if (Directory.Exists(args.FullPath) && args.ChangeType == WatcherChangeTypes.Created)
-                return;
-        }
-
-
-        /// <summary>
         /// Create a new CmisSync synchronized folder.
         /// </summary>
         public void StartFetcher(string name, Uri address, string user, string password, string repository, string remote_path, string local_path,
@@ -586,7 +618,7 @@ namespace CmisSync
             repoInfo.PollInterval = 5000;
             repoInfo.MaxUploadRetries = 2;
             foreach (string ignore in ignoredPaths)
-                repoInfo.addIgnorePath(ignore);
+                repoInfo.AddIgnorePath(ignore);
 
             fetcher = new Fetcher(repoInfo, activityListenerAggregator);
             this.FinishFetcher();
@@ -617,12 +649,36 @@ namespace CmisSync
         }
 
 
+        public void AddRepo(RepoInfo info)
+        {
+            lock (this.repo_lock)
+            {
+                // Add folder to XML config file.
+                ConfigManager.CurrentConfig.AddFolder(info);
+                // Initialize in the UI.
+                AddRepository(info);
+            }
+
+            // Update UI.
+            FolderListChanged();
+        }
+
+
         /// <summary>
         /// Show first-time wizard.
         /// </summary>
         public void ShowSetupWindow(PageType page_type)
         {
             ShowSetupWindowEvent(page_type);
+        }
+
+
+        /// <summary>
+        /// Show setting dialog
+        /// </summary>
+        public void ShowSettingWindow()
+        {
+            ShowSettingWindowEvent();
         }
 
 

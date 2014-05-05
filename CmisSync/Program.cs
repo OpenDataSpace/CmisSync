@@ -24,6 +24,7 @@ using log4net;
 using log4net.Config;
 using CmisSync.Lib.Sync;
 using System.Net;
+using System.Diagnostics;
 
 [assembly: CLSCompliant(true)]
 
@@ -82,7 +83,7 @@ namespace CmisSync
             }
 
             Logger.Info("Starting. Version: " + CmisSync.Lib.Backend.Version);
-
+            Trace.Listeners.Add(new CmisSync.Lib.Cmis.DotCMISLogListener());
             if (args.Length != 0 && !args[0].Equals("start") &&
                 Backend.Platform != PlatformID.MacOSX &&
                 Backend.Platform != PlatformID.Win32NT)
@@ -90,8 +91,8 @@ namespace CmisSync
 
                 string n = Environment.NewLine;
 
-                Console.WriteLine(n +
-                    "DataSpace Sync is a collaboration and sharing tool that is" + n +
+                Console.WriteLine(n + Properties_Resources.ApplicationName +
+                    " is a collaboration and sharing tool that is" + n +
                     "designed to keep things simple and to stay out of your way." + n +
                     n +
                     "Version: " + CmisSync.Lib.Backend.Version + n +
@@ -109,9 +110,11 @@ namespace CmisSync
             // Only allow one instance of CmisSync (on Windows)
             if (!program_mutex.WaitOne(0, false))
             {
-                Logger.Error("DataSpace Sync is already running.");
+                Logger.Error(Properties_Resources.ApplicationName + " is already running.");
                 Environment.Exit(-1);
             }
+
+            CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
 
             // Increase the number of concurrent requests to each server,
             // as an unsatisfying workaround until this DotCMIS bug 632 is solved.

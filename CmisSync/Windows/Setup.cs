@@ -106,8 +106,8 @@ namespace CmisSync
                             {
                                 // UI elements.
 
-                                Header = Properties_Resources.Welcome;
-                                Description = Properties_Resources.Intro;
+                                Header = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
+                                Description = String.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
 
                                 Button cancel_button = new Button()
                                 {
@@ -166,7 +166,7 @@ namespace CmisSync
                                             // UI elements.
 
                                             Header = Properties_Resources.WhatsNext;
-                                            Description = Properties_Resources.CmisSyncCreates;
+                                            Description = String.Format(Properties_Resources.CmisSyncCreates,Properties_Resources.ApplicationName);
 
                                             WPF.Image slide_image = new WPF.Image()
                                             {
@@ -254,7 +254,9 @@ namespace CmisSync
                                             // UI elements.
 
                                             Header = Properties_Resources.StatusIcon;
-                                            Description = Properties_Resources.StatusIconShows;
+                                            Description = String.Format(
+                                                Properties_Resources.StatusIconShows,
+                                                Properties_Resources.ApplicationName);
 
 
                                             Button continue_button = new Button()
@@ -292,7 +294,7 @@ namespace CmisSync
                                         {
                                             // UI elements.
 
-                                            Header = Properties_Resources.AddFolders;
+                                            Header = String.Format(Properties_Resources.AddFolders, Properties_Resources.ApplicationName);
                                             Description = Properties_Resources.YouCan;
 
 
@@ -311,7 +313,7 @@ namespace CmisSync
 
                                             CheckBox check_box = new CheckBox()
                                             {
-                                                Content = Properties_Resources.Startup,
+                                                Content = String.Format(Properties_Resources.Startup, Properties_Resources.ApplicationName),
                                                 IsChecked = true
                                             };
 
@@ -363,7 +365,7 @@ namespace CmisSync
                                 TextBox address_box = new TextBox()
                                 {
                                     Width = 420,
-                                    Text = (Controller.PreviousAddress!=null)?Controller.PreviousAddress.ToString():""
+                                    Text = (Controller.PreviousAddress!=null)?Controller.PreviousAddress.ToString():String.Empty
                                 };
 
                                 TextBlock address_help_label = new TextBlock()
@@ -436,6 +438,11 @@ namespace CmisSync
                                     Width = 200
                                 };
 
+                                CircularProgressBar logging_check = new CircularProgressBar()
+                                {
+                                    Visibility = System.Windows.Visibility.Hidden
+                                };
+
                                 TextBlock password_help_label = new TextBlock()
                                 {
                                     FontSize = 11,
@@ -491,6 +498,10 @@ namespace CmisSync
                                 ContentCanvas.Children.Add(password_box);
                                 Canvas.SetTop(password_box, 180);
                                 Canvas.SetRight(password_box, 30);
+
+                                ContentCanvas.Children.Add(logging_check);
+                                Canvas.SetTop(logging_check, 180);
+                                Canvas.SetRight(logging_check, 30);
 
                                 ContentCanvas.Children.Add(password_help_label);
                                 Canvas.SetTop(password_help_label, 215);
@@ -571,6 +582,7 @@ namespace CmisSync
                                 continue_button.Click += delegate
                                 {
                                     // Show wait cursor
+                                    logging_check.Visibility = System.Windows.Visibility.Visible;
                                     System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
 
                                     // Try to find the CMIS server (asynchronously)
@@ -595,33 +607,12 @@ namespace CmisSync
 
                                     // Hide wait cursor
                                     System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+                                    logging_check.Visibility = System.Windows.Visibility.Hidden;
 
                                     if (Controller.repositories == null)
                                     {
                                         // Could not retrieve repositories list from server, show warning.
-                                        string warning = "";
-                                        string message = result.Item2.Message;
-                                        Exception e = result.Item2;
-                                        if (e is CmisPermissionDeniedException)
-                                        {
-                                            warning = Properties_Resources.LoginFailedForbidden;
-                                        }
-                                        else if (e is CmisServerNotFoundException)
-                                        {
-                                            warning = Properties_Resources.ConnectFailure;
-                                        }
-                                        else if (e.Message == "SendFailure" && cmisServer.Url.Scheme.StartsWith("https"))
-                                        {
-                                            warning = Properties_Resources.SendFailureHttps;
-                                        }
-                                        else if (e.Message == "TrustFailure")
-                                        {
-                                            warning = Properties_Resources.TrustFailure;
-                                        }
-                                        else
-                                        {
-                                            warning = message + Environment.NewLine + Properties_Resources.Sorry;
-                                        }
+                                        string warning = Controller.GetConnectionsProblemWarning(cmisServer, result.Item2);
                                         address_error_label.Text = warning;
                                         address_error_label.Visibility = Visibility.Visible;
                                     }
@@ -1026,7 +1017,7 @@ namespace CmisSync
                                 // UI elements.
 
                                 Header = Properties_Resources.Ready;
-                                Description = Properties_Resources.YouCanFind;
+                                Description = String.Format(Properties_Resources.YouCanFind, Controller.saved_local_path);
 
                                 Button finish_button = new Button()
                                 {

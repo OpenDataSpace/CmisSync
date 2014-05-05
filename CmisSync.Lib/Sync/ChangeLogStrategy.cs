@@ -32,6 +32,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private void ChangeLogSync(IFolder remoteFolder)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("ChangeLogSync({0})", remoteFolder.Name)))
+                {
                 // Get last change log token on server side.
                 session.Binding.GetRepositoryService().GetRepositoryInfos(null);    //  refresh
                 string lastTokenOnServer = session.Binding.GetRepositoryService().GetRepositoryInfo(session.RepositoryInfo.Id, null).LatestChangeLogToken;
@@ -73,6 +75,7 @@ namespace CmisSync.Lib.Sync
                     bool success = true;
                     foreach (IChangeEvent change in changes.ChangeEventList)
                     {
+                        sleepWhileSuspended();
                         try
                         {
                             switch (change.ChangeType)
@@ -132,6 +135,7 @@ namespace CmisSync.Lib.Sync
                     }
                 }
                 while (!lastTokenOnServer.Equals(lastTokenOnClient));
+                }
             }
 
 
@@ -171,9 +175,9 @@ namespace CmisSync.Lib.Sync
                 }
                 if (remoteDocument != null)
                 {
-                    if (!Utils.WorthSyncing(remoteDocument.Name))
+                    if (!Utils.WorthSyncing(remoteDocument.Name, ConfigManager.CurrentConfig.IgnoreFileNames))
                     {
-                        Logger.Info("Change in remote unworth syncing file: " + remoteDocument.Paths);
+                        Logger.Info("Change in remote unworth syncing file: " + remoteDocument.Paths[0]);
                         return true;
                     }
                     if (remoteDocument.Paths.Count == 0)
@@ -191,7 +195,7 @@ namespace CmisSync.Lib.Sync
                     remoteParent = remoteFolder.FolderParent;
                     foreach (string name in remotePath.Split('/'))
                     {
-                        if (!String.IsNullOrEmpty(name) && Utils.IsInvalidFolderName(name))
+                        if (!String.IsNullOrEmpty(name) && Utils.IsInvalidFolderName(name, ConfigManager.CurrentConfig.IgnoreFolderNames))
                         {
                             Logger.Info(String.Format("Change in illegal syncing path name {0}: {1}", name, remotePath));
                             return true;
@@ -205,7 +209,7 @@ namespace CmisSync.Lib.Sync
                     return true;    // The change is not under the folder we care about.
                 }
 
-                if (this.repoinfo.isPathIgnored(remotePath))
+                if (this.repoinfo.IsPathIgnored(remotePath))
                 {
                     Logger.Info("Change in ignored path: " + remotePath);
                     return true;
@@ -333,6 +337,16 @@ namespace CmisSync.Lib.Sync
                 string savedDocumentPath = database.GetFilePath(change.ObjectId);
                 if (null != savedDocumentPath)
                 {
+                    string relativePath = Path.GetDirectoryName(savedDocumentPath).Substring(this.repoinfo.TargetDirectory.Length);
+                    string[] names = relativePath.Split(Path.DirectorySeparatorChar);
+                    foreach(string name in names)
+                    {
+                        if(!String.IsNullOrEmpty(name) && Utils.IsInvalidFolderName(name, ConfigManager.CurrentConfig.IgnoreFolderNames))
+                        {
+                            Logger.Debug(String.Format("Ignore remote deletion of \"{0}\" because \"{1}\" is ignored locally", savedDocumentPath, name));
+                            return true;
+                        }
+                    }
                     Logger.Info("Remove local document: " + savedDocumentPath);
                     if(File.Exists(savedDocumentPath))
                         File.Delete(savedDocumentPath);
@@ -344,6 +358,16 @@ namespace CmisSync.Lib.Sync
                 string savedFolderPath = database.GetFolderPath(change.ObjectId);
                 if (null != savedFolderPath)
                 {
+                    string relativePath = savedFolderPath.Substring(this.repoinfo.TargetDirectory.Length);
+                    string[] names = relativePath.Split(Path.DirectorySeparatorChar);
+                    foreach(string name in names)
+                    {
+                        if(!String.IsNullOrEmpty(name) && Utils.IsInvalidFolderName(name, ConfigManager.CurrentConfig.IgnoreFolderNames))
+                        {
+                            Logger.Debug(String.Format("Ignore remote deletion of \"{0}\" because \"{1}\" is ignored locally", savedFolderPath, name));
+                            return true;
+                        }
+                    }
                     Logger.Info("Remove local folder: " + savedFolderPath);
                     if(Directory.Exists(savedFolderPath)) {
                         Directory.Delete(savedFolderPath, true);

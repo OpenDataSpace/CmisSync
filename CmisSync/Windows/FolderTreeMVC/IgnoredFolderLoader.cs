@@ -43,6 +43,7 @@ namespace CmisSync.CmisTree
                 if (i == nodes.Length - 1)
                 {
                     nodes[i].Selected = false;
+                    nodes[i].Path = "/" + ignoredPath;
                 }
             }
             return nodes[0];

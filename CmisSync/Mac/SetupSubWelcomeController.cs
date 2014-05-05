@@ -41,7 +41,7 @@ namespace CmisSync
         {
             base.AwakeFromNib ();
 
-            this.WelcomeText.StringValue = Properties_Resources.Intro;
+			this.WelcomeText.StringValue = String.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
 
             this.CancelButton.Title = Properties_Resources.Cancel;
             this.ContinueButton.Title = Properties_Resources.Continue;

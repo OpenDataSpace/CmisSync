@@ -50,7 +50,11 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The status.
         /// </value>
-        public TransmissionProgressEventArgs Status { get {return this.status;} private set { this.status = value; } }
+        public TransmissionProgressEventArgs Status
+        {
+            get { return this.status; }
+            private set { this.status = value; }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileTransmissionEvent"/> class.
@@ -95,11 +99,13 @@ namespace CmisSync.Lib.Events
         /// </param>
         public void ReportProgress(TransmissionProgressEventArgs status)
         {
-                Status.Aborted = (status.Aborted != null) ? status.Aborted : Status.Aborted;
-                Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
-                Status.Length = (status.Length != null) ? status.Length : Status.Length;
-                Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
-                Status.BitsPerSecond = (status.BitsPerSecond != null && Status.BitsPerSecond!=status.BitsPerSecond) ? status.BitsPerSecond : null;
+            Status.Aborting = (status.Aborting != null) ? status.Aborting : Status.Aborting;
+            Status.Aborted = (status.Aborted != null) ? status.Aborted : Status.Aborted;
+            Status.ActualPosition = (status.ActualPosition != null) ? status.ActualPosition : Status.ActualPosition;
+            Status.Length = (status.Length != null) ? status.Length : Status.Length;
+            Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
+            Status.Started = (status.Started != null) ? status.Started : Status.Started;
+            Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
             if (TransmissionStatus != null)
                 TransmissionStatus(this, Status);
         }
@@ -129,7 +135,7 @@ namespace CmisSync.Lib.Events
                     return null;
                 if(Length == 0)
                     return 100d;
-                return ((double)ActualPosition*100d)/(double)Length;
+                return ((double) ActualPosition * 100d) / (double) Length;
             } }
 
         /// <summary>
@@ -165,12 +171,28 @@ namespace CmisSync.Lib.Events
         public bool? Resumed { get; set; }
 
         /// <summary>
+        /// Gets or sets if the transmission is aborting.
+        /// </summary>
+        /// <value>
+        /// Transmission aborted.
+        /// </value>
+        public bool? Aborting { get; set; }
+
+        /// <summary>
         /// Gets or sets if the transmission is aborted.
         /// </summary>
         /// <value>
         /// Transmission aborted.
         /// </value>
         public bool? Aborted{ get; set; }
+
+		/// <summary>
+		/// Gets or sets if the transmission is started.
+		/// </summary>
+		/// <value>
+		/// Transmission started.
+		/// </value>
+		public bool? Started { get; set; }
 
         /// <summary>
         /// Gets or sets if the transmission is completed.
@@ -210,9 +232,9 @@ namespace CmisSync.Lib.Events
                 return null;
             }
             TimeSpan difference = end - start;
-            if(difference.Seconds == 0)
-                return null;
-            return (bytes*8) / (difference.Seconds);
+            double seconds = difference.TotalMilliseconds / 1000d;
+            double dbytes = bytes;
+            return (long) ((dbytes * 8) / seconds);
         }
 
         /// <summary>
@@ -225,6 +247,7 @@ namespace CmisSync.Lib.Events
             ActualPosition = null;
             Paused = null;
             Resumed = null;
+            Aborting = null;
             Aborted = null;
             FailedException = null;
         }
@@ -257,6 +280,7 @@ namespace CmisSync.Lib.Events
                     (ActualPosition == e.ActualPosition) &&
                     (Paused == e.Paused) &&
                     (Resumed == e.Resumed) &&
+                    (Aborting == e.Aborting) &&
                     (Aborted == e.Aborted) &&
                     (FailedException == e.FailedException);
         }
@@ -286,7 +310,9 @@ namespace CmisSync.Lib.Events
                 status += "Paused";
             if(Resumed == true)
                 status += "Resumed";
-            if(Aborted == true)
+            if (Aborting == true)
+                status += "Aborting";
+            if (Aborted == true)
                 status += "Aborted";
             if(Completed == true)
                 status += "Completed";

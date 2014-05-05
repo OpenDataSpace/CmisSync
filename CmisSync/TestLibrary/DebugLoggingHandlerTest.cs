@@ -21,13 +21,13 @@ namespace TestLibrary
         }
 
 
-        [Test]
+        [Test, Category("Fast")]
         public void ToStringTest() {
             var handler = new DebugLoggingHandler();
             Assert.AreEqual("CmisSync.Lib.Events.DebugLoggingHandler with Priority 10000", handler.ToString());
         }
         
-        [Test]
+        [Test, Category("Fast")]
         public void PriorityTest() {
             var handler = new DebugLoggingHandler();
             Assert.AreEqual(10000, handler.Priority);

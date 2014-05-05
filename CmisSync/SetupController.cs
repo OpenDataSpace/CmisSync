@@ -111,10 +111,11 @@ namespace CmisSync
         public double ProgressBarPercentage { get; private set; }
 
         public Uri saved_address = null;
-        public string saved_remote_path = "";
-        public string saved_user = "";
-        public string saved_password = "";
-        public string saved_repository = "";
+        public string saved_remote_path = String.Empty;
+        public string saved_user = String.Empty;
+        public string saved_password = String.Empty;
+        public string saved_repository = String.Empty;
+        public string saved_local_path = String.Empty;
         public List<string> ignoredPaths = new List<string>();
 
         /// <summary>
@@ -175,8 +176,8 @@ namespace CmisSync
         /// Regex to check a CmisSync repository local folder name.
         /// Basically, it should be a valid local filesystem folder name.
         /// </summary>
-        Regex RepositoryRegex = new Regex(@"^([a-zA-Z0-9][^*/><?\|:]*)$");
-        Regex RepositoryRegexLinux = new Regex(@"^([a-zA-Z0-9][^*\\><?\|:]*)$");
+        Regex RepositoryRegex = new Regex(@"^([a-zA-Z0-9][^*/><?\|:;]*)$");
+        Regex RepositoryRegexLinux = new Regex(@"^([a-zA-Z0-9][^*\\><?\|:;]*)$");
 
 
         /// <summary>
@@ -184,11 +185,11 @@ namespace CmisSync
         /// </summary>
         public SetupController()
         {
-            Logger.Info("Entering constructor.");
+            Logger.Debug("Entering constructor.");
 
             TutorialCurrentPage = 0;
             PreviousAddress = null;
-            PreviousPath = "";
+            PreviousPath = String.Empty;
             SyncingReponame = "";
             DefaultRepoPath = Program.Controller.FoldersPath;
 
@@ -235,7 +236,7 @@ namespace CmisSync
                 ChangePageEvent(page);
                 ShowWindowEvent();
             };
-            Logger.Info("Exiting constructor.");
+            Logger.Debug("Exiting constructor.");
         }
 
 
@@ -245,9 +246,10 @@ namespace CmisSync
         public void PageCancelled()
         {
             PreviousAddress = null;
-            PreviousRepository = "";
-            PreviousPath = "";
+            PreviousRepository = String.Empty;
+            PreviousPath = String.Empty;
             ignoredPaths.Clear();
+            TutorialCurrentPage = 0;
 
             WindowIsOpen = false;
             HideWindowEvent();
@@ -369,16 +371,16 @@ namespace CmisSync
                 // Check whether foldername is already in use
                 int index = Program.Controller.Folders.FindIndex(x => x.Equals(reponame, StringComparison.OrdinalIgnoreCase));
                 if ( index != -1)
-                    throw new ArgumentException(String.Format(Properties_Resources.FolderAlreadyInUse, localpath, Program.Controller.Folders[index]));
+                    throw new ArgumentException(String.Format(Properties_Resources.FolderAlreadyExist, reponame));
 
                 // Check whether folder name contains invalid characters.
                 Regex regexRepoName = (Path.DirectorySeparatorChar.Equals('\\')) ? RepositoryRegex : RepositoryRegexLinux;
-                if (!regexRepoName.IsMatch(reponame)||CmisSync.Lib.Utils.IsInvalidFolderName(reponame.Replace(Path.DirectorySeparatorChar, ' ')))
+                if (!regexRepoName.IsMatch(reponame)||CmisSync.Lib.Utils.IsInvalidFolderName(reponame.Replace(Path.DirectorySeparatorChar, ' '), new List<string>()))
                     throw new ArgumentException(String.Format(Properties_Resources.InvalidRepoName, reponame));
                 // Validate localpath
                 if(localpath.EndsWith(Path.DirectorySeparatorChar.ToString()))
                     localpath = localpath.Substring(0,localpath.Length-1);
-                if (CmisSync.Lib.Utils.IsInvalidFolderName(Path.GetFileName(localpath)))
+                if (CmisSync.Lib.Utils.IsInvalidFolderName(Path.GetFileName(localpath), new List<string>()))
                     throw new ArgumentException(String.Format(Properties_Resources.InvalidFolderName, Path.GetFileName(localpath)));
                 // If no warning handler is registered, handle warning as error
                 if (LocalPathExists == null)
@@ -473,32 +475,76 @@ namespace CmisSync
                 }
             }
             SyncingReponame = repoName;
+            saved_local_path = localrepopath;
 
-            ChangePageEvent(PageType.Syncing);
+            bool enableFetch = false;
 
-            Program.Controller.FolderFetched += AddPageFetchedDelegate;
-
-            // Add the remote folder to the configuration and start syncing.
-            try
+            if (enableFetch)
             {
-                new Thread(() =>
+                ChangePageEvent (PageType.Syncing);
+
+                Program.Controller.FolderFetched += AddPageFetchedDelegate;
+
+                // Add the remote folder to the configuration and start syncing.
+                try
                 {
-                    Program.Controller.StartFetcher(
-                        repoName,
-                        saved_address,
-                        saved_user.TrimEnd(),
-                        saved_password.TrimEnd(),
-                        PreviousRepository,
-                        PreviousPath,
-                        localrepopath,
-                        ignoredPaths);
-                }).Start();
+                    new Thread (() =>
+                    {
+                        Program.Controller.StartFetcher (
+                            repoName,
+                            saved_address,
+                            saved_user.TrimEnd (),
+                            saved_password.TrimEnd (),
+                            PreviousRepository,
+                            PreviousPath,
+                            localrepopath,
+                            ignoredPaths);
+                    }).Start ();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Fatal (ex.ToString ());
+                }
             }
-            catch (Exception ex)
+            else
             {
-                Logger.Fatal(ex.ToString());
-            }
+                RepoInfo repoInfo = new RepoInfo(repoName, ConfigManager.CurrentConfig.ConfigPath);
+                repoInfo.Address = saved_address;
+                repoInfo.User = saved_user.TrimEnd ();
+                repoInfo.Password = saved_password.TrimEnd ();
+                repoInfo.RepoID = PreviousRepository;
+                repoInfo.RemotePath = PreviousPath;
+                repoInfo.TargetDirectory = localrepopath;
+                repoInfo.PollInterval = 5000;
+                repoInfo.MaxUploadRetries = 2;
+                foreach (string ignore in ignoredPaths)
+                    repoInfo.AddIgnorePath(ignore);
 
+                // Check that the folder exists.
+                if (Directory.Exists(repoInfo.TargetDirectory))
+                {
+                    Logger.Info(String.Format("DataSpace Repository Folder {0} already exist, this could lead to sync conflicts", repoInfo.TargetDirectory));
+                }
+                else
+                {
+                    // Create the local folder.
+                    Directory.CreateDirectory(repoInfo.TargetDirectory);
+                }
+
+                try
+                {
+                    new Thread (() =>
+                    {
+                        Program.Controller.AddRepo (repoInfo);
+                    }).Start ();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Fatal (ex.ToString ());
+                }
+
+                ChangePageEvent (PageType.Finished);
+            }
         }
 
 
@@ -545,29 +591,30 @@ namespace CmisSync
             HideWindowEvent();
         }
 
-		/// <summary>
-		/// Gets the connections problem warning message internationalized.
-		/// </summary>
-		/// <returns>The connections problem warning.</returns>
-		/// <param name="server">Tried server.</param>
-		/// <param name="e">Returned Exception</param>
-		public string getConnectionsProblemWarning(CmisServer server, Exception e)
-		{
-			string warning = "";
-			string message = e.Message;
-			if (e is CmisPermissionDeniedException)
-				warning = Properties_Resources.LoginFailedForbidden;
-			else if (e is CmisServerNotFoundException)
-				warning = Properties_Resources.ConnectFailure;
-			else if (e.Message == "SendFailure" && server.Url.Scheme.StartsWith("https"))
-				warning = Properties_Resources.SendFailureHttps;
-			else if (e.Message == "TrustFailure")
-				warning = Properties_Resources.TrustFailure;
-			/*						else if (e.Message == "NameResolutionFailure")
-				warning = Properties_Resources.NameResolutionFailure;*/
-			else
-				warning = message + Environment.NewLine + Properties_Resources.Sorry;
-			return warning;
-		}
+        /// <summary>
+        /// Gets the connections problem warning message internationalized.
+        /// </summary>
+        /// <returns>The connections problem warning.</returns>
+        /// <param name="server">Tried server.</param>
+        /// <param name="e">Returned Exception</param>
+        public string GetConnectionsProblemWarning(CmisServer server, Exception e)
+        {
+            string warning = "";
+            string message = e.Message;
+            if (e is CmisPermissionDeniedException)
+                warning = Properties_Resources.LoginFailedForbidden;
+            else if (e is CmisServerNotFoundException)
+                warning = Properties_Resources.ConnectFailure;
+            else if (e.Message == "SendFailure" && server.Url.Scheme.StartsWith("https"))
+                warning = Properties_Resources.SendFailureHttps;
+            else if (e.Message == "TrustFailure")
+                warning = Properties_Resources.TrustFailure;
+            /*                        else if (e.Message == "NameResolutionFailure")
+                warning = Properties_Resources.NameResolutionFailure;*/
+            else
+                warning = String.Format("{0}{1}{2}", message, Environment.NewLine, 
+                    String.Format(Properties_Resources.Sorry, Properties_Resources.ApplicationName));
+            return warning;
+        }
     }
 }

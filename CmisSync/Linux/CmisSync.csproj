@@ -41,12 +41,16 @@
       <Private>False</Private>
       <Package>notify-sharp</Package>
     </Reference>
+    <Reference Include="appindicator-sharp, Version=0.2.0.0, Culture=neutral, PublicKeyToken=bcae265d1c7ab4c2">
+      <Private>False</Private>
+      <Package>appindicator-sharp-0.1</Package>
+    </Reference>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
@@ -99,6 +103,7 @@
     </Compile>
     <Compile Include="CmisTree\CmisTreeStore.cs" />
     <Compile Include="CmisTree\StatusCellRenderer.cs" />
+    <Compile Include="Notification\NotificationUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -112,5 +117,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CmisTree\" />
+    <Folder Include="Notification\" />
   </ItemGroup>
 </Project>

@@ -26,6 +26,8 @@ namespace CmisSync.Lib.Sync
             ReplaceXMLRootElement();
             CheckForDoublicatedLog4NetElement();
             ReplaceTrunkByChunk();
+            MigrateIgnoredPatterns();
+            MigrateHiddenReposPatterns();
         }
 
         private static void CheckForDoublicatedLog4NetElement()
@@ -85,6 +87,29 @@ namespace CmisSync.Lib.Sync
                 fileContents = fileContents.Replace("<notifications>True</notifications>", "<notifications>true</notifications>");
                 System.IO.File.WriteAllText(ConfigManager.CurrentConfigFile, fileContents);
                 System.Console.Out.WriteLine("Migrated old upper case notification to lower case");
+            }
+        }
+
+        private static void MigrateIgnoredPatterns()
+        {
+            if(ConfigManager.CurrentConfig.Version < 1.0)
+            {
+                Config conf = ConfigManager.CurrentConfig;
+                conf.Version = 1.0;
+                conf.IgnoreFileNames = Config.CreateInitialListOfGloballyIgnoredFileNames();
+                conf.IgnoreFolderNames = Config.CreateInitialListOfGloballyIgnoredFolderNames();
+                conf.Save();
+            }
+        }
+
+        private static void MigrateHiddenReposPatterns()
+        {
+            if(ConfigManager.CurrentConfig.Version < 1.1)
+            {
+                Config conf = ConfigManager.CurrentConfig;
+                conf.Version = 1.1;
+                conf.HiddenRepos = Config.CreateInitialListOfGloballyHiddenRepoNames();
+                conf.Save();
             }
         }
     }

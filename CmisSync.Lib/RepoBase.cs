@@ -1,4 +1,4 @@
-//   CmisSync, a collaboration and sharing tool.
+﻿//   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,9 @@ using log4net;
 
 using Timers = System.Timers;
 using CmisSync.Lib.Events;
-
+#if __COCOA__
+using MonoMac.Foundation;
+#endif
 namespace CmisSync.Lib
 {
 
@@ -81,6 +83,10 @@ namespace CmisSync.Lib
         /// </summary>
         public SyncStatus Status { get; private set; }
 
+        /// <summary>
+        /// Whether stopped, to control for machine sleep/wake power management.
+        /// </summary>
+        public bool Stopped { get; set; }
 
         /// <summary>
         /// Stop syncing momentarily.
@@ -97,6 +103,14 @@ namespace CmisSync.Lib
         {
             Status = SyncStatus.Idle;
         }
+
+        /// <summary>
+        /// Gets the polling scheduler.
+        /// </summary>
+        /// <value>
+        /// The scheduler.
+        /// </value>
+        public SyncScheduler Scheduler { get; private set; }
 
         /// <summary>
         /// Event Queue for this repository.
@@ -119,36 +133,22 @@ namespace CmisSync.Lib
         /// <summary>
         /// Watches the local filesystem for changes.
         /// </summary>
-        public Watcher Watcher { get; private set; }
-
-
-        /// <summary>
-        /// Interval at which the local and remote filesystems should be polled.
-        /// </summary>
-        //private TimeSpan poll_interval = PollInterval.Short;
-
+        public CmisSync.Lib.Sync.Strategy.Watcher Watcher { get; private set; }
 
         /// <summary>
-        /// When the local and remote filesystems were last checked for modifications.
+        /// The ignored folders filter.
         /// </summary>
-        //private DateTime last_poll = DateTime.Now;
-
+        private Events.Filter.IgnoredFoldersFilter ignoredFoldersFilter;
 
         /// <summary>
-        /// Timer for watching the local and remote filesystems.
+        /// The ignored file name filter.
         /// </summary>
-        private Timers.Timer remote_timer = new Timers.Timer();
-
+        private Events.Filter.IgnoredFileNamesFilter ignoredFileNameFilter;
 
         /// <summary>
-        /// Intervals for local and remote filesystems polling.
-        /// Currently the polling interval is fixed.
+        /// The ignored folder name filter.
         /// </summary>
-        private static class PollInterval
-        {
-            public static readonly TimeSpan Short = new TimeSpan(0, 0, 5, 0);
-        }
-
+        private Events.Filter.IgnoredFolderNameFilter ignoredFolderNameFilter;
 
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
@@ -161,31 +161,39 @@ namespace CmisSync.Lib
         /// </summary>
         public RepoBase(RepoInfo repoInfo)
         {
-            EventManager = new SyncEventManager();
+            EventManager = new SyncEventManager(repoInfo.Name);
             EventManager.AddEventHandler(new DebugLoggingHandler());
-            EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
             Queue = new SyncEventQueue(EventManager);
             RepoInfo = repoInfo;
             LocalPath = repoInfo.TargetDirectory;
             Name = repoInfo.Name;
             RemoteUrl = repoInfo.Address;
+            ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(Queue){IgnoredPaths=new List<string>(repoInfo.GetIgnoredPaths())};
+            ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(Queue){Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames};
+            ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(Queue) {Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames};
+            EventManager.AddEventHandler(ignoredFoldersFilter);
+            EventManager.AddEventHandler(ignoredFileNameFilter);
+            EventManager.AddEventHandler(ignoredFolderNameFilter);
+            EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, RepoInfoChanged));
+            // start scheduler
+            Scheduler = new SyncScheduler(Queue, repoInfo.PollInterval);
+            EventManager.AddEventHandler(Scheduler);
 
-            Logger.Info("Repo " + repoInfo.Name + " - Set poll interval to " + repoInfo.PollInterval + "ms");
-            this.remote_timer.Interval = repoInfo.PollInterval;
+            EventManager.AddEventHandler(new GenericSyncEventHandler<StartNextSyncEvent>(0, delegate(ISyncEvent e) {
+                SyncInBackground();
+                return true;
+            }));
+
 
             SyncStatusChanged += delegate(SyncStatus status)
             {
                 Status = status;
             };
-
-            this.Watcher = new Watcher(LocalPath);
-
-            // Main loop syncing every X seconds.
-            this.remote_timer.Elapsed += delegate
-            {
-                // Synchronize.
-                SyncInBackground();
-            };
+            #if __COCOA__
+            this.Watcher = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
+            #else
+            this.Watcher = new CmisSync.Lib.Sync.Strategy.NetWatcher( new FileSystemWatcher(LocalPath), Queue);
+            #endif
         }
 
         private bool RepoInfoChanged(ISyncEvent e)
@@ -193,6 +201,9 @@ namespace CmisSync.Lib
             if (e is RepoConfigChangedEvent)
             {
                 this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
+                this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.GetIgnoredPaths());
+                this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
+                this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
                 return true;
             }
             else
@@ -231,9 +242,12 @@ namespace CmisSync.Lib
             {
                 if (disposing)
                 {
-                    this.remote_timer.Stop();
-                    this.remote_timer.Dispose();
+                    this.Scheduler.Dispose();
                     this.Watcher.Dispose();
+                    this.Queue.StopListener();
+                    int timeout = 500;
+                    if(!this.Queue.WaitForStopped(timeout))
+                        Logger.Debug(String.Format("Event Queue is of {0} has not been closed in {1} miliseconds", RemoteUrl.ToString(), timeout));
                     this.Queue.Dispose();
                 }
                 this.disposed = true;
@@ -242,15 +256,15 @@ namespace CmisSync.Lib
 
 
         /// <summary>
-        /// Initialize the watcher.
+        /// Initialize the scheduled background sync processes.
         /// </summary>
         public virtual void Initialize()
         {
             // Sync up everything that changed
             // since we've been offline
-            SyncInBackground();
-
-            this.remote_timer.Start();
+            // start full crawl sync on beginning
+            Queue.AddEvent(new StartNextSyncEvent(true));
+            Scheduler.Start();
         }
 
         /// <summary>

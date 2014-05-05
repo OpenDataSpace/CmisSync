@@ -33,7 +33,7 @@ hdiutil create -srcfolder "$source" -volname "DataSpace Sync" -fs HFS+ -fsargs "
 device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" | \
          egrep '^/dev/' | sed 1q | awk '{print $1}')
 # Wait for mount
-sleep 10
+sleep 25
 
 echo "$device"
 

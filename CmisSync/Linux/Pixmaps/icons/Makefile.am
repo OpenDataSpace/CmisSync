@@ -33,7 +33,10 @@ app_theme_icons = \
 	status,document-moved-12.png \
 	status,list-point-16.png \
 	status,media_playback_start-16.png \
-	status,media_playback_pause-16.png
+	status,media_playback_pause-16.png \
+	status,Downloading-16.png \
+	status,Uploading-16.png \
+	status,Updating-16.png
 
 install_icon_exec = $(top_srcdir)/build/icon-theme-installer \
 	-t "$(theme)" \

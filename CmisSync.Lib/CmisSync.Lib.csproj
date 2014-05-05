@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,8 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>CmisSync.Lib</RootNamespace>
     <AssemblyName>CmisSync.Lib</AssemblyName>
-    <ReleaseVersion>
-    </ReleaseVersion>
+    <UseMSBuildEngine>False</UseMSBuildEngine>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -49,49 +48,138 @@
       <HintPath>..\Extras\sqlite-netFx40-binary-Win32-2010-1.0.84.0\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="XamMac">
+      <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Posix" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cmis\Crypto.cs" />
-    <Compile Include="Cmis\Database.cs" />
-    <Compile Include="Cmis\IDatabase.cs" />
-    <Compile Include="Credentials.cs" />
-    <Compile Include="Events\ConfigChangedEvent.cs" />
-    <Compile Include="Events\GenericSyncEventHandler.cs" />
-    <Compile Include="Events\SyncEventQueue.cs" />
-    <Compile Include="LoggingStream.cs" />
-    <Compile Include="Sync\ChangeLogStrategy.cs" />
-    <Compile Include="ConfigMigration.cs" />
-    <Compile Include="Defines.cs" />
-    <Compile Include="Sync\SynchronizedFolder.cs" />
-    <Compile Include="Sync\CrawlStrategy.cs" />
+    <Compile Include="Backend.cs" />
+    <Compile Include="ChunkedStream.cs" />
     <Compile Include="Cmis\CmisPermissionDeniedException.cs" />
     <Compile Include="Cmis\CmisServerNotFoundException.cs" />
     <Compile Include="Cmis\CmisUtils.cs" />
+    <Compile Include="Cmis\Crypto.cs" />
+    <Compile Include="Cmis\Database.cs" />
+    <Compile Include="Cmis\IDatabase.cs" />
     <Compile Include="Cmis\MimeType.cs" />
-    <Compile Include="Sync\CmisRepo.cs" />
-    <Compile Include="Sync\WatcherStrategy.cs" />
+    <Compile Include="Cmis\PersistentStandardAuthenticationProvider.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="ConfigManager.cs" />
+    <Compile Include="ConfigMigration.cs" />
+    <Compile Include="ContentTasks\AbortException.cs" />
+    <Compile Include="Credentials.cs" />
+    <Compile Include="Defines.cs" />
+    <Compile Include="Events\ActiveActivitiesManager.cs" />
+    <Compile Include="Events\ConfigChangedEvent.cs" />
+    <Compile Include="Events\ContentChangeEvent.cs" />
+    <Compile Include="Events\GenericSyncEventHandler.cs" />
+    <Compile Include="Events\RecentChangedEvent.cs" />
+    <Compile Include="Events\SyncEventQueue.cs" />
     <Compile Include="Fetcher.cs" />
+    <Compile Include="LoggingStream.cs" />
     <Compile Include="RepoBase.cs" />
     <Compile Include="RepoInfo.cs" />
+    <Compile Include="Sync\ChangeLogStrategy.cs" />
+    <Compile Include="Sync\CmisRepo.cs" />
+    <Compile Include="Sync\CrawlStrategy.cs" />
+    <Compile Include="Sync\SynchronizedFolder.cs" />
     <Compile Include="Utils.cs" />
-    <Compile Include="Backend.cs" />
-    <Compile Include="Config.cs" />
-    <Compile Include="ChunkedStream.cs" />
     <Compile Include="Watcher.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="IActivityListener.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />
-    <Compile Include="Events\ISyncEvent.cs" />
-    <Compile Include="Events\FSEvent.cs" />
-    <Compile Include="Events\SyncEventManager.cs" />
-    <Compile Include="Events\SyncEventHandler.cs" />
+    <Compile Include="Cmis\PersistentNtlmAuthenticationProvider.cs" />
+    <Compile Include="ContentTasks\ChunkedDownloader.cs" />
+    <Compile Include="ContentTasks\ChunkedUploader.cs" />
+    <Compile Include="ContentTasks\IFileDownloader.cs" />
+    <Compile Include="ContentTasks\IFileUploader.cs" />
+    <Compile Include="ContentTasks\SimpleFileDownloader.cs" />
+    <Compile Include="ContentTasks\SimpleFileUploader.cs" />
+    <Compile Include="ContentTasks\Utils.cs" />
+    <Compile Include="Data\MappedObjects.cs" />
+    <Compile Include="Data\PathMatcher.cs" />
+    <Compile Include="Events\AbstractEventProducer.cs" />
+    <Compile Include="Events\BubbledEvent.cs" />
+    <Compile Include="Events\ChangeEnums.cs" />
+    <Compile Include="Events\CrawlRequestEvent.cs" />
     <Compile Include="Events\DebugLoggingHandler.cs" />
+    <Compile Include="Events\EncapsuledEvent.cs" />
+    <Compile Include="Events\EventFilter\AbstractFileFilter.cs" />
+    <Compile Include="Events\EventFilter\FailedOperationsFilter.cs" />
+    <Compile Include="Events\EventFilter\IgnoredFileNamesFilter.cs" />
+    <Compile Include="Events\EventFilter\IgnoredFilesFilter.cs" />
+    <Compile Include="Events\EventFilter\IgnoredFoldersFilter.cs" />
+    <Compile Include="Events\EventFilter\InvalidFolderNameFilter.cs" />
+    <Compile Include="Events\ExceptionEvent.cs" />
     <Compile Include="Events\FSDeletionHandler.cs" />
-    <Compile Include="Events\FileTransmissionEvent.cs" />
+    <Compile Include="Events\FSEvent.cs" />
     <Compile Include="Events\FileConflictEvent.cs" />
-    <Compile Include="Events\ActiveActivitiesManager.cs" />
+    <Compile Include="Events\FileDownloadRequest.cs" />
+    <Compile Include="Events\FileEvent.cs" />
+    <Compile Include="Events\FileTransmissionEvent.cs" />
+    <Compile Include="Events\FolderEvent.cs" />
+    <Compile Include="Events\FullSyncCompletedEvent.cs" />
+    <Compile Include="Events\ISyncEvent.cs" />
+    <Compile Include="Events\ISyncEventQueue.cs" />
+    <Compile Include="Events\PermissionDeniedEvent.cs" />
+    <Compile Include="Events\RemoteEvent.cs" />
+    <Compile Include="Events\ReportingSyncEventHandler.cs" />
+    <Compile Include="Events\RequestIgnoredEvent.cs" />
+    <Compile Include="Events\StartNextSyncEvent.cs" />
+    <Compile Include="Events\SuccessfulLoginEvent.cs" />
+    <Compile Include="Events\SyncEventHandler.cs" />
+    <Compile Include="Events\SyncEventManager.cs" />
+    <Compile Include="Events\SyncScheduler.cs" />
+    <Compile Include="HttpProxyUtils.cs" />
+    <Compile Include="IActivityListener.cs" />
+    <Compile Include="Storage\EventStorage.cs" />
+    <Compile Include="Storage\FailedOperationsStorage.cs" />
+    <Compile Include="Storage\GeneralRepoStorage.cs" />
+    <Compile Include="Storage\ICookieStorage.cs" />
+    <Compile Include="Storage\IDirectoryInfo.cs" />
+    <Compile Include="Storage\IFileSystemInfo.cs" />
+    <Compile Include="Storage\IMetaDataStorage.cs" />
+    <Compile Include="Storage\MetaDataStorage.cs" />
+    <Compile Include="Storage\PersistentStorage.cs" />
+    <Compile Include="Streams\BandwidthLimitedStream.cs" />
+    <Compile Include="Streams\ForwardReadingStream.cs" />
+    <Compile Include="Streams\NonClosingHashStream.cs" />
+    <Compile Include="Streams\OffsetStream.cs" />
+    <Compile Include="Streams\ProgressStream.cs" />
+    <Compile Include="Streams\StreamWrapper.cs" />
+    <Compile Include="Sync\Solver\ISolver.cs" />
+    <Compile Include="Sync\Solver\LocalObjectAdded.cs" />
+    <Compile Include="Sync\Solver\LocalObjectChanged.cs" />
+    <Compile Include="Sync\Solver\LocalObjectDeleted.cs" />
+    <Compile Include="Sync\Solver\LocalObjectMoved.cs" />
+    <Compile Include="Sync\Solver\LocalObjectRenamed.cs" />
+    <Compile Include="Sync\Solver\NothingToDoSolver.cs" />
+    <Compile Include="Sync\Solver\RemoteObjectAdded.cs" />
+    <Compile Include="Sync\Solver\RemoteObjectChanged.cs" />
+    <Compile Include="Sync\Solver\RemoteObjectDeleted.cs" />
+    <Compile Include="Sync\Solver\RemoteObjectMoved.cs" />
+    <Compile Include="Sync\Solver\RemoteObjectRenamed.cs" />
+    <Compile Include="Sync\Strategy\ContentChangeEventAccumulator.cs" />
+    <Compile Include="Sync\Strategy\ContentChangeEventTransformer.cs" />
+    <Compile Include="Sync\Strategy\ContentChanges.cs" />
+    <Compile Include="Sync\Strategy\Crawler.cs" />
+    <Compile Include="Sync\Strategy\FileEventHandler.cs" />
+    <Compile Include="Sync\Strategy\FileSynchronizer.cs" />
+    <Compile Include="Sync\Strategy\FolderSynchronizer.cs" />
+    <Compile Include="Sync\Strategy\ISituationDetection.cs" />
+    <Compile Include="Sync\Strategy\LocalCrawler.cs" />
+    <Compile Include="Sync\Strategy\LocalSituationDetection.cs" />
+    <Compile Include="Sync\Strategy\RemoteSituationDetection.cs" />
+    <Compile Include="Sync\Strategy\SimpleFileSynchronizer.cs" />
+    <Compile Include="Sync\Strategy\SyncMechanism.cs" />
+    <Compile Include="Sync\Strategy\Watcher.cs" />
+    <Compile Include="Sync\Strategy\MacWatcher.cs" />
+    <Compile Include="Sync\Strategy\NetWatcher.cs" />
+    <Compile Include="Events\EventFilter\IgnoredFolderNameFilter.cs" />
+    <Compile Include="Events\ProxyAuthRequiredEvent.cs" />
+    <Compile Include="Events\EventFilter\GenericHandleDoublicatedEventsFilter.cs" />
+    <Compile Include="Cmis\DotCMISLogListener.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -113,6 +201,29 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug_MonoMac|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;__COCOA__</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\CmisSync.Lib.XML</DocumentationFile>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_MonoMac|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <DefineConstants>__COCOA__</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Extras\OpenDataSpaceDotCMIS\DotCMIS\DotCMIS.csproj">
       <Project>{529EF90F-A34C-4426-A4F9-65113AC23841}</Project>
@@ -123,4 +234,5 @@
       <Name>log4net.vs2010</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
 </Project>

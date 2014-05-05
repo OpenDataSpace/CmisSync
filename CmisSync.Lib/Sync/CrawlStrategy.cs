@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -67,13 +67,17 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool CrawlSync(IFolder remoteFolder, string localFolder)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("CrawlSync({0})", localFolder)))
+                {
                 sleepWhileSuspended();
 
                 if (IsGetDescendantsSupported)
                 {
                     IList<ITree<IFileableCmisObject>> desc;
                     try{
+                        Logger.Debug("Starting getDescendants");
                         desc = remoteFolder.GetDescendants(-1);
+                        Logger.Debug("Finished getDescendants");
                     }catch (DotCMIS.Exceptions.CmisConnectionException ex) {
                         if(ex.InnerException is System.Xml.XmlException)
                         {
@@ -102,6 +106,7 @@ namespace CmisSync.Lib.Sync
                 success = CrawlLocalFolders(localFolder, remoteFolder, remoteSubfolders) && success;
 
                 return success;
+                }
             }
 
             /// <summary>
@@ -113,6 +118,8 @@ namespace CmisSync.Lib.Sync
             /// <returns></returns>
             private bool CrawlDescendants(IFolder remoteFolder, IList<ITree<IFileableCmisObject>> children, string localFolder)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("CrawlDescendants({0})", localFolder)))
+                {
                 bool success = true;
 
                 // Lists of files/folders, to delete those that have been removed on the server.
@@ -127,7 +134,7 @@ namespace CmisSync.Lib.Sync
                         // It is a CMIS folder.
                         IFolder remoteSubFolder = (IFolder)node.Item;
                         remoteSubfolders.Add(remoteSubFolder.Name);
-                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
+                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(remoteSubFolder.Path))
                         {
                             string localSubFolder = Path.Combine(localFolder, remoteSubFolder.Name);
 
@@ -160,6 +167,7 @@ namespace CmisSync.Lib.Sync
                 success = CrawlLocalFiles(localFolder, remoteFolder, remoteFiles) && success;
                 success = CrawlLocalFolders(localFolder, remoteFolder, remoteSubfolders) && success;
                 return success;
+                }
             }
 
 
@@ -180,7 +188,7 @@ namespace CmisSync.Lib.Sync
                     {
                         // It is a CMIS folder.
                         IFolder remoteSubFolder = (IFolder)cmisObject;
-                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name) && !repoinfo.isPathIgnored(remoteSubFolder.Path))
+                        if (!Utils.IsInvalidFolderName(remoteSubFolder.Name, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(remoteSubFolder.Path))
                         {
                             if (null != remoteFolders)
                             {
@@ -225,6 +233,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool CrawlLocalFiles(string localFolder, IFolder remoteFolder, IList<string> remoteFiles)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("CrawlLocalFiles({0})", localFolder)))
+                {
                 bool success = true;
 
                 try
@@ -241,7 +251,7 @@ namespace CmisSync.Lib.Sync
 
                         string fileName = Path.GetFileName(filePath);
 
-                        if (Utils.WorthSyncing(fileName))
+                        if (Utils.WorthSyncing(fileName, ConfigManager.CurrentConfig.IgnoreFileNames))
                         {
                             if (!remoteFiles.Contains(fileName))
                             {
@@ -292,11 +302,12 @@ namespace CmisSync.Lib.Sync
                 }
 
                 return success;
+                }
             }
 
             private void sleepWhileSuspended()
             {
-                while (repo.Status == SyncStatus.Suspend)
+                while (repo.Status == SyncStatus.Suspend || repo.Stopped)
                 {
                     Logger.Info(String.Format("Sync of {0} is suspend, next retry in {1}ms", repoinfo.Name, repoinfo.PollInterval));
                     System.Threading.Thread.Sleep((int)repoinfo.PollInterval);
@@ -309,6 +320,8 @@ namespace CmisSync.Lib.Sync
             /// </summary>
             private bool CrawlLocalFolders(string localFolder, IFolder remoteFolder, IList<string> remoteFolders)
             {
+                using(log4net.ThreadContext.Stacks["NDC"].Push(String.Format("CrawlLocalFolders({0})", localFolder)))
+                {
                 bool success = true;
 
                 try
@@ -323,15 +336,28 @@ namespace CmisSync.Lib.Sync
                         }
                         string path = localSubFolder.Substring(repoinfo.TargetDirectory.Length).Replace("\\", "/");
                         string folderName = Path.GetFileName(localSubFolder);
-                        if (!Utils.IsInvalidFolderName(folderName) && !repoinfo.isPathIgnored(path))
+                        if (!Utils.IsInvalidFolderName(folderName, ConfigManager.CurrentConfig.IgnoreFolderNames) && !repoinfo.IsPathIgnored(path))
                         {
                             if (!remoteFolders.Contains(folderName))
                             {
                                 // This local folder is not on the CMIS server now, so
                                 // check whether it used to exist on server or not.
-                                if (database.ContainsFolder(localSubFolder))
+                                string oldObjectId;
+                                if (database.ContainsFolder(localSubFolder, out oldObjectId))
                                 {
-                                    success = RemoveFolderLocally(localSubFolder) && success;
+                                    try{
+                                        IFolder remoteFoundFolder = session.GetObject(oldObjectId) as IFolder;
+                                        String remoteFoundPath = remoteFoundFolder.Path;
+                                        if(remoteFoundPath.StartsWith(repoinfo.RemotePath)) {
+                                            // It is in synced environment, we should move it to the new folder
+                                            remoteFoundPath = Path.Combine(repoinfo.TargetDirectory, remoteFoundPath.Substring(repoinfo.RemotePath.Length));
+                                            MoveFolderLocally(localSubFolder, remoteFoundPath);
+                                        } else {
+                                            success = RemoveFolderLocally(localSubFolder) && success;
+                                        }
+                                    }catch(CmisObjectNotFoundException) {
+                                        success = RemoveFolderLocally(localSubFolder) && success;
+                                    }
                                 }
                                 else
                                 {
@@ -352,6 +378,7 @@ namespace CmisSync.Lib.Sync
                 }
 
                 return success;
+                }
             }
         }
     }

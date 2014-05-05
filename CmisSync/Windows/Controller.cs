@@ -112,7 +112,7 @@ namespace CmisSync
             string ini_file = "[.ShellClassInfo]\r\n" +
                     "IconFile=" + icon_file_path + "\r\n" +
                     "IconIndex=0\r\n" +
-                    "InfoTip=DataSpace Sync\r\n" +
+                    "InfoTip="+ Properties_Resources.ApplicationName +"\r\n" +
                     "IconResource=" + icon_file_path + ",0\r\n" +
                     "[ViewState]\r\n" +
                     "Mode=\r\n" +

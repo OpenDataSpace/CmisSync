@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net;
+using System.Web;
+
 #if __MonoCS__
 using Mono.Data.Sqlite;
 #else
@@ -13,6 +16,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 using log4net;
+using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Cmis
 {
@@ -723,6 +727,15 @@ namespace CmisSync.Lib.Cmis
             return Denormalize((string)ExecuteSQLFunction("SELECT path FROM files WHERE id=@id", parameters));
         }
 
+        public String GetRemoteFileObjectId(string path)
+        {
+            path = Normalize(path);
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("path", path);
+            return (string)ExecuteSQLFunction("SELECT id FROM files WHERE path=@path", parameters);
+        }
+
 
         /// <summary>
         /// Checks whether the database contains a given folder.
@@ -736,6 +749,19 @@ namespace CmisSync.Lib.Cmis
             return null != ExecuteSQLFunction("SELECT serverSideModificationDate FROM folders WHERE path=@path", parameters);
         }
 
+        /// <summary>
+        /// Checks whether the database contains a given folder. And if true, returns saved object Id.
+        /// </summary>
+        public bool ContainsFolder(string path, out string folderId)
+        {
+            path = Normalize(path);
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("path", path);
+            folderId = (string)ExecuteSQLFunction("SELECT id FROM folders WHERE path=@path", parameters);
+            return null != folderId;
+        }
+
 
         /// <summary>
         /// <returns>path field in folders table for <paramref name="id"/></returns>
@@ -745,6 +771,24 @@ namespace CmisSync.Lib.Cmis
             Dictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("id", id);
             return Denormalize((string)ExecuteSQLFunction("SELECT path FROM folders WHERE id=@id", parameters));
+        }
+
+        /// <summary>
+        /// Gets the remote folder object identifier or null if not available.
+        /// </summary>
+        /// <returns>
+        /// The remote folder object identifier.
+        /// </returns>
+        /// <param name='path'>
+        /// Path.
+        /// </param>
+        public string GetRemoteFolderObjectId(string path)
+        {
+            path = Normalize(path);
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("path", path);
+            return (string)ExecuteSQLFunction("SELECT id FROM folders WHERE path=@path", parameters);
         }
 
 
@@ -803,6 +847,36 @@ namespace CmisSync.Lib.Cmis
             ExecuteSQLAction(command, parameters);
         }
 
+        public void AddRecentChange(RecentChangedEvent change)
+        {
+            //TODO
+            string command = "UPDATE";
+        }
+
+        public void SetRecentChangesLimit(int limit)
+        {
+            //TODO
+            string command = "UPDATE";
+        }
+
+        public int GetRecentChangesLimit()
+        {
+            //TODO
+            string command = "SELECT COUNT(*) FROM recentchanges";
+            return 0;
+        }
+
+        /// <summary>
+        /// Returns the List of recent changes
+        /// </summary>
+        /// <returns></returns>
+        public List<RecentChangedEvent> GetRecentChanges(int limit = 5)
+        {
+            //TODO
+            string command = "SELECT * FROM recentchanges ORDER BY datetime DESC LIMIT " + limit.ToString();
+            return new List<RecentChangedEvent>();
+        }
+
         /// <summary>
         /// Gets the path prefix.
         /// If no prefix has been found, the db will be migrated and the old one will be returned
@@ -837,6 +911,29 @@ namespace CmisSync.Lib.Cmis
             ExecuteSQLAction(command, parameters);
         }
 
+        public CookieCollection GetSessionCookies ()
+        {
+            CookieCollection collection = null;
+            var savedCookies = (string)ExecuteSQLFunction("SELECT value FROM general WHERE key=\"SessionCookies\"", null);
+            if(savedCookies!=null){
+                try{
+                    collection = (CookieCollection)JsonConvert.DeserializeObject<CookieCollection>(savedCookies);
+                }catch(Exception e)
+                {
+                    Logger.Debug("Failed to load cookies from db", e);
+                }
+            }
+            return (collection!=null)?collection:new CookieCollection();
+        }
+
+        public void SetSessionCookies (CookieCollection cookies)
+        {
+            string json = JsonConvert.SerializeObject(cookies);
+            string command = "INSERT OR REPLACE INTO general (key, value) VALUES (\"SessionCookies\", @cookies)";
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            parameters.Add("cookies", json);
+            ExecuteSQLAction(command, parameters);
+        }
 
         /// <summary>
         /// Helper method to execute an SQL command that does not return anything.

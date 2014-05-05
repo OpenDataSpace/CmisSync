@@ -9,6 +9,7 @@ using MonoMac.AppKit;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
+using System.Threading.Tasks;
 
 namespace CmisSync
 {
@@ -29,13 +30,14 @@ namespace CmisSync
             Initialize ();
         }
         // Call to load from the XIB/NIB file
-        public EditWizardController (CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath) : base ("EditWizard")
+        public EditWizardController (EditType type, CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath) : base ("EditWizard")
         {
             FolderName = name;
-            this.credentials = credentials;
+            this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = new List<string>(ignores);
             this.localPath = localPath;
+            this.type = type;
 
             Initialize ();
 
@@ -54,25 +56,32 @@ namespace CmisSync
 
         #endregion
 
+        public enum EditType {
+            EditFolder,
+            EditCredentials
+        };
+
         protected override void Dispose (bool disposing)
         {
             base.Dispose (disposing);
-            Console.WriteLine (this.GetType ().ToString () + " disposed " + disposing.ToString ());
         }
 
         public EditController Controller = new EditController();
 
         public string FolderName;
         public List<string> Ignores;
+        public CmisRepoCredentials Credentials;
 
-        private CmisRepoCredentials credentials;
         private string remotePath;
         private string localPath;
+        private EditType type;
 
         RootFolder Repo;
         private CmisTreeDataSource DataSource;
         private OutlineViewDelegate DataDelegate;
         private AsyncNodeLoader Loader;
+        private Object loginLock = new Object();
+        private bool isClosed;
 
         public override void AwakeFromNib ()
         {
@@ -87,8 +96,8 @@ namespace CmisSync
             Repo = new RootFolder()
             {
                 Name = FolderName,
-                Id = credentials.RepoId,
-                Address = credentials.Address.ToString()
+                Id = Credentials.RepoId,
+                Address = Credentials.Address.ToString()
             };
             Repo.Selected = true;
             IgnoredFolderLoader.AddIgnoredFolderToRootNode(Repo, Ignores);
@@ -96,7 +105,7 @@ namespace CmisSync
             List<RootFolder> repos = new List<RootFolder>();
             repos.Add(Repo);
 
-            Loader = new AsyncNodeLoader(Repo, credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            Loader = new AsyncNodeLoader(Repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
 
             CancelButton.Title = Properties_Resources.DiscardChanges;
             FinishButton.Title = Properties_Resources.SaveChanges;
@@ -105,6 +114,31 @@ namespace CmisSync
             DataSource = new CmisTree.CmisTreeDataSource(repos);
             Outline.DataSource = DataSource;
             Outline.Delegate = DataDelegate;
+
+            this.AddressLabel.StringValue = Properties_Resources.CmisWebAddress;
+            this.UserLabel.StringValue = Properties_Resources.User;
+            this.PasswordLabel.StringValue = Properties_Resources.Password;
+
+            this.AddressText.StringValue = Credentials.Address.ToString ();
+            this.UserText.StringValue = Credentials.UserName;
+            this.PasswordText.StringValue = Credentials.Password.ToString ();
+            this.AddressText.Enabled = false;
+            this.UserText.Enabled = false;
+            this.LoginStatusProgress.IsDisplayedWhenStopped = false;
+            this.LoginStatusLabel.Hidden = true;
+            this.FolderTab.Label = Properties_Resources.AddingFolder;
+            this.CredentialsTab.Label = Properties_Resources.Credentials;
+            switch (this.type) {
+            case EditType.EditFolder:
+                TabView.SelectAt (0);
+                break;
+            case EditType.EditCredentials:
+                TabView.SelectAt (1);
+                break;
+            default:
+                TabView.SelectAt (0);
+                break;
+            }
 
             Controller.CloseWindowEvent += delegate
             {
@@ -117,6 +151,8 @@ namespace CmisSync
 
             //  must be called after InsertEvent()
             Loader.Load(Repo);
+            lock(loginLock)
+                isClosed = false;
         }
 
         void InsertEvent ()
@@ -195,16 +231,65 @@ namespace CmisSync
 
         partial void OnCancel (MonoMac.Foundation.NSObject sender)
         {
+            lock(loginLock)
+            {
+                isClosed = true;
+            }
             Loader.Cancel ();
             RemoveEvent ();
             Controller.CloseWindow ();
         }
 
+        partial void OnPasswordChanged(NSObject sender)
+        {
+            this.LoginStatusLabel.StringValue = "logging in";
+            this.LoginStatusLabel.Hidden = false;
+            this.LoginStatusProgress.StartAnimation(this);
+            ServerCredentials cred = new ServerCredentials() {
+                Address = Credentials.Address,
+                UserName = Credentials.UserName,
+                Password = PasswordText.StringValue
+            };
+            new TaskFactory().StartNew(() => {
+                try{
+                    CmisUtils.GetRepositories(cred);
+                    InvokeOnMainThread(()=> {
+                        lock(loginLock)
+                        {
+                            if(!isClosed)
+                                this.LoginStatusLabel.StringValue = "login successful";
+                        }
+
+                    });
+                }catch(Exception e) {
+                    InvokeOnMainThread(() => {
+                        lock (loginLock)
+                        {
+                            if(!isClosed)
+                                this.LoginStatusLabel.StringValue = "login failed: " + e.Message;
+                        }
+                    });
+                }
+                InvokeOnMainThread(() => {
+                    lock (loginLock)
+                    {
+                        if(!isClosed)
+                            this.LoginStatusProgress.StopAnimation(this);
+                    }
+                });
+            });
+        }
+
         partial void OnFinish (MonoMac.Foundation.NSObject sender)
         {
+            lock(loginLock)
+            {
+                isClosed = true;
+            }
             Loader.Cancel ();
             RemoveEvent ();
             Ignores = NodeModelUtils.GetIgnoredFolder (Repo);
+            Credentials.Password = PasswordText.StringValue;
             Controller.SaveFolder ();
             Controller.CloseWindow ();
         }

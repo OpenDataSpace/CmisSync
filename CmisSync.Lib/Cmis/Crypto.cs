@@ -1,9 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace CmisSync.Lib.Cmis
+namespace CmisSync.Lib
 {
     /// <summary>
     /// Obfuscation for sensitive data, making password harvesting a little less straightforward.
@@ -202,6 +203,55 @@ namespace CmisSync.Lib.Cmis
         {
             return System.Text.Encoding.UTF8.GetBytes(
                 "Thou art so farth away, I miss you my dear files❥, with CmisSync be forever by my side!");
+        }
+
+        /// <summary>
+        /// Creates the hash algorithm by the given name.
+        /// </summary>
+        /// <returns>The hash algorithm.</returns>
+        /// <param name="name">Name.</param>
+        public static HashAlgorithm CreateHashAlgorithm(string name) {
+            name = name.ToLower();
+            if(name.Equals("sha1"))
+                return SHA1.Create();
+            if(name.Equals("sha256"))
+                return SHA256.Create();
+            if(name.Equals("sha384"))
+                return SHA384.Create();
+            if(name.Equals("sha512"))
+                return SHA512.Create();
+            if(name.Equals("md5"))
+                return MD5.Create();
+            if(name.Equals("ripemd160") || name.Equals("ripemd"))
+                return RIPEMD160.Create();
+            return HashAlgorithm.Create();
+        }
+
+        /// <summary>
+        /// Calculates the checksum over the given stream.
+        /// </summary>
+        /// <returns>The checksum.</returns>
+        /// <param name="hashAlgorithm">Hash algorithm.</param>
+        /// <param name="stream">Stream.</param>
+        public static byte[] CalculateChecksum(string hashAlgorithm, Stream stream) {
+            using (var bs = new BufferedStream(stream))
+            using (var hash = CreateHashAlgorithm(hashAlgorithm))
+            {
+                return hash.ComputeHash(bs);
+            }
+        }
+
+        /// <summary>
+        /// Calculates the checksum over the given stream with a former created hashAlgorithm
+        /// </summary>
+        /// <returns>The checksum.</returns>
+        /// <param name="hashAlgorithm">Hash algorithm.</param>
+        /// <param name="file">File.</param>
+        public static byte[] CalculateChecksum(string hashAlgorithm, FileInfo file) {
+            using (var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return CalculateChecksum(hashAlgorithm, stream);
+            }
         }
     }
 }

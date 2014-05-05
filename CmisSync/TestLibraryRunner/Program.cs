@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TestLibrary;
+using TestLibrary.IntegrationTests;
 using Newtonsoft.Json;
 using System.IO;
 using System.Net;
@@ -81,6 +82,8 @@ namespace TestLibraryRunner
             {
                 log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
             }
+
+            CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
 
             //new CmisSyncTests().TestCrypto();
             test(path == null ? "../../../TestLibrary/test-servers.json" : path);

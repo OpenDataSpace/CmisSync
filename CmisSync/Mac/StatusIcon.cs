@@ -19,6 +19,11 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Collections.Generic;
+using System.Text;
+
+using Mono.Unix.Native;
+
+using log4net;
 
 using MonoMac.Foundation;
 using MonoMac.AppKit;
@@ -31,6 +36,8 @@ namespace CmisSync {
 
     public class StatusIcon : NSObject {
 
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ControllerBase));
+
         public StatusIconController Controller = new StatusIconController ();
 
         private NSMenu menu;
@@ -42,6 +49,7 @@ namespace CmisSync {
         private NSMenuItem about_item;
         private NSMenuItem quit_item;
         private NSMenuItem log_item;
+        private NSMenuItem general_settings_item;
 
         private NSImage [] animation_frames;
         private NSImage [] animation_frames_active;
@@ -57,6 +65,7 @@ namespace CmisSync {
         private NSImage update_image;
 
         private Dictionary<String, NSMenuItem> FolderItems;
+
 
         public StatusIcon () : base ()
         {
@@ -100,7 +109,7 @@ namespace CmisSync {
             Controller.UpdateStatusItemEvent += delegate (string state_text) {
                 using (var a = new NSAutoreleasePool ())
                 {
-                    InvokeOnMainThread (delegate {
+                    BeginInvokeOnMainThread (delegate {
                         this.state_item.Title = state_text;
                     });
                 }
@@ -128,22 +137,31 @@ namespace CmisSync {
             // TODO Need to implement this method like the COCOA way to do it
             Controller.UpdateTransmissionMenuEvent += delegate
             {
+                //  Put Program.Controller.ActiveTransmissions() before transmit from managed code to native code
+                //  https://mantis.dataspace.cc/view.php?id=3781
+                List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
+
                 using (var a = new NSAutoreleasePool()) {
-                    InvokeOnMainThread(delegate {
-                        List<FileTransmissionEvent> transmissions =    Program.Controller.ActiveTransmissions();
-                        NSMenu transmissionmenu = new NSMenu();
+                    BeginInvokeOnMainThread(delegate {
+                        if(state_item.Submenu!=null){
+                            foreach(NSMenuItem item in state_item.Submenu.ItemArray()){
+                                item.Dispose();
+                            }
+                            state_item.Submenu.RemoveAllItems();
+                        } else {
+                            state_item.Submenu = new NSMenu();
+                        }
                         foreach(FileTransmissionEvent transmission in transmissions) {
                             NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
-                            transmissionmenu.AddItem(transmissionItem);
+                            state_item.Submenu.AddItem(transmissionItem);
                         }
                         if(transmissions.Count > 0) {
-                            state_item.Submenu = transmissionmenu;
                             state_item.Enabled = true;
                         }else{
                             state_item.Enabled = false;
                         }
                     });
-                }
+				}
             };
         }
 
@@ -216,8 +234,18 @@ namespace CmisSync {
                     Enabled = false
                 };
 
+                this.general_settings_item = new NSMenuItem()
+                {
+                    Title = Properties_Resources.EditTitle
+                };
+
+                this.general_settings_item.Activated += delegate
+                {
+                    Controller.SettingClicked();
+                };
+
                 this.log_item = new NSMenuItem () {
-                    Title = CmisSync.Properties_Resources.ViewLog
+                    Title = Properties_Resources.ViewLog
                 };
 
                 this.log_item.Activated += delegate
@@ -226,7 +254,7 @@ namespace CmisSync {
                 };
 
                 this.add_item = new NSMenuItem () {
-                    Title   = CmisSync.Properties_Resources.AddARemoteFolder,
+                    Title   = Properties_Resources.AddARemoteFolder,
                     Enabled = true
                 };
 
@@ -235,7 +263,7 @@ namespace CmisSync {
                 };
 
                 this.about_item = new NSMenuItem () {
-                    Title   = CmisSync.Properties_Resources.About,
+                    Title   = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName),
                     Enabled = true
                 };
 
@@ -244,7 +272,7 @@ namespace CmisSync {
                 };
 
                 this.quit_item = new NSMenuItem () {
-                    Title   = CmisSync.Properties_Resources.Exit,
+                    Title   = Properties_Resources.Exit,
                     Enabled = true
                 };
 
@@ -275,6 +303,7 @@ namespace CmisSync {
 
                 this.menu.AddItem (this.add_item);
                 this.menu.AddItem (NSMenuItem.SeparatorItem);
+                this.menu.AddItem (this.general_settings_item);
                 this.menu.AddItem (this.log_item);
                 this.menu.AddItem (this.about_item);
                 this.menu.AddItem (NSMenuItem.SeparatorItem);
@@ -375,26 +404,80 @@ namespace CmisSync {
 
     //TODO This isn't working well, please create a native COCOA like solution 
     public class TransmissionMenuItem : NSMenuItem {
-        public TransmissionMenuItem(FileTransmissionEvent transmission) {
 
-            Title = System.IO.Path.GetFileName(transmission.Path);
+        private FileTransmissionEvent transmissionEvent;
+        private int updateInterval = 1;
+        private DateTime updateTime;
+        private bool run = false;
+        private object disposeLock = new object ();
+        private bool disposed = false;
 
-            Activated += delegate {
-                NSWorkspace.SharedWorkspace.OpenFile (System.IO.Directory.GetParent(transmission.Path).FullName);
-            };
+        private string TransmissionStatus(TransmissionProgressEventArgs e)
+        {
+            double? percent = e.Percent;
+            long? bitsPerSecond = e.BitsPerSecond;
+            if (percent != null && bitsPerSecond != null) {
+                return String.Format ("{0} ({1} {2})",
+                    System.IO.Path.GetFileName (transmissionEvent.Path),
+                    CmisSync.Lib.Utils.FormatPercent((double)percent),
+                    CmisSync.Lib.Utils.FormatBandwidth ((long)bitsPerSecond));
+            } else {
+                return System.IO.Path.GetFileName (transmissionEvent.Path);
+            }
+        }
 
-            transmission.TransmissionStatus += delegate (object sender, TransmissionProgressEventArgs e){
-                double? percent = e.Percent;
-                long? bitsPerSecond = e.BitsPerSecond;
-                if( percent != null && bitsPerSecond != null ) {
-                    BeginInvokeOnMainThread(delegate {
-                        Title = String.Format("{0} ({1:###.#}% {2})",
-                            System.IO.Path.GetFileName(transmission.Path),
-                            Math.Round((double)percent,1),
-                            CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
-                    });
+        private void TransmissionEvent(object sender, TransmissionProgressEventArgs e)
+        {
+            lock (disposeLock) {
+                if (disposed) {
+                    return;
                 }
+                TimeSpan diff = DateTime.Now - updateTime;
+                if (diff.Seconds < updateInterval) {
+                    return;
+                }
+                if (run) {
+                    return;
+                }
+
+                run = true;
+                updateTime = DateTime.Now;
+                string title = TransmissionStatus (e);
+                BeginInvokeOnMainThread (delegate
+                {
+                    lock(disposeLock) {
+                        if (!disposed) {
+                            Title = title;
+                        }
+                    }
+                });
+                run = false;
+            }
+        }
+
+        public TransmissionMenuItem(FileTransmissionEvent transmission) {
+            Activated += delegate
+            {
+                NSWorkspace.SharedWorkspace.OpenFile (System.IO.Directory.GetParent (transmission.Path).FullName);
             };
+
+            transmissionEvent = transmission;
+            updateTime = DateTime.Now;
+
+            Title = TransmissionStatus (transmission.Status);
+
+            transmissionEvent.TransmissionStatus += TransmissionEvent;
+        }
+
+        protected override void Dispose (bool disposing)
+        {
+            lock (disposeLock) {
+                if (!disposed) {
+                    transmissionEvent.TransmissionStatus -= TransmissionEvent;
+                }
+                disposed = true;
+            }
+            base.Dispose (disposing);
         }
     }
 

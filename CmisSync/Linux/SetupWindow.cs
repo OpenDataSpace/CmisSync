@@ -45,7 +45,7 @@ namespace CmisSync {
 
         public SetupWindow () : base ("")
         {
-            Title          = Catalog.GetString ("DataSpace Sync Setup");
+            Title          = String.Format("{0} {1}", Properties_Resources.ApplicationName, Catalog.GetString ("Setup"));
             BorderWidth    = 0;
             IconName       = "app-cmissync";
             Resizable      = false;

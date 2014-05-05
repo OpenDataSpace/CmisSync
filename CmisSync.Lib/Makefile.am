@@ -3,7 +3,7 @@ TARGET = library
 
 ASSEMBLY_INFO_SOURCE = Defines.cs
 
-LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(WEBLIBS) $(MONOPOSIX)
+LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMISLIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS)
 
 SOURCES =  \
 	ActivityListenerAggregator.cs \
@@ -14,35 +14,120 @@ SOURCES =  \
 	Cmis/CmisUtils.cs \
 	Cmis/Crypto.cs \
 	Cmis/Database.cs \
+	Cmis/DotCMISLogListener.cs \
 	Cmis/IDatabase.cs \
 	Cmis/MimeType.cs \
+	Cmis/PersistentNtlmAuthenticationProvider.cs \
+	Cmis/PersistentStandardAuthenticationProvider.cs \
 	Config.cs \
 	ConfigManager.cs \
 	ConfigMigration.cs \
+	ContentTasks/AbortException.cs \
+	ContentTasks/ChunkedDownloader.cs \
+	ContentTasks/ChunkedUploader.cs \
+	ContentTasks/IFileDownloader.cs \
+	ContentTasks/IFileUploader.cs \
+	ContentTasks/SimpleFileDownloader.cs \
+	ContentTasks/SimpleFileUploader.cs \
+	ContentTasks/Utils.cs \
 	Credentials.cs \
+	Data/MappedObjects.cs \
+	Data/PathMatcher.cs \
 	Defines.cs \
+	Events/AbstractEventProducer.cs \
 	Events/ActiveActivitiesManager.cs \
+	Events/BubbledEvent.cs \
+	Events/ChangeEnums.cs \
 	Events/ConfigChangedEvent.cs \
+	Events/ContentChangeEvent.cs \
+	Events/CrawlRequestEvent.cs \
 	Events/DebugLoggingHandler.cs \
+	Events/EncapsuledEvent.cs \
+	Events/EventFilter/AbstractFileFilter.cs \
+	Events/EventFilter/FailedOperationsFilter.cs \
+	Events/EventFilter/GenericHandleDoublicatedEventsFilter.cs \
+	Events/EventFilter/IgnoredFileNamesFilter.cs \
+	Events/EventFilter/IgnoredFilesFilter.cs \
+	Events/EventFilter/IgnoredFolderNameFilter.cs \
+	Events/EventFilter/IgnoredFoldersFilter.cs \
+	Events/EventFilter/InvalidFolderNameFilter.cs \
+	Events/ExceptionEvent.cs \
 	Events/FileConflictEvent.cs \
+	Events/FileDownloadRequest.cs \
+	Events/FileEvent.cs \
 	Events/FileTransmissionEvent.cs \
+	Events/FolderEvent.cs \
 	Events/FSDeletionHandler.cs \
 	Events/FSEvent.cs \
+	Events/FullSyncCompletedEvent.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/ISyncEvent.cs \
+	Events/ISyncEventQueue.cs \
+	Events/PermissionDeniedEvent.cs \
+	Events/ProxyAuthRequiredEvent.cs \
+	Events/RecentChangedEvent.cs \
+	Events/RemoteEvent.cs \
+	Events/ReportingSyncEventHandler.cs \
+	Events/RequestIgnoredEvent.cs \
+	Events/StartNextSyncEvent.cs \
+	Events/SuccessfulLoginEvent.cs \
 	Events/SyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \
+	Events/SyncScheduler.cs \
 	Fetcher.cs \
+	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	LoggingStream.cs \
 	RepoBase.cs \
 	RepoInfo.cs \
+	Storage/EventStorage.cs \
+	Storage/FailedOperationsStorage.cs \
+	Storage/GeneralRepoStorage.cs \
+	Storage/ICookieStorage.cs \
+	Storage/IDirectoryInfo.cs \
+	Storage/IFileSystemInfo.cs \
+	Storage/IMetaDataStorage.cs \
+	Storage/MetaDataStorage.cs \
+	Storage/PersistentStorage.cs \
+	Streams/BandwidthLimitedStream.cs \
+	Streams/ForwardReadingStream.cs \
+	Streams/NonClosingHashStream.cs \
+	Streams/OffsetStream.cs \
+	Streams/ProgressStream.cs \
+	Streams/StreamWrapper.cs \
 	Sync/ChangeLogStrategy.cs \
 	Sync/CmisRepo.cs \
 	Sync/CrawlStrategy.cs \
+	Sync/Solver/ISolver.cs \
+	Sync/Solver/LocalObjectAdded.cs \
+	Sync/Solver/LocalObjectChanged.cs \
+	Sync/Solver/LocalObjectDeleted.cs \
+	Sync/Solver/LocalObjectMoved.cs \
+	Sync/Solver/LocalObjectRenamed.cs \
+	Sync/Solver/NothingToDoSolver.cs \
+	Sync/Solver/RemoteObjectAdded.cs \
+	Sync/Solver/RemoteObjectChanged.cs \
+	Sync/Solver/RemoteObjectDeleted.cs \
+	Sync/Solver/RemoteObjectMoved.cs \
+	Sync/Solver/RemoteObjectRenamed.cs \
+	Sync/Strategy/ContentChangeEventAccumulator.cs \
+	Sync/Strategy/ContentChangeEventTransformer.cs \
+	Sync/Strategy/ContentChanges.cs \
+	Sync/Strategy/Crawler.cs \
+	Sync/Strategy/FileEventHandler.cs \
+	Sync/Strategy/FileSynchronizer.cs \
+	Sync/Strategy/FolderSynchronizer.cs \
+	Sync/Strategy/ISituationDetection.cs \
+	Sync/Strategy/LocalCrawler.cs \
+	Sync/Strategy/LocalSituationDetection.cs \
+	Sync/Strategy/MacWatcher.cs \
+	Sync/Strategy/NetWatcher.cs \
+	Sync/Strategy/RemoteSituationDetection.cs \
+	Sync/Strategy/SimpleFileSynchronizer.cs \
+	Sync/Strategy/SyncMechanism.cs \
+	Sync/Strategy/Watcher.cs \
 	Sync/SynchronizedFolder.cs \
-	Sync/WatcherStrategy.cs \
 	Utils.cs \
 	Watcher.cs
 

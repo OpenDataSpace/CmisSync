@@ -25,13 +25,27 @@ namespace CmisSync
         // Shared initialization code
         void Initialize ()
         {
+            this.Delegate = new EditWizardDelegate();
         }
 
         #endregion
 
+        public class EditWizardDelegate : NSWindowDelegate {
+            bool closed = false;
+
+            public override bool WindowShouldClose (NSObject sender)
+            {
+                if (!closed) {
+                    closed = true;
+                    ((sender as EditWizard).WindowController as EditWizardController).Controller.CloseWindow();
+                }
+                return closed;
+            }
+        }
+
         public override void OrderFrontRegardless ()
         {
-            NSApplication.SharedApplication.AddWindowsItem (this, "DataSpace Sync", false);
+            NSApplication.SharedApplication.AddWindowsItem (this, Properties_Resources.ApplicationName, false);
             NSApplication.SharedApplication.ActivateIgnoringOtherApps (true);
             MakeKeyAndOrderFront (this);
 

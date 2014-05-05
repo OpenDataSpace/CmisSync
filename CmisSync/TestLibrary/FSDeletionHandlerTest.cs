@@ -23,28 +23,27 @@ namespace TestLibrary
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
 
-
-        [Test]
+        [Test, Category("Fast")]
         public void ToStringTest() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
             Assert.AreEqual("CmisSync.Lib.Events.FSDeletionHandler with Priority 100", handler.ToString());
         }
-        
-        [Test]
+
+        [Test, Category("Fast")]
         public void PriorityTest() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
             Assert.AreEqual(100, handler.Priority);
             
         }
-        
-        [Test]
+
+        [Test, Category("Fast")]
         public void IgnoresNonFSEvent() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
             bool handled = handler.Handle(new Mock<ISyncEvent>().Object);
             Assert.False(handled);            
         }
 
-        [Test]
+        [Test, Category("Fast")]
         public void IgnoresFSNonDeleteEvent() {
             var handler = new FSDeletionHandler(new Mock<IDatabase>().Object, new Mock<ISession>().Object);
             bool handled = handler.Handle(new Mock<FSEvent>(WatcherChangeTypes.Created, "").Object);

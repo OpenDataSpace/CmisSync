@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="12F45" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SetupSubLoginController">
@@ -11,6 +11,7 @@
                 <outlet property="AddressText" destination="u4D-dp-f4x" id="Xe8-TT-aCb"/>
                 <outlet property="CancelButton" destination="xDS-QZ-e0t" id="V0g-Rn-hIQ"/>
                 <outlet property="ContinueButton" destination="KKO-2W-Y1C" id="IVP-do-NEJ"/>
+                <outlet property="LoginProgress" destination="gCQ-7x-01C" id="75i-ok-MXl"/>
                 <outlet property="PasswordLabel" destination="3Gx-Ub-1ms" id="rNv-dU-2Rf"/>
                 <outlet property="PasswordText" destination="gqF-fE-Zp5" id="AB8-Ia-ddd"/>
                 <outlet property="UserLabel" destination="SI4-Te-Ojl" id="5Ac-Yj-zRs"/>
@@ -51,7 +52,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Label" id="X13-MV-WP3">
                         <font key="font" size="11" name="LucidaGrande"/>
-                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                        <color key="textColor" name="disabledControlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
@@ -101,7 +102,7 @@
                     </connections>
                 </secureTextField>
                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" id="8aS-k0-A4n">
-                    <rect key="frame" x="0.0" y="29" width="400" height="115"/>
+                    <rect key="frame" x="5" y="20" width="391" height="115"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" sendsActionOnEndEditing="YES" id="2hI-kJ-AIe">
                         <font key="font" size="11" name="LucidaGrande"/>
@@ -133,6 +134,10 @@
                         <outlet property="nextKeyView" destination="u4D-dp-f4x" id="dJ4-qB-0hd"/>
                     </connections>
                 </button>
+                <progressIndicator horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="gCQ-7x-01C">
+                    <rect key="frame" x="378" y="156" width="16" height="16"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                </progressIndicator>
             </subviews>
         </customView>
     </objects>

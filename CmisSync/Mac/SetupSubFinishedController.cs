@@ -38,7 +38,6 @@ namespace CmisSync
         protected override void Dispose (bool disposing)
         {
             base.Dispose (disposing);
-            Console.WriteLine (this.GetType ().ToString () + " disposed " + disposing.ToString ());
         }
 
         SetupController Controller;
@@ -47,6 +46,7 @@ namespace CmisSync
         {
             base.AwakeFromNib ();
 
+            this.FinishText.StringValue = String.Format(Properties_Resources.YouCanFind, Controller.saved_local_path);
             this.OpenButton.Title = Properties_Resources.OpenFolder;
             this.OpenButton.SizeToFit ();
             this.FinishButton.Title = Properties_Resources.Finish;

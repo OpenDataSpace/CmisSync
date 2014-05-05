@@ -34,5 +34,6 @@ namespace CmisSync.Lib.Events
             return this.GetType() + " with Priority " + Priority.ToString();
         }
     }
+
 }
 
