@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Sync.Solver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -34,8 +35,15 @@ namespace CmisSync.Lib.Sync.Solver
     {
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
-            // Rename remote object
-            throw new NotImplementedException();
+            // NOOP at the moment
+            /*IMappedObject obj = storage.GetObjectByRemoteId(remoteId.Id);
+            DateTime? lastModified = remoteId is IFolder ? (remoteId as IFolder).LastModificationDate : (remoteId as IDocument).LastModificationDate;
+            obj.LastRemoteWriteTimeUtc = lastModified;
+            if(lastModified != null) {
+                localFile.LastWriteTimeUtc = (DateTime)lastModified;
+            }
+
+            storage.SaveMappedObject(obj);*/
         }
     }
 }

@@ -20,13 +20,19 @@
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
     using System;
+    using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Solver;
+
+    using DotCMIS.Client;
 
     using Moq;
 
     using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture]
     public class RemoteObjectChangedTest
@@ -35,6 +41,48 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void DefaultConstructorTest()
         {
             new RemoteObjectChanged();
+        }
+
+        [Ignore]
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFolderChanged()
+        {
+            DateTime creationDate = DateTime.UtcNow;
+            string folderName = "a";
+            string path = Path.Combine(Path.GetTempPath(), folderName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+
+            var session = new Mock<ISession>();
+
+            var storage = new Mock<IMetaDataStorage>();
+
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            dirInfo.Setup(d => d.Name).Returns(folderName);
+            dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
+
+            storage.AddLocalFolder(dirInfo.Object, id);
+
+            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?) creationDate);
+
+            var solver = new RemoteObjectChanged();
+
+            solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
+
+            storage.Verify(
+                s => s.SaveMappedObject(
+                It.Is<IMappedObject>(f =>
+                                 f.RemoteObjectId == id &&
+                                 f.Name == folderName &&
+                                 f.ParentId == parentId &&
+                                 f.LastChangeToken == lastChangeToken &&
+                                 f.LastRemoteWriteTimeUtc == creationDate &&
+                                 f.Type == MappedObjectType.Folder)),
+                Times.Once());
+            dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
         }
     }
 }
