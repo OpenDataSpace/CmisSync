@@ -182,6 +182,10 @@ namespace CmisSync.Lib.Storage
                 MappedObject parent = root;
                 foreach(var name in pathSegments)
                 {
+                    if(name.Equals(".")) {
+                        continue;
+                    }
+                    
                     MappedObject child = objects.Find(o => o.ParentId == parent.RemoteObjectId && o.Name == name);
                     if(child != null)
                     {
