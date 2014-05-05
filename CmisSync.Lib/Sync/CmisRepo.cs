@@ -584,7 +584,6 @@ namespace CmisSync.Lib.Sync
 
             this.mechanism = new SyncMechanism(this.localDetection, this.remoteDetection, this.Queue, this.session, this.storage);
             this.EventManager.AddEventHandler(this.mechanism);
-            Logger.Debug("Before");
             
             var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken);
             
