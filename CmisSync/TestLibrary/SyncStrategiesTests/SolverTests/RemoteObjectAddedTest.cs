@@ -45,11 +45,13 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFolderAdded()
         {
+            DateTime creationDate = DateTime.UtcNow;
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
+
             var session = new Mock<ISession>();
 
             var storage = new Mock<IMetaDataStorage>();
@@ -60,9 +62,10 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
 
             Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?) creationDate);
 
             var solver = new RemoteObjectAdded();
-            
+
             solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
 
@@ -75,6 +78,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                                  f.LastChangeToken == lastChangeToken &&
                                  f.Type == MappedObjectType.Folder)),
                 Times.Once());
+            dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
         }
     }
 }
