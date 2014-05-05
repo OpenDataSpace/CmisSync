@@ -76,6 +76,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                                  f.Name == folderName &&
                                  f.ParentId == parentId &&
                                  f.LastChangeToken == lastChangeToken &&
+                                 f.LastRemoteWriteTimeUtc == creationDate &&
                                  f.Type == MappedObjectType.Folder)),
                 Times.Once());
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());

@@ -66,13 +66,12 @@ namespace CmisSync.Lib.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
         /// </summary>
-        /// <param name="name">Name.</param>
+        /// <param name="name">Name of the Directory/Folder.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        /// <param name="Type">Object type.</param>
+        /// <param name="type">Object type.</param>
         /// <param name="parentId">Parent identifier.</param>
         /// <param name="changeToken">Change token.</param>
-        /// <param name="guid">GUID.</param>
-        /// <param name="desc">The description</param>
+        /// <param name="contentSize">Size of the content. Only exists on Documents.</param>
         public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1)
         {
             if(string.IsNullOrEmpty(name))
@@ -101,8 +100,6 @@ namespace CmisSync.Lib.Data
             this.LastContentSize = contentSize;
         }
 
-      
-               
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
         /// </summary>
@@ -126,7 +123,7 @@ namespace CmisSync.Lib.Data
                 this.LastContentSize = data.LastContentSize;
             }
         }
-  
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
         /// </summary>
@@ -135,11 +132,12 @@ namespace CmisSync.Lib.Data
         /// </param>
         public MappedObject(IFolder remoteFolder)
         {
-               this.RemoteObjectId = remoteFolder.Id;
-               this.ParentId = remoteFolder.ParentId;
-               this.LastChangeToken = remoteFolder.ChangeToken;
-               this.Name = remoteFolder.Name;
-               this.Type = MappedObjectType.Folder;    
+            this.RemoteObjectId = remoteFolder.Id;
+            this.ParentId = remoteFolder.ParentId;
+            this.LastChangeToken = remoteFolder.ChangeToken;
+            this.Name = remoteFolder.Name;
+            this.Type = MappedObjectType.Folder;
+            this.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
         }
 
         /// <summary>

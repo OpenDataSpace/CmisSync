@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Sync.Solver
     using DotCMIS.Client;
 
     /// <summary>
-    /// Remote object has been changed. => Download the content or update the metadata locally.
+    /// Remote object has been changed. => update the metadata locally.
     /// </summary>
     public class RemoteObjectChanged : ISolver
     {
