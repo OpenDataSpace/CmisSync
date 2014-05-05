@@ -388,11 +388,9 @@ namespace CmisSync.Lib.Sync
                 this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
                 return true;
             }
-            else
-            {
-                // This should never ever happen!
-                return false;
-            }
+
+            return false;
+
         }
 
         /// <summary>

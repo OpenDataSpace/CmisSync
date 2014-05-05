@@ -33,6 +33,7 @@ namespace TestLibrary.StorageTests
 
     using NUnit.Framework;
 
+    [TestFixture]
     public class MetaDataStorageTest
     {
         private readonly IPathMatcher matcher = Mock.Of<IPathMatcher>();
@@ -321,6 +322,21 @@ namespace TestLibrary.StorageTests
             string remotePath = storage.GetRemotePath(remoteFolder);
 
             Assert.That(remotePath, Is.EqualTo("/remoteFolder"));
+        }
+
+        [Test, Category("Fast")]
+        public void FindRootFolder()
+        {
+            string id = "id";
+            string path = Path.GetTempPath();
+            var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
+            var matcher = new PathMatcher(path, "/");
+            var storage = new MetaDataStorage(this.engine, matcher);
+            var rootFolder = new MappedObject("/", id, MappedObjectType.Folder, null, "token");
+            storage.SaveMappedObject(rootFolder);
+            
+            Assert.That(storage.GetObjectByRemoteId(id), Is.Not.Null, "Not findable by ID");
+            Assert.That(storage.GetObjectByLocalPath(fsInfo), Is.Not.Null, "Not findable by path");
         }
     }
 }
