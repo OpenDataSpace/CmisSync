@@ -79,6 +79,7 @@ SOURCES =  \
 	Events/EventTypes/SuccessfulLoginEvent.cs \
 	Events/FileDownloadRequest.cs \
 	Events/GenericSyncEventHandler.cs \
+	Events/IDisposableSyncEventQueue.cs \
 	Events/ISyncEventQueue.cs \
 	Events/ReportingSyncEventHandler.cs \
 	Events/SyncEventHandler.cs \

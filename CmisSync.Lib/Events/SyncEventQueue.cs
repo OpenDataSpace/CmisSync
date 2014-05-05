@@ -24,7 +24,7 @@ using log4net;
 
 namespace CmisSync.Lib.Events
 {
-    public class SyncEventQueue : ISyncEventQueue, IDisposable {
+    public class SyncEventQueue : IDisposableSyncEventQueue {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
 
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();

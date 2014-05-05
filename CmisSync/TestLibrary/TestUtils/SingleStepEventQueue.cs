@@ -28,7 +28,7 @@ namespace TestLibrary
     /// </summary>
     /// Do not use this in production code. 
     /// It contains public fields that could do a lot of harm 
-    public class SingleStepEventQueue : ISyncEventQueue {
+    public class SingleStepEventQueue : IDisposableSyncEventQueue {
         public SyncEventManager manager; 
         public Queue<ISyncEvent> queue = new Queue<ISyncEvent>();
 
@@ -61,6 +61,16 @@ namespace TestLibrary
             var startSyncEvent = new StartNextSyncEvent(false);
             this.AddEvent(startSyncEvent);
             this.Run();
+        }
+
+        public void Dispose() {
+        }
+
+        public bool WaitForStopped(int timeout) {
+            return true;
+        }
+
+        public void StopListener(){
         }
     }
 }
