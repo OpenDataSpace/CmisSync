@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ISyncEventQueue.cs" company="GRAU DATA AG">
+// <copyright file="IDisposableSyncEventQueue.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,17 +16,17 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-
-using log4net;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks;
+
+    using log4net;
+
     public interface IDisposableSyncEventQueue : ISyncEventQueue, IDisposable {
         void StopListener();
         bool WaitForStopped(int timeout);
-
     }
 }
