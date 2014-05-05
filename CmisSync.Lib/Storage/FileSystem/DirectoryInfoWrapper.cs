@@ -99,5 +99,14 @@ namespace CmisSync.Lib.Storage
 
             return wrappedFiles;
         }
+
+        /// <summary>
+        /// Moves the directory to the destination directory path by using the original instance.
+        /// </summary>
+        /// <param name="destDirName">Destination directory path.</param>
+        public void MoveTo(string destDirName)
+        {
+            this.original.MoveTo(destDirName);
+        }
     }
 }

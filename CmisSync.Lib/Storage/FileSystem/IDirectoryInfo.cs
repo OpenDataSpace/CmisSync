@@ -52,5 +52,11 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         /// <param name="recursive">Deletes recursive if set to <c>true</c>.</param>
         void Delete(bool recursive);
+
+        /// <summary>
+        /// Moves the directory to the destination directory path.
+        /// </summary>
+        /// <param name="destDirName">Destination directory path.</param>
+        void MoveTo(string destDirName);
     }
 }
