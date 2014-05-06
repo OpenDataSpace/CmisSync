@@ -168,6 +168,29 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Fast")]
+        public void GetObjectByPathWithHierarchie()
+        {
+            var matcher = new PathMatcher(Path.GetTempPath(), "/");
+            var storage = new MetaDataStorage(this.engine, matcher);
+            var root = Mock.Of<IDirectoryInfo>(f =>
+                                               f.FullName == Path.GetTempPath());
+            var folder = Mock.Of<IDirectoryInfo>(f =>
+                                                 f.FullName == Path.Combine(Path.GetTempPath(), "a"));
+            var mappedRoot = new MappedObject("/", "rootId", MappedObjectType.Folder, null, null);
+            var mappedFolder = new MappedObject("a", "remoteId", MappedObjectType.Folder, "rootId", null)
+            {
+                Guid = Guid.NewGuid(),
+            };
+            storage.SaveMappedObject(mappedRoot);
+            storage.SaveMappedObject(mappedFolder);
+
+            var obj = storage.GetObjectByLocalPath(folder);
+
+            Assert.That(storage.GetObjectByLocalPath(root), Is.EqualTo(mappedRoot));
+            Assert.That(obj, Is.EqualTo(mappedFolder));
+        }
+
+        [Test, Category("Fast")]
         [ExpectedException(typeof(EntryNotFoundException))]
         public void GetChildrenOfNonExistingParentMustThrowException()
         {
@@ -337,6 +360,33 @@ namespace TestLibrary.StorageTests
             
             Assert.That(storage.GetObjectByRemoteId(id), Is.Not.Null, "Not findable by ID");
             Assert.That(storage.GetObjectByLocalPath(fsInfo), Is.Not.Null, "Not findable by path");
+        }
+
+        [Test, Category("Fast")]
+        public void SaveRenamedMappedObjectOverridesExistingEntry()
+        {
+            string id = "id";
+            string oldName = "my";
+            string newName = "newMy";
+            string path = Path.GetTempPath();
+            string parentId = "ParentId";
+            string oldToken = "oldToken";
+            string newToken = "newToken";
+            var matcher = new PathMatcher(path, "/");
+            var storage = new MetaDataStorage(this.engine, matcher);
+            var rootFolder = new MappedObject("/", parentId, MappedObjectType.Folder, null, "token");
+            storage.SaveMappedObject(rootFolder);
+            var folder = new MappedObject(oldName, id, MappedObjectType.Folder, parentId, oldToken);
+            storage.SaveMappedObject(folder);
+            Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(path, oldName))), Is.EqualTo(folder));
+
+            var savedObject = storage.GetObjectByRemoteId(id);
+            savedObject.Name = newName;
+            savedObject.LastChangeToken = newToken;
+            storage.SaveMappedObject(savedObject);
+
+            Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(path, oldName))), Is.Null);
+            Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(path, newName))), Is.EqualTo(savedObject));
         }
     }
 }

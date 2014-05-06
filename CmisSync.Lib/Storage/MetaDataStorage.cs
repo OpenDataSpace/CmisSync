@@ -185,7 +185,7 @@ namespace CmisSync.Lib.Storage
                     if(name.Equals(".")) {
                         continue;
                     }
-                    
+
                     MappedObject child = objects.Find(o => o.ParentId == parent.RemoteObjectId && o.Name == name);
                     if(child != null)
                     {
