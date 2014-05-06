@@ -37,8 +37,8 @@ namespace TestLibrary.StorageTests
         {
             path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var reader = new ExtendedAttributeReaderUnix();
-            if(!reader.IsFeatureAvaillable()) {
-                Assert.Ignore("Extended Attribute not availlable on this machine");
+            if(!reader.IsFeatureAvailable()) {
+                Assert.Ignore("Extended Attribute not available on this machine");
             }
 
         }
@@ -189,13 +189,19 @@ namespace TestLibrary.StorageTests
 
         [Test, Category("Medium")]
         [Category("ExtendedAttribute")]
-        public void CheckAvaillable()
+        public void CheckAvailable()
         {
-            Directory.CreateDirectory(path);
             var reader = new ExtendedAttributeReaderUnix();
-            reader.IsFeatureAvaillable();
+            reader.IsFeatureAvailable();
         }
 
+        [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
+        public void CheckAvailableOnPath()
+        {
+            var reader = new ExtendedAttributeReaderUnix();
+            reader.IsFeatureAvailable(Environment.CurrentDirectory);
+        }
     }
 }
 #endif

@@ -159,6 +159,7 @@
     <Compile Include="RepoInfoTests.cs" />
     <Compile Include="IntegrationTests\CmisRepoTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentStandardAuthenticationProviderTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\AlreadyAddedObjectsFsEventFilterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -60,6 +60,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             dirInfo.Setup(d => d.FullName).Returns(path);
             dirInfo.Setup(d => d.Name).Returns(folderName);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
+            dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(false);
 
             Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?) creationDate);
@@ -80,6 +81,49 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                                  f.Type == MappedObjectType.Folder)),
                 Times.Once());
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
+            dirInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(),It.IsAny<string>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFolderAddedAndExtendedAttributsAreAvailable()
+        {
+            DateTime creationDate = DateTime.UtcNow;
+            string folderName = "a";
+            string path = Path.Combine(Path.GetTempPath(), folderName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+
+            var session = new Mock<ISession>();
+
+            var storage = new Mock<IMetaDataStorage>();
+
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            dirInfo.Setup(d => d.Name).Returns(folderName);
+            dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
+            dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
+
+            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?) creationDate);
+
+            var solver = new RemoteObjectAdded();
+
+            solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
+            dirInfo.Verify(d => d.Create(), Times.Once());
+
+            storage.Verify(
+                s => s.SaveMappedObject(
+                It.Is<IMappedObject>(f =>
+                                 f.RemoteObjectId == id &&
+                                 f.Name == folderName &&
+                                 f.ParentId == parentId &&
+                                 f.LastChangeToken == lastChangeToken &&
+                                 f.LastRemoteWriteTimeUtc == creationDate &&
+                                 f.Type == MappedObjectType.Folder)),
+                Times.Once());
+            dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
+            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k.Equals(MappedObject.ExtendedAttributeKey)),It.IsAny<string>()), Times.Once());
         }
     }
 }

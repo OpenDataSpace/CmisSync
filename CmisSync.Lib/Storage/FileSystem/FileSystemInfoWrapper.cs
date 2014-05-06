@@ -144,5 +144,20 @@ namespace CmisSync.Lib.Storage
                 throw new ExtendedAttributeException("Feature is not supported");
             }
         }
+
+        /// <summary>
+        /// Determines whether instance is able to save extended attributes.
+        /// </summary>
+        /// <returns><c>true</c> if extended attributes are available, otherwise<c>false</c></returns>
+        public bool IsExtendedAttributeAvailable()
+        {
+            if (reader != null) {
+                return reader.IsFeatureAvailable(this.original.FullName);
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

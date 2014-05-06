@@ -79,7 +79,16 @@ namespace CmisSync.Lib.Storage
         /// <returns>
         /// <c>true</c> if Extended Attributes are active on the filesystem; otherwise, <c>false</c>.
         /// </returns>
-        bool IsFeatureAvaillable();
+        bool IsFeatureAvailable();
+
+        /// <summary>
+        /// Determines whether Extended Attributes are active on the filesystem.
+        /// </summary>
+        /// <param name="path">Path to be checked</param>
+        /// <returns>
+        /// <c>true</c> if Extended Attributes are active on the filesystem; otherwise, <c>false</c>.
+        /// </returns>
+        bool IsFeatureAvailable(string path);
     }
 
     /// <summary>

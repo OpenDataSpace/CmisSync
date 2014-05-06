@@ -350,6 +350,23 @@ namespace CmisSync.Lib.Storage
         }
 
         /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.MetaDataStorage"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.MetaDataStorage"/>.</returns>
+        public override string ToString()
+        {
+            string list = string.Empty;
+            using (var tran = this.engine.GetTransaction())
+            {
+                foreach (var row in tran.SelectForward<string, string>(MappedObjectsTable))
+                {
+                    list += string.Format("[ Key={0}, Value={1}]{2}", row.Key, row.Value, Environment.NewLine);
+                }
+            }
+            return string.Format("[MetaDataStorage: Matcher={0}, ChangeLogToken={1}]{2}{3}", Matcher, ChangeLogToken, Environment.NewLine, list);
+        }
+
+        /// <summary>
         /// Gets the identifier of the given object and throws Exceptions if object or remote object id is null
         /// </summary>
         /// <returns>

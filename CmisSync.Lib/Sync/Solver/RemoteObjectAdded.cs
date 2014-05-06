@@ -60,14 +60,23 @@ namespace CmisSync.Lib.Sync.Solver
                 }
 
                 var remoteFolder = remoteId as IFolder;
-                (localFile as IDirectoryInfo).Create();
+                IDirectoryInfo localFolder = (localFile as IDirectoryInfo);
+                localFolder.Create();
 
                 if(remoteFolder.LastModificationDate != null)
                 {
-                    (localFile as IDirectoryInfo).LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
+                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
+                }
+
+                Guid uuid = Guid.Empty;
+                if (localFolder.IsExtendedAttributeAvailable())
+                {
+                    uuid = Guid.NewGuid();
+                    localFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
                 }
 
                 var mappedObject = new MappedObject(remoteFolder);
+                mappedObject.Guid = uuid;
                 storage.SaveMappedObject(mappedObject);
             }
         }

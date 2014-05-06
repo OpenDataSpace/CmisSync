@@ -75,5 +75,11 @@ namespace CmisSync.Lib.Storage
         /// <returns>The extended attribute value.</returns>
         /// <param name="key">Attribute name.</param>
         string GetExtendedAttribute(string key);
+
+        /// <summary>
+        /// Determines whether instance is able to save extended attributes.
+        /// </summary>
+        /// <returns><c>true</c> if this instance is able to save extended attributes; otherwise, <c>false</c>.</returns>
+        bool IsExtendedAttributeAvailable();
     }
 }
