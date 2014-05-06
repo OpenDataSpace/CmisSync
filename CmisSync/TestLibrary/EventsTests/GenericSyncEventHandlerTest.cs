@@ -38,6 +38,32 @@ namespace TestLibrary.EventsTests
         private int priority = 666;
 
         [Test, Category("Fast")]
+        public void ConstructorTakesInstanceName()
+        {
+            string name = "InstanceName";
+            var handler = new GenericSyncEventHandler<ISyncEvent>(delegate {
+                return false;
+            }, name);
+            Assert.That(handler.ToString().Contains(name));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorWorksWithNullName()
+        {
+            var handler = new GenericSyncEventHandler<ISyncEvent>(delegate {
+                return false;
+            }, null);
+            handler.ToString();
+        }
+
+        [Test, Category("Fast")]
+        public void ToStringReturnsAcceptedType()
+        {
+            var handler = new GenericSyncEventHandler<ISyncEvent>(delegate { return false; });
+            Assert.That(handler.ToString().Contains("ISyncEvent"));
+        }
+
+        [Test, Category("Fast")]
         public void PriorityTest()
         {
             var handler = new GenericSyncEventHandler<ISyncEvent>(
