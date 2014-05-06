@@ -378,7 +378,6 @@ namespace TestLibrary.StorageTests
             storage.SaveMappedObject(rootFolder);
             var folder = new MappedObject(oldName, id, MappedObjectType.Folder, parentId, oldToken);
             storage.SaveMappedObject(folder);
-            Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(path, oldName))), Is.EqualTo(folder));
 
             var savedObject = storage.GetObjectByRemoteId(id);
             savedObject.Name = newName;

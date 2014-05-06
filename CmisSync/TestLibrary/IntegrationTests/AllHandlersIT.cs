@@ -160,6 +160,38 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast")]
+        public void ContentChangeIndicatesFolderRenameOfExistingFolder()
+        {
+            var storage = this.GetInitializedStorage();
+            string name = "a";
+            string newName = "b";
+            string parentId = "parentId";
+            string path = Path.Combine(this.localRoot, name);
+            string newPath = Path.Combine(this.localRoot, newName);
+            string id = "1";
+            string lastChangeToken = "changeToken";
+            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.Exists).Returns(true);
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(r => r.FullName == this.localRoot));
+            fsFactory.AddIDirectoryInfo(dirInfo.Object);
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
+            storage.SaveMappedObject(mappedObject);
+            storage.ChangeLogToken = "oldChangeToken";
+
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, id, Path.Combine(this.remoteRoot, newName), parentId, lastChangeToken);
+
+            var queue = this.CreateQueue(session, storage, fsFactory.Object);
+            queue.RunStartSyncEvent();
+            dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
+            Assert.That(storage.GetObjectByRemoteId(id), Is.Not.Null);
+            Assert.That(storage.GetObjectByRemoteId(id).Name, Is.EqualTo(newName));
+            Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == path)), Is.Null);
+            Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == newPath)), Is.Not.Null);
+        }
+
+        [Test, Category("Fast")]
         public void ContentChangeIndicatesFolderCreation()
         {
             string folderName = "folder";
