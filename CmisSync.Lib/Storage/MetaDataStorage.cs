@@ -27,6 +27,7 @@ namespace CmisSync.Lib.Storage
 
     using DBreeze;
     using DBreeze.DataTypes;
+    using DBreeze.Transactions;
 
     /// <summary>
     /// Meta data storage.
@@ -258,6 +259,36 @@ namespace CmisSync.Lib.Storage
             string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
+                MappedObject root = null;
+                List<MappedObject> objects = new List<MappedObject>();
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
+                {
+                    var value = row.Value;
+                    if(value == null)
+                    {
+                        continue;
+                    }
+
+                    var data = value.Get;
+                    if(data == null)
+                    {
+                        continue;
+                    }
+
+                    if(row.Key.Equals(id))
+                    {
+                        root = data;
+                    } else {
+                        objects.Add(data);
+                    }
+                }
+
+                if (root == null) {
+                    return;
+                }
+
+                this.RemoveChildren(tran, root, ref objects);
+
                 tran.RemoveKey<string>(MappedObjectsTable, id);
                 tran.Commit();
             }
@@ -363,7 +394,8 @@ namespace CmisSync.Lib.Storage
                     list += string.Format("[ Key={0}, Value={1}]{2}", row.Key, row.Value, Environment.NewLine);
                 }
             }
-            return string.Format("[MetaDataStorage: Matcher={0}, ChangeLogToken={1}]{2}{3}", Matcher, ChangeLogToken, Environment.NewLine, list);
+
+            return string.Format("[MetaDataStorage: Matcher={0}, ChangeLogToken={1}]{2}{3}", this.Matcher, this.ChangeLogToken, Environment.NewLine, list);
         }
 
         /// <summary>
@@ -391,7 +423,7 @@ namespace CmisSync.Lib.Storage
             return id;
         }
 
-        private string[] GetRelativePathSegments(DBreeze.Transactions.Transaction tran, string id)
+        private string[] GetRelativePathSegments(Transaction tran, string id)
         {
             Stack<string> pathSegments = new Stack<string>();
             MappedObject entry = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value.Get;
@@ -404,6 +436,16 @@ namespace CmisSync.Lib.Storage
             }
 
             return pathSegments.ToArray();
+        }
+
+        private void RemoveChildren(Transaction tran, MappedObject root, ref List<MappedObject> objects)
+        {
+            List<MappedObject> children = objects.FindAll(o => o.ParentId == root.RemoteObjectId);
+            objects.RemoveAll(o => o.ParentId == root.RemoteObjectId);
+            foreach(var child in children) {
+                this.RemoveChildren(tran, child, ref objects);
+                tran.RemoveKey<string>(MappedObjectsTable, child.RemoteObjectId);
+            }
         }
     }
 }

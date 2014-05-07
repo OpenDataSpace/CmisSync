@@ -272,7 +272,7 @@ namespace TestLibrary.StorageTests
             var storage = new MetaDataStorage(this.engine, this.matcher);
             storage.RemoveObject(Mock.Of<IMappedObject>());
         }
-
+        
         [Test, Category("Fast")]
         public void RemoveObjectTest()
         {
@@ -284,6 +284,48 @@ namespace TestLibrary.StorageTests
             storage.RemoveObject(obj);
 
             Assert.That(storage.GetObjectByRemoteId(remoteId), Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void RemoveObjectRemovesChildrenAsWell()
+        {
+            string remoteId = "remoteId";
+            string childId = "childId";
+            string subChildId = "subchildId";
+            var storage = new MetaDataStorage(this.engine, this.matcher);
+            var obj = new MappedObject("name", remoteId, MappedObjectType.Folder, null, null);
+            var child = new MappedObject("child", childId, MappedObjectType.Folder, remoteId, null);
+            var subchild = new MappedObject("subchild", subChildId, MappedObjectType.File, childId, null);
+            storage.SaveMappedObject(obj);
+            storage.SaveMappedObject(child);
+            storage.SaveMappedObject(subchild);
+
+            storage.RemoveObject(obj);
+
+            Assert.That(storage.GetObjectByRemoteId(remoteId), Is.Null);
+            Assert.That(storage.GetObjectByRemoteId(childId), Is.Null);
+            Assert.That(storage.GetObjectByRemoteId(subChildId), Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void RemoveObjectDoesNotTouchParents()
+        {
+            string remoteId = "remoteId";
+            string childId = "childId";
+            string subChildId = "subchildId";
+            var storage = new MetaDataStorage(this.engine, this.matcher);
+            var obj = new MappedObject("name", remoteId, MappedObjectType.Folder, null, null);
+            var child = new MappedObject("child", childId, MappedObjectType.Folder, remoteId, null);
+            var subchild = new MappedObject("subchild", subChildId, MappedObjectType.File, childId, null);
+            storage.SaveMappedObject(obj);
+            storage.SaveMappedObject(child);
+            storage.SaveMappedObject(subchild);
+
+            storage.RemoveObject(child);
+
+            Assert.That(storage.GetObjectByRemoteId(remoteId), Is.EqualTo(obj));
+            Assert.That(storage.GetObjectByRemoteId(childId), Is.Null);
+            Assert.That(storage.GetObjectByRemoteId(subChildId), Is.Null);
         }
 
         [Test, Category("Fast")]
