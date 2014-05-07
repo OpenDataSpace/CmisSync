@@ -70,8 +70,11 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                                                       f.Id == id &&
                                                       f.ParentId == parentId &&
                                                       f.ChangeToken == lastChangeToken);
+            var futureRemoteFolderId = Mock.Of<IObjectId>(o =>
+                                                          o.Id == id);
 
-            this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolder);
+            this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolderId);
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteFolderId))).Returns(futureRemoteFolder);
 
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);
@@ -109,8 +112,11 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                                                       f.Id == id &&
                                                       f.ParentId == parentId &&
                                                       f.ChangeToken == lastChangeToken);
+            var futureRemoteFolderId = Mock.Of<IObjectId>(o =>
+                                                          o.Id == id);
 
-            this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolder);
+            this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolderId);
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteFolderId))).Returns(futureRemoteFolder);
 
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);

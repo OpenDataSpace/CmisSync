@@ -58,7 +58,7 @@ namespace CmisSync.Lib.Sync.Solver
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
                 properties.Add(PropertyIds.CreationDate, string.Empty);
                 properties.Add(PropertyIds.LastModificationDate, string.Empty);
-                IFolder folder = session.CreateFolder(properties, new ObjectId(mappedParent.RemoteObjectId)) as IFolder;
+                IFolder folder = session.GetObject(session.CreateFolder(properties, new ObjectId(mappedParent.RemoteObjectId))) as IFolder;
                 Guid uuid = Guid.Empty;
                 if (localDirInfo.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();

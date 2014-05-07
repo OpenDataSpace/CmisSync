@@ -57,7 +57,6 @@ namespace CmisSync.Lib.Events.Filter
                 if (fsEvent.Type == WatcherChangeTypes.Created && this.storage.GetObjectByLocalPath(path) != null) {
                     return true;
                 }
-                Console.WriteLine(storage.ToString());
             }
 
             return false;
