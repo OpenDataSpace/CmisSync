@@ -95,7 +95,7 @@ namespace TestLibrary.IntegrationTests
                 session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
                 this.session = session.Object;
                 this.singleStepQueue = new SingleStepEventQueue(this.EventManager);
-                this.Queue = singleStepQueue;
+                this.Queue = this.singleStepQueue;
             }
 
             public SingleStepEventQueue singleStepQueue;
