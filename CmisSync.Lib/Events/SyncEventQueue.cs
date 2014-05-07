@@ -16,14 +16,18 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-
-using log4net;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks;
+
+    using log4net;
+
+    /// <summary>
+    /// Sync event queue.
+    /// </summary>
     public class SyncEventQueue : IDisposableSyncEventQueue {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
 
@@ -34,97 +38,130 @@ namespace CmisSync.Lib.Events
         private Task consumer;
 
         private bool alreadyDisposed = false;
-        
-        private static void Listen(BlockingCollection<ISyncEvent> queue, SyncEventManager manager){
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.SyncEventQueue"/> class.
+        /// </summary>
+        /// <param name="manager">Manager holding the handler.</param>
+        public SyncEventQueue(SyncEventManager manager) {
+            if(manager == null) {
+                throw new ArgumentException("manager may not be null");
+            }
+
+            this.manager = manager;
+            this.consumer = new Task(() => Listen(this.queue, this.manager));
+            this.consumer.Start();
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is stopped.
+        /// </summary>
+        /// <value><c>true</c> if this instance is stopped; otherwise, <c>false</c>.</value>
+        public bool IsStopped {
+            get {
+                return this.consumer.IsCompleted;
+            }
+        }
+
+        /// <summary>
+        /// Adds the event to the queue.
+        /// </summary>
+        /// <param name="newEvent">New event.</param>
+        /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
+        public virtual void AddEvent(ISyncEvent newEvent) {
+            if (this.alreadyDisposed) {
+                throw new ObjectDisposedException("SyncEventQueue", "Called AddEvent on Disposed object");
+            }
+
+            this.queue.Add(newEvent);
+        }
+
+        /// <summary>
+        /// Stops the listener.
+        /// </summary>
+        public void StopListener() {
+            if (this.alreadyDisposed) {
+                return;
+            }
+
+            this.queue.CompleteAdding();
+        }
+
+        /// <summary>
+        /// Waits for stopped.
+        /// </summary>
+        public void WaitForStopped() {
+            this.consumer.Wait();
+        }
+
+        /// <summary>
+        /// Waits for stopped.
+        /// </summary>
+        /// <returns><c>true</c>, if stopped in period of timeout, <c>false</c> otherwise.</returns>
+        /// <param name="timeout">Timeout time span.</param>
+        public bool WaitForStopped(TimeSpan timeout) {
+            return this.consumer.Wait(timeout);
+        }
+
+        /// <summary>
+        /// Waits for stopped.
+        /// </summary>
+        /// <returns><c>true</c>, if stopped in period of timeout, <c>false</c> otherwise.</returns>
+        /// <param name="milisecondsTimeout">Miliseconds timeout.</param>
+        public bool WaitForStopped(int milisecondsTimeout) {
+            return this.consumer.Wait(milisecondsTimeout);
+        }
+
+        public void Dispose() {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool isDisposing) {
+            if (this.alreadyDisposed) {
+                return;
+            }
+
+            if (!this.IsStopped) {
+                Logger.Warn("Disposing a not yet stopped SyncEventQueue");
+            }
+
+            if(isDisposing) {
+                this.queue.Dispose();
+            }
+
+            this.alreadyDisposed = true;
+        }
+
+        private static void Listen(BlockingCollection<ISyncEvent> queue, SyncEventManager manager) {
             Logger.Debug("Starting to listen on SyncEventQueue");
             while (!queue.IsCompleted)
             {
-
                 ISyncEvent syncEvent = null;
-                // Blocks if number.Count == 0 
-                // IOE means that Take() was called on a completed collection. 
-                // Some other thread can call CompleteAdding after we pass the 
+
+                // Blocks if number.Count == 0
+                // IOE means that Take() was called on a completed collection.
+                // Some other thread can call CompleteAdding after we pass the
                 // IsCompleted check but before we call Take.
                 // In this example, we can simply catch the exception since the
-                // loop will break on the next iteration. 
-                try
-                {
+                // loop will break on the next iteration.
+                try {
                     syncEvent = queue.Take();
+                } catch (InvalidOperationException) {
                 }
-                catch (InvalidOperationException) { }
 
-                if (syncEvent != null)
-                {
-                    try{
+                if (syncEvent != null) {
+                    try {
                         manager.Handle(syncEvent);
-                    }catch(Exception e) {
+                    } catch(Exception e) {
                         Logger.Error("Exception in EventHandler");
                         Logger.Error(e);
                         Logger.Error(e.StackTrace);
                     }
                 }
             }
+
             Logger.Debug("Stopping to listen on SyncEventQueue");
-        }
-
-        /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
-        public virtual void AddEvent(ISyncEvent newEvent) {
-            if(alreadyDisposed) {
-                throw new ObjectDisposedException("SyncEventQueue", "Called AddEvent on Disposed object");
-            }
-            this.queue.Add(newEvent);
-        }
-
-        public SyncEventQueue(SyncEventManager manager) {
-            if(manager == null) {
-                throw new ArgumentException("manager may not be null");
-            }
-            this.manager = manager;
-            this.consumer = new Task(() => Listen(this.queue, this.manager));
-            this.consumer.Start();
-        }
-
-        public void StopListener() {
-            if(alreadyDisposed) {
-                return;
-            }
-            this.queue.CompleteAdding();
-        }
-        
-        public bool IsStopped {
-            get {
-                return this.consumer.IsCompleted; 
-            }
-        }
-
-        public void WaitForStopped() {
-            this.consumer.Wait();
-        }
-
-        public bool WaitForStopped(TimeSpan timeout) {
-            return this.consumer.Wait(timeout);
-        }
-
-        public bool WaitForStopped(int milisecondsTimeout) {
-            return this.consumer.Wait(milisecondsTimeout);
-        }
-
-        public void Dispose() {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool isDisposing) {
-            if(alreadyDisposed) {
-                return;
-            }
-            if(!IsStopped){
-                Logger.Warn("Disposing a not yet stopped SyncEventQueue");
-            }
-            if(isDisposing) {
-                this.queue.Dispose();
-            }
-            this.alreadyDisposed = true;
         }
     }
 }
