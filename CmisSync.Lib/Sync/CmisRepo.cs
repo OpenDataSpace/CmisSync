@@ -128,20 +128,6 @@ namespace CmisSync.Lib.Sync
 
         private ContentChangeEventTransformer transformer;
 
-        private ContentChangeEventAccumulator ccaccumulator;
-
-        private LocalSituationDetection localDetection = new LocalSituationDetection();
-
-        private RemoteSituationDetection remoteDetection = new RemoteSituationDetection();
-
-        private RemoteObjectFetcher remoteFetcher;
-
-        private Crawler crawler;
-
-        private ContentChanges contentChanges;
-
-        private SyncMechanism mechanism;
-
         private DBreezeEngine db;
 
         protected MetaDataStorage storage;
@@ -191,7 +177,7 @@ namespace CmisSync.Lib.Sync
             this.RemoteUrl = repoInfo.Address;
 
             // Create Queue
-            this.EventManager = new SyncEventManager(repoInfo.DisplayName);
+            this.EventManager = new SyncEventManager();
             this.EventManager.AddEventHandler(new DebugLoggingHandler());
             this.Queue = new SyncEventQueue(this.EventManager);
 
@@ -246,10 +232,7 @@ namespace CmisSync.Lib.Sync
                 this.Status = status;
             };
 
-            this.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>(delegate {
-                this.NewSessionCreated();
-                return false;
-            }));
+            this.EventManager.AddEventHandler(new SuccessfulLoginHandler(this.Queue, this.storage, this.EventManager, this.RepoInfo, this.fileSystemFactory));
         }
 
         /// <summary>
@@ -420,7 +403,7 @@ namespace CmisSync.Lib.Sync
                     this.session = this.sessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.authProvider, null);
 
                     this.session.DefaultContext = this.CreateDefaultContext();
-                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address));
+                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, this.session));
                 }
                 catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
                 {
@@ -450,26 +433,7 @@ namespace CmisSync.Lib.Sync
             }
         }
 
-        /// <summary>
-        /// Detect whether the repository has the ChangeLog capability.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if this feature is available, otherwise <c>false</c>
-        /// </returns>
-        private bool AreChangeEventsSupported()
-        {
-            try
-            {
-                return (this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
-                        this.session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
-                    (this.RepoInfo.SupportedFeatures == null ||
-                    this.RepoInfo.SupportedFeatures.GetContentChangesSupport != false);
-            }
-            catch(NullReferenceException)
-            {
-                return false;
-            }
-        }
+
 
         private bool IsGetDescendantsSupported()
         {
@@ -525,65 +489,6 @@ namespace CmisSync.Lib.Sync
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             cmisParameters[SessionParameter.Compression] = bool.TrueString;
             return cmisParameters;
-        }
-
-        private void NewSessionCreated()
-        {
-            // Remove former added instances from event manager
-            if (this.ccaccumulator != null)
-            {
-                this.EventManager.RemoveEventHandler(this.ccaccumulator);
-            }
-
-            if (this.contentChanges != null)
-            {
-                this.EventManager.RemoveEventHandler(this.contentChanges);
-            }
-
-            if (this.AreChangeEventsSupported())
-            {
-
-                // Add Accumulator
-                this.ccaccumulator = new ContentChangeEventAccumulator(this.session, this.Queue);
-                this.EventManager.AddEventHandler(this.ccaccumulator);
-
-                // Add Content Change sync algorithm
-                this.contentChanges = new ContentChanges(this.session, this.storage, this.Queue);
-                this.EventManager.AddEventHandler(this.contentChanges);
-            }
-
-            // Add remote object fetcher
-            if(this.remoteFetcher != null)
-            {
-                this.EventManager.RemoveEventHandler(this.remoteFetcher);
-            }
-
-            this.remoteFetcher = new RemoteObjectFetcher(this.session, this.storage);
-            this.EventManager.AddEventHandler(this.remoteFetcher);
-
-            // Add crawler
-            if (this.crawler != null)
-            {
-                this.EventManager.RemoveEventHandler(this.crawler);
-            }
-            
-            var remoteRoot = this.session.GetObjectByPath(this.RepoInfo.RemotePath) as IFolder;
-
-            this.crawler = new Crawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath), this.fileSystemFactory);
-            this.EventManager.AddEventHandler(this.crawler);
-
-            if(this.mechanism != null)
-            {
-                this.EventManager.RemoveEventHandler(this.mechanism);
-            }
-
-            this.mechanism = new SyncMechanism(this.localDetection, this.remoteDetection, this.Queue, this.session, this.storage);
-            this.EventManager.AddEventHandler(this.mechanism);
-            
-            var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken);
-            
-            Logger.Debug("Saving Root Folder to DataBase");
-            this.storage.SaveMappedObject(rootFolder);
         }
     }
 }

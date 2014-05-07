@@ -49,19 +49,6 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorWithNameIsNullFails()
-        {
-            new SyncEventManager(null);
-        }
-
-        [Test, Category("Fast")]
-        public void ConstructorTakesNameAsParameter()
-        {
-            new SyncEventManager(string.Empty);
-        }
-
-        [Test, Category("Fast")]
         public void AddHandlerTest()
         {
             var handlerMock = new Mock<SyncEventHandler>();

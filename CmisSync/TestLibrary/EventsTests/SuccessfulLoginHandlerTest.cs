@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="GenericSyncEventHandlerTest.cs" company="GRAU DATA AG">
+// <copyright file="SuccessfulLoginHandlerTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,15 +16,17 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
 namespace TestLibrary.EventsTests
 {
     using System;
     using System.IO;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
 
     using DotCMIS.Client;
 
@@ -35,10 +37,60 @@ namespace TestLibrary.EventsTests
     [TestFixture]
     public class SuccessfulLoginHandlerTest
     {
+        private string remoteRoot = "/my/";
+        
+        private RepoInfo CreateRepoInfo() {
+            return new RepoInfo
+            {
+                Address = new Uri("http://example.com"),
+                LocalPath = Path.GetTempPath(),
+                RemotePath = "/"
+            };
+        }
+        
+        //ISyncEventQueue queue, IMetaDataStorage storage, SyncEventManager manager, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null
+        
         [Test, Category("Fast")]
         public void ConstructorTest()
         {
-            new SuccessfulLoginHandler();
+            var queue = new Mock<ISyncEventQueue>();
+            var manager = new Mock<SyncEventManager>();
+            var storage = new Mock<IMetaDataStorage>();
+            new SuccessfulLoginHandler(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+        }
+        
+        [Test, Category("Fast")]
+        public void IgnoresWrongEventsTest()
+        {
+            var queue = new Mock<ISyncEventQueue>();
+            var manager = new Mock<SyncEventManager>();
+            var storage = new Mock<IMetaDataStorage>();
+            var handler = new SuccessfulLoginHandler(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+            
+            var e = new Mock<ISyncEvent>();
+            Assert.False(handler.Handle(e.Object));            
+        }
+        
+        [Test, Category("Fast")]
+        public void RootFolderGetsAddedToStorage()
+        {
+            string id = "id";
+            string token = "token";
+            var session = new Mock<ISession>();
+            var remoteObject = new Mock<IFolder>();
+            remoteObject.Setup(r => r.Id).Returns(id);
+            remoteObject.Setup(r => r.ChangeToken).Returns(token);
+
+            session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
+            var queue = new Mock<ISyncEventQueue>();
+            var manager = new Mock<SyncEventManager>();
+            var storage = new Mock<IMetaDataStorage>();
+            var handler = new SuccessfulLoginHandler(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+            
+            var e = new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object);
+            Assert.True(handler.Handle(e));
+            MappedObject rootObject = new MappedObject("/", id, MappedObjectType.Folder, null, token);
+            storage.Verify(s => s.SaveMappedObject(It.Is<MappedObject>(m => m.Equals(rootObject))));
         }
     }
 }

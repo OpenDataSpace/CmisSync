@@ -56,9 +56,9 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         [Test, Category("Fast"), Category("EventFilter")]
         public void FilterLetsResetTypePassingThrough()
         {
-            var filter = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>();
-            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(this.url).Object));
-            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(this.url).Object));
+            var filter = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, StartNextSyncEvent>();
+            Assert.IsFalse(filter.Handle(new Mock<StartNextSyncEvent>(false).Object));
+            Assert.IsFalse(filter.Handle(new Mock<StartNextSyncEvent>(false).Object));
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
@@ -80,11 +80,11 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         [Test, Category("Fast"), Category("EventFilter")]
         public void FilterLetMatchingFilterTypePassAfterResetTypeOccured()
         {
-            var filter = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>();
+            var filter = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, StartNextSyncEvent>();
             Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
             Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
             Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
-            Assert.IsFalse(filter.Handle(new Mock<SuccessfulLoginEvent>(this.url).Object));
+            Assert.IsFalse(filter.Handle(new Mock<StartNextSyncEvent>(false).Object));
             Assert.IsFalse(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
             Assert.IsTrue(filter.Handle(new Mock<PermissionDeniedEvent>(this.deniedException).Object));
         }
