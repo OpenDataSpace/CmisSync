@@ -44,6 +44,7 @@ using MonoMac.ObjCRuntime;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Sync;
 
 namespace CmisSync {
 
@@ -424,7 +425,7 @@ namespace CmisSync {
 
         public void OpenCmisSyncFolder (string reponame)
         {
-            foreach(CmisSync.Lib.RepoBase repo in Program.Controller.Repositories)
+            foreach(CmisRepo repo in Program.Controller.Repositories)
             {
                 if(repo.Name.Equals(reponame))
                 {

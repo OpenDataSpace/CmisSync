@@ -88,9 +88,6 @@ namespace CmisSync
                         case PageType.Customize:
                             ShowCustomizePage();
                             break;
-                        case PageType.Syncing:
-                            ShowSyncingPage();
-                            break;
                         case PageType.Finished:
                             ShowFinishedPage();
                             break;
@@ -154,22 +151,6 @@ namespace CmisSync
             Description.StringValue = String.Empty;
             SubController = new SetupSubCustomizeController (Controller);
             Content.ContentView = SubController.View;
-        }
-
-        void ShowSyncingPage()
-        {
-            Header.StringValue = Properties_Resources.AddingFolder + " ‘" + Controller.SyncingReponame + "’…";
-            Description.StringValue = Properties_Resources.MayTakeTime;
-            NSProgressIndicator progress = new NSProgressIndicator() {
-                Frame = new RectangleF(0, 140, 300, 20),
-                Style = NSProgressIndicatorStyle.Bar,
-                MinValue = 0.0,
-                MaxValue = 100.0,
-                Indeterminate = false,
-                DoubleValue = Controller.ProgressBarPercentage
-            };
-            progress.StartAnimation(this);
-            Content.ContentView = progress;
         }
 
         void ShowFinishedPage()

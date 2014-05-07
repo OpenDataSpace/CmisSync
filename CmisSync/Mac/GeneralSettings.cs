@@ -22,12 +22,13 @@ using System.Linq;
 using MonoMac.Foundation;
 using MonoMac.AppKit;
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 
 namespace CmisSync
 {
     public partial class GeneralSettings : MonoMac.AppKit.NSWindow
     {
-        Config.ProxySettings ProxySettings
+        CmisSync.Lib.Config.ProxySettings ProxySettings
         {
             get;
             set;
@@ -194,13 +195,13 @@ namespace CmisSync
 
         partial void OnSave(NSObject sender)
         {
-            Config.ProxySettings settings = this.ProxySettings;
+            CmisSync.Lib.Config.ProxySettings settings = this.ProxySettings;
             if (NoProxyButton.State == NSCellStateValue.On) {
-                settings.Selection = Config.ProxySelection.NOPROXY;
+                settings.Selection = ProxySelection.NOPROXY;
             } else if(SystemDefaultProxyButton.State == NSCellStateValue.On) {
-                settings.Selection = Config.ProxySelection.SYSTEM;
+                settings.Selection = ProxySelection.SYSTEM;
             } else if(ManualProxyButton.State == NSCellStateValue.On) {
-                settings.Selection = Config.ProxySelection.CUSTOM;
+                settings.Selection = ProxySelection.CUSTOM;
             }
             string server = Controller.GetServer(this.ProxyServer.StringValue);
             if (server!=null)
@@ -262,11 +263,11 @@ namespace CmisSync
             this.ProxyUsername.StringValue = (ProxySettings.Username != null) ? ProxySettings.Username : String.Empty;
             this.ProxyPassword.StringValue = (ProxySettings.ObfuscatedPassword != null) ? Crypto.Deobfuscate(ProxySettings.ObfuscatedPassword) : String.Empty;
             Controller.CheckLogin (ProxySettings.LoginRequired);
-            if (ProxySettings.Selection == Config.ProxySelection.NOPROXY) {
+            if (ProxySettings.Selection == ProxySelection.NOPROXY) {
                 Controller.CheckProxyNone ();
-            } else if (ProxySettings.Selection == Config.ProxySelection.SYSTEM) {
+            } else if (ProxySettings.Selection == ProxySelection.SYSTEM) {
                 Controller.CheckProxySystem ();
-            } else if (ProxySettings.Selection == Config.ProxySelection.CUSTOM) {
+            } else if (ProxySettings.Selection == ProxySelection.CUSTOM) {
                 Controller.CheckProxyCustom ();
             } else {
                 Controller.CheckProxyNone ();
