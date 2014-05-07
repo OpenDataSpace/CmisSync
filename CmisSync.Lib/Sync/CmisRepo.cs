@@ -232,7 +232,7 @@ namespace CmisSync.Lib.Sync
                 this.Status = status;
             };
 
-            this.EventManager.AddEventHandler(new SuccessfulLoginHandler(this.Queue, this.storage, this.EventManager, this.RepoInfo, this.fileSystemFactory));
+            this.EventManager.AddEventHandler(new SyncStrategyInitializer(this.Queue, this.storage, this.EventManager, this.RepoInfo, this.fileSystemFactory));
         }
 
         /// <summary>
