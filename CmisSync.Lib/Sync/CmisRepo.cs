@@ -102,6 +102,11 @@ namespace CmisSync.Lib.Sync
         private Events.Filter.IgnoredFolderNameFilter ignoredFolderNameFilter;
 
         /// <summary>
+        /// The already added objects filter.
+        /// </summary>
+        private Events.Filter.AlreadyAddedObjectsFsEventFilter alreadyAddedFilter;
+
+        /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
         private bool disposed = false;
@@ -192,7 +197,7 @@ namespace CmisSync.Lib.Sync
 
             // Create Database connection
             this.db = new DBreezeEngine(new DBreezeConfiguration {
-                DBreezeDataFolderName = inMemory ? "" : repoInfo.GetDatabasePath(),
+                DBreezeDataFolderName = inMemory ? string.Empty : repoInfo.GetDatabasePath(),
                 Storage = inMemory ? DBreezeConfiguration.eStorage.MEMORY : DBreezeConfiguration.eStorage.DISK
             });
 
@@ -200,13 +205,18 @@ namespace CmisSync.Lib.Sync
             this.sessionFactory = sessionFactory == null ? SessionFactory.NewInstance() : sessionFactory;
             this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
 
+            // Initialize storage
+            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+
             // Add ignore file/folder filter
             this.ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(this.Queue) { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
             this.ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
             this.ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
+            this.alreadyAddedFilter = new Events.Filter.AlreadyAddedObjectsFsEventFilter(this.storage, this.fileSystemFactory);
             this.EventManager.AddEventHandler(this.ignoredFoldersFilter);
             this.EventManager.AddEventHandler(this.ignoredFileNameFilter);
             this.EventManager.AddEventHandler(this.ignoredFolderNameFilter);
+            this.EventManager.AddEventHandler(this.alreadyAddedFilter);
 
             // Add handler for repo config changes
             this.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, this.RepoInfoChanged));
@@ -222,9 +232,6 @@ namespace CmisSync.Lib.Sync
             this.Watcher = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue);
             #endif
             this.EventManager.AddEventHandler(this.Watcher);
-
-            // Initialize storage
-            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
 
             // Add transformer
             this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage, this.fileSystemFactory);
@@ -390,7 +397,6 @@ namespace CmisSync.Lib.Sync
             }
 
             return false;
-
         }
 
         /// <summary>

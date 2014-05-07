@@ -79,7 +79,7 @@ namespace CmisSync.Lib.Storage
         void SaveMappedObject(IMappedObject obj);
 
         /// <summary>
-        /// Removes the given object from Db
+        /// Removes the given object and recursive all its children from Db
         /// </summary>
         /// <param name='obj'>
         /// Object with the Remote object id, which should be removed.

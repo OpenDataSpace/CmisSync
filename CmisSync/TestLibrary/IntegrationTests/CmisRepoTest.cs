@@ -22,24 +22,24 @@ namespace TestLibrary.IntegrationTests
     using System.Collections.Generic;
     using System.IO;
     using System.Threading;
-    
+
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync;
-    
+
     using DBreeze;
-    
+
     using DotCMIS.Binding;
     using DotCMIS.Client;
-    
+
     using Moq;
-    
+
     using NUnit.Framework;
-    
+
     using TestLibrary.TestUtils;
-    
+
     [TestFixture]
     public class CmisRepoTest
     {
@@ -48,7 +48,7 @@ namespace TestLibrary.IntegrationTests
         {
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
-        
+
         [Test, Category("Fast")]
         public void CmisRepoCanBeConstructed() {
             string path = Path.GetTempPath();
@@ -57,14 +57,14 @@ namespace TestLibrary.IntegrationTests
             var sessionFact = new Mock<ISessionFactory>();
             new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
         }
-        
+
         [Test, Category("Fast")]
         public void RootFolderGetsAddedToStorage() {
             string path = Path.GetTempPath();
             RepoInfo repoInfo = this.CreateRepoInfo(path);
             var activityListener = new Mock<IActivityListener>().Object;
             var sessionFact = new Mock<ISessionFactory>();
-            
+
             var repo = new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
             repo.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("http://example.com")));
             var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
@@ -73,7 +73,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(repo.DB.GetObjectByRemoteId("id"), Is.Not.Null);
             Assert.That(repo.DB.GetObjectByLocalPath(fsInfo), Is.Not.Null);
         }
-        
+
         private RepoInfo CreateRepoInfo(string path) {
             return new RepoInfo
             {
@@ -83,7 +83,7 @@ namespace TestLibrary.IntegrationTests
                 RemotePath = "/"
             };
         }
-        
+
         private class CmisRepoWrapper : CmisRepo {
             public CmisRepoWrapper(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory = false, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null) :
                 base(repoInfo, activityListener, inMemory, sessionFactory, fileSystemInfoFactory)
@@ -95,12 +95,12 @@ namespace TestLibrary.IntegrationTests
                 session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
                 this.session = session.Object;
                 this.singleStepQueue = new SingleStepEventQueue(this.EventManager);
-                this.Queue = singleStepQueue;
+                this.Queue = this.singleStepQueue;
             }
 
             public SingleStepEventQueue singleStepQueue;
-            
-            public IMetaDataStorage DB { 
+
+            public IMetaDataStorage DB {
                 get { return this.storage; }
             }
         }

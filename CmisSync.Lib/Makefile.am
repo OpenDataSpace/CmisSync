@@ -46,6 +46,7 @@ SOURCES =  \
 	Events/ChangeEnums.cs \
 	Events/DebugLoggingHandler.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
+	Events/EventFilter/AlreadyAddedObjectsFsEventFilter.cs \
 	Events/EventFilter/GenericHandleDublicatedEventsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
 	Events/EventFilter/IgnoredFilesFilter.cs \
