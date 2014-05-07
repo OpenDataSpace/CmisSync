@@ -83,6 +83,7 @@ SOURCES =  \
 	Events/IDisposableSyncEventQueue.cs \
 	Events/ISyncEventQueue.cs \
 	Events/ReportingSyncEventHandler.cs \
+	Events/SuccessfulLoginHandler.cs \
 	Events/SyncEventHandler.cs \
 	Events/SyncEventManager.cs \
 	Events/SyncEventQueue.cs \

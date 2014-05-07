@@ -197,13 +197,14 @@
     <Compile Include="Streams\ChunkedStream.cs" />
     <Compile Include="Events\IDisposableSyncEventQueue.cs" />
     <Compile Include="Events\EventFilter\AlreadyAddedObjectsFsEventFilter.cs" />
+    <Compile Include="Events\SuccessfulLoginHandler.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
