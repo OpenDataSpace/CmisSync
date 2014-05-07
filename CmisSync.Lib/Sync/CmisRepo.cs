@@ -529,18 +529,19 @@ namespace CmisSync.Lib.Sync
 
         private void NewSessionCreated()
         {
+            // Remove former added instances from event manager
+            if (this.ccaccumulator != null)
+            {
+                this.EventManager.RemoveEventHandler(this.ccaccumulator);
+            }
+
+            if (this.contentChanges != null)
+            {
+                this.EventManager.RemoveEventHandler(this.contentChanges);
+            }
+
             if (this.AreChangeEventsSupported())
             {
-                // Remove former added instances from event manager
-                if (this.ccaccumulator != null)
-                {
-                    this.EventManager.RemoveEventHandler(this.ccaccumulator);
-                }
-
-                if (this.contentChanges != null)
-                {
-                    this.EventManager.RemoveEventHandler(this.contentChanges);
-                }
 
                 // Add Accumulator
                 this.ccaccumulator = new ContentChangeEventAccumulator(this.session, this.Queue);
@@ -549,18 +550,6 @@ namespace CmisSync.Lib.Sync
                 // Add Content Change sync algorithm
                 this.contentChanges = new ContentChanges(this.session, this.storage, this.Queue);
                 this.EventManager.AddEventHandler(this.contentChanges);
-            }
-            else
-            {
-                if (this.ccaccumulator != null)
-                {
-                    this.EventManager.RemoveEventHandler(this.ccaccumulator);
-                }
-
-                if (this.contentChanges != null)
-                {
-                    this.EventManager.RemoveEventHandler(this.contentChanges);
-                }
             }
 
             // Add remote object fetcher
