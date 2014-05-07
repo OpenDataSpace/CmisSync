@@ -205,6 +205,9 @@ namespace CmisSync.Lib.Sync
             this.sessionFactory = sessionFactory == null ? SessionFactory.NewInstance() : sessionFactory;
             this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
 
+            // Initialize storage
+            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+
             // Add ignore file/folder filter
             this.ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(this.Queue) { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
             this.ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
@@ -229,9 +232,6 @@ namespace CmisSync.Lib.Sync
             this.Watcher = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue);
             #endif
             this.EventManager.AddEventHandler(this.Watcher);
-
-            // Initialize storage
-            this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
 
             // Add transformer
             this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage, this.fileSystemFactory);
