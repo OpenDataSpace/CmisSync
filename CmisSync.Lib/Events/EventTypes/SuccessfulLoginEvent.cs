@@ -20,6 +20,8 @@
 namespace CmisSync.Lib.Events
 {
     using System;
+    
+    using DotCMIS.Client;
 
     /// <summary>
     /// Successful login on a server should add this event to the event queue.
@@ -27,18 +29,24 @@ namespace CmisSync.Lib.Events
     public class SuccessfulLoginEvent : ISyncEvent
     {
         private Uri url;
+        public ISession Session {get; private set;}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.SuccessfulLoginEvent"/> class.
         /// </summary>
         /// <param name="url">URL of the successful connection</param>
-        public SuccessfulLoginEvent(Uri url)
+        public SuccessfulLoginEvent(Uri url, ISession session)
         {
             if (url == null) {
                 throw new ArgumentNullException("Given Url is null");
             }
+            
+            if (session == null) {
+                throw new ArgumentNullException("Given session is null");
+            }
 
             this.url = url;
+            this.Session = session;
         }
 
         /// <summary>

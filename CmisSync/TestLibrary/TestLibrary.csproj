@@ -160,6 +160,7 @@
     <Compile Include="IntegrationTests\CmisRepoTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentStandardAuthenticationProviderTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\AlreadyAddedObjectsFsEventFilterTest.cs" />
+    <Compile Include="EventsTests\SuccessfulLoginHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -194,8 +195,8 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="True" RelativeConfigureInPath="../..">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="true" RelativeConfigureInPath="../..">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />

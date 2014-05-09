@@ -55,7 +55,8 @@ namespace TestLibrary.IntegrationTests
             RepoInfo repoInfo = this.CreateRepoInfo(path);
             var activityListener = new Mock<IActivityListener>().Object;
             var sessionFact = new Mock<ISessionFactory>();
-            new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
+            var session = new Mock<ISession>();
+            new CmisRepoWrapper(repoInfo, activityListener, session.Object, true, sessionFact.Object);
         }
 
         [Test, Category("Fast")]
@@ -64,9 +65,15 @@ namespace TestLibrary.IntegrationTests
             RepoInfo repoInfo = this.CreateRepoInfo(path);
             var activityListener = new Mock<IActivityListener>().Object;
             var sessionFact = new Mock<ISessionFactory>();
+            
+            var session = new Mock<ISession>();
+            var remoteObject = new Mock<IFolder>();
+            remoteObject.Setup(r => r.Id).Returns("id");
 
-            var repo = new CmisRepoWrapper(repoInfo, activityListener, true, sessionFact.Object);
-            repo.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("http://example.com")));
+            session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
+
+            var repo = new CmisRepoWrapper(repoInfo, activityListener, session.Object, true, sessionFact.Object);
+            repo.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object));
             var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
             repo.singleStepQueue.Run();
 
@@ -85,15 +92,10 @@ namespace TestLibrary.IntegrationTests
         }
 
         private class CmisRepoWrapper : CmisRepo {
-            public CmisRepoWrapper(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory = false, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null) :
+            public CmisRepoWrapper(RepoInfo repoInfo, IActivityListener activityListener, ISession session, bool inMemory = false, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null) :
                 base(repoInfo, activityListener, inMemory, sessionFactory, fileSystemInfoFactory)
             {
-                var session = new Mock<ISession>();
-                var remoteObject = new Mock<IFolder>();
-                remoteObject.Setup(r => r.Id).Returns("id");
-
-                session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
-                this.session = session.Object;
+                this.session = session;
                 this.singleStepQueue = new SingleStepEventQueue(this.EventManager);
                 this.Queue = this.singleStepQueue;
             }

@@ -27,13 +27,9 @@ namespace CmisSync.Lib.Events
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(SyncEventManager));
         private List<SyncEventHandler> handler = new List<SyncEventHandler>();
-        private readonly string Name;
-        public SyncEventManager(string name = "SyncEventManager")
+        
+        public SyncEventManager()
         {
-            if(name == null) {
-                throw new ArgumentNullException("Given name of the manager is null");
-            }
-            Name = name;
         }
 
         public void AddEventHandler(SyncEventHandler h)
@@ -51,16 +47,14 @@ namespace CmisSync.Lib.Events
         }
 
         public virtual void Handle(ISyncEvent e) {
-            using(log4net.ThreadContext.Stacks["NDC"].Push(Name))
-            {
-                for(int i = handler.Count-1; i >= 0; i--)
+            for(int i = handler.Count-1; i >= 0; i--)
                 {
                     var h = handler[i];
                     if(handler[i].Handle(e)){
                         return;
                     }
                 }
-            }
+            
         }
 
         public void RemoveEventHandler(SyncEventHandler h)
