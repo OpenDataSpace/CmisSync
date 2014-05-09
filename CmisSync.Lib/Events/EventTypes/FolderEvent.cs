@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Events
         /// </summary>
         /// <param name="localFolder">Local folder.</param>
         /// <param name="remoteFolder">Remote folder.</param>
-        public FolderEvent(IDirectoryInfo localFolder = null, IFolder remoteFolder = null)
+        public FolderEvent(IDirectoryInfo localFolder = null, IFolder remoteFolder = null, Object src = null)
         {
             if(localFolder == null && remoteFolder == null)
             {
@@ -45,6 +45,7 @@ namespace CmisSync.Lib.Events
 
             this.LocalFolder = localFolder;
             this.RemoteFolder = remoteFolder;
+            this.Source = src;
         }
 
         /// <summary>
@@ -59,6 +60,8 @@ namespace CmisSync.Lib.Events
         /// <value>The remote folder.</value>
         public IFolder RemoteFolder { get; set; }
 
+        public Object Source { get; private set; }
+
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderEvent"/>.
         /// </summary>
@@ -66,11 +69,12 @@ namespace CmisSync.Lib.Events
         public override string ToString()
         {
             return string.Format(
-                "[FolderEvent: Local={0} on {2}, Remote={1} on {3}]",
+                "[FolderEvent: Local={0} on {2}, Remote={1} on {3} created by {4}]",
                 this.Local,
                 this.Remote,
                 this.LocalFolder != null ? this.LocalFolder.Name : string.Empty,
-                this.RemoteFolder != null ? this.RemoteFolder.Name : string.Empty);
+                this.RemoteFolder != null ? this.RemoteFolder.Name : string.Empty,
+                this.Source != null ? this.Source : "null");
         }
     }
 }

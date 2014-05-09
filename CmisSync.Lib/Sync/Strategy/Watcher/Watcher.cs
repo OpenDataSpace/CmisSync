@@ -147,7 +147,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     null) 
                 { Local = MetaDataChangeType.MOVED };
             } else {
-                folderEvent = new FolderEvent(this.fsFactory.CreateDirectoryInfo(e.Path), null);
+                folderEvent = new FolderEvent(this.fsFactory.CreateDirectoryInfo(e.Path), null, this);
                 switch (e.Type) {
                 case WatcherChangeTypes.Created:
                     folderEvent.Local = MetaDataChangeType.CREATED;

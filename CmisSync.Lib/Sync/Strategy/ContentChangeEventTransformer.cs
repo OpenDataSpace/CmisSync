@@ -18,7 +18,7 @@
 //-----------------------------------------------------------------------
 
 namespace CmisSync.Lib.Sync.Strategy
-{ 
+{
     using System;
     using System.IO;
 
@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Sync.Strategy
     using DotCMIS.Client;
 
     using log4net;
-    
+
     /// <summary>
     /// Content change event transformer. Produces Folder and FileEvents from ContentChange Events.
     /// </summary>
@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private IMetaDataStorage storage;
 
         private IFileSystemInfoFactory fsFactory;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.ContentChangeEventTransformer"/> class.
         /// </summary>
@@ -65,7 +65,7 @@ namespace CmisSync.Lib.Sync.Strategy
             if(storage == null) {
                 throw new ArgumentNullException("Storage instance is needed for the ContentChangeEventTransformer, but was null");
             }
-                
+
             this.storage = storage;
 
             if(fsFactory == null) {
@@ -91,14 +91,14 @@ namespace CmisSync.Lib.Sync.Strategy
             if(!(e is ContentChangeEvent)) {
                 return false;
             }
-            
+
             Logger.Debug("Handling ContentChangeEvent");
-            
+
             var contentChangeEvent = e as ContentChangeEvent;
             if(contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted && contentChangeEvent.CmisObject == null) {
                 throw new InvalidOperationException("ERROR, ContentChangeEventAccumulator Missing");
             }
-            
+
             if(contentChangeEvent.Type == DotCMIS.Enums.ChangeType.Deleted) {
                 this.HandleDeletion(contentChangeEvent);
             } else if(contentChangeEvent.CmisObject is IFolder) {
@@ -121,7 +121,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     if(obj.Type == MappedObjectType.Folder)
                     {
                         var dirInfo = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(obj));
-                        Queue.AddEvent(new FolderEvent(dirInfo, null) { Remote = MetaDataChangeType.DELETED });
+                        Queue.AddEvent(new FolderEvent(dirInfo, null, this) { Remote = MetaDataChangeType.DELETED });
                         return;
                     }
                     else
@@ -132,7 +132,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     }
                 }
             }
-            
+
             Logger.Debug("nothing found in local storage; it has never been synced");
         }
 
@@ -147,7 +147,7 @@ namespace CmisSync.Lib.Sync.Strategy
                         Queue.AddEvent(fileEvent);
                         break;
                     }
-                
+
                 case DotCMIS.Enums.ChangeType.Security:
                     {
                         IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
@@ -160,11 +160,11 @@ namespace CmisSync.Lib.Sync.Strategy
                             fileEvent.Remote = MetaDataChangeType.CREATED;
                             fileEvent.RemoteContent = ContentChangeType.CREATED;
                         }
-                
+
                         Queue.AddEvent(fileEvent);
                         break;
                     }
-                
+
                 case DotCMIS.Enums.ChangeType.Updated:
                     {
                         IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
@@ -178,7 +178,7 @@ namespace CmisSync.Lib.Sync.Strategy
                             fileEvent.Remote = MetaDataChangeType.CREATED;
                             fileEvent.RemoteContent = ContentChangeType.CREATED;
                         }
-                
+
                         Queue.AddEvent(fileEvent);
                         break;
                     }
@@ -190,10 +190,11 @@ namespace CmisSync.Lib.Sync.Strategy
 
             IMappedObject dir = this.storage.GetObjectByRemoteId(folder.Id);
             IDirectoryInfo dirInfo = (dir == null) ? null : this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(dir));
-            var folderEvent = new FolderEvent(dirInfo, folder);
+            var folderEvent = new FolderEvent(dirInfo, folder, this);
             switch(contentChangeEvent.Type)
             {
                 case DotCMIS.Enums.ChangeType.Created:
+                Logger.Debug("Created Folder Event");
                     folderEvent.Remote = MetaDataChangeType.CREATED;
                     break;
                 case DotCMIS.Enums.ChangeType.Updated:
@@ -203,7 +204,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     folderEvent.Remote = MetaDataChangeType.CHANGED;
                     break;
             }
-            
+
             Queue.AddEvent(folderEvent);
         }
     }

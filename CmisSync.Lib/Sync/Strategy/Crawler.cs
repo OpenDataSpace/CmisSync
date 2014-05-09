@@ -141,7 +141,8 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Synchronize metadata if different
                         Queue.AddEvent(new FolderEvent(
                             localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
-                            remoteFolder: folder));
+                            remoteFolder: folder,
+                            src: this));
 
                         // Remove handled folder from set to get only the local only folders back from set if done
                         localDirNames.Remove(folder.Name);
@@ -149,7 +150,8 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Remote folder detected, which is not available locally
                         // Figure out, what to do with it
                         Queue.AddEvent(new FolderEvent(
-                            remoteFolder: folder) {
+                            remoteFolder: folder,
+                            src: this) {
                             Remote = MetaDataChangeType.CREATED });
                     }
 
@@ -185,7 +187,8 @@ namespace CmisSync.Lib.Sync.Strategy
             // Only local folders are available, inform synchronizer about them
             foreach(string folder in localDirNames) {
                 Queue.AddEvent(new FolderEvent(
-                    localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder))) { Local = MetaDataChangeType.CREATED });
+                    localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)),
+                    src: this) { Local = MetaDataChangeType.CREATED });
                 Queue.AddEvent(new CrawlRequestEvent(localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)), remoteFolder: null));
             }
 
