@@ -493,6 +493,7 @@ namespace CmisSync.Lib.Sync
             filters.Add("cmis:lastModificationDate");
             filters.Add("cmis:path");
             filters.Add("cmis:changeToken");
+            filters.Add("cmis:parentId");
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             return this.session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
