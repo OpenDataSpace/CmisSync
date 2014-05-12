@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SuccessfulLoginHandler.cs" company="GRAU DATA AG">
+// <copyright file="SyncStrategyInitializer.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -19,24 +19,27 @@
 namespace CmisSync.Lib
 {
     using System;
-    
+
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
-    
+
     using DotCMIS.Client;
     using DotCMIS.Enums;
-    
+
     using log4net;
-    
+
     /// <summary>
     /// Successful login handler. It handles the SuccessfulLoginEvent and registers
     /// the necessary handlers and registers the root folder to the MetaDataStorage.
     /// </summary>
     public class SyncStrategyInitializer : ReportingSyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncStrategyInitializer));
+
         private ContentChangeEventAccumulator ccaccumulator;
         private RepoInfo repoInfo;
         private IMetaDataStorage storage;
@@ -46,37 +49,36 @@ namespace CmisSync.Lib
         private Crawler crawler;
         private SyncMechanism mechanism;
         private IFileSystemInfoFactory fileSystemFactory;
+        private IgnoreAlreadyHandledContentChangeEventsFilter alreadyHandledFilter;
 
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncStrategyInitializer));
-        
         public SyncStrategyInitializer(ISyncEventQueue queue, IMetaDataStorage storage, ISyncEventManager manager, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null)
             {
                 throw new ArgumentNullException("storage null");
             }
-            
+
             if (repoInfo == null)
             {
                 throw new ArgumentNullException("Repoinfo null");
             }
-            
-            if(manager == null) 
+
+            if(manager == null)
             {
                 throw new ArgumentNullException("Manager is null");
             }
-            
+
             if(fsFactory == null) {
                 this.fileSystemFactory = new FileSystemInfoFactory();
             } else {
                 this.fileSystemFactory = fsFactory;
             }
-            
+
             this.repoInfo = repoInfo;
             this.storage = storage;
             this.manager = manager;
         }
-        
+
         /// <summary>
         /// Handle the specified e if it is a SuccessfulLoginEvent
         /// </summary>
@@ -92,71 +94,75 @@ namespace CmisSync.Lib
                 var successfulLoginEvent = e as SuccessfulLoginEvent;
                 var session = successfulLoginEvent.Session;
                 var remoteRoot = successfulLoginEvent.Session.GetObjectByPath(this.repoInfo.RemotePath) as IFolder;
-                
+
                 // Remove former added instances from event manager
-                if (this.ccaccumulator != null)
-                {
-                    manager.RemoveEventHandler(this.ccaccumulator);
+                if (this.ccaccumulator != null) {
+                    this.manager.RemoveEventHandler(this.ccaccumulator);
                 }
 
-                if (this.contentChanges != null)
-                {
-                    manager.RemoveEventHandler(this.contentChanges);
+                if (this.contentChanges != null) {
+                    this.manager.RemoveEventHandler(this.contentChanges);
+                }
+
+                if (this.alreadyHandledFilter != null) {
+                    this.manager.RemoveEventHandler(this.alreadyHandledFilter);
                 }
 
                 if (this.AreChangeEventsSupported(session))
                 {
-
                     // Add Accumulator
                     this.ccaccumulator = new ContentChangeEventAccumulator(session, this.Queue);
-                    manager.AddEventHandler(this.ccaccumulator);
+                    this.manager.AddEventHandler(this.ccaccumulator);
 
                     // Add Content Change sync algorithm
                     this.contentChanges = new ContentChanges(session, this.storage, this.Queue);
-                    manager.AddEventHandler(this.contentChanges);
+                    this.manager.AddEventHandler(this.contentChanges);
+
+                    // Add Filter of already handled change events
+                    this.alreadyHandledFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(this.storage, session);
+                    this.manager.AddEventHandler(this.alreadyHandledFilter);
                 }
 
                 // Add remote object fetcher
-                if (this.remoteFetcher != null)
-                {
-                    manager.RemoveEventHandler(this.remoteFetcher);
+                if (this.remoteFetcher != null) {
+                    this.manager.RemoveEventHandler(this.remoteFetcher);
                 }
 
                 this.remoteFetcher = new RemoteObjectFetcher(session, this.storage);
-                manager.AddEventHandler(this.remoteFetcher);
+                this.manager.AddEventHandler(this.remoteFetcher);
 
                 // Add crawler
-                if (this.crawler != null)
-                {
-                    manager.RemoveEventHandler(this.crawler);
+                if (this.crawler != null) {
+                    this.manager.RemoveEventHandler(this.crawler);
                 }
 
                 this.crawler = new Crawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.fileSystemFactory);
-                manager.AddEventHandler(this.crawler);
+                this.manager.AddEventHandler(this.crawler);
 
-                if (this.mechanism != null)
-                {
-                    manager.RemoveEventHandler(this.mechanism);
+                if (this.mechanism != null) {
+                    this.manager.RemoveEventHandler(this.mechanism);
                 }
-    
+
                 var localDetection = new LocalSituationDetection();
                 var remoteDetection = new RemoteSituationDetection();
-                
+
                 this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage);
-                manager.AddEventHandler(this.mechanism);
-                
+                this.manager.AddEventHandler(this.mechanism);
+
                 var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken);
-            
+
                 Logger.Debug("Saving Root Folder to DataBase");
                 this.storage.SaveMappedObject(rootFolder);
                 return true;
             }
+
             return false;
         }
-        
+
         /// <summary>
         /// Detect whether the repository has the ChangeLog capability.
         /// </summary>
+        /// <param name="session">The Cmis Session</param>
         /// <returns>
         /// <c>true</c> if this feature is available, otherwise <c>false</c>
         /// </returns>

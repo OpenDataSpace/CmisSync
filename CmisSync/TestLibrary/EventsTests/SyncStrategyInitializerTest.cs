@@ -26,6 +26,7 @@ namespace TestLibrary.EventsTests
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
 
@@ -40,12 +41,40 @@ namespace TestLibrary.EventsTests
     public class SyncStrategyInitializerTest
     {
         [Test, Category("Fast")]
-        public void ConstructorTest()
+        public void ConstructorTakesQueueAndManagerAndStorage()
         {
             var queue = new Mock<ISyncEventQueue>();
             var manager = new Mock<ISyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
             new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfQueueIsNull()
+        {
+            new SyncStrategyInitializer(null, Mock.Of<IMetaDataStorage>(), Mock.Of<ISyncEventManager>(), CreateRepoInfo());
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfStorageIsNull()
+        {
+            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), null, Mock.Of<ISyncEventManager>(), CreateRepoInfo());
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfSyncManagerIsNull()
+        {
+            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, CreateRepoInfo());
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfRepoInfoIsNull()
+        {
+            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<ISyncEventManager>(), null);
         }
 
         [Test, Category("Fast")]
@@ -102,7 +131,7 @@ namespace TestLibrary.EventsTests
                 manager: manager.Object,
                 changeEventSupported: true);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(5));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(6));
             VerifyNonContenChangeHandlersAdded(manager, Times.Once());
             VerifyContenChangeHandlersAdded(manager, Times.Once());
         }
@@ -122,10 +151,10 @@ namespace TestLibrary.EventsTests
 
             handler.Handle(e);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(10));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(12));
             VerifyNonContenChangeHandlersAdded(manager, Times.Exactly(2));
             VerifyContenChangeHandlersAdded(manager, Times.Exactly(2));
-            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(5));
+            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(6));
             VerifyNonContenChangeHandlersRemoved(manager, Times.Once());
             VerifyContenChangeHandlersRemoved(manager, Times.Once());
         }
@@ -146,7 +175,7 @@ namespace TestLibrary.EventsTests
             e = CreateNewSessionEvent(changeEventSupported: true);
             handler.Handle(e);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(8));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(9));
             VerifyNonContenChangeHandlersAdded(manager, Times.Exactly(2));
             VerifyContenChangeHandlersAdded(manager, Times.Exactly(1));
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(3));
@@ -198,6 +227,7 @@ namespace TestLibrary.EventsTests
         {
             manager.Verify(m => m.AddEventHandler(It.IsAny<ContentChanges>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<ContentChangeEventAccumulator>()), times);
+            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreAlreadyHandledContentChangeEventsFilter>()),times);
         }
 
         private static void VerifyNonContenChangeHandlersRemoved(Mock<ISyncEventManager> manager, Times times)
@@ -211,6 +241,7 @@ namespace TestLibrary.EventsTests
         {
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<ContentChanges>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<ContentChangeEventAccumulator>()), times);
+            manager.Verify(m => m.RemoveEventHandler(It.IsAny<IgnoreAlreadyHandledContentChangeEventsFilter>()), times);
         }
 
         private static void RunSuccessfulLoginEvent(IMetaDataStorage storage, ISyncEventManager manager, bool changeEventSupported = false, string id = "i", string token = "t")
