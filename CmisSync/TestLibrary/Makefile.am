@@ -41,9 +41,9 @@ SOURCES =  \
 	EventsTests/GenericSyncEventHandlerTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
-	EventsTests/SuccessfulLoginHandlerTest.cs \
 	EventsTests/SyncEventManagerTest.cs \
 	EventsTests/SyncEventQueueTest.cs \
+	EventsTests/SyncStrategyInitializerTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/CmisRepoTest.cs \
 	IntegrationTests/CmisSyncTests.cs \

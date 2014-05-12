@@ -35,7 +35,7 @@ namespace CmisSync.Lib
     /// Successful login handler. It handles the SuccessfulLoginEvent and registers
     /// the necessary handlers and registers the root folder to the MetaDataStorage.
     /// </summary>
-    public class SuccessfulLoginHandler : ReportingSyncEventHandler
+    public class SyncStrategyInitializer : ReportingSyncEventHandler
     {
         private ContentChangeEventAccumulator ccaccumulator;
         private RepoInfo repoInfo;
@@ -47,9 +47,9 @@ namespace CmisSync.Lib
         private SyncMechanism mechanism;
         private IFileSystemInfoFactory fileSystemFactory;
 
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(SuccessfulLoginHandler));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncStrategyInitializer));
         
-        public SuccessfulLoginHandler(ISyncEventQueue queue, IMetaDataStorage storage, SyncEventManager manager, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(queue)
+        public SyncStrategyInitializer(ISyncEventQueue queue, IMetaDataStorage storage, SyncEventManager manager, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null)
             {

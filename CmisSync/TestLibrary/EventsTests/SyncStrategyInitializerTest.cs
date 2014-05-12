@@ -35,7 +35,7 @@ namespace TestLibrary.EventsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class SuccessfulLoginHandlerTest
+    public class SyncStrategyInitializerTest
     {
         private string remoteRoot = "/my/";
         
@@ -56,7 +56,7 @@ namespace TestLibrary.EventsTests
             var queue = new Mock<ISyncEventQueue>();
             var manager = new Mock<SyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
-            new SuccessfulLoginHandler(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+            new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
         }
         
         [Test, Category("Fast")]
@@ -65,7 +65,7 @@ namespace TestLibrary.EventsTests
             var queue = new Mock<ISyncEventQueue>();
             var manager = new Mock<SyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
-            var handler = new SuccessfulLoginHandler(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+            var handler = new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
             
             var e = new Mock<ISyncEvent>();
             Assert.False(handler.Handle(e.Object));            
@@ -85,7 +85,7 @@ namespace TestLibrary.EventsTests
             var queue = new Mock<ISyncEventQueue>();
             var manager = new Mock<SyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
-            var handler = new SuccessfulLoginHandler(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+            var handler = new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
             
             var e = new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object);
             Assert.True(handler.Handle(e));
