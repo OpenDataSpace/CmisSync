@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Events
         /// Handler to add.
         /// </param>
         void AddEventHandler(SyncEventHandler handler);
-  
+
         /// <summary>
         /// Handle the specified event.
         /// </summary>
@@ -38,7 +38,7 @@ namespace CmisSync.Lib.Events
         /// Event to handle.
         /// </param>
         void Handle(ISyncEvent e);
-                    
+
         /// <summary>
         /// Removes the event handler.
         /// </summary>
