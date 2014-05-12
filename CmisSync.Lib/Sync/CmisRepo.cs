@@ -433,8 +433,6 @@ namespace CmisSync.Lib.Sync
             }
         }
 
-
-
         private bool IsGetDescendantsSupported()
         {
             try
