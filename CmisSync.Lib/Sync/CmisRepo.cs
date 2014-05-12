@@ -155,7 +155,7 @@ namespace CmisSync.Lib.Sync
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="sessionFactory">Session factory.</param>
         /// <param name="fileSystemInfoFactory">File system info factory.</param>
-        protected CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory = false, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null)
+        protected CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null)
         {
             if (repoInfo == null)
             {
