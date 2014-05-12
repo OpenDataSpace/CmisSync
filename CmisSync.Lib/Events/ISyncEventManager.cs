@@ -16,21 +16,35 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using log4net;
-
-using System;
-using System.Collections.Generic;
-
 namespace CmisSync.Lib.Events
 {
+    /// <summary>
+    /// Sync event manager which has a list of all Handlers and forwards events to them.
+    /// </summary>
     public interface ISyncEventManager
     {
-
-        void AddEventHandler(SyncEventHandler h);
-
+        /// <summary>
+        /// Adds the event handler to the manager.
+        /// </summary>
+        /// <param name='handler'>
+        /// Handler to add.
+        /// </param>
+        void AddEventHandler(SyncEventHandler handler);
+  
+        /// <summary>
+        /// Handle the specified event.
+        /// </summary>
+        /// <param name='e'>
+        /// Event to handle.
+        /// </param>
         void Handle(ISyncEvent e);
-
-        void RemoveEventHandler(SyncEventHandler h);
+                    
+        /// <summary>
+        /// Removes the event handler.
+        /// </summary>
+        /// <param name='handler'>
+        /// Handler to remove.
+        /// </param>
+        void RemoveEventHandler(SyncEventHandler handler);
     }
 }
-
