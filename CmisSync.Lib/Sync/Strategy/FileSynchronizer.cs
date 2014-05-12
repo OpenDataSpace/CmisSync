@@ -16,15 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Sync
 {
+    using System;
+    using System.IO;
+    
+    using CmisSync.Lib.Events;
+    
+    using DotCMIS.Client;
+
     public abstract class AbstractFileSynchronizer : ReportingSyncEventHandler
     {
         /// <summary>
@@ -34,6 +35,7 @@ namespace CmisSync.Lib.Sync
         /// The path.
         /// </value>
         public FileInfo Path { get; private set; }
+        
         /// <summary>
         /// Gets the session.
         /// </summary>
@@ -41,6 +43,7 @@ namespace CmisSync.Lib.Sync
         /// The session.
         /// </value>
         protected ISession Session { get; private set; }
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.AbstractFileSynchronizer"/> class.
         /// </summary>
@@ -55,23 +58,27 @@ namespace CmisSync.Lib.Sync
         /// </param>
         public AbstractFileSynchronizer (FileInfo path, ISession session, SyncEventQueue queue) : base(queue)
         {
-            if (path == null)
-                throw new ArgumentException ("Given path cannot be null");
-            if (session == null)
-                throw new ArgumentNullException ("The given session must not be null");
-            Path = path;
-            Session = session;
+            if (path == null) {
+                throw new ArgumentException("Given path cannot be null");
+            }
+  
+            if (session == null) {
+                throw new ArgumentNullException("The given session must not be null");
+            }
+            
+            this.Path = path;
+            this.Session = session;
         }
 
-        public abstract void start ();
+        public abstract void start();
 
-        public abstract void abort ();
+        public abstract void abort();
 
-        public abstract void pause ();
+        public abstract void pause();
 
-        public abstract void resume ();
+        public abstract void resume();
 
-        public abstract void inform ();
+        public abstract void inform();
 
         /*
         /// <summary>
@@ -148,4 +155,3 @@ namespace CmisSync.Lib.Sync
         }*/
     }
 }
-

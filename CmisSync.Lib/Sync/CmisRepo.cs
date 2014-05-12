@@ -19,7 +19,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
 namespace CmisSync.Lib.Sync
 {
     using System;
@@ -265,7 +264,7 @@ namespace CmisSync.Lib.Sync
         public SyncScheduler Scheduler { get; private set; }
 
         /// <summary>
-        /// Gets the Event Queue for this repository.
+        /// Gets or sets the Event Queue for this repository.
         /// Use this to notifiy events for this repository.
         /// </summary>
         /// <value>The queue.</value>
@@ -432,8 +431,6 @@ namespace CmisSync.Lib.Sync
                 }
             }
         }
-
-
 
         private bool IsGetDescendantsSupported()
         {

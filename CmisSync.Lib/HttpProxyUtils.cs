@@ -16,11 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
 namespace CmisSync.Lib
 {
     using System;
     using System.Net;
+    
     using log4net;
 
     /// <summary>

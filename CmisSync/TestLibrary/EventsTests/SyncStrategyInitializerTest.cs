@@ -67,7 +67,7 @@ namespace TestLibrary.EventsTests
             string token = "token";
             var storage = new Mock<IMetaDataStorage>();
             var manager = new Mock<ISyncEventManager>();
-            this.RunSuccessfulLoginEvent(
+            RunSuccessfulLoginEvent(
                 storage: storage.Object, 
                 manager: manager.Object,
                 id: id,
@@ -82,7 +82,7 @@ namespace TestLibrary.EventsTests
         {
             var storage = new Mock<IMetaDataStorage>();
             var manager = new Mock<ISyncEventManager>();
-            this.RunSuccessfulLoginEvent(
+            RunSuccessfulLoginEvent(
                 storage: storage.Object, 
                 manager: manager.Object,
                 changeEventSupported: false);
@@ -97,7 +97,7 @@ namespace TestLibrary.EventsTests
         {
             var storage = new Mock<IMetaDataStorage>();
             var manager = new Mock<ISyncEventManager>();
-            this.RunSuccessfulLoginEvent(
+            RunSuccessfulLoginEvent(
                 storage: storage.Object, 
                 manager: manager.Object,
                 changeEventSupported: true);
