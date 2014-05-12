@@ -290,6 +290,10 @@ namespace CmisSync.Lib.Data
             }
 
             string relativePath = localPath.Substring(this.LocalTargetRootPath.Length);
+            if (relativePath.StartsWith(Path.DirectorySeparatorChar.ToString())) {
+                relativePath = relativePath.Substring(1);
+            }
+
             if (relativePath.Length == 0)
             {
                 return ".";

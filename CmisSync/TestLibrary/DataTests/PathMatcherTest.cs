@@ -245,8 +245,8 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast")]
         public void GetRelativePathDoesNotStartWithSlash()
         {
-            this.localpath = this.localpath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? this.localpath.Substring(0, this.localpath.Length -1) : this.localpath;
-            var matcher = new PathMatcher( this.localpath, "/");
+            this.localpath = this.localpath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? this.localpath.Substring(0, this.localpath.Length - 1) : this.localpath;
+            var matcher = new PathMatcher(this.localpath, "/");
             string folderName = "new";
 
             Assert.That(matcher.GetRelativeLocalPath(Path.Combine(this.localpath, folderName)).StartsWith(Path.DirectorySeparatorChar.ToString()), Is.False);
