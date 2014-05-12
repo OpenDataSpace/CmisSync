@@ -333,7 +333,17 @@ namespace CmisSync.Lib.Storage
             string id = this.GetId(mappedObject);
             using(var tran = this.engine.GetTransaction())
             {
-                return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(this.GetRelativePathSegments(tran, id)));
+                string[] segments = this.GetRelativePathSegments(tran, id);
+                if(segments.Length > 0 && segments[0].Equals("/")) {
+                    string[] temp = new string[segments.Length - 1];
+                    for (int i = 1; i < segments.Length; i++) {
+                        temp[i - 1] = segments[i];
+                    }
+                    segments = temp;
+                }
+
+                string path = Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(segments));
+                return path;
             }
         }
 
