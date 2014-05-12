@@ -48,6 +48,7 @@ SOURCES =  \
 	Events/EventFilter/AbstractFileFilter.cs \
 	Events/EventFilter/AlreadyAddedObjectsFsEventFilter.cs \
 	Events/EventFilter/GenericHandleDublicatedEventsFilter.cs \
+	Events/EventFilter/IgnoreAlreadyHandledContentChangeEventsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
 	Events/EventFilter/IgnoredFilesFilter.cs \
 	Events/EventFilter/IgnoredFolderNameFilter.cs \

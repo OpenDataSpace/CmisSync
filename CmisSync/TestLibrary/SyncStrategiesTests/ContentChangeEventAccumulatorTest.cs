@@ -62,6 +62,23 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
+        public void DocumentAlreadyAccumulatedIsNotAccumulatedAgain() {
+            var session = new Mock<ISession>();
+            var remoteObject = Mock.Of<ICmisObject>();
+            var newRemoteObject = Mock.Of<ICmisObject>();
+            session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(remoteObject);
+            var accumulator = new ContentChangeEventAccumulator(session.Object, new Mock<ISyncEventQueue>().Object);
+            var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Created, Id);
+            contentChange.UpdateObject(session.Object);
+            session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject);
+
+            Assert.That(accumulator.Handle(contentChange), Is.False);
+            Assert.That(contentChange.CmisObject, Is.EqualTo(remoteObject));
+            Assert.That(contentChange.CmisObject, Is.Not.EqualTo(newRemoteObject));
+        }
+
+
+        [Test, Category("Fast"), Category("ContentChange")]
         public void DocumentDeletionNotAccumulated() {
             var session = new Mock<ISession>();
             var contentChange = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Deleted, Id);
