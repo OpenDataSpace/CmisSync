@@ -29,10 +29,10 @@ namespace TestLibrary
     /// Do not use this in production code. 
     /// It contains public fields that could do a lot of harm 
     public class SingleStepEventQueue : IDisposableSyncEventQueue {
-        public SyncEventManager manager; 
+        public ISyncEventManager manager; 
         public Queue<ISyncEvent> queue = new Queue<ISyncEvent>();
 
-        public SingleStepEventQueue(SyncEventManager manager) {
+        public SingleStepEventQueue(ISyncEventManager manager) {
             this.manager = manager;
         }
 

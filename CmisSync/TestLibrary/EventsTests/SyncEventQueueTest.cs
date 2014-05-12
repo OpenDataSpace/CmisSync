@@ -48,7 +48,7 @@ namespace TestLibrary.EventsTests
         [Test, Category("Fast")]
         public void EventlessStartStop()
         {
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>().Object))
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
             {
                 WaitFor(queue, (q) => { return !q.IsStopped; });
                 Assert.False(queue.IsStopped);
@@ -61,7 +61,7 @@ namespace TestLibrary.EventsTests
         [Test, Category("Fast")]
         public void AddEvent()
         {
-            var managerMock = new Mock<SyncEventManager>();
+            var managerMock = new Mock<ISyncEventManager>();
             var eventMock = new Mock<ISyncEvent>();
             using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object))
             {
@@ -79,7 +79,7 @@ namespace TestLibrary.EventsTests
         [ExpectedException(typeof(InvalidOperationException))]
         public void AddEventToStoppedQueue()
         {
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>().Object))
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
             {
                 queue.StopListener();
                 WaitFor(queue, (q) => { return q.IsStopped; });
@@ -91,7 +91,7 @@ namespace TestLibrary.EventsTests
         public void WaitForStop()
         {
             Task t;
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>().Object))
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
             {
                 t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
                 queue.WaitForStopped();
@@ -105,7 +105,7 @@ namespace TestLibrary.EventsTests
         public void WaitForStopWithTimeout()
         {
             Task t;
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>().Object))
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
             {
                 t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
                 Assert.False(queue.WaitForStopped(10));
@@ -120,7 +120,7 @@ namespace TestLibrary.EventsTests
         public void WaitForStopWithTimeSpan()
         {
             Task t;
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<SyncEventManager>().Object))
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
             {
                 t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
                 Assert.False(queue.WaitForStopped(new TimeSpan(0, 0, 0, 0, 10)));

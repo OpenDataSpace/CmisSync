@@ -276,7 +276,7 @@ namespace CmisSync.Lib.Sync
         /// Use this for adding and removing SyncEventHandler for this repository.
         /// </summary>
         /// <value>The event manager.</value>
-        public SyncEventManager EventManager { get; private set; }
+        public ISyncEventManager EventManager { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this Repo is stopped, to control for machine sleep/wake power management.

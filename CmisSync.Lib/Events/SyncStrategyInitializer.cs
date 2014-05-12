@@ -40,7 +40,7 @@ namespace CmisSync.Lib
         private ContentChangeEventAccumulator ccaccumulator;
         private RepoInfo repoInfo;
         private IMetaDataStorage storage;
-        private SyncEventManager manager;
+        private ISyncEventManager manager;
         private ContentChanges contentChanges;
         private RemoteObjectFetcher remoteFetcher;
         private Crawler crawler;
@@ -49,7 +49,7 @@ namespace CmisSync.Lib
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncStrategyInitializer));
         
-        public SyncStrategyInitializer(ISyncEventQueue queue, IMetaDataStorage storage, SyncEventManager manager, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(queue)
+        public SyncStrategyInitializer(ISyncEventQueue queue, IMetaDataStorage storage, ISyncEventManager manager, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null)
             {

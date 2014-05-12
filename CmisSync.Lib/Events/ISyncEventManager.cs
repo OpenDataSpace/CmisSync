@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SyncEventManager.cs" company="GRAU DATA AG">
+// <copyright file="ISyncEventManager.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -18,41 +18,18 @@
 //-----------------------------------------------------------------------
 namespace CmisSync.Lib.Events
 {
-    using System;
-    using System.Collections.Generic;
-    
-    using log4net;
- 
     /// <summary>
     /// Sync event manager which has a list of all Handlers and forwards events to them.
     /// </summary>
-    public class SyncEventManager : ISyncEventManager
+    public interface ISyncEventManager
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventManager));
-        private List<SyncEventHandler> handler = new List<SyncEventHandler>();
-  
         /// <summary>
         /// Adds the event handler to the manager.
         /// </summary>
         /// <param name='handler'>
         /// Handler to add.
         /// </param>
-        public void AddEventHandler(SyncEventHandler handler)
-        {
-            Logger.Debug("Adding Eventhandler " + handler);
-            
-            // The zero-based index of item in the sorted List<T>, 
-            // if item is found; otherwise, a negative number that 
-            // is the bitwise complement of the index of the next 
-            // element that is larger than item or.
-            int pos = this.handler.BinarySearch(handler);
-            if (pos < 0)
-            {
-                pos = ~pos;
-            }
-            
-            this.handler.Insert(pos, handler);
-        }
+        void AddEventHandler(SyncEventHandler handler);
   
         /// <summary>
         /// Handle the specified event.
@@ -60,27 +37,14 @@ namespace CmisSync.Lib.Events
         /// <param name='e'>
         /// Event to handle.
         /// </param>
-        public void Handle(ISyncEvent e)
-        {
-            for (int i = this.handler.Count - 1; i >= 0; i--)
-            {
-                var h = this.handler[i];
-                if (this.handler[i].Handle(e))
-                {
-                    return;
-                }
-            }
-        }
-  
+        void Handle(ISyncEvent e);
+                    
         /// <summary>
         /// Removes the event handler.
         /// </summary>
         /// <param name='handler'>
         /// Handler to remove.
         /// </param>
-        public void RemoveEventHandler(SyncEventHandler handler)
-        {
-            this.handler.Remove(handler);
-        }
+        void RemoveEventHandler(SyncEventHandler handler);
     }
 }

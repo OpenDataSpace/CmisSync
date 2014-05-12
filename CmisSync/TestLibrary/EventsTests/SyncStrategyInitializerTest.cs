@@ -36,9 +36,7 @@ namespace TestLibrary.EventsTests
 
     [TestFixture]
     public class SyncStrategyInitializerTest
-    {
-        private string remoteRoot = "/my/";
-        
+    {        
         private RepoInfo CreateRepoInfo() {
             return new RepoInfo
             {
@@ -48,13 +46,11 @@ namespace TestLibrary.EventsTests
             };
         }
         
-        //ISyncEventQueue queue, IMetaDataStorage storage, SyncEventManager manager, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null
-        
         [Test, Category("Fast")]
         public void ConstructorTest()
         {
             var queue = new Mock<ISyncEventQueue>();
-            var manager = new Mock<SyncEventManager>();
+            var manager = new Mock<ISyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
             new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
         }
@@ -63,7 +59,7 @@ namespace TestLibrary.EventsTests
         public void IgnoresWrongEventsTest()
         {
             var queue = new Mock<ISyncEventQueue>();
-            var manager = new Mock<SyncEventManager>();
+            var manager = new Mock<ISyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
             var handler = new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
             
@@ -83,7 +79,7 @@ namespace TestLibrary.EventsTests
 
             session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
             var queue = new Mock<ISyncEventQueue>();
-            var manager = new Mock<SyncEventManager>();
+            var manager = new Mock<ISyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
             var handler = new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
             

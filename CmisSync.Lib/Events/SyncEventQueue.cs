@@ -33,7 +33,7 @@ namespace CmisSync.Lib.Events
 
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
 
-        private SyncEventManager manager;
+        private ISyncEventManager manager;
 
         private Task consumer;
 
@@ -43,7 +43,7 @@ namespace CmisSync.Lib.Events
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.SyncEventQueue"/> class.
         /// </summary>
         /// <param name="manager">Manager holding the handler.</param>
-        public SyncEventQueue(SyncEventManager manager) {
+        public SyncEventQueue(ISyncEventManager manager) {
             if(manager == null) {
                 throw new ArgumentException("manager may not be null");
             }
@@ -133,7 +133,7 @@ namespace CmisSync.Lib.Events
             this.alreadyDisposed = true;
         }
 
-        private static void Listen(BlockingCollection<ISyncEvent> queue, SyncEventManager manager) {
+        private static void Listen(BlockingCollection<ISyncEvent> queue, ISyncEventManager manager) {
             Logger.Debug("Starting to listen on SyncEventQueue");
             while (!queue.IsCompleted)
             {
