@@ -24,11 +24,19 @@ namespace CmisSync.Lib.Events.Filter
 
     using CmisSync.Lib.Storage;
 
+    /// <summary>
+    /// Already added objects fs event filter.
+    /// </summary>
     public class AlreadyAddedObjectsFsEventFilter : SyncEventHandler
     {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.AlreadyAddedObjectsFsEventFilter"/> class.
+        /// </summary>
+        /// <param name="storage">Storage instance.</param>
+        /// <param name="fsFactory">Fs factory.</param>
         public AlreadyAddedObjectsFsEventFilter(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
         {
             if (storage == null) {
@@ -49,6 +57,12 @@ namespace CmisSync.Lib.Events.Filter
             }
         }
 
+        /// <summary>
+        /// Filters FSEvents if they signalize an add and are handled already.
+        /// This occurs if the syncer creates a local object on file system.
+        /// </summary>
+        /// <param name="e">Sync event</param>
+        /// <returns><c>true</c> if the storage contains an entry for this object</returns>
         public override bool Handle(ISyncEvent e)
         {
             if(e is FSEvent) {
