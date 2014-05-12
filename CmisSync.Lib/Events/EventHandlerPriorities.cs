@@ -70,6 +70,7 @@ namespace CmisSync.Lib.Events
             map[typeof(IgnoredFoldersFilter)] = FILTER;
             map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
             map[typeof(AlreadyAddedObjectsFsEventFilter)] = FILTER;
+            map[typeof(IgnoreAlreadyHandledContentChangeEventsFilter)] = FILTER;
 
             // Higher than fallback Crawler
             map[typeof(ContentChanges)] = HIGH;
