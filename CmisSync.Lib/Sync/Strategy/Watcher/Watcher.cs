@@ -19,27 +19,27 @@
 namespace CmisSync.Lib.Sync.Strategy
 {
     using System;
-    using System.Collections.Generic;   
+    using System.Collections.Generic;
     using System.Data.Common;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
- 
+
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
-    
+
     using DotCMIS;
     using DotCMIS.Client;
 
     using log4net;
-    
+
     /// <summary>
     /// Watcher sync.
     /// </summary>
     public class Watcher : ReportingSyncEventHandler, IDisposable
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Watcher));
-    
+
         private bool alreadyDisposed = false;
 
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
@@ -53,7 +53,7 @@ namespace CmisSync.Lib.Sync.Strategy
         public Watcher(ISyncEventQueue queue) : base(queue)
         {
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> enables the FSEvent report
         /// </summary>
@@ -61,10 +61,10 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <c>true</c> if enable events; otherwise, <c>false</c>.
         /// </value>
         public virtual bool EnableEvents { get; set; }
-  
+
         // This is a workaround to enable mocking Watcher with callbase
         // TODO: Remove this when Watcher is seperated
-        
+
         /// <summary>
         /// Gets the priority.
         /// </summary>
@@ -76,7 +76,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 return EventHandlerPriorities.GetPriority(typeof(CmisSync.Lib.Sync.Strategy.Watcher));
             }
         }
-  
+
         /// <summary>
         /// Handle the specified Event if it is FSEvent.
         /// </summary>
@@ -92,7 +92,7 @@ namespace CmisSync.Lib.Sync.Strategy
             if (fsevent == null) {
                 return false;
             }
-            
+
             Logger.Debug("Handling FSEvent: " + e);
 
             if (fsevent.IsDirectory()) {
@@ -100,10 +100,10 @@ namespace CmisSync.Lib.Sync.Strategy
             } else {
                 this.HandleFileEvents(fsevent);
             }
-            
+
             return true;
         }
-        
+
         #region IDisposable implementation
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// state. After calling <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> so the garbage collector can reclaim the memory that the
         /// <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> was occupying.</remarks>
-        public void Dispose() 
+        public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
@@ -143,8 +143,8 @@ namespace CmisSync.Lib.Sync.Strategy
                 folderEvent = new FolderMovedEvent(
                     this.fsFactory.CreateDirectoryInfo(movedEvent.OldPath),
                     this.fsFactory.CreateDirectoryInfo(movedEvent.Path),
-                    null, 
-                    null) 
+                    null,
+                    null)
                 { Local = MetaDataChangeType.MOVED };
             } else {
                 folderEvent = new FolderEvent(this.fsFactory.CreateDirectoryInfo(e.Path), null, this);
@@ -163,7 +163,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     return;
                 }
             }
-            
+
             Queue.AddEvent(folderEvent);
         }
 
@@ -182,9 +182,9 @@ namespace CmisSync.Lib.Sync.Strategy
                 var newEvent = new FileMovedEvent(
                     oldfile,
                     newfile,
-                    null, 
+                    null,
                     newfile.Directory,
-                    null, 
+                    null,
                     null);
                 Queue.AddEvent(newEvent);
             } else {
@@ -203,7 +203,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     newEvent.LocalContent = ContentChangeType.DELETED;
                     break;
                 }
-                
+
                 Queue.AddEvent(newEvent);
             }
         }
