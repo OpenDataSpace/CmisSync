@@ -30,14 +30,14 @@ namespace TestLibrary.SyncStrategiesTests
     {
         [Test, Category("Fast")]
         public void InitialState() {
-            var manager = new Mock<SyncEventManager>();
+            var manager = new Mock<ISyncEventManager>();
             var queue = new SingleStepEventQueue(manager.Object);
             Assert.That(queue.IsStopped, Is.True, "Queue starts stopped");
         }
 
         [Test, Category("Fast")]
         public void StartAndStopWorks() {
-            var manager = new Mock<SyncEventManager>();
+            var manager = new Mock<ISyncEventManager>();
             var queue = new SingleStepEventQueue(manager.Object);
             var syncEvent = new Mock<ISyncEvent>();
             queue.AddEvent(syncEvent.Object);
@@ -48,7 +48,7 @@ namespace TestLibrary.SyncStrategiesTests
         
         [Test, Category("Fast")]
         public void EventsGetForwarded() {
-            var manager = new Mock<SyncEventManager>();
+            var manager = new Mock<ISyncEventManager>();
             var queue = new SingleStepEventQueue(manager.Object);
             var syncEvent = new Mock<ISyncEvent>();
             queue.AddEvent(syncEvent.Object);
@@ -58,7 +58,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         public void QueueIsFifo() {
-            var manager = new Mock<SyncEventManager>();
+            var manager = new Mock<ISyncEventManager>();
             var queue = new SingleStepEventQueue(manager.Object);
             var syncEvent1 = new Mock<ISyncEvent>();
             var syncEvent2 = new Mock<ISyncEvent>();

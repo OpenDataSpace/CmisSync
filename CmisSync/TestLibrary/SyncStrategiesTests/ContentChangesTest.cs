@@ -221,7 +221,7 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             session.Setup(s => s.Binding.GetRepositoryService()).Returns(repositoryService.Object);
             session.Setup(s => s.RepositoryInfo.Id).Returns(this.repoId);
-            var manager = new Mock<SyncEventManager>().Object;
+            var manager = new Mock<ISyncEventManager>().Object;
             var storage = new Mock<IMetaDataStorage>();
             storage.Setup(db => db.ChangeLogToken).Returns((string)null);
             var queue = new Mock<ISyncEventQueue>();

@@ -198,6 +198,7 @@
     <Compile Include="Events\IDisposableSyncEventQueue.cs" />
     <Compile Include="Events\EventFilter\AlreadyAddedObjectsFsEventFilter.cs" />
     <Compile Include="Events\SyncStrategyInitializer.cs" />
+    <Compile Include="Events\ISyncEventManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

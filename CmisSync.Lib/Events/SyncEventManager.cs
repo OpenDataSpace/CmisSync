@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace CmisSync.Lib.Events
 {
-    public class SyncEventManager
+    public class SyncEventManager :ISyncEventManager
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(SyncEventManager));
         private List<SyncEventHandler> handler = new List<SyncEventHandler>();
@@ -46,7 +46,7 @@ namespace CmisSync.Lib.Events
             handler.Insert(pos, h);
         }
 
-        public virtual void Handle(ISyncEvent e) {
+        public void Handle(ISyncEvent e) {
             for(int i = handler.Count-1; i >= 0; i--)
                 {
                     var h = handler[i];
