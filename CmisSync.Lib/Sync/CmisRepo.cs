@@ -401,7 +401,7 @@ namespace CmisSync.Lib.Sync
                     // Create session.
                     this.session = this.sessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.authProvider, null);
 
-                    this.session.DefaultContext = this.CreateDefaultContext();
+                    this.session.DefaultContext = OperationContextFactory.CreateDefaultContext(this.session);
                     this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, this.session));
                 }
                 catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
@@ -442,22 +442,6 @@ namespace CmisSync.Lib.Sync
             {
                 return false;
             }
-        }
-
-        private IOperationContext CreateDefaultContext()
-        {
-            HashSet<string> filters = new HashSet<string>();
-            filters.Add("cmis:objectId");
-            filters.Add("cmis:name");
-            filters.Add("cmis:contentStreamFileName");
-            filters.Add("cmis:contentStreamLength");
-            filters.Add("cmis:lastModificationDate");
-            filters.Add("cmis:path");
-            filters.Add("cmis:changeToken");
-            filters.Add("cmis:parentId");
-            HashSet<string> renditions = new HashSet<string>();
-            renditions.Add("cmis:none");
-            return this.session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
         }
 
         /// <summary>

@@ -59,6 +59,19 @@ namespace TestLibrary.UtilsTests
             Assert.That(context, Is.EqualTo(result));
         }
 
+        [Test, Category("Fast")]
+        public void CreateDefaultContext()
+        {
+            var result = Mock.Of<IOperationContext>();
+            var session = this.CreateSessionMock(result);
+
+            var context = OperationContextFactory.CreateDefaultContext(session.Object);
+
+            this.VerifyThatAllDefaultValuesAreSet(session);
+            this.VerifyThatFilterContainsPath(session);
+            Assert.That(context, Is.EqualTo(result));
+        }
+
         private void VerifyThatAllDefaultValuesAreSet(Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
@@ -86,6 +99,23 @@ namespace TestLibrary.UtilsTests
                 s => s.CreateOperationContext(
                 It.Is<HashSet<string>>(set =>
                                    !set.Contains("cmis:path")),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<IncludeRelationshipsFlag>(),
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<int>()),
+                Times.Once());
+        }
+
+        private void VerifyThatFilterContainsPath(Mock<ISession> session) {
+            session.Verify(
+                s => s.CreateOperationContext(
+                It.Is<HashSet<string>>(set =>
+                                   set.Contains("cmis:path")),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
