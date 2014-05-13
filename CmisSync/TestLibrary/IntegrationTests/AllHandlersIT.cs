@@ -311,6 +311,9 @@ namespace TestLibrary.IntegrationTests
             var alreadyAddedFilter = new AlreadyAddedObjectsFsEventFilter(storage, fsFactory);
             manager.AddEventHandler(alreadyAddedFilter);
 
+            var ignoreContentChangesFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage, session.Object);
+            manager.AddEventHandler(ignoreContentChangesFilter);
+
             var invalidFolderNameFilter = new InvalidFolderNameFilter(queue);
             manager.AddEventHandler(invalidFolderNameFilter);
 
