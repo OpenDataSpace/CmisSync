@@ -16,6 +16,7 @@ SOURCES =  \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/IDisposableAuthProvider.cs \
 	Cmis/MimeType.cs \
+	Cmis/OperationContextFactory.cs \
 	Cmis/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/PersistentStandardAuthenticationProvider.cs \
 	Cmis/StandardAuthenticationProviderWrapper.cs \
