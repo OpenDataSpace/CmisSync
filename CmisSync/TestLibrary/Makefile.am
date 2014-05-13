@@ -97,7 +97,8 @@ SOURCES =  \
 	TestUtils/SingleStepEventQueueTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
 	UtilsTests/CredentialsTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs 
+	UtilsTests/HttpProxyUtilsTest.cs \
+	UtilsTests/OperationContextFactoryTest.cs 
 	
 
 EXTRA_DIST = TestLibrary.csproj \
