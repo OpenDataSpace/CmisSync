@@ -61,6 +61,7 @@ namespace TestLibrary.DataTests
             Assert.IsNull(file.LastLocalWriteTimeUtc);
             Assert.IsNull(file.LastRemoteWriteTimeUtc);
             Assert.AreEqual(-1, file.LastContentSize);
+            Assert.That(file.Ignored, Is.False);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
@@ -165,6 +166,13 @@ namespace TestLibrary.DataTests
 
             file.Description = "other desc";
             Assert.AreEqual("other desc", file.Description);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void IgnoredProperty()
+        {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Ignored = true };
+            Assert.That(obj.Ignored, Is.True);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]

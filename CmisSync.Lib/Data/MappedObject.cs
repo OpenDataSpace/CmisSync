@@ -244,6 +244,12 @@ namespace CmisSync.Lib.Data
         public long LastContentSize { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Data.MappedObject"/> is ignored.
+        /// </summary>
+        /// <value><c>true</c> if ignored; otherwise, <c>false</c>.</value>
+        public bool Ignored { get; set; }
+
+        /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Data.MappedObjectData"/>.
         /// </summary>
         /// <param name='obj'>
