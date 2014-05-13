@@ -20,11 +20,43 @@
 namespace CmisSync.Lib.Cmis
 {
     using System;
+    using System.Collections.Generic;
 
-    public class OperationContextFactory
+    using DotCMIS.Client;
+    using DotCMIS.Enums;
+
+    /// <summary>
+    /// Operation context factory.
+    /// </summary>
+    public static class OperationContextFactory
     {
-        public OperationContextFactory()
-        {
+        public static IOperationContext CreateContentChangeEventContext(ISession session) {
+            HashSet<string> filters = new HashSet<string>();
+            filters.Add("cmis:objectId");
+            filters.Add("cmis:name");
+            filters.Add("cmis:contentStreamFileName");
+            filters.Add("cmis:contentStreamLength");
+            filters.Add("cmis:lastModificationDate");
+            filters.Add("cmis:path");
+            filters.Add("cmis:changeToken");
+            filters.Add("cmis:parentId");
+            HashSet<string> renditions = new HashSet<string>();
+            renditions.Add("cmis:none");
+            return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
+        }
+
+        public static IOperationContext CreateCrawlContext(ISession session) {
+            HashSet<string> filters = new HashSet<string>();
+            filters.Add("cmis:objectId");
+            filters.Add("cmis:name");
+            filters.Add("cmis:contentStreamFileName");
+            filters.Add("cmis:contentStreamLength");
+            filters.Add("cmis:lastModificationDate");
+            filters.Add("cmis:changeToken");
+            filters.Add("cmis:parentId");
+            HashSet<string> renditions = new HashSet<string>();
+            renditions.Add("cmis:none");
+            return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
         }
     }
 }
