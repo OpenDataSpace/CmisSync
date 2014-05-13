@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="AlreadyAddedObjectsFsEventFilter.cs" company="GRAU DATA AG">
+// <copyright file="IgnoreAlreadyHandledFsEventsFilter.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -27,17 +27,17 @@ namespace CmisSync.Lib.Events.Filter
     /// <summary>
     /// Already added objects fs event filter.
     /// </summary>
-    public class AlreadyAddedObjectsFsEventFilter : SyncEventHandler
+    public class IgnoreAlreadyHandledFsEventsFilter : SyncEventHandler
     {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.AlreadyAddedObjectsFsEventFilter"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoreAlreadyHandledFsEventsFilter"/> class.
         /// </summary>
         /// <param name="storage">Storage instance.</param>
         /// <param name="fsFactory">Fs factory.</param>
-        public AlreadyAddedObjectsFsEventFilter(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
+        public IgnoreAlreadyHandledFsEventsFilter(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
         {
             if (storage == null) {
                 throw new ArgumentNullException("Given storage is null");
@@ -53,7 +53,7 @@ namespace CmisSync.Lib.Events.Filter
         /// <value>The default filter priority.</value>
         public override int Priority {
             get {
-                return EventHandlerPriorities.GetPriority(typeof(AlreadyAddedObjectsFsEventFilter));
+                return EventHandlerPriorities.GetPriority(typeof(IgnoreAlreadyHandledFsEventsFilter));
             }
         }
 
@@ -68,8 +68,13 @@ namespace CmisSync.Lib.Events.Filter
             if(e is FSEvent) {
                 var fsEvent = e as FSEvent;
                 IFileSystemInfo path = fsEvent.IsDirectory() ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(fsEvent.Path) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(fsEvent.Path);
-                if (fsEvent.Type == WatcherChangeTypes.Created && this.storage.GetObjectByLocalPath(path) != null) {
-                    return true;
+                switch(fsEvent.Type) {
+                case WatcherChangeTypes.Created:
+                    return this.storage.GetObjectByLocalPath(path) != null;
+                case WatcherChangeTypes.Deleted:
+                    return this.storage.GetObjectByLocalPath(path) == null;
+                default:
+                    return false;
                 }
             }
 

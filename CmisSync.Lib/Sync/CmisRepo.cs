@@ -103,7 +103,7 @@ namespace CmisSync.Lib.Sync
         /// <summary>
         /// The already added objects filter.
         /// </summary>
-        private Events.Filter.AlreadyAddedObjectsFsEventFilter alreadyAddedFilter;
+        private Events.Filter.IgnoreAlreadyHandledFsEventsFilter alreadyAddedFilter;
 
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
@@ -197,7 +197,7 @@ namespace CmisSync.Lib.Sync
             this.ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(this.Queue) { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
             this.ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
             this.ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
-            this.alreadyAddedFilter = new Events.Filter.AlreadyAddedObjectsFsEventFilter(this.storage, this.fileSystemFactory);
+            this.alreadyAddedFilter = new Events.Filter.IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
             this.EventManager.AddEventHandler(this.ignoredFoldersFilter);
             this.EventManager.AddEventHandler(this.ignoredFileNameFilter);
             this.EventManager.AddEventHandler(this.ignoredFolderNameFilter);

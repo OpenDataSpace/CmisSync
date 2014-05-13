@@ -196,10 +196,10 @@
     <Compile Include="Sync\Strategy\Watcher\Watcher.cs" />
     <Compile Include="Streams\ChunkedStream.cs" />
     <Compile Include="Events\IDisposableSyncEventQueue.cs" />
-    <Compile Include="Events\EventFilter\AlreadyAddedObjectsFsEventFilter.cs" />
     <Compile Include="Events\SyncStrategyInitializer.cs" />
     <Compile Include="Events\EventFilter\IgnoreAlreadyHandledContentChangeEventsFilter.cs" />
     <Compile Include="Events\ISyncEventManager.cs" />
+    <Compile Include="Events\EventFilter\IgnoreAlreadyHandledFsEventsFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

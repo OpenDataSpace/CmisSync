@@ -27,9 +27,9 @@ SOURCES =  \
 	EventsTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
-	EventsTests/EventsFilterTests/AlreadyAddedObjectsFsEventFilterTest.cs \
 	EventsTests/EventsFilterTests/GenericHandleDublicatedEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoreAlreadyHandledFsEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \

@@ -308,7 +308,7 @@ namespace TestLibrary.IntegrationTests
             var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();
             manager.AddEventHandler(permissionDenied);
 
-            var alreadyAddedFilter = new AlreadyAddedObjectsFsEventFilter(storage, fsFactory);
+            var alreadyAddedFilter = new IgnoreAlreadyHandledFsEventsFilter(storage, fsFactory);
             manager.AddEventHandler(alreadyAddedFilter);
 
             var ignoreContentChangesFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage, session.Object);
