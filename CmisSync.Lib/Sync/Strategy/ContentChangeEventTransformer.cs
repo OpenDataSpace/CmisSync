@@ -193,16 +193,16 @@ namespace CmisSync.Lib.Sync.Strategy
             var folderEvent = new FolderEvent(dirInfo, folder, this);
             switch(contentChangeEvent.Type)
             {
-                case DotCMIS.Enums.ChangeType.Created:
+            case DotCMIS.Enums.ChangeType.Created:
                 Logger.Debug("Created Folder Event");
-                    folderEvent.Remote = MetaDataChangeType.CREATED;
-                    break;
-                case DotCMIS.Enums.ChangeType.Updated:
-                    folderEvent.Remote = MetaDataChangeType.CHANGED;
-                    break;
-                case DotCMIS.Enums.ChangeType.Security:
-                    folderEvent.Remote = MetaDataChangeType.CHANGED;
-                    break;
+                folderEvent.Remote = MetaDataChangeType.CREATED;
+                break;
+            case DotCMIS.Enums.ChangeType.Updated:
+                folderEvent.Remote = MetaDataChangeType.CHANGED;
+                break;
+            case DotCMIS.Enums.ChangeType.Security:
+                folderEvent.Remote = MetaDataChangeType.CHANGED;
+                break;
             }
 
             Queue.AddEvent(folderEvent);
