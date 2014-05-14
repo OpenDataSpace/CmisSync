@@ -447,11 +447,13 @@ namespace CmisSync.Lib.Storage
 
         private string PrintFindLines(List<MappedObject> objects, MappedObject parent, string prefix) {
             var sb = new StringBuilder();
-            sb.Append(Path.Combine(prefix, parent.Name)).Append(Environment.NewLine);
+            string path = Path.Combine(prefix, parent.Name);
+            path = path.StartsWith("/") ? "." + path : path;
+            sb.Append(path).Append(Environment.NewLine);
             List<MappedObject> children = objects.FindAll(o => o.ParentId == parent.RemoteObjectId);
             foreach(var child in children) {
                 objects.Remove(child);
-                sb.Append(PrintFindLines(objects, child, Path.Combine(prefix, parent.Name)));
+                sb.Append(PrintFindLines(objects, child, path));
             }
 
             return sb.ToString();
