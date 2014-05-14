@@ -172,25 +172,17 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast"), Category("ContentChange")]
         public void ExecuteCrawlSyncOnNoLocalTokenAvailable()
         {
-            ISyncEvent queuedEvent = null;
             var startSyncEvent = new StartNextSyncEvent(false);
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.Setup(s => s.Binding.GetRepositoryService().GetRepositoryInfo(this.repoId, null).LatestChangeLogToken).Returns(this.changeLogToken);
             var storage = new Mock<IMetaDataStorage>();
             storage.Setup(db => db.ChangeLogToken).Returns((string)null);
-            int handled = 0;
             var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback<ISyncEvent>((e) => {
-                handled++;
-                queuedEvent = e;
-            });
             var changes = new ContentChanges(session.Object, storage.Object, queue.Object);
+
             Assert.IsTrue(changes.Handle(startSyncEvent));
-            Assert.AreEqual(1, handled);
-            Assert.NotNull(queuedEvent);
-            Assert.IsTrue(queuedEvent is StartNextSyncEvent);
-            Assert.IsTrue(((StartNextSyncEvent)queuedEvent).FullSyncRequested);
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -298,6 +290,38 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.IsTrue(changes.Handle(startSyncEvent));
             queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
+        }
+
+        [Test, Category("Fast"), Category("ContentChange")]
+        public void DropAllStartNextSyncEventsInQueueWhichAreAvailableUntilRequestIsDone()
+        {
+            var queue = new Mock<ISyncEventQueue>();
+            ISyncEvent resetToken = null;
+            queue.Setup(q => q.AddEvent(It.Is<ISyncEvent>(e => !(e is ContentChangeEvent)))).Callback<ISyncEvent>(e => resetToken = e);
+            var storage = new Mock<IMetaDataStorage>();
+            storage.SetupProperty(s => s.ChangeLogToken, "lastToken");
+
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturning3Changesin2Batches();
+
+            var startSyncEvent = new StartNextSyncEvent(false);
+            var changes = new ContentChanges(session.Object, storage.Object, queue.Object, this.maxNumberOfContentChanges, this.isPropertyChangesSupported);
+
+            // Start the first regular sync
+            Assert.That(changes.Handle(startSyncEvent), Is.True);
+            Assert.That(resetToken, Is.Not.Null);
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(4));
+
+            // Drop next incomming start sync events
+            Assert.That(changes.Handle(startSyncEvent), Is.True);
+            Assert.That(changes.Handle(startSyncEvent), Is.True);
+
+            // Handle reset event
+            Assert.That(changes.Handle(resetToken), Is.True);
+
+            // Executes next sync and passes a new reset token to queue
+            Assert.That(changes.Handle(startSyncEvent), Is.True);
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
+            queue.Verify(foo => foo.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(5));
         }
     }
 }

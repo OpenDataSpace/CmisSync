@@ -76,7 +76,7 @@ namespace TestLibrary.IntegrationTests
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, DefaultId, "someStreamId");
 
             ObservableHandler observer = this.RunQueue(session, storage);
-            
+
             observer.AssertGotSingleFileEvent(MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
 
