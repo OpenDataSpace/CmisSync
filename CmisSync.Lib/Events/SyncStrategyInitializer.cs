@@ -43,7 +43,6 @@ namespace CmisSync.Lib
         private ContentChangeEventAccumulator ccaccumulator;
         private RepoInfo repoInfo;
         private IMetaDataStorage storage;
-        private ISyncEventManager manager;
         private ContentChanges contentChanges;
         private RemoteObjectFetcher remoteFetcher;
         private Crawler crawler;
@@ -51,7 +50,7 @@ namespace CmisSync.Lib
         private IFileSystemInfoFactory fileSystemFactory;
         private IgnoreAlreadyHandledContentChangeEventsFilter alreadyHandledFilter;
 
-        public SyncStrategyInitializer(ISyncEventQueue queue, IMetaDataStorage storage, ISyncEventManager manager, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(queue)
+        public SyncStrategyInitializer(ISyncEventQueue Queue, IMetaDataStorage storage, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(Queue)
         {
             if (storage == null)
             {
@@ -63,11 +62,6 @@ namespace CmisSync.Lib
                 throw new ArgumentNullException("Repoinfo null");
             }
 
-            if(manager == null)
-            {
-                throw new ArgumentNullException("Manager is null");
-            }
-
             if(fsFactory == null) {
                 this.fileSystemFactory = new FileSystemInfoFactory();
             } else {
@@ -76,7 +70,6 @@ namespace CmisSync.Lib
 
             this.repoInfo = repoInfo;
             this.storage = storage;
-            this.manager = manager;
         }
 
         /// <summary>
@@ -95,59 +88,59 @@ namespace CmisSync.Lib
                 var session = successfulLoginEvent.Session;
                 var remoteRoot = successfulLoginEvent.Session.GetObjectByPath(this.repoInfo.RemotePath) as IFolder;
 
-                // Remove former added instances from event manager
+                // Remove former added instances from event Queue.EventManager
                 if (this.ccaccumulator != null) {
-                    this.manager.RemoveEventHandler(this.ccaccumulator);
+                    this.Queue.EventManager.RemoveEventHandler(this.ccaccumulator);
                 }
 
                 if (this.contentChanges != null) {
-                    this.manager.RemoveEventHandler(this.contentChanges);
+                    this.Queue.EventManager.RemoveEventHandler(this.contentChanges);
                 }
 
                 if (this.alreadyHandledFilter != null) {
-                    this.manager.RemoveEventHandler(this.alreadyHandledFilter);
+                    this.Queue.EventManager.RemoveEventHandler(this.alreadyHandledFilter);
                 }
 
                 if (this.AreChangeEventsSupported(session))
                 {
                     // Add Accumulator
                     this.ccaccumulator = new ContentChangeEventAccumulator(session, this.Queue);
-                    this.manager.AddEventHandler(this.ccaccumulator);
+                    this.Queue.EventManager.AddEventHandler(this.ccaccumulator);
 
                     // Add Content Change sync algorithm
                     this.contentChanges = new ContentChanges(session, this.storage, this.Queue);
-                    this.manager.AddEventHandler(this.contentChanges);
+                    this.Queue.EventManager.AddEventHandler(this.contentChanges);
 
                     // Add Filter of already handled change events
                     this.alreadyHandledFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(this.storage, session);
-                    this.manager.AddEventHandler(this.alreadyHandledFilter);
+                    this.Queue.EventManager.AddEventHandler(this.alreadyHandledFilter);
                 }
 
                 // Add remote object fetcher
                 if (this.remoteFetcher != null) {
-                    this.manager.RemoveEventHandler(this.remoteFetcher);
+                    this.Queue.EventManager.RemoveEventHandler(this.remoteFetcher);
                 }
 
                 this.remoteFetcher = new RemoteObjectFetcher(session, this.storage);
-                this.manager.AddEventHandler(this.remoteFetcher);
+                this.Queue.EventManager.AddEventHandler(this.remoteFetcher);
 
                 // Add crawler
                 if (this.crawler != null) {
-                    this.manager.RemoveEventHandler(this.crawler);
+                    this.Queue.EventManager.RemoveEventHandler(this.crawler);
                 }
 
                 this.crawler = new Crawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.fileSystemFactory);
-                this.manager.AddEventHandler(this.crawler);
+                this.Queue.EventManager.AddEventHandler(this.crawler);
 
                 if (this.mechanism != null) {
-                    this.manager.RemoveEventHandler(this.mechanism);
+                    this.Queue.EventManager.RemoveEventHandler(this.mechanism);
                 }
 
                 var localDetection = new LocalSituationDetection();
                 var remoteDetection = new RemoteSituationDetection();
 
                 this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage);
-                this.manager.AddEventHandler(this.mechanism);
+                this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken);
 

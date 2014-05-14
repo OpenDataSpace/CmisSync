@@ -33,7 +33,7 @@ namespace CmisSync.Lib.Events
 
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
 
-        private ISyncEventManager manager;
+        public ISyncEventManager EventManager {get; private set;}
 
         private Task consumer;
 
@@ -48,8 +48,8 @@ namespace CmisSync.Lib.Events
                 throw new ArgumentException("manager may not be null");
             }
 
-            this.manager = manager;
-            this.consumer = new Task(() => Listen(this.queue, this.manager));
+            this.EventManager = manager;
+            this.consumer = new Task(() => Listen(this.queue, this.EventManager));
             this.consumer.Start();
         }
 

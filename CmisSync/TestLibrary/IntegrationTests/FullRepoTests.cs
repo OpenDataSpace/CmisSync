@@ -51,6 +51,7 @@ namespace TestLibrary.IntegrationTests
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Sync;
 
     using log4net;
@@ -102,20 +103,17 @@ namespace TestLibrary.IntegrationTests
         public void FullRepoTest()
         {
             var activityListener = new Mock<IActivityListener>();
-            var repo = new CmisRepoMock(this.repoInfo, activityListener.Object);
-            repo.Initialize();
-            System.Threading.Thread.Sleep(2000);
-
-            repo.Queue.StopListener();
+            var queue = new SingleStepEventQueue(new SyncEventManager());
+            var repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
+            repo.Initialize();  
 
             while (!repo.Queue.IsStopped) {
-                System.Threading.Thread.Sleep(2000);
-                Console.WriteLine("Waiting");
+                queue.Run();
             }
         }
 
         private class CmisRepoMock : CmisRepo {
-            public CmisRepoMock(RepoInfo repoInfo, IActivityListener activityListener) : base(repoInfo, activityListener, true)
+            public CmisRepoMock(RepoInfo repoInfo, IActivityListener activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
             {
             }
         }
