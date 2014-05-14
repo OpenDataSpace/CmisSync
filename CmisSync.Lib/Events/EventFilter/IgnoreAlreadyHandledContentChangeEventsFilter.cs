@@ -26,11 +26,15 @@ namespace CmisSync.Lib.Events.Filter
     using DotCMIS.Client;
     using DotCMIS.Enums;
 
+    using log4net;
+
     /// <summary>
     /// Filters already handled content change events.
     /// </summary>
     public class IgnoreAlreadyHandledContentChangeEventsFilter : SyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(IgnoreAlreadyHandledContentChangeEventsFilter));
+
         private IMetaDataStorage storage;
         private ISession session;
 
@@ -83,7 +87,12 @@ namespace CmisSync.Lib.Events.Filter
                             }
                         }
 
-                        return mappedObject.LastChangeToken == change.CmisObject.ChangeToken;
+                        if (mappedObject.LastChangeToken == change.CmisObject.ChangeToken) {
+                            Logger.Debug(string.Format("Ignoring remote change because the ChangeToken \"{0}\" is equal to the stored one", mappedObject.LastChangeToken));
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
 
                 default:
