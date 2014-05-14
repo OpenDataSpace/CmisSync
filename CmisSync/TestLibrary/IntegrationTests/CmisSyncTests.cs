@@ -363,51 +363,6 @@ namespace TestLibrary.IntegrationTests
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
-        [Ignore]
-        public void DotCmisToIBMConnections(
-            string canonical_name,
-            string localPath,
-            string remoteFolderPath,
-            string url,
-            string user,
-            string password,
-            string repositoryId)
-        {
-            var cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = url;
-            cmisParameters[SessionParameter.User] = user;
-            cmisParameters[SessionParameter.Password] = password;
-            cmisParameters[SessionParameter.RepositoryId] = repositoryId;
-
-            SessionFactory factory = SessionFactory.NewInstance();
-            ISession session = factory.GetRepositories(cmisParameters)[0].CreateSession();
-
-            Console.WriteLine("Depth: 1");
-            IFolder root = session.GetRootFolder();
-            IItemEnumerable<ICmisObject> children = root.GetChildren();
-            foreach (var folder in children.OfType<IFolder>())
-            {
-                Console.WriteLine(folder.Path);
-            }
-
-            Console.WriteLine("Depth: 2");
-            root = session.GetRootFolder();
-            children = root.GetChildren();
-            foreach (var folder in children.OfType<IFolder>())
-            {
-                Console.WriteLine(folder.Path);
-                IItemEnumerable<ICmisObject> subChildren = folder.GetChildren();
-
-                // Exception happens here, see https://issues.apache.org/jira/browse/CMIS-593
-                foreach (var subFolder in subChildren.OfType<IFolder>()) 
-                {
-                    Console.WriteLine(subFolder.Path);
-                }
-            }
-        }
-
         [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(60000)]
         public void GetRepositoriesFuzzy(string url, string user, string password)
         {

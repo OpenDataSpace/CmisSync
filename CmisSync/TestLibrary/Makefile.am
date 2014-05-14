@@ -51,6 +51,7 @@ SOURCES =  \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DBreezeTests.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
