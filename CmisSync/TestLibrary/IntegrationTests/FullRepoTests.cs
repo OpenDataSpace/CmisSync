@@ -19,7 +19,7 @@
 
 /**
  * Unit Tests for CmisSync.
- * 
+ *
  * To use them, first create a JSON file containing the credentials/parameters to your CMIS server(s)
  * Put it in TestLibrary/test-servers.json and use this format:
 [
@@ -48,23 +48,23 @@ namespace TestLibrary.IntegrationTests
 {
     using System;
     using System.Net;
-  
+
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Sync;
-    
+
     using log4net;
-    
+
     using Moq;
-    
+
     using NUnit.Framework;
-    
+
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000)]
     public class FullRepoTests
-    {     
+    {
         private RepoInfo repoInfo;
-        
+
         [TestFixtureSetUp]
         public void ClassInit()
         {
@@ -80,40 +80,40 @@ namespace TestLibrary.IntegrationTests
             // Reanable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
-        
+
         [SetUp]
         public void Init()
         {
             var config = ITUtils.GetConfig();
-            this.repoInfo = new RepoInfo();
-            this.repoInfo.AuthenticationType = AuthenticationType.BASIC;
-
-            this.repoInfo.LocalPath = config[1].ToString();
-            this.repoInfo.RemotePath = config[2].ToString();
-            this.repoInfo.Address = new XmlUri(new Uri(config[3].ToString()));
-            this.repoInfo.User = config[4].ToString();
+            this.repoInfo = new RepoInfo {
+                AuthenticationType = AuthenticationType.BASIC,
+                LocalPath = config[1].ToString(),
+                RemotePath = config[2].ToString(),
+                Address = new XmlUri(new Uri(config[3].ToString())),
+                User = config[4].ToString(),
+                RepositoryId = config[6].ToString()
+            };
             this.repoInfo.SetPassword(config[5].ToString());
-            this.repoInfo.RepositoryId = config[6].ToString();
         }
-    
+
         // Write a file and immediately check whether it has been created.
         // Should help to find out whether CMIS servers are synchronous or not.
         [Test, Category("Slow")]
         public void FullRepoTest()
-        {            
+        {
             var activityListener = new Mock<IActivityListener>();
             var repo = new CmisRepoMock(this.repoInfo, activityListener.Object);
             repo.Initialize();
             System.Threading.Thread.Sleep(2000);
-            
+
             repo.Queue.StopListener();
-            
+
             while (!repo.Queue.IsStopped) {
                 System.Threading.Thread.Sleep(2000);
                 Console.WriteLine("Waiting");
             }
         }
-        
+
         private class CmisRepoMock : CmisRepo {
             public CmisRepoMock(RepoInfo repoInfo, IActivityListener activityListener) : base(repoInfo, activityListener, true)
             {
