@@ -54,9 +54,8 @@ namespace TestLibrary.IntegrationTests
             string path = Path.GetTempPath();
             RepoInfo repoInfo = this.CreateRepoInfo(path);
             var activityListener = new Mock<IActivityListener>().Object;
-            var sessionFact = new Mock<ISessionFactory>();
             var session = new Mock<ISession>();
-            new CmisRepoWrapper(repoInfo, activityListener, session.Object, true, sessionFact.Object);
+            new CmisRepoWrapper(repoInfo, activityListener, session.Object, new SingleStepEventQueue(new Mock<ISyncEventManager>().Object));
         }
 
         [Test, Category("Fast")]
@@ -64,7 +63,6 @@ namespace TestLibrary.IntegrationTests
             string path = Path.GetTempPath();
             RepoInfo repoInfo = this.CreateRepoInfo(path);
             var activityListener = new Mock<IActivityListener>().Object;
-            var sessionFact = new Mock<ISessionFactory>();
             
             var session = new Mock<ISession>();
             var remoteObject = new Mock<IFolder>();
@@ -72,7 +70,7 @@ namespace TestLibrary.IntegrationTests
 
             session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
 
-            var repo = new CmisRepoWrapper(repoInfo, activityListener, session.Object, true, sessionFact.Object);
+            var repo = new CmisRepoWrapper(repoInfo, activityListener, session.Object, new SingleStepEventQueue(new SyncEventManager()));
             repo.Queue.AddEvent(new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object));
             var fsInfo = new DirectoryInfoWrapper(new DirectoryInfo(path));
             repo.singleStepQueue.Run();
@@ -92,11 +90,11 @@ namespace TestLibrary.IntegrationTests
         }
 
         private class CmisRepoWrapper : CmisRepo {
-            public CmisRepoWrapper(RepoInfo repoInfo, IActivityListener activityListener, ISession session, bool inMemory = false, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null) :
-                base(repoInfo, activityListener, inMemory, sessionFactory, fileSystemInfoFactory)
+            public CmisRepoWrapper(RepoInfo repoInfo, IActivityListener activityListener, ISession session, SingleStepEventQueue queue) :
+                base(repoInfo, activityListener, true, queue)
             {
                 this.session = session;
-                this.singleStepQueue = new SingleStepEventQueue(this.EventManager);
+                this.singleStepQueue = queue;
                 this.Queue = this.singleStepQueue;
             }
 

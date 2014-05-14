@@ -30,5 +30,7 @@ namespace CmisSync.Lib.Events
         void AddEvent(ISyncEvent newEvent); 
 
         bool IsStopped{get;} 
+        
+        ISyncEventManager EventManager {get;}
     }
 }

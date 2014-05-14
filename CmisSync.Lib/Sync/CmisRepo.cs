@@ -137,13 +137,19 @@ namespace CmisSync.Lib.Sync
         {
             DBreezeInitializerSingleton.Init();
         }
+        
+        private static IDisposableSyncEventQueue CreateQueue() {
+            var manager = new SyncEventManager();
+            return new SyncEventQueue(manager);
+            
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
-        public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener) : this(repoInfo, activityListener, false, null, null)
+        public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener) : this(repoInfo, activityListener, false, CreateQueue())
         {
         }
         
@@ -155,7 +161,7 @@ namespace CmisSync.Lib.Sync
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="sessionFactory">Session factory.</param>
         /// <param name="fileSystemInfoFactory">File system info factory.</param>
-        protected CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory, ISessionFactory sessionFactory = null, IFileSystemInfoFactory fileSystemInfoFactory = null)
+        protected CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory, IDisposableSyncEventQueue queue)
         {
             if (repoInfo == null)
             {
@@ -167,7 +173,7 @@ namespace CmisSync.Lib.Sync
                 throw new ArgumentNullException("Given activityListener is null");
             }
 
-            this.fileSystemFactory = fileSystemInfoFactory == null ? new FileSystemInfoFactory() : fileSystemInfoFactory;
+            this.fileSystemFactory = new FileSystemInfoFactory();
 
             // Initialize local variables
             this.RepoInfo = repoInfo;
@@ -175,11 +181,11 @@ namespace CmisSync.Lib.Sync
             this.Name = repoInfo.DisplayName;
             this.RemoteUrl = repoInfo.Address;
 
-            // Create Queue
-            this.EventManager = new SyncEventManager();
-            this.EventManager.AddEventHandler(new DebugLoggingHandler());
-            this.Queue = new SyncEventQueue(this.EventManager);
 
+            this.Queue = queue;
+   
+            this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
+            
             // Create Database connection
             this.db = new DBreezeEngine(new DBreezeConfiguration {
                 DBreezeDataFolderName = inMemory ? string.Empty : repoInfo.GetDatabasePath(),
@@ -187,7 +193,7 @@ namespace CmisSync.Lib.Sync
             });
 
             // Create session dependencies
-            this.sessionFactory = sessionFactory == null ? SessionFactory.NewInstance() : sessionFactory;
+            this.sessionFactory = SessionFactory.NewInstance();
             this.authProvider = AuthProviderFactory.CreateAuthProvider(repoInfo.AuthenticationType, repoInfo.Address, this.db);
 
             // Initialize storage
@@ -198,17 +204,17 @@ namespace CmisSync.Lib.Sync
             this.ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
             this.ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
             this.alreadyAddedFilter = new Events.Filter.IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
-            this.EventManager.AddEventHandler(this.ignoredFoldersFilter);
-            this.EventManager.AddEventHandler(this.ignoredFileNameFilter);
-            this.EventManager.AddEventHandler(this.ignoredFolderNameFilter);
-            this.EventManager.AddEventHandler(this.alreadyAddedFilter);
+            this.Queue.EventManager.AddEventHandler(this.ignoredFoldersFilter);
+            this.Queue.EventManager.AddEventHandler(this.ignoredFileNameFilter);
+            this.Queue.EventManager.AddEventHandler(this.ignoredFolderNameFilter);
+            this.Queue.EventManager.AddEventHandler(this.alreadyAddedFilter);
 
             // Add handler for repo config changes
-            this.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, this.RepoInfoChanged));
+            this.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<RepoConfigChangedEvent>(0, this.RepoInfoChanged));
 
             // Add periodic sync procedures scheduler
             this.Scheduler = new SyncScheduler(this.Queue, repoInfo.PollInterval);
-            this.EventManager.AddEventHandler(this.Scheduler);
+            this.Queue.EventManager.AddEventHandler(this.Scheduler);
 
             // Add File System Watcher
             #if __COCOA__
@@ -216,22 +222,22 @@ namespace CmisSync.Lib.Sync
             #else
             this.Watcher = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue);
             #endif
-            this.EventManager.AddEventHandler(this.Watcher);
+            this.Queue.EventManager.AddEventHandler(this.Watcher);
 
             // Add transformer
             this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage, this.fileSystemFactory);
-            this.EventManager.AddEventHandler(this.transformer);
+            this.Queue.EventManager.AddEventHandler(this.transformer);
 
             // Add local fetcher
             var localFetcher = new LocalObjectFetcher(this.storage.Matcher, this.fileSystemFactory);
-            this.EventManager.AddEventHandler(localFetcher);
+            this.Queue.EventManager.AddEventHandler(localFetcher);
 
             this.SyncStatusChanged += delegate(SyncStatus status)
             {
                 this.Status = status;
             };
 
-            this.EventManager.AddEventHandler(new SyncStrategyInitializer(this.Queue, this.storage, this.EventManager, this.RepoInfo, this.fileSystemFactory));
+            this.Queue.EventManager.AddEventHandler(new SyncStrategyInitializer(this.Queue, this.storage, this.RepoInfo, this.fileSystemFactory));
         }
 
         /// <summary>
@@ -269,13 +275,6 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         /// <value>The queue.</value>
         public IDisposableSyncEventQueue Queue { get; protected set; }
-
-        /// <summary>
-        /// Gets the event manager for this repository.
-        /// Use this for adding and removing SyncEventHandler for this repository.
-        /// </summary>
-        /// <value>The event manager.</value>
-        public ISyncEventManager EventManager { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this Repo is stopped, to control for machine sleep/wake power management.

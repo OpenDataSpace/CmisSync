@@ -44,46 +44,37 @@ namespace TestLibrary.EventsTests
         public void ConstructorTakesQueueAndManagerAndStorage()
         {
             var queue = new Mock<ISyncEventQueue>();
-            var manager = new Mock<ISyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
-            new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+            new SyncStrategyInitializer(queue.Object, storage.Object, CreateRepoInfo());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new SyncStrategyInitializer(null, Mock.Of<IMetaDataStorage>(), Mock.Of<ISyncEventManager>(), CreateRepoInfo());
+            new SyncStrategyInitializer(null, Mock.Of<IMetaDataStorage>(), CreateRepoInfo());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull()
         {
-            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), null, Mock.Of<ISyncEventManager>(), CreateRepoInfo());
-        }
-
-        [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfSyncManagerIsNull()
-        {
-            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, CreateRepoInfo());
+            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), null, CreateRepoInfo());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfRepoInfoIsNull()
         {
-            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<ISyncEventManager>(), null);
+            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null);
         }
 
         [Test, Category("Fast")]
         public void IgnoresWrongEventsTest()
         {
             var queue = new Mock<ISyncEventQueue>();
-            var manager = new Mock<ISyncEventManager>();
             var storage = new Mock<IMetaDataStorage>();
-            var handler = new SyncStrategyInitializer(queue.Object, storage.Object, manager.Object, CreateRepoInfo());
+            var handler = new SyncStrategyInitializer(queue.Object, storage.Object, CreateRepoInfo());
 
             var e = new Mock<ISyncEvent>();
             Assert.False(handler.Handle(e.Object));
@@ -212,8 +203,9 @@ namespace TestLibrary.EventsTests
         private static SyncStrategyInitializer CreateStrategyInitializer(IMetaDataStorage storage, ISyncEventManager manager)
         {
             var queue = new Mock<ISyncEventQueue>();
+            queue.Setup(s => s.EventManager).Returns(manager);
 
-            return new SyncStrategyInitializer(queue.Object, storage, manager, CreateRepoInfo());
+            return new SyncStrategyInitializer(queue.Object, storage, CreateRepoInfo());
         }
 
         private static void VerifyNonContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times)

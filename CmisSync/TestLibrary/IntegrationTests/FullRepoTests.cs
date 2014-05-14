@@ -51,6 +51,7 @@ namespace TestLibrary.IntegrationTests
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Sync;
 
     using log4net;
@@ -96,26 +97,19 @@ namespace TestLibrary.IntegrationTests
             this.repoInfo.SetPassword(config[5].ToString());
         }
 
-        // Write a file and immediately check whether it has been created.
-        // Should help to find out whether CMIS servers are synchronous or not.
         [Test, Category("Slow")]
         public void FullRepoTest()
         {
             var activityListener = new Mock<IActivityListener>();
-            var repo = new CmisRepoMock(this.repoInfo, activityListener.Object);
-            repo.Initialize();
-            System.Threading.Thread.Sleep(2000);
-
-            repo.Queue.StopListener();
-
-            while (!repo.Queue.IsStopped) {
-                System.Threading.Thread.Sleep(2000);
-                Console.WriteLine("Waiting");
-            }
+            var queue = new SingleStepEventQueue(new SyncEventManager());
+            var repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
+            repo.Initialize();  
+            
+            queue.Run();
         }
 
         private class CmisRepoMock : CmisRepo {
-            public CmisRepoMock(RepoInfo repoInfo, IActivityListener activityListener) : base(repoInfo, activityListener, true)
+            public CmisRepoMock(RepoInfo repoInfo, IActivityListener activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
             {
             }
         }
