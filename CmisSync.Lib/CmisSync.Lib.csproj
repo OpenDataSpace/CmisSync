@@ -200,6 +200,7 @@
     <Compile Include="Events\EventFilter\IgnoreAlreadyHandledContentChangeEventsFilter.cs" />
     <Compile Include="Events\ISyncEventManager.cs" />
     <Compile Include="Events\EventFilter\IgnoreAlreadyHandledFsEventsFilter.cs" />
+    <Compile Include="Cmis\OperationContextFactory.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

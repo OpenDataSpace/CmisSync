@@ -271,12 +271,12 @@ namespace CmisSync.Lib.Config
                     return this.ignoredFolders;
                 }
             }
+
             set
             {
                 this.ignoredFolders = value;
             }
         }
-
 
         /// <summary>
         /// Gets the ignored paths.
