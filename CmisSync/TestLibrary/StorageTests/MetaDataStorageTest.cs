@@ -44,7 +44,7 @@ namespace TestLibrary.StorageTests
         public void InitCustomSerializator()
         {
             // Use Newtonsoft.Json as Serializator
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
@@ -273,7 +273,7 @@ namespace TestLibrary.StorageTests
             var storage = new MetaDataStorage(this.engine, this.matcher);
             storage.RemoveObject(Mock.Of<IMappedObject>());
         }
-        
+
         [Test, Category("Fast")]
         public void RemoveObjectTest()
         {
@@ -400,7 +400,7 @@ namespace TestLibrary.StorageTests
             var storage = new MetaDataStorage(this.engine, matcher);
             var rootFolder = new MappedObject("/", id, MappedObjectType.Folder, null, "token");
             storage.SaveMappedObject(rootFolder);
-            
+
             Assert.That(storage.GetObjectByRemoteId(id), Is.Not.Null, "Not findable by ID");
             Assert.That(storage.GetObjectByLocalPath(fsInfo), Is.Not.Null, "Not findable by path");
         }
@@ -435,7 +435,7 @@ namespace TestLibrary.StorageTests
         public void ToLinePrintReturnsEmptyStringOnEmptyDB()
         {
             var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
-            Assert.That(storage.ToFindString(), Is.EqualTo(String.Empty));
+            Assert.That(storage.ToFindString(), Is.EqualTo(string.Empty));
         }
 
         [Test, Category("Fast")]
