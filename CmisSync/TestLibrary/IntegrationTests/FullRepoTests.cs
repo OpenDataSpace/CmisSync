@@ -97,8 +97,6 @@ namespace TestLibrary.IntegrationTests
             this.repoInfo.SetPassword(config[5].ToString());
         }
 
-        // Write a file and immediately check whether it has been created.
-        // Should help to find out whether CMIS servers are synchronous or not.
         [Test, Category("Slow")]
         public void FullRepoTest()
         {
@@ -106,10 +104,8 @@ namespace TestLibrary.IntegrationTests
             var queue = new SingleStepEventQueue(new SyncEventManager());
             var repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
             repo.Initialize();  
-
-            while (!repo.Queue.IsStopped) {
-                queue.Run();
-            }
+            
+            queue.Run();
         }
 
         private class CmisRepoMock : CmisRepo {
