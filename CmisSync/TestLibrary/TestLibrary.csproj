@@ -164,6 +164,7 @@
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
     <Compile Include="UtilsTests\OperationContextFactoryTest.cs" />
+    <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
