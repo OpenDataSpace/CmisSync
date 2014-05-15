@@ -124,5 +124,10 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         /// <returns>The find string.</returns>
         string ToFindString();
+
+        /// <summary>
+        /// Validates the object structure. If the structure is not fine, the DB content will be printed and an exception will be thrown.
+        /// </summary>
+        void ValidateObjectStructure();
     }
 }

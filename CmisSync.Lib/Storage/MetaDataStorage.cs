@@ -457,6 +457,77 @@ namespace CmisSync.Lib.Storage
             }
         }
 
+        /// <summary>
+        /// Validates the object structure.
+        /// </summary>
+        public void ValidateObjectStructure() {
+            MappedObject root = null;
+            List<MappedObject> objects = new List<MappedObject>();
+            using(var tran = this.engine.GetTransaction())
+            {
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
+                {
+                    var value = row.Value;
+                    if(value == null)
+                    {
+                        continue;
+                    }
+
+                    var data = value.Get;
+                    if(data == null)
+                    {
+                        continue;
+                    }
+
+                    if(data.ParentId == null)
+                    {
+                        root = data;
+                    } else {
+                        objects.Add(data);
+                    }
+                }
+            }
+
+            if (root == null) {
+                if (objects.Count == 0) {
+                    return;
+                } else {
+                    throw new InvalidDataException(
+                        string.Format(
+                        "root object is missing but {0} objects are stored{1}{2}",
+                        objects.Count,
+                        Environment.NewLine,
+                        this.ToString()));
+                }
+            }
+
+            this.RemoveChildrenRecursively(objects, root);
+            if (objects.Count > 0) {
+                var sb = new StringBuilder();
+                foreach(var obj in objects) {
+                    sb.Append(obj).Append(Environment.NewLine);
+                }
+
+                throw new InvalidDataException(
+                    string.Format(
+                    "This objects are referencing to a not existing parentId: {0}{1}{0}{2}",
+                    Environment.NewLine,
+                    sb.ToString(),
+                    this.ToString()));
+            }
+        }
+
+        private void RemoveChildrenRecursively(List<MappedObject> objects, MappedObject root)
+        {
+            var children = objects.FindAll(o => o.ParentId == root.RemoteObjectId);
+            foreach (var child in children) {
+                objects.Remove(child);
+                if (child.Type == MappedObjectType.Folder) {
+                    this.RemoveChildrenRecursively(objects, child);
+                }
+            }
+        }
+
         private string PrintFindLines(List<MappedObject> objects, MappedObject parent, string prefix) {
             var sb = new StringBuilder();
             string path = Path.Combine(prefix, parent.Name);

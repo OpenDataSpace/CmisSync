@@ -483,5 +483,65 @@ namespace TestLibrary.StorageTests
             int count = src.Select((c, i) => src.Substring(i)).Count(sub => sub.StartsWith(Environment.NewLine));
             Assert.That(count, Is.EqualTo(2), string.Format("Newlines Counting {0}:{2} {1}", count, src, Environment.NewLine));
         }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(InvalidDataException))]
+        public void ValidateFolderStructureThrowsExceptionIfRootObjectIsMissingButOtherObjectsAreStored()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
+            storage.SaveMappedObject(child1Folder);
+
+            storage.ValidateObjectStructure();
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(InvalidDataException))]
+        public void ValidateFolderStructureThrowsExceptionIfParentObjectIsMissing()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "WRONGID", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1Folder);
+
+            storage.ValidateObjectStructure();
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(InvalidDataException))]
+        public void ValidateFolderStructureThrowsExceptionIfFileParentIdIsFileObject()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1File = new MappedObject("sub1", "subId1", MappedObjectType.File, "rootId", "token");
+            var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "sub1", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1File);
+            storage.SaveMappedObject(child2File);
+
+            storage.ValidateObjectStructure();
+        }
+
+        [Test, Category("Fast")]
+        public void ValidateFolderStructureIsFineIfNoObjectIsStored()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            storage.ValidateObjectStructure();
+        }
+
+        [Test, Category("Fast")]
+        public void ValidateFolderStructureIsFineOnCleanFolderStructure()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
+            var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "subId1", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1Folder);
+            storage.SaveMappedObject(child2File);
+
+            storage.ValidateObjectStructure();
+        }
     }
 }
