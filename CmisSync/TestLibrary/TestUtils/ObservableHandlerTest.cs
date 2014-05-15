@@ -34,8 +34,8 @@ namespace TestLibrary.TestUtils
             var event2 = new Mock<ISyncEvent>().Object;
             Assert.That(handler.Handle(event1), Is.True);
             handler.Handle(event2);
-            Assert.That(handler.list[0], Is.EqualTo(event1));
-            Assert.That(handler.list[1], Is.EqualTo(event2));
+            Assert.That(handler.List[0], Is.EqualTo(event1));
+            Assert.That(handler.List[1], Is.EqualTo(event2));
         }
     }
 }

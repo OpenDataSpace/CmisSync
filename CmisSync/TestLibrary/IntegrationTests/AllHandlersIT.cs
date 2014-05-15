@@ -91,7 +91,7 @@ namespace TestLibrary.IntegrationTests
             var myEvent = new Mock<ISyncEvent>();
             queue.AddEvent(myEvent.Object);
             queue.Run();
-            Assert.That(observer.list.Count, Is.EqualTo(1));
+            Assert.That(observer.List.Count, Is.EqualTo(1));
         }
 
         [Test, Category("Fast")]
@@ -104,8 +104,8 @@ namespace TestLibrary.IntegrationTests
             var observer = new ObservableHandler();
             var queue = this.CreateQueue(session, storage, observer);
             queue.RunStartSyncEvent();
-            Assert.That(observer.list.Count, Is.EqualTo(1));
-            Assert.That(observer.list[0], Is.TypeOf(typeof(FullSyncCompletedEvent)));
+            Assert.That(observer.List.Count, Is.EqualTo(1));
+            Assert.That(observer.List[0], Is.TypeOf(typeof(FullSyncCompletedEvent)));
         }
 
         [Test, Category("Fast")]

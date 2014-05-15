@@ -25,7 +25,6 @@ namespace TestLibrary.TestUtils
 
     public static class CmisConvenienceExtenders
     {
-
         public static IFolder CreateFolder(this IFolder folder, string name)
         {
             Dictionary<string, object> properties = new Dictionary<string, object>();

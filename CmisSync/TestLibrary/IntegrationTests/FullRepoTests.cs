@@ -121,7 +121,6 @@ namespace TestLibrary.IntegrationTests
             var queue = new SingleStepEventQueue(new SyncEventManager());
             this.repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
 
-
             // Session
             var cmisParameters = new Dictionary<string, string>();
             cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
@@ -158,16 +157,16 @@ namespace TestLibrary.IntegrationTests
 
         private class CmisRepoMock : CmisRepo
         {
-            public SingleStepEventQueue singleStepQueue;
+            public SingleStepEventQueue SingleStepQueue;
 
             public CmisRepoMock(RepoInfo repoInfo, IActivityListener activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
             {
-                this.singleStepQueue = queue;
+                this.SingleStepQueue = queue;
             }
 
             public void Run()
             {
-                this.singleStepQueue.Run();
+                this.SingleStepQueue.Run();
             }
         }
     }

@@ -86,7 +86,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             // dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modifiedDate)), Times.Once());
             storage.Verify(
                 s => s.SaveMappedObject(
-                It.Is<IMappedObject>(f => VerifySavedFolder(f, id, newFolderName, parentId, lastChangeToken, modifiedDate))),
+                It.Is<IMappedObject>(f => this.VerifySavedFolder(f, id, newFolderName, parentId, lastChangeToken, modifiedDate))),
                 Times.Once());
         }
 

@@ -41,18 +41,18 @@ namespace TestLibrary.EventsTests
         public void ConstructorTakesInstanceName()
         {
             string name = "InstanceName";
-            var handler = new GenericSyncEventHandler<ISyncEvent>(delegate {
-                return false;
-            }, name);
+            var handler = new GenericSyncEventHandler<ISyncEvent>(
+                delegate { return false; },
+            name);
             Assert.That(handler.ToString().Contains(name));
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithNullName()
         {
-            var handler = new GenericSyncEventHandler<ISyncEvent>(delegate {
-                return false;
-            }, null);
+            var handler = new GenericSyncEventHandler<ISyncEvent>(
+                delegate { return false; },
+            null);
             handler.ToString();
         }
 

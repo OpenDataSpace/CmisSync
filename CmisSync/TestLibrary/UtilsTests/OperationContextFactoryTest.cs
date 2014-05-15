@@ -34,58 +34,6 @@ namespace TestLibrary.UtilsTests
     [TestFixture]
     public class OperationContextFactoryTest
     {
-        [Test, Category("Fast")]
-        public void CreateContentChangeEventContext()
-        {
-            var result = Mock.Of<IOperationContext>();
-            var session = this.CreateSessionMock(result);
-
-            var context = OperationContextFactory.CreateContentChangeEventContext(session.Object);
-
-            VerifyThatAllDefaultValuesAreSet(session);
-            Assert.That(context, Is.EqualTo(result));
-        }
-
-        [Test, Category("Fast")]
-        public void CreateCrawlerContext()
-        {
-            var result = Mock.Of<IOperationContext>();
-            var session = this.CreateSessionMock(result);
-
-            var context = OperationContextFactory.CreateCrawlContext(session.Object);
-
-            VerifyThatAllDefaultValuesAreSet(session);
-            VerifyThatCrawlValuesAreSet(session);
-            Assert.That(context, Is.EqualTo(result));
-        }
-
-        [Test, Category("Fast")]
-        public void CreateDefaultContext()
-        {
-            var result = Mock.Of<IOperationContext>();
-            var session = this.CreateSessionMock(result);
-
-            var context = OperationContextFactory.CreateDefaultContext(session.Object);
-
-            VerifyThatAllDefaultValuesAreSet(session);
-            VerifyThatFilterContainsPath(session);
-            Assert.That(context, Is.EqualTo(result));
-        }
-
-        [Test, Category("Fast")]
-        public void CreateNonCachingAndPathIncludingContext()
-        {
-            var result = Mock.Of<IOperationContext>();
-            var session = this.CreateSessionMock(result);
-
-            var context = OperationContextFactory.CreateNonCachingPathIncludingContext(session.Object);
-
-            VerifyThatAllDefaultValuesAreSet(session);
-            VerifyThatFilterContainsPath(session);
-            VerifyThatCachingIsDisabled(session);
-            Assert.That(context, Is.EqualTo(result));
-        }
-
         public static void VerifyThatCachingIsDisabled(Mock<ISession> session)
         {
             session.Verify(
@@ -157,6 +105,58 @@ namespace TestLibrary.UtilsTests
                 It.IsAny<bool>(),
                 It.IsAny<int>()),
                 Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void CreateContentChangeEventContext()
+        {
+            var result = Mock.Of<IOperationContext>();
+            var session = this.CreateSessionMock(result);
+
+            var context = OperationContextFactory.CreateContentChangeEventContext(session.Object);
+
+            VerifyThatAllDefaultValuesAreSet(session);
+            Assert.That(context, Is.EqualTo(result));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateCrawlerContext()
+        {
+            var result = Mock.Of<IOperationContext>();
+            var session = this.CreateSessionMock(result);
+
+            var context = OperationContextFactory.CreateCrawlContext(session.Object);
+
+            VerifyThatAllDefaultValuesAreSet(session);
+            VerifyThatCrawlValuesAreSet(session);
+            Assert.That(context, Is.EqualTo(result));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDefaultContext()
+        {
+            var result = Mock.Of<IOperationContext>();
+            var session = this.CreateSessionMock(result);
+
+            var context = OperationContextFactory.CreateDefaultContext(session.Object);
+
+            VerifyThatAllDefaultValuesAreSet(session);
+            VerifyThatFilterContainsPath(session);
+            Assert.That(context, Is.EqualTo(result));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateNonCachingAndPathIncludingContext()
+        {
+            var result = Mock.Of<IOperationContext>();
+            var session = this.CreateSessionMock(result);
+
+            var context = OperationContextFactory.CreateNonCachingPathIncludingContext(session.Object);
+
+            VerifyThatAllDefaultValuesAreSet(session);
+            VerifyThatFilterContainsPath(session);
+            VerifyThatCachingIsDisabled(session);
+            Assert.That(context, Is.EqualTo(result));
         }
 
         private Mock<ISession> CreateSessionMock(IOperationContext result)
