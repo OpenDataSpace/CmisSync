@@ -84,4 +84,6 @@ T: CmisSync.Lib.Cmis.CmisUtils/NodeTree
 
 #Ignore DoNotHardCodePaths
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
-T: TestLibrary.LegacyCodeTests.IgnoreLocalFolderTests
+T: TestLibrary.LegacyCodeTests.RepoInfoTests
+# Install dir
+T: CmisSync.Controller
