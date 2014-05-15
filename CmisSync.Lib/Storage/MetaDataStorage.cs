@@ -340,6 +340,7 @@ namespace CmisSync.Lib.Storage
                     for (int i = 1; i < segments.Length; i++) {
                         temp[i - 1] = segments[i];
                     }
+
                     segments = temp;
                 }
 
@@ -409,6 +410,10 @@ namespace CmisSync.Lib.Storage
             return string.Format("[MetaDataStorage: Matcher={0}, ChangeLogToken={1}]{2}{3}", this.Matcher, this.ChangeLogToken, Environment.NewLine, list);
         }
 
+        /// <summary>
+        /// Prints the file/folder structure like unix "find" command.
+        /// </summary>
+        /// <returns>The find string.</returns>
         public string ToFindString()
         {
             using(var tran = this.engine.GetTransaction())
@@ -438,10 +443,10 @@ namespace CmisSync.Lib.Storage
                 }
 
                 if (root == null) {
-                    return String.Empty;
+                    return string.Empty;
                 }
 
-                string result = PrintFindLines(objects, root, String.Empty);
+                string result = this.PrintFindLines(objects, root, string.Empty);
                 var sb = new StringBuilder();
                 sb.Append(result);
                 foreach(var obj in objects) {
@@ -460,7 +465,7 @@ namespace CmisSync.Lib.Storage
             List<MappedObject> children = objects.FindAll(o => o.ParentId == parent.RemoteObjectId);
             foreach(var child in children) {
                 objects.Remove(child);
-                sb.Append(PrintFindLines(objects, child, path));
+                sb.Append(this.PrintFindLines(objects, child, path));
             }
 
             return sb.ToString();
