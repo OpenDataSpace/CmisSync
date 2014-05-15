@@ -42,7 +42,7 @@ namespace TestLibrary.UtilsTests
 
             var context = OperationContextFactory.CreateContentChangeEventContext(session.Object);
 
-            this.VerifyThatAllDefaultValuesAreSet(session);
+            VerifyThatAllDefaultValuesAreSet(session);
             Assert.That(context, Is.EqualTo(result));
         }
 
@@ -54,8 +54,8 @@ namespace TestLibrary.UtilsTests
 
             var context = OperationContextFactory.CreateCrawlContext(session.Object);
 
-            this.VerifyThatAllDefaultValuesAreSet(session);
-            this.VerifyThatCrawlValuesAreSet(session);
+            VerifyThatAllDefaultValuesAreSet(session);
+            VerifyThatCrawlValuesAreSet(session);
             Assert.That(context, Is.EqualTo(result));
         }
 
@@ -67,12 +67,43 @@ namespace TestLibrary.UtilsTests
 
             var context = OperationContextFactory.CreateDefaultContext(session.Object);
 
-            this.VerifyThatAllDefaultValuesAreSet(session);
-            this.VerifyThatFilterContainsPath(session);
+            VerifyThatAllDefaultValuesAreSet(session);
+            VerifyThatFilterContainsPath(session);
             Assert.That(context, Is.EqualTo(result));
         }
 
-        private void VerifyThatAllDefaultValuesAreSet(Mock<ISession> session) {
+        [Test, Category("Fast")]
+        public void CreateNonCachingAndPathIncludingContext()
+        {
+            var result = Mock.Of<IOperationContext>();
+            var session = this.CreateSessionMock(result);
+
+            var context = OperationContextFactory.CreateNonCachingPathIncludingContext(session.Object);
+
+            VerifyThatAllDefaultValuesAreSet(session);
+            VerifyThatFilterContainsPath(session);
+            VerifyThatCachingIsDisabled(session);
+            Assert.That(context, Is.EqualTo(result));
+        }
+
+        public static void VerifyThatCachingIsDisabled(Mock<ISession> session)
+        {
+            session.Verify(
+                s => s.CreateOperationContext(
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<IncludeRelationshipsFlag>(),
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.Is<bool>(b => b == false),
+                It.IsAny<int>()),
+                Times.Once());
+        }
+
+        public static void VerifyThatAllDefaultValuesAreSet(Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
                 It.Is<HashSet<string>>(set =>
@@ -94,7 +125,7 @@ namespace TestLibrary.UtilsTests
                 Times.Once());
         }
 
-        private void VerifyThatCrawlValuesAreSet(Mock<ISession> session) {
+        public static void VerifyThatCrawlValuesAreSet(Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
                 It.Is<HashSet<string>>(set =>
@@ -111,7 +142,7 @@ namespace TestLibrary.UtilsTests
                 Times.Once());
         }
 
-        private void VerifyThatFilterContainsPath(Mock<ISession> session) {
+        public static void VerifyThatFilterContainsPath(Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
                 It.Is<HashSet<string>>(set =>
