@@ -141,7 +141,7 @@ namespace TestLibrary.IntegrationTests
         {
             this.localRootDir.Delete(true);
             this.remoteRootDir.DeleteTree(true, null, true);
-            repo.Dispose();
+            this.repo.Dispose();
         }
 
         [Test, Category("Slow")]
@@ -154,6 +154,18 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
             var children = this.remoteRootDir.GetChildren();
             Assert.AreEqual(children.TotalNumItems, 1);
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFolder()
+        {
+            this.remoteRootDir.CreateFolder("Cat");
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
         private class CmisRepoMock : CmisRepo
