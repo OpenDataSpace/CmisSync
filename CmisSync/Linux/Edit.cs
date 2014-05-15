@@ -16,17 +16,18 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-
-using Gtk;
-
-using CmisSync.Lib.Credentials;
-using CmisSync.CmisTree;
 
 namespace CmisSync
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+
+    using CmisSync.CmisTree;
+    using CmisSync.Lib.Credentials;
+
+    using Gtk;
+
     /// <summary>
     /// Edit folder diaglog
     /// It allows user to edit the selected and ignored folders
@@ -39,11 +40,10 @@ namespace CmisSync
         /// </summary>
         public EditController Controller = new EditController();
 
-
         /// <summary>
         /// Synchronized folder name
         /// </summary>
-        public string Name;
+        public string Name { get; set; }
 
         /// <summary>
         /// Ignore folder list
@@ -65,100 +65,98 @@ namespace CmisSync
 
         private EditType type;
 
-
         /// <summary>
         /// Constructor
         /// </summary>
         public Edit(EditType type, CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
         {
-            Name = name;
+            this.Name = name;
             this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = ignores;
             this.localPath = localPath;
             this.type = type;
 
-            CreateEdit();
+            this.CreateEdit();
 
-            Deletable      = true;
+            this.Deletable = true;
 
-            DeleteEvent += delegate (object sender, DeleteEventArgs args) {
+            this.DeleteEvent += delegate(object sender, DeleteEventArgs args) {
                 args.RetVal = false;
-                Controller.CloseWindow();
+                this.Controller.CloseWindow();
             };
 
-            Controller.OpenWindowEvent += delegate
+            this.Controller.OpenWindowEvent += delegate
             {
-                ShowAll ();
-                Activate ();
+                this.ShowAll();
+                this.Activate();
             };
         }
-
 
         /// <summary>
         /// Create the UI
         /// </summary>
         private void CreateEdit()
         {
-            CmisTreeStore cmisStore = new CmisTreeStore ();
-            Gtk.TreeView treeView = new Gtk.TreeView (cmisStore.CmisStore);
+            CmisTreeStore cmisStore = new CmisTreeStore();
+            Gtk.TreeView treeView = new Gtk.TreeView(cmisStore);
 
-            RootFolder root = new RootFolder () {
+            RootFolder root = new RootFolder() {
                 Name = this.Name,
-                Id = Credentials.RepoId,
-                Address = Credentials.Address.ToString()
+                Id = this.Credentials.RepoId,
+                Address = this.Credentials.Address.ToString()
             };
-            IgnoredFolderLoader.AddIgnoredFolderToRootNode(root, Ignores);
-            LocalFolderLoader.AddLocalFolderToRootNode(root, localPath);
+            IgnoredFolderLoader.AddIgnoredFolderToRootNode(root, this.Ignores);
+            LocalFolderLoader.AddLocalFolderToRootNode(root, this.localPath);
 
-            AsyncNodeLoader asyncLoader = new AsyncNodeLoader (root, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(root, this.Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
             asyncLoader.UpdateNodeEvent += delegate {
                 cmisStore.UpdateCmisTree(root);
             };
-            cmisStore.UpdateCmisTree (root);
-            asyncLoader.Load (root);
+            cmisStore.UpdateCmisTree(root);
+            asyncLoader.Load(root);
 
-            Header = CmisSync.Properties_Resources.EditTitle;
+            this.Header = CmisSync.Properties_Resources.EditTitle;
 
-            VBox layout_vertical   = new VBox (false, 12);
+            VBox layout_vertical   = new VBox(false, 12);
 
-            Controller.CloseWindowEvent += delegate
+            this.Controller.CloseWindowEvent += delegate
             {
                 asyncLoader.Cancel();
             };
 
-            Button cancel_button = new Button (CmisSync.Properties_Resources.Cancel);
+            Button cancel_button = new Button(CmisSync.Properties_Resources.Cancel);
             cancel_button.Clicked += delegate {
-                Close();
+                this.Close();
             };
 
-            Button finish_button = new Button (CmisSync.Properties_Resources.SaveChanges);
+            Button finish_button = new Button(CmisSync.Properties_Resources.SaveChanges);
             finish_button.Clicked += delegate {
-                Ignores = NodeModelUtils.GetIgnoredFolder(root);
-                Controller.SaveFolder();
-                Close();
+                this.Ignores = NodeModelUtils.GetIgnoredFolder(root);
+                this.Controller.SaveFolder();
+                this.Close();
             };
 
             treeView.HeadersVisible = false;
             treeView.Selection.Mode = SelectionMode.Single;
 
-            TreeViewColumn column = new TreeViewColumn ();
+            TreeViewColumn column = new TreeViewColumn();
             column.Title = "Name";
-            CellRendererToggle renderToggle = new CellRendererToggle ();
-            column.PackStart (renderToggle, false);
+            CellRendererToggle renderToggle = new CellRendererToggle();
+            column.PackStart(renderToggle, false);
             renderToggle.Activatable = true;
-            column.AddAttribute (renderToggle, "active", (int)CmisTreeStore.Column.ColumnSelected);
-            column.AddAttribute (renderToggle, "inconsistent", (int)CmisTreeStore.Column.ColumnSelectedThreeState);
-            column.AddAttribute (renderToggle, "radio", (int)CmisTreeStore.Column.ColumnRoot);
-            renderToggle.Toggled += delegate (object render, ToggledArgs args) {
+            column.AddAttribute(renderToggle, "active", (int)CmisTreeStore.Column.ColumnSelected);
+            column.AddAttribute(renderToggle, "inconsistent", (int)CmisTreeStore.Column.ColumnSelectedThreeState);
+            column.AddAttribute(renderToggle, "radio", (int)CmisTreeStore.Column.ColumnRoot);
+            renderToggle.Toggled += delegate(object render, ToggledArgs args) {
                 TreeIter iterToggled;
-                if (! cmisStore.CmisStore.GetIterFromString (out iterToggled, args.Path))
+                if (!cmisStore.GetIterFromString(out iterToggled, args.Path))
                 {
                     Console.WriteLine("Toggled GetIter Error " + args.Path);
                     return;
                 }
 
-                Node node = cmisStore.CmisStore.GetValue(iterToggled,(int)CmisTreeStore.Column.ColumnNode) as Node;
+                Node node = cmisStore.GetValue(iterToggled, (int)CmisTreeStore.Column.ColumnNode) as Node;
                 if (node == null)
                 {
                     Console.WriteLine("Toggled GetValue Error " + args.Path);
@@ -180,18 +178,19 @@ namespace CmisSync
                         node.Selected = false;
                     }
                 }
+
                 cmisStore.UpdateCmisTree(root);
             };
-            CellRendererText renderText = new CellRendererText ();
-            column.PackStart (renderText, false);
-            column.SetAttributes (renderText, "text", (int)CmisTreeStore.Column.ColumnName);
+            CellRendererText renderText = new CellRendererText();
+            column.PackStart(renderText, false);
+            column.SetAttributes(renderText, "text", (int)CmisTreeStore.Column.ColumnName);
             column.Expand = true;
-            treeView.AppendColumn (column);
+            treeView.AppendColumn(column);
 
-            treeView.AppendColumn ("Status", new StatusCellRenderer (), "text", (int)CmisTreeStore.Column.ColumnStatus);
+            treeView.AppendColumn("Status", new StatusCellRenderer(), "text", (int)CmisTreeStore.Column.ColumnStatus);
 
-            treeView.RowExpanded += delegate (object o, RowExpandedArgs args) {
-                Node node = cmisStore.CmisStore.GetValue(args.Iter, (int)CmisTreeStore.Column.ColumnNode) as Node;
+            treeView.RowExpanded += delegate(object o, RowExpandedArgs args) {
+                Node node = cmisStore.GetValue(args.Iter, (int)CmisTreeStore.Column.ColumnNode) as Node;
                 asyncLoader.Load(node);
             };
 
@@ -200,13 +199,13 @@ namespace CmisSync
             };
             sw.Add(treeView);
 
-            layout_vertical.PackStart (new Label(""), false, false, 0);
-            layout_vertical.PackStart (sw, true, true, 0);
-            Add(layout_vertical);
-            AddButton(cancel_button);
-            AddButton(finish_button);
+            layout_vertical.PackStart(new Label(string.Empty), false, false, 0);
+            layout_vertical.PackStart(sw, true, true, 0);
+            this.Add(layout_vertical);
+            this.AddButton(cancel_button);
+            this.AddButton(finish_button);
 
-            finish_button.GrabDefault ();
+            finish_button.GrabDefault();
 
             this.ShowAll();
         }
@@ -216,7 +215,7 @@ namespace CmisSync
         /// </summary>
         public void Close()
         {
-            Controller.CloseWindow();
+            this.Controller.CloseWindow();
             this.Destroy();
         }
 
@@ -233,7 +232,10 @@ namespace CmisSync
                 // TODO Please change it to the correct Window property if this method is needed
                 return false;
             }
-            private set{}
+
+            private set
+            {
+            }
         }
     }
 }

@@ -335,8 +335,8 @@ namespace CmisSync {
 
         private void ShowAdd2Page()
         {
-            CmisTreeStore cmisStore = new CmisTreeStore ();
-            Gtk.TreeView treeView = new Gtk.TreeView (cmisStore.CmisStore);
+            CmisTreeStore cmisStore = new CmisTreeStore();
+            Gtk.TreeView treeView = new Gtk.TreeView(cmisStore);
 
             bool firstRepo = true;
             List<RootFolder> repositories = new List<RootFolder>();
@@ -426,13 +426,13 @@ namespace CmisSync {
             column.AddAttribute (renderToggle, "radio", (int)CmisTreeStore.Column.ColumnRoot);
             renderToggle.Toggled += delegate (object render, ToggledArgs args) {
                 TreeIter iterToggled;
-                if (! cmisStore.CmisStore.GetIterFromString (out iterToggled, args.Path))
+                if (! cmisStore.GetIterFromString (out iterToggled, args.Path))
                 {
                     Console.WriteLine("Toggled GetIter Error " + args.Path);
                     return;
                 }
 
-                Node node = cmisStore.CmisStore.GetValue(iterToggled,(int)CmisTreeStore.Column.ColumnNode) as Node;
+                Node node = cmisStore.GetValue(iterToggled,(int)CmisTreeStore.Column.ColumnNode) as Node;
                 if (node == null)
                 {
                     Console.WriteLine("Toggled GetValue Error " + args.Path);
@@ -478,7 +478,7 @@ namespace CmisSync {
             treeView.AppendColumn ("Status", new StatusCellRenderer (), "text", (int)CmisTreeStore.Column.ColumnStatus);
 
             treeView.RowExpanded += delegate (object o, RowExpandedArgs args) {
-                Node node = cmisStore.CmisStore.GetValue(args.Iter, (int)CmisTreeStore.Column.ColumnNode) as Node;
+                Node node = cmisStore.GetValue(args.Iter, (int)CmisTreeStore.Column.ColumnNode) as Node;
                 Node parent = node;
                 while (parent.Parent != null)
                 {
