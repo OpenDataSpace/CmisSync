@@ -47,12 +47,19 @@
 namespace TestLibrary.IntegrationTests
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
     using System.Net;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Credentials;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Sync;
+
+    using DotCMIS;
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
 
     using log4net;
 
@@ -60,11 +67,18 @@ namespace TestLibrary.IntegrationTests
 
     using NUnit.Framework;
 
+    using TestLibrary.TestUtils;
+
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000)]
     public class FullRepoTests
     {
+        private static readonly string Subfolder = "FullRepoTests";
         private RepoInfo repoInfo;
+        private DirectoryInfo localRootDir;
+        private IFolder remoteRootDir;
+        private ISession session;
+        private CmisRepoMock repo;
 
         [TestFixtureSetUp]
         public void ClassInit()
@@ -86,31 +100,74 @@ namespace TestLibrary.IntegrationTests
         public void Init()
         {
             var config = ITUtils.GetConfig();
+            
+            // RepoInfo
             this.repoInfo = new RepoInfo {
                 AuthenticationType = AuthenticationType.BASIC,
-                LocalPath = config[1].ToString(),
-                RemotePath = config[2].ToString(),
+                LocalPath = Path.Combine(config[1].ToString(), Subfolder),
+                RemotePath = config[2].ToString() + "/" + Subfolder,
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
                 RepositoryId = config[6].ToString()
             };
             this.repoInfo.SetPassword(config[5].ToString());
+
+            // FileSystemDir
+            this.localRootDir = new DirectoryInfo(this.repoInfo.LocalPath);
+            this.localRootDir.Create();
+
+            // Repo
+            var activityListener = new Mock<IActivityListener>();
+            var queue = new SingleStepEventQueue(new SyncEventManager());
+            this.repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
+
+
+            // Session
+            var cmisParameters = new Dictionary<string, string>();
+            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+            cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+            cmisParameters[SessionParameter.User] = this.repoInfo.User;
+            cmisParameters[SessionParameter.Password] = this.repoInfo.GetPassword().ToString();
+            cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
+
+            SessionFactory factory = SessionFactory.NewInstance();
+            this.session = factory.CreateSession(cmisParameters);
+
+            IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
+            this.remoteRootDir = root.CreateFolder(Subfolder);
+        }
+
+        [TearDown]
+        public void TestDown()
+        {
+            this.localRootDir.Delete(true);
+            this.remoteRootDir.DeleteTree(true, null, true);
         }
 
         [Test, Category("Slow")]
-        public void FullRepoTest()
+        public void OneLocalFolder()
         {
-            var activityListener = new Mock<IActivityListener>();
-            var queue = new SingleStepEventQueue(new SyncEventManager());
-            var repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
-            repo.Initialize();  
-            
-            queue.Run();
+            this.localRootDir.CreateSubdirectory("Cat");
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+            var children = this.remoteRootDir.GetChildren();
+            Assert.AreEqual(children.TotalNumItems, 1);
         }
 
-        private class CmisRepoMock : CmisRepo {
+        private class CmisRepoMock : CmisRepo
+        {
+            public SingleStepEventQueue singleStepQueue;
+
             public CmisRepoMock(RepoInfo repoInfo, IActivityListener activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
             {
+                this.singleStepQueue = queue;
+            }
+
+            public void Run()
+            {
+                this.singleStepQueue.Run();
             }
         }
     }

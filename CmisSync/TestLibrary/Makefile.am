@@ -46,7 +46,6 @@ SOURCES =  \
 	EventsTests/SyncEventQueueTest.cs \
 	EventsTests/SyncStrategyInitializerTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
-	IntegrationTests/CmisRepoTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DBreezeTests.cs \
@@ -89,6 +88,7 @@ SOURCES =  \
 	SyncStrategiesTests/SyncMechanismTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/WatcherTestUtils.cs \
+	TestUtils/CmisConvenienceExtenders.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
 	TestUtils/MockSessionUtil.cs \

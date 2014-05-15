@@ -157,13 +157,13 @@
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
     <Compile Include="RepoInfoTests.cs" />
-    <Compile Include="IntegrationTests\CmisRepoTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentStandardAuthenticationProviderTest.cs" />
     <Compile Include="EventsTests\SyncStrategyInitializerTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledContentChangeEventsFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
     <Compile Include="UtilsTests\OperationContextFactoryTest.cs" />
+    <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
