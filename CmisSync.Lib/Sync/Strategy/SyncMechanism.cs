@@ -207,8 +207,10 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             if(e is FolderEvent) {
                 s.Solve(this.session, this.storage, (e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder);
+                this.storage.ValidateObjectStructure();
             } else if (e is FileEvent) {
                 s.Solve(this.session, this.storage, (e as FileEvent).LocalFile, (e as FileEvent).RemoteFile);
+                this.storage.ValidateObjectStructure();
             }
         }
     }
