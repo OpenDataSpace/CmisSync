@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Storage
     /// <summary>
     /// Db requeted Entry not found exception.
     /// </summary>
+    [Serializable]
     public class EntryNotFoundException : Exception
     {
         /// <summary>

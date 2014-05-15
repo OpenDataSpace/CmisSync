@@ -8,6 +8,7 @@ A: CmisSync, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
 R: Gendarme.Rules.BadPractice.AvoidVisibleConstantFieldRule
 T: CmisSync.Defines
 T: CmisSync.Lib.Defines
+T: CmisSync.Lib.Config.Config
 
 #Cross reference between CmisSync.Lib.Sync.CmisRepo and CmisSync.Lib.Sync.CmisRepo/SynchronizedFolder
 R: Gendarme.Rules.Correctness.DisposableFieldsShouldBeDisposedRule
@@ -38,10 +39,14 @@ R: Gendarme.Rules.Design.EnumsShouldUseInt32Rule
 T: CmisSync.CertPolicyHandler/CertificateProblem
 
 #Top level widget does not need dispose pattern (Linux)
-R: Gendarme.Rules.Correctness.TypesWithDisposableFieldsShouldBeDisposableRule
+R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: CmisSync.UI
 T: CmisSync.StatusIcon
 T: CmisSync.ControllerBase
+
+# Disposed in TearDown
+R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
+T: TestLibrary.IntegrationTests.FullRepoTests
 
 #Ignore dispose pattern for UI widget (Windows)
 R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule

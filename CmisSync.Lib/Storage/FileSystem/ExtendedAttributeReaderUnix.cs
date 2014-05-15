@@ -131,7 +131,8 @@ namespace CmisSync.Lib.Storage
             byte[] value;
             string key = "test";
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            File.Create(path);
+            var stream = File.Create(path);
+            stream.Dispose();
             long ret = Syscall.getxattr(path, prefix + key, out value);
             bool retValue = true;
             if(ret != 0)
