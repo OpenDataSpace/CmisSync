@@ -128,7 +128,10 @@ namespace CmisSync.Lib.Sync
         private ContentChangeEventTransformer transformer;
 
         private DBreezeEngine db;
-
+  
+        /// <summary>
+        /// The storage.
+        /// </summary>
         protected MetaDataStorage storage;
 
         private IFileSystemInfoFactory fileSystemFactory;
@@ -136,12 +139,6 @@ namespace CmisSync.Lib.Sync
         static CmisRepo()
         {
             DBreezeInitializerSingleton.Init();
-        }
-        
-        private static IDisposableSyncEventQueue CreateQueue() {
-            var manager = new SyncEventManager();
-            return new SyncEventQueue(manager);
-            
         }
 
         /// <summary>
@@ -159,8 +156,7 @@ namespace CmisSync.Lib.Sync
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
-        /// <param name="sessionFactory">Session factory.</param>
-        /// <param name="fileSystemInfoFactory">File system info factory.</param>
+        /// <param name="queue">Event Queue.</param>
         protected CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory, IDisposableSyncEventQueue queue)
         {
             if (repoInfo == null)
@@ -180,7 +176,6 @@ namespace CmisSync.Lib.Sync
             this.LocalPath = repoInfo.LocalPath;
             this.Name = repoInfo.DisplayName;
             this.RemoteUrl = repoInfo.Address;
-
 
             this.Queue = queue;
    
@@ -364,6 +359,11 @@ namespace CmisSync.Lib.Sync
 
                 this.disposed = true;
             }
+        }
+               
+        private static IDisposableSyncEventQueue CreateQueue() {
+            var manager = new SyncEventManager();
+            return new SyncEventQueue(manager);    
         }
 
         private bool RepoInfoChanged(ISyncEvent e)

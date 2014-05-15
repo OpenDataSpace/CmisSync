@@ -49,8 +49,26 @@ namespace CmisSync.Lib
         private SyncMechanism mechanism;
         private IFileSystemInfoFactory fileSystemFactory;
         private IgnoreAlreadyHandledContentChangeEventsFilter alreadyHandledFilter;
-
-        public SyncStrategyInitializer(ISyncEventQueue Queue, IMetaDataStorage storage, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(Queue)
+  
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.SyncStrategyInitializer"/> class.
+        /// </summary>
+        /// <param name='queue'>
+        /// The SyncEventQueue.
+        /// </param>
+        /// <param name='storage'>
+        /// Storage for Metadata.
+        /// </param>
+        /// <param name='repoInfo'>
+        /// Repo info.
+        /// </param>
+        /// <param name='fsFactory'>
+        /// Fs factory.
+        /// </param>
+        /// <exception cref='ArgumentNullException'>
+        /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+        /// </exception>
+        public SyncStrategyInitializer(ISyncEventQueue queue, IMetaDataStorage storage, RepoInfo repoInfo, IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null)
             {
