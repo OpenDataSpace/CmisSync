@@ -16,21 +16,43 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-
-using log4net;
-
 namespace CmisSync.Lib.Events
 {
-    public interface ISyncEventQueue {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks;
 
+    using log4net;
+    
+    /// <summary>
+    /// Interface for all implementations of SyncEventQueues.
+    /// This interface is the "usage interface" which does not contain lifecyle related Methods.
+    /// The other interface which in fact contains them is <see cref="IDisposableEventQueue"/>
+    /// </summary>
+    public interface ISyncEventQueue {
+        /// <summary>
+        /// Gets a value indicating whether this instance is stopped.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is stopped; otherwise, <c>false</c>.
+        /// </value>
+        bool IsStopped { get; } 
+        
+        /// <summary>
+        /// Gets the event manager.
+        /// </summary>
+        /// <value>
+        /// The event manager.
+        /// </value>
+        ISyncEventManager EventManager { get; }
+        
+        /// <summary>
+        /// Adds the event.
+        /// </summary>
+        /// <param name='newEvent'>
+        /// New event.
+        /// </param>
         /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
         void AddEvent(ISyncEvent newEvent); 
-
-        bool IsStopped{get;} 
-        
-        ISyncEventManager EventManager {get;}
     }
 }
