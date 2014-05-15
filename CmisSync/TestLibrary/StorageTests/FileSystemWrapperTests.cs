@@ -165,7 +165,7 @@ namespace TestLibrary.StorageTests
             var stream = new FileInfo(fullPath1).Create();
             stream.Dispose();
             var stream2 = new FileInfo(fullPath2).Create();
-            stream.Dispose();
+            stream2.Dispose();
             IDirectoryInfo dirInfo = Factory.CreateDirectoryInfo(this.testFolder.FullName);
             Assert.That(dirInfo.GetFiles().Length, Is.EqualTo(2));
             Assert.That(dirInfo.GetFiles()[0].Name, Is.EqualTo(file1));

@@ -104,15 +104,17 @@ namespace CmisSync
             }
 
             Logger.Info("Starting. Version: " + CmisSync.Lib.Backend.Version);
-            Trace.Listeners.Add(new CmisSync.Lib.Cmis.DotCMISLogListener());
-            if (args.Length != 0 && !args[0].Equals("start") &&
+            using (var listener = new CmisSync.Lib.Cmis.DotCMISLogListener())
+            {
+                Trace.Listeners.Add(listener);
+                if (args.Length != 0 && !args[0].Equals("start") &&
                 Backend.Platform != PlatformID.MacOSX &&
                 Backend.Platform != PlatformID.Win32NT)
-            {
+                {
 
-                string n = Environment.NewLine;
+                    string n = Environment.NewLine;
 
-                Console.WriteLine(n + Properties_Resources.ApplicationName +
+                    Console.WriteLine(n + Properties_Resources.ApplicationName +
                     " is a collaboration and sharing tool that is" + n +
                     "designed to keep things simple and to stay out of your way." + n +
                     n +
@@ -125,42 +127,44 @@ namespace CmisSync
                     "under certain conditions. Please read the GNU GPLv3 for details." + n +
                     n +
                     "Usage: DataSpaceSync [start|stop|restart]");
-                Environment.Exit(-1);
-            }
+                    Environment.Exit(-1);
+                }
 
-            // Only allow one instance of CmisSync (on Windows)
-            if (!program_mutex.WaitOne(0, false))
-            {
-                Logger.Error(Properties_Resources.ApplicationName + " is already running.");
-                Environment.Exit(-1);
-            }
-            try{
-                CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
-            } catch(Exception e)
-            {
-                string message = string.Format("Missing Dependency: {0}{1}{2}", e.Message, Environment.NewLine, e.StackTrace);
-                Logger.Error(message);
-                Console.Error.WriteLine(message);
-                Environment.Exit(-1);
-            }
+                // Only allow one instance of CmisSync (on Windows)
+                if (!program_mutex.WaitOne(0, false))
+                {
+                    Logger.Error(Properties_Resources.ApplicationName + " is already running.");
+                    Environment.Exit(-1);
+                }
+                try
+                {
+                    CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
+                } catch (Exception e)
+                {
+                    string message = string.Format("Missing Dependency: {0}{1}{2}", e.Message, Environment.NewLine, e.StackTrace);
+                    Logger.Error(message);
+                    Console.Error.WriteLine(message);
+                    Environment.Exit(-1);
+                }
+            
 
-            // Increase the number of concurrent requests to each server,
-            // as an unsatisfying workaround until this DotCMIS bug 632 is solved.
-            // See https://github.com/nicolas-raoul/CmisSync/issues/140
-            ServicePointManager.DefaultConnectionLimit = 1000;
+                // Increase the number of concurrent requests to each server,
+                // as an unsatisfying workaround until this DotCMIS bug 632 is solved.
+                // See https://github.com/nicolas-raoul/CmisSync/issues/140
+                ServicePointManager.DefaultConnectionLimit = 1000;
 
-            try
-            {
-                Controller = new Controller();
-                Controller.Initialize(firstRun);
+                try
+                    {
+                    Controller = new Controller();
+                    Controller.Initialize(firstRun);
 
-                UI = new UI();
-                UI.Run();
-            }
-            catch (Exception e)
-            {
-                Logger.Fatal("Exception in Program.Main", e);
-                Environment.Exit(-1);
+                    UI = new UI();
+                    UI.Run();
+                } catch (Exception e)
+                {
+                    Logger.Fatal("Exception in Program.Main", e);
+                    Environment.Exit(-1);
+                }
             }
 
 #if !__MonoCS__

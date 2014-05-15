@@ -65,8 +65,8 @@ namespace CmisSync.Lib.Events.Filter
         /// <returns><c>true</c> if the storage contains an entry for this object</returns>
         public override bool Handle(ISyncEvent e)
         {
-            if(e is FSEvent) {
-                var fsEvent = e as FSEvent;
+            if(e is IFSEvent) {
+                var fsEvent = e as IFSEvent;
                 IFileSystemInfo path = fsEvent.IsDirectory() ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(fsEvent.Path) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(fsEvent.Path);
                 switch(fsEvent.Type) {
                 case WatcherChangeTypes.Created:

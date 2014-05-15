@@ -47,7 +47,7 @@ T: CmisSync.ControllerBase
 # Disposed in TearDown
 R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: TestLibrary.IntegrationTests.FullRepoTests
-
+T: TestLibrary.SyncStrategiesTests.WatcherData
 #Ignore dispose pattern for UI widget (Windows)
 R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: CmisSync.ControllerBase

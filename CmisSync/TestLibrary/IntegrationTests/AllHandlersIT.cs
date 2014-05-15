@@ -210,8 +210,10 @@ namespace TestLibrary.IntegrationTests
             storage.ChangeLogToken = "oldtoken";
             storage.SaveMappedObject(new MappedObject(rootFolderName, rootFolderId, MappedObjectType.Folder, null, "oldtoken"));
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
-            var fsFolderCreatedEvent = new Mock<FSEvent>(WatcherChangeTypes.Created, Path.Combine(this.localRoot, folderName)) { CallBase = true };
+            var fsFolderCreatedEvent = new Mock<IFSEvent>();
             fsFolderCreatedEvent.Setup(f => f.IsDirectory()).Returns(true);
+            fsFolderCreatedEvent.Setup(f => f.Path).Returns(Path.Combine(this.localRoot, folderName));
+            fsFolderCreatedEvent.Setup(f => f.Type).Returns(WatcherChangeTypes.Created);
             dirInfo.Setup(d => d.Create()).Callback(delegate { queue.AddEvent(fsFolderCreatedEvent.Object); });
 
             queue.RunStartSyncEvent();
