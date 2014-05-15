@@ -16,24 +16,34 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using CmisSync.Lib.Storage;
-
-using log4net;
-using CmisSync.Lib.Events;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+
+    using log4net;
+
+    /// <summary>
+    /// Local situation detection.
+    /// </summary>
     public class LocalSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-        private static readonly ILog logger = LogManager.GetLogger(typeof(LocalSituationDetection));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalSituationDetection));
 
+        /// <summary>
+        /// Analyse the situation of the actual event in combination with the meta data storage.
+        /// </summary>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="actualEvent">Actual event.</param>
+        /// <returns>The detected local situation.</returns>
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            SituationType type = DoAnalyse(storage, actualEvent);
-            logger.Debug(String.Format("Local Situation is: {0}", type));
+            SituationType type = this.DoAnalyse(storage, actualEvent);
+            Logger.Debug(string.Format("Local Situation is: {0}", type));
             return type;
         }
 
@@ -52,4 +62,3 @@ namespace CmisSync.Lib.Sync.Strategy
         }
     }
 }
-
