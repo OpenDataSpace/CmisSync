@@ -76,7 +76,7 @@ namespace TestLibrary.StorageTests
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             IFileSystemInfo fileInfo = Factory.CreateFileInfo(fullPath);
             Assert.That(fileInfo.Exists, Is.EqualTo(false));
-            using (var stream = new FileInfo(fullPath).Create()){
+            using (var stream = new FileInfo(fullPath).Create()) {
                 fileInfo = Factory.CreateFileInfo(fullPath);
                 Assert.That(fileInfo.Exists, Is.EqualTo(true));
             }
