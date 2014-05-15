@@ -100,7 +100,7 @@ namespace TestLibrary.IntegrationTests
         public void Init()
         {
             var config = ITUtils.GetConfig();
-
+            
             // RepoInfo
             this.repoInfo = new RepoInfo {
                 AuthenticationType = AuthenticationType.BASIC,
@@ -112,14 +112,15 @@ namespace TestLibrary.IntegrationTests
             };
             this.repoInfo.SetPassword(config[5].ToString());
 
+            // FileSystemDir
+            this.localRootDir = new DirectoryInfo(this.repoInfo.LocalPath);
+            this.localRootDir.Create();
+
             // Repo
             var activityListener = new Mock<IActivityListener>();
             var queue = new SingleStepEventQueue(new SyncEventManager());
             this.repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
 
-            // FileSystemDir
-            this.localRootDir = new DirectoryInfo(this.repoInfo.LocalPath);
-            this.localRootDir.Create();
 
             // Session
             var cmisParameters = new Dictionary<string, string>();
@@ -151,6 +152,8 @@ namespace TestLibrary.IntegrationTests
             this.repo.Initialize();
 
             this.repo.Run();
+            var children = this.remoteRootDir.GetChildren();
+            Assert.AreEqual(children.TotalNumItems, 1);
         }
 
         private class CmisRepoMock : CmisRepo
