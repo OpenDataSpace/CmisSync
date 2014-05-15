@@ -137,7 +137,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private void HandleFolderEvents(IFSEvent e)
         {
-            var movedEvent = e as FSMovedEvent;
+            var movedEvent = e as IFSMovedEvent;
             FolderEvent folderEvent;
             if (movedEvent != null) {
                 folderEvent = new FolderMovedEvent(
@@ -175,7 +175,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </param>
         private void HandleFileEvents(IFSEvent e)
         {
-            var movedEvent = e as FSMovedEvent;
+            var movedEvent = e as IFSMovedEvent;
             if (movedEvent != null) {
                 var oldfile = this.fsFactory.CreateFileInfo(movedEvent.OldPath);
                 var newfile = this.fsFactory.CreateFileInfo(movedEvent.Path);
