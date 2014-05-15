@@ -152,6 +152,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             } else {
                 Assert.That(o.Guid.Equals(Guid.Empty), Is.True);
             }
+
             return true;
         }
     }
