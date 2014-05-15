@@ -93,19 +93,22 @@ namespace CmisSync.Lib.Credentials
         }
 
         /// <summary>
+        /// Gets or sets the internal saved and obfuscated password
+        /// </summary>
+        public string ObfuscatedPassword {
+            get { return this.password; }
+            set { this.password = value; }
+        }
+
+        /// <summary>
         /// Implizit contructor for passing a plain text string as password
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">plain text password</param>
         /// <returns></returns>
         public static implicit operator Password(string value)
         {
             return new Password(value);
         }
-
-        /// <summary>
-        /// Gets and sets the internal saved and obfuscated password
-        /// </summary>
-        public string ObfuscatedPassword { get { return this.password; } set { this.password = value; } }
 
         /// <summary>
         /// Returns the password as plain text
