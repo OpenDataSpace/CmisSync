@@ -34,6 +34,7 @@ namespace TestLibrary.SyncStrategiesTests
     using NUnit.Framework;
 
     using TestLibrary.TestUtils;
+    using TestLibrary.UtilsTests;
 
     [TestFixture]
     public class RemoteObjectFetcherTest 
@@ -53,7 +54,7 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, Id).Object;
-            session.Setup(s => s.GetObject(Id)).Returns(remote);
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFile(Path, Id);
@@ -69,7 +70,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void FileEventForRemovedFile() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            session.Setup(s => s.GetObject(Id)).Throws(new CmisObjectNotFoundException());
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Throws(new CmisObjectNotFoundException());
 
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFile(Path, Id);
@@ -88,7 +89,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             var fileEvent = new FileEvent(new Mock<IFileInfo>().Object, null, new Mock<IDocument>().Object); 
             fetcher.Handle(fileEvent);
-            session.Verify(s => s.GetObject(It.IsAny<string>()), Times.Never());
+            session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 
         [Test, Category("Fast")]
@@ -98,7 +99,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             var fileEvent = new FolderEvent(new Mock<IDirectoryInfo>().Object, new Mock<IFolder>().Object); 
             fetcher.Handle(fileEvent);
-            session.Verify(s => s.GetObject(It.IsAny<string>()), Times.Never());
+            session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 
         [Test, Category("Fast")]
@@ -106,7 +107,7 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             IFolder remote = MockSessionUtil.CreateRemoteFolderMock(Id).Object;
-            session.Setup(s => s.GetObject(Id)).Returns(remote);
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id);
@@ -122,7 +123,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void FolderEventForRemovedFolder() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            session.Setup(s => s.GetObject(Id)).Throws(new CmisObjectNotFoundException());
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Throws(new CmisObjectNotFoundException());
 
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id);
@@ -139,7 +140,7 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             IFolder remote = MockSessionUtil.CreateRemoteFolderMock(Id).Object;
-            session.Setup(s => s.GetObject(Id)).Returns(remote);
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id);
@@ -149,6 +150,23 @@ namespace TestLibrary.SyncStrategiesTests
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             Assert.That(fetcher.Handle(crawlEvent), Is.False);
             Assert.That(crawlEvent.RemoteFolder, Is.EqualTo(remote));
+        }
+
+        [Test, Category("Fast")]
+        public void OperationContextDoesNotUsesTheSessionCache() {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(Id).Object;
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
+
+            var storage = new Mock<IMetaDataStorage>();
+            storage.AddLocalFolder(Path, Id);
+
+            var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(Path)));
+            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
+
+            Assert.That(fetcher.Handle(folderEvent), Is.False);
+            OperationContextFactoryTest.VerifyThatCachingIsDisabled(session);
         }
     }
 }
