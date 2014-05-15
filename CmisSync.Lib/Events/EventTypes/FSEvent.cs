@@ -22,11 +22,11 @@ namespace CmisSync.Lib.Events
     using System;
     using System.IO;
 
-    public class FSEvent : ISyncEvent
+    public class FSEvent : IFSEvent
     {
         public WatcherChangeTypes Type { get; private set; }
 
-        public virtual string Path { get; private set; }
+        public string Path { get; private set; }
 
         public FSEvent(WatcherChangeTypes type, string path)
         {

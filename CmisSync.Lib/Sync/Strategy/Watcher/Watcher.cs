@@ -88,7 +88,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </returns>
         public override bool Handle(ISyncEvent e)
         {
-            var fsevent = e as FSEvent;
+            var fsevent = e as IFSEvent;
             if (fsevent == null) {
                 return false;
             }
@@ -135,7 +135,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
         #endregion
 
-        private void HandleFolderEvents(FSEvent e)
+        private void HandleFolderEvents(IFSEvent e)
         {
             var movedEvent = e as FSMovedEvent;
             FolderEvent folderEvent;
@@ -173,7 +173,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='e'>
         /// The FSEvent.
         /// </param>
-        private void HandleFileEvents(FSEvent e)
+        private void HandleFileEvents(IFSEvent e)
         {
             var movedEvent = e as FSMovedEvent;
             if (movedEvent != null) {

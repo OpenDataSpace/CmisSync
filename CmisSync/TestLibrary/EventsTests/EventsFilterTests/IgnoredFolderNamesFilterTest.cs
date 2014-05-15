@@ -98,7 +98,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             string path = Path.Combine(Path.GetTempPath(), ".test");
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
-            var fsEvent = new Mock<FSEvent>(WatcherChangeTypes.Deleted, path);
+            var fsEvent = new Mock<IFSEvent>();
             fsEvent.Setup(fs => fs.IsDirectory()).Returns(true);
             fsEvent.Setup(fs => fs.Path).Returns(path);
             var wildcards = new List<string>();
@@ -115,7 +115,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             string path = Path.Combine(Path.GetTempPath(), ".test", "file.tmp");
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
-            var fsEvent = new Mock<FSEvent>(WatcherChangeTypes.Deleted, path);
+            var fsEvent = new Mock<IFSEvent>();
             fsEvent.Setup(fs => fs.IsDirectory()).Returns(false);
             fsEvent.Setup(fs => fs.Path).Returns(path);
             var wildcards = new List<string>();

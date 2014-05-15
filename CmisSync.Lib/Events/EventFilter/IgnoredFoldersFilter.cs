@@ -105,7 +105,7 @@ namespace CmisSync.Lib.Events.Filter
                 return this.CheckPath(request, request.LocalPath);
             }
 
-            FSEvent fsevent = e as FSEvent;
+            IFSEvent fsevent = e as IFSEvent;
             if (fsevent != null)
             {
                 return this.CheckPath(fsevent, fsevent.Path);

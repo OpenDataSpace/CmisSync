@@ -201,13 +201,15 @@
     <Compile Include="Events\ISyncEventManager.cs" />
     <Compile Include="Events\EventFilter\IgnoreAlreadyHandledFsEventsFilter.cs" />
     <Compile Include="Cmis\OperationContextFactory.cs" />
+    <Compile Include="Events\EventTypes\IFSEvent.cs" />
+    <Compile Include="Events\EventTypes\IFSMovedEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />

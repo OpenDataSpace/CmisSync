@@ -72,6 +72,8 @@ SOURCES =  \
 	Events/EventTypes/FSEvent.cs \
 	Events/EventTypes/FSMovedEvent.cs \
 	Events/EventTypes/FullSyncCompletedEvent.cs \
+	Events/EventTypes/IFSEvent.cs \
+	Events/EventTypes/IFSMovedEvent.cs \
 	Events/EventTypes/ISyncEvent.cs \
 	Events/EventTypes/PermissionDeniedEvent.cs \
 	Events/EventTypes/ProxyAuthRequiredEvent.cs \

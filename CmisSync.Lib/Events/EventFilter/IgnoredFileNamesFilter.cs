@@ -87,7 +87,7 @@ namespace CmisSync.Lib.Events.Filter
                 return this.CheckFile(request, request.Document.Name);
             }
                 
-            FSEvent fsevent = e as FSEvent;
+            IFSEvent fsevent = e as IFSEvent;
             if (fsevent != null)
             {
                 try

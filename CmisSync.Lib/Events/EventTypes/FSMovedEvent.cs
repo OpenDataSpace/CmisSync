@@ -22,9 +22,9 @@ namespace CmisSync.Lib.Events
     using System;
     using System.IO;
 
-    public class FSMovedEvent : FSEvent
+    public class FSMovedEvent : FSEvent, IFSMovedEvent
     {
-        public virtual string OldPath { get; private set; }
+        public string OldPath { get; private set; }
 
         public FSMovedEvent(string oldPath, string newPath) : base(WatcherChangeTypes.Renamed, newPath)
         {

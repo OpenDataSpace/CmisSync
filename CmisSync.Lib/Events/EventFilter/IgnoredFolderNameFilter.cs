@@ -86,9 +86,9 @@ namespace CmisSync.Lib.Events.Filter
         /// </returns>
         public override bool Handle(ISyncEvent e)
         {
-            if (e is FSEvent)
+            if (e is IFSEvent)
             {
-                var fsEvent = e as FSEvent;
+                var fsEvent = e as IFSEvent;
                 string name;
                 if (fsEvent.IsDirectory())
                 {
