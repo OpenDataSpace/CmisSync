@@ -56,6 +56,14 @@ namespace CmisSync.Lib.Sync.Strategy
             switch (actualEvent.Remote) 
             {
             case MetaDataChangeType.CREATED:
+                if (this.IsChangeEventAHintForMove(storage, actualEvent)) {
+                    return SituationType.MOVED;
+                }
+
+                if (this.IsChangeEventAHintForRename(storage, actualEvent)) {
+                    return SituationType.RENAMED;
+                }
+
                 if(actualEvent is FileEvent) {
                     return this.IsSavedFileEqual(storage, (actualEvent as FileEvent).RemoteFile) ? SituationType.NOCHANGE : SituationType.ADDED;
                 } else {
@@ -103,7 +111,11 @@ namespace CmisSync.Lib.Sync.Strategy
             {
                 var folderEvent = actualEvent as FolderEvent;
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
-                return storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.ParentId != folderEvent.RemoteFolder.ParentId;
+                if (storedFolder != null) {
+                    return storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.ParentId != folderEvent.RemoteFolder.ParentId;
+                } else {
+                    return false;
+                }
             }
 
             return false;
@@ -115,7 +127,11 @@ namespace CmisSync.Lib.Sync.Strategy
             {
                 var folderEvent = actualEvent as FolderEvent;
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
-                return storedFolder.Name != folderEvent.RemoteFolder.Name;
+                if (storedFolder != null) {
+                    return storedFolder.Name != folderEvent.RemoteFolder.Name;
+                } else {
+                    return false;
+                }
             }
 
             return false;
