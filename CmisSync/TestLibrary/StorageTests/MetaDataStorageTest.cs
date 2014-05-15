@@ -464,8 +464,24 @@ namespace TestLibrary.StorageTests
             storage.SaveMappedObject(subChildFile);
 
             string src = storage.ToFindString();
+
             int count = src.Select((c, i) => src.Substring(i)).Count(sub => sub.StartsWith(Environment.NewLine));
             Assert.That(count, Is.EqualTo(5), string.Format("Newlines Counting {0}:{2} {1}", count, src, Environment.NewLine));
+        }
+
+        [Test, Category("Fast")]
+        public void ToLinePrintReturnsOneLinePerNotFittingEntry()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "WRONGID", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1Folder);
+
+            string src = storage.ToFindString();
+
+            int count = src.Select((c, i) => src.Substring(i)).Count(sub => sub.StartsWith(Environment.NewLine));
+            Assert.That(count, Is.EqualTo(2), string.Format("Newlines Counting {0}:{2} {1}", count, src, Environment.NewLine));
         }
     }
 }

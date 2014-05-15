@@ -441,7 +441,14 @@ namespace CmisSync.Lib.Storage
                     return String.Empty;
                 }
 
-                return PrintFindLines(objects, root, String.Empty);
+                string result = PrintFindLines(objects, root, String.Empty);
+                var sb = new StringBuilder();
+                sb.Append(result);
+                foreach(var obj in objects) {
+                    sb.Append(Environment.NewLine).Append(obj.ToString());
+                }
+
+                return sb.ToString();
             }
         }
 
