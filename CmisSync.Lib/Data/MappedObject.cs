@@ -299,5 +299,28 @@ namespace CmisSync.Lib.Data
         {
             return (this.RemoteObjectId != null) ? this.RemoteObjectId.GetHashCode() : base.GetHashCode();
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format(
+                "[MappedObject: ParentId={0}, Type={1}, RemoteObjectId={2}, LastChangeToken={3}, LastRemoteWriteTimeUtc={4}, LastLocalWriteTimeUtc={5}, LastChecksum={6}, ChecksumAlgorithmName={7}, Name={8}, Description={9}, Guid={10}, LastContentSize={11}, Ignored={12}]",
+                this.ParentId,
+                this.Type,
+                this.RemoteObjectId,
+                this.LastChangeToken,
+                this.LastRemoteWriteTimeUtc,
+                this.LastLocalWriteTimeUtc,
+                this.LastChecksum,
+                this.ChecksumAlgorithmName,
+                this.Name,
+                this.Description,
+                this.Guid,
+                this.LastContentSize,
+                this.Ignored);
+        }
     }
 }
