@@ -141,6 +141,7 @@ namespace TestLibrary.IntegrationTests
         {
             this.localRootDir.Delete(true);
             this.remoteRootDir.DeleteTree(true, null, true);
+            repo.Dispose();
         }
 
         [Test, Category("Slow")]

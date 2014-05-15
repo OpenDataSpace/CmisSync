@@ -211,7 +211,8 @@ namespace TestLibrary.ContentTasksTests
             }
 
             this.mockedStream.Setup(stream => stream.Length).Returns(remoteChunk.Length);
-            this.mockedStream.Setup(stream => stream.Stream).Returns(new MemoryStream(remoteChunk));
+            var memStream = new MemoryStream(remoteChunk);
+            this.mockedStream.Setup(stream => stream.Stream).Returns(memStream);
             this.mock.Setup(doc => doc.ContentStreamLength).Returns(this.remoteLength);
             this.mock.Setup(doc => doc.ContentStreamId).Returns(this.contentStreamId);
             this.mock.Setup(doc => doc.GetContentStream(
@@ -246,6 +247,7 @@ namespace TestLibrary.ContentTasksTests
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.remoteContent), this.hashAlg.Hash);
                 Assert.AreEqual(SHA1Managed.Create().ComputeHash(this.localFileStream.ToArray()), this.hashAlg.Hash);
             }
+            memStream.Dispose();
         }
 
         [Test, Category("Fast")]
