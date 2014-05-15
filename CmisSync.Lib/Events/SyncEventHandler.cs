@@ -16,46 +16,72 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using log4net;
-
 namespace CmisSync.Lib.Events
 {
-    ///<summary>
-    ///Base class for all Event-Handlers
-    ///</summary>
+    using System;
+
+    using log4net;
+    
+    /// <summary>
+    /// Base class for all Event-Handlers
+    /// </summary>
     public abstract class SyncEventHandler : IComparable<SyncEventHandler>, IComparable
     {
-        public abstract bool Handle(ISyncEvent e);
-
-        ///<summary>
-        ///May not be changed during runtime
-        ///</summary>
+        /// <summary>
+        /// Gets the priority.
+        /// </summary>
+        /// <value>
+        /// The priority.
+        /// </value>
         public virtual int Priority {
             get {
                 return EventHandlerPriorities.GetPriority(this.GetType());
             }
         }
+        
+        /// <summary>
+        /// Handle the specified e.
+        /// </summary>
+        /// <param name='e'>
+        /// The event to handle.
+        /// </param>
+        /// <returns>
+        /// true is handled
+        /// </returns>
+        public abstract bool Handle(ISyncEvent e);
 
+        /// <summary>
+        /// Compares to another instance
+        /// </summary>
+        /// <returns>
+        /// A 32-bit signed integer that indicates whether this instance precedes, follows, or appears in the same position in the sort order as the value parameter.
+        /// </returns>
+        /// <param name='other'>
+        /// The other instance.
+        /// </param>
         public int CompareTo(SyncEventHandler other) {
-            return Priority.CompareTo(other.Priority);
+            return this.Priority.CompareTo(other.Priority);
         }
 
         // CompareTo is implemented for Sorting EventHandlers
         // Equals is not implemented because EventHandler removal shall work by Object.Equals
         int IComparable.CompareTo(object obj) {
-            if(!(obj is SyncEventHandler)){
+            if(!(obj is SyncEventHandler)) {
                 throw new ArgumentException("Argument is not a SyncEventHandler", "obj");
             }
+            
             SyncEventHandler other = obj as SyncEventHandler;
             return this.CompareTo(other);
         }
-
+  
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.SyncEventHandler"/>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.SyncEventHandler"/>.
+        /// </returns>
         public override string ToString() {
             return this.GetType() + " with Priority " + this.Priority.ToString();
         }
     }
-
 }
-
