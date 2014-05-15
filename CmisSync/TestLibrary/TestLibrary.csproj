@@ -157,7 +157,6 @@
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
     <Compile Include="RepoInfoTests.cs" />
-    <Compile Include="IntegrationTests\CmisRepoTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentStandardAuthenticationProviderTest.cs" />
     <Compile Include="EventsTests\SyncStrategyInitializerTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledContentChangeEventsFilterTest.cs" />
