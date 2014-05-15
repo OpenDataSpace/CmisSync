@@ -145,7 +145,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void FullRepoTest()
+        public void OneLocalFolder()
         {
             this.localRootDir.CreateSubdirectory("Cat");
 
