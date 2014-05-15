@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Sync.Strategy {
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
@@ -81,7 +82,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             string id = this.FetchIdFromStorage(e);
             if(id != null) {
                 try {
-                    remote = this.session.GetObject(id);
+                    remote = this.session.GetObject(id, OperationContextFactory.CreateNonCachingPathIncludingContext(this.session));
                 } catch (CmisObjectNotFoundException) {
                     // Deleted on Server, this is ok
                     return false;

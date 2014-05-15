@@ -125,10 +125,15 @@ namespace CmisSync.Lib.Sync.Strategy
             {
                 localDirNames.Add(subdir.Name);
             }
-            
+
             foreach(IFileInfo file in localFolder.GetFiles())
             {
                 localFileNames.Add(file.Name);
+            }
+
+            if (remoteFolder == null) {
+                Logger.Debug(string.Format("Remote Folder is null => skipping crawl sync on local folder \"{0}\"", localFolder.FullName));
+                return;
             }
 
             // Collect all child objects of the remote folder and figure out differences

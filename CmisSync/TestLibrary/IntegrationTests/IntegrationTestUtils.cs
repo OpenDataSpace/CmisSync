@@ -70,7 +70,13 @@ namespace TestLibrary.IntegrationTests
                     File.ReadAllText(path));
             }
         }
-        
+
+        public static dynamic GetConfig()
+        {
+            var path = GetServerPath();
+            return JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
+        }
+
         private static string GetServerPath()
         {
             string path = "../../test-servers.json";
@@ -80,14 +86,8 @@ namespace TestLibrary.IntegrationTests
             {
                 path = "../CmisSync/TestLibrary/test-servers.json";
             }
-            
+
             return path;
-        }
-        
-        public static dynamic GetConfig()
-        {
-            var path = GetServerPath();
-            return JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
         }
     }
 }

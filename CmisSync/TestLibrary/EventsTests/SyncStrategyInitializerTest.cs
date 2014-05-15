@@ -219,7 +219,7 @@ namespace TestLibrary.EventsTests
         {
             manager.Verify(m => m.AddEventHandler(It.IsAny<ContentChanges>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<ContentChangeEventAccumulator>()), times);
-            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreAlreadyHandledContentChangeEventsFilter>()),times);
+            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreAlreadyHandledContentChangeEventsFilter>()), times);
         }
 
         private static void VerifyNonContenChangeHandlersRemoved(Mock<ISyncEventManager> manager, Times times)

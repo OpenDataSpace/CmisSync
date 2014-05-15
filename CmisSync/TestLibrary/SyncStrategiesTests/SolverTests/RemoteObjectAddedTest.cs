@@ -63,7 +63,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(false);
 
             Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
-            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?) creationDate);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
             var solver = new RemoteObjectAdded();
 
@@ -81,7 +81,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                                  f.Type == MappedObjectType.Folder)),
                 Times.Once());
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
-            dirInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(),It.IsAny<string>()), Times.Never());
+            dirInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -105,7 +105,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
 
             Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
-            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?) creationDate);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
             var solver = new RemoteObjectAdded();
 
@@ -123,7 +123,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                                  f.Type == MappedObjectType.Folder)),
                 Times.Once());
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
-            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k.Equals(MappedObject.ExtendedAttributeKey)),It.IsAny<string>()), Times.Once());
+            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>()), Times.Once());
         }
     }
 }

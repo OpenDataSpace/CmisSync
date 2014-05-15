@@ -40,14 +40,14 @@ namespace TestLibrary.SyncStrategiesTests
 
     public class BaseWatcherTest
     {
-        private static readonly int RETRIES = 10;
-        private static readonly int MILISECONDSWAIT = 1000;
-
         protected DirectoryInfo localFolder;
         protected FileInfo localFile;
         protected DirectoryInfo localSubFolder;
         protected Mock<ISyncEventQueue> queue;
         protected FSEvent returnedFSEvent;
+
+        private static readonly int RETRIES = 10;
+        private static readonly int MILISECONDSWAIT = 1000;
 
         public void ReportFSFileAddedEvent() {
             this.localFile.Delete();
