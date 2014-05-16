@@ -165,7 +165,49 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFolderIsRenamedAndOneCrawlSyncShouldDetectIt()
+        {
+            var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            remoteFolder.Rename("Dog");
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Dog"));
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolder()
+        {
+            var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
+            var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("target"));
+            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
         private class CmisRepoMock : CmisRepo
@@ -180,6 +222,12 @@ namespace TestLibrary.IntegrationTests
             public void Run()
             {
                 this.SingleStepQueue.Run();
+            }
+
+            public override void Initialize() {
+                base.Initialize();
+                this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
+                this.Scheduler.Stop();
             }
         }
     }

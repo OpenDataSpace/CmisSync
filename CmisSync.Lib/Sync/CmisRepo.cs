@@ -314,7 +314,7 @@ namespace CmisSync.Lib.Sync
         /// <summary>
         /// Initialize the scheduled background sync processes.
         /// </summary>
-        public void Initialize()
+        public virtual void Initialize()
         {
             this.Connect();
 
