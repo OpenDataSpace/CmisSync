@@ -344,8 +344,7 @@ namespace CmisSync.Lib.Storage
                     segments = temp;
                 }
 
-                string path = Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(segments));
-                return path;
+                return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(segments));
             }
         }
 
