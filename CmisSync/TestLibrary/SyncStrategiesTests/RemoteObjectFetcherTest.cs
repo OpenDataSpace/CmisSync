@@ -53,7 +53,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void FileEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IDocument remote = MockSessionUtil.CreateRemoteObjectMock(null, Id).Object;
+            IDocument remote = MockSessionUtil.CreateRemoteDocumentMock(null, Id).Object;
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();

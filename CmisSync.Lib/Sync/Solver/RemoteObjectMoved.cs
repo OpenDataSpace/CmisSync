@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Sync.Solver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -32,10 +33,30 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class RemoteObjectMoved : ISolver
     {
+        /// <summary>
+        /// Solve the specified situation by using the session, storage, localFile and remoteId.
+        /// Moves the local file/folder to the new location.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Old local file/folder.</param>
+        /// <param name="remoteId">Remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
             // Move local object
-            throw new NotImplementedException();
+            var savedObject = storage.GetObjectByRemoteId(remoteId.Id);
+            string newPath = remoteId is IFolder ? storage.Matcher.CreateLocalPath(remoteId as IFolder) : storage.Matcher.CreateLocalPath(remoteId as IDocument);
+            if (remoteId is IFolder) {
+                IDirectoryInfo dirInfo = localFile as IDirectoryInfo;
+                dirInfo.MoveTo(newPath);
+            } else if (remoteId is IDocument) {
+                IFileInfo fileInfo = localFile as IFileInfo;
+                fileInfo.MoveTo(newPath);
+            }
+
+            savedObject.Name = (remoteId as ICmisObject).Name;
+            savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
+            storage.SaveMappedObject(savedObject);
         }
     }
 }
