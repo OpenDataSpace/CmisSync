@@ -36,6 +36,8 @@ namespace TestLibrary.TestUtils
 
     using Moq;
 
+    using NUnit.Framework;
+
     public static class MockMetaDataStorageUtil
     {
         public static Mock<IMetaDataStorage> GetMetaStorageMockWithToken(string token = "lastToken")
@@ -95,6 +97,39 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == folder.RemoteObjectId))).Returns(folder);
             db.Setup(foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(localPath);
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(remotePath);
+        }
+
+        public static void VerifySavedMappedObject(this Mock<IMetaDataStorage> db, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, bool extendedAttributeAvailable = true, DateTime? lastModification = null)
+        {
+            VerifySavedMappedObject(db, type, remoteId, name, parentId, changeToken, Times.Once(), extendedAttributeAvailable, lastModification);
+        }
+
+        public static void VerifySavedMappedObject(this Mock<IMetaDataStorage> db, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, Times times, bool extendedAttributeAvailable = true, DateTime? lastModification = null)
+        {
+            db.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, times, extendedAttributeAvailable, lastModification))), times);
+        }
+
+        private static bool VerifyMappedObject(IMappedObject o, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, Times times, bool extendedAttributeAvailable, DateTime? lastModification)
+        {
+            Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId));
+            Assert.That(o.Name, Is.EqualTo(name));
+            Assert.That(o.ParentId, Is.EqualTo(parentId));
+            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken));
+            Assert.That(o.Type, Is.EqualTo(type));
+            if (extendedAttributeAvailable) {
+                Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty));
+            }
+            else
+            {
+                Assert.That(o.Guid, Is.EqualTo(Guid.Empty));
+            }
+
+            if (lastModification != null) {
+                Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastModification));
+                Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastModification));
+            }
+
+            return true;
         }
     }
 }
