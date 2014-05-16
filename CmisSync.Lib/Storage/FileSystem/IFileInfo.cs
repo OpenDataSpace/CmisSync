@@ -62,5 +62,11 @@ namespace CmisSync.Lib.Storage
         /// <param name="share">Share mode.</param>
         /// <returns>Stream of the content</returns>
         Stream Open(FileMode open, FileAccess access, FileShare share);
+
+        /// <summary>
+        /// Moves to target file.
+        /// </summary>
+        /// <param name="target">Target file name.</param>
+        void MoveTo(string target);
     }
 }
