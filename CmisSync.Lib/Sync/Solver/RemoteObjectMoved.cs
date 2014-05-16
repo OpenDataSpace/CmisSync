@@ -49,13 +49,18 @@ namespace CmisSync.Lib.Sync.Solver
             if (remoteId is IFolder) {
                 IDirectoryInfo dirInfo = localFile as IDirectoryInfo;
                 dirInfo.MoveTo(newPath);
+                dirInfo.LastWriteTimeUtc = (remoteId as IFolder).LastModificationDate != null ? (DateTime)(remoteId as IFolder).LastModificationDate : dirInfo.LastWriteTimeUtc;
             } else if (remoteId is IDocument) {
                 IFileInfo fileInfo = localFile as IFileInfo;
                 fileInfo.MoveTo(newPath);
+                fileInfo.LastWriteTimeUtc = (remoteId as IDocument).LastModificationDate != null ? (DateTime)(remoteId as IDocument).LastModificationDate : fileInfo.LastWriteTimeUtc;
             }
 
             savedObject.Name = (remoteId as ICmisObject).Name;
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
+            savedObject.LastChangeToken = remoteId is ICmisObject ? (remoteId as ICmisObject).ChangeToken : null;
+            savedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+            savedObject.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
             storage.SaveMappedObject(savedObject);
         }
     }

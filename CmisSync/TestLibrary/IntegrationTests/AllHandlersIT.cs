@@ -244,7 +244,7 @@ namespace TestLibrary.IntegrationTests
             rootFolderInfo.Setup(r => r.FullName).Returns(this.localRoot);
             rootFolderInfo.Setup(r => r.Name).Returns(Path.GetDirectoryName(this.localRoot));
             fsFactory.AddIDirectoryInfo(rootFolderInfo.Object);
-            var folderInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName));
+            var dirInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName));
             var subFolderInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName, subFolderName));
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, rootFolderId, this.remoteRoot + subFolderName, rootFolderId, lastChangeToken);
             session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id.Equals(subFolderId)))).Returns(Mock.Of<IFolder>(f => f.ParentId == rootFolderId && f.Name == subFolderName && f.Id == subFolderId));

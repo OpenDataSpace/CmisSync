@@ -32,10 +32,32 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class LocalObjectRenamed : ISolver
     {
+        /// <summary>
+        /// Solve the specified situation by using the session, storage, localFile and remoteId.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="remoteId">Remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
+            var obj = storage.GetObjectByRemoteId(remoteId.Id);
+            ICmisObject remoteObject;
             // Rename remote object
-            throw new NotImplementedException();
+            if(remoteId is IFolder) {
+                remoteObject = (remoteId as IFolder).Rename(localFile.Name, true) as IFolder;
+            } else if (remoteId is IDocument){
+                remoteObject = (remoteId as IDocument).Rename(localFile.Name, true) as IDocument;
+            } else {
+                throw new NotImplementedException();
+            }
+
+            localFile.LastWriteTimeUtc = remoteObject.LastModificationDate != null ? (DateTime)remoteObject.LastModificationDate : localFile.LastWriteTimeUtc;
+            obj.Name = remoteObject.Name;
+            obj.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
+            obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+            obj.LastChangeToken = remoteObject.ChangeToken;
+            storage.SaveMappedObject(obj);
         }
     }
 }

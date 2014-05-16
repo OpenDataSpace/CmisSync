@@ -30,6 +30,7 @@ namespace CmisSync.Lib.Sync.Solver
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Enums;
 
     /// <summary>
     /// Solver to handle the situation of a locally added file/folderobject.
@@ -50,20 +51,20 @@ namespace CmisSync.Lib.Sync.Solver
             {
                 IDirectoryInfo localDirInfo = localFile as IDirectoryInfo;
                 IDirectoryInfo parent = localDirInfo.Parent;
-                IMappedObject mappedParent = storage.GetObjectByLocalPath(parent) as IMappedObject;
+                IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
 
                 // Create remote folder
                 Dictionary<string, object> properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.Name, localDirInfo.Name);
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
-                properties.Add(PropertyIds.CreationDate, string.Empty);
-                properties.Add(PropertyIds.LastModificationDate, string.Empty);
                 IFolder folder = session.GetObject(session.CreateFolder(properties, new ObjectId(mappedParent.RemoteObjectId))) as IFolder;
                 Guid uuid = Guid.Empty;
                 if (localDirInfo.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
                     localDirInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
                 }
+
+                localDirInfo.LastWriteTimeUtc = folder.LastModificationDate != null ? (DateTime)folder.LastModificationDate : localDirInfo.LastWriteTimeUtc;
 
                 MappedObject mappedFolder = new MappedObject(
                     localDirInfo.Name,
@@ -72,15 +73,43 @@ namespace CmisSync.Lib.Sync.Solver
                     mappedParent.RemoteObjectId,
                     folder.ChangeToken)
                 {
-                    Guid = uuid
+                    Guid = uuid,
+                    LastRemoteWriteTimeUtc = folder.LastModificationDate,
+                    LastLocalWriteTimeUtc = localDirInfo.LastWriteTimeUtc
                 };
                 storage.SaveMappedObject(mappedFolder);
             }
             else if(localFile is IFileInfo)
             {
                 // Create empty remote file
-                //string remotePath = storage.Matcher.CreateRemotePath(localFile.FullName);
-                //session.CreateDocument();
+                IFileInfo localFileInfo = localFile as IFileInfo;
+                IDirectoryInfo parent = localFileInfo.Directory;
+                IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
+
+                Dictionary<string, object> properties = new Dictionary<string, object>();
+                properties.Add(PropertyIds.Name, localFileInfo.Name);
+                properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                IDocument doc = session.GetObject(session.CreateDocument(properties, new ObjectId(mappedParent.RemoteObjectId), null, null, null, null, null)) as IDocument;
+                Guid uuid = Guid.Empty;
+                if (localFileInfo.IsExtendedAttributeAvailable()) {
+                    uuid = Guid.NewGuid();
+                    localFileInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
+                }
+
+                localFileInfo.LastWriteTimeUtc = doc.LastModificationDate != null ? (DateTime)doc.LastModificationDate : localFileInfo.LastWriteTimeUtc;
+
+                IMappedObject mappedFile = new MappedObject(
+                    localFileInfo.Name,
+                    doc.Id,
+                    MappedObjectType.File,
+                    mappedParent.RemoteObjectId,
+                    doc.ChangeToken)
+                {
+                    Guid = uuid,
+                    LastRemoteWriteTimeUtc = doc.LastModificationDate,
+                    LastLocalWriteTimeUtc = localFileInfo.LastWriteTimeUtc
+                };
+                storage.SaveMappedObject(mappedFile);
             }
         }
     }

@@ -112,7 +112,11 @@ namespace CmisSync.Lib.Sync.Strategy
                 var folderEvent = actualEvent as FolderEvent;
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
                 if (storedFolder != null) {
-                    return storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.ParentId != folderEvent.RemoteFolder.ParentId;
+                    if(storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.ParentId != folderEvent.RemoteFolder.ParentId) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 } else {
                     return false;
                 }
