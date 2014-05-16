@@ -39,6 +39,7 @@ namespace CmisSync.Lib.Sync.Strategy {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectFetcher));
         private IMetaDataStorage storage;
         private ISession session;
+        private IOperationContext operationContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RemoteObjectFetcher"/> class.
@@ -59,6 +60,7 @@ namespace CmisSync.Lib.Sync.Strategy {
 
             this.session = session;
             this.storage = storage;
+            this.operationContext = OperationContextFactory.CreateNonCachingPathIncludingContext(this.session);
         }
 
         /// <summary>
@@ -82,7 +84,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             string id = this.FetchIdFromStorage(e);
             if(id != null) {
                 try {
-                    remote = this.session.GetObject(id, OperationContextFactory.CreateNonCachingPathIncludingContext(this.session));
+                    remote = this.session.GetObject(id, this.operationContext);
                 } catch (CmisObjectNotFoundException) {
                     // Deleted on Server, this is ok
                     return false;
