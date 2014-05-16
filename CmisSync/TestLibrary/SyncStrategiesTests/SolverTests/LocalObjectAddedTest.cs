@@ -36,6 +36,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
     using NUnit.Framework;
 
+    using TestLibrary.TestUtils;
+
     [TestFixture]
     public class LocalObjectAddedTest
     {
@@ -93,7 +95,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
 
-            this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f => this.VerifySavedMappedObject(f, id, folderName, parentId, lastChangeToken, extendedAttributes))), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
             dirInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
         }
@@ -135,25 +137,9 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
 
-            this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(f => this.VerifySavedMappedObject(f, id, folderName, parentId, lastChangeToken, extendedAttributes))), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
             dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k == MappedObject.ExtendedAttributeKey), It.Is<string>(v => !v.Equals(Guid.Empty))), Times.Once());
-        }
-
-        private bool VerifySavedMappedObject(IMappedObject o, string remoteId, string name, string parentId, string changeToken, bool extendedAttributeAvailable)
-        {
-            Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId));
-            Assert.That(o.Name, Is.EqualTo(name));
-            Assert.That(o.ParentId, Is.EqualTo(parentId));
-            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken));
-            Assert.That(o.Type, Is.EqualTo(MappedObjectType.Folder));
-            if (extendedAttributeAvailable) {
-                Assert.That(o.Guid.Equals(Guid.Empty), Is.False);
-            } else {
-                Assert.That(o.Guid.Equals(Guid.Empty), Is.True);
-            }
-
-            return true;
         }
     }
 }

@@ -64,6 +64,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             localFolder.Setup(f => f.Name).Returns(newName);
             var mappedFolder = new Mock<IMappedObject>();
             mappedFolder.SetupAllProperties();
+            mappedFolder.SetupProperty(f => f.Guid, Guid.NewGuid());
             mappedFolder.SetupProperty(f => f.Name, oldName);
             mappedFolder.SetupProperty(f => f.RemoteObjectId, id);
             mappedFolder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
@@ -77,10 +78,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == newName), It.Is<bool>(b => b == true)), Times.Once());
 
-            storage.Verify(
-                s =>
-                s.SaveMappedObject(It.Is<IMappedObject>(o => this.VerifySavedObject(o, MappedObjectType.Folder, id, newName, newChangeToken, modificationDate))),
-                Times.Once());
+            storage.VerifySavedMappedObject(MappedObjectType.Folder, id, newName, null, newChangeToken, true, modificationDate);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -105,6 +103,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             localFolder.Setup(f => f.Name).Returns(newName);
             var mappedFile = new Mock<IMappedObject>();
             mappedFile.SetupAllProperties();
+            mappedFile.SetupProperty(f => f.Guid, Guid.NewGuid());
             mappedFile.SetupProperty(f => f.Name, oldName);
             mappedFile.SetupProperty(f => f.RemoteObjectId, id);
             mappedFile.Setup(f => f.Type).Returns(MappedObjectType.File);
@@ -118,20 +117,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == newName), It.Is<bool>(b => b == true)), Times.Once());
 
-            storage.Verify(
-                s =>
-                s.SaveMappedObject(It.Is<IMappedObject>(o => this.VerifySavedObject(o, MappedObjectType.File, id, newName, newChangeToken, modificationDate))),
-                Times.Once());
-        }
-
-        private bool VerifySavedObject(IMappedObject o, MappedObjectType type, string id, string name, string changeToken, DateTime modificationDate)
-        {
-            Assert.That(o.Type, Is.EqualTo(type));
-            Assert.That(o.Name, Is.EqualTo(name));
-            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken));
-            Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(modificationDate));
-            Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(modificationDate));
-            return true;
+            storage.VerifySavedMappedObject(MappedObjectType.File, id, newName, null, newChangeToken, true, modificationDate);
         }
     }
 }
