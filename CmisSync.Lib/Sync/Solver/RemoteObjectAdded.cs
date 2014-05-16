@@ -60,7 +60,7 @@ namespace CmisSync.Lib.Sync.Solver
                 }
 
                 var remoteFolder = remoteId as IFolder;
-                IDirectoryInfo localFolder = (localFile as IDirectoryInfo);
+                IDirectoryInfo localFolder = localFile as IDirectoryInfo;
                 localFolder.Create();
 
                 if(remoteFolder.LastModificationDate != null)
@@ -77,6 +77,8 @@ namespace CmisSync.Lib.Sync.Solver
 
                 var mappedObject = new MappedObject(remoteFolder);
                 mappedObject.Guid = uuid;
+                mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
+                mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
                 storage.SaveMappedObject(mappedObject);
             }
         }

@@ -57,6 +57,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var storage = new Mock<IMetaDataStorage>();
 
             var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.SetupAllProperties();
             dirInfo.Setup(d => d.FullName).Returns(path);
             dirInfo.Setup(d => d.Name).Returns(folderName);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
@@ -68,18 +69,9 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var solver = new RemoteObjectAdded();
 
             solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
-            dirInfo.Verify(d => d.Create(), Times.Once());
 
-            storage.Verify(
-                s => s.SaveMappedObject(
-                It.Is<IMappedObject>(f =>
-                                 f.RemoteObjectId == id &&
-                                 f.Name == folderName &&
-                                 f.ParentId == parentId &&
-                                 f.LastChangeToken == lastChangeToken &&
-                                 f.LastRemoteWriteTimeUtc == creationDate &&
-                                 f.Type == MappedObjectType.Folder)),
-                Times.Once());
+            dirInfo.Verify(d => d.Create(), Times.Once());
+            storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, false, creationDate);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
             dirInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
         }
@@ -99,6 +91,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var storage = new Mock<IMetaDataStorage>();
 
             var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.SetupAllProperties();
             dirInfo.Setup(d => d.FullName).Returns(path);
             dirInfo.Setup(d => d.Name).Returns(folderName);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
@@ -111,17 +104,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
-
-            storage.Verify(
-                s => s.SaveMappedObject(
-                It.Is<IMappedObject>(f =>
-                                 f.RemoteObjectId == id &&
-                                 f.Name == folderName &&
-                                 f.ParentId == parentId &&
-                                 f.LastChangeToken == lastChangeToken &&
-                                 f.LastRemoteWriteTimeUtc == creationDate &&
-                                 f.Type == MappedObjectType.Folder)),
-                Times.Once());
+            storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, true, creationDate);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
             dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>()), Times.Once());
         }
