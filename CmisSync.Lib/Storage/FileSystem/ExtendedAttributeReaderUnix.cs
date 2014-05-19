@@ -16,17 +16,21 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-using System.Text;
-using System.Collections.Generic;
-
-#if __MonoCS__
-using Mono.Unix.Native;
-#endif
 
 namespace CmisSync.Lib.Storage
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
+
+    #if __MonoCS__
+    using Mono.Unix.Native;
+    #endif
+
+    /// <summary>
+    /// Extended attribute reader for unix.
+    /// </summary>
     public class ExtendedAttributeReaderUnix : IExtendedAttributeReader
     {
         private readonly string prefix = "user.";
@@ -38,7 +42,7 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
-        public string GetExtendedAttribute (string path, string key)
+        public string GetExtendedAttribute(string path, string key)
         {
 #if __MonoCS__
             byte[] value;
@@ -61,12 +65,11 @@ namespace CmisSync.Lib.Storage
                 return Encoding.UTF8.GetString(value);
             }
 #else
-            throw new WrongPlatformException ();
+            throw new WrongPlatformException();
 #endif
-
         }
 
-        public void SetExtendedAttribute (string path, string key, string value)
+        public void SetExtendedAttribute(string path, string key, string value)
         {
 #if __MonoCS__
             long ret;
@@ -84,12 +87,16 @@ namespace CmisSync.Lib.Storage
                 throw new ExtendedAttributeException(Syscall.GetLastError().ToString());
             }
 #else
-            throw new WrongPlatformException ();
+            throw new WrongPlatformException();
 #endif
-
         }
 
-        public void RemoveExtendedAttribute (string path, string key)
+        /// <summary>
+        /// Removes the extended attribute.
+        /// </summary>
+        /// <param name="path">Removes attribute from this path.</param>
+        /// <param name="key">Key of the attribute, which should be removed.</param>
+        public void RemoveExtendedAttribute(string path, string key)
         {
 #if __MonoCS__
             long ret = Syscall.removexattr (path, prefix + key);
@@ -98,11 +105,16 @@ namespace CmisSync.Lib.Storage
                 throw new ExtendedAttributeException(Syscall.GetLastError().ToString());
             }
 #else
-            throw new WrongPlatformException ();
+            throw new WrongPlatformException();
 #endif
         }
 
-        public List<string> ListAttributeKeys (string path)
+        /// <summary>
+        /// Lists the attribute keys.
+        /// </summary>
+        /// <returns>The attribute keys.</returns>
+        /// <param name="path">Path which should be read.</param>
+        public List<string> ListAttributeKeys(string path)
         {
 #if __MonoCS__
             string[] list;
@@ -117,7 +129,7 @@ namespace CmisSync.Lib.Storage
             }
             return result;
 #else
-            throw new WrongPlatformException ();
+            throw new WrongPlatformException();
 #endif
         }
 
@@ -147,7 +159,7 @@ namespace CmisSync.Lib.Storage
             }
             return retValue;
 #else
-            throw new WrongPlatformException ();
+            throw new WrongPlatformException();
 #endif
         }
 
@@ -172,7 +184,7 @@ namespace CmisSync.Lib.Storage
             }
             return retValue;
 #else
-            throw new WrongPlatformException ();
+            throw new WrongPlatformException();
 #endif
         }
     }

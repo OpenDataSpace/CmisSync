@@ -30,13 +30,8 @@ namespace CmisSync.Lib.Events
     /// </summary>
     public class SyncEventQueue : IDisposableSyncEventQueue {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
-
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
-
-        public ISyncEventManager EventManager {get; private set;}
-
         private Task consumer;
-
         private bool alreadyDisposed = false;
 
         /// <summary>
@@ -52,6 +47,8 @@ namespace CmisSync.Lib.Events
             this.consumer = new Task(() => Listen(this.queue, this.EventManager));
             this.consumer.Start();
         }
+
+        public ISyncEventManager EventManager { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether this instance is stopped.

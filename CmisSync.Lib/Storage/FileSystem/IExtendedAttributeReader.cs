@@ -16,12 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
 
 namespace CmisSync.Lib.Storage
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Runtime.Serialization;
+
     /// <summary>
     /// Extended attribute reader interface
     /// </summary>
@@ -97,9 +98,9 @@ namespace CmisSync.Lib.Storage
     /// </summary>
     [Serializable]
     public class WrongPlatformException : Exception {
-        public WrongPlatformException () { }
-        public WrongPlatformException (string message) : base (message) { }
-        public WrongPlatformException (string message, Exception inner) : base (message, inner) { }
-        protected WrongPlatformException (SerializationInfo info, StreamingContext context) : base (info, context) { }
+        public WrongPlatformException() { }
+        public WrongPlatformException(string message) : base(message) { }
+        public WrongPlatformException(string message, Exception inner) : base(message, inner) { }
+        protected WrongPlatformException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

@@ -43,10 +43,11 @@ namespace CmisSync.Lib.Sync.Solver
         {
             var obj = storage.GetObjectByRemoteId(remoteId.Id);
             ICmisObject remoteObject;
+
             // Rename remote object
             if(remoteId is IFolder) {
                 remoteObject = (remoteId as IFolder).Rename(localFile.Name, true) as IFolder;
-            } else if (remoteId is IDocument){
+            } else if (remoteId is IDocument) {
                 remoteObject = (remoteId as IDocument).Rename(localFile.Name, true) as IDocument;
             } else {
                 throw new NotImplementedException();
