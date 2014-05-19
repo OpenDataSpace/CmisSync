@@ -58,7 +58,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <returns><c>false</c> on every event</returns>
         public override bool Handle(ISyncEvent e)
         {
-            if(!CouldLocalObjectBeAccumulated(e as AbstractFolderEvent)) {
+            if (!this.CouldLocalObjectBeAccumulated(e as AbstractFolderEvent)) {
                 return false;
             }
 
@@ -107,7 +107,7 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
-        void AccumulateEvent(AbstractFolderEvent abstractFolderEvent, IMappedObject storedObject)
+        private void AccumulateEvent(AbstractFolderEvent abstractFolderEvent, IMappedObject storedObject)
         {
             if(abstractFolderEvent is FolderEvent) {
                 (abstractFolderEvent as FolderEvent).LocalFolder = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedObject));

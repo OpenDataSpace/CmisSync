@@ -122,7 +122,7 @@ namespace TestLibrary.SyncStrategiesTests
                 f =>
                 f.Id == this.remoteId &&
                 f.Parents == parents);
-            var fileEvent = new FileEvent(remoteFile: remoteFile) {Remote = MetaDataChangeType.CREATED};
+            var fileEvent = new FileEvent(remoteFile: remoteFile) { Remote = MetaDataChangeType.CREATED };
 
             Assert.That(acc.Handle(fileEvent), Is.False);
             Assert.That(fileEvent.LocalFile, Is.Not.Null);
@@ -137,4 +137,3 @@ namespace TestLibrary.SyncStrategiesTests
         }
     }
 }
-
