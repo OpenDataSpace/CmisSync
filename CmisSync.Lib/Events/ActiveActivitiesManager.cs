@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Events
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ActiveActivitiesManager));
 
-        private object Lock = new object();
+        private object collectionLock = new object();
 
         private ObservableCollection<FileTransmissionEvent> activeTransmissions = new ObservableCollection<FileTransmissionEvent>();
 
@@ -60,7 +60,7 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public List<FileTransmissionEvent> ActiveTransmissionsAsList()
         {
-            lock (this.Lock)
+            lock (this.collectionLock)
             {
                 return this.activeTransmissions.ToList<FileTransmissionEvent>();
             }
@@ -69,7 +69,8 @@ namespace CmisSync.Lib.Events
         /// <summary>
         /// Add a new Transmission to the active transmission manager
         /// </summary>
-        /// <param name="transmission"></param>
+        /// <param name="transmission">transmission which should be added</param>
+        /// <returns>true if added</returns>
         public bool AddTransmission(FileTransmissionEvent transmission)
         {
             if(transmission == null)
@@ -77,7 +78,7 @@ namespace CmisSync.Lib.Events
                 throw new ArgumentNullException();
             }
 
-            lock (this.Lock)
+            lock (this.collectionLock)
             {
                 if (this.activeTransmissions.Contains(transmission))
                 {
@@ -105,7 +106,7 @@ namespace CmisSync.Lib.Events
         {
             if (e.Aborted == true || e.Completed == true || e.FailedException != null)
             {
-                lock (this.Lock)
+                lock (this.collectionLock)
                 {
                     FileTransmissionEvent transmission = sender as FileTransmissionEvent;
                     if (transmission != null && this.activeTransmissions.Contains(transmission))
