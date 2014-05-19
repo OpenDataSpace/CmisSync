@@ -29,22 +29,6 @@ namespace CmisSync.Lib.Sync
     public abstract class AbstractFileSynchronizer : ReportingSyncEventHandler
     {
         /// <summary>
-        /// Gets the path on which the File Synchronizer is working on.
-        /// </summary>
-        /// <value>
-        /// The path.
-        /// </value>
-        public FileInfo Path { get; private set; }
-        
-        /// <summary>
-        /// Gets the session.
-        /// </summary>
-        /// <value>
-        /// The session.
-        /// </value>
-        protected ISession Session { get; private set; }
-        
-        /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.AbstractFileSynchronizer"/> class.
         /// </summary>
         /// <param name='path'>
@@ -56,7 +40,7 @@ namespace CmisSync.Lib.Sync
         /// <param name='queue'>
         /// Queue where the status/failures should be reported to.
         /// </param>
-        public AbstractFileSynchronizer (FileInfo path, ISession session, SyncEventQueue queue) : base(queue)
+        public AbstractFileSynchronizer(FileInfo path, ISession session, SyncEventQueue queue) : base(queue)
         {
             if (path == null) {
                 throw new ArgumentException("Given path cannot be null");
@@ -70,15 +54,31 @@ namespace CmisSync.Lib.Sync
             this.Session = session;
         }
 
-        public abstract void start();
+        /// <summary>
+        /// Gets the path on which the File Synchronizer is working on.
+        /// </summary>
+        /// <value>
+        /// The path.
+        /// </value>
+        public FileInfo Path { get; private set; }
 
-        public abstract void abort();
+        /// <summary>
+        /// Gets the session.
+        /// </summary>
+        /// <value>
+        /// The session.
+        /// </value>
+        protected ISession Session { get; private set; }
 
-        public abstract void pause();
+        public abstract void Start();
 
-        public abstract void resume();
+        public abstract void Abort();
 
-        public abstract void inform();
+        public abstract void Pause();
+
+        public abstract void Resume();
+
+        public abstract void Inform();
 
         /*
         /// <summary>
