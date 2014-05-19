@@ -146,7 +146,7 @@ SOURCES =  \
 	Sync/Strategy/LocalObjectFetcher.cs \
 	Sync/Strategy/LocalSituationDetection.cs \
 	Sync/Strategy/RemoteObjectFetcher.cs \
-	Sync/Strategy/RemoteObjectMovedAccumulator.cs \
+	Sync/Strategy/RemoteObjectMovedOrRenamedAccumulator.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SyncMechanism.cs \
 	Sync/Strategy/Watcher/MacWatcher.cs \

@@ -78,7 +78,7 @@ namespace CmisSync.Lib.Events
             map[typeof(IgnoreAlreadyHandledContentChangeEventsFilter)] = FILTER;
 
             // Below filter but higher than remote/local accumulators
-            map[typeof(RemoteObjectMovedAccumulator)] = HIGHER;
+            map[typeof(RemoteObjectMovedOrRenamedAccumulator)] = HIGHER;
 
             // Higher than fallback Crawler
             map[typeof(ContentChanges)] = HIGH;

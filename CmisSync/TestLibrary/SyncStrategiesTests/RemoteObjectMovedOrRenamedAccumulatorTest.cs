@@ -43,38 +43,38 @@ namespace TestLibrary.SyncStrategiesTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionOnNullQueue()
         {
-            new RemoteObjectMovedAccumulator(null, Mock.Of<IMetaDataStorage>());
+            new RemoteObjectMovedOrRenamedAccumulator(null, Mock.Of<IMetaDataStorage>());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionOnNullStorage()
         {
-            new RemoteObjectMovedAccumulator(Mock.Of<ISyncEventQueue>(), null);
+            new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), null);
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithoutGivenFsFactory()
         {
-            new RemoteObjectMovedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
+            new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksIfFsFactoryIsNull()
         {
-            new RemoteObjectMovedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null);
+            new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null);
         }
 
         [Test, Category("Fast")]
         public void ConstructorTakesFsFactoryInstance()
         {
-            new RemoteObjectMovedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
+            new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
         }
 
         [Test, Category("Fast")]
         public void PriorityIsEqualToHigherPriority()
         {
-            var acc = new RemoteObjectMovedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
+            var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
             Assert.That(acc.Priority, Is.EqualTo(EventHandlerPriorities.HIGHER));
         }
 
@@ -90,7 +90,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fsFactory = new Mock<IFileSystemInfoFactory>();
             var localPathInfo = Mock.Of<IDirectoryInfo>();
             fsFactory.Setup(f => f.CreateDirectoryInfo(this.localPath)).Returns(localPathInfo);
-            var acc = new RemoteObjectMovedAccumulator(Mock.Of<ISyncEventQueue>(), storage.Object, fsFactory.Object);
+            var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), storage.Object, fsFactory.Object);
             var remoteFolder = Mock.Of<IFolder>(
                 f =>
                 f.Id == this.remoteId &&
@@ -115,7 +115,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fsFactory = new Mock<IFileSystemInfoFactory>();
             var localPathInfo = Mock.Of<IFileInfo>();
             fsFactory.Setup(f => f.CreateFileInfo(this.localPath)).Returns(localPathInfo);
-            var acc = new RemoteObjectMovedAccumulator(Mock.Of<ISyncEventQueue>(), storage.Object, fsFactory.Object);
+            var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), storage.Object, fsFactory.Object);
             var parents = new List<IFolder>();
             parents.Add(Mock.Of<IFolder>(f => f.Id == "parentId"));
             var remoteFile = Mock.Of<IDocument>(
@@ -131,7 +131,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void IgnoresNonFileOrFolderEvents()
         {
-            var acc = new RemoteObjectMovedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
+            var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>());
             var e = new Mock<ISyncEvent>(MockBehavior.Strict);
             Assert.That(acc.Handle(e.Object), Is.False);
         }

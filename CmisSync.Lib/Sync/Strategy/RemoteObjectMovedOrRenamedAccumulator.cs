@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="RemoteObjectMovedAccumulator.cs" company="GRAU DATA AG">
+// <copyright file="RemoteObjectMovedOrRenamedAccumulator.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -26,22 +26,22 @@ namespace CmisSync.Lib.Sync.Strategy
     using CmisSync.Lib.Storage;
 
     /// <summary>
-    /// Remote object moved accumulator.
-    /// Takes File/Folder Events and checks if the remote object has been moved.
-    /// If the were moved, the privious local path will be added to the event.
+    /// Remote object moved or renamed accumulator.
+    /// Takes File/Folder Events and checks if the remote object has been moved or renamed.
+    /// If the file/folder was moved, the privious local path will be added to the event.
     /// </summary>
-    public class RemoteObjectMovedAccumulator : ReportingSyncEventHandler
+    public class RemoteObjectMovedOrRenamedAccumulator : ReportingSyncEventHandler
     {
         private IFileSystemInfoFactory fsFactory;
         private IMetaDataStorage storage;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RemoteObjectMovedAccumulator"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RemoteObjectMovedOrRenamedAccumulator"/> class.
         /// </summary>
         /// <param name="queue">Sync event queue.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="fsFactory">FileSystemInfo factory.</param>
-        public RemoteObjectMovedAccumulator(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue)
+        public RemoteObjectMovedOrRenamedAccumulator(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null) {
                 throw new ArgumentNullException("Given storage is null");

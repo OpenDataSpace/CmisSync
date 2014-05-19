@@ -203,7 +203,7 @@
     <Compile Include="Cmis\OperationContextFactory.cs" />
     <Compile Include="Events\EventTypes\IFSEvent.cs" />
     <Compile Include="Events\EventTypes\IFSMovedEvent.cs" />
-    <Compile Include="Sync\Strategy\RemoteObjectMovedAccumulator.cs" />
+    <Compile Include="Sync\Strategy\RemoteObjectMovedOrRenamedAccumulator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

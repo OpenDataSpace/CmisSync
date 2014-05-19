@@ -73,7 +73,7 @@ SOURCES =  \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/RemoteObjectFetcherTest.cs \
-	SyncStrategiesTests/RemoteObjectMovedAccumulatorTest.cs \
+	SyncStrategiesTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
