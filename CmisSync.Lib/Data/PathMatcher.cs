@@ -203,7 +203,7 @@ namespace CmisSync.Lib.Data
         /// <returns>true if the paths matches</returns>
         public bool Matches(string localPath, string remotePath)
         {
-            if (!localPath.StartsWith(this.LocalTargetRootPath))
+            if (!CanCreateRemotePath(localPath))
             {
                 throw new ArgumentOutOfRangeException(string.Format("The given local path \"{0}\"does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
