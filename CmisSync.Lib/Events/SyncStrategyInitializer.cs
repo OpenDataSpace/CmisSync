@@ -49,6 +49,7 @@ namespace CmisSync.Lib
         private SyncMechanism mechanism;
         private IFileSystemInfoFactory fileSystemFactory;
         private IgnoreAlreadyHandledContentChangeEventsFilter alreadyHandledFilter;
+        private RemoteObjectMovedAccumulator romaccumulator;
   
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.SyncStrategyInitializer"/> class.
@@ -150,6 +151,15 @@ namespace CmisSync.Lib
                 this.crawler = new Crawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.fileSystemFactory);
                 this.Queue.EventManager.AddEventHandler(this.crawler);
 
+                // Add remote object moved accumulator
+                if (this.romaccumulator != null) {
+                    this.Queue.EventManager.RemoveEventHandler(this.romaccumulator);
+                }
+
+                this.romaccumulator = new RemoteObjectMovedAccumulator(this.Queue, this.storage, this.fileSystemFactory);
+                this.Queue.EventManager.AddEventHandler(this.romaccumulator);
+
+                // Add sync mechanism
                 if (this.mechanism != null) {
                     this.Queue.EventManager.RemoveEventHandler(this.mechanism);
                 }

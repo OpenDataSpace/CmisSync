@@ -107,7 +107,7 @@ namespace TestLibrary.EventsTests
                 manager: manager.Object,
                 changeEventSupported: false);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(3));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(4));
             VerifyNonContenChangeHandlersAdded(manager, Times.Once());
             VerifyContenChangeHandlersAdded(manager, Times.Never());
         }
@@ -122,7 +122,7 @@ namespace TestLibrary.EventsTests
                 manager: manager.Object,
                 changeEventSupported: true);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(6));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(7));
             VerifyNonContenChangeHandlersAdded(manager, Times.Once());
             VerifyContenChangeHandlersAdded(manager, Times.Once());
         }
@@ -142,10 +142,10 @@ namespace TestLibrary.EventsTests
 
             handler.Handle(e);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(12));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(14));
             VerifyNonContenChangeHandlersAdded(manager, Times.Exactly(2));
             VerifyContenChangeHandlersAdded(manager, Times.Exactly(2));
-            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(6));
+            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(7));
             VerifyNonContenChangeHandlersRemoved(manager, Times.Once());
             VerifyContenChangeHandlersRemoved(manager, Times.Once());
         }
@@ -166,10 +166,10 @@ namespace TestLibrary.EventsTests
             e = CreateNewSessionEvent(changeEventSupported: true);
             handler.Handle(e);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(9));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(11));
             VerifyNonContenChangeHandlersAdded(manager, Times.Exactly(2));
             VerifyContenChangeHandlersAdded(manager, Times.Exactly(1));
-            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(3));
+            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(4));
             VerifyNonContenChangeHandlersRemoved(manager, Times.Exactly(1));
             VerifyContenChangeHandlersRemoved(manager, Times.Never());
         }
@@ -213,6 +213,7 @@ namespace TestLibrary.EventsTests
             manager.Verify(m => m.AddEventHandler(It.IsAny<Crawler>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<RemoteObjectFetcher>()), times);
             manager.Verify(m => m.AddEventHandler(It.IsAny<SyncMechanism>()), times);
+            manager.Verify(m => m.AddEventHandler(It.IsAny<RemoteObjectMovedAccumulator>()), times);
         }
 
         private static void VerifyContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times)
@@ -227,6 +228,7 @@ namespace TestLibrary.EventsTests
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<Crawler>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<RemoteObjectFetcher>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncMechanism>()), times);
+            manager.Verify(m => m.RemoveEventHandler(It.IsAny<RemoteObjectMovedAccumulator>()),times);
         }
 
         private static void VerifyContenChangeHandlersRemoved(Mock<ISyncEventManager> manager, Times times)
