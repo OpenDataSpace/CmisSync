@@ -73,7 +73,7 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.That(folderEvent.LocalFolder, Is.Not.Null);
             Assert.That(folderEvent.LocalFolder.FullName, Is.EqualTo(localPath));
         }
-        
+
         [Test, Category("Fast")]
         public void FetchOnlyIfLocalFolderNull() {
             var matcher = new Mock<IPathMatcher>();
