@@ -29,12 +29,12 @@ namespace CmisSync.Lib.Events
     public class SuccessfulLoginEvent : ISyncEvent
     {
         private Uri url;
-        public ISession Session {get; private set;}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.SuccessfulLoginEvent"/> class.
         /// </summary>
         /// <param name="url">URL of the successful connection</param>
+        /// <param name="session">Session instance.</param>
         public SuccessfulLoginEvent(Uri url, ISession session)
         {
             if (url == null) {
@@ -48,6 +48,12 @@ namespace CmisSync.Lib.Events
             this.url = url;
             this.Session = session;
         }
+
+        /// <summary>
+        /// Gets the session.
+        /// </summary>
+        /// <value>The session.</value>
+        public ISession Session { get; private set; }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.SuccessfulLoginEvent"/>.
