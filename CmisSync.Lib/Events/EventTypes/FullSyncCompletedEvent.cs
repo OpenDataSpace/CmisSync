@@ -21,17 +21,30 @@ namespace CmisSync.Lib.Events
 {
     using System;
 
+    /// <summary>
+    /// Full sync completed event.
+    /// </summary>
     public class FullSyncCompletedEvent : EncapsuledEvent
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FullSyncCompletedEvent"/> class.
+        /// </summary>
+        /// <param name="startEvent">Start event, which is completed.</param>
         public FullSyncCompletedEvent(StartNextSyncEvent startEvent) : base(startEvent)
         {
         }
 
         /// <summary>
-        /// Completed sync requested event
+        /// Gets the start event, which has been completed
         /// </summary>
-        public StartNextSyncEvent StartEvent { get { return this.Event as StartNextSyncEvent; } }
+        public StartNextSyncEvent StartEvent {
+            get { return this.Event as StartNextSyncEvent; }
+        }
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FullSyncCompletedEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FullSyncCompletedEvent"/>.</returns>
         public override string ToString() {
             return "FullSyncCompletedEvent: " + base.ToString();
         }
