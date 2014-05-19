@@ -28,7 +28,20 @@ namespace CmisSync.Lib.Events
     /// </summary>
     public class StartNextSyncEvent : ISyncEvent
     {
-        private bool fullSyncRequested;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.StartNextSyncEvent"/> class.
+        /// </summary>
+        /// <param name="fullSyncRequested">If set to <c>true</c> a full sync is requested.</param>
+        public StartNextSyncEvent(bool fullSyncRequested = false)
+        {
+            this.FullSyncRequested = fullSyncRequested;
+        }
+
+        /// <summary>
+        /// Gets or sets the last content change token on server.
+        /// </summary>
+        /// <value>The last token on server.</value>
+        public string LastTokenOnServer { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="CmisSync.Lib.Events.StartNextSyncEvent"/> should force a full sync.
@@ -36,16 +49,7 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// <c>true</c> if full sync requested; otherwise, <c>false</c>.
         /// </value>
-        public bool FullSyncRequested {
-            get { return this.fullSyncRequested; }
-        }
-
-        public string LastTokenOnServer { get; set; }
-
-        public StartNextSyncEvent(bool fullSyncRequested = false)
-        {
-            this.fullSyncRequested = fullSyncRequested;
-        }
+        public bool FullSyncRequested { get; private set; }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.StartNextSyncEvent"/>.
@@ -55,7 +59,7 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format("[StartNextSyncEvent: FullSyncRequested={0}]", this.fullSyncRequested);
+            return string.Format("[StartNextSyncEvent: FullSyncRequested={0}]", this.FullSyncRequested);
         }
     }
 }
