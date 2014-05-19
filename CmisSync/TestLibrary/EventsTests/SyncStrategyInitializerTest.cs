@@ -228,7 +228,7 @@ namespace TestLibrary.EventsTests
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<Crawler>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<RemoteObjectFetcher>()), times);
             manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncMechanism>()), times);
-            manager.Verify(m => m.RemoveEventHandler(It.IsAny<RemoteObjectMovedAccumulator>()),times);
+            manager.Verify(m => m.RemoveEventHandler(It.IsAny<RemoteObjectMovedAccumulator>()), times);
         }
 
         private static void VerifyContenChangeHandlersRemoved(Mock<ISyncEventManager> manager, Times times)
