@@ -36,7 +36,8 @@ namespace CmisSync.Lib.Events
         /// </summary>
         /// <param name="localFolder">Local folder.</param>
         /// <param name="remoteFolder">Remote folder.</param>
-        public FolderEvent(IDirectoryInfo localFolder = null, IFolder remoteFolder = null, Object src = null)
+        /// <param name="src">Event creator.</param>
+        public FolderEvent(IDirectoryInfo localFolder = null, IFolder remoteFolder = null, object src = null)
         {
             if(localFolder == null && remoteFolder == null)
             {
@@ -60,7 +61,11 @@ namespace CmisSync.Lib.Events
         /// <value>The remote folder.</value>
         public IFolder RemoteFolder { get; set; }
 
-        public Object Source { get; private set; }
+        /// <summary>
+        /// Gets the source.
+        /// </summary>
+        /// <value>The source.</value>
+        public object Source { get; private set; }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderEvent"/>.
