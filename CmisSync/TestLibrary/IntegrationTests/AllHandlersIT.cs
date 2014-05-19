@@ -134,6 +134,22 @@ namespace TestLibrary.IntegrationTests
             session.Verify(f => f.Delete(It.Is<IObjectId>(i => i.Id == id), true), Times.Once());
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
+        
+        [Ignore]
+        [Test, Category("Fast")]
+        public void RunFSEventFileCreated()
+        {
+            string fileName = "as";
+
+            var storage = this.GetInitializedStorage();
+            var session = new Mock<ISession>();
+
+            var queue = this.CreateQueue(session, storage);
+            var myEvent = new FSEvent(WatcherChangeTypes.Created, Path.Combine(localRoot, fileName));
+            queue.AddEvent(myEvent);
+            queue.Run();
+
+        }
 
         [Test, Category("Fast")]
         public void ContentChangeIndicatesFolderDeletionOfExistingFolder()
@@ -228,8 +244,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
         }
 
-        [Ignore]
         [Test, Category("Fast")]
+        [Ignore]
         public void ContentChangeIndicatesFolderMove()
         {
             string rootFolderName = "/";
@@ -246,7 +262,7 @@ namespace TestLibrary.IntegrationTests
             fsFactory.AddIDirectoryInfo(rootFolderInfo.Object);
             var dirInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName));
             var subFolderInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName, subFolderName));
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, rootFolderId, this.remoteRoot + subFolderName, rootFolderId, lastChangeToken);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, rootFolderId, this.remoteRoot + "/" + subFolderName, rootFolderId, lastChangeToken);
             session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id.Equals(subFolderId)))).Returns(Mock.Of<IFolder>(f => f.ParentId == rootFolderId && f.Name == subFolderName && f.Id == subFolderId));
             var storage = this.GetInitializedStorage();
             storage.ChangeLogToken = "oldtoken";
