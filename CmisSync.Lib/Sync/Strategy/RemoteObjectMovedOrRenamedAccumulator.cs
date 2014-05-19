@@ -64,8 +64,9 @@ namespace CmisSync.Lib.Sync.Strategy
 
             var storedObject = this.GetStoredObject(e as AbstractFolderEvent);
             if(storedObject != null) {
-                string parentId = this.GetParentId(e as AbstractFolderEvent);
-                if (storedObject.ParentId != parentId) {
+                if (storedObject.ParentId != this.GetParentId(e as AbstractFolderEvent)) {
+                    this.AccumulateEvent(e as AbstractFolderEvent, storedObject);
+                } else if(storedObject.Name != GetRemoteObjectName(e as AbstractFolderEvent)) {
                     this.AccumulateEvent(e as AbstractFolderEvent, storedObject);
                 }
             }
@@ -102,6 +103,16 @@ namespace CmisSync.Lib.Sync.Strategy
                 return (e as FolderEvent).RemoteFolder.ParentId;
             } else if(e is FileEvent) {
                 return (e as FileEvent).RemoteFile.Parents[0].Id;
+            } else {
+                throw new ArgumentException();
+            }
+        }
+
+        private string GetRemoteObjectName(AbstractFolderEvent e) {
+            if (e is FolderEvent) {
+                return (e as FolderEvent).RemoteFolder.Name;
+            } else if(e is FileEvent) {
+                return (e as FileEvent).RemoteFile.Name;
             } else {
                 throw new ArgumentException();
             }

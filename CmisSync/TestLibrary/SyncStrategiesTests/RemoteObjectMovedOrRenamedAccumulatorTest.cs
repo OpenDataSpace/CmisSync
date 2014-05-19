@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="RemoteObjectMovedAccumulatorTest.cs" company="GRAU DATA AG">
+// <copyright file="RemoteObjectMovedOrRenamedAccumulatorTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -34,10 +34,11 @@ namespace TestLibrary.SyncStrategiesTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class RemoteObjectMovedAccumulatorTest
+    public class RemoteObjectMovedOrRenamedAccumulatorTest
     {
         private readonly string localPath = "localPath";
         private readonly string remoteId = "remoteId";
+        private readonly string parentId = "parentId";
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -94,7 +95,7 @@ namespace TestLibrary.SyncStrategiesTests
             var remoteFolder = Mock.Of<IFolder>(
                 f =>
                 f.Id == this.remoteId &&
-                f.ParentId == "parentId");
+                f.ParentId == this.parentId);
             var folderEvent = new FolderEvent(remoteFolder: remoteFolder) {
                 Remote = MetaDataChangeType.CREATED
             };
@@ -117,7 +118,7 @@ namespace TestLibrary.SyncStrategiesTests
             fsFactory.Setup(f => f.CreateFileInfo(this.localPath)).Returns(localPathInfo);
             var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), storage.Object, fsFactory.Object);
             var parents = new List<IFolder>();
-            parents.Add(Mock.Of<IFolder>(f => f.Id == "parentId"));
+            parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
             var remoteFile = Mock.Of<IDocument>(
                 f =>
                 f.Id == this.remoteId &&
@@ -125,7 +126,61 @@ namespace TestLibrary.SyncStrategiesTests
             var fileEvent = new FileEvent(remoteFile: remoteFile) { Remote = MetaDataChangeType.CREATED };
 
             Assert.That(acc.Handle(fileEvent), Is.False);
-            Assert.That(fileEvent.LocalFile, Is.Not.Null);
+            Assert.That(fileEvent.LocalFile, Is.EqualTo(localPathInfo));
+        }
+
+        [Test, Category("Fast")]
+        public void AccumulatesRemoteRenamedFolderEvents()
+        {
+            var storage = new Mock<IMetaDataStorage>();
+            var storedObject = Mock.Of<IMappedObject>(
+                o =>
+                o.ParentId == this.parentId &&
+                o.Name == "oldName");
+            storage.Setup(s => s.GetObjectByRemoteId(this.remoteId)).Returns(storedObject);
+            storage.Setup(s => s.GetLocalPath(storedObject)).Returns(this.localPath);
+            var fsFactory = new Mock<IFileSystemInfoFactory>();
+            var localPathInfo = Mock.Of<IDirectoryInfo>();
+            fsFactory.Setup(f => f.CreateDirectoryInfo(this.localPath)).Returns(localPathInfo);
+            var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), storage.Object, fsFactory.Object);
+            var remoteFolder = Mock.Of<IFolder>(
+                f =>
+                f.Id == this.remoteId &&
+                f.ParentId == this.parentId &&
+                f.Name == "newName");
+            var folderEvent = new FolderEvent(remoteFolder: remoteFolder) {
+                Remote = MetaDataChangeType.CREATED
+            };
+
+            Assert.That(acc.Handle(folderEvent), Is.False);
+            Assert.That(folderEvent.LocalFolder, Is.EqualTo(localPathInfo));
+        }
+
+        [Test, Category("Fast")]
+        public void AccumulatesRemoteRenamedFileEvents()
+        {
+            var storage = new Mock<IMetaDataStorage>();
+            var storedObject = Mock.Of<IMappedObject>(
+                o =>
+                o.ParentId == this.parentId &&
+                o.Name == "oldName");
+            storage.Setup(s => s.GetObjectByRemoteId(this.remoteId)).Returns(storedObject);
+            storage.Setup(s => s.GetLocalPath(storedObject)).Returns(this.localPath);
+            var fsFactory = new Mock<IFileSystemInfoFactory>();
+            var localPathInfo = Mock.Of<IFileInfo>();
+            fsFactory.Setup(f => f.CreateFileInfo(this.localPath)).Returns(localPathInfo);
+            var acc = new RemoteObjectMovedOrRenamedAccumulator(Mock.Of<ISyncEventQueue>(), storage.Object, fsFactory.Object);
+            var parents = new List<IFolder>();
+            parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
+            var remoteFile = Mock.Of<IDocument>(
+                f =>
+                f.Id == this.remoteId &&
+                f.Parents == parents &&
+                f.Name == "newName");
+            var fileEvent = new FileEvent(remoteFile: remoteFile) { Remote = MetaDataChangeType.CREATED };
+
+            Assert.That(acc.Handle(fileEvent), Is.False);
+            Assert.That(fileEvent.LocalFile, Is.EqualTo(localPathInfo));
         }
 
         [Test, Category("Fast")]
