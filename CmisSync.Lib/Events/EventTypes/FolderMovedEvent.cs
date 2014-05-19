@@ -16,27 +16,47 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Storage;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// Folder moved event.
+    /// </summary>
     public class FolderMovedEvent : FolderEvent
     {
-        public IDirectoryInfo OldLocalFolder { get; private set; }
-        public string OldRemoteFolderPath { get; private set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FolderMovedEvent"/> class.
+        /// </summary>
+        /// <param name="oldLocalFolder">Old local folder.</param>
+        /// <param name="newLocalFolder">New local folder.</param>
+        /// <param name="oldRemoteFolderPath">Old remote folder path.</param>
+        /// <param name="newRemoteFolder">New remote folder.</param>
         public FolderMovedEvent(
             IDirectoryInfo oldLocalFolder,
             IDirectoryInfo newLocalFolder,
             string oldRemoteFolderPath,
-            IFolder newRemoteFolder) : base ( newLocalFolder, newRemoteFolder) {
-            OldLocalFolder = oldLocalFolder;
-            OldRemoteFolderPath = oldRemoteFolderPath;
+            IFolder newRemoteFolder) : base(newLocalFolder, newRemoteFolder) {
+            this.OldLocalFolder = oldLocalFolder;
+            this.OldRemoteFolderPath = oldRemoteFolderPath;
         }
+
+        /// <summary>
+        /// Gets the old local folder.
+        /// </summary>
+        /// <value>The old local folder.</value>
+        public IDirectoryInfo OldLocalFolder { get; private set; }
+
+        /// <summary>
+        /// Gets the old remote folder path.
+        /// </summary>
+        /// <value>The old remote folder path.</value>
+        public string OldRemoteFolderPath { get; private set; }
     }
 }
-
