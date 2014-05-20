@@ -195,6 +195,7 @@ namespace CmisSync.Lib.Data
             if(!remotePath.EndsWith("/")) {
                 remotePath += "/";
             }
+
             return remotePath.StartsWith(this.RemoteTargetRootPath);
         }
 
@@ -205,9 +206,10 @@ namespace CmisSync.Lib.Data
         /// <param name="localPath">Local path.</param>
         public bool CanCreateRemotePath(string localPath)
         {
-            if(!localPath.EndsWith(Path.DirectorySeparatorChar.ToString())){
+            if(!localPath.EndsWith(Path.DirectorySeparatorChar.ToString())) {
                 localPath += Path.DirectorySeparatorChar;
             }
+
             return localPath.StartsWith(this.LocalTargetRootPath);
         }
 
@@ -219,7 +221,7 @@ namespace CmisSync.Lib.Data
         /// <returns>true if the paths matches</returns>
         public bool Matches(string localPath, string remotePath)
         {
-            if (!CanCreateRemotePath(localPath))
+            if (!this.CanCreateRemotePath(localPath))
             {
                 throw new ArgumentOutOfRangeException(string.Format("The given local path \"{0}\"does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
@@ -264,6 +266,7 @@ namespace CmisSync.Lib.Data
             {
                 throw new ArgumentOutOfRangeException(string.Format("Given remote object with Path \"{0}\" is not in the remote target folder \"{1}\"", remotePath, this.RemoteTargetRootPath));
             }
+
             if(this.RemoteTargetRootPath.Equals(remotePath + "/")) {
                 return this.LocalTargetRootPath;
             }
@@ -284,7 +287,7 @@ namespace CmisSync.Lib.Data
             {
                 throw new ArgumentOutOfRangeException(string.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
-                
+
             string relativePath = localPath.Substring(this.LocalTargetRootPath.Length);
             if (relativePath.Length == 0)
             {

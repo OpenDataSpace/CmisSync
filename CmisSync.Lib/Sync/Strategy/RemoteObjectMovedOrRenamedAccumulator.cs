@@ -63,6 +63,7 @@ namespace CmisSync.Lib.Sync.Strategy
             }
 
             var storedObject = this.GetStoredObject(e as AbstractFolderEvent);
+            Console.WriteLine(storage.ToString());
             if(storedObject != null) {
                 if (storedObject.ParentId != this.GetParentId(e as AbstractFolderEvent)) {
                     this.AccumulateEvent(e as AbstractFolderEvent, storedObject);
