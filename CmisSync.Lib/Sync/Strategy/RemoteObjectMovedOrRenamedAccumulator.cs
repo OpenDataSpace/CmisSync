@@ -25,6 +25,8 @@ namespace CmisSync.Lib.Sync.Strategy
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
+    using log4net;
+
     /// <summary>
     /// Remote object moved or renamed accumulator.
     /// Takes File/Folder Events and checks if the remote object has been moved or renamed.
@@ -32,6 +34,8 @@ namespace CmisSync.Lib.Sync.Strategy
     /// </summary>
     public class RemoteObjectMovedOrRenamedAccumulator : ReportingSyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectMovedOrRenamedAccumulator));
+
         private IFileSystemInfoFactory fsFactory;
         private IMetaDataStorage storage;
 
@@ -62,8 +66,12 @@ namespace CmisSync.Lib.Sync.Strategy
                 return false;
             }
 
+            Logger.Debug("Handling event: " + e);
+
             var storedObject = this.GetStoredObject(e as AbstractFolderEvent);
-            Console.WriteLine(storage.ToString());
+            Logger.Debug(storedObject);
+
+            Logger.Debug(this.GetParentId(e as AbstractFolderEvent));
             if(storedObject != null) {
                 if (storedObject.ParentId != this.GetParentId(e as AbstractFolderEvent)) {
                     this.AccumulateEvent(e as AbstractFolderEvent, storedObject);
@@ -121,6 +129,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private void AccumulateEvent(AbstractFolderEvent abstractFolderEvent, IMappedObject storedObject)
         {
+            Logger.Debug("Accumulating: " + this.storage.GetLocalPath(storedObject));
             if(abstractFolderEvent is FolderEvent) {
                 (abstractFolderEvent as FolderEvent).LocalFolder = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedObject));
             }

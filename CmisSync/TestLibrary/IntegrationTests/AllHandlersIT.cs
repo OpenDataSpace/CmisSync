@@ -247,31 +247,35 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast")]
         public void ContentChangeIndicatesFolderMove()
         {
-            string rootFolderName = "/";
-            string rootFolderId = "root";
-            string folderName = "a";
-            string folderId = "folderId";
-            string subFolderName = "sub";
-            string subFolderId = "subId";
+            // Moves /a/b to /b
+
+            string rootFolderId = "rootId";
+            string folderAName = "a";
+            string folderAId = "aid";
+            string folderBName = "b";
+            string folderBId = "bid";
+
             string lastChangeToken = "changeToken";
+
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
-            var rootFolderInfo = new Mock<IDirectoryInfo>();
-            rootFolderInfo.Setup(r => r.FullName).Returns(this.localRoot);
-            rootFolderInfo.Setup(r => r.Name).Returns(Path.GetDirectoryName(this.localRoot));
-            fsFactory.AddIDirectoryInfo(rootFolderInfo.Object);
-            var dirInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName));
-            var subFolderInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName, subFolderName));
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, folderId, this.remoteRoot + "/" + subFolderName, rootFolderId, lastChangeToken);
-            session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id.Equals(subFolderId)))).Returns(Mock.Of<IFolder>(f => f.ParentId == rootFolderId && f.Name == subFolderName && f.Id == subFolderId));
+            var folderBInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderAName, folderBName));
+
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, folderBId, remoteRoot + "/" + folderBName, rootFolderId, lastChangeToken);
+
             var storage = this.GetInitializedStorage();
             storage.ChangeLogToken = "oldtoken";
-            var mappedObject = new MappedObject(subFolderName,subFolderId,MappedObjectType.Folder,folderId,storage.ChangeLogToken);
-            storage.SaveMappedObject(mappedObject);
+            var mappedRootObject = new MappedObject("/", rootFolderId, MappedObjectType.Folder, null, storage.ChangeLogToken);
+            storage.SaveMappedObject(mappedRootObject);
+            var mappedAObject = new MappedObject(folderAName, folderAId, MappedObjectType.Folder, rootFolderId, storage.ChangeLogToken);
+            storage.SaveMappedObject(mappedAObject);
+            var mappedBObject = new MappedObject(folderBName, folderBId, MappedObjectType.Folder, folderAId, storage.ChangeLogToken);
+            storage.SaveMappedObject(mappedBObject);
+
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
 
             queue.RunStartSyncEvent();
 
-            subFolderInfo.Verify(d => d.MoveTo(rootFolderName + subFolderName), Times.Once());
+            folderBInfo.Verify(d => d.MoveTo(Path.Combine(this.localRoot, folderBName)), Times.Once());
         }
 
         private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage) 
