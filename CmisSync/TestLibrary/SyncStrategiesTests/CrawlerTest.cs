@@ -58,47 +58,51 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         public void ConstructorWithValidInputTest() {
-            var queue = new Mock<ISyncEventQueue>().Object;
-            var remoteFolder = new Mock<IFolder>().Object;
-            var localFolder = new Mock<IDirectoryInfo>();
-            var factory = new Mock<IFileSystemInfoFactory>();
-            new Crawler(queue, remoteFolder, localFolder.Object, factory.Object);
+            var queue = Mock.Of<ISyncEventQueue>();
+            var remoteFolder = Mock.Of<IFolder>();
+            var localFolder = Mock.Of<IDirectoryInfo>();
+            var factory = Mock.Of<IFileSystemInfoFactory>();
+            var storage = Mock.Of<IMetaDataStorage>();
+            new Crawler(queue, remoteFolder, localFolder, storage, factory);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullQueueTest()
         {
-            var remoteFolder = new Mock<IFolder>().Object;
-            var localFolder = new Mock<IDirectoryInfo>();
-
-            new Crawler(null, remoteFolder, localFolder.Object);
+            var remoteFolder = Mock.Of<IFolder>();
+            var localFolder = Mock.Of<IDirectoryInfo>();
+            var storage = Mock.Of<IMetaDataStorage>();
+            new Crawler(null, remoteFolder, localFolder, storage);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullLocalFolderTest()
         {
-            var queue = new Mock<ISyncEventQueue>().Object;
-            var remoteFolder = new Mock<IFolder>().Object;
-            new Crawler(queue, remoteFolder, null);
+            var queue = Mock.Of<ISyncEventQueue>();
+            var remoteFolder = Mock.Of<IFolder>();
+            var storage = Mock.Of<IMetaDataStorage>();
+            new Crawler(queue, remoteFolder, null, storage);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullRemoteFolderTest()
         {
-            var queue = new Mock<ISyncEventQueue>().Object;
-            new Crawler(queue, null, this.localFolder);
+            var queue = Mock.Of<ISyncEventQueue>();
+            var storage = Mock.Of<IMetaDataStorage>();
+            new Crawler(queue, null, this.localFolder, storage);
         }
 
         [Test, Category("Fast")]
         public void IgnoreWrongEventsTest() {
-            var queue = new Mock<ISyncEventQueue>().Object;
-            var remoteFolder = new Mock<IFolder>().Object;
-            var localFolder = new Mock<IDirectoryInfo>();
-            var wrongEvent = new Mock<ISyncEvent>().Object;
-            var crawler = new Crawler(queue, remoteFolder, localFolder.Object);
+            var queue = Mock.Of<ISyncEventQueue>();
+            var remoteFolder = Mock.Of<IFolder>();
+            var localFolder = Mock.Of<IDirectoryInfo>();
+            var wrongEvent = Mock.Of<ISyncEvent>();
+            var storage = Mock.Of<IMetaDataStorage>();
+            var crawler = new Crawler(queue, remoteFolder, localFolder, storage);
             Assert.False(crawler.Handle(wrongEvent));
         }
 
@@ -110,7 +114,8 @@ namespace TestLibrary.SyncStrategiesTests
 
             var localFolder = new Mock<IDirectoryInfo>();
 
-            var crawler = new Crawler(queue.Object, remoteFolder.Object, localFolder.Object);
+            var storage = Mock.Of<IMetaDataStorage>();
+            var crawler = new Crawler(queue.Object, remoteFolder.Object, localFolder.Object, storage);
             var startEvent = new StartNextSyncEvent(true);
             Assert.True(crawler.Handle(startEvent));
 
@@ -329,7 +334,8 @@ namespace TestLibrary.SyncStrategiesTests
             // these are fakes that throw if they are used
             var localFolder = new Mock<IDirectoryInfo>(MockBehavior.Strict);
             var remoteFolder = new Mock<IFolder>(MockBehavior.Strict);
-            return new Crawler(queue.Object, remoteFolder.Object, localFolder.Object);
+            var storage = new Mock<IMetaDataStorage>(MockBehavior.Strict);
+            return new Crawler(queue.Object, remoteFolder.Object, localFolder.Object, storage.Object);
         }
 
         private bool VerifyRemoteFileEvent(FileEvent e, string folder, string file, MetaDataChangeType metaType, ContentChangeType changeType) {
