@@ -29,11 +29,34 @@ namespace CmisSync.Lib.Events
     /// </summary>
     public enum FileConflictType
     {
+        /// <summary>
+        /// Remote File Deleted
+        /// </summary>
         DELETED_REMOTE_FILE,
+
+        /// <summary>
+        /// Remote File Moved
+        /// </summary>
         MOVED_REMOTE_FILE,
+
+        /// <summary>
+        /// Remote File already existed
+        /// </summary>
         ALREADY_EXISTS_REMOTELY,
+
+        /// <summary>
+        /// Content was modified
+        /// </summary>
         CONTENT_MODIFIED,
+
+        /// <summary>
+        /// Remote Path Deleted
+        /// </summary>
         DELETED_REMOTE_PATH,
+
+        /// <summary>
+        /// Remote added path conflicts with local file
+        /// </summary>
         REMOTE_ADDED_PATH_CONFLICTS_LOCAL_FILE
     }
 
