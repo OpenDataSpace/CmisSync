@@ -34,10 +34,10 @@ SOURCES =  \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
-	EventsTests/EventTypesTest.cs \
 	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
+	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \

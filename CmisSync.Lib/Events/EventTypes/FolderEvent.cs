@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Folder event. Should be added to the Queue if anything on a folder could have been changed.
     /// </summary>
-    public class FolderEvent : AbstractFolderEvent
+    public class FolderEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterablePathEvent, IFilterableRemoteObjectEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FolderEvent"/> class.
@@ -68,6 +68,36 @@ namespace CmisSync.Lib.Events
         public object Source { get; private set; }
 
         /// <summary>
+        /// Gets the folder name.
+        /// </summary>
+        /// <value>The folder name.</value>
+        public string Name {
+            get {
+                return this.LocalFolder != null ? this.LocalFolder.Name : this.RemoteFolder.Name;
+            }
+        }
+
+        /// <summary>
+        /// Gets the remote path.
+        /// </summary>
+        /// <value>The path.</value>
+        public string Path {
+            get {
+                return this.RemoteFolder != null ? this.RemoteFolder.Path : null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the remote object.
+        /// </summary>
+        /// <value>The remote object.</value>
+        public ICmisObject RemoteObject {
+            get {
+                return this.RemoteFolder;
+            }
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderEvent"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderEvent"/>.</returns>
@@ -80,6 +110,14 @@ namespace CmisSync.Lib.Events
                 this.LocalFolder != null ? this.LocalFolder.Name : string.Empty,
                 this.RemoteFolder != null ? this.RemoteFolder.Name : string.Empty,
                 this.Source != null ? this.Source : "null");
+        }
+
+        /// <summary>
+        /// Determines whether this event contains a directory.
+        /// </summary>
+        /// <returns><c>true</c></returns>
+        public bool IsDirectory() {
+            return true;
         }
     }
 }

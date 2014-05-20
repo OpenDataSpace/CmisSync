@@ -37,11 +37,6 @@ namespace CmisSync.Lib.Sync.Strategy
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Crawler));
 
-        private IFolder remoteFolder;
-        private IDirectoryInfo localFolder;
-        private IFileSystemInfoFactory fsFactory;
-        private IMetaDataStorage storage;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.Crawler"/> class.
         /// </summary>
@@ -54,13 +49,15 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='localFolder'>
         /// Local folder, which is the root of the crawl strategy.
         /// </param>
+        /// <param name='storage'>
+        /// Meta Data Storage. Null is forbidden and produces ArgumentNullException
+        /// </param>
         /// <param name='fsFactory'>
         /// Factory for everyThing FileSystem related. Null leaves the default which is fine.
         /// </param>
         public Crawler(ISyncEventQueue queue, IFolder remoteFolder, IDirectoryInfo localFolder, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
-            if (localFolder == null)
-            {
+            if (localFolder == null) {
                 throw new ArgumentNullException("Given local folder is null");
             }
 
@@ -72,16 +69,40 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException("Given storage is null");
             }
 
-            this.remoteFolder = remoteFolder;
-            this.localFolder = localFolder;
-            this.storage = storage;
+            this.RemoteFolder = remoteFolder;
+            this.LocalFolder = localFolder;
+            this.Storage = storage;
 
-            if(fsFactory == null) {
-                this.fsFactory = new FileSystemInfoFactory();
+            if (fsFactory == null) {
+                this.FsFactory = new FileSystemInfoFactory();
             } else {
-                this.fsFactory = fsFactory;
+                this.FsFactory = fsFactory;
             }
         }
+
+        /// <summary>
+        /// Gets the remote folder.
+        /// </summary>
+        /// <value>The remote folder.</value>
+        public IFolder RemoteFolder { get; private set; }
+
+        /// <summary>
+        /// Gets the local folder.
+        /// </summary>
+        /// <value>The local folder.</value>
+        public IDirectoryInfo LocalFolder { get; private set; }
+
+        /// <summary>
+        /// Gets the file system info factory.
+        /// </summary>
+        /// <value>The fs factory.</value>
+        public IFileSystemInfoFactory FsFactory { get; private set; }
+
+        /// <summary>
+        /// Gets the meta data storage.
+        /// </summary>
+        /// <value>The storage.</value>
+        public IMetaDataStorage Storage { get; private set; }
 
         /// <summary>
         /// Handles the specified e.
@@ -99,10 +120,9 @@ namespace CmisSync.Lib.Sync.Strategy
                 return true;
             }
 
-            if(e is StartNextSyncEvent)
-            {
+            if(e is StartNextSyncEvent) {
                 Logger.Debug("Starting CrawlSync upon " + e);
-                this.CrawlSync(this.remoteFolder, this.localFolder);
+                this.CrawlSync(this.RemoteFolder, this.LocalFolder);
                 Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
                 return true;
             }
@@ -151,7 +171,7 @@ namespace CmisSync.Lib.Sync.Strategy
                         // Both sides do have got the same folder name
                         // Synchronize metadata if different
                         Queue.AddEvent(new FolderEvent(
-                            localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
+                            localFolder: this.FsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
                             remoteFolder: folder,
                             src: this));
 
@@ -168,12 +188,12 @@ namespace CmisSync.Lib.Sync.Strategy
 
                     // Recursive crawl the content of the folder
                     Queue.AddEvent(new CrawlRequestEvent(
-                        localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
+                        localFolder: this.FsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder.Name)),
                         remoteFolder: folder));
                 } else if(cmisObject is IDocument) {
                     IDocument doc = cmisObject as IDocument;
                     var fileEvent = new FileEvent(
-                        localFile: this.fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
+                        localFile: this.FsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
                         localParentDirectory: localFolder,
                         remoteFile: doc);
                     if(localFileNames.Contains(doc.Name)) {
@@ -198,15 +218,15 @@ namespace CmisSync.Lib.Sync.Strategy
             // Only local folders are available, inform synchronizer about them
             foreach(string folder in localDirNames) {
                 Queue.AddEvent(new FolderEvent(
-                    localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)),
+                    localFolder: this.FsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)),
                     src: this) { Local = MetaDataChangeType.CREATED });
-                Queue.AddEvent(new CrawlRequestEvent(localFolder: this.fsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)), remoteFolder: null));
+                Queue.AddEvent(new CrawlRequestEvent(localFolder: this.FsFactory.CreateDirectoryInfo(Path.Combine(localFolder.FullName, folder)), remoteFolder: null));
             }
 
             // Only local files are available, inform synchronizer about them
             foreach(string file in localFileNames) {
                 Queue.AddEvent(new FileEvent(
-                    localFile: this.fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, file)),
+                    localFile: this.FsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, file)),
                     localParentDirectory: localFolder)
                         { Local = MetaDataChangeType.CREATED,
                         LocalContent = ContentChangeType.CREATED });

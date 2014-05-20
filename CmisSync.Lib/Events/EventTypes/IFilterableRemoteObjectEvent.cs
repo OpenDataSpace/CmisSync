@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IFSEvent.cs" company="GRAU DATA AG">
+// <copyright file="IFilterableRemoteObjectEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,21 +16,22 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Events
 {
-    using System.IO;
-    
+    using System;
+
+    using DotCMIS.Client;
+
     /// <summary>
-    /// Interface for FileSystem Events.
+    /// This events are filterable by the containing remote object.
     /// </summary>
-    public interface IFSEvent : IFilterablePathEvent, IFilterableNameEvent
+    public interface IFilterableRemoteObjectEvent : ISyncEvent
     {
         /// <summary>
-        /// Gets the type.
+        /// Gets the remote object.
         /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        WatcherChangeTypes Type { get; }
+        /// <value>The remote object.</value>
+        ICmisObject RemoteObject { get; }
     }
 }

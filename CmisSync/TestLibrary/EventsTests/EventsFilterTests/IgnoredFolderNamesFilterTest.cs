@@ -36,7 +36,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         [Test, Category("Fast"), Category("EventFilter")]
         public void ConstructorWorksWithGivenQueue()
         {
-            new IgnoredFolderNameFilter(new Mock<ISyncEventQueue>().Object);
+            new IgnoredFolderNameFilter(Mock.Of<ISyncEventQueue>());
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
@@ -50,7 +50,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         public void FilterIgnoresNonFittingISyncEvents()
         {
             var genericEvent = new Mock<ISyncEvent>().Object;
-            var queue = new Mock<ISyncEventQueue>();
+            var queue = new Mock<ISyncEventQueue>(MockBehavior.Strict);
             var filter = new IgnoredFolderNameFilter(queue.Object);
 
             Assert.IsFalse(filter.Handle(genericEvent));
@@ -60,7 +60,10 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         [Test, Category("Fast"), Category("EventFilter")]
         public void FilterLetsFSEventsPassIfNoWildcardsAreSet()
         {
-            var fsEvent = new Mock<FSEvent>(WatcherChangeTypes.Created, ".test").Object;
+            var fsEvent = Mock.Of<IFilterableNameEvent>(
+                f =>
+                f.Name == "foldername" &&
+                f.IsDirectory() == true);
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
 
@@ -93,41 +96,43 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void FilterFiltersDirectoryFSEventsMatchingWildcard()
+        public void FilterFiltersEventsMatchingWildcard()
         {
-            string path = Path.Combine(Path.GetTempPath(), ".test");
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
-            var fsEvent = new Mock<IFSEvent>();
-            fsEvent.Setup(fs => fs.IsDirectory()).Returns(true);
-            fsEvent.Setup(fs => fs.Path).Returns(path);
+            var fsEvent = Mock.Of<IFilterableNameEvent>(
+                f =>
+                f.Name == ".test" &&
+                f.IsDirectory() == true);
             var wildcards = new List<string>();
             wildcards.Add(".*");
             filter.Wildcards = wildcards;
 
-            Assert.IsTrue(filter.Handle(fsEvent.Object));
+            Assert.That(filter.Handle(fsEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<RequestIgnoredEvent>()), Times.Once());
         }
 
+        [Ignore]
         [Test, Category("Fast"), Category("EventFilter")]
-        public void FilterFiltersFileFSEventsParentMatchingWildcard()
+        public void FilterFiltersEventsParentMatchingWildcard()
         {
-            string path = Path.Combine(Path.GetTempPath(), ".test", "file.tmp");
+            string path = "/.test/file.tmp";
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
-            var fsEvent = new Mock<IFSEvent>();
-            fsEvent.Setup(fs => fs.IsDirectory()).Returns(false);
-            fsEvent.Setup(fs => fs.Path).Returns(path);
+            var fsEvent = Mock.Of<IFilterablePathEvent>(
+                f =>
+                f.Path == path &&
+                f.IsDirectory() == false);
             var wildcards = new List<string>();
             wildcards.Add(".*");
             filter.Wildcards = wildcards;
 
-            Assert.IsTrue(filter.Handle(fsEvent.Object));
+            Assert.That(filter.Handle(fsEvent), Is.True);
             queue.Verify(q => q.AddEvent(It.IsAny<RequestIgnoredEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void FilterLetsFSEventsPassIfNotMatchingWildcard()
+        public void FilterLetsEventsPassIfNotMatchingWildcard()
         {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
@@ -135,7 +140,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             var wildcards = new List<string>();
             wildcards.Add(".tmp");
             filter.Wildcards = wildcards;
-            Assert.IsFalse(filter.Handle(fsEvent));
+            Assert.That(filter.Handle(fsEvent), Is.False);
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
     }

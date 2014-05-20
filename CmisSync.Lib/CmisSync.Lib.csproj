@@ -205,6 +205,11 @@
     <Compile Include="Sync\Strategy\Watcher\IWatcherProducer.cs" />
     <Compile Include="Sync\Strategy\Watcher\WatcherConsumer.cs" />
     <Compile Include="Cmis\CmisUtils.cs" />
+    <Compile Include="Events\EventTypes\IFilterablePathEvent.cs" />
+    <Compile Include="Events\EventTypes\IFilterableRemoteObjectEvent.cs" />
+    <Compile Include="Sync\Strategy\DescendantsCrawler.cs" />
+    <Compile Include="Events\EventTypes\IFilterableNameEvent.cs" />
+    <Compile Include="Events\EventTypes\IFilterableEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -88,7 +88,6 @@
     <Compile Include="EncodingTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
-    <Compile Include="EventsTests\EventTypesTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\InvalidFolderNameFilterTest.cs" />
@@ -165,6 +164,7 @@
     <Compile Include="UtilsTests\OperationContextFactoryTest.cs" />
     <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
     <Compile Include="SyncStrategiesTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
+    <Compile Include="EventsTests\FsEventTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

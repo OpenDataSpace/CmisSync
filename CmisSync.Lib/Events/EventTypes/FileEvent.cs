@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// File event.
     /// </summary>
-    public class FileEvent : AbstractFolderEvent
+    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterablePathEvent, IFilterableRemoteObjectEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileEvent"/> class.
@@ -57,7 +57,37 @@ namespace CmisSync.Lib.Events
             this.RemoteContent = ContentChangeType.NONE;
         }
 
-                /// <summary>
+        /// <summary>
+        /// Gets the name.
+        /// </summary>
+        /// <value>The name.</value>
+        public string Name {
+            get {
+                return this.LocalFile != null ? this.LocalFile.Name : this.RemoteFile.Name;
+            }
+        }
+
+        /// <summary>
+        /// Gets the remote path.
+        /// </summary>
+        /// <value>The path.</value>
+        public string Path {
+            get {
+                return this.RemoteFile != null ? this.RemoteFile.Paths[0] : null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the remote object.
+        /// </summary>
+        /// <value>The remote object.</value>
+        public ICmisObject RemoteObject {
+            get {
+                return this.RemoteFile;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the content of the local.
         /// </summary>
         /// <value>
@@ -111,6 +141,14 @@ namespace CmisSync.Lib.Events
                 this.LocalContent,
                 this.Remote,
                 this.RemoteContent);
+        }
+
+        /// <summary>
+        /// Determines whether this event contains a directory.
+        /// </summary>
+        /// <returns><c>false</c></returns>
+        public bool IsDirectory() {
+            return false;
         }
     }
 }

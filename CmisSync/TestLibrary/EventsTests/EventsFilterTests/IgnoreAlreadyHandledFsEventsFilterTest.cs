@@ -69,7 +69,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
             var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
-            var fsEvent = new FSEvent(WatcherChangeTypes.Created, "path");
+            var fsEvent = new FSEvent(WatcherChangeTypes.Created, Path.Combine(Path.GetTempPath(), "path"));
             Assert.That(filter.Handle(fsEvent), Is.False);
         }
 

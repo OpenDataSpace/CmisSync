@@ -50,6 +50,8 @@ namespace CmisSync.Lib.Events
 
             this.Type = type;
             this.Path = path;
+            path = path.Trim(System.IO.Path.DirectorySeparatorChar);
+            this.Name = path.Substring(path.LastIndexOf(System.IO.Path.DirectorySeparatorChar.ToString()) + 1);
         }
   
         /// <summary>
@@ -67,6 +69,8 @@ namespace CmisSync.Lib.Events
         /// The path.
         /// </value>
         public string Path { get; private set; }
+
+        public string Name { get; private set; }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FSEvent"/>.

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IFSEvent.cs" company="GRAU DATA AG">
+// <copyright file="IFilterableEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,21 +16,21 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Events
 {
-    using System.IO;
-    
+    using System;
+
     /// <summary>
-    /// Interface for FileSystem Events.
+    /// Filterable event.
     /// </summary>
-    public interface IFSEvent : IFilterablePathEvent, IFilterableNameEvent
+    public interface IFilterableEvent : ISyncEvent
     {
         /// <summary>
-        /// Gets the type.
+        /// Determines whether this event contains a directory.
         /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        WatcherChangeTypes Type { get; }
+        /// <returns><c>true</c> if this event contains a directory; otherwise, <c>false</c>.</returns>
+        bool IsDirectory();
     }
 }
+

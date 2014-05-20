@@ -67,7 +67,7 @@ namespace CmisSync.Lib.Events.Filter
                 lock (this.listLock)
                 {
                     this.wildcards.Clear();
-                    foreach (var wildcard in value)
+                    foreach (string wildcard in value)
                     {
                         this.wildcards.Add(Utils.IgnoreLineToRegex(wildcard));
                     }
@@ -86,28 +86,32 @@ namespace CmisSync.Lib.Events.Filter
         /// </returns>
         public override bool Handle(ISyncEvent e)
         {
-            if (e is IFSEvent)
+            if (e is IFilterableNameEvent)
             {
-                var fsEvent = e as IFSEvent;
-                string name;
-                if (fsEvent.IsDirectory())
-                {
-                    name = Path.GetFileName(fsEvent.Path);
-                }
-                else
-                {
-                    name = Path.GetFileName(Path.GetDirectoryName(fsEvent.Path));
-                }
+                IFilterableNameEvent filterable = e as IFilterableNameEvent;
+                return this.CheckFolderName(e, filterable.Name);
+            } else if (e is IFilterablePathEvent) {
+                IFilterablePathEvent filterable = e as IFilterablePathEvent;
+                string path = (e as IFilterablePathEvent).Path;
 
-                lock (this.listLock)
+
+                if (!filterable.IsDirectory()) {
+                    return this.CheckFolderName(e, Path.GetDirectoryName(path));
+                }
+            }
+
+            return false;
+        }
+
+        private bool CheckFolderName(ISyncEvent e, string name) {
+            lock (this.listLock)
+            {
+                foreach (Regex wildcard in this.wildcards)
                 {
-                    foreach (var wildcard in this.wildcards)
+                    if (wildcard.IsMatch(name))
                     {
-                        if (wildcard.IsMatch(name))
-                        {
-                            Queue.AddEvent(new RequestIgnoredEvent(e, string.Format("Folder \"{0}\" matches regex {1}", fsEvent.Path, wildcard.ToString()), this));
-                            return true;
-                        }
+                        Queue.AddEvent(new RequestIgnoredEvent(e, string.Format("Folder \"{0}\" matches regex {1}", name, wildcard.ToString()), this));
+                        return true;
                     }
                 }
             }

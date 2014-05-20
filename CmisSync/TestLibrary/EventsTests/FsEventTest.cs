@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="EventTypesTest.cs" company="GRAU DATA AG">
+// <copyright file="FsEventTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -28,18 +28,21 @@ namespace TestLibrary.EventsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class EventTypesTest
+    public class FsEventTest
     {
         [Test, Category("Fast")]
-        public void FSEventTest()
+        public void Constructor()
         {
-            ISyncEvent e = new FSEvent(WatcherChangeTypes.Created, "test");
-            Assert.AreEqual("FSEvent with type \"Created\" on path \"test\"", e.ToString());
+            string name = "test";
+            string path = Path.Combine(Path.GetTempPath(), name);
+            var e = new FSEvent(WatcherChangeTypes.Created, path);
+            Assert.That(e.Name, Is.EqualTo(name));
+            Assert.That(e.Path, Is.EqualTo(path));
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void FSEventPreventNullTest()
+        public void ConstructorThrowsExceptionInNullPath()
         {
             new FSEvent(WatcherChangeTypes.Created, null);
         }
