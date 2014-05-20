@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="Watcher.cs" company="GRAU DATA AG">
+// <copyright file="WatcherConsumer.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -39,8 +39,6 @@ namespace CmisSync.Lib.Sync.Strategy
     public class WatcherConsumer : ReportingSyncEventHandler
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WatcherConsumer));
-
-        private bool alreadyDisposed = false;
 
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
 

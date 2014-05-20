@@ -29,11 +29,12 @@ namespace CmisSync.Lib.Sync.Strategy
     /// </summary>
     public class NetWatcher : IWatcherProducer
     {
+        private readonly ISyncEventQueue queue;
+
         /// <summary>
         /// The .Net file system watcher instance.
         /// </summary>
         private FileSystemWatcher fileSystemWatcher;
-        private readonly ISyncEventQueue Queue;
 
         /// <summary>
         /// Whether this object has been disposed or not.
@@ -59,8 +60,8 @@ namespace CmisSync.Lib.Sync.Strategy
             if (queue == null) {
                 throw new ArgumentNullException("The given queue must not be null");
             }
-            
-            this.Queue = queue;
+
+            this.queue = queue;
 
             this.fileSystemWatcher = watcher;
             this.fileSystemWatcher.IncludeSubdirectories = true;
@@ -125,7 +126,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </param>
         private void OnCreatedChangedDeleted(object source, FileSystemEventArgs e)
         {
-            Queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath));
+            this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath));
         }
 
         /// <summary>
@@ -143,11 +144,11 @@ namespace CmisSync.Lib.Sync.Strategy
             string newname = e.FullPath;
             if (oldname.StartsWith(this.fileSystemWatcher.Path) && newname.StartsWith(this.fileSystemWatcher.Path))
             {
-                Queue.AddEvent(new FSMovedEvent(oldname, newname));
+                this.queue.AddEvent(new FSMovedEvent(oldname, newname));
             } else if (oldname.StartsWith(this.fileSystemWatcher.Path)) {
-                Queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname));
+                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname));
             } else if (newname.StartsWith(this.fileSystemWatcher.Path)) {
-                Queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname));
+                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname));
             }
         }
     }

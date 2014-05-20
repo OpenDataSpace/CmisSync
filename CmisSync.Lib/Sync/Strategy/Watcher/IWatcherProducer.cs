@@ -19,6 +19,10 @@
 namespace CmisSync.Lib.Sync.Strategy
 {
     using System;
+
+    /// <summary>
+    /// Interface for Mac and DotNet Watcher Producers
+    /// </summary>
     public interface IWatcherProducer : IDisposable
     {
         /// <summary>

@@ -88,7 +88,6 @@ namespace TestLibrary.SyncStrategiesTests
             var watcher = new WatcherConsumer(this.queue.Object);
             Assert.False(watcher.Handle(new Mock<ISyncEvent>().Object));
             Assert.False(watcher.Handle(new Mock<FileEvent>(new Mock<IFileInfo>().Object, null, null) { CallBase = false }.Object));
-            
         }
 
         [Test, Category("Fast")]
@@ -106,7 +105,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
             Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
             Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
-            
         }
 
         [Test, Category("Fast")]
@@ -124,7 +122,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
             Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
             Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
-            
         }
 
         [Test, Category("Fast")]
@@ -142,7 +139,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
             Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
             Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
-            
         }
 
         [Test, Category("Fast")]
@@ -162,7 +158,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
             Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).Remote);
             Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).RemoteContent);
-            
         }
 
         [Test, Category("Fast")]
@@ -178,7 +173,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
             Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
             Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
-            
         }
 
         [Test, Category("Fast")]
@@ -194,7 +188,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
             Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
             Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
-            
         }
 
         [Test, Category("Fast")]
@@ -210,7 +203,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
             Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
             Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
-            
         }
 
         [Test, Category("Fast")]
@@ -229,7 +221,6 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.IsNull((this.returnedFolderEvent as FolderMovedEvent).RemoteFolder);
             Assert.IsNull((this.returnedFolderEvent as FolderMovedEvent).OldRemoteFolderPath);
             Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
-            
         }
     }
 }
