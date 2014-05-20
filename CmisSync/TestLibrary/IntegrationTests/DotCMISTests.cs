@@ -31,6 +31,7 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Credentials;
+    using CmisSync.Lib.Streams;
     using CmisSync.Lib.Sync;
 
     using DotCMIS;
@@ -366,6 +367,50 @@ namespace TestLibrary.IntegrationTests
             emptyDoc.DeleteAllVersions();
         }
 
+        [Ignore]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void EnsureFileNameStaysEqualWhileUploading(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+
+            string filename = "testfile.txt";
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            try {
+                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc != null) {
+                    doc.Delete(true);
+                }
+            } catch (CmisObjectNotFoundException)
+            {
+            }
+
+            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            int length = 1024 * 1024;
+            byte[] content = new byte[length];
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = filename;
+            contentStream.MimeType = MimeType.GetMIMEType(filename);
+            contentStream.Length = content.Length;
+            Action assert = delegate {
+                Assert.That((session.GetObject(emptyDoc.Id, OperationContextFactory.CreateNonCachingPathIncludingContext(session)) as IDocument).Name, Is.EqualTo(filename));
+            };
+
+            using (var memstream = new AssertingStream(new MemoryStream(content), assert)) {
+                contentStream.Stream = memstream;
+                emptyDoc.SetContentStream(contentStream, true, true);
+            }
+        }
+
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void SetJPEGContentStream(
             string canonical_name,
@@ -404,6 +449,7 @@ namespace TestLibrary.IntegrationTests
             contentStream.FileName = filename;
             contentStream.MimeType = MimeType.GetMIMEType(filename);
             contentStream.Length = content.Length;
+
             using (var memstream = new MemoryStream(content)) {
                 contentStream.Stream = memstream;
                 Console.WriteLine("content: " + memstream.Length.ToString());
@@ -415,6 +461,20 @@ namespace TestLibrary.IntegrationTests
             Assert.That(randomDoc != null);
             Assert.AreEqual(content.Length, randomDoc.ContentStreamLength, "Getting content on new object failed");
             emptyDoc.DeleteAllVersions();
+        }
+
+        private class AssertingStream : StreamWrapper {
+            private Action verification;
+
+            public AssertingStream(Stream stream, Action verification) : base(stream) {
+                this.verification = verification;
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                this.verification();
+                return base.Read(buffer, offset, count);
+            }
         }
     }
 
