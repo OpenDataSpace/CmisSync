@@ -325,7 +325,7 @@ namespace TestLibrary.IntegrationTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
             var localFolder = new Mock<IDirectoryInfo>();
-            var crawler = new Crawler(queue, remoteFolder.Object, localFolder.Object);
+            var crawler = new Crawler(queue, remoteFolder.Object, localFolder.Object, storage);
             manager.AddEventHandler(crawler);
 
             var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();

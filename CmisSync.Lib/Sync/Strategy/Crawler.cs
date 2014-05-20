@@ -22,25 +22,26 @@ namespace CmisSync.Lib.Sync.Strategy
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    
+
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
-    
+
     using DotCMIS.Client;
-    
+
     using log4net;
- 
+
     /// <summary>
     /// Crawler Strategy which crawls local and remote directories for finding differences between them.
     /// </summary>
     public class Crawler : ReportingSyncEventHandler
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Crawler));
-        
+
         private IFolder remoteFolder;
         private IDirectoryInfo localFolder;
         private IFileSystemInfoFactory fsFactory;
-        
+        private IMetaDataStorage storage;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.Crawler"/> class.
         /// </summary>
@@ -56,19 +57,24 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='fsFactory'>
         /// Factory for everyThing FileSystem related. Null leaves the default which is fine.
         /// </param>
-        public Crawler(ISyncEventQueue queue, IFolder remoteFolder, IDirectoryInfo localFolder, IFileSystemInfoFactory fsFactory = null) : base(queue)
+        public Crawler(ISyncEventQueue queue, IFolder remoteFolder, IDirectoryInfo localFolder, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
-            if(localFolder == null) 
+            if (localFolder == null)
             {
                 throw new ArgumentNullException("Given local folder is null");
             }
-            
-            if(remoteFolder == null) {
+
+            if (remoteFolder == null) {
                 throw new ArgumentNullException("Given remote folder is null");
             }
-            
+
+            if (storage == null) {
+                throw new ArgumentNullException("Given storage is null");
+            }
+
             this.remoteFolder = remoteFolder;
             this.localFolder = localFolder;
+            this.storage = storage;
 
             if(fsFactory == null) {
                 this.fsFactory = new FileSystemInfoFactory();
@@ -92,7 +98,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 this.CrawlSync(request.RemoteFolder, request.LocalFolder);
                 return true;
             }
-            
+
             if(e is StartNextSyncEvent)
             {
                 Logger.Debug("Starting CrawlSync upon " + e);
@@ -100,7 +106,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
                 return true;
             }
-            
+
             return false;
         }
 
@@ -202,7 +208,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 Queue.AddEvent(new FileEvent(
                     localFile: this.fsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, file)),
                     localParentDirectory: localFolder)
-                        { Local = MetaDataChangeType.CREATED, 
+                        { Local = MetaDataChangeType.CREATED,
                         LocalContent = ContentChangeType.CREATED });
             }
         }
