@@ -51,7 +51,7 @@ namespace CmisSync.Lib.Data
 
             if (!localTargetRootPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
             {
-                localTargetRootPath += Path.DirectorySeparatorChar;
+                localTargetRootPath += Path.DirectorySeparatorChar.ToString();
             }
 
             if (!remoteTargetRootPath.EndsWith("/"))
@@ -207,7 +207,7 @@ namespace CmisSync.Lib.Data
         public bool CanCreateRemotePath(string localPath)
         {
             if(!localPath.EndsWith(Path.DirectorySeparatorChar.ToString())) {
-                localPath += Path.DirectorySeparatorChar;
+                localPath += Path.DirectorySeparatorChar.ToString();
             }
 
             return localPath.StartsWith(this.LocalTargetRootPath);
@@ -311,7 +311,7 @@ namespace CmisSync.Lib.Data
                 throw new ArgumentOutOfRangeException(string.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
 
-            if(this.LocalTargetRootPath.Equals(localPath + Path.DirectorySeparatorChar)) {
+            if(this.LocalTargetRootPath.Equals(localPath + Path.DirectorySeparatorChar.ToString())) {
                 return ".";
             }
 

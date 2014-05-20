@@ -42,7 +42,8 @@ namespace TestLibrary.SyncStrategiesTests
         private AbstractFolderEvent returnedFolderEvent;
 
         [SetUp]
-        public void SetUp() {
+        public void SetUp()
+        {
             this.localPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             this.localFolder = new DirectoryInfo(this.localPath);
             this.localFolder.Create();
@@ -59,164 +60,176 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [TearDown]
-        public void TearDown() {
+        public void TearDown()
+        {
             this.localFile.Refresh();
-            if (this.localFile.Exists) {
+            if (this.localFile.Exists)
+            {
                 this.localFile.Delete();
             }
 
             this.localSubFolder.Refresh();
-            if (this.localSubFolder.Exists) {
+            if (this.localSubFolder.Exists)
+            {
                 this.localSubFolder.Delete(true);
             }
 
             this.localFolder.Refresh();
-            if (this.localFolder.Exists) {
+            if (this.localFolder.Exists)
+            {
                 this.localFolder.Delete(true);
             }
         }
 
         [Test, Category("Fast")]
-        public void IgnoreWrongEventsTest() {
+        public void IgnoreWrongEventsTest()
+        {
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                Assert.False(watcher.Handle(new Mock<ISyncEvent>().Object));
-                Assert.False(watcher.Handle(new Mock<FileEvent>(new Mock<IFileInfo>().Object, null, null) { CallBase = false }.Object));
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+            Assert.False(watcher.Handle(new Mock<ISyncEvent>().Object));
+            Assert.False(watcher.Handle(new Mock<FileEvent>(new Mock<IFileInfo>().Object, null, null) { CallBase = false }.Object));
+            
         }
 
         [Test, Category("Fast")]
-        public void HandleFSFileAddedEvents() {
+        public void HandleFSFileAddedEvents()
+        {
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFileEvent = f as AbstractFolderEvent);
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                var fileCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, this.localFile.FullName);
-                Assert.True(watcher.Handle(fileCreatedFSEvent));
-                Assert.AreEqual(MetaDataChangeType.CREATED, this.returnedFileEvent.Local);
-                Assert.AreEqual(ContentChangeType.CREATED, (this.returnedFileEvent as FileEvent).LocalContent);
-                Assert.AreEqual(this.localFile.FullName, (this.returnedFileEvent as FileEvent).LocalFile.FullName);
-                Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
-                Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
-                Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+
+            var fileCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, this.localFile.FullName);
+            Assert.True(watcher.Handle(fileCreatedFSEvent));
+            Assert.AreEqual(MetaDataChangeType.CREATED, this.returnedFileEvent.Local);
+            Assert.AreEqual(ContentChangeType.CREATED, (this.returnedFileEvent as FileEvent).LocalContent);
+            Assert.AreEqual(this.localFile.FullName, (this.returnedFileEvent as FileEvent).LocalFile.FullName);
+            Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
+            Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
+            Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
+            
         }
 
         [Test, Category("Fast")]
-        public void HandleFSFileChangedEvents() {
+        public void HandleFSFileChangedEvents()
+        {
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFileEvent = f as AbstractFolderEvent);
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                var fileChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, this.localFile.FullName);
-                Assert.True(watcher.Handle(fileChangedFSEvent));
-                Assert.AreEqual(MetaDataChangeType.NONE, this.returnedFileEvent.Local);
-                Assert.AreEqual(ContentChangeType.CHANGED, (this.returnedFileEvent as FileEvent).LocalContent);
-                Assert.AreEqual(this.localFile.FullName, (this.returnedFileEvent as FileEvent).LocalFile.FullName);
-                Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
-                Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
-                Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+            
+            var fileChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, this.localFile.FullName);
+            Assert.True(watcher.Handle(fileChangedFSEvent));
+            Assert.AreEqual(MetaDataChangeType.NONE, this.returnedFileEvent.Local);
+            Assert.AreEqual(ContentChangeType.CHANGED, (this.returnedFileEvent as FileEvent).LocalContent);
+            Assert.AreEqual(this.localFile.FullName, (this.returnedFileEvent as FileEvent).LocalFile.FullName);
+            Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
+            Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
+            Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
+            
         }
 
         [Test, Category("Fast")]
-        public void HandleFSFileRemovedEvents() {
+        public void HandleFSFileRemovedEvents()
+        {
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFileEvent = f as AbstractFolderEvent);
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                var fileRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, this.localFile.FullName);
-                Assert.True(watcher.Handle(fileRemovedFSEvent));
-                Assert.AreEqual(MetaDataChangeType.DELETED, this.returnedFileEvent.Local);
-                Assert.AreEqual(ContentChangeType.DELETED, (this.returnedFileEvent as FileEvent).LocalContent);
-                Assert.AreEqual(this.localFile.FullName, (this.returnedFileEvent as FileEvent).LocalFile.FullName);
-                Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
-                Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
-                Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+            
+            var fileRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, this.localFile.FullName);
+            Assert.True(watcher.Handle(fileRemovedFSEvent));
+            Assert.AreEqual(MetaDataChangeType.DELETED, this.returnedFileEvent.Local);
+            Assert.AreEqual(ContentChangeType.DELETED, (this.returnedFileEvent as FileEvent).LocalContent);
+            Assert.AreEqual(this.localFile.FullName, (this.returnedFileEvent as FileEvent).LocalFile.FullName);
+            Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
+            Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileEvent).Remote);
+            Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileEvent).RemoteContent);
+            
         }
 
         [Test, Category("Fast")]
-        public void HandleFSFileRenamedEvents() {
+        public void HandleFSFileRenamedEvents()
+        {
             string oldpath = Path.Combine(this.localFolder.FullName, Path.GetRandomFileName());
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFileEvent = f as AbstractFolderEvent);
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                var fileRenamedFSEvent = new FSMovedEvent(oldpath, this.localFile.FullName);
-                Assert.True(watcher.Handle(fileRenamedFSEvent));
-                Assert.AreEqual(MetaDataChangeType.MOVED, this.returnedFileEvent.Local);
-                Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).LocalContent);
-                Assert.AreEqual(this.localFile.FullName, (this.returnedFileEvent as FileMovedEvent).LocalFile.FullName);
-                Assert.AreEqual(oldpath, (this.returnedFileEvent as FileMovedEvent).OldLocalFile.FullName);
-                Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
-                Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).Remote);
-                Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).RemoteContent);
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+            
+            var fileRenamedFSEvent = new FSMovedEvent(oldpath, this.localFile.FullName);
+            Assert.True(watcher.Handle(fileRenamedFSEvent));
+            Assert.AreEqual(MetaDataChangeType.MOVED, this.returnedFileEvent.Local);
+            Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).LocalContent);
+            Assert.AreEqual(this.localFile.FullName, (this.returnedFileEvent as FileMovedEvent).LocalFile.FullName);
+            Assert.AreEqual(oldpath, (this.returnedFileEvent as FileMovedEvent).OldLocalFile.FullName);
+            Assert.IsNull((this.returnedFileEvent as FileEvent).RemoteFile);
+            Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).Remote);
+            Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).RemoteContent);
+            
         }
 
         [Test, Category("Fast")]
-        public void HandleFSFolderAddedEvents() {
+        public void HandleFSFolderAddedEvents()
+        {
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFolderEvent = f as AbstractFolderEvent);
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                var folderCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, this.localFolder.FullName);
-                Assert.True(watcher.Handle(folderCreatedFSEvent));
-                Assert.AreEqual(MetaDataChangeType.CREATED, this.returnedFolderEvent.Local);
-                Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
-                Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
-                Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+            
+            var folderCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, this.localFolder.FullName);
+            Assert.True(watcher.Handle(folderCreatedFSEvent));
+            Assert.AreEqual(MetaDataChangeType.CREATED, this.returnedFolderEvent.Local);
+            Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
+            Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
+            Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
+            
         }
 
         [Test, Category("Fast")]
-        public void HandleFSFolderChangedEvents() {
+        public void HandleFSFolderChangedEvents()
+        {
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFolderEvent = f as AbstractFolderEvent);
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                var folderChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, this.localFolder.FullName);
-                Assert.True(watcher.Handle(folderChangedFSEvent));
-                Assert.AreEqual(MetaDataChangeType.CHANGED, this.returnedFolderEvent.Local);
-                Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
-                Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
-                Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+            
+            var folderChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, this.localFolder.FullName);
+            Assert.True(watcher.Handle(folderChangedFSEvent));
+            Assert.AreEqual(MetaDataChangeType.CHANGED, this.returnedFolderEvent.Local);
+            Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
+            Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
+            Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
+            
         }
 
         [Test, Category("Fast")]
-        public void HandleFSFolderRemovedEvents() {
+        public void HandleFSFolderRemovedEvents()
+        {
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFolderEvent = f as AbstractFolderEvent);
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                var folderRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, this.localFolder.FullName);
-                Assert.True(watcher.Handle(folderRemovedFSEvent));
-                Assert.AreEqual(MetaDataChangeType.DELETED, this.returnedFolderEvent.Local);
-                Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
-                Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
-                Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+            
+            var folderRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, this.localFolder.FullName);
+            Assert.True(watcher.Handle(folderRemovedFSEvent));
+            Assert.AreEqual(MetaDataChangeType.DELETED, this.returnedFolderEvent.Local);
+            Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
+            Assert.IsNull((this.returnedFolderEvent as FolderEvent).RemoteFolder);
+            Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
+            
         }
 
         [Test, Category("Fast")]
-        public void HandleFSFolderRenamedEvents() {
+        public void HandleFSFolderRenamedEvents()
+        {
             string oldpath = Path.Combine(this.localFolder.FullName, Path.GetRandomFileName());
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFolderEvent = f as AbstractFolderEvent);
-            using (var watcher = new Watcher(this.queue.Object))
-            {
-                var folderRenamedFSEvent = new FSMovedEvent(oldpath, this.localFolder.FullName);
-                Assert.True(watcher.Handle(folderRenamedFSEvent));
-                Assert.AreEqual(MetaDataChangeType.MOVED, this.returnedFolderEvent.Local);
-                Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
-                Assert.AreEqual(oldpath, (this.returnedFolderEvent as FolderMovedEvent).OldLocalFolder.FullName);
-                Assert.IsNull((this.returnedFolderEvent as FolderMovedEvent).RemoteFolder);
-                Assert.IsNull((this.returnedFolderEvent as FolderMovedEvent).OldRemoteFolderPath);
-                Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
-            }
+            var watcher = new WatcherConsumer(this.queue.Object);
+            
+            var folderRenamedFSEvent = new FSMovedEvent(oldpath, this.localFolder.FullName);
+            Assert.True(watcher.Handle(folderRenamedFSEvent));
+            Assert.AreEqual(MetaDataChangeType.MOVED, this.returnedFolderEvent.Local);
+            Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
+            Assert.AreEqual(oldpath, (this.returnedFolderEvent as FolderMovedEvent).OldLocalFolder.FullName);
+            Assert.IsNull((this.returnedFolderEvent as FolderMovedEvent).RemoteFolder);
+            Assert.IsNull((this.returnedFolderEvent as FolderMovedEvent).OldRemoteFolderPath);
+            Assert.AreEqual(MetaDataChangeType.NONE, (this.returnedFolderEvent as FolderEvent).Remote);
+            
         }
     }
 }

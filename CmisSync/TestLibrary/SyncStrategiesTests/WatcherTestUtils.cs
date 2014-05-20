@@ -33,7 +33,7 @@ namespace TestLibrary.SyncStrategiesTests
 
     public class WatcherData
     {
-        public Watcher Watcher { get; set; }
+        public IWatcherProducer Watcher { get; set; }
 
         public object Data { get; set; }
     }

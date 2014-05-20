@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2C914413-B31C-4362-93C7-1AE34F09112A}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -60,7 +60,6 @@
     <Compile Include="Backend.cs" />
     <Compile Include="Cmis\CmisPermissionDeniedException.cs" />
     <Compile Include="Cmis\CmisServerNotFoundException.cs" />
-    <Compile Include="Cmis\CmisUtils.cs" />
     <Compile Include="Cmis\Crypto.cs" />
     <Compile Include="Cmis\MimeType.cs" />
     <Compile Include="Cmis\PersistentStandardAuthenticationProvider.cs" />
@@ -193,7 +192,6 @@
     <Compile Include="Storage\FileSystem\IFileSystemWatcher.cs" />
     <Compile Include="Sync\Strategy\Watcher\MacWatcher.cs" />
     <Compile Include="Sync\Strategy\Watcher\NetWatcher.cs" />
-    <Compile Include="Sync\Strategy\Watcher\Watcher.cs" />
     <Compile Include="Streams\ChunkedStream.cs" />
     <Compile Include="Events\IDisposableSyncEventQueue.cs" />
     <Compile Include="Events\SyncStrategyInitializer.cs" />
@@ -204,23 +202,11 @@
     <Compile Include="Events\EventTypes\IFSEvent.cs" />
     <Compile Include="Events\EventTypes\IFSMovedEvent.cs" />
     <Compile Include="Sync\Strategy\RemoteObjectMovedOrRenamedAccumulator.cs" />
+    <Compile Include="Sync\Strategy\Watcher\IWatcherProducer.cs" />
+    <Compile Include="Sync\Strategy\Watcher\WatcherConsumer.cs" />
+    <Compile Include="Cmis\CmisUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
-          <DeployFilesVar />
-          <ResourcesVar />
-          <OthersVar />
-          <GacRefVar />
-          <AsmRefVar />
-          <ProjectRefVar />
-        </MonoDevelop.Autotools.MakefileInfo>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>

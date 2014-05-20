@@ -36,45 +36,22 @@ namespace CmisSync.Lib.Sync.Strategy
     /// <summary>
     /// Watcher sync.
     /// </summary>
-    public class Watcher : ReportingSyncEventHandler, IDisposable
+    public class WatcherConsumer : ReportingSyncEventHandler
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(Watcher));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(WatcherConsumer));
 
         private bool alreadyDisposed = false;
 
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> class.
         /// </summary>
         /// <param name='queue'>
         /// Queue where the FSEvents and also the FileEvents and FolderEvents are reported.
         /// </param>
-        public Watcher(ISyncEventQueue queue) : base(queue)
+        public WatcherConsumer(ISyncEventQueue queue) : base(queue)
         {
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> enables the FSEvent report
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if enable events; otherwise, <c>false</c>.
-        /// </value>
-        public virtual bool EnableEvents { get; set; }
-
-        // This is a workaround to enable mocking Watcher with callbase
-        // TODO: Remove this when Watcher is seperated
-
-        /// <summary>
-        /// Gets the priority.
-        /// </summary>
-        /// <value>
-        /// The priority.
-        /// </value>
-        public override int Priority {
-            get {
-                return EventHandlerPriorities.GetPriority(typeof(CmisSync.Lib.Sync.Strategy.Watcher));
-            }
         }
 
         /// <summary>
@@ -103,37 +80,6 @@ namespace CmisSync.Lib.Sync.Strategy
 
             return true;
         }
-
-        #region IDisposable implementation
-
-        /// <summary>
-        /// Releases all resource used by the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> object.
-        /// </summary>
-        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/>.
-        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> in an unusable
-        /// state. After calling <see cref="Dispose"/>, you must release all references to the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> so the garbage collector can reclaim the memory that the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> was occupying.</remarks>
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Dispose the specified disposing.
-        /// </summary>
-        /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!this.alreadyDisposed)
-            {
-                // Indicate that the instance has been disposed.
-                this.alreadyDisposed = true;
-            }
-        }
-
-        #endregion
 
         private void HandleFolderEvents(IFSEvent e)
         {

@@ -92,7 +92,7 @@ namespace CmisSync.Lib.Events
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;
-            map[typeof(Watcher)] = NORMAL;
+            map[typeof(WatcherConsumer)] = NORMAL;
             map[typeof(Crawler)] = NORMAL;
             map[typeof(SyncMechanism)] = NORMAL;
             map[typeof(GenericSyncEventHandler<>)] = NORMAL;

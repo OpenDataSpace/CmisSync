@@ -213,11 +213,12 @@ namespace CmisSync.Lib.Sync
 
             // Add File System Watcher
             #if __COCOA__
-            this.Watcher = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
+            this.WatcherProducer = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
             #else
-            this.Watcher = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue);
+            this.WatcherProducer = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue);
             #endif
-            this.Queue.EventManager.AddEventHandler(this.Watcher);
+            this.WatcherConsumer = new WatcherConsumer(this.Queue);
+            this.Queue.EventManager.AddEventHandler(this.WatcherConsumer);
 
             // Add transformer
             this.transformer = new ContentChangeEventTransformer(this.Queue, this.storage, this.fileSystemFactory);
@@ -277,9 +278,14 @@ namespace CmisSync.Lib.Sync
         public bool Stopped { get; set; }
 
         /// <summary>
-        /// Gets the watcher of the local filesystem for changes.
+        /// Gets the watcherproducer of the local filesystem for changes.
         /// </summary>
-        public CmisSync.Lib.Sync.Strategy.Watcher Watcher { get; private set; }
+        public IWatcherProducer WatcherProducer { get; private set; }
+        
+        /// <summary>
+        /// Gets the watcherconsumer of the local filesystem for changes.
+        /// </summary>
+        public WatcherConsumer WatcherConsumer { get; private set; }
 
         /// <summary>
         /// Gets or sets the synchronized folder's information.
@@ -319,7 +325,7 @@ namespace CmisSync.Lib.Sync
             this.Connect();
 
             // Enable FS Watcher events
-            this.Watcher.EnableEvents = true;
+            this.WatcherProducer.EnableEvents = true;
 
             // Sync up everything that changed
             // since we've been offline
@@ -341,7 +347,7 @@ namespace CmisSync.Lib.Sync
                 if (disposing)
                 {
                     this.Scheduler.Dispose();
-                    this.Watcher.Dispose();
+                    this.WatcherProducer.Dispose();
                     this.Queue.StopListener();
                     int timeout = 500;
                     if(!this.Queue.WaitForStopped(timeout))

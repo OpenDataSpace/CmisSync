@@ -151,7 +151,8 @@ SOURCES =  \
 	Sync/Strategy/SyncMechanism.cs \
 	Sync/Strategy/Watcher/MacWatcher.cs \
 	Sync/Strategy/Watcher/NetWatcher.cs \
-	Sync/Strategy/Watcher/Watcher.cs \
+	Sync/Strategy/Watcher/IWatcherProducer.cs \
+	Sync/Strategy/Watcher/WatcherConsumer.cs \
 	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs

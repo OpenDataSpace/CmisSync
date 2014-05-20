@@ -315,8 +315,8 @@ namespace TestLibrary.IntegrationTests
             var localFetcher = new LocalObjectFetcher(storage.Matcher, fsFactory);
             manager.AddEventHandler(localFetcher);
 
-            var watcher = new Mock<Strategy.Watcher>(queue) { CallBase = true };
-            manager.AddEventHandler(watcher.Object);
+            var watcher = new Strategy.WatcherConsumer(queue);
+            manager.AddEventHandler(watcher);
 
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
