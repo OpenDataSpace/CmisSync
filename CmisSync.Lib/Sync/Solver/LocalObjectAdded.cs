@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Sync.Solver
         /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
             // Create new remote object
             if(localFile is IDirectoryInfo)

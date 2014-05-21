@@ -134,8 +134,7 @@ namespace TestLibrary.IntegrationTests
             session.Verify(f => f.Delete(It.Is<IObjectId>(i => i.Id == id), true), Times.Once());
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
-        
-        [Ignore]
+
         [Test, Category("Fast")]
         public void RunFSEventFileCreated()
         {

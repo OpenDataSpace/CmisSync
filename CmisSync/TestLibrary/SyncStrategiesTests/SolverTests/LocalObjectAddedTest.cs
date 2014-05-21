@@ -61,39 +61,12 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void LocalFolderAdded()
         {
             string folderName = "a";
-            string path = Path.Combine(Path.GetTempPath(), folderName);
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
             bool extendedAttributes = false;
 
-            var futureRemoteFolder = Mock.Of<IFolder>(f =>
-                                                      f.Name == folderName &&
-                                                      f.Id == id &&
-                                                      f.ParentId == parentId &&
-                                                      f.ChangeToken == lastChangeToken);
-            var futureRemoteFolderId = Mock.Of<IObjectId>(o =>
-                                                          o.Id == id);
-
-            this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolderId);
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteFolderId))).Returns(futureRemoteFolder);
-
-            var dirInfo = new Mock<IDirectoryInfo>();
-            dirInfo.Setup(d => d.FullName).Returns(path);
-            dirInfo.Setup(d => d.Name).Returns(folderName);
-            dirInfo.Setup(d => d.Exists).Returns(true);
-            dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
-
-            var parentDirInfo = Mock.Of<IDirectoryInfo>(d =>
-                                                        d.FullName == Path.GetTempPath() &&
-                                                        d.Name == Path.GetFileName(Path.GetTempPath()));
-            dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
-            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == Path.GetTempPath()))).Returns(
-                Mock.Of<IMappedObject>(o =>
-                                   o.RemoteObjectId == parentId));
-            var solver = new LocalObjectAdded();
-
-            solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
+            var dirInfo = RunSolveFolder(folderName, id, parentId, lastChangeToken, extendedAttributes);
 
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
@@ -104,42 +77,49 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void LocalFolderAddedWithExtendedAttributes()
         {
             string folderName = "a";
-            string path = Path.Combine(Path.GetTempPath(), folderName);
+            
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
             bool extendedAttributes = true;
-            var futureRemoteFolder = Mock.Of<IFolder>(f =>
-                                                      f.Name == folderName &&
-                                                      f.Id == id &&
-                                                      f.ParentId == parentId &&
-                                                      f.ChangeToken == lastChangeToken);
-            var futureRemoteFolderId = Mock.Of<IObjectId>(o =>
-                                                          o.Id == id);
+            var dirInfo = RunSolveFolder(folderName, id, parentId, lastChangeToken, extendedAttributes);
 
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
+            this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
+            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k == MappedObject.ExtendedAttributeKey), It.Is<string>(v => !v.Equals(Guid.Empty))), Times.Once());
+        }
+
+        private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes)
+        {
+            string path = Path.Combine(Path.GetTempPath(), folderName);
+            var futureRemoteFolder = Mock.Of<IFolder>(f =>
+                                                   f.Name == folderName &&
+                                                   f.Id == id &&
+                                                   f.ParentId == parentId &&
+                                                   f.ChangeToken == lastChangeToken);
+            var futureRemoteFolderId = Mock.Of<IObjectId>(o =>
+                                                       o.Id == id);
+         
             this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolderId);
             this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteFolderId))).Returns(futureRemoteFolder);
-
+         
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);
             dirInfo.Setup(d => d.Name).Returns(folderName);
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
-
+         
             var parentDirInfo = Mock.Of<IDirectoryInfo>(d =>
-                                                        d.FullName == Path.GetTempPath() &&
-                                                        d.Name == Path.GetFileName(Path.GetTempPath()));
+                                                     d.FullName == Path.GetTempPath() &&
+                                                     d.Name == Path.GetFileName(Path.GetTempPath()));
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == Path.GetTempPath()))).Returns(
-                Mock.Of<IMappedObject>(o =>
-                                   o.RemoteObjectId == parentId));
+             Mock.Of<IMappedObject>(o =>
+                                o.RemoteObjectId == parentId));
             var solver = new LocalObjectAdded();
-
+         
             solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
-
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
-            this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
-            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k == MappedObject.ExtendedAttributeKey), It.Is<string>(v => !v.Equals(Guid.Empty))), Times.Once());
+            return dirInfo;
         }
     }
 }
