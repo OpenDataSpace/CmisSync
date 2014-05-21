@@ -49,7 +49,7 @@ namespace CmisSync.Lib.Sync.Solver
             string parentId = this.GetParentId(localFile, storage);
             ICmisObject addedObject = this.AddCmisObject(localFile, parentId, session);
 
-            Guid uuid = this.WriteUuidToExtendedAttributeIfSupported(localFile);
+            Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFile);
 
             localFile.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFile.LastWriteTimeUtc;
 
