@@ -101,10 +101,10 @@ namespace CmisSync.Lib.Sync.Solver
             properties.Add(PropertyIds.Name, name);
             if (localFile is IDirectoryInfo) {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
-                return session.GetObject(session.CreateFolder(properties, new ObjectId(parentId))) as IFolder;
+                return session.GetObject(session.CreateFolder(properties, new ObjectId(parentId)));
             } else {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
-                return session.GetObject(session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null)) as IDocument;
+                return session.GetObject(session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null));
             }
         }
     }
