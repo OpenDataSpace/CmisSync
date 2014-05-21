@@ -58,40 +58,37 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileAdded() {
+        public void LocalFileAddedWithoutExtAttr() {
+            string fileName = "fileName";
+            string fileId = "fileId";
+            string parentId = "parentId";
+            string lastChangeToken = "token";
+            bool extendedAttributes = false;
+
+            Mock<IFileInfo> fileInfo = this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
+            this.session.Verify(
+                s => s.CreateDocument(
+                    It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
+                    It.Is<IObjectId>(o => o.Id == parentId),
+                    It.Is<IContentStream>(st => st == null),
+                    null,
+                    null,
+                    null,
+                    null),
+                Times.Once());
+            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileAddedWithExtAttr() {
             string fileName = "fileName";
             string fileId = "fileId";
             string parentId = "parentId";
             string lastChangeToken = "token";
             bool extendedAttributes = true;
 
-            var parentDirInfo = this.SetupParentFolder(parentId);
-
-            var parents = new List<IFolder>();
-            parents.Add(Mock.Of<IFolder>(f => f.Id == parentId));
-
-            string path = Path.Combine(Path.GetTempPath(), fileName);
-            var futureRemoteDoc = Mock.Of<IDocument>(f =>
-                                                   f.Name == fileName &&
-                                                   f.Id == fileId &&
-                                                   f.Parents == parents &&
-                                                   f.ChangeToken == lastChangeToken);
-            var futureRemoteDocId = Mock.Of<IObjectId>(o =>
-                                                       o.Id == fileId);
-
-            this.session.Setup(s => s.CreateDocument(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == fileName), It.Is<IObjectId>(o => o.Id == parentId), null, null, null, null, null)).Returns(futureRemoteDocId);
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteDocId))).Returns(futureRemoteDoc);
-
-            var fileInfo = new Mock<IFileInfo>();
-            fileInfo.Setup(d => d.FullName).Returns(path);
-            fileInfo.Setup(d => d.Name).Returns(fileName);
-            fileInfo.Setup(d => d.Exists).Returns(true);
-            fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
-
-            fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
-            var solver = new LocalObjectAdded();
-
-            solver.Solve(this.session.Object, this.storage.Object, fileInfo.Object, null);
+            Mock<IFileInfo> fileInfo = this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(
                 s => s.CreateDocument(
@@ -107,7 +104,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderAdded()
+        public void LocalFolderAddedWithoutExtAttr()
         {
             string folderName = "a";
             string id = "id";
@@ -148,6 +145,45 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                              Mock.Of<IMappedObject>(o =>
                              o.RemoteObjectId == parentId));
             return parentDirInfo;
+        }
+
+        private Mock<IFileInfo> RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes)
+        {
+            var parentDirInfo = this.SetupParentFolder(parentId);
+
+            var parents = new List<IFolder>();
+            parents.Add(Mock.Of<IFolder>(f => f.Id == parentId));
+
+            string path = Path.Combine(Path.GetTempPath(), fileName);
+            var futureRemoteDoc = Mock.Of<IDocument>(f =>
+                                                f.Name == fileName &&
+                                                f.Id == fileId &&
+                                                f.Parents == parents &&
+                                                f.ChangeToken == lastChangeToken);
+            var futureRemoteDocId = Mock.Of<IObjectId>(o =>
+                                                    o.Id == fileId);
+
+            this.session.Setup(s => s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == fileName),
+                It.Is<IObjectId>(o => o.Id == parentId),
+                null,
+                null,
+                null,
+                null,
+                null)).Returns(futureRemoteDocId);
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteDocId))).Returns(futureRemoteDoc);
+
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(d => d.FullName).Returns(path);
+            fileInfo.Setup(d => d.Name).Returns(fileName);
+            fileInfo.Setup(d => d.Exists).Returns(true);
+            fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
+
+            fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
+            var solver = new LocalObjectAdded();
+
+            solver.Solve(this.session.Object, this.storage.Object, fileInfo.Object, null);
+            return fileInfo;
         }
 
         private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes)
