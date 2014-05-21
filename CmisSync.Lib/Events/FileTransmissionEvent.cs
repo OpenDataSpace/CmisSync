@@ -106,6 +106,7 @@ namespace CmisSync.Lib.Events
             Status.Completed = (status.Completed != null) ? status.Completed : Status.Completed;
             Status.Started = (status.Started != null) ? status.Started : Status.Started;
             Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : Status.BitsPerSecond;
+            Status.FailedException = status.FailedException != null ? status.FailedException : Status.FailedException;
             if (TransmissionStatus != null)
                 TransmissionStatus(this, Status);
         }
@@ -317,7 +318,7 @@ namespace CmisSync.Lib.Events
             if(Completed == true)
                 status += "Completed";
             return String.Format("[TransmissionProgressEventArgs: [Length: {0}] [ActualPosition: {1}] [Percent: {2}] [Status: {3}]] [Exception: {4}]",
-                                 Length, ActualPosition, Percent, status, FailedException);
+                                 Length, ActualPosition, Percent, status, FailedException.ToString());
         }
     }
 
