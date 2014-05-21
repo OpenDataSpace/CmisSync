@@ -46,70 +46,65 @@ namespace CmisSync.Lib.Sync.Solver
         /// <param name="remoteId">Remote identifier.</param>
         public void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
-            // Create new remote object
-            if(localFile is IDirectoryInfo)
-            {
-                IDirectoryInfo localDirInfo = localFile as IDirectoryInfo;
-                IDirectoryInfo parent = localDirInfo.Parent;
-                IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
+            string parentId = this.GetParentId(localFile, storage);
+            ICmisObject addedObject = this.AddCmisObject(localFile, parentId, session);
 
-                // Create remote folder
-                Dictionary<string, object> properties = new Dictionary<string, object>();
-                properties.Add(PropertyIds.Name, localDirInfo.Name);
-                properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
-                IFolder folder = session.GetObject(session.CreateFolder(properties, new ObjectId(mappedParent.RemoteObjectId))) as IFolder;
-                Guid uuid = Guid.Empty;
-                if (localDirInfo.IsExtendedAttributeAvailable()) {
-                    uuid = Guid.NewGuid();
-                    localDirInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
-                }
+            Guid uuid = this.WriteUuidToExtendedAttribute(localFile);
 
-                localDirInfo.LastWriteTimeUtc = folder.LastModificationDate != null ? (DateTime)folder.LastModificationDate : localDirInfo.LastWriteTimeUtc;
+            localFile.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFile.LastWriteTimeUtc;
 
-                MappedObject mappedFolder = new MappedObject(
-                    localDirInfo.Name,
-                    folder.Id,
-                    MappedObjectType.Folder,
-                    mappedParent.RemoteObjectId,
-                    folder.ChangeToken)
+            MappedObject mappedFolder = new MappedObject(
+                    localFile.Name,
+                    addedObject.Id,
+                    localFile is IDirectoryInfo ? MappedObjectType.Folder : MappedObjectType.File,
+                    parentId,
+                    addedObject.ChangeToken)
                 {
                     Guid = uuid,
-                    LastRemoteWriteTimeUtc = folder.LastModificationDate,
-                    LastLocalWriteTimeUtc = localDirInfo.LastWriteTimeUtc
+                    LastRemoteWriteTimeUtc = addedObject.LastModificationDate,
+                    LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc
                 };
-                storage.SaveMappedObject(mappedFolder);
+            storage.SaveMappedObject(mappedFolder);
+        }
+
+        private static Guid WriteUuidToExtendedAttribute(IFileSystemInfo localFile)
+        {
+            Guid uuid = Guid.Empty;
+            if (localFile.IsExtendedAttributeAvailable())
+            {
+                uuid = Guid.NewGuid();
+                localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
             }
-            else if(localFile is IFileInfo)
-            {
-                // Create empty remote file
-                IFileInfo localFileInfo = localFile as IFileInfo;
-                IDirectoryInfo parent = localFileInfo.Directory;
-                IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
+            
+            return uuid;
+        }
 
-                Dictionary<string, object> properties = new Dictionary<string, object>();
-                properties.Add(PropertyIds.Name, localFileInfo.Name);
+        private string GetParentId(IFileSystemInfo fileInfo, IMetaDataStorage storage)
+        {
+            IDirectoryInfo parent = null;
+            if (fileInfo is IDirectoryInfo) {
+                IDirectoryInfo localDirInfo = fileInfo as IDirectoryInfo;
+                parent = localDirInfo.Parent;
+            } else {
+                IFileInfo localFileInfo = fileInfo as IFileInfo;
+                parent = localFileInfo.Directory;
+            }
+
+            IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
+            return mappedParent.RemoteObjectId;
+        }
+
+        private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session)
+        {
+            string name = localFile.Name;
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, name);
+            if (localFile is IDirectoryInfo) {
+                properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+                return session.GetObject(session.CreateFolder(properties, new ObjectId(parentId))) as IFolder;
+            } else {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
-                IDocument doc = session.GetObject(session.CreateDocument(properties, new ObjectId(mappedParent.RemoteObjectId), null, null, null, null, null)) as IDocument;
-                Guid uuid = Guid.Empty;
-                if (localFileInfo.IsExtendedAttributeAvailable()) {
-                    uuid = Guid.NewGuid();
-                    localFileInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
-                }
-
-                localFileInfo.LastWriteTimeUtc = doc.LastModificationDate != null ? (DateTime)doc.LastModificationDate : localFileInfo.LastWriteTimeUtc;
-
-                IMappedObject mappedFile = new MappedObject(
-                    localFileInfo.Name,
-                    doc.Id,
-                    MappedObjectType.File,
-                    mappedParent.RemoteObjectId,
-                    doc.ChangeToken)
-                {
-                    Guid = uuid,
-                    LastRemoteWriteTimeUtc = doc.LastModificationDate,
-                    LastLocalWriteTimeUtc = localFileInfo.LastWriteTimeUtc
-                };
-                storage.SaveMappedObject(mappedFile);
+                return session.GetObject(session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null)) as IDocument;
             }
         }
     }
