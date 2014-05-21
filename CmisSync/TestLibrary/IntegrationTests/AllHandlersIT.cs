@@ -136,21 +136,6 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast")]
-        public void RunFSEventFileCreated()
-        {
-            string fileName = "as";
-
-            var storage = this.GetInitializedStorage();
-            var session = new Mock<ISession>();
-
-            var queue = this.CreateQueue(session, storage);
-            var myEvent = new FSEvent(WatcherChangeTypes.Created, Path.Combine(localRoot, fileName));
-            queue.AddEvent(myEvent);
-            queue.Run();
-
-        }
-
-        [Test, Category("Fast")]
         public void ContentChangeIndicatesFolderDeletionOfExistingFolder()
         {
             var storage = this.GetInitializedStorage();
