@@ -966,7 +966,6 @@ namespace CmisSync.Lib.Sync
                             Logger.Info("Uploading: " + filePath);
                             this.Queue.AddEvent(transmissionEvent);
                             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = true});
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Started = false});
                             // Prepare properties
                             string fileName = Path.GetFileName(filePath);
                             Dictionary<string, object> properties = new Dictionary<string, object>();
