@@ -100,7 +100,7 @@ namespace TestLibrary.IntegrationTests
         public void Init()
         {
             var config = ITUtils.GetConfig();
-            
+
             // RepoInfo
             this.repoInfo = new RepoInfo {
                 AuthenticationType = AuthenticationType.BASIC,
@@ -208,6 +208,20 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("target"));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalFileCreated()
+        {
+            string fileName = "file";
+            var filePath = Path.Combine(localRootDir.FullName, fileName);
+            File.Create(filePath).Dispose();
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+            var children = this.remoteRootDir.GetChildren();
+            Assert.AreEqual(children.TotalNumItems, 1);
         }
 
         private class CmisRepoMock : CmisRepo
