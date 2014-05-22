@@ -93,6 +93,7 @@ SOURCES =  \
 	TestUtils/CmisConvenienceExtenders.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
+	TestUtils/MockOfIFolderUtil.cs \
 	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \
