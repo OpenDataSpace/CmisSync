@@ -46,7 +46,7 @@ namespace CmisSync.Lib.Events
         /// The event to handle.
         /// </param>
         /// <returns>
-        /// true is handled
+        /// true if handled
         /// </returns>
         public abstract bool Handle(ISyncEvent e);
 

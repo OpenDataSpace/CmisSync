@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Events
     using System;
 
     using log4net;
- 
+
     /// <summary>
     /// Abstrace baseclass for all SyncEventHandlers which need the queue.
     /// </summary>
@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Events
         /// The queue.
         /// </summary>
         protected readonly ISyncEventQueue Queue;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.ReportingSyncEventHandler"/> class.
         /// </summary>
@@ -48,7 +48,7 @@ namespace CmisSync.Lib.Events
             if(queue == null) {
                 throw new ArgumentNullException("Given SyncEventQueue was null");
             }
-            
+
             this.Queue = queue;
         }
     }
