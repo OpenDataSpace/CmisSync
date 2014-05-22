@@ -19,7 +19,7 @@
 
 namespace TestLibrary
 {
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
 
     using CmisSync.Lib.Events;
 
@@ -31,7 +31,7 @@ namespace TestLibrary
     public class SingleStepEventQueue : IDisposableSyncEventQueue
     {
         public ISyncEventManager Manager;
-        public Queue<ISyncEvent> Queue = new Queue<ISyncEvent>();
+        public ConcurrentQueue<ISyncEvent> Queue = new ConcurrentQueue<ISyncEvent>();
 
         public SingleStepEventQueue(ISyncEventManager manager) {
             this.Manager = manager;
@@ -52,8 +52,11 @@ namespace TestLibrary
         }
 
         public void Step() {
-            ISyncEvent e = this.Queue.Dequeue();
-            this.Manager.Handle(e);
+
+            ISyncEvent e;
+            if(this.Queue.TryDequeue(out e)){
+                this.Manager.Handle(e);
+            }
         }
 
         public void Run() {

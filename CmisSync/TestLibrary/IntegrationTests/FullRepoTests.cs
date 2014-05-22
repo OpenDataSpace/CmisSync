@@ -49,6 +49,7 @@ namespace TestLibrary.IntegrationTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net;
 
     using CmisSync.Lib;
@@ -100,7 +101,7 @@ namespace TestLibrary.IntegrationTests
         public void Init()
         {
             var config = ITUtils.GetConfig();
-            
+
             // RepoInfo
             this.repoInfo = new RepoInfo {
                 AuthenticationType = AuthenticationType.BASIC,
@@ -208,6 +209,29 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("target"));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalFileCreated()
+        {
+            string fileName = "file";
+            string content = "content";
+            var filePath = Path.Combine(localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(filePath);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(content);
+            }
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOfType(typeof(IDocument)));
+            var doc = child as IDocument;
+            Assert.That(doc.ContentStreamId, Is.Not.Null, "ContentStream not set");
+
         }
 
         private class CmisRepoMock : CmisRepo
