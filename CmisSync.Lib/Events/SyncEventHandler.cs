@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Events
     using System;
 
     using log4net;
-    
+
     /// <summary>
     /// Base class for all Event-Handlers
     /// </summary>
@@ -38,7 +38,7 @@ namespace CmisSync.Lib.Events
                 return EventHandlerPriorities.GetPriority(this.GetType());
             }
         }
-        
+
         /// <summary>
         /// Handle the specified e.
         /// </summary>
@@ -69,11 +69,11 @@ namespace CmisSync.Lib.Events
             if(!(obj is SyncEventHandler)) {
                 throw new ArgumentException("Argument is not a SyncEventHandler", "obj");
             }
-            
+
             SyncEventHandler other = obj as SyncEventHandler;
             return this.CompareTo(other);
         }
-  
+
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.SyncEventHandler"/>.
         /// </summary>
