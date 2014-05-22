@@ -165,6 +165,7 @@
     <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
     <Compile Include="SyncStrategiesTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
     <Compile Include="EventsTests\FsEventTest.cs" />
+    <Compile Include="SyncStrategiesTests\DescendantsCrawlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

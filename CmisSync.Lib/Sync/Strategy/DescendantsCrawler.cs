@@ -30,9 +30,13 @@ namespace CmisSync.Lib.Sync.Strategy
     /// <summary>
     /// Decendants crawler.
     /// </summary>
-    public class DecendantsCrawler : Crawler
+    public class DecendantsCrawler : ReportingSyncEventHandler
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(DecendantsCrawler));
+        private IFolder remoteFolder;
+        private IDirectoryInfo localFolder;
+        private IMetaDataStorage storage;
+        private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.DecendantsCrawler"/> class.
@@ -48,8 +52,21 @@ namespace CmisSync.Lib.Sync.Strategy
             IDirectoryInfo localFolder, 
             IMetaDataStorage storage,
             IFileSystemInfoFactory fsFactory = null)
-            : base(queue, remoteFolder, localFolder, storage, fsFactory)
+            : base(queue)
         {
+            if (remoteFolder == null) {
+                throw new ArgumentNullException("Given remoteFolder is null");
+            }
+
+            if (localFolder == null) {
+                throw new ArgumentNullException("Given localFolder is null");
+            }
+
+            if (fsFactory == null) {
+                this.fsFactory = new FileSystemInfoFactory();
+            } else {
+                this.fsFactory = fsFactory;
+            }
         }
 
         public override bool Handle(ISyncEvent e)
@@ -65,7 +82,7 @@ namespace CmisSync.Lib.Sync.Strategy
         }
 
         private void CrawlDescendants() {
-            var desc = this.RemoteFolder.GetDescendants(-1);
+            var desc = this.remoteFolder.GetDescendants(-1);
         }
     }
 }
