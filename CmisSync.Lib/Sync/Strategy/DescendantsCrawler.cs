@@ -30,26 +30,26 @@ namespace CmisSync.Lib.Sync.Strategy
     /// <summary>
     /// Decendants crawler.
     /// </summary>
-    public class DecendantsCrawler : ReportingSyncEventHandler
+    public class DescendantsCrawler : ReportingSyncEventHandler
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(DecendantsCrawler));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(DescendantsCrawler));
         private IFolder remoteFolder;
         private IDirectoryInfo localFolder;
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.DecendantsCrawler"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.DescendantsCrawler"/> class.
         /// </summary>
         /// <param name="queue">Sync Event Queue.</param>
         /// <param name="remoteFolder">Remote folder.</param>
         /// <param name="localFolder">Local folder.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="fsFactory">File system info factory.</param>
-        public DecendantsCrawler(
+        public DescendantsCrawler(
             ISyncEventQueue queue,
             IFolder remoteFolder,
-            IDirectoryInfo localFolder, 
+            IDirectoryInfo localFolder,
             IMetaDataStorage storage,
             IFileSystemInfoFactory fsFactory = null)
             : base(queue)
@@ -62,6 +62,14 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException("Given localFolder is null");
             }
 
+            if (storage == null) {
+                throw new ArgumentNullException("Given storage is null");
+            }
+
+            this.storage = storage;
+            this.remoteFolder = remoteFolder;
+            this.localFolder = localFolder;
+
             if (fsFactory == null) {
                 this.fsFactory = new FileSystemInfoFactory();
             } else {
@@ -69,6 +77,11 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
+        /// <summary>
+        /// Handles StartNextSync events.
+        /// </summary>
+        /// <param name="e">The event to handle.</param>
+        /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e)
         {
             if(e is StartNextSyncEvent) {

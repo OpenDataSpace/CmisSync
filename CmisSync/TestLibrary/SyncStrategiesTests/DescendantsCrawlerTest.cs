@@ -21,6 +21,12 @@ namespace TestLibrary.SyncStrategiesTests
 {
     using System;
 
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using DotCMIS.Client;
+
     using Moq;
 
     using NUnit.Framework;
@@ -28,8 +34,51 @@ namespace TestLibrary.SyncStrategiesTests
     [TestFixture]
     public class DescendantsCrawlerTest
     {
-        public DescendantsCrawlerTest()
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfLocalFolderIsNull()
         {
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), null, Mock.Of<IMetaDataStorage>());
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfRemoteFolderIsNull()
+        {
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>());
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfQueueIsNull()
+        {
+            new DescendantsCrawler(null, Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>());
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfStorageIsNull()
+        {
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), null);
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorWorksWithoutFsInfoFactory()
+        {
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>());
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorTakesFsInfoFactory()
+        {
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
+        }
+
+        [Test, Category("Fast")]
+        public void PriorityIsNormal()
+        {
+            var crawler = new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>());
+            Assert.That(crawler.Priority == EventHandlerPriorities.NORMAL);
         }
     }
 }
