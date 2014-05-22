@@ -49,6 +49,7 @@ namespace TestLibrary.IntegrationTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net;
 
     using CmisSync.Lib;
@@ -214,14 +215,23 @@ namespace TestLibrary.IntegrationTests
         public void OneLocalFileCreated()
         {
             string fileName = "file";
+            string content = "content";
             var filePath = Path.Combine(localRootDir.FullName, fileName);
-            File.Create(filePath).Dispose();
+            var fileInfo = new FileInfo(filePath);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(content);
+            }
 
             this.repo.Initialize();
 
             this.repo.Run();
             var children = this.remoteRootDir.GetChildren();
-            Assert.AreEqual(children.TotalNumItems, 1);
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOfType(typeof(IDocument)));
+            var doc = child as IDocument;
+            Assert.That(doc.ContentStreamId, Is.Not.Null, "ContentStream not set");
+
         }
 
         private class CmisRepoMock : CmisRepo
