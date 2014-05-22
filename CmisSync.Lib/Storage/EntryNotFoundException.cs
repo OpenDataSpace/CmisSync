@@ -20,11 +20,54 @@
 namespace CmisSync.Lib.Storage
 {
     using System;
+    using System.Runtime.Serialization;
 
     /// <summary>
     /// Db requeted Entry not found exception.
     /// </summary>
+    [Serializable]
     public class EntryNotFoundException : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.EntryNotFoundException"/> class.
+        /// </summary>
+        public EntryNotFoundException() : base() {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.EntryNotFoundException"/> class.
+        /// </summary>
+        /// <param name='message'>
+        /// Message of the exception.
+        /// </param>
+        public EntryNotFoundException(string message) : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.EntryNotFoundException"/> class.
+        /// </summary>
+        /// <param name='message'>
+        /// Message of the exception.
+        /// </param>
+        /// <param name='inner'>
+        /// Inner Exception.
+        /// </param>
+        public EntryNotFoundException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.EntryNotFoundException"/> class.
+        /// </summary>
+        /// <param name='info'>
+        /// Serialization Info.
+        /// </param>
+        /// <param name='context'>
+        /// Serialization Context.
+        /// </param>
+        protected EntryNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
     }
 }

@@ -34,6 +34,10 @@ namespace CmisSync.Lib.Sync.Solver
     {
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
+            if (remoteId == null) {
+                remoteId = new DotCMIS.Client.Impl.ObjectId(storage.GetObjectByLocalPath(localFile).RemoteObjectId);
+            }
+
             session.Delete(remoteId, true);
             var mappedObject = storage.GetObjectByRemoteId(remoteId.Id);
             storage.RemoveObject(mappedObject);

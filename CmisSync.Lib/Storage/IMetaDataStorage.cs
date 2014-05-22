@@ -118,5 +118,16 @@ namespace CmisSync.Lib.Storage
         /// Parent, which should be used to request its children.
         /// </param>
         List<IMappedObject> GetChildren(IMappedObject parent);
+
+        /// <summary>
+        /// Prints the file/folder structure like unix "find" command.
+        /// </summary>
+        /// <returns>The find string.</returns>
+        string ToFindString();
+
+        /// <summary>
+        /// Validates the object structure. If the structure is not fine, the DB content will be printed and an exception will be thrown.
+        /// </summary>
+        void ValidateObjectStructure();
     }
 }

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="FileEvent.cs" company="GRAU DATA AG">
+// <copyright file="FileMovedEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -31,26 +31,46 @@ namespace CmisSync.Lib.Events
     /// </summary>
     public class FileMovedEvent : FileEvent
     {
-
-        public IFileInfo OldLocalFile{ get; protected set; }
-
-        public IDirectoryInfo OldParentFolder { get; protected set; }
-
-        public string OldRemoteFilePath { get; protected set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileMovedEvent"/> class.
+        /// </summary>
+        /// <param name="oldLocalFile">Old local file.</param>
+        /// <param name="newLocalFile">New local file.</param>
+        /// <param name="oldParentFolder">Old parent folder.</param>
+        /// <param name="newParentFolder">New parent folder.</param>
+        /// <param name="oldRemoteFilePath">Old remote file path.</param>
+        /// <param name="newRemoteFile">New remote file.</param>
         public FileMovedEvent(
             IFileInfo oldLocalFile = null,
             IFileInfo newLocalFile = null,
             IDirectoryInfo oldParentFolder = null,
             IDirectoryInfo newParentFolder = null,
             string oldRemoteFilePath = null,
-            IDocument newRemoteFile = null
-        ) : base(newLocalFile, newParentFolder, newRemoteFile)
+            IDocument newRemoteFile = null)
+            : base(newLocalFile, newParentFolder, newRemoteFile)
         {
-            Local = MetaDataChangeType.MOVED;
-            OldLocalFile = oldLocalFile;
-            OldParentFolder = oldParentFolder;
-            OldRemoteFilePath = oldRemoteFilePath;
+            this.Local = MetaDataChangeType.MOVED;
+            this.OldLocalFile = oldLocalFile;
+            this.OldParentFolder = oldParentFolder;
+            this.OldRemoteFilePath = oldRemoteFilePath;
         }
+
+        /// <summary>
+        /// Gets or sets the old local file.
+        /// </summary>
+        /// <value>The old local file.</value>
+        public IFileInfo OldLocalFile { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets the old parent folder.
+        /// </summary>
+        /// <value>The old parent folder.</value>
+        public IDirectoryInfo OldParentFolder { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets the old remote file path.
+        /// </summary>
+        /// <value>The old remote file path.</value>
+        public string OldRemoteFilePath { get; protected set; }
     }
 }

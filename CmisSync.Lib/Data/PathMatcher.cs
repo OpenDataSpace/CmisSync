@@ -49,6 +49,16 @@ namespace CmisSync.Lib.Data
                 throw new ArgumentException("Given remote path is null or empty");
             }
 
+            if (!localTargetRootPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                localTargetRootPath += Path.DirectorySeparatorChar.ToString();
+            }
+
+            if (!remoteTargetRootPath.EndsWith("/"))
+            {
+                remoteTargetRootPath += "/";
+            }
+
             this.LocalTargetRootPath = localTargetRootPath;
             this.RemoteTargetRootPath = remoteTargetRootPath;
         }
@@ -182,6 +192,10 @@ namespace CmisSync.Lib.Data
         /// <param name="remotePath">Remote path.</param>
         public bool CanCreateLocalPath(string remotePath)
         {
+            if(!remotePath.EndsWith("/")) {
+                remotePath += "/";
+            }
+
             return remotePath.StartsWith(this.RemoteTargetRootPath);
         }
 
@@ -192,6 +206,10 @@ namespace CmisSync.Lib.Data
         /// <param name="localPath">Local path.</param>
         public bool CanCreateRemotePath(string localPath)
         {
+            if(!localPath.EndsWith(Path.DirectorySeparatorChar.ToString())) {
+                localPath += Path.DirectorySeparatorChar.ToString();
+            }
+
             return localPath.StartsWith(this.LocalTargetRootPath);
         }
 
@@ -203,7 +221,7 @@ namespace CmisSync.Lib.Data
         /// <returns>true if the paths matches</returns>
         public bool Matches(string localPath, string remotePath)
         {
-            if (!localPath.StartsWith(this.LocalTargetRootPath))
+            if (!this.CanCreateRemotePath(localPath))
             {
                 throw new ArgumentOutOfRangeException(string.Format("The given local path \"{0}\"does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
@@ -248,6 +266,10 @@ namespace CmisSync.Lib.Data
             {
                 throw new ArgumentOutOfRangeException(string.Format("Given remote object with Path \"{0}\" is not in the remote target folder \"{1}\"", remotePath, this.RemoteTargetRootPath));
             }
+
+            if(this.RemoteTargetRootPath.Equals(remotePath + "/")) {
+                return this.LocalTargetRootPath;
+            }
                 
             string relativePath = remotePath.Substring(this.RemoteTargetRootPath.Length);
             relativePath = (relativePath.Length > 0 && relativePath[0] == '/') ? relativePath.Substring(1) : relativePath;
@@ -265,7 +287,7 @@ namespace CmisSync.Lib.Data
             {
                 throw new ArgumentOutOfRangeException(string.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
-                
+
             string relativePath = localPath.Substring(this.LocalTargetRootPath.Length);
             if (relativePath.Length == 0)
             {
@@ -274,7 +296,7 @@ namespace CmisSync.Lib.Data
 
             relativePath = (relativePath.Length > 0 && relativePath[0] == Path.DirectorySeparatorChar) ? relativePath.Substring(1) : relativePath;
             relativePath = relativePath.Replace(Path.DirectorySeparatorChar, '/');
-            return string.Format("{0}/{1}", this.RemoteTargetRootPath, relativePath);
+            return string.Format("{0}{1}", this.RemoteTargetRootPath, relativePath);
         }
 
         /// <summary>
@@ -289,7 +311,15 @@ namespace CmisSync.Lib.Data
                 throw new ArgumentOutOfRangeException(string.Format("Given local path \"{0}\" does not start with the correct path \"{1}\"", localPath, this.LocalTargetRootPath));
             }
 
+            if(this.LocalTargetRootPath.Equals(localPath + Path.DirectorySeparatorChar.ToString())) {
+                return ".";
+            }
+
             string relativePath = localPath.Substring(this.LocalTargetRootPath.Length);
+            if (relativePath.StartsWith(Path.DirectorySeparatorChar.ToString())) {
+                relativePath = relativePath.Substring(1);
+            }
+
             if (relativePath.Length == 0)
             {
                 return ".";

@@ -16,23 +16,40 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-
-using log4net;
-
 namespace CmisSync.Lib.Events
 {
+    using System;
 
+    using log4net;
+ 
+    /// <summary>
+    /// Abstrace baseclass for all SyncEventHandlers which need the queue.
+    /// </summary>
+    /// <exception cref='ArgumentNullException'>
+    /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+    /// </exception>
     public abstract class ReportingSyncEventHandler : SyncEventHandler
     {
-
+        /// <summary>
+        /// The queue.
+        /// </summary>
         protected readonly ISyncEventQueue Queue;
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.ReportingSyncEventHandler"/> class.
+        /// </summary>
+        /// <param name='queue'>
+        /// A reference to the queue.
+        /// </param>
+        /// <exception cref='ArgumentNullException'>
+        /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+        /// </exception>
         public ReportingSyncEventHandler(ISyncEventQueue queue) : base() {
-            if( queue == null )
+            if(queue == null) {
                 throw new ArgumentNullException("Given SyncEventQueue was null");
+            }
+            
             this.Queue = queue;
         }
-
     }
 }
-

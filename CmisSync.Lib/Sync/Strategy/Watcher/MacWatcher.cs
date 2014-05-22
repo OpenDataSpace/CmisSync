@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Sync.Strategy
     /// <summary>
     /// Implementation of a Mac OS specific file system watcher.
     /// </summary>
-    public class MacWatcher : Watcher
+    public class MacWatcher : IWatcherProducer
     {
 
         private FSEventStream FsStream;
@@ -45,12 +45,13 @@ namespace CmisSync.Lib.Sync.Strategy
         private bool StopRunLoop = false;
         private NSRunLoop RunLoop = null;
         private Thread RunLoopThread = null;
+        private readonly ISyncEventQueue Queue;
 
         /// <summary>
         /// Enables the FSEvent report
         /// </summary>
         /// <value><c>true</c> if enable events; otherwise, <c>false</c>.</value>
-        public override bool EnableEvents {
+        public bool EnableEvents {
             get {
                 return isStarted;
             }
@@ -114,22 +115,36 @@ namespace CmisSync.Lib.Sync.Strategy
         /// Dispose the FsStream.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected override void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (! disposed) {
                 if (disposing) {
                     // Dispose of any managed resources of the derived class here.
                     EnableEvents = false;
                     FsStream.Invalidate ();
-                    // Call the base class implementation.
-                    base.Dispose(disposing);
+
                     StopRunLoop = true;
                     RunLoopThread.Join ();
                     disposed = true;
                 }
                 // Dispose of any unmanaged resources of the derived class here.
             }
-        } 
+        }
+        
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/>.
+        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> in an unusable
+        /// state. After calling <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> so the garbage collector can reclaim the memory that the
+        /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> was occupying.</remarks>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
 
         private void OnFSEventStreamEvents (object sender, FSEventStreamEventsArgs e)
         {

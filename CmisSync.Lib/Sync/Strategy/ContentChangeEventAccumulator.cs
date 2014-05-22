@@ -73,7 +73,7 @@ namespace CmisSync.Lib.Sync.Strategy
             }
 
             var contentChangeEvent = e as ContentChangeEvent;
-            if(contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted) {
+            if(contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted && contentChangeEvent.CmisObject == null) {
                 try {
                     contentChangeEvent.UpdateObject(this.session);
                     Logger.Debug("Updated Object in contentChangeEvent" + contentChangeEvent.ToString());

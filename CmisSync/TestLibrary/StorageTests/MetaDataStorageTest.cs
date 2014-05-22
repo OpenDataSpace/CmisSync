@@ -21,6 +21,7 @@ namespace TestLibrary.StorageTests
 {
     using System;
     using System.IO;
+    using System.Linq;
 
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
@@ -43,7 +44,7 @@ namespace TestLibrary.StorageTests
         public void InitCustomSerializator()
         {
             // Use Newtonsoft.Json as Serializator
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
@@ -272,7 +273,7 @@ namespace TestLibrary.StorageTests
             var storage = new MetaDataStorage(this.engine, this.matcher);
             storage.RemoveObject(Mock.Of<IMappedObject>());
         }
-        
+
         [Test, Category("Fast")]
         public void RemoveObjectTest()
         {
@@ -399,7 +400,7 @@ namespace TestLibrary.StorageTests
             var storage = new MetaDataStorage(this.engine, matcher);
             var rootFolder = new MappedObject("/", id, MappedObjectType.Folder, null, "token");
             storage.SaveMappedObject(rootFolder);
-            
+
             Assert.That(storage.GetObjectByRemoteId(id), Is.Not.Null, "Not findable by ID");
             Assert.That(storage.GetObjectByLocalPath(fsInfo), Is.Not.Null, "Not findable by path");
         }
@@ -428,6 +429,119 @@ namespace TestLibrary.StorageTests
 
             Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(path, oldName))), Is.Null);
             Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(path, newName))), Is.EqualTo(savedObject));
+        }
+
+        [Test, Category("Fast")]
+        public void ToLinePrintReturnsEmptyStringOnEmptyDB()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            Assert.That(storage.ToFindString(), Is.EqualTo(string.Empty));
+        }
+
+        [Test, Category("Fast")]
+        public void ToLinePrintReturnsOneLineIfOnlyRootFolderIsInDB()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            storage.SaveMappedObject(rootFolder);
+
+            Assert.That(storage.ToFindString(), Is.EqualTo("name" + Environment.NewLine));
+        }
+
+        [Test, Category("Fast")]
+        public void ToLinePrintReturnsOneLinePerEntry()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
+            var child2Folder = new MappedObject("sub2", "subId2", MappedObjectType.Folder, "rootId", "token");
+            var child3Folder = new MappedObject("sub3", "subId3", MappedObjectType.Folder, "rootId", "token");
+            var subChildFile = new MappedObject("file", "subId4", MappedObjectType.File, "subId1", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1Folder);
+            storage.SaveMappedObject(child2Folder);
+            storage.SaveMappedObject(child3Folder);
+            storage.SaveMappedObject(subChildFile);
+
+            string src = storage.ToFindString();
+
+            int count = src.Select((c, i) => src.Substring(i)).Count(sub => sub.StartsWith(Environment.NewLine));
+            Assert.That(count, Is.EqualTo(5), string.Format("Newlines Counting {0}:{2} {1}", count, src, Environment.NewLine));
+        }
+
+        [Test, Category("Fast")]
+        public void ToLinePrintReturnsOneLinePerNotFittingEntry()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "WRONGID", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1Folder);
+
+            string src = storage.ToFindString();
+
+            int count = src.Select((c, i) => src.Substring(i)).Count(sub => sub.StartsWith(Environment.NewLine));
+            Assert.That(count, Is.EqualTo(2), string.Format("Newlines Counting {0}:{2} {1}", count, src, Environment.NewLine));
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(InvalidDataException))]
+        public void ValidateFolderStructureThrowsExceptionIfRootObjectIsMissingButOtherObjectsAreStored()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
+            storage.SaveMappedObject(child1Folder);
+
+            storage.ValidateObjectStructure();
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(InvalidDataException))]
+        public void ValidateFolderStructureThrowsExceptionIfParentObjectIsMissing()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "WRONGID", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1Folder);
+
+            storage.ValidateObjectStructure();
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(InvalidDataException))]
+        public void ValidateFolderStructureThrowsExceptionIfFileParentIdIsFileObject()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1File = new MappedObject("sub1", "subId1", MappedObjectType.File, "rootId", "token");
+            var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "sub1", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1File);
+            storage.SaveMappedObject(child2File);
+
+            storage.ValidateObjectStructure();
+        }
+
+        [Test, Category("Fast")]
+        public void ValidateFolderStructureIsFineIfNoObjectIsStored()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            storage.ValidateObjectStructure();
+        }
+
+        [Test, Category("Fast")]
+        public void ValidateFolderStructureIsFineOnCleanFolderStructure()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
+            var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "subId1", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1Folder);
+            storage.SaveMappedObject(child2File);
+
+            storage.ValidateObjectStructure();
         }
     }
 }

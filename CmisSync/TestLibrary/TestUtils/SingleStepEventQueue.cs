@@ -26,29 +26,34 @@ namespace TestLibrary
     /// <summary>
     /// This is a synchronous test-replacement for SyncEventQueue
     /// </summary>
-    /// Do not use this in production code. 
-    /// It contains public fields that could do a lot of harm 
-    public class SingleStepEventQueue : IDisposableSyncEventQueue {
-        public SyncEventManager manager; 
-        public Queue<ISyncEvent> queue = new Queue<ISyncEvent>();
+    /// Do not use this in production code.
+    /// It contains public fields that could do a lot of harm
+    public class SingleStepEventQueue : IDisposableSyncEventQueue
+    {
+        public ISyncEventManager Manager;
+        public Queue<ISyncEvent> Queue = new Queue<ISyncEvent>();
 
-        public SingleStepEventQueue(SyncEventManager manager) {
-            this.manager = manager;
+        public SingleStepEventQueue(ISyncEventManager manager) {
+            this.Manager = manager;
+        }
+
+        public ISyncEventManager EventManager {
+            get { return this.Manager; }
         }
 
         public bool IsStopped {
             get {
-                return this.queue.Count == 0; 
+                return this.Queue.Count == 0;
             }
         }
 
         public void AddEvent(ISyncEvent e) {
-            this.queue.Enqueue(e);
+            this.Queue.Enqueue(e);
         }
 
         public void Step() {
-            ISyncEvent e = this.queue.Dequeue();
-            this.manager.Handle(e);
+            ISyncEvent e = this.Queue.Dequeue();
+            this.Manager.Handle(e);
         }
 
         public void Run() {
@@ -70,7 +75,7 @@ namespace TestLibrary
             return true;
         }
 
-        public void StopListener(){
+        public void StopListener() {
         }
     }
 }

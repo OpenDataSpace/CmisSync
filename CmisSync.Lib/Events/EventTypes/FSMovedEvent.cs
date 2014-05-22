@@ -21,14 +21,32 @@ namespace CmisSync.Lib.Events
 {
     using System;
     using System.IO;
-
-    public class FSMovedEvent : FSEvent
+ 
+    /// <summary>
+    /// FS moved event.
+    /// </summary>
+    public class FSMovedEvent : FSEvent, IFSMovedEvent
     {
-        public virtual string OldPath { get; private set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FSMovedEvent"/> class.
+        /// </summary>
+        /// <param name='oldPath'>
+        /// Old path.
+        /// </param>
+        /// <param name='newPath'>
+        /// New path.
+        /// </param>
         public FSMovedEvent(string oldPath, string newPath) : base(WatcherChangeTypes.Renamed, newPath)
         {
             this.OldPath = oldPath;
         }
+        
+        /// <summary>
+        /// Gets the old path.
+        /// </summary>
+        /// <value>
+        /// The old path.
+        /// </value>
+        public string OldPath { get; private set; }
     }
 }

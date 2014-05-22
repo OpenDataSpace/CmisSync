@@ -76,7 +76,7 @@ namespace TestLibrary.IntegrationTests
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType.Created, DefaultId, "someStreamId");
 
             ObservableHandler observer = this.RunQueue(session, storage);
-            
+
             observer.AssertGotSingleFileEvent(MetaDataChangeType.CREATED, ContentChangeType.CREATED);
         }
 
@@ -123,7 +123,7 @@ namespace TestLibrary.IntegrationTests
 
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Deleted);
             ObservableHandler observer = this.RunQueue(session, storage);
-            Assert.That(observer.list.Count, Is.EqualTo(0));
+            Assert.That(observer.List.Count, Is.EqualTo(0));
         }
 
         private ObservableHandler RunQueue(Mock<ISession> session, Mock<IMetaDataStorage> storage) {

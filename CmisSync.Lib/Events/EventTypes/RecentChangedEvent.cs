@@ -16,29 +16,55 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
+    /// <summary>
+    /// Recent changed event.
+    /// </summary>
     public class RecentChangedEvent : ISyncEvent
     {
-        public string Path { get; private set; }
-        public DateTime ChangeTime { get; private set; }
-        public RecentChangedEvent(String path) : this(path, DateTime.Now) { }
-
-        public RecentChangedEvent(String Path, DateTime? ChangeTime)
-        {
-            this.Path = Path;
-            this.ChangeTime = ChangeTime != null? (DateTime) ChangeTime: DateTime.Now;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.RecentChangedEvent"/> class.
+        /// </summary>
+        /// <param name="path">Path of the change.</param>
+        public RecentChangedEvent(string path) : this(path, DateTime.Now) {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.RecentChangedEvent"/> class.
+        /// </summary>
+        /// <param name="path">Path of the change.</param>
+        /// <param name="changeTime">Change time.</param>
+        public RecentChangedEvent(string path, DateTime? changeTime) {
+            this.Path = path;
+            this.ChangeTime = changeTime != null ? (DateTime)this.ChangeTime : DateTime.Now;
+        }
 
+        /// <summary>
+        /// Gets the path.
+        /// </summary>
+        /// <value>The path.</value>
+        public string Path { get; private set; }
+
+        /// <summary>
+        /// Gets the change time.
+        /// </summary>
+        /// <value>The change time.</value>
+        public DateTime ChangeTime { get; private set; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RecentChangedEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RecentChangedEvent"/>.</returns>
         public override string ToString()
         {
-            return String.Format("RecentChangedEvent: {0} at {1}", Path, ChangeTime.ToLongTimeString());
+            return string.Format("RecentChangedEvent: {0} at {1}", this.Path, this.ChangeTime.ToLongTimeString());
         }
     }
 }

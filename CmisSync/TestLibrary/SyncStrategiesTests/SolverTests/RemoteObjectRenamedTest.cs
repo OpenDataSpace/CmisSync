@@ -63,18 +63,20 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(oldPath);
             dirInfo.Setup(d => d.Name).Returns(oldFolderName);
+            dirInfo.SetupProperty(d => d.LastWriteTimeUtc);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
 
             Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, newPath, parentId, lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
 
-            var mappedFolder = Mock.Of<IMappedObject>(f =>
-                                                      f.Name == oldFolderName &&
-                                                      f.RemoteObjectId == id &&
-                                                      f.LastChangeToken == "oldToken" &&
-                                                      f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
-                                                      f.Type == MappedObjectType.Folder &&
-                                                      f.ParentId == parentId);
+            var mappedFolder = Mock.Of<IMappedObject>(
+                f =>
+                f.Name == oldFolderName &&
+                f.RemoteObjectId == id &&
+                f.LastChangeToken == "oldToken" &&
+                f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
+                f.Type == MappedObjectType.Folder &&
+                f.ParentId == parentId);
             storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
 
             var solver = new RemoteObjectRenamed();
@@ -83,21 +85,67 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
 
-            // dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modifiedDate)), Times.Once());
+            dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modifiedDate)), Times.Once());
             storage.Verify(
                 s => s.SaveMappedObject(
-                It.Is<IMappedObject>(f => VerifySavedFolder(f, id, newFolderName, parentId, lastChangeToken, modifiedDate))),
+                It.Is<IMappedObject>(f => this.VerifySavedObject(f, MappedObjectType.Folder, id, newFolderName, parentId, lastChangeToken, modifiedDate))),
                 Times.Once());
         }
 
-        private bool VerifySavedFolder(IMappedObject folder, string id, string name, string parentId, string changeToken, DateTime modifiedTime)
+        [Test, Category("Fast")]
+        public void RenameFile()
         {
-            Assert.That(folder.Type, Is.EqualTo(MappedObjectType.Folder));
-            Assert.That(folder.RemoteObjectId, Is.EqualTo(id));
-            Assert.That(folder.ParentId, Is.EqualTo(parentId));
-            Assert.That(folder.Name, Is.EqualTo(name));
-            Assert.That(folder.LastChangeToken, Is.EqualTo(changeToken));
-            Assert.That(folder.LastRemoteWriteTimeUtc, Is.EqualTo(modifiedTime));
+            DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
+            string oldFileName = "a";
+            string newFileName = "b";
+            string oldPath = Path.Combine(Path.GetTempPath(), oldFileName);
+            string oldRemotePath = "/" + oldFileName;
+            string newPath = Path.Combine(Path.GetTempPath(), newFileName);
+            string id = "id";
+            string parentId = "root";
+            string lastChangeToken = "token";
+            var storage = new Mock<IMetaDataStorage>();
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.FullName).Returns(oldPath);
+            fileInfo.Setup(f => f.Name).Returns(oldFileName);
+            fileInfo.SetupProperty(f => f.LastWriteTimeUtc);
+            fileInfo.Setup(f => f.Directory).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
+
+            var remoteObject = MockSessionUtil.CreateRemoteDocumentMock(null, id, newFileName, lastChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
+
+            var mappedFile = Mock.Of<IMappedObject>(
+                f =>
+                f.Name == oldFileName &&
+                f.RemoteObjectId == id &&
+                f.LastChangeToken == "oldToken" &&
+                f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
+                f.Type == MappedObjectType.File &&
+                f.ParentId == parentId);
+            storage.AddMappedFolder(mappedFile, oldPath, oldRemotePath);
+
+            var solver = new RemoteObjectRenamed();
+
+            solver.Solve(null, storage.Object, fileInfo.Object, remoteObject.Object);
+
+            fileInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
+
+            fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modifiedDate)), Times.Once());
+            storage.Verify(
+                s => s.SaveMappedObject(
+                It.Is<IMappedObject>(f => this.VerifySavedObject(f, MappedObjectType.File, id, newFileName, parentId, lastChangeToken, modifiedDate))),
+                Times.Once());
+        }
+
+        private bool VerifySavedObject(IMappedObject obj, MappedObjectType type, string id, string name, string parentId, string changeToken, DateTime modifiedTime)
+        {
+            Assert.That(obj.Type, Is.EqualTo(type));
+            Assert.That(obj.RemoteObjectId, Is.EqualTo(id));
+            Assert.That(obj.ParentId, Is.EqualTo(parentId));
+            Assert.That(obj.Name, Is.EqualTo(name));
+            Assert.That(obj.LastChangeToken, Is.EqualTo(changeToken));
+            Assert.That(obj.LastRemoteWriteTimeUtc, Is.EqualTo(modifiedTime));
+            Assert.That(obj.LastLocalWriteTimeUtc, Is.EqualTo(modifiedTime));
             return true;
         }
     }

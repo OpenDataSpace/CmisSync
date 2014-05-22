@@ -16,20 +16,17 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace CmisSync.Lib
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    
     /// <summary>
     /// Aggregates the activity status of multiple processes
-    /// 
     /// The overall activity is considered "started" if any of the processes is "started";
-    /// 
     /// Example chronology (only started/stopped are important, active/down here for readability):
-    /// 
     /// PROCESS1 PROCESS2 OVERALL
     /// DOWN     DOWN     DOWN
     /// STARTED  DOWN     STARTED
@@ -47,42 +44,40 @@ namespace CmisSync.Lib
         /// </summary>
         private IActivityListener overall;
 
-
         /// <summary>
         /// Number of processes that have been started but not stopped yet.
         /// </summary>
         private int numberOfActiveProcesses;
-
-
+        
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ActivityListenerAggregator"/> class.
         /// </summary>
-        /// <param name="overallListener">The activity listener to which aggregated activity will be sent.</param>
+        /// <param name='overallListener'>
+        /// The activity listener to which aggregated activity will be sent
+        /// </param>
         public ActivityListenerAggregator(IActivityListener overallListener)
         {
             this.overall = overallListener;
         }
-
 
         /// <summary>
         /// Call this method to indicate that activity has started.
         /// </summary>
         public void ActivityStarted()
         {
-            numberOfActiveProcesses++;
-            overall.ActivityStarted();
+            this.numberOfActiveProcesses++;
+            this.overall.ActivityStarted();
         }
-
 
         /// <summary>
         /// Call this method to indicate that activity has stopped.
         /// </summary>
         public void ActivityStopped()
         {
-            numberOfActiveProcesses--;
-            if (numberOfActiveProcesses == 0)
+            this.numberOfActiveProcesses--;
+            if (this.numberOfActiveProcesses == 0)
             {
-                overall.ActivityStopped();
+                this.overall.ActivityStopped();
             }
         }
     }

@@ -27,16 +27,17 @@ SOURCES =  \
 	EventsTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
-	EventsTests/EventsFilterTests/AlreadyAddedObjectsFsEventFilterTest.cs \
 	EventsTests/EventsFilterTests/GenericHandleDublicatedEventsFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoreAlreadyHandledFsEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
-	EventsTests/EventTypesTest.cs \
 	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
+	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
@@ -45,11 +46,11 @@ SOURCES =  \
 	EventsTests/SyncEventQueueTest.cs \
 	EventsTests/SyncStrategyInitializerTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
-	IntegrationTests/CmisRepoTest.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DBreezeTests.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
@@ -72,6 +73,7 @@ SOURCES =  \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/RemoteObjectFetcherTest.cs \
+	SyncStrategiesTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
@@ -87,6 +89,7 @@ SOURCES =  \
 	SyncStrategiesTests/SyncMechanismTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/WatcherTestUtils.cs \
+	TestUtils/CmisConvenienceExtenders.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
 	TestUtils/MockSessionUtil.cs \
@@ -96,7 +99,8 @@ SOURCES =  \
 	TestUtils/SingleStepEventQueueTest.cs \
 	UtilsTests/CmisSyncLibUtilsTest.cs \
 	UtilsTests/CredentialsTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs 
+	UtilsTests/HttpProxyUtilsTest.cs \
+	UtilsTests/OperationContextFactoryTest.cs 
 	
 
 EXTRA_DIST = TestLibrary.csproj \

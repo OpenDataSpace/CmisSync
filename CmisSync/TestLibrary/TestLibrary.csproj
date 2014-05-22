@@ -88,7 +88,6 @@
     <Compile Include="EncodingTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
-    <Compile Include="EventsTests\EventTypesTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\InvalidFolderNameFilterTest.cs" />
@@ -157,10 +156,15 @@
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
     <Compile Include="RepoInfoTests.cs" />
-    <Compile Include="IntegrationTests\CmisRepoTest.cs" />
     <Compile Include="AuthenticationProviderTests\PersistentStandardAuthenticationProviderTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\AlreadyAddedObjectsFsEventFilterTest.cs" />
     <Compile Include="EventsTests\SyncStrategyInitializerTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledContentChangeEventsFilterTest.cs" />
+    <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
+    <Compile Include="IntegrationTests\FullRepoTests.cs" />
+    <Compile Include="UtilsTests\OperationContextFactoryTest.cs" />
+    <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
+    <Compile Include="SyncStrategiesTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
+    <Compile Include="EventsTests\FsEventTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -195,8 +199,8 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="true" RelativeConfigureInPath="../..">
-          <BuildFilesVar Sync="true" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="True" RelativeConfigureInPath="../..">
+          <BuildFilesVar Sync="True" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />

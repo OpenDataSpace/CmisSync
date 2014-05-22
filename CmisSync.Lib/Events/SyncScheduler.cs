@@ -16,11 +16,12 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Timers;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+    using System.Timers;
+
     /// <summary>
     /// Sync scheduler. Inserts every pollInterval a new StartNextSyncEvent into the Queue
     /// </summary>
@@ -32,18 +33,22 @@ namespace CmisSync.Lib.Events
         private double interval;
         private ISyncEventQueue queue;
         private Timer timer;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.SyncScheduler"/> class.
         /// Starts adding events automatically after successful creation.
         /// </summary>
-        /// <param name="queue">Queue.</param>
+        /// <param name="queue">Sync event queue.</param>
         /// <param name="pollInterval">Poll interval.</param>
-        public SyncScheduler (ISyncEventQueue queue, double pollInterval = 5000)
+        public SyncScheduler(ISyncEventQueue queue, double pollInterval = 5000)
         {
-            if(queue == null)
+            if (queue == null) {
                 throw new ArgumentNullException("Given queue must not be null");
-            if(pollInterval <= 0)
+            }
+
+            if (pollInterval <= 0) {
                 throw new ArgumentException("pollinterval must be greater than zero");
+            }
 
             this.interval = pollInterval;
             this.queue = queue;
@@ -71,28 +76,29 @@ namespace CmisSync.Lib.Events
         /// Handles Config changes if the poll interval has been changed.
         /// Resets also the timer if a full sync event has been recognized.
         /// </summary>
-        /// <param name="e">E.</param>
-        public override bool Handle (ISyncEvent e)
+        /// <param name="e">Sync event.</param>
+        /// <returns><c>false</c> on every event.</returns>
+        public override bool Handle(ISyncEvent e)
         {
             RepoConfigChangedEvent config = e as RepoConfigChangedEvent;
-            if(config!=null)
-            {
+            if (config != null) {
                 double newInterval = config.RepoInfo.PollInterval;
-                if( newInterval> 0 && this.interval != newInterval)
-                {
+                if (newInterval > 0 && this.interval != newInterval) {
                     this.interval = newInterval;
-                    Stop ();
-                    timer.Interval = this.interval;
-                    Start ();
+                    this.Stop();
+                    this.timer.Interval = this.interval;
+                    this.Start();
                 }
+
                 return false;
             }
+
             StartNextSyncEvent start = e as StartNextSyncEvent;
-            if(start != null && start.FullSyncRequested)
-            {
-                Stop ();
-                Start();
+            if(start != null && start.FullSyncRequested) {
+                this.Stop();
+                this.Start();
             }
+
             return false;
         }
 
@@ -105,9 +111,8 @@ namespace CmisSync.Lib.Events
         /// <see cref="CmisSync.Lib.Events.SyncScheduler"/> so the garbage collector can reclaim the memory that the
         /// <see cref="CmisSync.Lib.Events.SyncScheduler"/> was occupying.</remarks>
         public void Dispose() {
-            timer.Stop();
-            timer.Dispose();
+            this.timer.Stop();
+            this.timer.Dispose();
         }
     }
 }
-

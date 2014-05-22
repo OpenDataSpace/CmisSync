@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="AlreadyAddedObjectsFsEventFilter.cs" company="GRAU DATA AG">
+// <copyright file="IgnoreAlreadyHandledFsEventsFilter.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -24,12 +24,20 @@ namespace CmisSync.Lib.Events.Filter
 
     using CmisSync.Lib.Storage;
 
-    public class AlreadyAddedObjectsFsEventFilter : SyncEventHandler
+    /// <summary>
+    /// Already added objects fs event filter.
+    /// </summary>
+    public class IgnoreAlreadyHandledFsEventsFilter : SyncEventHandler
     {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
-        public AlreadyAddedObjectsFsEventFilter(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoreAlreadyHandledFsEventsFilter"/> class.
+        /// </summary>
+        /// <param name="storage">Storage instance.</param>
+        /// <param name="fsFactory">Fs factory.</param>
+        public IgnoreAlreadyHandledFsEventsFilter(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
         {
             if (storage == null) {
                 throw new ArgumentNullException("Given storage is null");
@@ -45,17 +53,28 @@ namespace CmisSync.Lib.Events.Filter
         /// <value>The default filter priority.</value>
         public override int Priority {
             get {
-                return EventHandlerPriorities.GetPriority(typeof(AlreadyAddedObjectsFsEventFilter));
+                return EventHandlerPriorities.GetPriority(typeof(IgnoreAlreadyHandledFsEventsFilter));
             }
         }
 
+        /// <summary>
+        /// Filters FSEvents if they signalize an add and are handled already.
+        /// This occurs if the syncer creates a local object on file system.
+        /// </summary>
+        /// <param name="e">Sync event</param>
+        /// <returns><c>true</c> if the storage contains an entry for this object</returns>
         public override bool Handle(ISyncEvent e)
         {
-            if(e is FSEvent) {
-                var fsEvent = e as FSEvent;
+            if(e is IFSEvent) {
+                var fsEvent = e as IFSEvent;
                 IFileSystemInfo path = fsEvent.IsDirectory() ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(fsEvent.Path) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(fsEvent.Path);
-                if (fsEvent.Type == WatcherChangeTypes.Created && this.storage.GetObjectByLocalPath(path) != null) {
-                    return true;
+                switch(fsEvent.Type) {
+                case WatcherChangeTypes.Created:
+                    return this.storage.GetObjectByLocalPath(path) != null;
+                case WatcherChangeTypes.Deleted:
+                    return this.storage.GetObjectByLocalPath(path) == null;
+                default:
+                    return false;
                 }
             }
 

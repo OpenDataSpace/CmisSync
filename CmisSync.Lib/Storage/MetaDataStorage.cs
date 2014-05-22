@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Storage
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
 
     using CmisSync.Lib.Data;
 
@@ -333,7 +334,17 @@ namespace CmisSync.Lib.Storage
             string id = this.GetId(mappedObject);
             using(var tran = this.engine.GetTransaction())
             {
-                return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(this.GetRelativePathSegments(tran, id)));
+                string[] segments = this.GetRelativePathSegments(tran, id);
+                if(segments.Length > 0 && segments[0].Equals("/")) {
+                    string[] temp = new string[segments.Length - 1];
+                    for (int i = 1; i < segments.Length; i++) {
+                        temp[i - 1] = segments[i];
+                    }
+
+                    segments = temp;
+                }
+
+                return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(segments));
             }
         }
 
@@ -396,6 +407,138 @@ namespace CmisSync.Lib.Storage
             }
 
             return string.Format("[MetaDataStorage: Matcher={0}, ChangeLogToken={1}]{2}{3}", this.Matcher, this.ChangeLogToken, Environment.NewLine, list);
+        }
+
+        /// <summary>
+        /// Prints the file/folder structure like unix "find" command.
+        /// </summary>
+        /// <returns>The find string.</returns>
+        public string ToFindString()
+        {
+            using(var tran = this.engine.GetTransaction())
+            {
+                MappedObject root = null;
+                List<MappedObject> objects = new List<MappedObject>();
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
+                {
+                    var value = row.Value;
+                    if(value == null)
+                    {
+                        continue;
+                    }
+
+                    var data = value.Get;
+                    if(data == null)
+                    {
+                        continue;
+                    }
+
+                    if(data.ParentId == null)
+                    {
+                        root = data;
+                    } else {
+                        objects.Add(data);
+                    }
+                }
+
+                if (root == null) {
+                    return string.Empty;
+                }
+
+                string result = this.PrintFindLines(objects, root, string.Empty);
+                var sb = new StringBuilder();
+                sb.Append(result);
+                foreach(var obj in objects) {
+                    sb.Append(Environment.NewLine).Append(obj.ToString());
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Validates the object structure.
+        /// </summary>
+        public void ValidateObjectStructure() {
+            MappedObject root = null;
+            List<MappedObject> objects = new List<MappedObject>();
+            using(var tran = this.engine.GetTransaction())
+            {
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
+                {
+                    var value = row.Value;
+                    if(value == null)
+                    {
+                        continue;
+                    }
+
+                    var data = value.Get;
+                    if(data == null)
+                    {
+                        continue;
+                    }
+
+                    if(data.ParentId == null)
+                    {
+                        root = data;
+                    } else {
+                        objects.Add(data);
+                    }
+                }
+            }
+
+            if (root == null) {
+                if (objects.Count == 0) {
+                    return;
+                } else {
+                    throw new InvalidDataException(
+                        string.Format(
+                        "root object is missing but {0} objects are stored{1}{2}",
+                        objects.Count,
+                        Environment.NewLine,
+                        this.ToString()));
+                }
+            }
+
+            this.RemoveChildrenRecursively(objects, root);
+            if (objects.Count > 0) {
+                var sb = new StringBuilder();
+                foreach(var obj in objects) {
+                    sb.Append(obj).Append(Environment.NewLine);
+                }
+
+                throw new InvalidDataException(
+                    string.Format(
+                    "This objects are referencing to a not existing parentId: {0}{1}{0}{2}",
+                    Environment.NewLine,
+                    sb.ToString(),
+                    this.ToString()));
+            }
+        }
+
+        private void RemoveChildrenRecursively(List<MappedObject> objects, MappedObject root)
+        {
+            var children = objects.FindAll(o => o.ParentId == root.RemoteObjectId);
+            foreach (var child in children) {
+                objects.Remove(child);
+                if (child.Type == MappedObjectType.Folder) {
+                    this.RemoveChildrenRecursively(objects, child);
+                }
+            }
+        }
+
+        private string PrintFindLines(List<MappedObject> objects, MappedObject parent, string prefix) {
+            var sb = new StringBuilder();
+            string path = Path.Combine(prefix, parent.Name);
+            path = path.StartsWith("/") ? "." + path : path;
+            sb.Append(path).Append(Environment.NewLine);
+            List<MappedObject> children = objects.FindAll(o => o.ParentId == parent.RemoteObjectId);
+            foreach(var child in children) {
+                objects.Remove(child);
+                sb.Append(this.PrintFindLines(objects, child, path));
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>

@@ -76,9 +76,10 @@ namespace TestLibrary.StorageTests
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             IFileSystemInfo fileInfo = Factory.CreateFileInfo(fullPath);
             Assert.That(fileInfo.Exists, Is.EqualTo(false));
-            new FileInfo(fullPath).Create();
-            fileInfo = Factory.CreateFileInfo(fullPath);
-            Assert.That(fileInfo.Exists, Is.EqualTo(true));
+            using (var stream = new FileInfo(fullPath).Create()) {
+                fileInfo = Factory.CreateFileInfo(fullPath);
+                Assert.That(fileInfo.Exists, Is.EqualTo(true));
+            }
         }
 
         [Test, Category("Medium")]
@@ -89,7 +90,8 @@ namespace TestLibrary.StorageTests
 
             // trigger lacy loading
             Assert.That(fileInfo.Exists, Is.EqualTo(false));
-            new FileInfo(fullPath).Create();
+            var stream = new FileInfo(fullPath).Create();
+            stream.Dispose();
             fileInfo.Refresh();
             Assert.That(fileInfo.Exists, Is.EqualTo(true));
         }
@@ -160,8 +162,10 @@ namespace TestLibrary.StorageTests
             string file2 = "file2";
             string fullPath1 = Path.Combine(this.testFolder.FullName, file1);
             string fullPath2 = Path.Combine(this.testFolder.FullName, file2);
-            new FileInfo(fullPath1).Create();
-            new FileInfo(fullPath2).Create();
+            var stream = new FileInfo(fullPath1).Create();
+            stream.Dispose();
+            var stream2 = new FileInfo(fullPath2).Create();
+            stream2.Dispose();
             IDirectoryInfo dirInfo = Factory.CreateDirectoryInfo(this.testFolder.FullName);
             Assert.That(dirInfo.GetFiles().Length, Is.EqualTo(2));
             Assert.That(dirInfo.GetFiles()[0].Name, Is.EqualTo(file1));

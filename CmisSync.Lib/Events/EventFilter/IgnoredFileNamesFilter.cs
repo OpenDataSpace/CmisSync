@@ -81,32 +81,19 @@ namespace CmisSync.Lib.Events.Filter
         /// </returns>
         public override bool Handle(ISyncEvent e)
         {
-            FileDownloadRequest request = e as FileDownloadRequest;
-            if (request != null)
+            try {
+                if (e is IFilterableNameEvent && !(e as IFilterableNameEvent).IsDirectory()) {
+                    return this.CheckFile((e as IFilterableNameEvent));
+                }
+            } catch (System.IO.FileNotFoundException)
             {
-                return this.CheckFile(request, request.Document.Name);
+                // Only happens, if the deleted file/folder does not exists anymore
+                // To be sure, this event is not misinterpreted, just let it pass
+                return false;
             }
-                
-            FSEvent fsevent = e as FSEvent;
-            if (fsevent != null)
+            catch (System.IO.DirectoryNotFoundException)
             {
-                try
-                {
-                    if (!fsevent.IsDirectory())
-                    {
-                        return this.CheckFile(fsevent, Path.GetFileName(fsevent.Path));
-                    }
-                }
-                catch (System.IO.FileNotFoundException)
-                {
-                    // Only happens, if the deleted file/folder does not exists anymore
-                    // To be sure, this event is not misinterpreted, just let it pass
-                    return false;
-                }
-                catch (System.IO.DirectoryNotFoundException)
-                {
-                    return false;
-                }
+                return false;
             }
 
             return false;
@@ -124,11 +111,11 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='fileName'>
         /// If set to <c>true</c> file name.
         /// </param>
-        private bool CheckFile(ISyncEvent e, string fileName)
+        private bool CheckFile(IFilterableNameEvent e)
         {
             lock (this.wildCardLock)
             {
-                if (!Utils.WorthSyncing(fileName, new List<string>()))
+                if (!Utils.WorthSyncing(e.Name, new List<string>()))
                 {
                     Queue.AddEvent(new RequestIgnoredEvent(e, source: this));
                     return true;
@@ -136,7 +123,7 @@ namespace CmisSync.Lib.Events.Filter
 
                 foreach (var wildcard in this.wildcards)
                 {
-                    if (wildcard.IsMatch(fileName))
+                    if (wildcard.IsMatch(e.Name))
                     {
                         Queue.AddEvent(new RequestIgnoredEvent(e, reason: string.Format("filename matches: {0}", wildcard.ToString()), source: this));
                         return true;

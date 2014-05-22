@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="Watcher.cs" company="GRAU DATA AG">
+// <copyright file="WatcherConsumer.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -19,64 +19,39 @@
 namespace CmisSync.Lib.Sync.Strategy
 {
     using System;
-    using System.Collections.Generic;   
+    using System.Collections.Generic;
     using System.Data.Common;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
- 
+
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
-    
+
     using DotCMIS;
     using DotCMIS.Client;
 
     using log4net;
-    
+
     /// <summary>
     /// Watcher sync.
     /// </summary>
-    public class Watcher : ReportingSyncEventHandler, IDisposable
+    public class WatcherConsumer : ReportingSyncEventHandler
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(Watcher));
-    
-        private bool alreadyDisposed = false;
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(WatcherConsumer));
 
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> class.
         /// </summary>
         /// <param name='queue'>
         /// Queue where the FSEvents and also the FileEvents and FolderEvents are reported.
         /// </param>
-        public Watcher(ISyncEventQueue queue) : base(queue)
+        public WatcherConsumer(ISyncEventQueue queue) : base(queue)
         {
         }
-        
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> enables the FSEvent report
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if enable events; otherwise, <c>false</c>.
-        /// </value>
-        public virtual bool EnableEvents { get; set; }
-  
-        // This is a workaround to enable mocking Watcher with callbase
-        // TODO: Remove this when Watcher is seperated
-        
-        /// <summary>
-        /// Gets the priority.
-        /// </summary>
-        /// <value>
-        /// The priority.
-        /// </value>
-        public override int Priority {
-            get {
-                return EventHandlerPriorities.GetPriority(typeof(CmisSync.Lib.Sync.Strategy.Watcher));
-            }
-        }
-  
+
         /// <summary>
         /// Handle the specified Event if it is FSEvent.
         /// </summary>
@@ -88,11 +63,11 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </returns>
         public override bool Handle(ISyncEvent e)
         {
-            var fsevent = e as FSEvent;
+            var fsevent = e as IFSEvent;
             if (fsevent == null) {
                 return false;
             }
-            
+
             Logger.Debug("Handling FSEvent: " + e);
 
             if (fsevent.IsDirectory()) {
@@ -100,51 +75,20 @@ namespace CmisSync.Lib.Sync.Strategy
             } else {
                 this.HandleFileEvents(fsevent);
             }
-            
+
             return true;
         }
-        
-        #region IDisposable implementation
 
-        /// <summary>
-        /// Releases all resource used by the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> object.
-        /// </summary>
-        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/>.
-        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> in an unusable
-        /// state. After calling <see cref="Dispose"/>, you must release all references to the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> so the garbage collector can reclaim the memory that the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> was occupying.</remarks>
-        public void Dispose() 
+        private void HandleFolderEvents(IFSEvent e)
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Dispose the specified disposing.
-        /// </summary>
-        /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!this.alreadyDisposed)
-            {
-                // Indicate that the instance has been disposed.
-                this.alreadyDisposed = true;
-            }
-        }
-
-        #endregion
-
-        private void HandleFolderEvents(FSEvent e)
-        {
-            var movedEvent = e as FSMovedEvent;
+            var movedEvent = e as IFSMovedEvent;
             FolderEvent folderEvent;
             if (movedEvent != null) {
                 folderEvent = new FolderMovedEvent(
                     this.fsFactory.CreateDirectoryInfo(movedEvent.OldPath),
                     this.fsFactory.CreateDirectoryInfo(movedEvent.Path),
-                    null, 
-                    null) 
+                    null,
+                    null)
                 { Local = MetaDataChangeType.MOVED };
             } else {
                 folderEvent = new FolderEvent(this.fsFactory.CreateDirectoryInfo(e.Path), null, this);
@@ -163,7 +107,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     return;
                 }
             }
-            
+
             Queue.AddEvent(folderEvent);
         }
 
@@ -173,18 +117,18 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='e'>
         /// The FSEvent.
         /// </param>
-        private void HandleFileEvents(FSEvent e)
+        private void HandleFileEvents(IFSEvent e)
         {
-            var movedEvent = e as FSMovedEvent;
+            var movedEvent = e as IFSMovedEvent;
             if (movedEvent != null) {
                 var oldfile = this.fsFactory.CreateFileInfo(movedEvent.OldPath);
                 var newfile = this.fsFactory.CreateFileInfo(movedEvent.Path);
                 var newEvent = new FileMovedEvent(
                     oldfile,
                     newfile,
-                    null, 
+                    null,
                     newfile.Directory,
-                    null, 
+                    null,
                     null);
                 Queue.AddEvent(newEvent);
             } else {
@@ -203,7 +147,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     newEvent.LocalContent = ContentChangeType.DELETED;
                     break;
                 }
-                
+
                 Queue.AddEvent(newEvent);
             }
         }

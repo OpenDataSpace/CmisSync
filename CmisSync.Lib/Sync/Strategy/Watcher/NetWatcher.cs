@@ -27,8 +27,10 @@ namespace CmisSync.Lib.Sync.Strategy
     /// <summary>
     /// .Net file system watcher.
     /// </summary>
-    public class NetWatcher : Watcher
+    public class NetWatcher : IWatcherProducer
     {
+        private readonly ISyncEventQueue queue;
+
         /// <summary>
         /// The .Net file system watcher instance.
         /// </summary>
@@ -45,7 +47,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </summary>
         /// <param name="watcher">File System Watcher.</param>
         /// <param name="queue">Queue for the occured events.</param>
-        public NetWatcher(FileSystemWatcher watcher, ISyncEventQueue queue) : base(queue)
+        public NetWatcher(FileSystemWatcher watcher, ISyncEventQueue queue)
         {
             if (watcher == null) {
                 throw new ArgumentNullException("The given fs watcher must not be null");
@@ -54,6 +56,12 @@ namespace CmisSync.Lib.Sync.Strategy
             if (string.IsNullOrEmpty(watcher.Path)) {
                 throw new ArgumentException("The given watcher must contain a path, where it is listening");
             }
+
+            if (queue == null) {
+                throw new ArgumentNullException("The given queue must not be null");
+            }
+
+            this.queue = queue;
 
             this.fileSystemWatcher = watcher;
             this.fileSystemWatcher.IncludeSubdirectories = true;
@@ -70,16 +78,30 @@ namespace CmisSync.Lib.Sync.Strategy
         /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Sync.Strategy.NetWatcher"/> enable events.
         /// </summary>
         /// <value><c>true</c> if enable events; otherwise, <c>false</c>.</value>
-        public override bool EnableEvents {
+        public bool EnableEvents {
             get { return this.fileSystemWatcher.EnableRaisingEvents; }
             set { this.fileSystemWatcher.EnableRaisingEvents = value; }
+        }
+
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/>.
+        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Sync.Strategy.Watcher"/> in an unusable
+        /// state. After calling <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> so the garbage collector can reclaim the memory that the
+        /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> was occupying.</remarks>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
         /// Dispose the .Net File System Watcher.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected override void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (!this.disposed)
             {
@@ -91,8 +113,6 @@ namespace CmisSync.Lib.Sync.Strategy
 
                 this.disposed = true;
             }
-
-            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -106,7 +126,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </param>
         private void OnCreatedChangedDeleted(object source, FileSystemEventArgs e)
         {
-            Queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath));
+            this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath));
         }
 
         /// <summary>
@@ -124,11 +144,11 @@ namespace CmisSync.Lib.Sync.Strategy
             string newname = e.FullPath;
             if (oldname.StartsWith(this.fileSystemWatcher.Path) && newname.StartsWith(this.fileSystemWatcher.Path))
             {
-                Queue.AddEvent(new FSMovedEvent(oldname, newname));
+                this.queue.AddEvent(new FSMovedEvent(oldname, newname));
             } else if (oldname.StartsWith(this.fileSystemWatcher.Path)) {
-                Queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname));
+                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname));
             } else if (newname.StartsWith(this.fileSystemWatcher.Path)) {
-                Queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname));
+                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname));
             }
         }
     }

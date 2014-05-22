@@ -31,7 +31,7 @@ namespace CmisSync.Lib.Storage
     {
         public ExtendedAttributeException() : base("ExtendedAttribute manipulation exception") { }
         public ExtendedAttributeException(string msg) : base(msg) { }
-        public ExtendedAttributeException(string message, Exception inner) : base (message, inner) { }
-        protected ExtendedAttributeException(SerializationInfo info, StreamingContext context) : base (info, context) { }
+        public ExtendedAttributeException(string message, Exception inner) : base(message, inner) { }
+        protected ExtendedAttributeException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

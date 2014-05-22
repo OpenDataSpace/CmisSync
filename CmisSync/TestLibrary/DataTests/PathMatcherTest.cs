@@ -48,7 +48,7 @@ namespace TestLibrary.DataTests
         {
             var matcher = new PathMatcher(this.localpath, this.remotepath);
             Assert.AreEqual(this.localpath, matcher.LocalTargetRootPath);
-            Assert.AreEqual(this.remotepath, matcher.RemoteTargetRootPath);
+            AssertPathEqual(this.remotepath, matcher.RemoteTargetRootPath);
             try
             {
                 new PathMatcher(null, this.remotepath);
@@ -197,7 +197,7 @@ namespace TestLibrary.DataTests
         {
             var matcher = new PathMatcher(this.localpath, this.remotepath);
             string result = matcher.CreateRemotePath(this.localpath);
-            Assert.AreEqual(this.remotepath, result);
+            AssertPathEqual(this.remotepath, result);
             string subfolder = "sub";
             result = matcher.CreateRemotePath(Path.Combine(this.localpath, subfolder));
             Assert.AreEqual(this.remotepath + "/" + subfolder, result);
@@ -219,17 +219,17 @@ namespace TestLibrary.DataTests
         {
             var matcher = new PathMatcher(this.localpath, this.remotepath);
             string result = matcher.CreateRemotePath(this.localpath);
-            Assert.AreEqual(this.remotepath, result);
+            AssertPathEqual(this.remotepath, result);
             result = matcher.CreateLocalPath(result);
-            Assert.AreEqual(this.localpath, result);
+            AssertPathEqual(this.localpath, result);
 
             result = matcher.CreateRemotePath(Path.Combine(this.localpath, "sub"));
             result = matcher.CreateLocalPath(result);
-            Assert.AreEqual(Path.Combine(this.localpath, "sub"), result);
+            AssertPathEqual(Path.Combine(this.localpath, "sub"), result);
 
             result = matcher.CreateLocalPath(this.remotepath + "/sub");
             result = matcher.CreateRemotePath(result);
-            Assert.AreEqual(this.remotepath + "/sub", result);
+            AssertPathEqual(this.remotepath + "/sub", result);
         }
 
         [Test, Category("Fast")]
@@ -245,11 +245,66 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast")]
         public void GetRelativePathDoesNotStartWithSlash()
         {
-            this.localpath = this.localpath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? this.localpath.Substring(0, this.localpath.Length -1) : this.localpath;
-            var matcher = new PathMatcher( this.localpath, "/");
+            this.localpath = this.localpath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? this.localpath.Substring(0, this.localpath.Length - 1) : this.localpath;
+            var matcher = new PathMatcher(this.localpath, "/");
             string folderName = "new";
 
             Assert.That(matcher.GetRelativeLocalPath(Path.Combine(this.localpath, folderName)).StartsWith(Path.DirectorySeparatorChar.ToString()), Is.False);
+        }
+        
+        [Test, Category("Fast")]
+        public void RootFolderCanBeRemotelyCreatedWithoutTrailingDenominator()
+        {
+            var matcher = new PathMatcher("/tmp/", "/");
+
+            Assert.That(matcher.CanCreateRemotePath("/tmp"), Is.True);
+        }
+
+        [Test, Category("Fast")]
+        public void RootFolderCanBeRemotelyCreatedWithTrailingDenominator()
+        {
+            var matcher = new PathMatcher("/tmp", "/");
+
+            Assert.That(matcher.CanCreateRemotePath("/tmp/"), Is.True);
+        }
+
+        [Test, Category("Fast")]
+        public void RootFolderMatchesItselfWithTrailingDenominator()
+        {
+            var matcher = new PathMatcher("/tmp", "/");
+
+            Assert.That(matcher.CanCreateRemotePath("/tmp/"), Is.True);
+        }
+
+        [Test, Category("Fast")]
+        public void RootFolderMatchesItselfWithoutTrailingDenominator()
+        {
+            var matcher = new PathMatcher("/tmp/", "/");
+
+            Assert.That(matcher.CanCreateRemotePath("/tmp"), Is.True);
+        }
+
+        [Test, Category("Fast")]
+        public void GetRootFolderRelativePathWithoutTrailingDenominator()
+        {
+            var matcher = new PathMatcher(Path.GetTempPath(), "/tmp");
+
+            Assert.That(matcher.GetRelativeLocalPath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.EqualTo("."));
+        }
+
+        private void AssertPathEqual(string left, string right)
+        {
+            if(right.EndsWith("/") && !left.EndsWith("/")) {
+                Assert.That(right, Is.EqualTo(left + "/"));
+            } else if(!right.EndsWith("/") && left.EndsWith("/")) {
+                Assert.That(right + "/", Is.EqualTo(left));
+            } else if(right.EndsWith("\\") && !left.EndsWith("\\")) {
+                Assert.That(right, Is.EqualTo(left + "\\"));
+            } else if(!right.EndsWith("\\") && left.EndsWith("\\")) {
+                Assert.That(right + "\\", Is.EqualTo(left));
+            } else {
+                Assert.That(right, Is.EqualTo(left));
+            }
         }
     }
 }

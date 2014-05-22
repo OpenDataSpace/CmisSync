@@ -54,12 +54,13 @@ namespace TestLibrary.TestUtils
             return changeEvent;
         }
 
-        public static Mock<IDocument> CreateRemoteObjectMock(string documentContentStreamId, string id) {
+        public static Mock<IDocument> CreateRemoteDocumentMock(string documentContentStreamId, string id, string name = null, string changeToken = "changetoken") {
             var newRemoteObject = new Mock<IDocument>();
             newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
             newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId == null ? 0 : 1);
             newRemoteObject.Setup(d => d.Id).Returns(id);
-
+            newRemoteObject.Setup(d => d.Name).Returns(name);
+            newRemoteObject.Setup(d => d.ChangeToken).Returns(changeToken);
             return newRemoteObject;
         }
         
@@ -183,7 +184,7 @@ namespace TestLibrary.TestUtils
         public static Mock<ISession> GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType type, string id, string documentContentStreamId = null) {
             var session = MockSessionUtil.PrepareSessionMockForSingleChange(type, id);
 
-            var newRemoteObject = MockSessionUtil.CreateRemoteObjectMock(documentContentStreamId, id);
+            var newRemoteObject = MockSessionUtil.CreateRemoteDocumentMock(documentContentStreamId, id);
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);
          
             return session;

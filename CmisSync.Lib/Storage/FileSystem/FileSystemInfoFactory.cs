@@ -16,24 +16,35 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.IO;
 
 namespace CmisSync.Lib.Storage
 {
-    ///
-    ///<summary>Wrapps all interfaced methods and calls the Systems.IO classes<summary>
-    ///
+    using System;
+    using System.IO;
+
+    /// <summary>
+    /// Wrapps all interfaced methods and calls the Systems.IO classes
+    /// </summary>
     public class FileSystemInfoFactory : IFileSystemInfoFactory
     {
-        public IDirectoryInfo CreateDirectoryInfo (string path)
+        /// <summary>
+        /// Creates the directory info.
+        /// </summary>
+        /// <returns>The directory info.</returns>
+        /// <param name="path">For this path.</param>
+        public IDirectoryInfo CreateDirectoryInfo(string path)
         {
-            return new DirectoryInfoWrapper (new DirectoryInfo (path));
+            return new DirectoryInfoWrapper(new DirectoryInfo(path));
         }
 
-        public IFileInfo CreateFileInfo (string path)
+        /// <summary>
+        /// Creates the file info.
+        /// </summary>
+        /// <returns>The file info.</returns>
+        /// <param name="path">For this path.</param>
+        public IFileInfo CreateFileInfo(string path)
         {
-            return new FileInfoWrapper (new FileInfo (path));
+            return new FileInfoWrapper(new FileInfo(path));
         }
     }
 }

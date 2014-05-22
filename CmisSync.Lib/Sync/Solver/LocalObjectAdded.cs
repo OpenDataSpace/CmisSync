@@ -30,6 +30,7 @@ namespace CmisSync.Lib.Sync.Solver
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Enums;
 
     /// <summary>
     /// Solver to handle the situation of a locally added file/folderobject.
@@ -43,44 +44,67 @@ namespace CmisSync.Lib.Sync.Solver
         /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
-            // Create new remote object
-            if(localFile is IDirectoryInfo)
-            {
-                IDirectoryInfo localDirInfo = localFile as IDirectoryInfo;
-                IDirectoryInfo parent = localDirInfo.Parent;
-                IMappedObject mappedParent = storage.GetObjectByLocalPath(parent) as IMappedObject;
+            string parentId = this.GetParentId(localFile, storage);
+            ICmisObject addedObject = this.AddCmisObject(localFile, parentId, session);
 
-                // Create remote folder
-                Dictionary<string, object> properties = new Dictionary<string, object>();
-                properties.Add(PropertyIds.Name, localDirInfo.Name);
-                properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
-                properties.Add(PropertyIds.CreationDate, string.Empty);
-                properties.Add(PropertyIds.LastModificationDate, string.Empty);
-                IFolder folder = session.GetObject(session.CreateFolder(properties, new ObjectId(mappedParent.RemoteObjectId))) as IFolder;
-                Guid uuid = Guid.Empty;
-                if (localDirInfo.IsExtendedAttributeAvailable()) {
-                    uuid = Guid.NewGuid();
-                    localDirInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
-                }
+            Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFile);
 
-                MappedObject mappedFolder = new MappedObject(
-                    localDirInfo.Name,
-                    folder.Id,
-                    MappedObjectType.Folder,
-                    mappedParent.RemoteObjectId,
-                    folder.ChangeToken)
+            localFile.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFile.LastWriteTimeUtc;
+
+            MappedObject mappedFolder = new MappedObject(
+                    localFile.Name,
+                    addedObject.Id,
+                    localFile is IDirectoryInfo ? MappedObjectType.Folder : MappedObjectType.File,
+                    parentId,
+                    addedObject.ChangeToken)
                 {
-                    Guid = uuid
+                    Guid = uuid,
+                    LastRemoteWriteTimeUtc = addedObject.LastModificationDate,
+                    LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc
                 };
-                storage.SaveMappedObject(mappedFolder);
-            }
-            else if(localFile is IFileInfo)
+            storage.SaveMappedObject(mappedFolder);
+        }
+
+        private static Guid WriteUuidToExtendedAttributeIfSupported(IFileSystemInfo localFile)
+        {
+            Guid uuid = Guid.Empty;
+            if (localFile.IsExtendedAttributeAvailable())
             {
-                // Create empty remote file
-                //string remotePath = storage.Matcher.CreateRemotePath(localFile.FullName);
-                //session.CreateDocument();
+                uuid = Guid.NewGuid();
+                localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
+            }
+            
+            return uuid;
+        }
+
+        private string GetParentId(IFileSystemInfo fileInfo, IMetaDataStorage storage)
+        {
+            IDirectoryInfo parent = null;
+            if (fileInfo is IDirectoryInfo) {
+                IDirectoryInfo localDirInfo = fileInfo as IDirectoryInfo;
+                parent = localDirInfo.Parent;
+            } else {
+                IFileInfo localFileInfo = fileInfo as IFileInfo;
+                parent = localFileInfo.Directory;
+            }
+
+            IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
+            return mappedParent.RemoteObjectId;
+        }
+
+        private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session)
+        {
+            string name = localFile.Name;
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, name);
+            if (localFile is IDirectoryInfo) {
+                properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+                return session.GetObject(session.CreateFolder(properties, new ObjectId(parentId)));
+            } else {
+                properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                return session.GetObject(session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null));
             }
         }
     }

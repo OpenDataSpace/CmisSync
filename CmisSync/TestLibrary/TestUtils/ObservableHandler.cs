@@ -26,7 +26,7 @@ namespace TestLibrary.TestUtils
     using NUnit.Framework;
 
     public class ObservableHandler : SyncEventHandler {
-        public List<ISyncEvent> list = new List<ISyncEvent>();
+        public List<ISyncEvent> List = new List<ISyncEvent>();
 
         public override int Priority
         {
@@ -35,21 +35,21 @@ namespace TestLibrary.TestUtils
 
         public override bool Handle(ISyncEvent e)
         {
-            this.list.Add(e);
+            this.List.Add(e);
             return true;
         }
 
         public void AssertGotSingleFolderEvent(MetaDataChangeType metaType) {
-            Assert.That(this.list.Count, Is.EqualTo(1));
-            Assert.That(this.list[0], Is.TypeOf(typeof(FolderEvent)));
-            var folderEvent = this.list[0] as FolderEvent;
+            Assert.That(this.List.Count, Is.EqualTo(1));
+            Assert.That(this.List[0], Is.TypeOf(typeof(FolderEvent)));
+            var folderEvent = this.List[0] as FolderEvent;
             Assert.That(folderEvent.Remote, Is.EqualTo(metaType), "MetaDataChangeType incorrect");
         }
 
         public void AssertGotSingleFileEvent(MetaDataChangeType metaType, ContentChangeType contentType) {
-            Assert.That(this.list.Count, Is.EqualTo(1));
-            Assert.That(this.list[0], Is.TypeOf(typeof(FileEvent)));
-            var fileEvent = this.list[0] as FileEvent;
+            Assert.That(this.List.Count, Is.EqualTo(1));
+            Assert.That(this.List[0], Is.TypeOf(typeof(FileEvent)));
+            var fileEvent = this.List[0] as FileEvent;
 
             Assert.That(fileEvent.Remote, Is.EqualTo(metaType), "MetaDataChangeType incorrect");
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(contentType), "ContentChangeType incorrect");

@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Sync.Strategy
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
-    
+
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
@@ -39,23 +39,23 @@ namespace CmisSync.Lib.Sync.Strategy
         private ISession session;
         private IMetaDataStorage storage;
         private int maxNumberOfContentChanges;
-        private bool isPropertyChangesSupported;
-
         private IChangeEvent lastChange;
+        private bool isPropertyChangesSupported;
+        private bool dropNextSyncEvents = false;
 
         public ContentChanges(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base(queue) {
             if(session == null) {
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
             }
-                
+
             if(storage == null) {
                 throw new ArgumentNullException("MetaDataStorage instance is needed for the ChangeLogStrategy, but was null");
             }
-            
+
             if(maxNumberOfContentChanges <= 1) {
                 throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
             }
-            
+
             this.session = session;
             this.storage = storage;
             this.maxNumberOfContentChanges = maxNumberOfContentChanges;
@@ -75,14 +75,21 @@ namespace CmisSync.Lib.Sync.Strategy
                     if(this.storage.ChangeLogToken == null) {
                         syncEvent.LastTokenOnServer = lastRemoteChangeLogTokenBeforeFullCrawlSync;
                     }
-                    
+
                     // Use fallback sync algorithm
                     return false;
                 }
                 else
                 {
+                    if (dropNextSyncEvents) {
+                        Logger.Debug("Dropping: " + e.ToString());
+                        return true;
+                    }
                     Logger.Debug("Starting ContentChange Sync");
-                    return this.StartSync();
+                    bool result = this.StartSync();
+                    dropNextSyncEvents = true;
+                    Queue.AddEvent(new ResetStartNextSyncFilterEvent());
+                    return result;
                 }
             }
 
@@ -94,6 +101,11 @@ namespace CmisSync.Lib.Sync.Strategy
                 {
                     this.storage.ChangeLogToken = lastTokenOnServer;
                 }
+            }
+
+            if(e is ResetStartNextSyncFilterEvent) {
+                dropNextSyncEvents = false;
+                return true;
             }
 
             return false;
@@ -117,13 +129,13 @@ namespace CmisSync.Lib.Sync.Strategy
                 {
                     this.Sync();
                 }
-                
+
                 return true;
             } catch(CmisRuntimeException e) {
                 Logger.Warn("ContentChangeSync not successfull, fallback to CrawlSync");
                 Logger.Debug(e.Message);
                 Logger.Debug(e.StackTrace);
-                
+
                 // Use fallback sync algorithm
                 return false;
             }
@@ -141,7 +153,7 @@ namespace CmisSync.Lib.Sync.Strategy
             if (lastTokenOnClient == null)
             {
                 // Token is null, which means no content change sync has ever happened yet, so just sync everything from remote.
-                // Force full sync  
+                // Force full sync
                 var fullsyncevent = new StartNextSyncEvent(true);
                 Queue.AddEvent(fullsyncevent);
                 return;
@@ -151,7 +163,7 @@ namespace CmisSync.Lib.Sync.Strategy
             {
                 // Check which files/folders have changed.
                 IChangeEvents changes = this.session.GetContentChanges(lastTokenOnClient, this.isPropertyChangesSupported, this.maxNumberOfContentChanges);
-                
+
                 // Replicate each change to the local side.
                 bool first = true;
                 foreach (IChangeEvent change in changes.ChangeEventList)
@@ -159,7 +171,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     // ignore first event when lists overlapp
                     if(first) {
                         first = false;
-                        if(this.lastChange != null && 
+                        if(this.lastChange != null &&
                            (this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Created
                          || this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Deleted))
                         {
@@ -168,7 +180,7 @@ namespace CmisSync.Lib.Sync.Strategy
                             }
                         }
                     }
-                    
+
                     this.lastChange = change;
 
                     Queue.AddEvent(new ContentChangeEvent(change.ChangeType, change.ObjectId));
@@ -191,6 +203,13 @@ namespace CmisSync.Lib.Sync.Strategy
                 lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
             }
             while (!lastTokenOnServer.Equals(lastTokenOnClient));
+        }
+
+        private class ResetStartNextSyncFilterEvent : ISyncEvent {
+            public override string ToString()
+            {
+                return string.Format("[ResetStartNextSyncFilterEvent]");
+            }
         }
     }
 }

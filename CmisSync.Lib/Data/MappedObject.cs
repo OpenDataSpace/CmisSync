@@ -244,6 +244,12 @@ namespace CmisSync.Lib.Data
         public long LastContentSize { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Data.MappedObject"/> is ignored.
+        /// </summary>
+        /// <value><c>true</c> if ignored; otherwise, <c>false</c>.</value>
+        public bool Ignored { get; set; }
+
+        /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Data.MappedObjectData"/>.
         /// </summary>
         /// <param name='obj'>
@@ -292,6 +298,29 @@ namespace CmisSync.Lib.Data
         public override int GetHashCode()
         {
             return (this.RemoteObjectId != null) ? this.RemoteObjectId.GetHashCode() : base.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format(
+                "[MappedObject: ParentId={0}, Type={1}, RemoteObjectId={2}, LastChangeToken={3}, LastRemoteWriteTimeUtc={4}, LastLocalWriteTimeUtc={5}, LastChecksum={6}, ChecksumAlgorithmName={7}, Name={8}, Description={9}, Guid={10}, LastContentSize={11}, Ignored={12}]",
+                this.ParentId,
+                this.Type,
+                this.RemoteObjectId,
+                this.LastChangeToken,
+                this.LastRemoteWriteTimeUtc,
+                this.LastLocalWriteTimeUtc,
+                this.LastChecksum,
+                this.ChecksumAlgorithmName,
+                this.Name,
+                this.Description,
+                this.Guid,
+                this.LastContentSize,
+                this.Ignored);
         }
     }
 }

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="AlreadyAddedObjectsFsEventFilterTest.cs" company="GRAU DATA AG">
+// <copyright file="IgnoreAlreadyHandledFsEventsFilterTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -35,31 +35,31 @@ namespace TestLibrary.EventsTests.EventsFilterTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class AlreadyAddedObjectsFsEventFilterTest
+    public class IgnoreAlreadyHandledFsEventsFilterTest
     {
         [Test, Category("Fast")]
         public void ConstructorTakesStorage()
         {
-            new AlreadyAddedObjectsFsEventFilter(Mock.Of<IMetaDataStorage>());
+            new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull()
         {
-            new AlreadyAddedObjectsFsEventFilter(null);
+            new IgnoreAlreadyHandledFsEventsFilter(null);
         }
 
         [Test, Category("Fast")]
         public void ConstructorTakesStorageAndFsFactory()
         {
-            new AlreadyAddedObjectsFsEventFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
+            new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
         }
 
         [Test, Category("Fast")]
         public void FilterIgnoresNonFsEvents()
         {
-            var filter = new AlreadyAddedObjectsFsEventFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
+            var filter = new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
             Assert.That(filter.Handle(Mock.Of<ISyncEvent>()), Is.False);
         }
 
@@ -68,8 +68,8 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         {
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
-            var filter = new AlreadyAddedObjectsFsEventFilter(storage.Object, fsFactory.Object);
-            var fsEvent = new FSEvent(WatcherChangeTypes.Created, "path");
+            var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
+            var fsEvent = new FSEvent(WatcherChangeTypes.Created, Path.Combine(Path.GetTempPath(), "path"));
             Assert.That(filter.Handle(fsEvent), Is.False);
         }
 
@@ -79,9 +79,11 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             string path = "path";
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
-            var filter = new AlreadyAddedObjectsFsEventFilter(storage.Object, fsFactory.Object);
-            var fsEvent = new Mock<FSEvent>(WatcherChangeTypes.Created, path) { CallBase = true };
+            var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
+            var fsEvent = new Mock<IFSEvent>();
             fsEvent.Setup(e => e.IsDirectory()).Returns(true);
+            fsEvent.Setup(e => e.Path).Returns(path);
+            fsEvent.Setup(e => e.Type).Returns(WatcherChangeTypes.Created);
             fsFactory.AddDirectory(path);
             storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileSystemInfo>(p => p.FullName.Equals(path)))).Returns(Mock.Of<IMappedObject>());
 
@@ -94,11 +96,28 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             string path = "path";
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
-            var filter = new AlreadyAddedObjectsFsEventFilter(storage.Object, fsFactory.Object);
-            var fsEvent = new Mock<FSEvent>(WatcherChangeTypes.Created, path) { CallBase = true };
+            var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
+            
+            var fsEvent = new Mock<IFSEvent>();
             fsEvent.Setup(e => e.IsDirectory()).Returns(false);
+            fsEvent.Setup(e => e.Path).Returns(path);
+            fsEvent.Setup(e => e.Type).Returns(WatcherChangeTypes.Created);
+
             fsFactory.AddFile(path);
             storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileSystemInfo>(p => p.FullName.Equals(path)))).Returns(Mock.Of<IMappedObject>());
+
+            Assert.That(filter.Handle(fsEvent.Object), Is.True);
+        }
+
+        [Test, Category("Fast")]
+        public void FilterDeleteFsEventsIfNoCorrespondingElementExistsInStorage()
+        {
+            string path = "path";
+            var filter = new IgnoreAlreadyHandledFsEventsFilter(Mock.Of<IMetaDataStorage>(), Mock.Of<IFileSystemInfoFactory>());
+            var fsEvent = new Mock<IFSEvent>();
+            fsEvent.Setup(e => e.Path).Returns(path);
+            fsEvent.Setup(e => e.Type).Returns(WatcherChangeTypes.Deleted);
+            fsEvent.Setup(e => e.IsDirectory()).Returns(false);
 
             Assert.That(filter.Handle(fsEvent.Object), Is.True);
         }

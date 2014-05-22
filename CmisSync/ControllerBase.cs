@@ -289,22 +289,22 @@ namespace CmisSync
                 UpdateState();
             };
 
-            repo.EventManager.AddEventHandler(
+            repo.Queue.EventManager.AddEventHandler(
                 new GenericSyncEventHandler<FileTransmissionEvent>( 50, delegate(ISyncEvent e){
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 return false;
             }));
-            repo.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
-            repo.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
-            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<ProxyAuthRequiredEvent>(0, delegate(ISyncEvent e) {
+            repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
+            repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
+            repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ProxyAuthRequiredEvent>(0, delegate(ISyncEvent e) {
                 ProxyAuthReqired(repositoryInfo.DisplayName);
                 return true;
             }));
-            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<PermissionDeniedEvent>(0, delegate(ISyncEvent e) {
+            repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<PermissionDeniedEvent>(0, delegate(ISyncEvent e) {
                 ShowChangePassword(repositoryInfo.DisplayName);
                 return true;
             }));
-            repo.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>( 0, delegate(ISyncEvent e) {
+            repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>( 0, delegate(ISyncEvent e) {
                 SuccessfulLogin(repositoryInfo.DisplayName);
                 return false;
             }));

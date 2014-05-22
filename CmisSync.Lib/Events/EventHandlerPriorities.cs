@@ -42,6 +42,11 @@ namespace CmisSync.Lib.Events
         public static readonly int FILTER = 10000;
 
         /// <summary>
+        /// The HIGHER handler priority.
+        /// </summary>
+        public static readonly int HIGHER = 3000;
+
+        /// <summary>
         /// The HIGH handler priority.
         /// </summary>
         public static readonly int HIGH = 2000;
@@ -69,7 +74,11 @@ namespace CmisSync.Lib.Events
             map[typeof(InvalidFolderNameFilter)] = FILTER;
             map[typeof(IgnoredFoldersFilter)] = FILTER;
             map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
-            map[typeof(AlreadyAddedObjectsFsEventFilter)] = FILTER;
+            map[typeof(IgnoreAlreadyHandledFsEventsFilter)] = FILTER;
+            map[typeof(IgnoreAlreadyHandledContentChangeEventsFilter)] = FILTER;
+
+            // Below filter but higher than remote/local accumulators
+            map[typeof(RemoteObjectMovedOrRenamedAccumulator)] = HIGHER;
 
             // Higher than fallback Crawler
             map[typeof(ContentChanges)] = HIGH;
@@ -83,7 +92,7 @@ namespace CmisSync.Lib.Events
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;
-            map[typeof(CmisSync.Lib.Sync.Strategy.Watcher)] = NORMAL;
+            map[typeof(WatcherConsumer)] = NORMAL;
             map[typeof(Crawler)] = NORMAL;
             map[typeof(SyncMechanism)] = NORMAL;
             map[typeof(GenericSyncEventHandler<>)] = NORMAL;

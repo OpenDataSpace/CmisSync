@@ -16,51 +16,71 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using log4net;
-
-using System;
-using System.Collections.Generic;
-
 namespace CmisSync.Lib.Events
 {
-    public class SyncEventManager
+    using System;
+    using System.Collections.Generic;
+    
+    using log4net;
+ 
+    /// <summary>
+    /// Sync event manager which has a list of all Handlers and forwards events to them.
+    /// </summary>
+    public class SyncEventManager : ISyncEventManager
     {
-        private static readonly ILog logger = LogManager.GetLogger(typeof(SyncEventManager));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventManager));
         private List<SyncEventHandler> handler = new List<SyncEventHandler>();
-        
-        public SyncEventManager()
+  
+        /// <summary>
+        /// Adds the event handler to the manager.
+        /// </summary>
+        /// <param name='handler'>
+        /// Handler to add.
+        /// </param>
+        public void AddEventHandler(SyncEventHandler handler)
         {
-        }
-
-        public void AddEventHandler(SyncEventHandler h)
-        {
-            logger.Debug("Adding Eventhandler " + h);
-            //The zero-based index of item in the sorted List<T>, 
-            //if item is found; otherwise, a negative number that 
-            //is the bitwise complement of the index of the next 
-            //element that is larger than item or.
-            int pos = handler.BinarySearch(h);
-            if(pos < 0){
+            Logger.Debug("Adding Eventhandler " + handler);
+            
+            // The zero-based index of item in the sorted List<T>, 
+            // if item is found; otherwise, a negative number that 
+            // is the bitwise complement of the index of the next 
+            // element that is larger than item or.
+            int pos = this.handler.BinarySearch(handler);
+            if (pos < 0)
+            {
                 pos = ~pos;
             }
-            handler.Insert(pos, h);
-        }
-
-        public virtual void Handle(ISyncEvent e) {
-            for(int i = handler.Count-1; i >= 0; i--)
-                {
-                    var h = handler[i];
-                    if(handler[i].Handle(e)){
-                        return;
-                    }
-                }
             
+            this.handler.Insert(pos, handler);
         }
-
-        public void RemoveEventHandler(SyncEventHandler h)
+  
+        /// <summary>
+        /// Handle the specified event.
+        /// </summary>
+        /// <param name='e'>
+        /// Event to handle.
+        /// </param>
+        public void Handle(ISyncEvent e)
         {
-            handler.Remove(h);
+            for (int i = this.handler.Count - 1; i >= 0; i--)
+            {
+                var h = this.handler[i];
+                if (this.handler[i].Handle(e))
+                {
+                    return;
+                }
+            }
+        }
+  
+        /// <summary>
+        /// Removes the event handler.
+        /// </summary>
+        /// <param name='handler'>
+        /// Handler to remove.
+        /// </param>
+        public void RemoveEventHandler(SyncEventHandler handler)
+        {
+            this.handler.Remove(handler);
         }
     }
 }
-

@@ -26,16 +26,30 @@ namespace CmisSync.Lib.Events
 
     using DotCMIS.Client;
 
+    /// <summary>
+    /// Abstract folder event.
+    /// </summary>
     public abstract class AbstractFolderEvent : ISyncEvent
     {
-        public MetaDataChangeType Local { get; set; }
-
-        public MetaDataChangeType Remote { get; set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.AbstractFolderEvent"/> class.
+        /// </summary>
         public AbstractFolderEvent()
         {
             this.Local = MetaDataChangeType.NONE;
             this.Remote = MetaDataChangeType.NONE;
         }
+
+        /// <summary>
+        /// Gets or sets the local change type.
+        /// </summary>
+        /// <value>The local change type.</value>
+        public MetaDataChangeType Local { get; set; }
+
+        /// <summary>
+        /// Gets or sets the remote change type.
+        /// </summary>
+        /// <value>The remote change type.</value>
+        public MetaDataChangeType Remote { get; set; }
     }
 }

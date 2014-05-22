@@ -31,19 +31,16 @@
 //
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-
-using System;
-using System.Reflection;
-using System.Diagnostics;
-using System.IO;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Cmis;
-using CmisSync.Notifications;
-using CmisSync.Lib.Config;
-
 namespace CmisSync {
+    using System;
+    using System.Reflection;
+    using System.Diagnostics;
+    using System.IO;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Notifications;
+    using CmisSync.Lib.Config;
 
     public class Controller : ControllerBase {
 

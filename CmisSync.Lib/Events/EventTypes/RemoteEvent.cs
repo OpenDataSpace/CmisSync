@@ -31,12 +31,10 @@ namespace CmisSync.Lib.Events
     {
         private IChangeEvent change;
 
-        public IChangeEvent Change { get { return this.change; } }
-
-        public string ObjectId { get { return this.change.ObjectId; } }
-
-        public DotCMIS.Enums.ChangeType? Type { get { return this.change.ChangeType; } }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.RemoteEvent"/> class.
+        /// </summary>
+        /// <param name="change">Change event.</param>
         public RemoteEvent(IChangeEvent change)
         {
             if(change == null) {
@@ -44,6 +42,30 @@ namespace CmisSync.Lib.Events
             }
 
             this.change = change;
+        }
+
+        /// <summary>
+        /// Gets the change event.
+        /// </summary>
+        /// <value>The change.</value>
+        public IChangeEvent Change {
+            get { return this.change; }
+        }
+
+        /// <summary>
+        /// Gets the object identifier.
+        /// </summary>
+        /// <value>The object identifier.</value>
+        public string ObjectId {
+            get { return this.change.ObjectId; }
+        }
+
+        /// <summary>
+        /// Gets the change type.
+        /// </summary>
+        /// <value>The type.</value>
+        public DotCMIS.Enums.ChangeType? Type {
+            get { return this.change.ChangeType; }
         }
 
         /// <summary>

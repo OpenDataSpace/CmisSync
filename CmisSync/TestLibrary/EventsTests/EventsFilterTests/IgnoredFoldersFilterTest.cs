@@ -49,25 +49,25 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             new IgnoredFoldersFilter(queue);
         }
 
-        [Test, Category("Medium"), Category("EventFilter")]
+        [Test, Category("Fast"), Category("EventFilter")]
         public void AllowCorrectFSEvents()
         {
             var queue = new Mock<ISyncEventQueue>();
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var filter = new IgnoredFoldersFilter(queue.Object);
-            var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, Path.GetTempPath());
+            var folderEvent = new Mock<IFSEvent>();
             folderEvent.Setup(e => e.IsDirectory()).Returns(true);
             folderEvent.Setup(e => e.Path).Returns(Path.GetTempPath());
 
             Assert.IsFalse(filter.Handle(folderEvent.Object));
         }
 
-        [Test, Category("Medium"), Category("EventFilter")]
+        [Test, Category("Fast"), Category("EventFilter")]
         public void HandleIgnoredFolderNames()
         {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFoldersFilter(queue.Object);
-            var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, Path.GetTempPath());
+            var folderEvent = new Mock<IFSEvent>();
             folderEvent.Setup(e => e.IsDirectory()).Returns(true);
             folderEvent.Setup(e => e.Path).Returns(Path.GetTempPath());
             var ignoredFolder = new List<string>();
@@ -83,7 +83,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFoldersFilter(queue.Object);
-            var fileEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, string.Empty);
+            var fileEvent = new Mock<IFSEvent>();
             fileEvent.Setup(e => e.IsDirectory()).Returns(false);
 
             Assert.IsFalse(filter.Handle(fileEvent.Object));
@@ -96,7 +96,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFoldersFilter(queue.Object);
-            var folderEvent = new Mock<FSEvent>(WatcherChangeTypes.Changed, Path.Combine(Path.GetTempPath(), Path.GetTempFileName()));
+            var folderEvent = new Mock<IFSEvent>();
             folderEvent.Setup(e => e.IsDirectory()).Throws(new FileNotFoundException());
 
             Assert.IsFalse(filter.Handle(folderEvent.Object));
@@ -109,7 +109,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFoldersFilter(queue.Object);
-            var moveEvent = new Mock<FSMovedEvent>(" ", " ");
+            var moveEvent = new Mock<IFSMovedEvent>();
             moveEvent.Setup(e => e.IsDirectory()).Returns(false);
 
             Assert.IsFalse(filter.Handle(moveEvent.Object));

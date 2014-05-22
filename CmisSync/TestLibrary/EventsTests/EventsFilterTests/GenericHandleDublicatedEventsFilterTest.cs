@@ -36,7 +36,6 @@ namespace TestLibrary.EventsTests.EventsFilterTests
     public class GenericHandleDublicatedEventsFilterTest
     {
         private readonly DotCMIS.Exceptions.CmisPermissionDeniedException deniedException = new DotCMIS.Exceptions.CmisPermissionDeniedException();
-        private readonly Uri url = new Uri("http://example.com");
 
         [Test, Category("Fast"), Category("EventFilter")]
         public void DefaultConstructorWorks()

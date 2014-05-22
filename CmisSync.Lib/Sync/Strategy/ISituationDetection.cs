@@ -16,24 +16,68 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using CmisSync.Lib.Storage;
-using CmisSync.Lib.Events;
-
 namespace CmisSync.Lib.Sync.Strategy
 {
-    public interface ISituationDetection<T> where T : AbstractFolderEvent
-    {
-        SituationType Analyse(IMetaDataStorage storage, T actualEvent);
-    }
+    using System;
 
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+
+    /// <summary>
+    /// Situation type.
+    /// </summary>
     public enum SituationType {
+        /// <summary>
+        /// Constant NOCHANGE.
+        /// </summary>
         NOCHANGE,
+        
+        /// <summary>
+        /// Constant ADDED.
+        /// </summary>
         ADDED,
+        
+        /// <summary>
+        /// Constant CHANGE.
+        /// </summary>
         CHANGED,
+        
+        /// <summary>
+        /// Constant RENAME.
+        /// </summary>
         RENAMED,
+        
+        /// <summary>
+        /// Constant MOVE.
+        /// </summary>
         MOVED,
+        
+        /// <summary>
+        /// Constant REMOVE.
+        /// </summary>
         REMOVED
     }
-}
 
+    /// <summary>
+    /// Situation Detection Interface for SyncStrategy
+    /// </summary>
+    /// <typeparam name="T">
+    /// Type of folderevent to detect sitation upon
+    /// </typeparam>
+    public interface ISituationDetection<T> where T : AbstractFolderEvent
+    {
+        /// <summary>
+        /// Analyse the specified actualEvent.
+        /// </summary>
+        /// <param name='storage'>
+        /// Storage interface.
+        /// </param>
+        /// <param name='actualEvent'>
+        /// Actual event.
+        /// </param>
+        /// <returns>
+        /// The Situation Type.
+        /// </returns>
+        SituationType Analyse(IMetaDataStorage storage, T actualEvent);
+    }
+}

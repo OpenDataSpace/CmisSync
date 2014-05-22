@@ -90,5 +90,14 @@ namespace CmisSync.Lib.Storage
         {
             return this.original.Open(mode, access, share);
         }
+
+        /// <summary>
+        /// Moves to target file.
+        /// </summary>
+        /// <param name="target">Target file name.</param>
+        public void MoveTo(string target)
+        {
+            this.original.MoveTo(target);
+        }
     }
 }

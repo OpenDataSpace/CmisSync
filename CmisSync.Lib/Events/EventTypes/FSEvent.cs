@@ -21,13 +21,27 @@ namespace CmisSync.Lib.Events
 {
     using System;
     using System.IO;
-
-    public class FSEvent : ISyncEvent
+ 
+    /// <summary>
+    /// FS event.
+    /// </summary>
+    /// <exception cref='ArgumentNullException'>
+    /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+    /// </exception>
+    public class FSEvent : IFSEvent
     {
-        public WatcherChangeTypes Type { get; private set; }
-
-        public virtual string Path { get; private set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FSEvent"/> class.
+        /// </summary>
+        /// <param name='type'>
+        /// The Type.
+        /// </param>
+        /// <param name='path'>
+        /// The Path.
+        /// </param>
+        /// <exception cref='ArgumentNullException'>
+        /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
+        /// </exception>
         public FSEvent(WatcherChangeTypes type, string path)
         {
             if (path == null) {
@@ -36,14 +50,46 @@ namespace CmisSync.Lib.Events
 
             this.Type = type;
             this.Path = path;
+            path = path.Trim(System.IO.Path.DirectorySeparatorChar);
+            this.Name = path.Substring(path.LastIndexOf(System.IO.Path.DirectorySeparatorChar.ToString()) + 1);
         }
+  
+        /// <summary>
+        /// Gets the type.
+        /// </summary>
+        /// <value>
+        /// The type.
+        /// </value>
+        public WatcherChangeTypes Type { get; private set; }
+  
+        /// <summary>
+        /// Gets the path.
+        /// </summary>
+        /// <value>
+        /// The path.
+        /// </value>
+        public string Path { get; private set; }
 
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FSEvent"/>.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FSEvent"/>.
+        /// </returns>
         public override string ToString()
         {
             return string.Format("FSEvent with type \"{0}\" on path \"{1}\"", this.Type, this.Path);
         }
-
-        public virtual bool IsDirectory()
+  
+        /// <summary>
+        /// Determines whether this instance is directory.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if this instance is directory; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsDirectory()
         {
             // detect whether its a directory or file
             try

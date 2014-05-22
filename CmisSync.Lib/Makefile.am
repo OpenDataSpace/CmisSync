@@ -16,6 +16,7 @@ SOURCES =  \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/IDisposableAuthProvider.cs \
 	Cmis/MimeType.cs \
+	Cmis/OperationContextFactory.cs \
 	Cmis/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/PersistentStandardAuthenticationProvider.cs \
 	Cmis/StandardAuthenticationProviderWrapper.cs \
@@ -46,8 +47,9 @@ SOURCES =  \
 	Events/ChangeEnums.cs \
 	Events/DebugLoggingHandler.cs \
 	Events/EventFilter/AbstractFileFilter.cs \
-	Events/EventFilter/AlreadyAddedObjectsFsEventFilter.cs \
 	Events/EventFilter/GenericHandleDublicatedEventsFilter.cs \
+	Events/EventFilter/IgnoreAlreadyHandledContentChangeEventsFilter.cs \
+	Events/EventFilter/IgnoreAlreadyHandledFsEventsFilter.cs \
 	Events/EventFilter/IgnoredFileNamesFilter.cs \
 	Events/EventFilter/IgnoredFilesFilter.cs \
 	Events/EventFilter/IgnoredFolderNameFilter.cs \
@@ -70,7 +72,13 @@ SOURCES =  \
 	Events/EventTypes/FSEvent.cs \
 	Events/EventTypes/FSMovedEvent.cs \
 	Events/EventTypes/FullSyncCompletedEvent.cs \
+	Events/EventTypes/IFSEvent.cs \
+	Events/EventTypes/IFSMovedEvent.cs \
 	Events/EventTypes/ISyncEvent.cs \
+	Events/EventTypes/IFilterableEvent.cs \
+	Events/EventTypes/IFilterablePathEvent.cs \
+	Events/EventTypes/IFilterableNameEvent.cs \
+	Events/EventTypes/IFilterableRemoteObjectEvent.cs \
 	Events/EventTypes/PermissionDeniedEvent.cs \
 	Events/EventTypes/ProxyAuthRequiredEvent.cs \
 	Events/EventTypes/RecentChangedEvent.cs \
@@ -81,6 +89,7 @@ SOURCES =  \
 	Events/FileDownloadRequest.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/IDisposableSyncEventQueue.cs \
+	Events/ISyncEventManager.cs \
 	Events/ISyncEventQueue.cs \
 	Events/ReportingSyncEventHandler.cs \
 	Events/SyncEventHandler.cs \
@@ -141,11 +150,13 @@ SOURCES =  \
 	Sync/Strategy/LocalObjectFetcher.cs \
 	Sync/Strategy/LocalSituationDetection.cs \
 	Sync/Strategy/RemoteObjectFetcher.cs \
+	Sync/Strategy/RemoteObjectMovedOrRenamedAccumulator.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SyncMechanism.cs \
 	Sync/Strategy/Watcher/MacWatcher.cs \
 	Sync/Strategy/Watcher/NetWatcher.cs \
-	Sync/Strategy/Watcher/Watcher.cs \
+	Sync/Strategy/Watcher/IWatcherProducer.cs \
+	Sync/Strategy/Watcher/WatcherConsumer.cs \
 	Utils.cs
 
 EXTRA_DIST = CmisSync.Lib.csproj StaticDefines.cs

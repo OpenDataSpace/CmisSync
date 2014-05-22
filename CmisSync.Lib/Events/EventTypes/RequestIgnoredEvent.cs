@@ -16,30 +16,55 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
 namespace CmisSync.Lib.Events
 {
+    using System;
+
+    /// <summary>
+    /// Request ignored event.
+    /// </summary>
     public class RequestIgnoredEvent : ISyncEvent
     {
-        private ISyncEvent ignoredEvent;
-        public ISyncEvent IgnoredEvent { get{ return ignoredEvent; } }
-        private readonly string reason;
-        public string Reason{ get{return this.reason; } }
-        public RequestIgnoredEvent (ISyncEvent ignoredEvent, string reason = null, SyncEventHandler source = null)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.RequestIgnoredEvent"/> class.
+        /// </summary>
+        /// <param name="ignoredEvent">Ignored event.</param>
+        /// <param name="reason">Reason why it has been ignored.</param>
+        /// <param name="source">The source which ignored the event.</param>
+        public RequestIgnoredEvent(ISyncEvent ignoredEvent, string reason = null, SyncEventHandler source = null)
         {
-            if(ignoredEvent== null)
+            if (ignoredEvent == null) {
                 throw new ArgumentNullException("The ignored event cannot be null");
-            this.ignoredEvent = ignoredEvent;
-            if(reason == null && source == null)
+            }
+
+            if (reason == null && source == null) {
                 throw new ArgumentNullException("There must be a reason or source given for the ignored event");
-            this.reason = (reason!=null)? reason: "Event has been ignored by: " + source.ToString();
+            }
+
+            this.IgnoredEvent = ignoredEvent;
+            this.Reason = (reason != null) ? reason : "Event has been ignored by: " + source.ToString();
         }
 
-        public override string ToString ()
+        /// <summary>
+        /// Gets the ignored event.
+        /// </summary>
+        /// <value>The ignored event.</value>
+        public ISyncEvent IgnoredEvent { get; private set; }
+
+        /// <summary>
+        /// Gets the reason why the event has been ignored.
+        /// </summary>
+        /// <value>The reason.</value>
+        public string Reason { get; private set; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RequestIgnoredEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RequestIgnoredEvent"/>.</returns>
+        public override string ToString()
         {
-            return string.Format ("[RequestIgnoredEvent: IgnoredEvent={0} Reason={1}]", IgnoredEvent, Reason);
+            return string.Format("[RequestIgnoredEvent: IgnoredEvent={0} Reason={1}]", this.IgnoredEvent, this.Reason);
         }
     }
 }
-
