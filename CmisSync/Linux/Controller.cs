@@ -45,9 +45,12 @@ namespace CmisSync {
             this.ShowChangePassword += delegate(string reponame) {
                 NotificationUtils.NotifyAsync(reponame, String.Format(Properties_Resources.NotificationCredentialsError, reponame));
             };
+
+            this.ShowException += delegate(string title, string msg) {
+                NotificationUtils.NotifyAsync(title, msg);
+            };
+
             base.Initialize(firstRun);
-
-
         }
 
         // Creates a .desktop entry in autostart folder to
