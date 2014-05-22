@@ -46,6 +46,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private NSRunLoop RunLoop = null;
         private Thread RunLoopThread = null;
         private readonly ISyncEventQueue Queue;
+        private MonoMac.CoreServices.FSEvent? LastRenameEvent;
 
         /// <summary>
         /// Enables the FSEvent report
@@ -60,14 +61,14 @@ namespace CmisSync.Lib.Sync.Strategy
                     return;
                 }
                 if (value) {
-                    isStarted = FsStream.Start ();
+                    isStarted = FsStream.Start();
                     if (isStarted) {
-                        FsStream.FlushSync ();
+                        FsStream.FlushSync();
                         FsStream.Events += OnFSEventStreamEvents;
                     }
                 } else {
                     FsStream.Events -= OnFSEventStreamEvents;
-                    FsStream.FlushSync ();
+                    FsStream.FlushSync();
                     FsStream.Stop ();
                     isStarted = false;
                 }
@@ -78,37 +79,45 @@ namespace CmisSync.Lib.Sync.Strategy
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.MacWatcher"/> class.
         /// The default latency is set to 1 second.
         /// </summary>
-        /// <param name="pathname">Pathname.</param>
-        /// <param name="queue">Queue.</param>
-        /// <param name="loop">Loop.</param>
-        public MacWatcher (string pathname, ISyncEventQueue queue) : this(pathname, queue, TimeSpan.FromSeconds(1))
+        /// <param name="pathname">Path to be monitored.</param>
+        /// <param name="queue">Queue to pass the new events to.</param>
+        public MacWatcher(string pathname, ISyncEventQueue queue) : this(pathname, queue, TimeSpan.FromSeconds(1))
         { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.MacWatcher"/> class.
         /// </summary>
-        /// <param name="pathname">Pathname.</param>
-        /// <param name="queue">Queue.</param>
-        /// <param name="loop">Loop.</param>
-        /// <param name="latency">Latency.</param>
-        public MacWatcher (string pathname, ISyncEventQueue queue, TimeSpan latency) : base(queue)
+        /// <param name="pathname">Path to be monitored.</param>
+        /// <param name="queue">Queue to pass the new events to.</param>
+        /// <param name="latency">Maximum latency for file system events.</param>
+        public MacWatcher(string pathname, ISyncEventQueue queue, TimeSpan latency)
         {
-            if (String.IsNullOrEmpty (pathname))
-                throw new ArgumentNullException ("The given fs stream must not be null");
-            RunLoopThread = new Thread (() =>
+            if (string.IsNullOrEmpty(pathname)) {
+                throw new ArgumentNullException("The given fs stream must not be null");
+            }
+
+            if (queue == null) {
+                throw new ArgumentNullException("The given queue must not be null");
+            }
+
+            this.Queue = queue;
+            this.RunLoopThread = new Thread(() =>
             {
-                RunLoop = NSRunLoop.Current;
-                while (!StopRunLoop) {
-                    RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(1));
+                this.RunLoop = NSRunLoop.Current;
+                while (!this.StopRunLoop) {
+                    this.RunLoop.RunUntil(NSDate.FromTimeIntervalSinceNow(1));
+                    this.CleanLastRenameEvent();
                 }
             });
-            RunLoopThread.Start ();
+
+            this.RunLoopThread.Start();
             while (RunLoop == null) {
                 Thread.Sleep(10);
             }
-            FsStream = new FSEventStream (new [] { pathname }, latency, FSEventStreamCreateFlags.FileEvents);
-            EnableEvents = false;
-            FsStream.ScheduleWithRunLoop (RunLoop);
+
+            this.FsStream = new FSEventStream(new [] { pathname }, latency, FSEventStreamCreateFlags.FileEvents);
+            this.EnableEvents = false;
+            this.FsStream.ScheduleWithRunLoop(this.RunLoop);
         }
 
         /// <summary>
@@ -117,14 +126,14 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected void Dispose(bool disposing)
         {
-            if (! disposed) {
+            if (!disposed) {
                 if (disposing) {
                     // Dispose of any managed resources of the derived class here.
                     EnableEvents = false;
-                    FsStream.Invalidate ();
+                    FsStream.Invalidate();
 
                     StopRunLoop = true;
-                    RunLoopThread.Join ();
+                    RunLoopThread.Join();
                     disposed = true;
                 }
                 // Dispose of any unmanaged resources of the derived class here.
@@ -145,54 +154,56 @@ namespace CmisSync.Lib.Sync.Strategy
             GC.SuppressFinalize(this);
         }
 
-
         private void OnFSEventStreamEvents (object sender, FSEventStreamEventsArgs e)
         {
-            foreach(MonoMac.CoreServices.FSEvent fsEvent in e.Events) {
-                if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRemoved) != 0) {
-                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0 && !File.Exists (fsEvent.Path)) {
-                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
-                        return;
-                    }
-                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0 && !Directory.Exists (fsEvent.Path)) {
-                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
-                        return;
-                    }
+            foreach (MonoMac.CoreServices.FSEvent fsEvent in e.Events) {
+                bool isFile = (fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0;
+                if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRemoved) != 0 && !FileOrDirectoryExists(fsEvent.Path, isFile)) {
+                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
+                    continue;
                 }
-                if ((fsEvent.Flags & FSEventStreamEventFlags.ItemCreated) != 0) {
-                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0 && File.Exists (fsEvent.Path)) {
-                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
-                    }
-                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0 && Directory.Exists (fsEvent.Path)) {
-                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
-                    }
+
+                if ((fsEvent.Flags & FSEventStreamEventFlags.ItemCreated) != 0 && FileOrDirectoryExists(fsEvent.Path, isFile)) {
+                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Created, fsEvent.Path));
                 }
-                if ((fsEvent.Flags & FSEventStreamEventFlags.ItemModified) != 0 || (fsEvent.Flags & FSEventStreamEventFlags.ItemInodeMetaMod) != 0) {
-                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0 && File.Exists (fsEvent.Path)) {
-                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Changed, fsEvent.Path));
-                    }
-                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0 && Directory.Exists (fsEvent.Path)) {
-                        Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Changed, fsEvent.Path));
-                    }
+
+                if (((fsEvent.Flags & FSEventStreamEventFlags.ItemModified) != 0
+                    || (fsEvent.Flags & FSEventStreamEventFlags.ItemInodeMetaMod) != 0)
+                    && FileOrDirectoryExists(fsEvent.Path, isFile)) {
+                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Changed, fsEvent.Path));
                 }
+
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRenamed) != 0) {
-                    //TODO rename optimization
-                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0) {
-                        if (File.Exists (fsEvent.Path)) {
-                            Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
+                    if (FileOrDirectoryExists(fsEvent.Path, isFile)) {
+                        if (this.LastRenameEvent != null && this.LastRenameEvent.Value.Id == fsEvent.Id - 1) {
+                            this.Queue.AddEvent(new CmisSync.Lib.Events.FSMovedEvent(this.LastRenameEvent.Value.Path, fsEvent.Path));
+                            this.LastRenameEvent = null;
                         } else {
-                            Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
+                            this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Created, fsEvent.Path));
                         }
-                    }
-                    if ((fsEvent.Flags & FSEventStreamEventFlags.ItemIsDir) != 0) {
-                        if (Directory.Exists (fsEvent.Path)) {
-                            Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Created, fsEvent.Path));
-                        } else {
-                            Queue.AddEvent (new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
-                        }
+                    } else {
+                        this.LastRenameEvent = fsEvent;
+                        continue;
                     }
                 }
+                this.CleanLastRenameEvent();
             }
+        }
+
+        /// <summary>
+        /// Cleans the last rename event. If no corresponding second rename event has been found yet, the rename has been a sign for a deletion.
+        /// </summary>
+        private void CleanLastRenameEvent() {
+            if (this.LastRenameEvent != null)
+            {
+                this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Deleted, this.LastRenameEvent.Value.Path));
+                this.LastRenameEvent = null;
+            }
+        }
+
+        internal static bool FileOrDirectoryExists(string path, bool isFile)
+        {
+            return isFile ? File.Exists(path) : Directory.Exists(path);
         }
     }
 }

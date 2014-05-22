@@ -68,7 +68,6 @@ namespace TestLibrary.SyncStrategiesTests
             using (var watcher = new MacWatcher(localFolder.FullName, queue.Object))
             {
                 Assert.False(watcher.EnableEvents);
-                Assert.AreEqual(EventHandlerPriorities.NORMAL, watcher.Priority);
             }
         }
 
@@ -94,6 +93,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             private ISyncEventQueue Queue;
             public List<FSEvent> Events = new List<FSEvent>();
+            public ISyncEventManager EventManager { get; private set; }
 
             public EventQueue(ISyncEventQueue queue)
             {
@@ -107,6 +107,7 @@ namespace TestLibrary.SyncStrategiesTests
                     if (fsEvent != null) {
                         Events.Add (fsEvent);
                     }
+
                     Queue.AddEvent (newEvent);
                 }
             }
