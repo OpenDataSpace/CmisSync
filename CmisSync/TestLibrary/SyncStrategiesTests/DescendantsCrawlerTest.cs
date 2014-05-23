@@ -138,7 +138,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void RecognizesOneNewRemoteFolder()
         {
-            var newRemoteFolder = Mock.Of<IFolder>();
+            IFolder newRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("id", "name", "/name", this.remoteRootId).Object;
             this.remoteFolder.SetupDescendants(newRemoteFolder);
             var crawler = this.CreateCrawler();
 
@@ -149,14 +149,15 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void RegognizesNewRemoteFolderHierarchie()
         {
-            var newRemoteSubFolder = Mock.Of<IFolder>();
-            var newRemoteFolder = new Mock<IFolder>();
-            this.remoteFolder.SetupDescendants(this.remoteFolder.Object);
+            var newRemoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteSubFolder", "sub", "/name/sub", "remoteFolder");
+            var newRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteFolder", "name", "/name", this.remoteRootId);
+            newRemoteFolder.SetupDescendants(newRemoteSubFolder.Object);
+            this.remoteFolder.SetupDescendants(newRemoteFolder.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteFolder.Object))), Times.Once());
-            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteSubFolder))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteSubFolder.Object))), Times.Once());
         }
 
         [Test, Category("Fast")]

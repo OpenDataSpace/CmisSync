@@ -36,11 +36,10 @@ namespace TestLibrary.TestUtils
         public static void SetupDescendants(this Mock<IFolder> folder, params IFileableCmisObject[] children) {
             var list = new List<ITree<IFileableCmisObject>>();
             foreach (var child in children) {
-                var tree = Mock.Of<ITree<IFileableCmisObject>>(
-                    t =>
-                    t.Item == child &&
-                    t.Children == (child is IFolder ? (child as IFolder).GetDescendants(-1) : new List<ITree<IFileableCmisObject>>()));
-                list.Add(tree);
+                var tree = new Mock<ITree<IFileableCmisObject>>();
+                tree.Setup(t => t.Item).Returns(child);
+                tree.Setup(t => t.Children).Returns((child is IFolder ? (child as IFolder).GetDescendants(-1) : new List<ITree<IFileableCmisObject>>()));
+                list.Add(tree.Object);
             }
 
             folder.Setup(f => f.GetDescendants(-1)).Returns(list);
@@ -54,6 +53,7 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.ParentId).Returns(parentId);
             newRemoteObject.Setup(d => d.Name).Returns(name);
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
+            newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
             return newRemoteObject;
         }
     }
