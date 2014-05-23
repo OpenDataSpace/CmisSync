@@ -97,6 +97,7 @@ namespace TestLibrary.IntegrationTests
             Assert.IsNotNull(remoteFolder);
         }
 
+        [Ignore]
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void GetSyncPropertyFromFile(string canonical_name, string localPath, string remoteFolderPath,
             string url, string user, string password, string repositoryId)
