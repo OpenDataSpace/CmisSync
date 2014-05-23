@@ -145,7 +145,18 @@ namespace CmisSync.Lib.Sync.Strategy
             foreach (var localDir in localDirectories) {
                 var matchingStoredObject = storedChildren.Find(c => c.Name == localDir.Name);
                 if (matchingStoredObject == null) {
-                    addedLocalObjects.Add(localDir);
+                    var ea = localDir.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                    Guid uuid;
+                    if (ea != null && Guid.TryParse(ea, out uuid)) {
+                        var oldObject = storage.GetObjectByGuid(uuid);
+                        if (oldObject == null) {
+                            addedLocalObjects.Add(localDir);
+                        } else {
+                            // TODO moved locally
+                        }
+                    } else {
+                        addedLocalObjects.Add(localDir);
+                    }
                 }
             }
 

@@ -229,10 +229,10 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "oldFolder"));
             oldLocalFolder.Setup(f => f.Exists).Returns(false);
-            var storedFile = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
+            var storedFolder = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
                 Guid = Guid.NewGuid()
             };
-            this.storage.SaveMappedObject(storedFile);
+            this.storage.SaveMappedObject(storedFolder);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
@@ -248,16 +248,41 @@ namespace TestLibrary.SyncStrategiesTests
             oldLocalFolder.Setup(f => f.Exists).Returns(false);
             newLocalFolder.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(uuid.ToString());
 
-            var storedFile = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
+            var storedFolder = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
                 Guid = uuid
             };
-            this.storage.SaveMappedObject(storedFile);
+            this.storage.SaveMappedObject(storedFolder);
 
             this.localFolder.SetupDirectories();
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderMovedEvent>(e => e.LocalFolder.Equals(oldLocalFolder))), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void NoChangeOnExistingFileAndFolder()
+        {
+            string changeToken = "token";
+            string fileName = "name";
+            string fileId = "fileId";
+            string folderName = "folder";
+            string folderId = "folderId";
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, fileName, this.remoteRootId, changeToken: changeToken);
+            var existingRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, folderName, this.remoteRootPath + folderName, this.remoteRootId, changeToken);
+            var file = this.fsFactory.AddFile(Path.Combine(this.localRootPath, fileName));
+            var storedFile = new MappedObject(fileName, fileId, MappedObjectType.File, this.remoteRootId, changeToken);
+            this.storage.SaveMappedObject(storedFile);
+            var folder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, folderName));
+            var storedFolder = new MappedObject(folderName, folderId, MappedObjectType.Folder, this.remoteRootId, changeToken);
+            this.storage.SaveMappedObject(storedFolder);
+            this.remoteFolder.SetupDescendants(remoteFile.Object, existingRemoteFolder.Object);
+            this.localFolder.SetupFilesAndDirectories(file.Object, folder.Object);
+
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()), Times.Never());
         }
 
         private DescendantsCrawler CreateCrawler()
