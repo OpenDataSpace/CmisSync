@@ -62,12 +62,12 @@ namespace TestLibrary.TestUtils
         {
             List<IDirectoryInfo> dirs = new List<IDirectoryInfo>();
             List<IFileInfo> files = new List<IFileInfo>();
-            foreach (IFileInfo file in children) {
-                files.Add(file);
-            }
-
-            foreach (IDirectoryInfo dir in children) {
-                dirs.Add(dir);
+            foreach (var child in children) {
+                if (child is IFileInfo) {
+                    files.Add(child as IFileInfo);
+                } else if (child is IDirectoryInfo) {
+                    dirs.Add(child as IDirectoryInfo);
+                }
             }
 
             parent.SetupFiles(files.ToArray());
@@ -94,6 +94,7 @@ namespace TestLibrary.TestUtils
         public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true)
         {
             Mock<IFileInfo> file = new Mock<IFileInfo>();
+            file.Setup(f => f.Name).Returns(Path.GetFileName(path));
             file.Setup(f => f.FullName).Returns(path);
             file.Setup(f => f.Exists).Returns(exists);
             fsFactory.AddIFileInfo(file.Object);
