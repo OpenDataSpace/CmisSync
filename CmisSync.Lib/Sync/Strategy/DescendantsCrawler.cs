@@ -133,8 +133,7 @@ namespace CmisSync.Lib.Sync.Strategy
             var storedChildren = this.storage.GetChildren(this.storage.GetObjectByRemoteId(remoteFolder.Id));
 
             // Find all new remote objects in this folder hierarchy
-            var desc = this.remoteFolder.GetDescendants(-1);
-            foreach (var child in desc) {
+            foreach (var child in descendants) {
                 var matchingStoredObject = storedChildren.Find(c => c.RemoteObjectId == child.Item.Id);
                 if (matchingStoredObject == null) {
                     addedRemoteObjects.Add(child.Item);
