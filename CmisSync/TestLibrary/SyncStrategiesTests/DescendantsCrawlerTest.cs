@@ -56,6 +56,7 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue = new Mock<ISyncEventQueue>();
             this.storage = new Mock<IMetaDataStorage>();
             this.remoteFolder = new Mock<IFolder>();
+            this.remoteFolder.SetupDescendants();
             this.localFolder = new Mock<IDirectoryInfo>();
             this.localFolder.Setup(f => f.FullName).Returns(this.localRootPath);
             this.localFolder.Setup(f => f.Exists).Returns(true);
@@ -139,10 +140,23 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var newRemoteFolder = Mock.Of<IFolder>();
             this.remoteFolder.SetupDescendants(newRemoteFolder);
-
             var crawler = this.CreateCrawler();
+
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteFolder))), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void RegognizesNewRemoteFolderHierarchie()
+        {
+            var newRemoteSubFolder = Mock.Of<IFolder>();
+            var newRemoteFolder = new Mock<IFolder>();
+            this.remoteFolder.SetupDescendants(this.remoteFolder.Object);
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteFolder.Object))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteSubFolder))), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -150,6 +164,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var newFolderMock = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
             var crawler = this.CreateCrawler();
+
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.Equals(newFolderMock.Object))), Times.Once());
         }

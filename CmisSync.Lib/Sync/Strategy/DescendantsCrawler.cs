@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Sync.Strategy
 {
     using System;
+    using System.Collections.Generic;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
@@ -95,7 +96,17 @@ namespace CmisSync.Lib.Sync.Strategy
         }
 
         private void CrawlDescendants() {
+            List<IFileableCmisObject> addedRemoteObjects = new List<IFileableCmisObject>();
+            List<IFileSystemInfo> addedLocalObjects = new List<IFileSystemInfo>();
+            List<IFileSystemInfo> removedLocalObjects = new List<IFileSystemInfo>();
+            List<IFileableCmisObject> removedRemoteObjects = new List<IFileableCmisObject>();
             var desc = this.remoteFolder.GetDescendants(-1);
+            var localChildren = this.localFolder.GetDirectories();
+            foreach (var child in desc) {
+                var storedObject = this.storage.GetObjectByRemoteId(child.Item.Id);
+                if (storedObject == null) {
+                }
+            }
         }
     }
 }
