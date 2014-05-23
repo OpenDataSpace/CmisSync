@@ -28,9 +28,13 @@ namespace TestLibrary.SyncStrategiesTests
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
 
+    using DBreeze;
+
     using DotCMIS.Client;
 
     using Moq;
+
+    using Newtonsoft.Json;
 
     using NUnit.Framework;
 
@@ -42,20 +46,31 @@ namespace TestLibrary.SyncStrategiesTests
         private readonly string remoteRootId = "rootId";
         private readonly string remoteRootPath = "/";
         private Mock<ISyncEventQueue> queue;
-        private Mock<IMetaDataStorage> storage;
+        private IMetaDataStorage storage;
         private Mock<IFolder> remoteFolder;
         private Mock<IDirectoryInfo> localFolder;
         private Mock<IFileSystemInfoFactory> fsFactory;
         private string localRootPath;
         private MappedObject mappedRootObject;
+        private IPathMatcher matcher;
+        private DBreezeEngine storageEngine;
+
+        [TestFixtureSetUp]
+        public void InitCustomSerializator()
+        {
+            // Use Newtonsoft.Json as Serializator
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
+        }
 
         [SetUp]
         public void CreateMockObjects()
         {
+            this.storageEngine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
             this.localRootPath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            this.matcher = new PathMatcher(this.localRootPath, this.remoteRootPath);
             this.queue = new Mock<ISyncEventQueue>();
-            this.storage = new Mock<IMetaDataStorage>();
-            this.remoteFolder = new Mock<IFolder>();
+            this.remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteRootId, this.remoteRootPath, this.remoteRootPath);
             this.remoteFolder.SetupDescendants();
             this.localFolder = new Mock<IDirectoryInfo>();
             this.localFolder.Setup(f => f.FullName).Returns(this.localRootPath);
@@ -68,7 +83,8 @@ namespace TestLibrary.SyncStrategiesTests
                 MappedObjectType.Folder,
                 null,
                 "changeToken");
-            this.storage.AddMappedFolder(this.mappedRootObject, this.localRootPath, this.remoteRootPath);
+            this.storage = new MetaDataStorage(this.storageEngine, this.matcher);
+            this.storage.SaveMappedObject(this.mappedRootObject);
         }
 
         [Test, Category("Fast")]
@@ -164,6 +180,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void RecognizesOneNewLocalFolder()
         {
             var newFolderMock = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
+            this.localFolder.SetupDirectories(newFolderMock.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
@@ -176,7 +193,7 @@ namespace TestLibrary.SyncStrategiesTests
                 this.queue.Object,
                 this.remoteFolder.Object,
                 this.localFolder.Object,
-                this.storage.Object,
+                this.storage,
                 this.fsFactory.Object);
         }
     }

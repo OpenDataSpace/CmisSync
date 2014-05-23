@@ -100,11 +100,49 @@ namespace CmisSync.Lib.Sync.Strategy
             List<IFileSystemInfo> addedLocalObjects = new List<IFileSystemInfo>();
             List<IFileSystemInfo> removedLocalObjects = new List<IFileSystemInfo>();
             List<IFileableCmisObject> removedRemoteObjects = new List<IFileableCmisObject>();
+            var storedChildren = this.storage.GetChildren(this.storage.GetObjectByRemoteId(this.remoteFolder.Id));
+
+            // Find all new remote objects in this folder hierarchy
             var desc = this.remoteFolder.GetDescendants(-1);
-            var localChildren = this.localFolder.GetDirectories();
             foreach (var child in desc) {
-                var storedObject = this.storage.GetObjectByRemoteId(child.Item.Id);
-                if (storedObject == null) {
+                var matchingStoredObject = storedChildren.Find(c => c.RemoteObjectId == child.Item.Id);
+                if (matchingStoredObject == null) {
+                    addedRemoteObjects.Add(child.Item);
+                }
+            }
+
+            // Find all new local object in this folder hierarchy
+            var localDirectories = this.localFolder.GetDirectories();
+            foreach (var localDir in localDirectories) {
+                var matchingStoredObject = storedChildren.Find(c => c.Name == localDir.Name);
+                if (matchingStoredObject == null) {
+                    addedLocalObjects.Add(localDir);
+                }
+            }
+
+            // Find all new local object in this folder hierarchy
+            var localFiles = this.localFolder.GetFiles();
+            foreach (var localFile in localFiles) {
+                var matchingStoredObject = storedChildren.Find(c => c.Name == localFile.Name);
+                if (matchingStoredObject == null) {
+                    addedLocalObjects.Add(localFile);
+                }
+            }
+
+            // Send out Events to queue
+            foreach (var addedRemotely in addedRemoteObjects) {
+                if (addedRemotely is IFolder) {
+                    this.Queue.AddEvent(new FolderEvent(null, addedRemotely as IFolder, this) { Remote = MetaDataChangeType.CREATED });
+                } else if (addedRemotely is IDocument) {
+                    this.Queue.AddEvent(new FileEvent(null, this.localFolder, addedRemotely as IDocument) { Remote = MetaDataChangeType.CREATED });
+                }
+            }
+
+            foreach (var addedLocally in addedLocalObjects) {
+                if (addedLocally is IDirectoryInfo) {
+                    this.Queue.AddEvent(new FolderEvent(addedLocally as IDirectoryInfo, null, this) { Local = MetaDataChangeType.CREATED });
+                } else if (addedLocally is IFileInfo) {
+                    this.Queue.AddEvent(new FileEvent(addedLocally as IFileInfo, this.localFolder, null) { Local = MetaDataChangeType.CREATED });
                 }
             }
         }
