@@ -63,16 +63,6 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changeToken);
             return newRemoteObject;
         }
-        
-        public static Mock<IFolder> CreateRemoteFolderMock(string id, string path = "/", string parentId = "", string changetoken = "changetoken") {
-            var newRemoteObject = new Mock<IFolder>();
-            newRemoteObject.Setup(d => d.Id).Returns(id);
-            newRemoteObject.Setup(d => d.Path).Returns(path);
-            newRemoteObject.Setup(d => d.ParentId).Returns(parentId);
-            newRemoteObject.Setup(d => d.Name).Returns(Path.GetFileName(path));
-            newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
-            return newRemoteObject;
-        }
 
         public static Mock<ISession> PrepareSessionMockForSingleChange(DotCMIS.Enums.ChangeType type, string objectId = "objectId", string changeLogToken = "token", string latestChangeLogToken = "latestChangeLogToken") {
             var changeEvents = new Mock<IChangeEvents>();
@@ -146,9 +136,9 @@ namespace TestLibrary.TestUtils
             return remoteFolder;
         }
 
-        public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid", string path = "path", string parentId = "", string changetoken = "changetoken") {
+        public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid", string folderName = "name", string path = "path", string parentId = "", string changetoken = "changetoken") {
             var session = PrepareSessionMockForSingleChange(type, id);
-            var newRemoteObject = CreateRemoteFolderMock(id, path, parentId, changetoken);
+            var newRemoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, changetoken);
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);
          
             return session;

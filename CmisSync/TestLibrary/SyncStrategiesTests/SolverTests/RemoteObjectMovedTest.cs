@@ -68,7 +68,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             dirInfo.Setup(d => d.Name).Returns(oldFolderName);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
 
-            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, newPath, subFolderId, lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, newFolderName ,newPath, subFolderId, lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
 
             var mappedFolder = Mock.Of<IMappedObject>(

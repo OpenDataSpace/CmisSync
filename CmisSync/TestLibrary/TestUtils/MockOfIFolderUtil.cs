@@ -46,5 +46,15 @@ namespace TestLibrary.TestUtils
             folder.Setup(f => f.GetDescendants(-1)).Returns(list);
             folder.Setup(f => f.GetDescendants(It.Is<int>(d => d != -1))).Throws(new ArgumentOutOfRangeException("Get Descendants should not be limited"));
         }
+
+        public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken") {
+            var newRemoteObject = new Mock<IFolder>();
+            newRemoteObject.Setup(d => d.Id).Returns(id);
+            newRemoteObject.Setup(d => d.Path).Returns(path);
+            newRemoteObject.Setup(d => d.ParentId).Returns(parentId);
+            newRemoteObject.Setup(d => d.Name).Returns(name);
+            newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
+            return newRemoteObject;
+        }
     }
 }

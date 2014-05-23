@@ -65,7 +65,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             storage.AddLocalFolder(dirInfo.Object, id);
 
-            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
             var solver = new RemoteObjectChanged();

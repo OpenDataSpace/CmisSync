@@ -183,7 +183,7 @@ namespace TestLibrary.DataTests
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
-            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, lastChangeToken);
             MappedObject mappedObject = new MappedObject(remoteObject.Object);
             Assert.That(mappedObject.RemoteObjectId, Is.EqualTo(id), "RemoteObjectId incorrect");
             Assert.That(mappedObject.Name, Is.EqualTo(folderName), "Name incorrect");

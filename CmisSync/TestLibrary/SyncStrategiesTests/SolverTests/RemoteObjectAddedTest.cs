@@ -68,7 +68,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(false);
 
-            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(this.id, this.path, this.parentId, this.lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
             var solver = new RemoteObjectAdded();
@@ -93,7 +93,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
 
-            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(this.id, this.path, this.parentId, this.lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
             var solver = new RemoteObjectAdded();
