@@ -129,5 +129,12 @@ namespace CmisSync.Lib.Storage
         /// Validates the object structure. If the structure is not fine, the DB content will be printed and an exception will be thrown.
         /// </summary>
         void ValidateObjectStructure();
+
+        /// <summary>
+        /// Gets the object by GUID.
+        /// </summary>
+        /// <returns>The object by GUID.</returns>
+        /// <param name="guid">GUID of the requested object.</param>
+        IMappedObject GetObjectByGuid(Guid guid);
     }
 }

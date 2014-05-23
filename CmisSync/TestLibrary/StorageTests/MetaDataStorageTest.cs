@@ -543,5 +543,23 @@ namespace TestLibrary.StorageTests
 
             storage.ValidateObjectStructure();
         }
+
+        [Test, Category("Fast")]
+        public void GetObjectByGuidReturnsNullIfNoEntryExists()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            Assert.That(storage.GetObjectByGuid(Guid.NewGuid()), Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void GetObjectByGuidReturnsSavedObject()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var uuid = Guid.NewGuid();
+            var file = new MappedObject("name" , "rootId", MappedObjectType.File, null, "token") { Guid = uuid };
+            storage.SaveMappedObject(file);
+
+            Assert.That(storage.GetObjectByGuid(uuid), Is.EqualTo(file));
+        }
     }
 }
