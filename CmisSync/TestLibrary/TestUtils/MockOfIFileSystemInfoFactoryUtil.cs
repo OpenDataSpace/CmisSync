@@ -48,6 +48,32 @@ namespace TestLibrary.TestUtils
             return dir;
         }
 
+        public static void SetupDirectories(this Mock<IDirectoryInfo> parent, params IDirectoryInfo[] dirs)
+        {
+            parent.Setup(p => p.GetDirectories()).Returns(dirs);
+        }
+
+        public static void SetupFiles(this Mock<IDirectoryInfo> parent, params IFileInfo[] files)
+        {
+            parent.Setup(p => p.GetFiles()).Returns(files);
+        }
+
+        public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children)
+        {
+            List<IDirectoryInfo> dirs = new List<IDirectoryInfo>();
+            List<IFileInfo> files = new List<IFileInfo>();
+            foreach (IFileInfo file in children) {
+                files.Add(file);
+            }
+
+            foreach (IDirectoryInfo dir in children) {
+                dirs.Add(dir);
+            }
+
+            parent.SetupFiles(files.ToArray());
+            parent.SetupDirectories(dirs.ToArray());
+        }
+
         public static void AddDirectoryWithParents(this Mock<IFileSystemInfoFactory> fsFactory, string path)
         {
             if (path.Length > 0) {
