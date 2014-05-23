@@ -228,7 +228,7 @@ namespace TestLibrary.IntegrationTests
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(1));
             var child = children.First();
-            Assert.That(child, Is.InstanceOfType(typeof(IDocument)));
+            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamId, Is.Not.Null, "ContentStream not set");
 

@@ -20,6 +20,7 @@
 namespace TestLibrary.DataTests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
     using CmisSync.Lib.Data;
@@ -62,6 +63,8 @@ namespace TestLibrary.DataTests
             Assert.IsNull(file.LastRemoteWriteTimeUtc);
             Assert.AreEqual(-1, file.LastContentSize);
             Assert.That(file.Ignored, Is.False);
+            Assert.That(file.ActualOperation, Is.EqualTo(OperationType.No));
+            Assert.That(file.Retries, Is.Empty);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
@@ -176,6 +179,16 @@ namespace TestLibrary.DataTests
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
+        public void RetriesDictionaryProperty()
+        {
+            var dict = new Dictionary<OperationType, int>();
+            dict.Add(OperationType.Download, 1);
+            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Retries = dict };
+            Assert.That(obj.Retries, Is.EqualTo(dict));
+            Assert.That(obj.Retries[OperationType.Download], Is.EqualTo(1));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
         public void IFolderConstructor()
         {
             string folderName = "a";
@@ -183,7 +196,7 @@ namespace TestLibrary.DataTests
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
-            Mock<IFolder> remoteObject = MockSessionUtil.CreateRemoteFolderMock(id, path, parentId, lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, lastChangeToken);
             MappedObject mappedObject = new MappedObject(remoteObject.Object);
             Assert.That(mappedObject.RemoteObjectId, Is.EqualTo(id), "RemoteObjectId incorrect");
             Assert.That(mappedObject.Name, Is.EqualTo(folderName), "Name incorrect");

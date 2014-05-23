@@ -53,7 +53,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void FileEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IDocument remote = MockSessionUtil.CreateRemoteDocumentMock(null, Id).Object;
+            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, Id, "name", null).Object;
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
@@ -106,7 +106,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void FolderEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(Id).Object;
+            IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(Id, "name", "/name").Object;
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
@@ -139,7 +139,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void CrawlRequestedEventWithNewRemoteFolder() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(Id).Object;
+            IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(Id, "name", "/name").Object;
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
@@ -156,7 +156,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void OperationContextDoesNotUsesTheSessionCache() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
-            IFolder remote = MockSessionUtil.CreateRemoteFolderMock(Id).Object;
+            IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(Id, "name", "/name").Object;
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();

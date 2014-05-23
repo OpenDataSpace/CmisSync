@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Data
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
 
     using DotCMIS.Client;
@@ -46,6 +47,28 @@ namespace CmisSync.Lib.Data
         /// The typs is a folder.
         /// </summary>
         Folder = 2
+    }
+
+    /// <summary>
+    /// Operation type.
+    /// </summary>
+    [Serializable]
+    public enum OperationType
+    {
+        /// <summary>
+        /// No operation. (default)
+        /// </summary>
+        No = 0,
+
+        /// <summary>
+        /// Upload operation
+        /// </summary>
+        Upload = 1,
+
+        /// <summary>
+        /// Download operation.
+        /// </summary>
+        Download = 2
     }
 
     /// <summary>
@@ -103,6 +126,8 @@ namespace CmisSync.Lib.Data
             this.ParentId = parentId;
             this.LastChangeToken = changeToken;
             this.LastContentSize = contentSize;
+            this.ActualOperation = OperationType.No;
+            this.Retries = new Dictionary<OperationType, int>();
         }
 
         /// <summary>
@@ -126,6 +151,8 @@ namespace CmisSync.Lib.Data
                 this.RemoteObjectId = data.RemoteObjectId;
                 this.Type = data.Type;
                 this.LastContentSize = data.LastContentSize;
+                this.ActualOperation = data.ActualOperation;
+                this.Retries = data.Retries ?? new Dictionary<OperationType, int>();
             }
         }
 
@@ -143,6 +170,8 @@ namespace CmisSync.Lib.Data
             this.Name = remoteFolder.Name;
             this.Type = MappedObjectType.Folder;
             this.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
+            this.ActualOperation = OperationType.No;
+            this.Retries = new Dictionary<OperationType, int>();
         }
 
         /// <summary>
@@ -248,6 +277,18 @@ namespace CmisSync.Lib.Data
         /// </summary>
         /// <value><c>true</c> if ignored; otherwise, <c>false</c>.</value>
         public bool Ignored { get; set; }
+
+        /// <summary>
+        /// Gets or sets the actual running operation.
+        /// </summary>
+        /// <value>The actual operation.</value>
+        public OperationType ActualOperation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the retries of failed operations.
+        /// </summary>
+        /// <value>The retries.</value>
+        public Dictionary<OperationType, int> Retries { get; set; }
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Data.MappedObjectData"/>.

@@ -69,6 +69,7 @@ SOURCES =  \
 	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
 	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/CrawlerTest.cs \
+	SyncStrategiesTests/DescendantsCrawlerTest.cs \
 	SyncStrategiesTests/LocalObjectFetcherTest.cs \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
@@ -91,7 +92,9 @@ SOURCES =  \
 	SyncStrategiesTests/WatcherTestUtils.cs \
 	TestUtils/CmisConvenienceExtenders.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
+	TestUtils/MockOfIDocumentUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
+	TestUtils/MockOfIFolderUtil.cs \
 	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \

@@ -516,6 +516,36 @@ namespace CmisSync.Lib.Storage
             }
         }
 
+        /// <summary>
+        /// Gets the object by GUID.
+        /// </summary>
+        /// <returns>The object by GUID.</returns>
+        /// <param name="guid">GUID of the requested object.</param>
+        public IMappedObject GetObjectByGuid(Guid guid)
+        {
+            using(var tran = this.engine.GetTransaction())
+            {
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
+                {
+                    var value = row.Value;
+                    if (value == null) {
+                        continue;
+                    }
+
+                    var data = value.Get;
+                    if (data == null) {
+                        continue;
+                    }
+
+                    if (data.Guid == guid) {
+                        return data;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private void RemoveChildrenRecursively(List<MappedObject> objects, MappedObject root)
         {
             var children = objects.FindAll(o => o.ParentId == root.RemoteObjectId);

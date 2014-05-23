@@ -48,6 +48,32 @@ namespace TestLibrary.TestUtils
             return dir;
         }
 
+        public static void SetupDirectories(this Mock<IDirectoryInfo> parent, params IDirectoryInfo[] dirs)
+        {
+            parent.Setup(p => p.GetDirectories()).Returns(dirs);
+        }
+
+        public static void SetupFiles(this Mock<IDirectoryInfo> parent, params IFileInfo[] files)
+        {
+            parent.Setup(p => p.GetFiles()).Returns(files);
+        }
+
+        public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children)
+        {
+            List<IDirectoryInfo> dirs = new List<IDirectoryInfo>();
+            List<IFileInfo> files = new List<IFileInfo>();
+            foreach (var child in children) {
+                if (child is IFileInfo) {
+                    files.Add(child as IFileInfo);
+                } else if (child is IDirectoryInfo) {
+                    dirs.Add(child as IDirectoryInfo);
+                }
+            }
+
+            parent.SetupFiles(files.ToArray());
+            parent.SetupDirectories(dirs.ToArray());
+        }
+
         public static void AddDirectoryWithParents(this Mock<IFileSystemInfoFactory> fsFactory, string path)
         {
             if (path.Length > 0) {
@@ -68,6 +94,7 @@ namespace TestLibrary.TestUtils
         public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true)
         {
             Mock<IFileInfo> file = new Mock<IFileInfo>();
+            file.Setup(f => f.Name).Returns(Path.GetFileName(path));
             file.Setup(f => f.FullName).Returns(path);
             file.Setup(f => f.Exists).Returns(exists);
             fsFactory.AddIFileInfo(file.Object);
