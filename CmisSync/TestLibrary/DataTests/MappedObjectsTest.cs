@@ -20,6 +20,7 @@
 namespace TestLibrary.DataTests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
     using CmisSync.Lib.Data;
@@ -62,6 +63,8 @@ namespace TestLibrary.DataTests
             Assert.IsNull(file.LastRemoteWriteTimeUtc);
             Assert.AreEqual(-1, file.LastContentSize);
             Assert.That(file.Ignored, Is.False);
+            Assert.That(file.ActualOperation, Is.EqualTo(OperationType.No));
+            Assert.That(file.Retries, Is.Empty);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
@@ -173,6 +176,16 @@ namespace TestLibrary.DataTests
         {
             var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Ignored = true };
             Assert.That(obj.Ignored, Is.True);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void RetriesDictionaryProperty()
+        {
+            var dict = new Dictionary<OperationType, int>();
+            dict.Add(OperationType.Download, 1);
+            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Retries = dict };
+            Assert.That(obj.Retries, Is.EqualTo(dict));
+            Assert.That(obj.Retries[OperationType.Download], Is.EqualTo(1));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
