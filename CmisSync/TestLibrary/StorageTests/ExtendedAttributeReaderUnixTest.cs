@@ -30,13 +30,14 @@ namespace TestLibrary.StorageTests
     [TestFixture]
     public class ExtendedAttributeReaderUnixTest
     {
-        private string path = "";
+        private string path = string.Empty;
 
         [SetUp]
         public void SetUp()
         {
             path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var reader = new ExtendedAttributeReaderUnix();
+            Console.WriteLine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
             if(!reader.IsFeatureAvailable()) {
                 Assert.Ignore("Extended Attribute not available on this machine");
             }

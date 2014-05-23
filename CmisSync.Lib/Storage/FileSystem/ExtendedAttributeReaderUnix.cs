@@ -49,12 +49,19 @@ namespace CmisSync.Lib.Storage
             long ret = Syscall.getxattr(path, prefix + key, out value);
             if(ret != 0)
             {
+                #if __COCOA__
+                // On MacOS 93 means no value is found
+                if (ret == 93) {
+                    return null;
+                }
+                #else
                 Errno error = Syscall.GetLastError();
                 if(error.ToString().Equals("ENODATA")) {
                     return null;
                 } else {
                     //throw new ExtendedAttributeException(Syscall.GetLastError().ToString());
                 }
+                #endif
             }
             if(value == null)
             {
@@ -140,22 +147,15 @@ namespace CmisSync.Lib.Storage
         public bool IsFeatureAvailable()
         {
 #if __MonoCS__
-            byte[] value;
-            string key = "test";
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            var stream = File.Create(path);
-            stream.Dispose();
-            long ret = Syscall.getxattr(path, prefix + key, out value);
+            using (File.Create(path));
             bool retValue = true;
-            if(ret != 0)
-            {
-                Errno error = Syscall.GetLastError();
-                if(error.ToString().Equals("EOPNOTSUPP")) {
-                    retValue = false;
+            try {
+                retValue = this.IsFeatureAvailable(path);
+            } finally {
+                if(File.Exists(path)) {
+                    File.Delete(path);
                 }
-            }
-            if(File.Exists(path)) {
-                File.Delete(path);
             }
             return retValue;
 #else
@@ -171,16 +171,31 @@ namespace CmisSync.Lib.Storage
         public bool IsFeatureAvailable(string path)
         {
 #if __MonoCS__
+            if (!File.Exists(path) && !Directory.Exists(path)) {
+                throw new ArgumentException(
+                    string.Format(
+                        "Given path \"{0}\" does not exists",
+                        path));
+            }
+
             byte[] value;
             string key = "test";
             long ret = Syscall.getxattr(path, prefix + key, out value);
             bool retValue = true;
             if(ret != 0)
             {
+#if __COCOA__
+                // Feature not supported is errno 102
+                if (ret == 102) {
+                    retValue = false;
+                }
+#else
                 Errno error = Syscall.GetLastError();
+                Console.WriteLine(error.ToString());
                 if(error.ToString().Equals("EOPNOTSUPP")) {
                     retValue = false;
                 }
+#endif
             }
             return retValue;
 #else
