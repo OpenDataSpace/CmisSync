@@ -152,7 +152,7 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
-        public void RecognizesOneNewRemoteFolder()
+        public void OneRemoteFolderAdded()
         {
             IFolder newRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("id", "name", "/name", this.remoteRootId).Object;
             this.remoteFolder.SetupDescendants(newRemoteFolder);
@@ -163,7 +163,18 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
-        public void RegognizesNewRemoteFolderHierarchie()
+        public void OneRemoteDocumentAdded()
+        {
+            IDocument newRemoteDocument = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "id", "name", this.remoteRootId).Object;
+            this.remoteFolder.SetupDescendants(newRemoteDocument);
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.RemoteFile.Equals(newRemoteDocument))), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void SimpleRemoteFolderHierarchyAdded()
         {
             var newRemoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteSubFolder", "sub", "/name/sub", "remoteFolder");
             var newRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteFolder", "name", "/name", this.remoteRootId);
@@ -177,7 +188,7 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
-        public void RecognizesOneNewLocalFolder()
+        public void OneLocalFolderAdded()
         {
             var newFolderMock = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
             this.localFolder.SetupDirectories(newFolderMock.Object);
@@ -185,6 +196,68 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.Equals(newFolderMock.Object))), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void OneLocalFileAdded()
+        {
+            var newFileMock = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "newFile"));
+            this.localFolder.SetupFiles(newFileMock.Object);
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.Equals(newFileMock.Object))), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void OneLocalFileRemoved()
+        {
+            var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "oldFile"));
+            oldLocalFile.Setup(f => f.Exists).Returns(false);
+            var storedFile = new MappedObject("oldFile", "oldFileId", MappedObjectType.File, this.remoteRootId, "oldChange") {
+                Guid = Guid.NewGuid()
+            };
+            this.storage.SaveMappedObject(storedFile);
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.Equals(oldLocalFile))), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void OneLocalFolderRemoved()
+        {
+            var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "oldFolder"));
+            oldLocalFolder.Setup(f => f.Exists).Returns(false);
+            var storedFile = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
+                Guid = Guid.NewGuid()
+            };
+            this.storage.SaveMappedObject(storedFile);
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.Equals(oldLocalFolder))), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void OneLocalFolderRenamed()
+        {
+            var uuid = Guid.NewGuid();
+            var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "oldFolder"));
+            var newLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
+            oldLocalFolder.Setup(f => f.Exists).Returns(false);
+            newLocalFolder.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(uuid.ToString());
+
+            var storedFile = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
+                Guid = uuid
+            };
+            this.storage.SaveMappedObject(storedFile);
+
+            this.localFolder.SetupDirectories();
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderMovedEvent>(e => e.LocalFolder.Equals(oldLocalFolder))), Times.Once());
         }
 
         private DescendantsCrawler CreateCrawler()

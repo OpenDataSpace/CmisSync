@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="DecendantsCrawler.cs" company="GRAU DATA AG">
+// <copyright file="DescendantsCrawler.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Sync.Strategy
     using System;
     using System.Collections.Generic;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using DotCMIS.Client;
@@ -95,12 +96,41 @@ namespace CmisSync.Lib.Sync.Strategy
             return false;
         }
 
-        private void CrawlDescendants() {
+        private void CrawlDescendants()
+        {
             List<IFileableCmisObject> addedRemoteObjects = new List<IFileableCmisObject>();
             List<IFileSystemInfo> addedLocalObjects = new List<IFileSystemInfo>();
             List<IFileSystemInfo> removedLocalObjects = new List<IFileSystemInfo>();
             List<IFileableCmisObject> removedRemoteObjects = new List<IFileableCmisObject>();
-            var storedChildren = this.storage.GetChildren(this.storage.GetObjectByRemoteId(this.remoteFolder.Id));
+            List<MappedObject> storedObjects = new List<MappedObject>();
+            this.CrawlDescendants(
+                this.localFolder,
+                this.remoteFolder,
+                this.remoteFolder.GetDescendants(-1),
+                addedRemoteObjects,
+                addedLocalObjects,
+                removedLocalObjects,
+                removedRemoteObjects,
+                storedObjects);
+
+            // Send out Events to queue
+            this.InformAboutRemoteObjectsAdded(addedRemoteObjects);
+            this.InformAboutLocalObjectsAdded(addedLocalObjects);
+            this.InformAboutRemoteObjectsDeleted(removedRemoteObjects);
+            this.InformAboutLocalObjectsDeleted(removedLocalObjects);
+        }
+
+        private void CrawlDescendants(
+            IDirectoryInfo localFolder,
+            IFolder remoteFolder,
+            IList<ITree<IFileableCmisObject>> descendants,
+            List<IFileableCmisObject> addedRemoteObjects,
+            List<IFileSystemInfo> addedLocalObjects,
+            List<IFileSystemInfo> removedLocalObjects,
+            List<IFileableCmisObject> removedRemoteObjects,
+            List<MappedObject> storedObjects)
+        {
+            var storedChildren = this.storage.GetChildren(this.storage.GetObjectByRemoteId(remoteFolder.Id));
 
             // Find all new remote objects in this folder hierarchy
             var desc = this.remoteFolder.GetDescendants(-1);
@@ -128,21 +158,44 @@ namespace CmisSync.Lib.Sync.Strategy
                     addedLocalObjects.Add(localFile);
                 }
             }
+        }
 
-            // Send out Events to queue
-            foreach (var addedRemotely in addedRemoteObjects) {
+        private void InformAboutRemoteObjectsAdded(IList<IFileableCmisObject> objects) {
+            foreach (var addedRemotely in objects) {
                 if (addedRemotely is IFolder) {
                     this.Queue.AddEvent(new FolderEvent(null, addedRemotely as IFolder, this) { Remote = MetaDataChangeType.CREATED });
                 } else if (addedRemotely is IDocument) {
-                    this.Queue.AddEvent(new FileEvent(null, this.localFolder, addedRemotely as IDocument) { Remote = MetaDataChangeType.CREATED });
+                    this.Queue.AddEvent(new FileEvent(null, null, addedRemotely as IDocument) { Remote = MetaDataChangeType.CREATED });
                 }
             }
+        }
 
-            foreach (var addedLocally in addedLocalObjects) {
+        private void InformAboutLocalObjectsAdded(IList<IFileSystemInfo> objects) {
+            foreach (var addedLocally in objects) {
                 if (addedLocally is IDirectoryInfo) {
                     this.Queue.AddEvent(new FolderEvent(addedLocally as IDirectoryInfo, null, this) { Local = MetaDataChangeType.CREATED });
                 } else if (addedLocally is IFileInfo) {
-                    this.Queue.AddEvent(new FileEvent(addedLocally as IFileInfo, this.localFolder, null) { Local = MetaDataChangeType.CREATED });
+                    this.Queue.AddEvent(new FileEvent(addedLocally as IFileInfo, null, null) { Local = MetaDataChangeType.CREATED });
+                }
+            }
+        }
+
+        private void InformAboutLocalObjectsDeleted(IList<IFileSystemInfo> objects) {
+            foreach (var deleted in objects) {
+                if (deleted is IDirectoryInfo) {
+                    this.Queue.AddEvent(new FolderEvent(deleted as IDirectoryInfo, null, this) { Local = MetaDataChangeType.DELETED });
+                } else if (deleted is IFileInfo) {
+                    this.Queue.AddEvent(new FileEvent(deleted as IFileInfo) { Local = MetaDataChangeType.DELETED });
+                }
+            }
+        }
+
+        private void InformAboutRemoteObjectsDeleted(IList<IFileableCmisObject> objects) {
+            foreach (var deleted in objects) {
+                if (deleted is IFolder) {
+                    this.Queue.AddEvent(new FolderEvent(null, deleted as IFolder, this) { Remote = MetaDataChangeType.DELETED });
+                } else if (deleted is IDocument) {
+                    this.Queue.AddEvent(new FileEvent(null, null, deleted as IDocument) { Remote = MetaDataChangeType.DELETED });
                 }
             }
         }

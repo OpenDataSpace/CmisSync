@@ -167,6 +167,7 @@
     <Compile Include="EventsTests\FsEventTest.cs" />
     <Compile Include="SyncStrategiesTests\DescendantsCrawlerTest.cs" />
     <Compile Include="TestUtils\MockOfIFolderUtil.cs" />
+    <Compile Include="TestUtils\MockOfIDocumentUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

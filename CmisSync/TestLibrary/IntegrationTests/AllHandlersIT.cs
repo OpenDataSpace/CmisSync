@@ -124,7 +124,7 @@ namespace TestLibrary.IntegrationTests
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
-            IDocument remote = MockSessionUtil.CreateRemoteDocumentMock(null, id).Object;
+            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, name, null).Object;
             session.Setup(s => s.GetObject(id)).Returns(remote);
             var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName);
             var queue = this.CreateQueue(session, storage);

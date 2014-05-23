@@ -111,7 +111,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             fileInfo.SetupProperty(f => f.LastWriteTimeUtc);
             fileInfo.Setup(f => f.Directory).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
 
-            var remoteObject = MockSessionUtil.CreateRemoteDocumentMock(null, id, newFileName, lastChangeToken);
+            var remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, newFileName, null, changeToken: lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
 
             var mappedFile = Mock.Of<IMappedObject>(
