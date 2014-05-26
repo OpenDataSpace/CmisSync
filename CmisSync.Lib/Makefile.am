@@ -41,6 +41,7 @@ SOURCES =  \
 	Data/IObjectTree.cs \
 	Data/IPathMatcher.cs \
 	Data/MappedObject.cs \
+	Data/ObjectTree.cs \
 	Data/PathMatcher.cs \
 	Defines.cs \
 	Events/AbstractEventProducer.cs \

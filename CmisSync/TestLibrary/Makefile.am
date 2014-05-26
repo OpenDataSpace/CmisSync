@@ -22,6 +22,7 @@ SOURCES =  \
 	ContentTasksTests/SimpleFileDownloaderTest.cs \
 	ContentTasksTests/SimpleFileUploaderTest.cs \
 	DataTests/MappedObjectsTest.cs \
+	DataTests/ObjectTreeTest.cs \
 	DataTests/PathMatcherTest.cs \
 	EncodingTest.cs \
 	EventsTests/DebugLoggingHandlerTest.cs \

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IObjectTree.cs" company="GRAU DATA AG">
+// <copyright file="ObjectTree.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -23,33 +23,46 @@ namespace CmisSync.Lib.Data
     using System.Collections.Generic;
 
     /// <summary>
-    /// Object Tree interface. The tree has got the possibility to flag each node.
+    /// Object tree implementation.
     /// </summary>
-    /// <typeparam name="T">Type of the saved item.</typeparam>
-    public interface IObjectTree<T>
+    /// <typeparam name="T">Type of the stored node item.</typeparam>
+    public class ObjectTree<T> : IObjectTree<T>
     {
         /// <summary>
-        /// Gets the item.
+        /// Gets or sets the item.
         /// </summary>
         /// <value>The item.</value>
-        T Item { get; }
+        public T Item { get; set; }
 
         /// <summary>
         /// Gets or sets the flag.
         /// </summary>
         /// <value>The flag.</value>
-        int Flag { get; set; }
+        public int Flag { get; set; }
 
         /// <summary>
-        /// Gets the sub trees as list of the child nodes.
+        /// Gets or sets the sub trees as list of the child nodes.
         /// </summary>
         /// <value>The children.</value>
-        IList<IObjectTree<T>> Children { get; }
+        public IList<IObjectTree<T>> Children { get; set; }
 
         /// <summary>
         /// Returns a list with all items of the whole tree.
         /// </summary>
         /// <returns>The list.</returns>
-        IList<T> ToList();
+        public IList<T> ToList() {
+            var list = new List<T>();
+            if (Item != null) {
+                list.Add(Item);
+            }
+
+            if (Children != null) {
+                foreach (var child in Children) {
+                    list.AddRange(child.ToList());
+                }
+            }
+
+            return list;
+        }
     }
 }

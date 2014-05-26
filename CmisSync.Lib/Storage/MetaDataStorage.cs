@@ -581,7 +581,7 @@ namespace CmisSync.Lib.Storage
             return this.GetSubTree(objects, root);
         }
 
-        private MappedObjectTree GetSubTree(List<MappedObject> nodes, MappedObject parent) {
+        private IObjectTree<IMappedObject> GetSubTree(List<MappedObject> nodes, MappedObject parent) {
             var children = nodes.FindAll(o => o.ParentId == parent.RemoteObjectId);
             nodes.RemoveAll(o => o.ParentId == parent.RemoteObjectId);
             IList<IObjectTree<IMappedObject>> childNodes = new List<IObjectTree<IMappedObject>>();
@@ -589,7 +589,7 @@ namespace CmisSync.Lib.Storage
                 childNodes.Add(this.GetSubTree(nodes, child));
             }
 
-            MappedObjectTree tree = new MappedObjectTree {
+            IObjectTree<IMappedObject> tree = new ObjectTree<IMappedObject> {
                 Item = parent,
                 Children = childNodes
             };
@@ -669,15 +669,6 @@ namespace CmisSync.Lib.Storage
                 this.RemoveChildren(tran, child, ref objects);
                 tran.RemoveKey<string>(MappedObjectsTable, child.RemoteObjectId);
             }
-        }
-
-        private class MappedObjectTree : IObjectTree<IMappedObject>
-        {
-            public IMappedObject Item { get; set; }
-
-            public int Flag { get; set; }
-
-            public IList<IObjectTree<IMappedObject>> Children { get; set; }
         }
     }
 }
