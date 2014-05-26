@@ -136,5 +136,11 @@ namespace CmisSync.Lib.Storage
         /// <returns>The object by GUID.</returns>
         /// <param name="guid">GUID of the requested object.</param>
         IMappedObject GetObjectByGuid(Guid guid);
+
+        /// <summary>
+        /// Gets the tree of mapped objects.
+        /// </summary>
+        /// <returns>The object tree.</returns>
+        IObjectTree<MappedObject> GetObjectTree();
     }
 }

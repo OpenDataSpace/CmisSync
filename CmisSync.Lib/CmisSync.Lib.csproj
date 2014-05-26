@@ -210,6 +210,7 @@
     <Compile Include="Sync\Strategy\DescendantsCrawler.cs" />
     <Compile Include="Events\EventTypes\IFilterableNameEvent.cs" />
     <Compile Include="Events\EventTypes\IFilterableEvent.cs" />
+    <Compile Include="Data\IObjectTree.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

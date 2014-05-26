@@ -546,6 +546,10 @@ namespace CmisSync.Lib.Storage
             return null;
         }
 
+        public IObjectTree<MappedObject> GetObjectTree() {
+            throw new NotImplementedException();
+        }
+
         private void RemoveChildrenRecursively(List<MappedObject> objects, MappedObject root)
         {
             var children = objects.FindAll(o => o.ParentId == root.RemoteObjectId);
@@ -619,6 +623,13 @@ namespace CmisSync.Lib.Storage
                 this.RemoveChildren(tran, child, ref objects);
                 tran.RemoveKey<string>(MappedObjectsTable, child.RemoteObjectId);
             }
+        }
+
+        private class MappedObjectTree : IObjectTree<MappedObject>
+        {
+            public MappedObject Item { get; set; }
+            public int Flag { get; set; }
+            public IList<IObjectTree<MappedObject>> Children { get; set; }
         }
     }
 }

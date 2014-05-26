@@ -561,5 +561,48 @@ namespace TestLibrary.StorageTests
 
             Assert.That(storage.GetObjectByGuid(uuid), Is.EqualTo(file));
         }
+
+        [Test, Category("Fast")]
+        public void GetObjectTreeReturnsNullIfNoEntryExists()
+        {
+            IMetaDataStorage storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            Assert.That(storage.GetObjectTree(), Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void GetObjectTreeReturnsOneItemWithEmptyChildrenList()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            storage.SaveMappedObject(rootFolder);
+
+            var tree = storage.GetObjectTree();
+            Assert.That(tree.Item, Is.EqualTo(rootFolder));
+            Assert.That(tree.Flag, Is.EqualTo(0));
+            Assert.That(tree.Children, Is.Empty);
+        }
+
+        [Test, Category("Fast")]
+        public void GetObjectTreeReturnsTreeEqualToFolderStructure()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
+            var child2File = new MappedObject("sub2", "subId2", MappedObjectType.File, "subId1", "token");
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1Folder);
+            storage.SaveMappedObject(child2File);
+
+            var tree = storage.GetObjectTree();
+
+            Assert.That(tree.Item, Is.EqualTo(rootFolder));
+            Assert.That(tree.Flag, Is.EqualTo(0));
+            Assert.That(tree.Children.Count, Is.EqualTo(1));
+            Assert.That(tree.Children[0].Item, Is.EqualTo(child1Folder));
+            Assert.That(tree.Children[0].Flag, Is.EqualTo(0));
+            Assert.That(tree.Children[0].Children.Count, Is.EqualTo(1));
+            Assert.That(tree.Children[0].Children[0].Item, Is.EqualTo(child2File));
+            Assert.That(tree.Children[0].Children[0].Flag, Is.EqualTo(0));
+        }
     }
 }

@@ -38,6 +38,7 @@ SOURCES =  \
 	ContentTasks/Utils.cs \
 	Credentials.cs \
 	Data/IMappedObject.cs \
+	Data/IObjectTree.cs \
 	Data/IPathMatcher.cs \
 	Data/MappedObject.cs \
 	Data/PathMatcher.cs \
