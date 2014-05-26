@@ -193,14 +193,6 @@ namespace TestLibrary.StorageTests
 
         [Test, Category("Medium")]
         [Category("ExtendedAttribute")]
-        public void CheckAvailable()
-        {
-            var reader = new ExtendedAttributeReaderUnix();
-            reader.IsFeatureAvailable();
-        }
-
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
         public void CheckAvailableOnPath()
         {
             var reader = new ExtendedAttributeReaderUnix();
