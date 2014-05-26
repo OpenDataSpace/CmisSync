@@ -546,8 +546,54 @@ namespace CmisSync.Lib.Storage
             return null;
         }
 
-        public IObjectTree<MappedObject> GetObjectTree() {
-            throw new NotImplementedException();
+        /// <summary>
+        /// Gets the tree of mapped objects.
+        /// </summary>
+        /// <returns>The object tree.</returns>
+        public IObjectTree<IMappedObject> GetObjectTree() {
+            MappedObject root = null;
+            List<MappedObject> objects = new List<MappedObject>();
+            using(var tran = this.engine.GetTransaction())
+            {
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable)) {
+                    var value = row.Value;
+                    if(value == null) {
+                        continue;
+                    }
+
+                    var data = value.Get;
+                    if(data == null) {
+                        continue;
+                    }
+
+                    if(data.ParentId == null) {
+                        root = data;
+                    } else {
+                        objects.Add(data);
+                    }
+                }
+            }
+
+            if(root == null) {
+                return null;
+            }
+
+            return this.GetSubTree(objects, root);
+        }
+
+        private MappedObjectTree GetSubTree(List<MappedObject> nodes, MappedObject parent) {
+            var children = nodes.FindAll(o => o.ParentId == parent.RemoteObjectId);
+            nodes.RemoveAll(o => o.ParentId == parent.RemoteObjectId);
+            IList<IObjectTree<IMappedObject>> childNodes = new List<IObjectTree<IMappedObject>>();
+            foreach (var child in children) {
+                childNodes.Add(this.GetSubTree(nodes, child));
+            }
+
+            MappedObjectTree tree = new MappedObjectTree {
+                Item = parent,
+                Children = childNodes
+            };
+            return tree;
         }
 
         private void RemoveChildrenRecursively(List<MappedObject> objects, MappedObject root)
@@ -625,11 +671,13 @@ namespace CmisSync.Lib.Storage
             }
         }
 
-        private class MappedObjectTree : IObjectTree<MappedObject>
+        private class MappedObjectTree : IObjectTree<IMappedObject>
         {
-            public MappedObject Item { get; set; }
+            public IMappedObject Item { get; set; }
+
             public int Flag { get; set; }
-            public IList<IObjectTree<MappedObject>> Children { get; set; }
+
+            public IList<IObjectTree<IMappedObject>> Children { get; set; }
         }
     }
 }
