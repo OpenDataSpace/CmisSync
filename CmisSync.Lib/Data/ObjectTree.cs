@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Data
         /// Returns a list with all items of the whole tree.
         /// </summary>
         /// <returns>The list.</returns>
-        public IList<T> ToList() {
+        public List<T> ToList() {
             var list = new List<T>();
             if (Item != null) {
                 list.Add(Item);

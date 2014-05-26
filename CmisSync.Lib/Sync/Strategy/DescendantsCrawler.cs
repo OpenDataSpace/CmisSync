@@ -112,14 +112,19 @@ namespace CmisSync.Lib.Sync.Strategy
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
 
-            this.MarkRemoteTreeObjectsAsEqual(storedTree, remoteTree);
-            this.MarkLocalTreeObjectsAsEqual(storedTree, localTree);
+            // Mark roots as handled
+            localTree.Flag = 1;
+            remoteTree.Flag = 1;
+
+            List<IMappedObject> storedObjects = storedTree.ToList();
+            this.MarkRemoteTreeObjectsAsEqual(storedObjects, remoteTree);
+            this.MarkLocalTreeObjectsAsEqual(storedObjects, localTree);
 
             List<IFileableCmisObject> addedRemoteObjects = new List<IFileableCmisObject>();
             List<IFileSystemInfo> addedLocalObjects = new List<IFileSystemInfo>();
             List<IFileSystemInfo> removedLocalObjects = new List<IFileSystemInfo>();
             List<IFileableCmisObject> removedRemoteObjects = new List<IFileableCmisObject>();
-            List<MappedObject> storedObjects = new List<MappedObject>();
+
             this.CrawlDescendants(
                 this.localFolder,
                 this.remoteFolder,
@@ -137,12 +142,34 @@ namespace CmisSync.Lib.Sync.Strategy
             this.InformAboutLocalObjectsDeleted(removedLocalObjects);
         }
 
-        void MarkLocalTreeObjectsAsEqual(IObjectTree<IMappedObject> storedTree, IObjectTree<IFileSystemInfo> localTree)
+        void MarkLocalTreeObjectsAsEqual(List<IMappedObject> storedObjects, IObjectTree<IFileSystemInfo> localTree)
         {
-            throw new NotImplementedException();
+            var parent = localTree.Item;
+            IMappedObject parentMappedObject;
+            Guid parentGuid = Guid.Empty;
+            string ea = localTree.Item.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+            if (!string.IsNullOrEmpty(ea)) {
+                Guid guid;
+                if (Guid.TryParse(ea, out guid)) {
+                    parentGuid = guid;
+                    parentMappedObject = storedObjects.Find(o => o.Guid.Equals(guid));
+                }
+            }
+
+            foreach (var child in localTree.Children) {
+                string childEa = child.Item.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                if (!string.IsNullOrEmpty(childEa)) {
+                    Guid childGuid;
+                    if (Guid.TryParse(childEa, out childGuid)) {
+                        storedObjects.Find(o => o.Guid == childGuid);
+                    }
+                }
+
+                this.MarkLocalTreeObjectsAsEqual(storedObjects, child);
+            }
         }
 
-        void MarkRemoteTreeObjectsAsEqual(IObjectTree<IMappedObject> storedTree, IObjectTree<IFileableCmisObject> remoteTree)
+        void MarkRemoteTreeObjectsAsEqual(IList<IMappedObject> storedObjects, IObjectTree<IFileableCmisObject> remoteTree)
         {
             throw new NotImplementedException();
         }
@@ -155,7 +182,7 @@ namespace CmisSync.Lib.Sync.Strategy
             List<IFileSystemInfo> addedLocalObjects,
             List<IFileSystemInfo> removedLocalObjects,
             List<IFileableCmisObject> removedRemoteObjects,
-            List<MappedObject> storedObjects)
+            IList<IMappedObject> storedObjects)
         {
             var storedChildren = this.storage.GetChildren(this.storage.GetObjectByRemoteId(remoteFolder.Id));
 

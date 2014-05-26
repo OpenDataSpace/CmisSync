@@ -50,6 +50,6 @@ namespace CmisSync.Lib.Data
         /// Returns a list with all items of the whole tree.
         /// </summary>
         /// <returns>The list.</returns>
-        IList<T> ToList();
+        List<T> ToList();
     }
 }
