@@ -105,7 +105,6 @@ namespace CmisSync.Lib.Sync.Strategy
             if (e is AbstractFolderEvent) {
                 var folderEvent = e as AbstractFolderEvent;
 
-
                 this.DoHandle(folderEvent);
                 return true;
             }
