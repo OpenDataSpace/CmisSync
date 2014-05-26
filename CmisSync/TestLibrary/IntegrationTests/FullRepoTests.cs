@@ -230,7 +230,7 @@ namespace TestLibrary.IntegrationTests
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
-            Assert.That(doc.ContentStreamId, Is.Not.Null, "ContentStream not set");
+            Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
 
         }
 
