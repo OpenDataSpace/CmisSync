@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Sync.Strategy
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
@@ -98,6 +99,19 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private void CrawlDescendants()
         {
+            IObjectTree<IMappedObject> storedTree = null;
+            IObjectTree<IFileSystemInfo> localTree = null;
+            IObjectTree<IFileableCmisObject> remoteTree = null;
+
+            // Request 3 trees in parallel
+            Task[] tasks = new Task[3];
+            tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
+            tasks[1] = Task.Factory.StartNew(() => localTree = this.GetLocalDirectoryTree(this.localFolder));
+            tasks[2] = Task.Factory.StartNew(() => remoteTree = this.GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1)));
+
+            // Wait until all tasks are finished
+            Task.WaitAll(tasks);
+
             List<IFileableCmisObject> addedRemoteObjects = new List<IFileableCmisObject>();
             List<IFileSystemInfo> addedLocalObjects = new List<IFileSystemInfo>();
             List<IFileSystemInfo> removedLocalObjects = new List<IFileSystemInfo>();
@@ -148,7 +162,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     var ea = localDir.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
                     Guid uuid;
                     if (ea != null && Guid.TryParse(ea, out uuid)) {
-                        var oldObject = storage.GetObjectByGuid(uuid);
+                        var oldObject = this.storage.GetObjectByGuid(uuid);
                         if (oldObject == null) {
                             addedLocalObjects.Add(localDir);
                         } else {
@@ -208,6 +222,66 @@ namespace CmisSync.Lib.Sync.Strategy
                     this.Queue.AddEvent(new FileEvent(null, null, deleted as IDocument) { Remote = MetaDataChangeType.DELETED });
                 }
             }
+        }
+
+        private IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent) {
+            var children = new List<IObjectTree<IFileSystemInfo>>();
+            foreach (var child in parent.GetDirectories()) {
+                children.Add(this.GetLocalDirectoryTree(child));
+            }
+
+            foreach (var file in parent.GetFiles()) {
+                children.Add(new DirectoryTree {
+                    Item = file,
+                    Children = new List<IObjectTree<IFileSystemInfo>>()
+                });
+            }
+
+            IObjectTree<IFileSystemInfo> tree = new DirectoryTree {
+                Item = parent,
+                Children = children
+            };
+            return tree;
+        }
+
+        private IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants)
+        {
+            IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
+            foreach (var child in descendants) {
+                if(child.Item is IFolder) {
+                    children.Add(this.GetRemoteDirectoryTree(child.Item as IFolder, child.Children));
+                } else if(child is IDocument) {
+                    children.Add(new FileableCmisObjectTree {
+                        Item = child.Item,
+                        Children = new List<IObjectTree<IFileableCmisObject>>()
+                    });
+                }
+            }
+
+            var tree = new FileableCmisObjectTree {
+                Item = parent,
+                Children = children
+            };
+
+            return tree;
+        }
+
+        private class FileableCmisObjectTree : IObjectTree<IFileableCmisObject>
+        {
+            public IFileableCmisObject Item { get; set; }
+
+            public int Flag { get; set; }
+
+            public IList<IObjectTree<IFileableCmisObject>> Children { get; set; }
+        }
+
+        private class DirectoryTree : IObjectTree<IFileSystemInfo>
+        {
+            public IFileSystemInfo Item { get; set; }
+
+            public int Flag { get; set; }
+
+            public IList<IObjectTree<IFileSystemInfo>> Children { get; set; }
         }
     }
 }
