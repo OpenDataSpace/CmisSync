@@ -285,6 +285,130 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()), Times.Never());
         }
 
+        [Test, Category("Fast")]
+        public void MarkLocalTreeObjectsAsEqualIfEveryNodeIsEqual()
+        {
+            var changeToken = "changeToken";
+            var rootName = "/";
+            var folderName = "folder";
+            var rootId = "rootId";
+            var rootUUID = Guid.NewGuid();
+            var folderUUID = Guid.NewGuid();
+            var rootFolder = new MappedObject(rootName, rootId, MappedObjectType.Folder, null, changeToken) {
+                Guid = rootUUID
+            };
+            var childFolder = new MappedObject(folderName, "folderId", MappedObjectType.Folder, rootId, changeToken) {
+                Guid = folderUUID
+            };
+            this.storage.SaveMappedObject(rootFolder);
+            this.storage.SaveMappedObject(childFolder);
+            var localSubFolder = new Mock<IDirectoryInfo>();
+            localSubFolder.Setup(f => f.Name).Returns(folderName);
+            localSubFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(folderUUID.ToString());
+            var localRootFolder = new Mock<IDirectoryInfo>();
+            localRootFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(rootUUID.ToString());
+            localRootFolder.SetupDirectories(localSubFolder.Object);
+
+            var localTree = DescendantsCrawler.GetLocalDirectoryTree(localRootFolder.Object);
+            DescendantsCrawler.MarkLocalTreeObjectsAsEqual(this.storage.GetObjectTree().ToList(), localTree);
+            Assert.That(localTree.Flag, Is.EqualTo(0));
+            Assert.That(localTree.Children[0].Flag, Is.EqualTo(1));
+        }
+
+        [Test, Category("Fast")]
+        public void DoNotMarkLocalTreeObjectsAsEqualIfNodeNameIsNotEqual()
+        {
+            var changeToken = "changeToken";
+            var rootName = "/";
+            var folderName = "folder";
+            var rootId = "rootId";
+            var rootUUID = Guid.NewGuid();
+            var folderUUID = Guid.NewGuid();
+            var rootFolder = new MappedObject(rootName, rootId, MappedObjectType.Folder, null, changeToken) {
+                Guid = rootUUID
+            };
+            var childFolder = new MappedObject("oldFolderName", "folderId", MappedObjectType.Folder, rootId, changeToken) {
+                Guid = folderUUID
+            };
+            this.storage.SaveMappedObject(rootFolder);
+            this.storage.SaveMappedObject(childFolder);
+            var localSubFolder = new Mock<IDirectoryInfo>();
+            localSubFolder.Setup(f => f.Name).Returns(folderName);
+            localSubFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(folderUUID.ToString());
+            var localRootFolder = new Mock<IDirectoryInfo>();
+            localRootFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(rootUUID.ToString());
+            localRootFolder.SetupDirectories(localSubFolder.Object);
+
+            var localTree = DescendantsCrawler.GetLocalDirectoryTree(localRootFolder.Object);
+            DescendantsCrawler.MarkLocalTreeObjectsAsEqual(this.storage.GetObjectTree().ToList(), localTree);
+            Assert.That(localTree.Flag, Is.EqualTo(0));
+            Assert.That(localTree.Children[0].Flag, Is.EqualTo(0));
+        }
+
+        [Test, Category("Fast")]
+        public void MarkRemoteTreeObjectsAsEqualIfEveryNodeIsEqual()
+        {
+            var changeToken = "changeToken";
+            var rootName = "/";
+            var folderName = "folder";
+            var rootId = "rootId";
+            var rootUUID = Guid.NewGuid();
+            var folderUUID = Guid.NewGuid();
+            var folderId = "folderId";
+            var rootFolder = new MappedObject(rootName, rootId, MappedObjectType.Folder, null, changeToken) {
+                Guid = rootUUID
+            };
+            var childFolder = new MappedObject(folderName, folderId, MappedObjectType.Folder, rootId, changeToken) {
+                Guid = folderUUID
+            };
+            this.storage.SaveMappedObject(rootFolder);
+            this.storage.SaveMappedObject(childFolder);
+            var remoteSubFolder = new Mock<IFolder>();
+            remoteSubFolder.Setup(f => f.Name).Returns(folderName);
+            remoteSubFolder.Setup(f => f.Id).Returns(folderId);
+            remoteSubFolder.SetupDescendants();
+            var remoteRootFolder = new Mock<IFolder>();
+            remoteRootFolder.Setup(f => f.Id).Returns(rootId);
+            remoteRootFolder.SetupDescendants(remoteSubFolder.Object);
+
+            var remoteTree = DescendantsCrawler.GetRemoteDirectoryTree(remoteRootFolder.Object, remoteRootFolder.Object.GetDescendants(-1));
+            DescendantsCrawler.MarkRemoteTreeObjectsAsEqual(this.storage.GetObjectTree().ToList(), remoteTree);
+            Assert.That(remoteTree.Flag, Is.EqualTo(0));
+            Assert.That(remoteTree.Children[0].Flag, Is.EqualTo(1));
+        }
+
+        [Test, Category("Fast")]
+        public void DoNotMarkRemoteTreeObjectsAsEqualIfNodeNameIsNotEqual()
+        {
+            var changeToken = "changeToken";
+            var rootName = "/";
+            var folderName = "folder";
+            var rootId = "rootId";
+            var rootUUID = Guid.NewGuid();
+            var folderUUID = Guid.NewGuid();
+            var folderId = "folderId";
+            var rootFolder = new MappedObject(rootName, rootId, MappedObjectType.Folder, null, changeToken) {
+                Guid = rootUUID
+            };
+            var childFolder = new MappedObject("oldFolderName", folderId, MappedObjectType.Folder, rootId, changeToken) {
+                Guid = folderUUID
+            };
+            this.storage.SaveMappedObject(rootFolder);
+            this.storage.SaveMappedObject(childFolder);
+            var remoteSubFolder = new Mock<IFolder>();
+            remoteSubFolder.Setup(f => f.Name).Returns(folderName);
+            remoteSubFolder.Setup(f => f.Id).Returns(folderId);
+            remoteSubFolder.SetupDescendants();
+            var remoteRootFolder = new Mock<IFolder>();
+            remoteRootFolder.Setup(f => f.Id).Returns(rootId);
+            remoteRootFolder.SetupDescendants(remoteSubFolder.Object);
+
+            var remoteTree = DescendantsCrawler.GetRemoteDirectoryTree(remoteRootFolder.Object, remoteRootFolder.Object.GetDescendants(-1));
+            DescendantsCrawler.MarkRemoteTreeObjectsAsEqual(this.storage.GetObjectTree().ToList(), remoteTree);
+            Assert.That(remoteTree.Flag, Is.EqualTo(0));
+            Assert.That(remoteTree.Children[0].Flag, Is.EqualTo(0));
+        }
+
         private DescendantsCrawler CreateCrawler()
         {
             return new DescendantsCrawler(

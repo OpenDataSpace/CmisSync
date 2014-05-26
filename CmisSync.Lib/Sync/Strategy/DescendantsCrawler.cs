@@ -106,8 +106,8 @@ namespace CmisSync.Lib.Sync.Strategy
             // Request 3 trees in parallel
             Task[] tasks = new Task[3];
             tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
-            tasks[1] = Task.Factory.StartNew(() => localTree = this.GetLocalDirectoryTree(this.localFolder));
-            tasks[2] = Task.Factory.StartNew(() => remoteTree = this.GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1)));
+            tasks[1] = Task.Factory.StartNew(() => localTree = GetLocalDirectoryTree(this.localFolder));
+            tasks[2] = Task.Factory.StartNew(() => remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1)));
 
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
@@ -117,8 +117,8 @@ namespace CmisSync.Lib.Sync.Strategy
             remoteTree.Flag = 1;
 
             List<IMappedObject> storedObjects = storedTree.ToList();
-            this.MarkRemoteTreeObjectsAsEqual(storedObjects, remoteTree);
-            this.MarkLocalTreeObjectsAsEqual(storedObjects, localTree);
+            MarkRemoteTreeObjectsAsEqual(storedObjects, remoteTree);
+            MarkLocalTreeObjectsAsEqual(storedObjects, localTree);
 
             List<IFileableCmisObject> addedRemoteObjects = new List<IFileableCmisObject>();
             List<IFileSystemInfo> addedLocalObjects = new List<IFileSystemInfo>();
@@ -142,36 +142,54 @@ namespace CmisSync.Lib.Sync.Strategy
             this.InformAboutLocalObjectsDeleted(removedLocalObjects);
         }
 
-        void MarkLocalTreeObjectsAsEqual(List<IMappedObject> storedObjects, IObjectTree<IFileSystemInfo> localTree)
+        public static void MarkLocalTreeObjectsAsEqual(List<IMappedObject> storedObjects, IObjectTree<IFileSystemInfo> localTree, int flag = 1)
         {
             var parent = localTree.Item;
-            IMappedObject parentMappedObject;
-            Guid parentGuid = Guid.Empty;
+            IMappedObject parentMappedObject = null;
             string ea = localTree.Item.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
             if (!string.IsNullOrEmpty(ea)) {
                 Guid guid;
                 if (Guid.TryParse(ea, out guid)) {
-                    parentGuid = guid;
                     parentMappedObject = storedObjects.Find(o => o.Guid.Equals(guid));
                 }
             }
 
             foreach (var child in localTree.Children) {
-                string childEa = child.Item.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                if (!string.IsNullOrEmpty(childEa)) {
-                    Guid childGuid;
-                    if (Guid.TryParse(childEa, out childGuid)) {
-                        storedObjects.Find(o => o.Guid == childGuid);
+                if (parentMappedObject != null) {
+                    string childEa = child.Item.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                    if (!string.IsNullOrEmpty(childEa)) {
+                        Guid childGuid;
+                        if (Guid.TryParse(childEa, out childGuid)) {
+                            var storedMappedChild = storedObjects.Find(o => o.Guid == childGuid);
+                            if (storedMappedChild != null &&
+                                storedMappedChild.Name == child.Item.Name &&
+                                storedMappedChild.ParentId == parentMappedObject.RemoteObjectId) {
+                                child.Flag = flag;
+                            }
+                        }
                     }
                 }
 
-                this.MarkLocalTreeObjectsAsEqual(storedObjects, child);
+                MarkLocalTreeObjectsAsEqual(storedObjects, child);
             }
         }
 
-        void MarkRemoteTreeObjectsAsEqual(IList<IMappedObject> storedObjects, IObjectTree<IFileableCmisObject> remoteTree)
+        public static void MarkRemoteTreeObjectsAsEqual(List<IMappedObject> storedObjects, IObjectTree<IFileableCmisObject> remoteTree, int flag = 1)
         {
-            throw new NotImplementedException();
+            var storedParent = storedObjects.Find(o => o.RemoteObjectId == remoteTree.Item.Id);
+
+            foreach (var child in remoteTree.Children) {
+                if(storedParent != null) {
+                    var storedMappedChild = storedObjects.Find(o => o.RemoteObjectId == child.Item.Id);
+                    if (storedMappedChild != null &&
+                        storedMappedChild.ParentId == storedParent.RemoteObjectId &&
+                        storedMappedChild.Name == child.Item.Name) {
+                        child.Flag = flag;
+                    }
+                }
+
+                MarkRemoteTreeObjectsAsEqual(storedObjects, child);
+            }
         }
 
         private void CrawlDescendants(
@@ -264,10 +282,10 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
-        private IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent) {
+        public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent) {
             var children = new List<IObjectTree<IFileSystemInfo>>();
             foreach (var child in parent.GetDirectories()) {
-                children.Add(this.GetLocalDirectoryTree(child));
+                children.Add(GetLocalDirectoryTree(child));
             }
 
             foreach (var file in parent.GetFiles()) {
@@ -284,12 +302,12 @@ namespace CmisSync.Lib.Sync.Strategy
             return tree;
         }
 
-        private IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants)
+        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants)
         {
             IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
             foreach (var child in descendants) {
                 if(child.Item is IFolder) {
-                    children.Add(this.GetRemoteDirectoryTree(child.Item as IFolder, child.Children));
+                    children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children));
                 } else if(child is IDocument) {
                     children.Add(new ObjectTree<IFileableCmisObject> {
                         Item = child.Item,
