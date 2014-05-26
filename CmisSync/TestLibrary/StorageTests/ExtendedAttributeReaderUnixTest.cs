@@ -25,6 +25,8 @@ using NUnit.Framework;
 
 using Moq;
 
+using TestLibrary.IntegrationTests;
+
 namespace TestLibrary.StorageTests
 {
     [TestFixture]
@@ -35,10 +37,11 @@ namespace TestLibrary.StorageTests
         [SetUp]
         public void SetUp()
         {
-            path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var config = ITUtils.GetConfig();
+            string localPath = config[1].ToString();
+            path = Path.Combine(localPath, Path.GetRandomFileName());
             var reader = new ExtendedAttributeReaderUnix();
-            Console.WriteLine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-            if(!reader.IsFeatureAvailable()) {
+            if(!reader.IsFeatureAvailable(localPath)) {
                 Assert.Ignore("Extended Attribute not available on this machine");
             }
 
@@ -186,14 +189,6 @@ namespace TestLibrary.StorageTests
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.ListAttributeKeys(path).Count == 1);
             Assert.Contains("test", reader.ListAttributeKeys(path));
-        }
-
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
-        public void CheckAvailable()
-        {
-            var reader = new ExtendedAttributeReaderUnix();
-            reader.IsFeatureAvailable();
         }
 
         [Test, Category("Medium")]

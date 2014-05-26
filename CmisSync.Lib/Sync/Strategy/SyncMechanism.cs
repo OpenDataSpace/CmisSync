@@ -102,25 +102,10 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <returns><c>true</c> if the Event has been handled, otherwise <c>false</c></returns>
         public override bool Handle(ISyncEvent e)
         {
-            if (e is FolderEvent) {
-                var folderEvent = e as FolderEvent;
+            if (e is AbstractFolderEvent) {
+                var folderEvent = e as AbstractFolderEvent;
 
-                if(folderEvent.LocalFolder == null) {
-                    throw new ArgumentException("LocalFolder has to be filled: " + folderEvent);
-                }
-
-                this.HandleMetaData(folderEvent);
-                return true;
-            }
-
-            if (e is FileEvent) {
-                var fileEvent = e as FileEvent;
-
-                if(fileEvent.LocalFile == null) {
-                    throw new ArgumentException("LocalFile has to be filled " + fileEvent);
-                }
-
-                this.HandleFileEvent(fileEvent);
+                this.DoHandle(folderEvent);
                 return true;
             }
 
@@ -176,7 +161,7 @@ namespace CmisSync.Lib.Sync.Strategy
             return solver;
         }
 
-        private void HandleMetaData(AbstractFolderEvent actualEvent)
+        private void DoHandle(AbstractFolderEvent actualEvent)
         {
             int localSituation = (int)this.LocalSituation.Analyse(this.storage, actualEvent);
             int remoteSituation = (int)this.RemoteSituation.Analyse(this.storage, actualEvent);
@@ -194,13 +179,6 @@ namespace CmisSync.Lib.Sync.Strategy
                     }
                 }
             }
-        }
-
-        private void HandleFileEvent(FileEvent file)
-        {
-            this.HandleMetaData(file);
-
-            // TODO Content sync if Situation is
         }
 
         private void Solve(ISolver s, AbstractFolderEvent e)

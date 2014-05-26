@@ -143,29 +143,6 @@ namespace CmisSync.Lib.Storage
         /// <summary>
         /// Determines whether Extended Attributes are active on the filesystem.
         /// </summary>
-        /// <returns><c>true</c> if this instance is feature available; otherwise, <c>false</c>.</returns>
-        public bool IsFeatureAvailable()
-        {
-#if __MonoCS__
-            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            using (File.Create(path));
-            bool retValue = true;
-            try {
-                retValue = this.IsFeatureAvailable(path);
-            } finally {
-                if(File.Exists(path)) {
-                    File.Delete(path);
-                }
-            }
-            return retValue;
-#else
-            throw new WrongPlatformException();
-#endif
-        }
-
-        /// <summary>
-        /// Determines whether Extended Attributes are active on the filesystem.
-        /// </summary>
         /// <param name="path">Path to be checked</param>
         /// <returns><c>true</c> if this instance is feature available the specified path; otherwise, <c>false</c>.</returns>
         public bool IsFeatureAvailable(string path)
@@ -191,7 +168,6 @@ namespace CmisSync.Lib.Storage
                 }
 #else
                 Errno error = Syscall.GetLastError();
-                Console.WriteLine(error.ToString());
                 if(error.ToString().Equals("EOPNOTSUPP")) {
                     retValue = false;
                 }

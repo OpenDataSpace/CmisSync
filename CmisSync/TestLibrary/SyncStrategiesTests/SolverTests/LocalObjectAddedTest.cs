@@ -58,14 +58,16 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileAddedWithoutExtAttr() {
+        public void LocalEmptyFileAddedWithoutExtAttr() {
             string fileName = "fileName";
             string fileId = "fileId";
             string parentId = "parentId";
             string lastChangeToken = "token";
             bool extendedAttributes = false;
 
-            Mock<IFileInfo> fileInfo = this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes);
+            Mock<IFileInfo> fileInfo;
+            Mock<IDocument> document;
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, out fileInfo, out document);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(
                 s => s.CreateDocument(
@@ -78,17 +80,20 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+            document.Verify(d => d.AppendContentStream(It.IsAny<ContentStream>, It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileAddedWithExtAttr() {
+        public void LocalEmptyFileAddedWithExtAttr() {
             string fileName = "fileName";
             string fileId = "fileId";
             string parentId = "parentId";
             string lastChangeToken = "token";
             bool extendedAttributes = true;
 
-            Mock<IFileInfo> fileInfo = this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes);
+            Mock<IFileInfo> fileInfo;
+            Mock<IDocument> document;
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, out fileInfo, out document);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(
                 s => s.CreateDocument(
@@ -101,6 +106,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+            document.Verify(d => d.AppendContentStream(It.IsAny<ContentStream>, It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -147,7 +153,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             return parentDirInfo;
         }
 
-        private Mock<IFileInfo> RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes)
+        private void RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, out Mock<IFileInfo> fileInfoMock, out Mock<IDocument> documentMock)
         {
             var parentDirInfo = this.SetupParentFolder(parentId);
 
@@ -183,7 +189,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var solver = new LocalObjectAdded();
 
             solver.Solve(this.session.Object, this.storage.Object, fileInfo.Object, null);
-            return fileInfo;
+            fileInfoMock = fileInfo;
+            documentMock = Mock.Get(futureRemoteDoc);
         }
 
         private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes)
