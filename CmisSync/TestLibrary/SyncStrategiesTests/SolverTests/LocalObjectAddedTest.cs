@@ -65,9 +65,11 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             string lastChangeToken = "token";
             bool extendedAttributes = false;
 
-            Mock<IFileInfo> fileInfo;
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+
             Mock<IDocument> document;
-            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, out fileInfo, out document);
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(
                 s => s.CreateDocument(
@@ -80,7 +82,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
-            document.Verify(d => d.AppendContentStream(It.IsAny<ContentStream>, It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
+            document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -91,9 +93,11 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             string lastChangeToken = "token";
             bool extendedAttributes = true;
 
-            Mock<IFileInfo> fileInfo;
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+
             Mock<IDocument> document;
-            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, out fileInfo, out document);
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(
                 s => s.CreateDocument(
@@ -106,7 +110,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
-            document.Verify(d => d.AppendContentStream(It.IsAny<ContentStream>, It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
+            document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -153,7 +157,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             return parentDirInfo;
         }
 
-        private void RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, out Mock<IFileInfo> fileInfoMock, out Mock<IDocument> documentMock)
+        private void RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, Mock<IFileInfo> fileInfo, out Mock<IDocument> documentMock)
         {
             var parentDirInfo = this.SetupParentFolder(parentId);
 
@@ -179,7 +183,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 null)).Returns(futureRemoteDocId);
             this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteDocId))).Returns(futureRemoteDoc);
 
-            var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(d => d.FullName).Returns(path);
             fileInfo.Setup(d => d.Name).Returns(fileName);
             fileInfo.Setup(d => d.Exists).Returns(true);
@@ -189,7 +192,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var solver = new LocalObjectAdded();
 
             solver.Solve(this.session.Object, this.storage.Object, fileInfo.Object, null);
-            fileInfoMock = fileInfo;
             documentMock = Mock.Get(futureRemoteDoc);
         }
 
