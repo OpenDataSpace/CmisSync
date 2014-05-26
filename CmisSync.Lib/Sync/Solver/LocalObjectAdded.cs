@@ -22,7 +22,9 @@ namespace CmisSync.Lib.Sync.Solver
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Security.Cryptography;
 
+    using CmisSync.Lib.ContentTasks;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
@@ -32,39 +34,58 @@ namespace CmisSync.Lib.Sync.Solver
     using DotCMIS.Client.Impl;
     using DotCMIS.Enums;
 
+    using log4net;
+
     /// <summary>
     /// Solver to handle the situation of a locally added file/folderobject.
     /// </summary>
     public class LocalObjectAdded : ISolver
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
+
         /// <summary>
         /// Solve the situation of a local object added and should be uploaded by using the session, storage, localFile and remoteId.
         /// </summary>
         /// <param name="session">Cmis session instance.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="localFile">Local file.</param>
+        /// <param name="localFileSystemInfo">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
-            string parentId = this.GetParentId(localFile, storage);
-            ICmisObject addedObject = this.AddCmisObject(localFile, parentId, session);
+            string parentId = this.GetParentId(localFileSystemInfo, storage);
+            ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, session);
 
-            Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFile);
+            Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFileSystemInfo);
 
-            localFile.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFile.LastWriteTimeUtc;
+            localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
 
-            MappedObject mappedFolder = new MappedObject(
-                    localFile.Name,
+            MappedObject mapped = new MappedObject(
+                    localFileSystemInfo.Name,
                     addedObject.Id,
-                    localFile is IDirectoryInfo ? MappedObjectType.Folder : MappedObjectType.File,
+                    localFileSystemInfo is IDirectoryInfo ? MappedObjectType.Folder : MappedObjectType.File,
                     parentId,
                     addedObject.ChangeToken)
                 {
                     Guid = uuid,
                     LastRemoteWriteTimeUtc = addedObject.LastModificationDate,
-                    LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc
+                    LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc
                 };
-            storage.SaveMappedObject(mappedFolder);
+            storage.SaveMappedObject(mapped);
+
+            var localFile = localFileSystemInfo as IFileInfo;
+
+            if(localFile != null && localFile.Length > 0) {
+                Logger.Debug("Uploading File");
+                IFileUploader uploader = ContentTaskUtils.CreateUploader();
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                using (SHA1 hashAlg = new SHA1Managed())
+                using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)){
+                    uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
+                    mapped.ChecksumAlgorithmName = "SHA1";
+                    mapped.LastChecksum = hashAlg.Hash;
+                }
+
+            }
         }
 
         private static Guid WriteUuidToExtendedAttributeIfSupported(IFileSystemInfo localFile)
@@ -75,7 +96,7 @@ namespace CmisSync.Lib.Sync.Solver
                 uuid = Guid.NewGuid();
                 localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
             }
-            
+
             return uuid;
         }
 

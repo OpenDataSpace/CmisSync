@@ -58,6 +58,36 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void Local1ByteFileAddedWithoutExtAttr() {
+            string fileName = "fileName";
+            string fileId = "fileId";
+            string parentId = "parentId";
+            string lastChangeToken = "token";
+            bool extendedAttributes = false;
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(1);
+            var localFileStream = new MemoryStream(new byte[1]);
+            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
+
+            Mock<IDocument> document;
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
+            this.session.Verify(
+                s => s.CreateDocument(
+                    It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
+                    It.Is<IObjectId>(o => o.Id == parentId),
+                    It.Is<IContentStream>(st => st == null),
+                    null,
+                    null,
+                    null,
+                    null),
+                Times.Once());
+            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+            document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void LocalEmptyFileAddedWithoutExtAttr() {
             string fileName = "fileName";
             string fileId = "fileId";
@@ -67,6 +97,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(0);
+
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
