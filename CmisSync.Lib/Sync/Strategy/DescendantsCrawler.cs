@@ -112,6 +112,9 @@ namespace CmisSync.Lib.Sync.Strategy
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
 
+            this.MarkRemoteTreeObjectsAsEqual(storedTree, remoteTree);
+            this.MarkLocalTreeObjectsAsEqual(storedTree, localTree);
+
             List<IFileableCmisObject> addedRemoteObjects = new List<IFileableCmisObject>();
             List<IFileSystemInfo> addedLocalObjects = new List<IFileSystemInfo>();
             List<IFileSystemInfo> removedLocalObjects = new List<IFileSystemInfo>();
@@ -132,6 +135,16 @@ namespace CmisSync.Lib.Sync.Strategy
             this.InformAboutLocalObjectsAdded(addedLocalObjects);
             this.InformAboutRemoteObjectsDeleted(removedRemoteObjects);
             this.InformAboutLocalObjectsDeleted(removedLocalObjects);
+        }
+
+        void MarkLocalTreeObjectsAsEqual(IObjectTree<IMappedObject> storedTree, IObjectTree<IFileSystemInfo> localTree)
+        {
+            throw new NotImplementedException();
+        }
+
+        void MarkRemoteTreeObjectsAsEqual(IObjectTree<IMappedObject> storedTree, IObjectTree<IFileableCmisObject> remoteTree)
+        {
+            throw new NotImplementedException();
         }
 
         private void CrawlDescendants(
@@ -231,13 +244,13 @@ namespace CmisSync.Lib.Sync.Strategy
             }
 
             foreach (var file in parent.GetFiles()) {
-                children.Add(new DirectoryTree {
+                children.Add(new ObjectTree<IFileSystemInfo> {
                     Item = file,
                     Children = new List<IObjectTree<IFileSystemInfo>>()
                 });
             }
 
-            IObjectTree<IFileSystemInfo> tree = new DirectoryTree {
+            IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {
                 Item = parent,
                 Children = children
             };
@@ -251,37 +264,19 @@ namespace CmisSync.Lib.Sync.Strategy
                 if(child.Item is IFolder) {
                     children.Add(this.GetRemoteDirectoryTree(child.Item as IFolder, child.Children));
                 } else if(child is IDocument) {
-                    children.Add(new FileableCmisObjectTree {
+                    children.Add(new ObjectTree<IFileableCmisObject> {
                         Item = child.Item,
                         Children = new List<IObjectTree<IFileableCmisObject>>()
                     });
                 }
             }
 
-            var tree = new FileableCmisObjectTree {
+            var tree = new ObjectTree<IFileableCmisObject> {
                 Item = parent,
                 Children = children
             };
 
             return tree;
-        }
-
-        private class FileableCmisObjectTree : IObjectTree<IFileableCmisObject>
-        {
-            public IFileableCmisObject Item { get; set; }
-
-            public int Flag { get; set; }
-
-            public IList<IObjectTree<IFileableCmisObject>> Children { get; set; }
-        }
-
-        private class DirectoryTree : IObjectTree<IFileSystemInfo>
-        {
-            public IFileSystemInfo Item { get; set; }
-
-            public int Flag { get; set; }
-
-            public IList<IObjectTree<IFileSystemInfo>> Children { get; set; }
         }
     }
 }
