@@ -99,17 +99,17 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(remotePath);
         }
 
-        public static void VerifySavedMappedObject(this Mock<IMetaDataStorage> db, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, bool extendedAttributeAvailable = true, DateTime? lastModification = null)
+        public static void VerifySavedMappedObject(this Mock<IMetaDataStorage> db, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, bool extendedAttributeAvailable = true, DateTime? lastModification = null, byte[] checksum = null)
         {
-            VerifySavedMappedObject(db, type, remoteId, name, parentId, changeToken, Times.Once(), extendedAttributeAvailable, lastModification);
+            VerifySavedMappedObject(db, type, remoteId, name, parentId, changeToken, Times.Once(), extendedAttributeAvailable, lastModification, checksum);
         }
 
-        public static void VerifySavedMappedObject(this Mock<IMetaDataStorage> db, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, Times times, bool extendedAttributeAvailable = true, DateTime? lastModification = null)
+        public static void VerifySavedMappedObject(this Mock<IMetaDataStorage> db, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, Times times, bool extendedAttributeAvailable = true, DateTime? lastModification = null, byte[] checksum = null)
         {
-            db.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, times, extendedAttributeAvailable, lastModification))), times);
+            db.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, times, extendedAttributeAvailable, lastModification, checksum))), times);
         }
 
-        private static bool VerifyMappedObject(IMappedObject o, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, Times times, bool extendedAttributeAvailable, DateTime? lastModification)
+        private static bool VerifyMappedObject(IMappedObject o, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, Times times, bool extendedAttributeAvailable, DateTime? lastModification, byte[] checksum)
         {
             Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId));
             Assert.That(o.Name, Is.EqualTo(name));
@@ -127,6 +127,11 @@ namespace TestLibrary.TestUtils
             if (lastModification != null) {
                 Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastModification));
                 Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastModification));
+            }
+            
+            if(checksum != null) {
+                Assert.That(o.ChecksumAlgorithmName, Is.EqualTo("SHA1"));
+                Assert.That(o.LastChecksum, Is.EqualTo(checksum));
             }
 
             return true;

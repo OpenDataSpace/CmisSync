@@ -23,6 +23,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
+    using System.Security.Cryptography;
 
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
@@ -67,12 +68,18 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(1);
-            var localFileStream = new MemoryStream(new byte[1]);
+            var fileContent = new byte[1];
+            var localFileStream = new MemoryStream(fileContent);
+            byte[] hash;
+            using (SHA1 hashAlg = new SHA1Managed()){
+                hash = hashAlg.ComputeHash(fileContent);
+            }
+            Console.WriteLine(BitConverter.ToString(hash));
             fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, null, hash);
             this.session.Verify(
                 s => s.CreateDocument(
                     It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
