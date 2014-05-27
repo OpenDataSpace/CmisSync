@@ -74,7 +74,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             using (SHA1 hashAlg = new SHA1Managed()){
                 hash = hashAlg.ComputeHash(fileContent);
             }
-            Console.WriteLine(BitConverter.ToString(hash));
             fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
 
             Mock<IDocument> document;

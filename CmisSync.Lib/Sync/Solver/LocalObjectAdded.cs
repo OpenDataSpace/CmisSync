@@ -83,7 +83,6 @@ namespace CmisSync.Lib.Sync.Solver
                     uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
                     mapped.ChecksumAlgorithmName = "SHA1";
                     mapped.LastChecksum = hashAlg.Hash;
-                    Console.WriteLine(BitConverter.ToString(mapped.LastChecksum));
                 }
 
             }
