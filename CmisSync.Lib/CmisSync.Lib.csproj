@@ -212,6 +212,7 @@
     <Compile Include="Events\EventTypes\IFilterableEvent.cs" />
     <Compile Include="Data\IObjectTree.cs" />
     <Compile Include="Data\ObjectTree.cs" />
+    <Compile Include="Events\FileOrFolderEventFactory.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

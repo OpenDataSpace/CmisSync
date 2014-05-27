@@ -88,6 +88,7 @@ SOURCES =  \
 	Events/EventTypes/RequestIgnoredEvent.cs \
 	Events/EventTypes/StartNextSyncEvent.cs \
 	Events/EventTypes/SuccessfulLoginEvent.cs \
+	Events/FileOrFolderEventFactory.cs \
 	Events/FileDownloadRequest.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/IDisposableSyncEventQueue.cs \
