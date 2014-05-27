@@ -222,14 +222,13 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteDocId))).Returns(futureRemoteDoc);
             Mock.Get(futureRemoteDoc).Setup(
                 doc =>
-                doc.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()))
-                .Callback<IContentStream, bool>(
-                    (s, o) =>
+                doc.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .Callback<IContentStream, bool, bool>(
+                    (s, o, r) =>
                     {
                     using(var temp = new MemoryStream())
                     {
                         s.Stream.CopyTo(temp);
-                        Mock.Get(futureRemoteDoc).SetupGet(doc => doc.ContentStreamLength == temp.Length);
                     }
                 });
             fileInfo.Setup(d => d.FullName).Returns(path);
