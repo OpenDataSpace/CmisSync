@@ -219,21 +219,21 @@ namespace CmisSync.Lib.Sync.Strategy
                             if (storedMappedChild.LastChangeToken != child.Item.ChangeToken) {
                                 // Update
                                 AbstractFolderEvent updateEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.CHANGED, src: this);
-                                eventMap.Add(child.Item.Id, new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, updateEvent));
+                                eventMap[child.Item.Id] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, updateEvent);
                             } else {
                                 // Equal
                                 AbstractFolderEvent noChangeEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.NONE, src: this);
-                                eventMap.Add(child.Item.Id, new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, noChangeEvent));
+                                eventMap[child.Item.Id] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, noChangeEvent);
                             }
                         } else {
                             //Renamed
                             AbstractFolderEvent renameEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.CHANGED, src: this);
-                            eventMap.Add(child.Item.Id, new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, renameEvent));
+                            eventMap[child.Item.Id] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, renameEvent);
                         }
                     } else {
                         // Moved
                         AbstractFolderEvent movedEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.MOVED, oldRemotePath: storage.GetRemotePath(storedMappedChild), src: this);
-                        eventMap.Add(child.Item.Id, new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, movedEvent));
+                        eventMap[child.Item.Id] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, movedEvent);
                     }
                 } else {
                     // Added

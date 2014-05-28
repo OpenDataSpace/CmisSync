@@ -232,7 +232,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.Equals(oldLocalFile))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.FullName.Equals(oldLocalFile.Object.FullName) && e.Local.Equals(MetaDataChangeType.DELETED))), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -240,14 +240,16 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "oldFolder"));
             oldLocalFolder.Setup(f => f.Exists).Returns(false);
+            var remoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("oldFolderId", "oldFolder", remoteRootPath + "oldFolder" , remoteRootId, "oldChange");
             var storedFolder = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
                 Guid = Guid.NewGuid()
             };
             this.storage.SaveMappedObject(storedFolder);
+            this.remoteFolder.SetupDescendants(remoteSubFolder.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.Equals(oldLocalFolder))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.FullName.Equals(oldLocalFolder.Object.FullName))), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -264,7 +266,7 @@ namespace TestLibrary.SyncStrategiesTests
             };
             this.storage.SaveMappedObject(storedFolder);
 
-            this.localFolder.SetupDirectories();
+            this.localFolder.SetupDirectories(newLocalFolder.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
