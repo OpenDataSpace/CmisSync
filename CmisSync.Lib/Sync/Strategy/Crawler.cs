@@ -194,7 +194,6 @@ namespace CmisSync.Lib.Sync.Strategy
                     IDocument doc = cmisObject as IDocument;
                     var fileEvent = new FileEvent(
                         localFile: this.FsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, doc.Name)),
-                        localParentDirectory: localFolder,
                         remoteFile: doc);
                     if(localFileNames.Contains(doc.Name)) {
                         // Both sides do have got the file, synchronize them if different
@@ -226,8 +225,7 @@ namespace CmisSync.Lib.Sync.Strategy
             // Only local files are available, inform synchronizer about them
             foreach(string file in localFileNames) {
                 Queue.AddEvent(new FileEvent(
-                    localFile: this.FsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, file)),
-                    localParentDirectory: localFolder)
+                    localFile: this.FsFactory.CreateFileInfo(Path.Combine(localFolder.FullName, file)))
                         { Local = MetaDataChangeType.CREATED,
                         LocalContent = ContentChangeType.CREATED });
             }

@@ -87,7 +87,7 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
             var watcher = new WatcherConsumer(this.queue.Object);
             Assert.False(watcher.Handle(new Mock<ISyncEvent>().Object));
-            Assert.False(watcher.Handle(new Mock<FileEvent>(new Mock<IFileInfo>().Object, null, null) { CallBase = false }.Object));
+            Assert.False(watcher.Handle(new Mock<FileEvent>(new Mock<IFileInfo>().Object, null) { CallBase = false }.Object));
         }
 
         [Test, Category("Fast")]

@@ -87,7 +87,7 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
-            var fileEvent = new FileEvent(new Mock<IFileInfo>().Object, null, new Mock<IDocument>().Object); 
+            var fileEvent = new FileEvent(new Mock<IFileInfo>().Object, new Mock<IDocument>().Object); 
             fetcher.Handle(fileEvent);
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }

@@ -351,7 +351,6 @@ namespace TestLibrary.SyncStrategiesTests
 
         private bool VerifyFileEvent(FileEvent e, string folder, string file) {
             Assert.That(e.LocalFile.FullName, Is.EqualTo(Path.Combine(folder, file)));
-            Assert.That(e.LocalParentDirectory.FullName, Is.EqualTo(folder));
 
             return true;
         }

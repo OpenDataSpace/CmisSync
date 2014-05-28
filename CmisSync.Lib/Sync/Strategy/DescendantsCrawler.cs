@@ -264,7 +264,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 if (addedRemotely is IFolder) {
                     this.Queue.AddEvent(new FolderEvent(null, addedRemotely as IFolder, this) { Remote = MetaDataChangeType.CREATED });
                 } else if (addedRemotely is IDocument) {
-                    this.Queue.AddEvent(new FileEvent(null, null, addedRemotely as IDocument) { Remote = MetaDataChangeType.CREATED });
+                    this.Queue.AddEvent(new FileEvent(null, addedRemotely as IDocument) { Remote = MetaDataChangeType.CREATED });
                 }
             }
         }
@@ -274,7 +274,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 if (addedLocally is IDirectoryInfo) {
                     this.Queue.AddEvent(new FolderEvent(addedLocally as IDirectoryInfo, null, this) { Local = MetaDataChangeType.CREATED });
                 } else if (addedLocally is IFileInfo) {
-                    this.Queue.AddEvent(new FileEvent(addedLocally as IFileInfo, null, null) { Local = MetaDataChangeType.CREATED });
+                    this.Queue.AddEvent(new FileEvent(addedLocally as IFileInfo, null) { Local = MetaDataChangeType.CREATED });
                 }
             }
         }

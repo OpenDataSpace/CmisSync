@@ -86,7 +86,6 @@ namespace CmisSync.Lib.Events
                 if (isFile) {
                     return new FileEvent(
                         localObject as IFileInfo,
-                        null, 
                         remoteObject as IDocument) {
                         Local = localChange,
                         Remote = remoteChange
@@ -105,8 +104,6 @@ namespace CmisSync.Lib.Events
                     return new FileMovedEvent(
                         oldLocalObject as IFileInfo,
                         localObject as IFileInfo,
-                        null,
-                        null,
                         oldRemotePath,
                         remoteObject as IDocument);
                 } else {

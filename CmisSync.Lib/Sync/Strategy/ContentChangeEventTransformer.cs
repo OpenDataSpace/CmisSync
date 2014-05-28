@@ -127,7 +127,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     else
                     {
                         var fileInfo = this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(obj));
-                        Queue.AddEvent(new FileEvent(fileInfo, fileInfo.Directory, null) { Remote = MetaDataChangeType.DELETED });
+                        Queue.AddEvent(new FileEvent(fileInfo, null) { Remote = MetaDataChangeType.DELETED });
                         return;
                     }
                 }
@@ -142,7 +142,7 @@ namespace CmisSync.Lib.Sync.Strategy
             {
                 case DotCMIS.Enums.ChangeType.Created:
                     {
-                        var fileEvent = new FileEvent(null, null, doc) { Remote = MetaDataChangeType.CREATED };
+                        var fileEvent = new FileEvent(null, doc) { Remote = MetaDataChangeType.CREATED };
                         fileEvent.RemoteContent = doc.ContentStreamId == null ? ContentChangeType.NONE : ContentChangeType.CREATED;
                         Queue.AddEvent(fileEvent);
                         break;
@@ -152,7 +152,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     {
                         IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
                         var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
-                        var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
+                        var fileEvent = new FileEvent(fileInfo, doc);
                         if(fileInfo != null)
                         {
                             fileEvent.Remote = MetaDataChangeType.CHANGED;
@@ -169,7 +169,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     {
                         IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
                         var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
-                        var fileEvent = new FileEvent(fileInfo, fileInfo == null ? null : fileInfo.Directory, doc);
+                        var fileEvent = new FileEvent(fileInfo, doc);
                         if(fileInfo != null)
                         {
                             fileEvent.Remote = MetaDataChangeType.CHANGED;

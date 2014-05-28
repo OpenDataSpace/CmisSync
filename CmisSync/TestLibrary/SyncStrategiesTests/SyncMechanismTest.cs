@@ -125,7 +125,7 @@ namespace TestLibrary.SyncStrategiesTests
                 solver);
             var remoteDoc = new Mock<IDocument>();
             remoteDoc.Setup(doc => doc.Id).Returns(remoteId.Id);
-            var noChangeEvent = new Mock<FileEvent>(new FileInfoWrapper(new FileInfo(path)), new DirectoryInfoWrapper(new DirectoryInfo(parentPath)), remoteDoc.Object) { CallBase = true }.Object;
+            var noChangeEvent = new Mock<FileEvent>(new FileInfoWrapper(new FileInfo(path)), remoteDoc.Object) { CallBase = true }.Object;
             Assert.True(mechanism.Handle(noChangeEvent));
             noChangeSolver.Verify(
                 s => s.Solve(
@@ -193,7 +193,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object);
             var remoteDocument = new Mock<IDocument>();
-            var remoteEvent = new Mock<FileEvent>(new Mock<IFileInfo>().Object, null, remoteDocument.Object).Object;
+            var remoteEvent = new Mock<FileEvent>(new Mock<IFileInfo>().Object, remoteDocument.Object).Object;
             mechanism.Solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = failingSolver.Object;
             mechanism.Solver[(int)SituationType.NOCHANGE, (int)SituationType.REMOVED] = successfulSolver.Object;
 

@@ -37,13 +37,10 @@ namespace CmisSync.Lib.Events
         /// <param name='localFile'>
         /// Local file.
         /// </param>
-        /// <param name='localParentDirectory'>
-        /// Local parent directory.
-        /// </param>
         /// <param name='remoteFile'>
         /// Remote file.
         /// </param>
-        public FileEvent(IFileInfo localFile = null, IDirectoryInfo localParentDirectory = null, IDocument remoteFile = null)
+        public FileEvent(IFileInfo localFile = null, IDocument remoteFile = null)
         {
             if (localFile == null && remoteFile == null)
             {
@@ -51,7 +48,6 @@ namespace CmisSync.Lib.Events
             }
 
             this.LocalFile = localFile;
-            this.LocalParentDirectory = localParentDirectory;
             this.RemoteFile = remoteFile;
             this.LocalContent = ContentChangeType.NONE;
             this.RemoteContent = ContentChangeType.NONE;
@@ -110,14 +106,6 @@ namespace CmisSync.Lib.Events
         /// The local file.
         /// </value>
         public IFileInfo LocalFile { get; set; }
-
-        /// <summary>
-        /// Gets or sets the local parent directory.
-        /// </summary>
-        /// <value>
-        /// The local parent directory.
-        /// </value>
-        public IDirectoryInfo LocalParentDirectory { get; protected set; }
 
         /// <summary>
         /// Gets or sets the remote file.

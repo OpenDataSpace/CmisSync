@@ -127,13 +127,11 @@ namespace CmisSync.Lib.Sync.Strategy
                     oldfile,
                     newfile,
                     null,
-                    newfile.Directory,
-                    null,
                     null);
                 Queue.AddEvent(newEvent);
             } else {
                 var file = this.fsFactory.CreateFileInfo(e.Path);
-                var newEvent = new FileEvent(file, file.Directory, null);
+                var newEvent = new FileEvent(file, null);
                 switch (e.Type) {
                 case WatcherChangeTypes.Created:
                     newEvent.Local = MetaDataChangeType.CREATED;

@@ -43,15 +43,12 @@ namespace CmisSync.Lib.Events
         public FileMovedEvent(
             IFileInfo oldLocalFile = null,
             IFileInfo newLocalFile = null,
-            IDirectoryInfo oldParentFolder = null,
-            IDirectoryInfo newParentFolder = null,
             string oldRemoteFilePath = null,
             IDocument newRemoteFile = null)
-            : base(newLocalFile, newParentFolder, newRemoteFile)
+            : base(newLocalFile, newRemoteFile)
         {
             this.Local = MetaDataChangeType.MOVED;
             this.OldLocalFile = oldLocalFile;
-            this.OldParentFolder = oldParentFolder;
             this.OldRemoteFilePath = oldRemoteFilePath;
         }
 
@@ -60,12 +57,6 @@ namespace CmisSync.Lib.Events
         /// </summary>
         /// <value>The old local file.</value>
         public IFileInfo OldLocalFile { get; protected set; }
-
-        /// <summary>
-        /// Gets or sets the old parent folder.
-        /// </summary>
-        /// <value>The old parent folder.</value>
-        public IDirectoryInfo OldParentFolder { get; protected set; }
 
         /// <summary>
         /// Gets or sets the old remote file path.
