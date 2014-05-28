@@ -24,6 +24,8 @@ namespace TestLibrary.EventsTests
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
+    using DotCMIS.Client;
+
     using Moq;
 
     using NUnit.Framework;
@@ -34,7 +36,17 @@ namespace TestLibrary.EventsTests
         [Test, Category("Fast")]
         public void ConstructorTakesIFileInfoInstance()
         {
-            new FileEvent(new Mock<IFileInfo>().Object);
+            var file = Mock.Of<IFileInfo>();
+            var ev = new FileEvent(file);
+            Assert.That(ev.LocalFile, Is.EqualTo(file));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorTakesRemoteFile()
+        {
+            var file = Mock.Of<IDocument>();
+            var ev = new FileEvent(null, file);
+            Assert.That(ev.RemoteFile, Is.EqualTo(file));
         }
 
         [Test, Category("Fast")]
@@ -47,18 +59,18 @@ namespace TestLibrary.EventsTests
         [Test, Category("Fast")]
         public void EqualityNull()
         {
-            var localFile = new Mock<IFileInfo>();
-            localFile.Setup(f => f.FullName).Returns("bla");
-            var fe = new FileEvent(localFile.Object);
+            var localFile = Mock.Of<IFileInfo>();
+            var fe = new FileEvent(localFile);
+            Assert.That(fe.RemoteFile, Is.Null);
             Assert.That(fe, Is.Not.EqualTo(null));
         }
 
         [Test, Category("Fast")]
         public void EqualitySame()
         {
-            var localFile = new Mock<IFileInfo>();
-            localFile.Setup(f => f.FullName).Returns("bla");
-            var fe = new FileEvent(localFile.Object);
+            var remoteFile = Mock.Of<IDocument>();
+            var fe = new FileEvent(null, remoteFile);
+            Assert.That(fe.LocalFile, Is.Null);
             Assert.That(fe, Is.EqualTo(fe));
         }
     }
