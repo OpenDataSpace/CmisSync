@@ -312,6 +312,32 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Verify(q => q.AddEvent(It.Is<AbstractFolderEvent>(e => e.Local != MetaDataChangeType.NONE && e.Remote != MetaDataChangeType.NONE)), Times.Never());
         }
 
+        [Ignore]
+        [Test, Category("Fast")]
+        public void OneRemoteFolderRenamed()
+        {
+            Assert.Fail("TODO");
+        }
+
+        [Ignore]
+        [Test, Category("Fast")]
+        public void OneRemoteFolderMoved()
+        {
+            Assert.Fail("TODO");
+        }
+
+        [Test, Category("Fast")]
+        public void OneRemoteFolderRemoved()
+        {
+            var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "folderName"));
+            var storedFolder = new MappedObject("folderName", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken");
+            this.storage.SaveMappedObject(storedFolder);
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+        }
+
         private DescendantsCrawler CreateCrawler()
         {
             return new DescendantsCrawler(
