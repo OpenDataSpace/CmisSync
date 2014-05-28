@@ -33,6 +33,7 @@ M: System.Void CmisSync.CmisSyncMenuItem::.ctor(System.String)
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 M: System.Void CmisSync.UI::.cctor()
 M: System.Void TestLibrary.DataTests.PathMatcherTest::SetUp()
+T: TestLibrary.EventsTests.EventsFilterTests.IgnoredFolderNamesFilterTest
 
 #Required to be type long for error code
 R: Gendarme.Rules.Design.EnumsShouldUseInt32Rule
@@ -48,6 +49,12 @@ T: CmisSync.ControllerBase
 R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: TestLibrary.IntegrationTests.FullRepoTests
 T: TestLibrary.SyncStrategiesTests.WatcherData
+T: TestLibrary.SyncStrategiesTests.DescendantsCrawlerTest
+T: TestLibrary.StorageTests.PersistentCookieStorageTest
+T: TestLibrary.StorageTests.MetaDataStorageTest
+T: TestLibrary.IntegrationTests.DBreezeTests
+T: TestLibrary.IntegrationTests.AllHandlersIT
+T: TestLibrary.AuthenticationProviderTests.AuthProviderFactoryTest
 #Ignore dispose pattern for UI widget (Windows)
 R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: CmisSync.ControllerBase
@@ -95,3 +102,7 @@ R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 T: TestLibrary.LegacyCodeTests.RepoInfoTests
 # Install dir
 T: CmisSync.Controller
+
+# Test for Events which have nested exceptions
+R: Gendarme.Rules.BadPractice.CheckNewExceptionWithoutThrowingRule
+T: TestLibrary.EventsTests.EventsFilterTests.GenericHandleDublicatedEventsFilterTest
