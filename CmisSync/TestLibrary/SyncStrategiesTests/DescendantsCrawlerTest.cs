@@ -232,7 +232,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.FullName.Equals(oldLocalFile.Object.FullName) && e.Local.Equals(MetaDataChangeType.DELETED))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.Equals(oldLocalFile.Object) && e.Local.Equals(MetaDataChangeType.DELETED))), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -249,7 +249,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.FullName.Equals(oldLocalFolder.Object.FullName))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -270,7 +270,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FolderMovedEvent>(e => e.LocalFolder.Equals(oldLocalFolder))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderMovedEvent>(e => e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
         }
 
         [Test, Category("Fast")]
