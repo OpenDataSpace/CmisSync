@@ -45,6 +45,7 @@ namespace TestLibrary.SyncStrategiesTests
     {
         private readonly string remoteRootId = "rootId";
         private readonly string remoteRootPath = "/";
+        private readonly Guid rootGuid = Guid.NewGuid();
         private Mock<ISyncEventQueue> queue;
         private IMetaDataStorage storage;
         private Mock<IFolder> remoteFolder;
@@ -54,6 +55,7 @@ namespace TestLibrary.SyncStrategiesTests
         private MappedObject mappedRootObject;
         private IPathMatcher matcher;
         private DBreezeEngine storageEngine;
+        private DateTime lastLocalWriteTime = DateTime.Now;
 
         [TestFixtureSetUp]
         public void InitCustomSerializator()
@@ -75,6 +77,9 @@ namespace TestLibrary.SyncStrategiesTests
             this.localFolder = new Mock<IDirectoryInfo>();
             this.localFolder.Setup(f => f.FullName).Returns(this.localRootPath);
             this.localFolder.Setup(f => f.Exists).Returns(true);
+            this.localFolder.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
+            this.localFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(this.rootGuid.ToString());
+            this.localFolder.Setup(f => f.LastWriteTimeUtc).Returns(this.lastLocalWriteTime);
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
             this.fsFactory.AddIDirectoryInfo(this.localFolder.Object);
             this.mappedRootObject = new MappedObject(
@@ -82,7 +87,10 @@ namespace TestLibrary.SyncStrategiesTests
                 this.remoteRootId,
                 MappedObjectType.Folder,
                 null,
-                "changeToken");
+                "changeToken") {
+                Guid = rootGuid,
+                LastLocalWriteTimeUtc = this.lastLocalWriteTime
+            };
             this.storage = new MetaDataStorage(this.storageEngine, this.matcher);
             this.storage.SaveMappedObject(this.mappedRootObject);
         }
@@ -268,13 +276,15 @@ namespace TestLibrary.SyncStrategiesTests
             string fileId = "fileId";
             string folderName = "folder";
             string folderId = "folderId";
+            Guid folderGuid = Guid.NewGuid();
+            Guid fileGuid = Guid.NewGuid();
             var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, fileName, this.remoteRootId, changeToken: changeToken);
             var existingRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, folderName, this.remoteRootPath + folderName, this.remoteRootId, changeToken);
-            var file = this.fsFactory.AddFile(Path.Combine(this.localRootPath, fileName));
-            var storedFile = new MappedObject(fileName, fileId, MappedObjectType.File, this.remoteRootId, changeToken);
+            var file = this.fsFactory.AddFile(Path.Combine(this.localRootPath, fileName), fileGuid);
+            var storedFile = new MappedObject(fileName, fileId, MappedObjectType.File, this.remoteRootId, changeToken) { Guid = fileGuid };
             this.storage.SaveMappedObject(storedFile);
-            var folder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, folderName));
-            var storedFolder = new MappedObject(folderName, folderId, MappedObjectType.Folder, this.remoteRootId, changeToken);
+            var folder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, folderName), folderGuid);
+            var storedFolder = new MappedObject(folderName, folderId, MappedObjectType.Folder, this.remoteRootId, changeToken) { Guid = folderGuid};
             this.storage.SaveMappedObject(storedFolder);
             this.remoteFolder.SetupDescendants(remoteFile.Object, existingRemoteFolder.Object);
             this.localFolder.SetupFilesAndDirectories(file.Object, folder.Object);
@@ -283,130 +293,6 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()), Times.Never());
-        }
-
-        [Test, Category("Fast")]
-        public void MarkLocalTreeObjectsAsEqualIfEveryNodeIsEqual()
-        {
-            var changeToken = "changeToken";
-            var rootName = "/";
-            var folderName = "folder";
-            var rootId = "rootId";
-            var rootUUID = Guid.NewGuid();
-            var folderUUID = Guid.NewGuid();
-            var rootFolder = new MappedObject(rootName, rootId, MappedObjectType.Folder, null, changeToken) {
-                Guid = rootUUID
-            };
-            var childFolder = new MappedObject(folderName, "folderId", MappedObjectType.Folder, rootId, changeToken) {
-                Guid = folderUUID
-            };
-            this.storage.SaveMappedObject(rootFolder);
-            this.storage.SaveMappedObject(childFolder);
-            var localSubFolder = new Mock<IDirectoryInfo>();
-            localSubFolder.Setup(f => f.Name).Returns(folderName);
-            localSubFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(folderUUID.ToString());
-            var localRootFolder = new Mock<IDirectoryInfo>();
-            localRootFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(rootUUID.ToString());
-            localRootFolder.SetupDirectories(localSubFolder.Object);
-
-            var localTree = DescendantsCrawler.GetLocalDirectoryTree(localRootFolder.Object);
-            DescendantsCrawler.MarkLocalTreeObjectsAsEqual(this.storage.GetObjectTree().ToList(), localTree);
-            Assert.That(localTree.Flag, Is.EqualTo(0));
-            Assert.That(localTree.Children[0].Flag, Is.EqualTo(1));
-        }
-
-        [Test, Category("Fast")]
-        public void DoNotMarkLocalTreeObjectsAsEqualIfNodeNameIsNotEqual()
-        {
-            var changeToken = "changeToken";
-            var rootName = "/";
-            var folderName = "folder";
-            var rootId = "rootId";
-            var rootUUID = Guid.NewGuid();
-            var folderUUID = Guid.NewGuid();
-            var rootFolder = new MappedObject(rootName, rootId, MappedObjectType.Folder, null, changeToken) {
-                Guid = rootUUID
-            };
-            var childFolder = new MappedObject("oldFolderName", "folderId", MappedObjectType.Folder, rootId, changeToken) {
-                Guid = folderUUID
-            };
-            this.storage.SaveMappedObject(rootFolder);
-            this.storage.SaveMappedObject(childFolder);
-            var localSubFolder = new Mock<IDirectoryInfo>();
-            localSubFolder.Setup(f => f.Name).Returns(folderName);
-            localSubFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(folderUUID.ToString());
-            var localRootFolder = new Mock<IDirectoryInfo>();
-            localRootFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(rootUUID.ToString());
-            localRootFolder.SetupDirectories(localSubFolder.Object);
-
-            var localTree = DescendantsCrawler.GetLocalDirectoryTree(localRootFolder.Object);
-            DescendantsCrawler.MarkLocalTreeObjectsAsEqual(this.storage.GetObjectTree().ToList(), localTree);
-            Assert.That(localTree.Flag, Is.EqualTo(0));
-            Assert.That(localTree.Children[0].Flag, Is.EqualTo(0));
-        }
-
-        [Test, Category("Fast")]
-        public void MarkRemoteTreeObjectsAsEqualIfEveryNodeIsEqual()
-        {
-            var changeToken = "changeToken";
-            var rootName = "/";
-            var folderName = "folder";
-            var rootId = "rootId";
-            var rootUUID = Guid.NewGuid();
-            var folderUUID = Guid.NewGuid();
-            var folderId = "folderId";
-            var rootFolder = new MappedObject(rootName, rootId, MappedObjectType.Folder, null, changeToken) {
-                Guid = rootUUID
-            };
-            var childFolder = new MappedObject(folderName, folderId, MappedObjectType.Folder, rootId, changeToken) {
-                Guid = folderUUID
-            };
-            this.storage.SaveMappedObject(rootFolder);
-            this.storage.SaveMappedObject(childFolder);
-            var remoteSubFolder = new Mock<IFolder>();
-            remoteSubFolder.Setup(f => f.Name).Returns(folderName);
-            remoteSubFolder.Setup(f => f.Id).Returns(folderId);
-            remoteSubFolder.SetupDescendants();
-            var remoteRootFolder = new Mock<IFolder>();
-            remoteRootFolder.Setup(f => f.Id).Returns(rootId);
-            remoteRootFolder.SetupDescendants(remoteSubFolder.Object);
-
-            var remoteTree = DescendantsCrawler.GetRemoteDirectoryTree(remoteRootFolder.Object, remoteRootFolder.Object.GetDescendants(-1));
-            DescendantsCrawler.MarkRemoteTreeObjectsAsEqual(this.storage.GetObjectTree().ToList(), remoteTree);
-            Assert.That(remoteTree.Flag, Is.EqualTo(0));
-            Assert.That(remoteTree.Children[0].Flag, Is.EqualTo(1));
-        }
-
-        [Test, Category("Fast")]
-        public void DoNotMarkRemoteTreeObjectsAsEqualIfNodeNameIsNotEqual()
-        {
-            var changeToken = "changeToken";
-            var rootName = "/";
-            var folderName = "folder";
-            var rootId = "rootId";
-            var rootUUID = Guid.NewGuid();
-            var folderUUID = Guid.NewGuid();
-            var folderId = "folderId";
-            var rootFolder = new MappedObject(rootName, rootId, MappedObjectType.Folder, null, changeToken) {
-                Guid = rootUUID
-            };
-            var childFolder = new MappedObject("oldFolderName", folderId, MappedObjectType.Folder, rootId, changeToken) {
-                Guid = folderUUID
-            };
-            this.storage.SaveMappedObject(rootFolder);
-            this.storage.SaveMappedObject(childFolder);
-            var remoteSubFolder = new Mock<IFolder>();
-            remoteSubFolder.Setup(f => f.Name).Returns(folderName);
-            remoteSubFolder.Setup(f => f.Id).Returns(folderId);
-            remoteSubFolder.SetupDescendants();
-            var remoteRootFolder = new Mock<IFolder>();
-            remoteRootFolder.Setup(f => f.Id).Returns(rootId);
-            remoteRootFolder.SetupDescendants(remoteSubFolder.Object);
-
-            var remoteTree = DescendantsCrawler.GetRemoteDirectoryTree(remoteRootFolder.Object, remoteRootFolder.Object.GetDescendants(-1));
-            DescendantsCrawler.MarkRemoteTreeObjectsAsEqual(this.storage.GetObjectTree().ToList(), remoteTree);
-            Assert.That(remoteTree.Flag, Is.EqualTo(0));
-            Assert.That(remoteTree.Children[0].Flag, Is.EqualTo(0));
         }
 
         private DescendantsCrawler CreateCrawler()

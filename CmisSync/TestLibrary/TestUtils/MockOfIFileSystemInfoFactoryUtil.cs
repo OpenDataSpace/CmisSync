@@ -23,6 +23,7 @@ namespace TestLibrary.TestUtils
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
 
     using Moq;
@@ -45,6 +46,13 @@ namespace TestLibrary.TestUtils
             dir.Setup(d => d.Name).Returns(Path.GetFileName(path));
             dir.Setup(d => d.Exists).Returns(exists);
             fsFactory.AddIDirectoryInfo(dir.Object);
+            return dir;
+        }
+
+        public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, Guid guid, bool exists = true)
+        {
+            var dir = fsFactory.AddDirectory(path, exists);
+            dir.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
             return dir;
         }
 
@@ -98,6 +106,13 @@ namespace TestLibrary.TestUtils
             file.Setup(f => f.FullName).Returns(path);
             file.Setup(f => f.Exists).Returns(exists);
             fsFactory.AddIFileInfo(file.Object);
+            return file;
+        }
+
+        public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, Guid guid, bool exists = true)
+        {
+            var file = fsFactory.AddFile(path, exists);
+            file.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
             return file;
         }
 

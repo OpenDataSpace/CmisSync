@@ -34,6 +34,36 @@ namespace CmisSync.Lib.Events
         /// Creates the event.
         /// </summary>
         /// <returns>The event.</returns>
+        /// <param name="remoteObject">Remote object.</param>
+        /// <param name="localObject">Local object.</param>
+        /// <param name="remoteChange">Remote change.</param>
+        /// <param name="localChange">Local change.</param>
+        /// <param name="oldRemotePath">Old remote path.</param>
+        /// <param name="oldLocalObject">Old local object.</param>
+        /// <param name="src">Source of the creation.</param>
+        public static AbstractFolderEvent CreateEvent(
+            IFileableCmisObject remoteObject = null,
+            IFileSystemInfo localObject = null,
+            MetaDataChangeType remoteChange = MetaDataChangeType.NONE,
+            MetaDataChangeType localChange = MetaDataChangeType.NONE,
+            string oldRemotePath = null,
+            IFileSystemInfo oldLocalObject = null,
+            object src = null) {
+            return CreateEvent(
+                remoteObject is IDocument || localObject is IFileInfo,
+                remoteObject,
+                localObject,
+                remoteChange,
+                localChange,
+                oldRemotePath,
+                oldLocalObject,
+                src);
+        }
+
+        /// <summary>
+        /// Creates the event.
+        /// </summary>
+        /// <returns>The event.</returns>
         /// <param name="isFile">If set to <c>true</c> is file.</param>
         /// <param name="remoteObject">Remote object.</param>
         /// <param name="localObject">Local object.</param>
