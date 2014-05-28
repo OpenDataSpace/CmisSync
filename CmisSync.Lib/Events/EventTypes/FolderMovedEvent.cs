@@ -38,11 +38,13 @@ namespace CmisSync.Lib.Events
         /// <param name="newLocalFolder">New local folder.</param>
         /// <param name="oldRemoteFolderPath">Old remote folder path.</param>
         /// <param name="newRemoteFolder">New remote folder.</param>
+        /// <param name="src">Creator of the event.</param>
         public FolderMovedEvent(
             IDirectoryInfo oldLocalFolder,
             IDirectoryInfo newLocalFolder,
             string oldRemoteFolderPath,
-            IFolder newRemoteFolder) : base(newLocalFolder, newRemoteFolder) {
+            IFolder newRemoteFolder,
+            object src = null) : base(newLocalFolder, newRemoteFolder, src) {
             this.OldLocalFolder = oldLocalFolder;
             this.OldRemoteFolderPath = oldRemoteFolderPath;
         }
@@ -58,5 +60,20 @@ namespace CmisSync.Lib.Events
         /// </summary>
         /// <value>The old remote folder path.</value>
         public string OldRemoteFolderPath { get; private set; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderMovedEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderMovedEvent"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format(
+                "[FolderMovedEvent: OldLocalFolder={0}, OldRemoteFolderPath={1}, LocalFolder={2}, RemoteFolder={3} created by {4}]",
+                this.OldLocalFolder,
+                this.OldRemoteFolderPath,
+                this.LocalFolder,
+                this.RemoteFolder,
+                this.Source);
+        }
     }
 }
