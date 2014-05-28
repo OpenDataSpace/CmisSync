@@ -81,7 +81,7 @@ namespace CmisSync.Lib.Events
             string oldRemotePath = null,
             IFileSystemInfo oldLocalObject = null,
             object src = null) {
-            if (localChange != MetaDataChangeType.MOVED &&
+            if (localChange != MetaDataChangeType.MOVED ||
                 remoteChange != MetaDataChangeType.MOVED) {
                 if (isFile) {
                     return new FileEvent(
