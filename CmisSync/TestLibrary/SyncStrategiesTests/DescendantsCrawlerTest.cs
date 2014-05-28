@@ -260,11 +260,12 @@ namespace TestLibrary.SyncStrategiesTests
             var newLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
             oldLocalFolder.Setup(f => f.Exists).Returns(false);
             newLocalFolder.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(uuid.ToString());
-
+            var remoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("oldFolderId", "oldFolder", remoteRootPath + "oldFolder" , remoteRootId, "oldChange");
             var storedFolder = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
                 Guid = uuid
             };
             this.storage.SaveMappedObject(storedFolder);
+            this.remoteFolder.SetupDescendants(remoteSubFolder.Object);
 
             this.localFolder.SetupDirectories(newLocalFolder.Object);
             var crawler = this.CreateCrawler();
