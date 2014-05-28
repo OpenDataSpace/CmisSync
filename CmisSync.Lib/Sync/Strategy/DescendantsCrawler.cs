@@ -322,7 +322,7 @@ namespace CmisSync.Lib.Sync.Strategy
             foreach (var child in descendants) {
                 if(child.Item is IFolder) {
                     children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children));
-                } else if(child is IDocument) {
+                } else if(child.Item is IDocument) {
                     children.Add(new ObjectTree<IFileableCmisObject> {
                         Item = child.Item,
                         Children = new List<IObjectTree<IFileableCmisObject>>()
