@@ -81,7 +81,7 @@ namespace CmisSync.Lib.Events
             string oldRemotePath = null,
             IFileSystemInfo oldLocalObject = null,
             object src = null) {
-            if (localChange != MetaDataChangeType.MOVED ||
+            if (localChange != MetaDataChangeType.MOVED &&
                 remoteChange != MetaDataChangeType.MOVED) {
                 if (isFile) {
                     return new FileEvent(
@@ -105,13 +105,19 @@ namespace CmisSync.Lib.Events
                         oldLocalObject as IFileInfo,
                         localObject as IFileInfo,
                         oldRemotePath,
-                        remoteObject as IDocument);
+                        remoteObject as IDocument) {
+                        Local = localChange,
+                        Remote = remoteChange
+                    };
                 } else {
                     return new FolderMovedEvent(
                         oldLocalObject as IDirectoryInfo,
                         localObject as IDirectoryInfo,
                         oldRemotePath,
-                        remoteObject as IFolder);
+                        remoteObject as IFolder) {
+                        Local = localChange,
+                        Remote = remoteChange
+                    };
                 }
             }
         }
