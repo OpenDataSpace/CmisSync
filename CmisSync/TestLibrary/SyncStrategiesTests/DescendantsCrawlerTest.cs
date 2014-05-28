@@ -222,10 +222,13 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "oldFile"));
             oldLocalFile.Setup(f => f.Exists).Returns(false);
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "oldFileId", "oldFile", this.remoteRootId, changeToken: "oldChange");
             var storedFile = new MappedObject("oldFile", "oldFileId", MappedObjectType.File, this.remoteRootId, "oldChange") {
                 Guid = Guid.NewGuid()
             };
             this.storage.SaveMappedObject(storedFile);
+
+            this.remoteFolder.SetupDescendants(remoteFile.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
