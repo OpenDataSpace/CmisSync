@@ -54,6 +54,9 @@ T: CmisSync.ControllerBase
 T: CmisSync.StatusIconController
 T: CmisSync.UI
 T: CmisSync.CmisTree.AsyncNodeLoader
+#Disposed in CmisRepo:
+T: CmisSync.Lib.Storage.PersistentCookieStorage
+T: CmisSync.Lib.Storage.MetaDataStorage
 
 #Windows Gendarme bug? XmlNodeList is not an IDisposal object at all
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
