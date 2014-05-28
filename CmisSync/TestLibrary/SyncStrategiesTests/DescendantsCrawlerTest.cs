@@ -232,7 +232,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.Equals(oldLocalFile.Object) && e.Local.Equals(MetaDataChangeType.DELETED))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile != null && e.LocalFile.Equals(oldLocalFile.Object) && e.Local.Equals(MetaDataChangeType.DELETED))), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -249,7 +249,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder != null && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -271,12 +271,21 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FolderMovedEvent>(e => e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+            this.queue.Verify(
+                q =>
+                q.AddEvent(
+                It.Is<FolderMovedEvent>(
+                e =>
+                e.LocalFolder.Equals(newLocalFolder.Object) &&
+                e.RemoteFolder.Equals(remoteSubFolder.Object) &&
+                e.OldLocalFolder.Equals(oldLocalFolder.Object))),
+                Times.Once());
         }
 
         [Test, Category("Fast")]
         public void NoChangeOnExistingFileAndFolder()
         {
+            DateTime changeTime = DateTime.UtcNow;
             string changeToken = "token";
             string fileName = "name";
             string fileId = "fileId";
@@ -287,10 +296,12 @@ namespace TestLibrary.SyncStrategiesTests
             var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, fileName, this.remoteRootId, changeToken: changeToken);
             var existingRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, folderName, this.remoteRootPath + folderName, this.remoteRootId, changeToken);
             var file = this.fsFactory.AddFile(Path.Combine(this.localRootPath, fileName), fileGuid);
-            var storedFile = new MappedObject(fileName, fileId, MappedObjectType.File, this.remoteRootId, changeToken) { Guid = fileGuid };
+            file.Setup(f => f.LastWriteTimeUtc).Returns(changeTime);
+            var storedFile = new MappedObject(fileName, fileId, MappedObjectType.File, this.remoteRootId, changeToken) { Guid = fileGuid, LastLocalWriteTimeUtc = changeTime };
             this.storage.SaveMappedObject(storedFile);
             var folder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, folderName), folderGuid);
-            var storedFolder = new MappedObject(folderName, folderId, MappedObjectType.Folder, this.remoteRootId, changeToken) { Guid = folderGuid};
+            folder.Setup(f => f.LastWriteTimeUtc).Returns(changeTime);
+            var storedFolder = new MappedObject(folderName, folderId, MappedObjectType.Folder, this.remoteRootId, changeToken) { Guid = folderGuid, LastLocalWriteTimeUtc = changeTime };
             this.storage.SaveMappedObject(storedFolder);
             this.remoteFolder.SetupDescendants(remoteFile.Object, existingRemoteFolder.Object);
             this.localFolder.SetupFilesAndDirectories(file.Object, folder.Object);
@@ -298,7 +309,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.Is<AbstractFolderEvent>(e => e.Local != MetaDataChangeType.NONE && e.Remote != MetaDataChangeType.NONE)), Times.Never());
         }
 
         private DescendantsCrawler CreateCrawler()

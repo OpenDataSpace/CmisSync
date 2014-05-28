@@ -136,6 +136,8 @@ namespace CmisSync.Lib.Sync.Strategy
                 removedRemoteObjects.Add(info);
             }
 
+            this.MergeAndSendEvents(eventMap);
+
             // Send out Events to queue
             this.InformAboutRemoteObjectsDeleted(removedRemoteObjects);
             this.InformAboutLocalObjectsDeleted(removedLocalObjects);
@@ -256,6 +258,33 @@ namespace CmisSync.Lib.Sync.Strategy
             } else {
                 guid = Guid.Empty;
                 return false;
+            }
+        }
+
+        void MergeAndSendEvents(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
+        {
+            foreach (var entry in eventMap) {
+                if (entry.Value == null) {
+                    continue;
+                } else if (entry.Value.Item1 == null && entry.Value.Item2 == null) {
+                    continue;
+                } else if (entry.Value.Item1 == null) {
+                    this.Queue.AddEvent(entry.Value.Item2);
+                } else if (entry.Value.Item2 == null) {
+                    this.Queue.AddEvent(entry.Value.Item1);
+                } else {
+                    var localEvent = entry.Value.Item1;
+                    var remoteEvent = entry.Value.Item2;
+                    var newEvent = FileOrFolderEventFactory.CreateEvent(
+                        remoteEvent is FileEvent ? (IFileableCmisObject)(remoteEvent as FileEvent).RemoteFile : (IFileableCmisObject)(remoteEvent as FolderEvent).RemoteFolder,
+                        localEvent is FileEvent ? (IFileSystemInfo)(localEvent as FileEvent).LocalFile : (IFileSystemInfo)(localEvent as FolderEvent).LocalFolder,
+                        remoteEvent.Remote,
+                        localEvent.Local,
+                        remoteEvent.Remote == MetaDataChangeType.MOVED ? (remoteEvent is FileMovedEvent ? (remoteEvent as FileMovedEvent).OldRemoteFilePath : (remoteEvent as FolderMovedEvent).OldRemoteFolderPath) : null,
+                        localEvent.Local == MetaDataChangeType.MOVED ? (localEvent is FileMovedEvent ? (IFileSystemInfo)(localEvent as FileMovedEvent).OldLocalFile : (IFileSystemInfo)(localEvent as FolderMovedEvent).OldLocalFolder) : null,
+                        this);
+                    this.Queue.AddEvent(newEvent);
+                }
             }
         }
 
