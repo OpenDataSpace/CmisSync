@@ -179,7 +179,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
-            remoteFolder.Rename("Dog");
+            remoteFolder.Rename("Dog", true);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
 
