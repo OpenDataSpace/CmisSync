@@ -47,22 +47,24 @@ namespace CmisSync.Lib.Storage
 #if __MonoCS__
             byte[] value;
             long ret = Syscall.getxattr(path, prefix + key, out value);
-            if(ret != 0)
+#if __COCOA__
+            if (ret != 0)
             {
-                #if __COCOA__
                 // On MacOS 93 means no value is found
                 if (ret == 93) {
                     return null;
                 }
-                #else
+            }
+#else
+            if (ret == -1) {
                 Errno error = Syscall.GetLastError();
                 if(error.ToString().Equals("ENODATA")) {
                     return null;
                 } else {
-                    //throw new ExtendedAttributeException(Syscall.GetLastError().ToString());
+                    throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Syscall.GetLastError().ToString(), path));
                 }
-                #endif
             }
+#endif
             if(value == null)
             {
                 return null;
@@ -91,7 +93,7 @@ namespace CmisSync.Lib.Storage
             }
             if(ret != 0)
             {
-                throw new ExtendedAttributeException(Syscall.GetLastError().ToString());
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Syscall.GetLastError().ToString(), path));
             }
 #else
             throw new WrongPlatformException();
@@ -109,7 +111,7 @@ namespace CmisSync.Lib.Storage
             long ret = Syscall.removexattr (path, prefix + key);
             if(ret != 0)
             {
-                throw new ExtendedAttributeException(Syscall.GetLastError().ToString());
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Syscall.GetLastError().ToString(), path));
             }
 #else
             throw new WrongPlatformException();
