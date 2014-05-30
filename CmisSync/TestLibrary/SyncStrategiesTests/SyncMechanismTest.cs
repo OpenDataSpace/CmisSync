@@ -101,7 +101,6 @@ namespace TestLibrary.SyncStrategiesTests
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
             IObjectId remoteId = new ObjectId("RemoteId");
             string path = "path";
-            string parentPath = ".";
             ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
             var noChangeSolver = new Mock<ISolver>();
             noChangeSolver.Setup(s => s.Solve(
