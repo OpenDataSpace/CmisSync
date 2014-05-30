@@ -64,7 +64,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     return SituationType.RENAMED;
                 }
 
-                if(actualEvent is FileEvent) {
+                if (actualEvent is FileEvent) {
                     return this.IsSavedFileEqual(storage, (actualEvent as FileEvent).RemoteFile) ? SituationType.NOCHANGE : SituationType.ADDED;
                 } else {
                     return SituationType.ADDED;
@@ -79,7 +79,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     return SituationType.MOVED;
                 }
 
-                if(this.IsChangeEventAHintForRename(storage, actualEvent)) {
+                if (this.IsChangeEventAHintForRename(storage, actualEvent)) {
                     return SituationType.RENAMED;
                 }
 
