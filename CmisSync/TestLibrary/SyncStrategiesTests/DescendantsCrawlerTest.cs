@@ -332,10 +332,25 @@ namespace TestLibrary.SyncStrategiesTests
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "folderName"));
             var storedFolder = new MappedObject("folderName", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken");
             this.storage.SaveMappedObject(storedFolder);
+            this.localFolder.SetupDirectories(oldLocalFolder.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+        }
+
+        [Ignore]
+        [Test, Category("Fast")]
+        public void OneRemoteAndTheSameLocalFolderRemoved()
+        {
+            var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "folderName"));
+            var storedFolder = new MappedObject("folderName", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken");
+            this.storage.SaveMappedObject(storedFolder);
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
         }
 
         private DescendantsCrawler CreateCrawler()
