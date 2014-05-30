@@ -108,5 +108,14 @@ namespace CmisSync.Lib.Storage
         {
             this.original.MoveTo(destDirName);
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.DirectoryInfoWrapper"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.DirectoryInfoWrapper"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format("[{0}]", this.original.FullName);
+        }
     }
 }
