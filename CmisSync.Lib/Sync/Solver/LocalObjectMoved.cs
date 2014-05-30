@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Sync.Solver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -32,10 +33,25 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class LocalObjectMoved : ISolver
     {
+        /// <summary>
+        /// Solve the specified situation by using the session, storage, localFile and remoteId.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Actual local file.</param>
+        /// <param name="remoteId">Corresponding remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
             // Move Remote Object
-            throw new NotImplementedException();
+            var remoteObject = remoteId as IFileableCmisObject;
+            var mappedObject = storage.GetObjectByRemoteId(remoteId.Id);
+            var targetPath = localFile is IDirectoryInfo ? (localFile as IDirectoryInfo).Parent : (localFile as IFileInfo).Directory;
+            var targetId = storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
+            var src = session.GetObject(mappedObject.ParentId);
+            var target = session.GetObject(targetId);
+            remoteObject.Move(src, target);
+            mappedObject.ParentId = targetId;
+            storage.SaveMappedObject(mappedObject);
         }
     }
 }

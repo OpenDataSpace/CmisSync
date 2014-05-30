@@ -20,13 +20,19 @@
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
     using System;
+    using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Solver;
+
+    using DotCMIS.Client;
 
     using Moq;
 
     using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture]
     public class LocalObjectMovedTest
@@ -35,6 +41,62 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void DefaultConstructorTest()
         {
             new LocalObjectMoved();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void MoveObjectToSubfolder()
+        {
+            var solver = new LocalObjectMoved();
+            var storage = new Mock<IMetaDataStorage>();
+            var session = new Mock<ISession>();
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", "rootId");
+            var targetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", "rootId");
+            var rootFolder = MockOfIFolderUtil.CreateRemoteFolderMock("rootId", "/", "/", null);
+            session.AddRemoteObject(remoteFolder.Object);
+            session.AddRemoteObject(targetFolder.Object);
+            session.AddRemoteObject(rootFolder.Object);
+            var localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
+            var localTargetFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target"));
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target", "folder"));
+            localFolder.Setup(f => f.Parent).Returns(localTargetFolder.Object);
+            var mappedRootFolder = new MappedObject("/", "rootId", MappedObjectType.Folder, null, "changeToken");
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, "rootId", "changeToken");
+            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, "rootId", "changeToken");
+            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localRootFolder.Object)))).Returns(mappedRootFolder);
+            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
+            storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+
+            solver.Solve(session.Object, storage.Object, localFolder.Object, remoteFolder.Object);
+
+            remoteFolder.Verify(f => f.Move(rootFolder.Object, targetFolder.Object), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void MoveObjectFromSubFolder()
+        {
+            var solver = new LocalObjectMoved();
+            var storage = new Mock<IMetaDataStorage>();
+            var session = new Mock<ISession>();
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/sub/folder", "subId");
+            var subFolder = MockOfIFolderUtil.CreateRemoteFolderMock("subId", "sub", "/sub", "rootId");
+            var rootFolder = MockOfIFolderUtil.CreateRemoteFolderMock("rootId", "/", "/", null);
+            session.AddRemoteObject(remoteFolder.Object);
+            session.AddRemoteObject(subFolder.Object);
+            session.AddRemoteObject(rootFolder.Object);
+            var localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
+            var localSubFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "sub"));
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "folder"));
+            localFolder.Setup(f => f.Parent).Returns(localRootFolder.Object);
+            var mappedRootFolder = new MappedObject("/", "rootId", MappedObjectType.Folder, null, "changeToken");
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, "subId", "changeToken");
+            var mappedSubFolder = new MappedObject("sub", "subId", MappedObjectType.Folder, "rootId", "changeToken");
+            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localRootFolder.Object)))).Returns(mappedRootFolder);
+            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localSubFolder.Object)))).Returns(mappedSubFolder);
+            storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+
+            solver.Solve(session.Object, storage.Object, localFolder.Object, remoteFolder.Object);
+
+            remoteFolder.Verify(f => f.Move(subFolder.Object, rootFolder.Object), Times.Once());
         }
     }
 }
