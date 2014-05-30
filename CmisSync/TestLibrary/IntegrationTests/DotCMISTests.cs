@@ -240,7 +240,7 @@ namespace TestLibrary.IntegrationTests
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
             IList<string> devices = new List<string>();
             devices.Add("*");
-            properties.Add("ignoreDeviceIds", devices);
+            properties.Add("gds:ignoreDeviceIds", devices);
             IList<string> ids = new List<string>();
             ids.Add("gds:sync");
             properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
@@ -252,7 +252,7 @@ namespace TestLibrary.IntegrationTests
             bool propertyFound = false;
             foreach (var prop in requestedDoc.Properties)
             {
-                if (prop.Id == "ignoreDeviceIds")
+                if (prop.Id == "gds:ignoreDeviceIds")
                 {
                     propertyFound = true;
                     Assert.AreEqual("*", prop.FirstValue as string);
