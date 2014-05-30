@@ -185,8 +185,7 @@ namespace CmisSync.Lib.Sync.Strategy
                                 }
                             } else {
                                 // Renamed
-                                IFileSystemInfo oldLocalPath = child.Item is IFileInfo ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedMappedChild)) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedMappedChild));
-                                AbstractFolderEvent renamedEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.MOVED, oldLocalObject: oldLocalPath, src: this);
+                                AbstractFolderEvent renamedEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CHANGED, src: this);
                                 eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(renamedEvent, eventMap[storedMappedChild.RemoteObjectId].Item2);
                             }
                         } else {
