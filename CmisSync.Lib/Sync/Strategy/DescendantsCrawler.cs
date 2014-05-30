@@ -103,7 +103,6 @@ namespace CmisSync.Lib.Sync.Strategy
             IObjectTree<IFileSystemInfo> localTree = null;
             IObjectTree<IFileableCmisObject> remoteTree = null;
 
-            /*
             // Request 3 trees in parallel
             Task[] tasks = new Task[3];
             tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
@@ -112,11 +111,12 @@ namespace CmisSync.Lib.Sync.Strategy
 
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
-            */
+
+            /*
             storedTree = this.storage.GetObjectTree();
             localTree = GetLocalDirectoryTree(this.localFolder);
             var desc = this.remoteFolder.GetDescendants(-1);
-            remoteTree = GetRemoteDirectoryTree(this.remoteFolder, desc);
+            remoteTree = GetRemoteDirectoryTree(this.remoteFolder, desc);*/
 
             List<IMappedObject> storedObjectsForRemote = storedTree.ToList();
             List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>(storedObjectsForRemote);
