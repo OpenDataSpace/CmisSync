@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using CmisSync.Lib.Data;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
@@ -49,15 +50,27 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            switch (actualEvent.Local) 
+            switch (actualEvent.Local)
             {
-                case MetaDataChangeType.CREATED:
-                    return SituationType.ADDED;
-                case MetaDataChangeType.DELETED:
-                    return SituationType.REMOVED;
-                case MetaDataChangeType.NONE:
-                default:
-                    return SituationType.NOCHANGE;
+            case MetaDataChangeType.CREATED:
+                return SituationType.ADDED;
+            case MetaDataChangeType.DELETED:
+                return SituationType.REMOVED;
+            case MetaDataChangeType.MOVED:
+                return SituationType.MOVED;
+            case MetaDataChangeType.CHANGED:
+                IFileSystemInfo localPath = actualEvent is FolderEvent ? (IFileSystemInfo)(actualEvent as FolderEvent).LocalFolder : (IFileSystemInfo)(actualEvent is FileEvent ? (actualEvent as FileEvent).LocalFile : null);
+                if (storage.GetObjectByLocalPath(localPath) == null) {
+                    string ea = localPath.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                    Guid guid;
+                    if (Guid.TryParse(ea, out guid) && storage.GetObjectByGuid(guid) != null) {
+                        return SituationType.RENAMED;
+                    }
+                }
+                return SituationType.CHANGED;
+            case MetaDataChangeType.NONE:
+            default:
+                return SituationType.NOCHANGE;
             }
         }
     }
