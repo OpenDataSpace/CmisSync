@@ -97,7 +97,10 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Fast")]
         public void RunStartNewSyncEvent()
         {
+            string rootFolderName = "/";
+            string rootFolderId = "root";
             var storage = this.GetInitializedStorage();
+            storage.SaveMappedObject(new MappedObject(rootFolderName, rootFolderId, MappedObjectType.Folder, null, "oldtoken"));
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
@@ -308,8 +311,9 @@ namespace TestLibrary.IntegrationTests
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
+
             var localFolder = new Mock<IDirectoryInfo>();
-            var crawler = new Crawler(queue, remoteFolder.Object, localFolder.Object, storage);
+            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, fsFactory);
             manager.AddEventHandler(crawler);
 
             var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();

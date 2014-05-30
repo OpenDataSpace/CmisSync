@@ -103,6 +103,7 @@ namespace CmisSync.Lib.Sync.Strategy
             IObjectTree<IFileSystemInfo> localTree = null;
             IObjectTree<IFileableCmisObject> remoteTree = null;
 
+            /*
             // Request 3 trees in parallel
             Task[] tasks = new Task[3];
             tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
@@ -111,6 +112,11 @@ namespace CmisSync.Lib.Sync.Strategy
 
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
+            */
+            storedTree = this.storage.GetObjectTree();
+            localTree = GetLocalDirectoryTree(this.localFolder);
+            var desc = this.remoteFolder.GetDescendants(-1);
+            remoteTree = GetRemoteDirectoryTree(this.remoteFolder, desc);
 
             List<IMappedObject> storedObjectsForRemote = storedTree.ToList();
             List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>(storedObjectsForRemote);
@@ -348,14 +354,16 @@ namespace CmisSync.Lib.Sync.Strategy
         public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants)
         {
             IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
-            foreach (var child in descendants) {
-                if(child.Item is IFolder) {
-                    children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children));
-                } else if(child.Item is IDocument) {
-                    children.Add(new ObjectTree<IFileableCmisObject> {
-                        Item = child.Item,
-                        Children = new List<IObjectTree<IFileableCmisObject>>()
-                    });
+            if (descendants != null) {
+                foreach (var child in descendants) {
+                    if(child.Item is IFolder) {
+                        children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children));
+                    } else if(child.Item is IDocument) {
+                        children.Add(new ObjectTree<IFileableCmisObject> {
+                            Item = child.Item,
+                            Children = new List<IObjectTree<IFileableCmisObject>>()
+                        });
+                    }
                 }
             }
 

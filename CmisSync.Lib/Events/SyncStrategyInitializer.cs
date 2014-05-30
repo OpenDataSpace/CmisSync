@@ -45,7 +45,7 @@ namespace CmisSync.Lib
         private IMetaDataStorage storage;
         private ContentChanges contentChanges;
         private RemoteObjectFetcher remoteFetcher;
-        private Crawler crawler;
+        private DescendantsCrawler crawler;
         private SyncMechanism mechanism;
         private IFileSystemInfoFactory fileSystemFactory;
         private IgnoreAlreadyHandledContentChangeEventsFilter alreadyHandledFilter;
@@ -148,7 +148,7 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.crawler);
                 }
 
-                this.crawler = new Crawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.fileSystemFactory);
+                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.fileSystemFactory);
                 this.Queue.EventManager.AddEventHandler(this.crawler);
 
                 // Add remote object moved accumulator
