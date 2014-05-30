@@ -97,6 +97,12 @@ namespace TestLibrary.TestUtils
             }
         }
 
+        public static void AddRemoteObjects(this Mock<ISession> session, params ICmisObject[] remoteObjects) {
+            foreach(var obj in remoteObjects) {
+                session.AddRemoteObject(obj);
+            }
+        }
+
         public static Mock<IFolder> CreateCmisFolder(List<string> fileNames = null, List<string> folderNames = null, bool contentStream = false) {
             var remoteFolder = new Mock<IFolder>();
             var remoteChildren = new Mock<IItemEnumerable<ICmisObject>>();

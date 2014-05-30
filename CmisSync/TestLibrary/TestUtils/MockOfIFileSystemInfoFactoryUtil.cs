@@ -139,6 +139,7 @@ namespace TestLibrary.TestUtils
             }
 
             localFolder.Setup(f => f.GetDirectories()).Returns(folderList.ToArray());
+            localFolder.Setup(f => f.Name).Returns(Path.GetFileName(path));
             return localFolder;
         }
     }

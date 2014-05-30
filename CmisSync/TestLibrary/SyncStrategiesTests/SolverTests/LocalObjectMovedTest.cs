@@ -37,6 +37,24 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     [TestFixture]
     public class LocalObjectMovedTest
     {
+        private readonly string rootId = "rootId";
+        private Mock<ISession> session;
+        private Mock<IMetaDataStorage> storage;
+        private Mock<IFolder> remoteRootFolder;
+        private Mock<IDirectoryInfo> localRootFolder;
+        private MappedObject mappedRootFolder;
+
+        [SetUp]
+        public void SetUp() {
+            this.storage = new Mock<IMetaDataStorage>();
+            this.session = new Mock<ISession>();
+            this.remoteRootFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.rootId, "/", "/", null);
+            this.session.AddRemoteObject(this.remoteRootFolder.Object);
+            this.localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
+            this.mappedRootFolder = new MappedObject("/", this.rootId, MappedObjectType.Folder, null, "changeToken") { Guid = Guid.NewGuid() };
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(this.localRootFolder.Object)))).Returns(this.mappedRootFolder);
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
@@ -46,57 +64,72 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void MoveObjectToSubfolder()
         {
-            var solver = new LocalObjectMoved();
-            var storage = new Mock<IMetaDataStorage>();
-            var session = new Mock<ISession>();
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", "rootId");
-            var targetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", "rootId");
-            var rootFolder = MockOfIFolderUtil.CreateRemoteFolderMock("rootId", "/", "/", null);
-            session.AddRemoteObject(remoteFolder.Object);
-            session.AddRemoteObject(targetFolder.Object);
-            session.AddRemoteObject(rootFolder.Object);
-            var localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", this.rootId);
+            var remoteTargetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", this.rootId);
+            this.session.AddRemoteObjects(remoteFolder.Object, remoteTargetFolder.Object);
             var localTargetFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target"));
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target", "folder"));
             localFolder.Setup(f => f.Parent).Returns(localTargetFolder.Object);
-            var mappedRootFolder = new MappedObject("/", "rootId", MappedObjectType.Folder, null, "changeToken");
-            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, "rootId", "changeToken");
-            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, "rootId", "changeToken");
-            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localRootFolder.Object)))).Returns(mappedRootFolder);
-            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
-            storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
+            this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+            remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object)).Callback(() => { remoteFolder.Setup(r => r.ChangeToken).Returns("changeToken"); }).Returns(remoteFolder.Object);
 
-            solver.Solve(session.Object, storage.Object, localFolder.Object, remoteFolder.Object);
+            new LocalObjectMoved().Solve(this.session.Object, this.storage.Object, localFolder.Object, remoteFolder.Object);
 
-            remoteFolder.Verify(f => f.Move(rootFolder.Object, targetFolder.Object), Times.Once());
+            remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "targetId", "changeToken", true);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void MoveObjectFromSubFolder()
         {
-            var solver = new LocalObjectMoved();
-            var storage = new Mock<IMetaDataStorage>();
-            var session = new Mock<ISession>();
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/sub/folder", "subId");
-            var subFolder = MockOfIFolderUtil.CreateRemoteFolderMock("subId", "sub", "/sub", "rootId");
-            var rootFolder = MockOfIFolderUtil.CreateRemoteFolderMock("rootId", "/", "/", null);
-            session.AddRemoteObject(remoteFolder.Object);
-            session.AddRemoteObject(subFolder.Object);
-            session.AddRemoteObject(rootFolder.Object);
-            var localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
+            var subFolder = MockOfIFolderUtil.CreateRemoteFolderMock("subId", "sub", "/sub", this.rootId);
+            this.session.AddRemoteObjects(remoteFolder.Object, subFolder.Object);
             var localSubFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "sub"));
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "folder"));
-            localFolder.Setup(f => f.Parent).Returns(localRootFolder.Object);
-            var mappedRootFolder = new MappedObject("/", "rootId", MappedObjectType.Folder, null, "changeToken");
-            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, "subId", "changeToken");
-            var mappedSubFolder = new MappedObject("sub", "subId", MappedObjectType.Folder, "rootId", "changeToken");
-            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localRootFolder.Object)))).Returns(mappedRootFolder);
-            storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localSubFolder.Object)))).Returns(mappedSubFolder);
-            storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+            localFolder.Setup(f => f.Parent).Returns(this.localRootFolder.Object);
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, "subId", "changeToken") { Guid = Guid.NewGuid() };
+            var mappedSubFolder = new MappedObject("sub", "subId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localSubFolder.Object)))).Returns(mappedSubFolder);
+            this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+            remoteFolder.Setup(f => f.Move(subFolder.Object, this.remoteRootFolder.Object)).Callback(() => {
+                remoteFolder.Setup(r => r.ChangeToken).Returns("changeToken");
+            }).Returns(remoteFolder.Object);
 
-            solver.Solve(session.Object, storage.Object, localFolder.Object, remoteFolder.Object);
+            new LocalObjectMoved().Solve(this.session.Object, this.storage.Object, localFolder.Object, remoteFolder.Object);
 
-            remoteFolder.Verify(f => f.Move(subFolder.Object, rootFolder.Object), Times.Once());
+            remoteFolder.Verify(f => f.Move(subFolder.Object, this.remoteRootFolder.Object), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "rootId", "changeToken");
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void MoveRenamedObject()
+        {
+            string newFolderName = "newFolder";
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", this.rootId);
+            var targetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", this.rootId);
+            this.session.AddRemoteObjects(remoteFolder.Object, targetFolder.Object);
+            var localTargetFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target"));
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target", newFolderName));
+            localFolder.Setup(f => f.Parent).Returns(localTargetFolder.Object);
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
+            this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+            remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object)).Returns(remoteFolder.Object);
+            remoteFolder.Setup(f => f.Rename(newFolderName, true)).Callback(() => {
+                remoteFolder.Setup(f => f.Name).Returns(newFolderName);
+                remoteFolder.Setup(f => f.ChangeToken).Returns("changeToken");
+            }).Returns(remoteFolder.Object);
+
+            new LocalObjectMoved().Solve(this.session.Object, this.storage.Object, localFolder.Object, remoteFolder.Object);
+
+            remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object), Times.Once());
+            remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", newFolderName, "targetId", "changeToken");
         }
     }
 }

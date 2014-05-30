@@ -49,8 +49,15 @@ namespace CmisSync.Lib.Sync.Solver
             var targetId = storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
             var src = session.GetObject(mappedObject.ParentId);
             var target = session.GetObject(targetId);
-            remoteObject.Move(src, target);
+            remoteObject = remoteObject.Move(src, target);
+            if(localFile.Name != remoteObject.Name) {
+                remoteObject.Rename(localFile.Name, true);
+            }
+
             mappedObject.ParentId = targetId;
+            mappedObject.LastChangeToken = remoteObject.ChangeToken;
+            mappedObject.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
+            mappedObject.Name = remoteObject.Name;
             storage.SaveMappedObject(mappedObject);
         }
     }
