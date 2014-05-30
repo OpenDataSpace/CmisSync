@@ -170,7 +170,23 @@ namespace CmisSync.Lib
                 this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage);
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
-                var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken);
+                var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);
+                Guid rootFolderGuid;
+                if (!Guid.TryParse(localRootFolder.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out rootFolderGuid)) {
+                    try {
+                        rootFolderGuid = Guid.NewGuid();
+                        localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString());
+                    } catch (ExtendedAttributeException ex)
+                    {
+                        Logger.Warn("Problem on setting Guid of the root path", ex);
+                        rootFolderGuid = Guid.Empty;
+                    }
+                }
+
+                var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken) {
+                    LastRemoteWriteTimeUtc = remoteRoot.LastModificationDate,
+                    Guid = rootFolderGuid
+                };
 
                 Logger.Debug("Saving Root Folder to DataBase");
                 this.storage.SaveMappedObject(rootFolder);
