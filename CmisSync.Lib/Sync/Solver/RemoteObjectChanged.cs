@@ -21,7 +21,9 @@ namespace CmisSync.Lib.Sync.Solver
 {
     using System;
     using System.IO;
+    using System.Security.Cryptography;
 
+    using CmisSync.Lib.ContentTasks;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
@@ -33,17 +35,74 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class RemoteObjectChanged : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        private ISyncEventQueue queue;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.RemoteObjectChanged"/> class.
+        /// </summary>
+        /// <param name="queue">Event Queue to report transmission events to.</param>
+        public RemoteObjectChanged(ISyncEventQueue queue)
         {
-            // NOOP at the moment
-            /*IMappedObject obj = storage.GetObjectByRemoteId(remoteId.Id);
-            DateTime? lastModified = remoteId is IFolder ? (remoteId as IFolder).LastModificationDate : (remoteId as IDocument).LastModificationDate;
-            obj.LastRemoteWriteTimeUtc = lastModified;
-            if(lastModified != null) {
-                localFile.LastWriteTimeUtc = (DateTime)lastModified;
+            if (queue == null) {
+                throw new ArgumentNullException("Given queue is null");
             }
 
-            storage.SaveMappedObject(obj);*/
+            this.queue = queue;
+        }
+
+        /// <summary>
+        /// Solve the specified situation by using the session, storage, localFile and remoteId.
+        /// If a folder is affected, simply update the local change time of the corresponding local folder.
+        /// If it is a file and the changeToken is not equal to the saved, the new content is downloaded.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="remoteId">Remote identifier.</param>
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        {
+            IMappedObject obj = storage.GetObjectByRemoteId(remoteId.Id);
+            if (remoteId is IFolder) {
+                var remoteFolder = remoteId as IFolder;
+                DateTime? lastModified = remoteFolder.LastModificationDate;
+                obj.LastChangeToken = remoteFolder.ChangeToken;
+                if (lastModified != null) {
+                    localFile.LastWriteTimeUtc = (DateTime)lastModified;
+                    obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+                }
+            } else if (remoteId is IDocument) {
+                var remoteDocument = remoteId as IDocument;
+                DateTime? lastModified = remoteDocument.LastModificationDate;
+                if ((lastModified != null && lastModified != obj.LastRemoteWriteTimeUtc) || obj.LastChangeToken != remoteDocument.ChangeToken) {
+                    if (obj.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
+                        throw new ArgumentException("The local file has been changed since last write => aborting update");
+                    }
+
+                    // Download changes
+                    var file = localFile as IFileInfo;
+                    var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName);
+                    this.queue.AddEvent(transmissionEvent);
+                    using (SHA1 hashAlg = new SHA1Managed())
+                    using (var filestream = file.Open(FileMode.Truncate, FileAccess.Write, FileShare.Read))
+                    using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
+                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        obj.ChecksumAlgorithmName = "SHA1";
+                        obj.LastChecksum = hashAlg.Hash;
+                    }
+
+                    obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
+                    if (remoteDocument.LastModificationDate != null) {
+                        localFile.LastWriteTimeUtc = (DateTime)remoteDocument.LastModificationDate;
+                    }
+
+                    obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+                }
+
+                obj.LastChangeToken = remoteDocument.ChangeToken;
+                obj.LastRemoteWriteTimeUtc = lastModified;
+            }
+
+            storage.SaveMappedObject(obj);
         }
     }
 }

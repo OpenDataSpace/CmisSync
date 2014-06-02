@@ -123,14 +123,14 @@ namespace CmisSync.Lib.Sync.Strategy
             solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed();
             solver[(int)SituationType.REMOVED, (int)SituationType.NOCHANGE] = new LocalObjectDeleted();
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded();
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.Queue);
             solver[(int)SituationType.ADDED, (int)SituationType.ADDED] = null;
             solver[(int)SituationType.CHANGED, (int)SituationType.ADDED] = null;
             solver[(int)SituationType.MOVED, (int)SituationType.ADDED] = null;
             solver[(int)SituationType.RENAMED, (int)SituationType.ADDED] = null;
             solver[(int)SituationType.REMOVED, (int)SituationType.ADDED] = null;
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged();
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.Queue);
             solver[(int)SituationType.ADDED, (int)SituationType.CHANGED] = null;
             solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = null;
             solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = null;

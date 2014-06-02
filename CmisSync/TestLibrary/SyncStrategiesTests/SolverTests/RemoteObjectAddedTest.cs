@@ -16,12 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
     using System;
     using System.IO;
 
     using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Solver;
 
@@ -51,9 +53,15 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void DefaultConstructorTest()
+        public void ConstructorTakesQueue()
         {
-            new RemoteObjectAdded();
+            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfQueueIsNull() {
+            new RemoteObjectAdded(null);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -71,7 +79,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            var solver = new RemoteObjectAdded();
+            var solver = new RemoteObjectAdded(Mock.Of<ISyncEventQueue>());
 
             solver.Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
 
@@ -82,7 +90,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderAddedAndExtendedAttributsAreAvailable()
+        public void RemoteFolderAddedAndExtendedAttributesAreAvailable()
         {
             var storage = new Mock<IMetaDataStorage>();
 
@@ -96,13 +104,39 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            var solver = new RemoteObjectAdded();
+            var solver = new RemoteObjectAdded(Mock.Of<ISyncEventQueue>());
 
             solver.Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
             storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>()), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileAddedAndExtendedAttributesAreAvailable()
+        {
+            var storage = new Mock<IMetaDataStorage>();
+            var queue = new Mock<ISyncEventQueue>();
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.SetupAllProperties();
+            fileInfo.Setup(d => d.FullName).Returns(this.path);
+            fileInfo.Setup(d => d.Name).Returns(this.objectName);
+            fileInfo.Setup(d => d.Directory).Returns(Mock.Of<IDirectoryInfo>());
+            fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
+
+            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, 0, null,  this.lastChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+
+            var solver = new RemoteObjectAdded(queue.Object);
+
+            solver.Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
+
+            fileInfo.Verify(f => f.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read), Times.Once());
+            storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate);
+            fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
+            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+            queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Type == FileTransmissionType.DOWNLOAD_NEW_FILE)), Times.Once());
         }
     }
 }

@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using System.Security.Cryptography;
 
 namespace CmisSync.Lib.Sync.Solver
 {
@@ -35,6 +36,21 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class RemoteObjectAdded : ISolver
     {
+        private ISyncEventQueue queue;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.RemoteObjectAdded"/> class.
+        /// </summary>
+        /// <param name="queue">Queue to report new transmissions to.</param>
+        public RemoteObjectAdded(ISyncEventQueue queue) {
+            if (queue == null) {
+                throw new ArgumentNullException("Given queue is null");
+            }
+
+            this.queue = queue;
+        }
+
+
         /// <summary>
         /// Adds the Object to Disk and Database
         /// </summary>
@@ -80,6 +96,20 @@ namespace CmisSync.Lib.Sync.Solver
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
                 storage.SaveMappedObject(mappedObject);
+            } else if (localFile is IFileInfo) {
+                var file = localFile as IFileInfo;
+                if (!(remoteId is IDocument)) {
+                    throw new ArgumentException("remoteId has to be a prefetched Document");
+                }
+
+                var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName);
+                this.queue.AddEvent(transmissionEvent);
+                using (var hashAlg = new SHA1Managed())
+                using (var fileStream = file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                using (var downloader = ContentTasks.ContentTaskUtils.CreateDownloader())
+                {
+                    downloader.DownloadFile(remoteId as IDocument, fileStream, transmissionEvent, hashAlg);
+                }
             }
         }
     }
