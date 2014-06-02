@@ -216,7 +216,7 @@ namespace TestLibrary.IntegrationTests
         {
             string fileName = "file";
             string content = "content";
-            var filePath = Path.Combine(localRootDir.FullName, fileName);
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(filePath);
             using (StreamWriter sw = fileInfo.CreateText()) {
                 sw.WriteLine(content);
@@ -231,7 +231,24 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
+        }
 
+        [Test, Category("Slow")]
+        public void OneRemoteFileCreated()
+        {
+            string fileName = "file";
+            string content = "content";
+            this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            var children = this.localRootDir.GetFiles();
+            Assert.That(children.Length, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(child.Length, Is.EqualTo(content.Length));
         }
 
         private class CmisRepoMock : CmisRepo
