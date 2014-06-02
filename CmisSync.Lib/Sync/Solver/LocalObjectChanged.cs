@@ -32,10 +32,17 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class LocalObjectChanged : ISolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
             // Match local changes to remote changes and updated them remotely
-            throw new NotImplementedException();
+            var mappedObject = storage.GetObjectByLocalPath(localFileSystemInfo);
+            var localFile = localFileSystemInfo as IFileInfo;
+            if(localFile != null) {
+                throw new NotImplementedException();
+            } else {
+                mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                storage.SaveMappedObject(mappedObject);
+            }
         }
     }
 }

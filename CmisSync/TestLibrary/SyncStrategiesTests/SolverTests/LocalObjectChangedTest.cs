@@ -21,12 +21,17 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
     using System;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Solver;
+
+    using DotCMIS.Client;
 
     using Moq;
 
     using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture]
     public class LocalObjectChangedTest
@@ -35,6 +40,55 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void DefaultConstructorTest()
         {
             new LocalObjectChanged();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFolderChanged()
+        {
+            var modificationDate = DateTime.UtcNow;
+            var solver = new LocalObjectChanged();
+            var storage = new Mock<IMetaDataStorage>();
+            var localDirectory = Mock.Of<IDirectoryInfo>(
+                f =>
+                f.LastWriteTimeUtc == modificationDate);
+            var remoteDirectory = new Mock<IFolder>();
+
+            var mappedObject = new MappedObject(
+                "name",
+                "remoteId",
+                MappedObjectType.Folder,
+                "parentId",
+                "changeToken")
+            {
+                Guid = Guid.NewGuid(),
+                LastRemoteWriteTimeUtc = modificationDate
+            };
+            storage.AddMappedFolder(mappedObject);
+
+            solver.Solve(Mock.Of<ISession>(), storage.Object, localDirectory, remoteDirectory.Object);
+
+            storage.VerifySavedMappedObject(
+                MappedObjectType.Folder,
+                "remoteId",
+                mappedObject.Name,
+                mappedObject.ParentId,
+                mappedObject.LastChangeToken,
+                true,
+                localDirectory.LastWriteTimeUtc);
+        }
+
+        [Ignore]
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileModificationDateChanged()
+        {
+            Assert.Fail("TODO");
+        }
+
+        [Ignore]
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileContentChanged()
+        {
+            Assert.Fail("TODO");
         }
     }
 }
