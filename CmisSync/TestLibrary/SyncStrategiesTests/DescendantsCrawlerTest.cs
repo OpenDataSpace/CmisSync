@@ -274,11 +274,11 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Verify(
                 q =>
                 q.AddEvent(
-                It.Is<FolderMovedEvent>(
+                It.Is<FolderEvent>(
                 e =>
                 e.LocalFolder.Equals(newLocalFolder.Object) &&
                 e.RemoteFolder.Equals(remoteSubFolder.Object) &&
-                e.OldLocalFolder.Equals(oldLocalFolder.Object))),
+                e.Local.Equals(MetaDataChangeType.CHANGED))),
                 Times.Once());
         }
 
@@ -312,14 +312,27 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Verify(q => q.AddEvent(It.Is<AbstractFolderEvent>(e => e.Local != MetaDataChangeType.NONE && e.Remote != MetaDataChangeType.NONE)), Times.Never());
         }
 
-        [Ignore]
         [Test, Category("Fast")]
         public void OneRemoteFolderRenamed()
         {
-            Assert.Fail("TODO");
+            var localGuid = Guid.NewGuid();
+            var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "folderName"));
+            var storedFolder = new MappedObject("foldername", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localGuid };
+            this.localFolder.SetupDirectories(oldLocalFolder.Object);
+            this.storage.SaveMappedObject(storedFolder);
+            var renamedRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "newFolderName", this.remoteRootPath + "newFolderName", this.remoteRootId, "newChangeToken");
+            this.remoteFolder.SetupDescendants(renamedRemoteFolder.Object);
+            Assert.That(this.CreateCrawler().Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(
+                q =>
+                q.AddEvent(
+                It.Is<FolderEvent>(
+                e =>
+                e.Remote == MetaDataChangeType.CHANGED &&
+                e.Local == MetaDataChangeType.NONE &&
+                e.RemoteFolder.Equals(renamedRemoteFolder.Object))), Times.Once());
         }
 
-        [Ignore]
         [Test, Category("Fast")]
         public void OneRemoteFolderMoved()
         {
@@ -340,7 +353,6 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
         }
 
-        [Ignore]
         [Test, Category("Fast")]
         public void OneRemoteAndTheSameLocalFolderRemoved()
         {
