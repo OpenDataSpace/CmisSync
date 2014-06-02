@@ -77,14 +77,12 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 localDirectory.LastWriteTimeUtc);
         }
 
-        [Ignore]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileModificationDateChanged()
         {
             Assert.Fail("TODO");
         }
 
-        [Ignore]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileContentChanged()
         {
