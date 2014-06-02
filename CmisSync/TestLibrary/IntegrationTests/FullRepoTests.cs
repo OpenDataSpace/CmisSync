@@ -146,7 +146,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneLocalFolder()
+        public void OneLocalFolderCreated()
         {
             this.localRootDir.CreateSubdirectory("Cat");
 
@@ -158,7 +158,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFolder()
+        public void OneRemoteFolderCreated()
         {
             this.remoteRootDir.CreateFolder("Cat");
 
