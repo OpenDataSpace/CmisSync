@@ -141,20 +141,7 @@ namespace TestLibrary.IntegrationTests
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
-        public IDocument CreateDocument(IFolder folder, string name, string content)
-        {
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.Name, name);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
 
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = name;
-            contentStream.MimeType = MimeType.GetMIMEType(name);
-            contentStream.Length = content.Length;
-            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
-
-            return folder.CreateDocument(properties, contentStream, null);
-        }
 
         public IDocument CopyDocument(IFolder folder, IDocument source, string name)
         {
@@ -256,7 +243,7 @@ namespace TestLibrary.IntegrationTests
                 for (int fileNumber = 0; fileNumber < this.heavyNumber; ++fileNumber)
                 {
                     string content = new string((char)('A' + (fileNumber % 10)), this.heavyFileSize);
-                    this.CreateDocument(folder, fileNumber.ToString(), content);
+                    folder.CreateDocument(fileNumber.ToString(), content);
                 }
             }
         }

@@ -16,12 +16,18 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace TestLibrary.TestUtils
 {
     using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
+
+    using CmisSync.Lib.Cmis;
 
     using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Data.Impl;
 
     public static class CmisConvenienceExtenders
     {
@@ -32,6 +38,21 @@ namespace TestLibrary.TestUtils
             properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
 
             return folder.CreateFolder(properties);
+        }
+
+        public static IDocument CreateDocument(this IFolder folder, string name, string content)
+        {
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, name);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = name;
+            contentStream.MimeType = MimeType.GetMIMEType(name);
+            contentStream.Length = content.Length;
+            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+
+            return folder.CreateDocument(properties, contentStream, null);
         }
     }
 }
