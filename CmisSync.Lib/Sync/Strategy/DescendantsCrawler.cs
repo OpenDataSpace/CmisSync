@@ -169,6 +169,12 @@ namespace CmisSync.Lib.Sync.Strategy
                     storedMappedChild = storedObjects.Find(o => o.Guid == childGuid);
                     if (storedMappedChild != null) {
                         // Moved, Renamed, Updated or Equal
+                        AbstractFolderEvent correspondingRemoteEvent = null;
+                        Tuple<AbstractFolderEvent, AbstractFolderEvent> tuple;
+                        if (eventMap.TryGetValue(storedMappedChild.RemoteObjectId, out tuple)) {
+                            correspondingRemoteEvent = tuple.Item2;
+                        }
+
                         if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                             // Renamed, Updated or Equal
                             if (child.Item.Name == storedMappedChild.Name) {
@@ -176,22 +182,22 @@ namespace CmisSync.Lib.Sync.Strategy
                                 if (child.Item.LastWriteTimeUtc != storedMappedChild.LastLocalWriteTimeUtc) {
                                     // Updated
                                     AbstractFolderEvent updateEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CHANGED, src: this);
-                                    eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(updateEvent, eventMap[storedMappedChild.RemoteObjectId].Item2);
+                                    eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(updateEvent, correspondingRemoteEvent);
                                 } else {
                                     // Equal
                                     AbstractFolderEvent equalEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, src: this);
-                                    eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(equalEvent, eventMap[storedMappedChild.RemoteObjectId].Item2);
+                                    eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(equalEvent, correspondingRemoteEvent);
                                 }
                             } else {
                                 // Renamed
                                 AbstractFolderEvent renamedEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CHANGED, src: this);
-                                eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(renamedEvent, eventMap[storedMappedChild.RemoteObjectId].Item2);
+                                eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(renamedEvent, correspondingRemoteEvent);
                             }
                         } else {
                             // Moved
                             IFileSystemInfo oldLocalPath = child.Item is IFileInfo ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedMappedChild)) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedMappedChild));
                             AbstractFolderEvent movedEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.MOVED, oldLocalObject: oldLocalPath, src: this);
-                            eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(movedEvent, eventMap[storedMappedChild.RemoteObjectId].Item2);
+                            eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(movedEvent, correspondingRemoteEvent);
                         }
                     } else {
                         // Added
