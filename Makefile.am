@@ -58,5 +58,5 @@ DotCMIS.dll:
 	xbuild Extras/OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
 	cp -f Extras/OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* Extras
 
-dist-hook:
+package:
 	make $(PACKAGE_TARGET)
