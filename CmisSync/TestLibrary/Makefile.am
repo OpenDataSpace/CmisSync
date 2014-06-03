@@ -45,6 +45,7 @@ SOURCES =  \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	LegacyCodeTests/RepoInfoTests.cs \
 	LocalFilesystemActivityGenerator.cs \

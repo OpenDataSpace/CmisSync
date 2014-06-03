@@ -1,16 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Newtonsoft.Json;
 
 namespace TestLibrary.IntegrationTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using Newtonsoft.Json;
+
     /// <summary>
     /// Helper functions for integration tests
     /// </summary>
     public class ITUtils
     {
-
         /// <summary>
         /// Gets the test servers configuration with repository id in json file "test-servers.json".
         /// </summary>
@@ -57,6 +58,26 @@ namespace TestLibrary.IntegrationTests
                     File.ReadAllText(path));
             }
         }
+
+        /// <summary>
+        /// Gets the proxy server settings saved in "proxy-server.json" file.
+        /// </summary>
+        /// <value>The proxy server.</value>
+        public static IEnumerable<object[]> ProxyServer
+        {
+            get
+            {
+                string path = "../../proxy-server.json";
+                bool exists = File.Exists(path);
+
+                if (!exists)
+                {
+                    path = "../CmisSync/TestLibrary/proxy-server.json";
+                }
+
+                return JsonConvert.DeserializeObject<List<object[]>>(
+                    File.ReadAllText(path));
+            }
+        }
     }
 }
-

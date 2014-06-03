@@ -1,0 +1,10 @@
+[
+    [
+        "@TEST_URL@",
+        "@TEST_USER@",
+        "@TEST_PASSWORD@",
+        "@TEST_PROXY_URL@",
+        "@TEST_PROXY_USER@",
+        "@TEST_PROXY_PASSWORD@"
+    ]
+]
