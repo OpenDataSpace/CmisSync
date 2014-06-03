@@ -89,5 +89,26 @@ namespace TestLibrary.IntegrationTests
 
             return path;
         }
+
+        /// <summary>
+        /// Gets the proxy server settings saved in "proxy-server.json" file.
+        /// </summary>
+        /// <value>The proxy server.</value>
+        public static IEnumerable<object[]> ProxyServer
+        {
+            get
+            {
+                string path = "../../proxy-server.json";
+                bool exists = File.Exists(path);
+
+                if (!exists)
+                {
+                    path = "../CmisSync/TestLibrary/proxy-server.json";
+                }
+
+                return JsonConvert.DeserializeObject<List<object[]>>(
+                    File.ReadAllText(path));
+            }
+        }
     }
 }

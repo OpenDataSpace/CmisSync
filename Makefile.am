@@ -39,7 +39,7 @@ debian-package:
 apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
-	(cd build; ./dmg-creator.sh ../bin/DataSpace\ Sync.app/; cd ..)
+	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
 
 none:
 
@@ -47,5 +47,5 @@ DotCMIS.dll:
 	xbuild Extras/OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
 	cp -f Extras/OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* Extras
 
-dist-hook:
+package:
 	make $(PACKAGE_TARGET)

@@ -152,6 +152,7 @@ namespace CmisSync.Lib.Events
             this.Status.Completed = (status.Completed != null) ? status.Completed : this.Status.Completed;
             this.Status.Started = (status.Started != null) ? status.Started : this.Status.Started;
             this.Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : this.Status.BitsPerSecond;
+            this.Status.FailedException = (status.FailedException != null) ? status.FailedException : this.Status.FailedException;
             if (this.TransmissionStatus != null) {
                 this.TransmissionStatus(this, this.Status);
             }
@@ -372,7 +373,7 @@ namespace CmisSync.Lib.Events
                 this.ActualPosition,
                 this.Percent,
                 status,
-                this.FailedException);
+                this.FailedException.ToString());
         }
     }
 }

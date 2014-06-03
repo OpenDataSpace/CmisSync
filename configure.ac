@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [1.2.1])
+m4_define([cmissync_version], [1.3.0])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
@@ -95,7 +95,7 @@ else
 fi
 
 
-TEST_URL="https://devel.dataspace.cc/cmis/atom"
+TEST_URL="https://devel.dataspace.cc/cmis/atom11"
 AC_ARG_WITH([test-url],
     AS_HELP_STRING([--with-test-url=URL],[Specify server URL for testing]),
     TEST_URL=${withval})
@@ -130,6 +130,25 @@ AC_ARG_WITH([test-repoid],
     AS_HELP_STRING([--with-test-repoid=PATH],[Specify remote repository-ID for testing]),
     TEST_REPOID=${withval})
 AC_SUBST(TEST_REPOID)
+
+TEST_PROXY_USER=""
+AC_ARG_WITH([test-proxy-user],
+    AS_HELP_STRING([--with-test-proxy-user=PATH],[Specify user for authetication required proxy for testing]),
+    TEST_PROXY_USER=${withval})
+AC_SUBST(TEST_PROXY_USER)
+
+TEST_PROXY_PASSWORD=""
+AC_ARG_WITH([test-proxy-password],
+    AS_HELP_STRING([--with-test-proxy-password=PATH],[Specify password for authetication required proxy for testing]),
+    TEST_PROXY_PASSWORD=${withval})
+AC_SUBST(TEST_PROXY_PASSWORD)
+
+TEST_PROXY_URL=""
+AC_ARG_WITH([test-proxy-url],
+    AS_HELP_STRING([--with-test-proxy-url=PATH],[Specify proxy url for testing]),
+    TEST_PROXY_URL=${withval})
+AC_SUBST(TEST_PROXY_URL)
+
 
 OSNAME=`uname -s`
 OSOK=no
@@ -257,6 +276,7 @@ AC_OUTPUT([
 build/cmissync.spec
 build/Makefile
 build/m4/Makefile
+build/dmg-creator.sh
 CmisSync.Lib/Defines.cs
 CmisSync.Lib/Makefile
 CmisSync/Common/Makefile
@@ -274,6 +294,8 @@ CmisSync/Mac/Info.plist
 CmisSync/Mac/Pixmaps/Makefile
 CmisSync/TestLibrary/Makefile
 CmisSync/TestLibrary/test-servers.json
+CmisSync/TestLibrary/proxy-server.json
+CmisSync/TestLibraryRunner/Makefile
 CmisSync/Linux/dataspacesync
 DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli

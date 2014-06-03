@@ -102,6 +102,15 @@ namespace CmisSync
                     ToolTipIcon.Warning);
             };
 
+            Program.Controller.ShowException += delegate(string title, string message)
+            {
+                this.trayicon.ShowBalloonTip(
+                    30000,
+                    title,
+                    message,
+                    ToolTipIcon.Warning);
+            };
+
             this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
         }
 
@@ -570,6 +579,7 @@ namespace CmisSync
             {
                 if (disposed)
                     return;
+
                 TimeSpan diff = DateTime.Now - updateTime;
                 if (diff.Seconds < updateInterval)
                 {

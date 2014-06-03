@@ -95,5 +95,18 @@ namespace CmisSync.Lib.ContentTasks
                 return this.doc;
             }
         }
+
+	public override string ToString()
+        {
+            return string.Format("{0}: {1}", base.ToString(), this.InnerException.ToString());
+        }
+
+        public override string Message
+        {
+            get
+            {
+                return string.Format("{0}: {1}", base.Message, this.InnerException.Message);
+            }
+        }
     }
 }

@@ -133,6 +133,9 @@ namespace CmisSync
         public delegate void ShowChangePasswordEventHandler(string reponame);
         public event ShowChangePasswordEventHandler ShowChangePassword = delegate { };
 
+        public delegate void ShowExceptionExceptionEventHandler(string title, string msg);
+        public event ShowExceptionExceptionEventHandler ShowException = delegate { };
+
         public delegate void SuccessfulLoginEventHandler (string reponame);
         public event SuccessfulLoginEventHandler SuccessfulLogin = delegate { };
 
@@ -292,6 +295,16 @@ namespace CmisSync
             repo.Queue.EventManager.AddEventHandler(
                 new GenericSyncEventHandler<FileTransmissionEvent>( 50, delegate(ISyncEvent e){
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
+                FileTransmissionEvent transEvent = e as FileTransmissionEvent;
+                transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args)
+                {
+                    if (args.Aborted == true && args.FailedException != null)
+                    {
+                        this.ShowException(
+                            string.Format(Properties_Resources.TransmissionFailedOnRepo, repo.Name),
+                            string.Format("{0}{1}{2}", transEvent.Path, Environment.NewLine, args.FailedException.Message));
+                    }
+                };
                 return false;
             }));
             repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());

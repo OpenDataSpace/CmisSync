@@ -880,6 +880,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [{0}] Transmission failed:.
+        /// </summary>
+        internal static string TransmissionFailedOnRepo {
+            get {
+                return ResourceManager.GetString("TransmissionFailedOnRepo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to establish a trusted Connection. Please inform your server administrator..
         /// </summary>
         internal static string TrustFailure {
