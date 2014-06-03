@@ -20,7 +20,7 @@ namespace TestLibrary.IntegrationTests
         [SetUp]
         public void ResetToDefaultProxySettings()
         {
-            ProxySettings settings;
+            ProxySettings settings = new ProxySettings();
             settings.Selection = ProxySelection.SYSTEM;
             settings.LoginRequired = false;
             HttpProxyUtils.SetDefaultProxy(settings, true);
@@ -55,7 +55,7 @@ namespace TestLibrary.IntegrationTests
                 Password = cmisPassword
             };
 
-            ProxySettings proxySettings;
+            ProxySettings proxySettings = new ProxySettings();
             proxySettings.Selection = string.IsNullOrEmpty(cmisServerUrl) ? ProxySelection.NOPROXY : ProxySelection.CUSTOM;
             proxySettings.Server = new Uri(proxyUrl);
             proxySettings.LoginRequired = !string.IsNullOrEmpty(proxyUser);
