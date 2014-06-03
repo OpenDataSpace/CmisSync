@@ -13,7 +13,7 @@ source=$1
 applicationName="DataSpace Sync"
 backgroundPictureName="dmgBackground.png"
 title=$applicationName
-finalDMGName=$applicationName".dmg"
+finalDMGName=$applicationName"-@ASM_VERSION@.dmg"
 volumeIcon="dmgVolumeIcon.icns"
 
 echo "Application Name: $applicationName"

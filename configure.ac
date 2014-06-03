@@ -352,6 +352,7 @@ AC_OUTPUT([
 build/cmissync.spec
 build/Makefile
 build/m4/Makefile
+build/dmg-creator.sh
 CmisSync.Lib/Defines.cs
 CmisSync.Lib/Makefile
 CmisSync/Common/Makefile
