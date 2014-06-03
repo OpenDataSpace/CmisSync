@@ -46,8 +46,7 @@ namespace CmisSync.Lib
                         proxy = WebRequest.GetSystemWebProxy();
                         break;
                     case Config.ProxySelection.CUSTOM:
-                        proxy = new WebProxy();
-                        (proxy as WebProxy).Address = settings.Server;
+                        proxy = new WebProxy(settings.Server);
                         break;
                 }
 
