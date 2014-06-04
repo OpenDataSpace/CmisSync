@@ -1,8 +1,8 @@
-
 namespace TestLibrary.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
@@ -23,6 +23,18 @@ namespace TestLibrary.IntegrationTests
             settings.Selection = Config.ProxySelection.SYSTEM;
             settings.LoginRequired = false;
             HttpProxyUtils.SetDefaultProxy(settings, true);
+        }
+
+        [TestFixtureSetUp]
+        public void DisableSSLVerification()
+        {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+        }
+
+        [TestFixtureTearDown]
+        public void EnableSSLVerification()
+        {
+            ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
         /// <summary>
