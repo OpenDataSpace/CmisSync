@@ -17,7 +17,7 @@ namespace TestLibrary.IntegrationTests
     [TestFixture, Timeout(60000)]
     public class HttpProxyConnectionTests
     {
-        [SetUp]
+        [SetUp, TearDown]
         public void ResetToDefaultProxySettings()
         {
             ProxySettings settings = new ProxySettings();
