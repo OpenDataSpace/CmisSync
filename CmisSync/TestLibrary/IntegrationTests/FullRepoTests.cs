@@ -134,6 +134,12 @@ namespace TestLibrary.IntegrationTests
             this.session = factory.CreateSession(cmisParameters);
 
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
+            foreach (var child in root.GetChildren()) {
+                if (child is IFolder && child.Name == Subfolder) {
+                    (child as IFolder).DeleteTree(true, null, true);
+                }
+            }
+
             this.remoteRootDir = root.CreateFolder(Subfolder);
         }
 
@@ -249,6 +255,29 @@ namespace TestLibrary.IntegrationTests
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(content.Length));
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFileUpdated()
+        {
+            string fileName = "file.txt";
+            string content = "cat";
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            content += content;
+            doc.SetContent(content);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(file.Length, Is.EqualTo(content.Length));
         }
 
         private class CmisRepoMock : CmisRepo
