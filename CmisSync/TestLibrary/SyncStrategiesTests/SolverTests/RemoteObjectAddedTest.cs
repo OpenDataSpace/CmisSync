@@ -16,6 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using System.Text;
+using System.Security.Cryptography;
 
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
@@ -119,13 +121,17 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
             var fileInfo = new Mock<IFileInfo>();
+
+            byte[] content = Encoding.UTF8.GetBytes("content");
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
             fileInfo.SetupAllProperties();
             fileInfo.Setup(d => d.FullName).Returns(this.path);
             fileInfo.Setup(d => d.Name).Returns(this.objectName);
             fileInfo.Setup(d => d.Directory).Returns(Mock.Of<IDirectoryInfo>());
             fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
+            fileInfo.Setup(d => d.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read)).Returns(new MemoryStream());
 
-            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, 0, null,  this.lastChangeToken);
+            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
             var solver = new RemoteObjectAdded(queue.Object);
@@ -133,10 +139,10 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             solver.Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
 
             fileInfo.Verify(f => f.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read), Times.Once());
-            storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate);
             fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+            fileInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>()), Times.Once());
             queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Type == FileTransmissionType.DOWNLOAD_NEW_FILE)), Times.Once());
+            storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, expectedHash);
         }
     }
 }

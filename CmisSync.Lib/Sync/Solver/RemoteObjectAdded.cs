@@ -102,14 +102,39 @@ namespace CmisSync.Lib.Sync.Solver
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
 
+                IDocument remoteDoc = remoteId as IDocument;
                 var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName);
                 this.queue.AddEvent(transmissionEvent);
+                byte[] hash = null;
                 using (var hashAlg = new SHA1Managed())
                 using (var fileStream = file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read))
                 using (var downloader = ContentTasks.ContentTaskUtils.CreateDownloader())
                 {
-                    downloader.DownloadFile(remoteId as IDocument, fileStream, transmissionEvent, hashAlg);
+                    downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
+                    hash = hashAlg.Hash;
                 }
+
+                Guid guid = Guid.NewGuid();
+                file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString());
+                if (remoteDoc.LastModificationDate != null) {
+                    file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
+                }
+
+                MappedObject mappedObject = new MappedObject(
+                    file.Name,
+                    remoteId.Id,
+                    MappedObjectType.File,
+                    remoteDoc.Parents[0].Id,
+                    remoteDoc.ChangeToken,
+                    file.Length)
+                {
+                    Guid = guid,
+                    LastLocalWriteTimeUtc = file.LastWriteTimeUtc,
+                    LastRemoteWriteTimeUtc = remoteDoc.LastModificationDate,
+                    LastChecksum = hash,
+                    ChecksumAlgorithmName = "SHA1"
+                };
+                storage.SaveMappedObject(mappedObject);
             }
         }
     }

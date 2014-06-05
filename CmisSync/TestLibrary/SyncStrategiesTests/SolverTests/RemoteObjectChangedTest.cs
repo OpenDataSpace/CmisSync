@@ -103,13 +103,10 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             string parentId = "papa";
             string lastChangeToken = "token";
             string newChangeToken = "newToken";
-            byte[] newContent = Encoding.UTF8.GetBytes("new Content");
+            byte[] newContent = Encoding.UTF8.GetBytes("content");
             long oldContentSize = 234;
             long newContentSize = newContent.Length;
-            byte[] expectedHash;
-            using (var sha1 = new SHA1Managed()) {
-                expectedHash = sha1.ComputeHash(newContent);
-            }
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(newContent);
             var queue = new Mock<ISyncEventQueue>();
             var storage = new Mock<IMetaDataStorage>();
             var mappedObject = new MappedObject(
