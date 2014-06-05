@@ -309,7 +309,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         private ContentChangeEvent PrepareEvent(DotCMIS.Enums.ChangeType type, bool hasContentStream) {
             var e = new ContentChangeEvent(type, Id);
-            var remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(hasContentStream ? "streamId" : null, Id, "name", null);
+            var remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(hasContentStream ? "streamId" : null, Id, "name", (string)null);
             var session = new Mock<ISession>();
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(remoteObject.Object);
 

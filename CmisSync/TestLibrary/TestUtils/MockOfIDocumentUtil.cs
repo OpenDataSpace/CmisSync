@@ -20,6 +20,7 @@
 namespace TestLibrary.TestUtils
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
     using DotCMIS.Client;
@@ -30,13 +31,19 @@ namespace TestLibrary.TestUtils
     public static class MockOfIDocumentUtil
     {
         public static Mock<IDocument> CreateRemoteDocumentMock(string documentContentStreamId, string id, string name, string parentId, long contentLength = 0, byte[] content = null, string changeToken = "changetoken") {
+            var newParentMock = Mock.Of<IFolder>(p => p.Id == parentId);
+            return CreateRemoteDocumentMock(documentContentStreamId, id, name, newParentMock, contentLength, content, changeToken);
+        }
+
+        public static Mock<IDocument> CreateRemoteDocumentMock(string documentContentStreamId, string id, string name, IFolder parent, long contentLength = 0, byte[] content = null, string changeToken = "changetoken") {
             var newRemoteObject = new Mock<IDocument>();
             newRemoteObject.Setup(d => d.ContentStreamId).Returns(documentContentStreamId);
-            newRemoteObject.Setup(d => d.ContentStreamLength).Returns(documentContentStreamId == null ? 0 : contentLength);
+            newRemoteObject.Setup(d => d.ContentStreamLength).Returns(contentLength);
             newRemoteObject.Setup(d => d.Id).Returns(id);
             newRemoteObject.Setup(d => d.Name).Returns(name);
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changeToken);
             newRemoteObject.SetupContent(content, name);
+            newRemoteObject.SetupParent(parent);
             return newRemoteObject;
         }
 
@@ -50,6 +57,12 @@ namespace TestLibrary.TestUtils
                     s.Stream == new MemoryStream(content));
                 doc.Setup(d => d.GetContentStream()).Returns(stream);
             }
+        }
+
+        public static void SetupParent(this Mock<IDocument> doc, IFolder parent) {
+            List<IFolder> parents = new List<IFolder>();
+            parents.Add(parent);
+            doc.Setup(d => d.Parents).Returns(parents);
         }
     }
 }

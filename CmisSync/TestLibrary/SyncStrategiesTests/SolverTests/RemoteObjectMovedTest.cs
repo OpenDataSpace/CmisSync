@@ -128,7 +128,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             var fileParents = new List<IFolder>();
             fileParents.Add(Mock.Of<IFolder>(f => f.Id == subFolderId));
-            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, newFileName, null, changeToken: lastChangeToken);
+            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, newFileName, (string)null, changeToken: lastChangeToken);
             remoteObject.Setup(f => f.Parents).Returns(fileParents);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
 

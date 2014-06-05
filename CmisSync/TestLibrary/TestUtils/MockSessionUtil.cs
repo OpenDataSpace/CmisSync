@@ -170,7 +170,7 @@ namespace TestLibrary.TestUtils
         public static Mock<ISession> GetSessionMockReturningDocumentChange(DotCMIS.Enums.ChangeType type, string id, string documentContentStreamId = null) {
             var session = MockSessionUtil.PrepareSessionMockForSingleChange(type, id);
 
-            var newRemoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(documentContentStreamId, id, "name", null);
+            var newRemoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(documentContentStreamId, id, "name", (string)null);
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);
          
             return session;
