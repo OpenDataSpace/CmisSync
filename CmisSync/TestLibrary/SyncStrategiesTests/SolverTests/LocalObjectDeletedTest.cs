@@ -65,12 +65,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             bool remoteObjectDeleted = false;
 
             string remoteDocumentId = "DocumentId";
-            /* //var remoteDocument = new Mock<ICmisObject>(MockBehavior.Strict);
-            //remoteDocument.Setup(d => d.Id).Returns(remoteDocumentId);
-
-            //string remoteParentFolderId = "parentFolder";
-            //var remoteParentFolder = new Mock<ICmisObject>(MockBehavior.Strict);
-            //remoteParentFolder.Setup(f => f.Id).Returns(remoteParentFolderId); */
 
             this.session.When(
                 () => remoteObjectDeleted).Setup(
@@ -83,29 +77,16 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             this.session.When(
                 () => !remoteObjectDeleted).Setup(
                 s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId), It.IsAny<bool>())).Callback(() => remoteObjectDeleted = true);
-            /*
-            //Session.Setup(s => s.GetObject(
-            //    It.Is<IObjectId>((id) => id.Id == remoteParentFolderId))
-            //    ).Returns(remoteParentFolder.Object);
-            //Session.When(() => !remoteObjectDeleted
-            //    ).Setup(s => s.GetObject(
-            //    It.Is<IObjectId>((id) => id.Id == remoteDocumentId))
-            //    ).Returns(remoteDocument.Object);
-            //Session.When(() => remoteObjectDeleted
-            //    ).Setup(s => s.GetObject(
-            //    It.Is<IObjectId>((id) => id.Id == remoteDocumentId))
-            //    ).Throws(new InvalidOperationException()); */
 
-                var solver = new LocalObjectDeleted();
-                var docId = new Mock<IObjectId>(MockBehavior.Strict);
-                docId.Setup(d => d.Id).Returns(remoteDocumentId);
-                this.storage.AddLocalFile(tempFile, remoteDocumentId);
-                this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
+            var docId = new Mock<IObjectId>(MockBehavior.Strict);
+            docId.Setup(d => d.Id).Returns(remoteDocumentId);
+            this.storage.AddLocalFile(tempFile, remoteDocumentId);
+            this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
 
-                solver.Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
+            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
 
-                this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId)), Times.Once());
-                Assert.IsTrue(remoteObjectDeleted);
+            this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId)), Times.Once());
+            Assert.IsTrue(remoteObjectDeleted);
         }
 
         [Test, Category("Medium"), Category("Solver")]
@@ -116,13 +97,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             bool remoteObjectDeleted = false;
 
             string remoteFolderId = "FolderId";
-            /*
-            //var remoteFolder = new Mock<ICmisObject>(MockBehavior.Strict);
-            //remoteFolder.Setup(d => d.Id).Returns(remoteFolderId);
-
-            //string remoteParentFolderId = "parentFolder";
-            //var remoteParentFolder = new Mock<ICmisObject>(MockBehavior.Strict);
-            //remoteParentFolder.Setup(f => f.Id).Returns(remoteParentFolderId); */
 
             this.session.When(
                 () => remoteObjectDeleted).Setup(
@@ -136,26 +110,12 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 () => !remoteObjectDeleted).Setup(
                 s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteFolderId), It.IsAny<bool>())).Callback(() => remoteObjectDeleted = true);
 
-            /*
-            // Session.Setup(s => s.GetObject(
-            //    It.Is<IObjectId>((id) => id.Id == remoteParentFolderId))
-            //    ).Returns(remoteParentFolder.Object);
-            // Session.When(() => !remoteObjectDeleted
-            //    ).Setup(s => s.GetObject(
-            //    It.Is<IObjectId>((id) => id.Id == remoteFolderId))
-            //    ).Returns(remoteFolder.Object);
-            // Session.When(() => remoteObjectDeleted
-            //    ).Setup(s => s.GetObject(
-            //    It.Is<IObjectId>((id) => id.Id == remoteFolderId))
-            //    ).Throws(new InvalidOperationException()); */
-
-            var solver = new LocalObjectDeleted();
             var docId = new Mock<IObjectId>(MockBehavior.Strict);
             docId.Setup(d => d.Id).Returns(remoteFolderId);
             this.storage.AddLocalFolder(tempFolder, remoteFolderId);
             this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
 
-            solver.Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), docId.Object);
+            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), docId.Object);
 
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteFolderId)), Times.Once());
             Assert.IsTrue(remoteObjectDeleted);
@@ -166,22 +126,12 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void LocalFileDeletedWhileNetworkError()
         {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
-
-            // bool remoteObjectDeleted = false;
             string remoteDocumentId = "DocumentId";
+            this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisConnectionException());
+            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId));
+            var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
 
-            this.session.Setup(
-                s => s.Delete(
-                It.Is<IObjectId>((id) => id.Id == remoteDocumentId))).Throws(new CmisConnectionException());
-            this.session.Setup(
-                s => s.Delete(
-                It.Is<IObjectId>((id) => id.Id == remoteDocumentId),
-                It.IsAny<bool>())).Throws(new CmisConnectionException());
-
-            var solver = new LocalObjectDeleted();
-            var docId = new Mock<IObjectId>(MockBehavior.Strict);
-            docId.Setup(d => d.Id).Returns(remoteDocumentId);
-            solver.Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFile), docId.Object);
+            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
         }
 
         [Test, Category("Medium"), Category("Solver")]
@@ -189,22 +139,22 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void LocalFileDeletedWhileServerError()
         {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
-
-            // bool remoteObjectDeleted = false;
             string remoteDocumentId = "DocumentId";
+            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId));
+            this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisRuntimeException());
+            var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
 
+            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+        }
+
+        private void SetupSessionExceptionOnDeletion(string remoteId, Exception ex) {
             this.session.Setup(
                 s => s.Delete(
-                It.Is<IObjectId>((id) => id.Id == remoteDocumentId))).Throws(new CmisRuntimeException());
+                It.Is<IObjectId>((id) => id.Id == remoteId))).Throws(ex);
             this.session.Setup(
                 s => s.Delete(
-                It.Is<IObjectId>((id) => id.Id == remoteDocumentId),
-                It.IsAny<bool>())).Throws(new CmisRuntimeException());
-
-            var solver = new LocalObjectDeleted();
-            var docId = new Mock<IObjectId>(MockBehavior.Strict);
-            docId.Setup(d => d.Id).Returns(remoteDocumentId);
-            solver.Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFile), docId.Object);
+                It.Is<IObjectId>((id) => id.Id == remoteId),
+                It.IsAny<bool>())).Throws(ex);
         }
     }
 }
