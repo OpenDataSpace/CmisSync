@@ -54,5 +54,16 @@ namespace TestLibrary.TestUtils
 
             return folder.CreateDocument(properties, contentStream, null);
         }
+
+        public static IObjectId SetContent(this IDocument doc, string content, bool overwrite = true, bool refresh = true)
+        {
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = doc.Name;
+            contentStream.MimeType = MimeType.GetMIMEType(doc.Name);
+            contentStream.Length = content.Length;
+            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+
+            return doc.SetContentStream(contentStream, overwrite, refresh);
+        }
     }
 }
