@@ -578,7 +578,6 @@ namespace TestLibrary.StorageTests
 
             var tree = storage.GetObjectTree();
             Assert.That(tree.Item, Is.EqualTo(rootFolder));
-            Assert.That(tree.Flag, Is.EqualTo(0));
             Assert.That(tree.Children, Is.Empty);
         }
 
@@ -596,13 +595,10 @@ namespace TestLibrary.StorageTests
             var tree = storage.GetObjectTree();
 
             Assert.That(tree.Item, Is.EqualTo(rootFolder));
-            Assert.That(tree.Flag, Is.EqualTo(0));
             Assert.That(tree.Children.Count, Is.EqualTo(1));
             Assert.That(tree.Children[0].Item, Is.EqualTo(child1Folder));
-            Assert.That(tree.Children[0].Flag, Is.EqualTo(0));
             Assert.That(tree.Children[0].Children.Count, Is.EqualTo(1));
             Assert.That(tree.Children[0].Children[0].Item, Is.EqualTo(child2File));
-            Assert.That(tree.Children[0].Children[0].Flag, Is.EqualTo(0));
         }
     }
 }

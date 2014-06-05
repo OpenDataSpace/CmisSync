@@ -35,12 +35,6 @@ namespace CmisSync.Lib.Data
         public T Item { get; set; }
 
         /// <summary>
-        /// Gets or sets the flag.
-        /// </summary>
-        /// <value>The flag.</value>
-        public int Flag { get; set; }
-
-        /// <summary>
         /// Gets or sets the sub trees as list of the child nodes.
         /// </summary>
         /// <value>The children.</value>
