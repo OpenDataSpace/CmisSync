@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Streams
             {
                 throw new ArgumentNullException("Given stream must not be null");
             }
-                
+
             this.Stream = stream;
         }
 
