@@ -280,6 +280,27 @@ namespace TestLibrary.IntegrationTests
             Assert.That(file.Length, Is.EqualTo(content.Length));
         }
 
+        [Test, Category("Slow")]
+        public void RemoteCreatedFileIsDeletedLocally()
+        {
+            string fileName = "file.txt";
+            string content = "cat";
+            this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            this.localRootDir.GetFiles().First().Delete();
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles(), Is.Empty);
+            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
+        }
+
         private class CmisRepoMock : CmisRepo
         {
             public SingleStepEventQueue SingleStepQueue;
