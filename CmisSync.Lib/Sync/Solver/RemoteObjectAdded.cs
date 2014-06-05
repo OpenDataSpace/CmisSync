@@ -122,7 +122,7 @@ namespace CmisSync.Lib.Sync.Solver
 
                 MappedObject mappedObject = new MappedObject(
                     file.Name,
-                    remoteId.Id,
+                    remoteDoc.Id,
                     MappedObjectType.File,
                     remoteDoc.Parents[0].Id,
                     remoteDoc.ChangeToken,
