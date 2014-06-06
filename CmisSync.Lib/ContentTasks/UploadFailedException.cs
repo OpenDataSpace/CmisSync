@@ -96,17 +96,25 @@ namespace CmisSync.Lib.ContentTasks
             }
         }
 
-	public override string ToString()
-        {
-            return string.Format("{0}: {1}", base.ToString(), this.InnerException.ToString());
-        }
-
+        /// <summary>
+        /// Gets the message.
+        /// </summary>
+        /// <value>The message.</value>
         public override string Message
         {
             get
             {
                 return string.Format("{0}: {1}", base.Message, this.InnerException.Message);
             }
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format("{0}: {1}", base.ToString(), this.InnerException.ToString());
         }
     }
 }
