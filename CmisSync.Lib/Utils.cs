@@ -297,33 +297,35 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static string FindNextConflictFreeFilename(string path, String user)
+        public static string FindNextConflictFreeFilename(string path, String user = null)
         {
             if (!File.Exists(path))
             {
                 return path;
             }
-            else
+
+            if (user == null) {
+                user = Environment.UserName;
+            }
+
+            string extension = Path.GetExtension(path);
+            string filepath = path.Substring(0, path.Length - extension.Length);
+            string ret = string.Format("{0}_{1}-version{2}", filepath, user, extension);
+            if (!File.Exists(ret)) {
+                return ret;
+            }
+
+            int index = 1;
+            do
             {
-                string extension = Path.GetExtension(path);
-                string filepath = path.Substring(0, path.Length - extension.Length);
-                string ret = string.Format("{0}_{1}-version{2}", filepath, user, extension);
+                ret = string.Format("{0}_{1}-version ({2}){3}", filepath, user, index.ToString(), extension);
                 if (!File.Exists(ret)) {
                     return ret;
                 }
 
-                int index = 1;
-                do
-                {
-                    ret = string.Format("{0}_{1}-version ({2}){3}", filepath, user, index.ToString(), extension);
-                    if (!File.Exists(ret)) {
-                        return ret;
-                    }
-
-                    index++;
-                }
-                while (true);
+                index++;
             }
+            while (true);
         }
 
         /// <summary>
