@@ -72,9 +72,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddMappedFolder(mappedFolder.Object);
 
-            var solver = new LocalObjectRenamed();
-
-            solver.Solve(Mock.Of<ISession>(), storage.Object, localFolder.Object, remoteFolder.Object);
+            new LocalObjectRenamed().Solve(Mock.Of<ISession>(), storage.Object, localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == newName), It.Is<bool>(b => b == true)), Times.Once());
 
@@ -111,9 +109,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddMappedFile(mappedFile.Object);
 
-            var solver = new LocalObjectRenamed();
-
-            solver.Solve(Mock.Of<ISession>(), storage.Object, localFolder.Object, remoteFile.Object);
+            new LocalObjectRenamed().Solve(Mock.Of<ISession>(), storage.Object, localFolder.Object, remoteFile.Object);
 
             remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == newName), It.Is<bool>(b => b == true)), Times.Once());
 
