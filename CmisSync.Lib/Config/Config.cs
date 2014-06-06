@@ -537,10 +537,10 @@ namespace CmisSync.Lib.Config
         {
             XmlSerializer deserializer = new XmlSerializer(typeof(Config));
             Config config;
-            using (TextReader textReader = new StreamReader(fullPath))
-            {
+            using (TextReader textReader = new StreamReader(fullPath)) {
                 config = (Config)deserializer.Deserialize(textReader);
             }
+
             config.fullpath = fullPath;
             config.configPath = Path.GetDirectoryName(fullPath);
             HttpProxyUtils.SetDefaultProxy(config.Proxy);
