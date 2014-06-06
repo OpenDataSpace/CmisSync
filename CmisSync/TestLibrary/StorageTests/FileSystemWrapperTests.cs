@@ -184,10 +184,90 @@ namespace TestLibrary.StorageTests
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             IDirectoryInfo dirInfo = Factory.CreateDirectoryInfo(fullPath);
             dirInfo.Create();
-            Assert.That(dirInfo.Exists, Is.EqualTo(true));
+            Assert.That(dirInfo.Exists, Is.True);
             dirInfo.Delete(true);
             dirInfo.Refresh();
-            Assert.That(dirInfo.Exists, Is.EqualTo(false));
+            Assert.That(dirInfo.Exists, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void DeleteFile() {
+            string fileName = "toBeDeleted";
+            string fullPath = Path.Combine(this.testFolder.FullName, fileName);
+            IFileInfo fileInfo = Factory.CreateFileInfo(fullPath);
+            using (fileInfo.Open(FileMode.CreateNew)) {
+            }
+
+            Assert.That(fileInfo.Exists, Is.True);
+            fileInfo.Delete();
+            fileInfo.Refresh();
+            Assert.That(fileInfo.Exists, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void ReplaceFileContent() {
+            string sourceFile = "source";
+            string targetFile = "target";
+            string backupFile = "source.bak";
+            IFileInfo sourceInfo = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, sourceFile));
+            IFileInfo targetInfo = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, targetFile));
+            IFileInfo backupInfo = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, backupFile));
+            using (var stream = sourceInfo.Open(FileMode.CreateNew, FileAccess.Write)) {
+                stream.Write(new byte[2], 0, 2);
+            }
+
+            sourceInfo.Refresh();
+            Assert.That(sourceInfo.Exists, Is.True);
+            Assert.That(sourceInfo.Length, Is.EqualTo(2));
+            using (var stream = targetInfo.Open(FileMode.CreateNew, FileAccess.Write)) {
+                stream.Write(new byte[5], 0, 5);
+            }
+
+            targetInfo.Refresh();
+            Assert.That(targetInfo.Exists, Is.True);
+            Assert.That(targetInfo.Length, Is.EqualTo(5));
+
+            var newFileInfo = sourceInfo.Replace(targetInfo, backupInfo, true);
+
+            sourceInfo.Refresh();
+            targetInfo.Refresh();
+            backupInfo.Refresh();
+            Assert.That(sourceInfo.Exists, Is.False);
+            Assert.That(targetInfo.Length, Is.EqualTo(2));
+            Assert.That(backupInfo.Exists, Is.True);
+            Assert.That(backupInfo.Length, Is.EqualTo(5));
+            Assert.That(newFileInfo.FullName, Is.EqualTo(targetInfo.FullName));
+        }
+
+        [Test, Category("Medium")]
+        public void ReplaceFileContentButNotExtendedAttributes() {
+            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
+                Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+
+            string sourceFile = "source";
+            string targetFile = "target";
+            string backupFile = "source.bak";
+            IFileInfo sourceInfo = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, sourceFile));
+            IFileInfo targetInfo = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, targetFile));
+            IFileInfo backupInfo = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, backupFile));
+            using (var stream = sourceInfo.Open(FileMode.CreateNew, FileAccess.Write)) {
+                stream.Write(new byte[2], 0, 2);
+            }
+
+            sourceInfo.SetExtendedAttribute("test", sourceFile);
+            sourceInfo.Refresh();
+            using (var stream = targetInfo.Open(FileMode.CreateNew, FileAccess.Write)) {
+                stream.Write(new byte[5], 0, 5);
+            }
+
+            targetInfo.SetExtendedAttribute("test", targetFile);
+            targetInfo.Refresh();
+
+            var newFileInfo = sourceInfo.Replace(targetInfo, backupInfo, true);
+            Assert.That(newFileInfo.GetExtendedAttribute("test"), Is.EqualTo(targetFile));
+            backupInfo.Refresh();
+            Assert.That(backupInfo.GetExtendedAttribute("test"), Is.Null);
         }
     }
 }
