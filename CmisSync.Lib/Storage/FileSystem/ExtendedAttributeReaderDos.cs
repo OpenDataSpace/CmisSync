@@ -96,7 +96,7 @@ namespace CmisSync.Lib.Storage
                 throw new ArgumentException("Empty or null key is not allowed");
             }
 
-            IntPtr fileHandle = CreateFile(string.Format ("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, 0, FileMode.Create, 0, IntPtr.Zero);
+            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, 0, FileMode.Create, 0, IntPtr.Zero);
             TextWriter writer = new StreamWriter(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Write));
             writer.Write(value);
             writer.Close();
