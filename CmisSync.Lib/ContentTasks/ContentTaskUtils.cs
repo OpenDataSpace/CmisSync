@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="Utils.cs" company="GRAU DATA AG">
+// <copyright file="ContentTaskUtils.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by

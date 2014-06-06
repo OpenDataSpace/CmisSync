@@ -82,7 +82,6 @@
     <Compile Include="ContentTasks\IFileUploader.cs" />
     <Compile Include="ContentTasks\SimpleFileDownloader.cs" />
     <Compile Include="ContentTasks\SimpleFileUploader.cs" />
-    <Compile Include="ContentTasks\Utils.cs" />
     <Compile Include="Data\PathMatcher.cs" />
     <Compile Include="Events\AbstractEventProducer.cs" />
     <Compile Include="Events\ChangeEnums.cs" />
@@ -214,6 +213,7 @@
     <Compile Include="Data\IObjectTree.cs" />
     <Compile Include="Data\ObjectTree.cs" />
     <Compile Include="Events\FileOrFolderEventFactory.cs" />
+    <Compile Include="ContentTasks\ContentTaskUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
