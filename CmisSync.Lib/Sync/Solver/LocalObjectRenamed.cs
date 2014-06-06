@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Sync.Solver
             } else if (remoteId is IDocument) {
                 remoteObject = (remoteId as IDocument).Rename(localFile.Name, true) as IDocument;
             } else {
-                throw new NotImplementedException();
+                throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
             }
 
             localFile.LastWriteTimeUtc = remoteObject.LastModificationDate != null ? (DateTime)remoteObject.LastModificationDate : localFile.LastWriteTimeUtc;
