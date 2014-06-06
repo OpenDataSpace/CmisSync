@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Sync.Solver
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.ContentTasks;
@@ -36,18 +37,21 @@ namespace CmisSync.Lib.Sync.Solver
     public class RemoteObjectChanged : ISolver
     {
         private ISyncEventQueue queue;
+        private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.RemoteObjectChanged"/> class.
         /// </summary>
         /// <param name="queue">Event Queue to report transmission events to.</param>
-        public RemoteObjectChanged(ISyncEventQueue queue)
+        /// <param name="fsFactory">File System Factory.</param>
+        public RemoteObjectChanged(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null)
         {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
 
             this.queue = queue;
+            this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 
         /// <summary>
@@ -71,6 +75,7 @@ namespace CmisSync.Lib.Sync.Solver
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 }
             } else if (remoteId is IDocument) {
+                byte[] lastChecksum = obj.LastChecksum;
                 var remoteDocument = remoteId as IDocument;
                 DateTime? lastModified = remoteDocument.LastModificationDate;
                 if ((lastModified != null && lastModified != obj.LastRemoteWriteTimeUtc) || obj.LastChangeToken != remoteDocument.ChangeToken) {
@@ -80,14 +85,27 @@ namespace CmisSync.Lib.Sync.Solver
 
                     // Download changes
                     var file = localFile as IFileInfo;
-                    var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName);
+                    var cacheFile = this.fsFactory.CreateFileInfo(file.FullName + ".sync");
+                    var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName, cacheFile.FullName);
                     this.queue.AddEvent(transmissionEvent);
                     using (SHA1 hashAlg = new SHA1Managed())
-                    using (var filestream = file.Open(FileMode.Truncate, FileAccess.Write, FileShare.Read))
+                    using (var filestream = cacheFile.Open(FileMode.Truncate, FileAccess.Write, FileShare.None))
                     using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                         download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
                         obj.ChecksumAlgorithmName = "SHA1";
                         obj.LastChecksum = hashAlg.Hash;
+                    }
+
+                    var backupFile = this.fsFactory.CreateFileInfo(file.FullName + ".bak.sync");
+                    cacheFile.Replace(file, backupFile, true);
+
+                    using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
+                        byte[] checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
+                        if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
+                            backupFile.MoveTo(Utils.FindNextConflictFreeFilename(file.FullName));
+                        } else {
+                            backupFile.Delete();
+                        }
                     }
 
                     obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
