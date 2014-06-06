@@ -68,5 +68,20 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         /// <param name="target">Target file name.</param>
         void MoveTo(string target);
+
+        /// <summary>
+        /// Replaces the contents of a specified destinationFile with the file described by the current IFileInfo object, deleting the original file, and creating a backup of the replaced file.
+        /// Also specifies whether to ignore merge errors.
+        /// </summary>
+        /// <param name="destinationFile">Destination file.</param>
+        /// <param name="destinationBackupFileName">Destination backup file name.</param>
+        /// <param name="ignoreMetadataErrors"><c>true</c> to ignore merge errors (such as attributes and ACLs) from the replaced file to the replacement file; otherwise <c>false</c>.</param>
+        /// <returns>A IFileInfo object that encapsulates information about the file described by the destFileName parameter.</returns>
+        IFileInfo Replace(IFileInfo destinationFile, IFileInfo destinationBackupFileName, bool ignoreMetadataErrors);
+
+        /// <summary>
+        /// Deletes the file on the fs.
+        /// </summary>
+        void Delete();
     }
 }
