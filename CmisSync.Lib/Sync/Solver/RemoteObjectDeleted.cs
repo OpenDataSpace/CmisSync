@@ -33,12 +33,19 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class RemoteObjectDeleted : ISolver
     {
+        /// <summary>
+        /// Deletes the given localFileInfo on file system and removes the stored object from storage.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFileInfo">Local file info.</param>
+        /// <param name="remoteId">Remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileInfo, IObjectId remoteId)
         {
-            if(localFileInfo is IDirectoryInfo)
-            {
-                var localFolder = localFileInfo as IDirectoryInfo;
-                localFolder.Delete(true);
+            if(localFileInfo is IDirectoryInfo) {
+                (localFileInfo as IDirectoryInfo).Delete(true);
+            } else if(localFileInfo is IFileInfo) {
+                (localFileInfo as IFileInfo).Delete();
             }
 
             storage.RemoveObject(storage.GetObjectByLocalPath(localFileInfo));

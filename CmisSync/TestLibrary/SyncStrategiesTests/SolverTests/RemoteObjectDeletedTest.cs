@@ -46,16 +46,30 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void RemoteFolderDeleted()
         {
             string path = Path.Combine(Path.GetTempPath(), "a");
-            var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
             Mock<IMappedObject> folder = storage.AddLocalFolder(path, "id");
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);
-            var solver = new RemoteObjectDeleted();
-            solver.Solve(session.Object, storage.Object, dirInfo.Object, null);
+
+            new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, null);
 
             dirInfo.Verify(d => d.Delete(true), Times.Once());
             storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileDeleted()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "a");
+            var storage = new Mock<IMetaDataStorage>();
+            Mock<IMappedObject> file = storage.AddLocalFile(path, "id");
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.FullName).Returns(path);
+
+            new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, null);
+
+            fileInfo.Verify(f => f.Delete(), Times.Once());
+            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
         }
     }
 }

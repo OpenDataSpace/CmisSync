@@ -47,22 +47,23 @@ namespace TestLibrary.TestUtils
             return storage;
         }
 
-        public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id)
+        public static Mock<IMappedObject> AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id)
         {
             var file = Mock.Of<IFileInfo>(f =>
                                           f.Name == Path.GetFileName(path) &&
                                           f.FullName == path &&
                                           f.Exists == true);
-            db.AddLocalFile(file, id);
+            return db.AddLocalFile(file, id);
         }
 
-        public static void AddLocalFile(this Mock<IMetaDataStorage> db, IFileInfo path, string id)
+        public static Mock<IMappedObject> AddLocalFile(this Mock<IMetaDataStorage> db, IFileInfo path, string id)
         {
             var file = Mock.Of<IMappedObject>(f =>
                                               f.RemoteObjectId == id &&
                                               f.Name == path.Name &&
                                               f.Type == MappedObjectType.File);
             db.AddMappedFile(file, path.FullName);
+            return Mock.Get(file);
         }
 
         public static Mock<IMappedObject> AddLocalFolder(this Mock<IMetaDataStorage> db, string path, string id)
