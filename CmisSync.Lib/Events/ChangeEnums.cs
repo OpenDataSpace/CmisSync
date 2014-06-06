@@ -21,22 +21,65 @@ namespace CmisSync.Lib.Events
 {
     using System;
 
+    /// <summary>
+    /// Meta data change type.
+    /// </summary>
     public enum MetaDataChangeType
     {
+        /// <summary>
+        /// Nothing has been changed.
+        /// </summary>
         NONE,
+
+        /// <summary>
+        /// The entity has been created.
+        /// </summary>
         CREATED,
+
+        /// <summary>
+        /// The meta data has been changed.
+        /// </summary>
         CHANGED,
+
+        /// <summary>
+        /// The entity has been deleted.
+        /// </summary>
         DELETED,
+
+        /// <summary>
+        /// The entity has been moved.
+        /// </summary>
         MOVED
     }
 
+    /// <summary>
+    /// Content change type.
+    /// </summary>
     public enum ContentChangeType
     {
+        /// <summary>
+        /// The content has not been changed.
+        /// </summary>
         NONE,
+
+        /// <summary>
+        /// The content has been created.
+        /// </summary>
         CREATED,
+
+        /// <summary>
+        /// The content has been changed.
+        /// </summary>
         CHANGED,
+
+        /// <summary>
+        /// The content has been deleted.
+        /// </summary>
         DELETED,
+
+        /// <summary>
+        /// The content has been changed by an append.
+        /// </summary>
         APPENDED
     }
 }
-
