@@ -33,4 +33,3 @@ namespace CmisSync.Lib.Events
         bool IsDirectory();
     }
 }
-
