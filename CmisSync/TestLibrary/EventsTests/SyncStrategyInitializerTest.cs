@@ -96,7 +96,7 @@ namespace TestLibrary.EventsTests
                 token: token);
 
             MappedObject rootObject = new MappedObject("/", id, MappedObjectType.Folder, null, token);
-            storage.Verify(s => s.SaveMappedObject(It.Is<MappedObject>(m => m.Equals(rootObject))));
+            storage.Verify(s => s.SaveMappedObject(It.Is<MappedObject>(m => AssertMappedObjectEqualExceptGUID(rootObject, m))));
         }
 
         [Test, Category("Fast")]
@@ -247,6 +247,20 @@ namespace TestLibrary.EventsTests
             var handler = CreateStrategyInitializer(storage, manager);
 
             Assert.True(handler.Handle(e));
+        }
+
+        private static bool AssertMappedObjectEqualExceptGUID(IMappedObject expected, IMappedObject actual) {
+            Assert.AreEqual(actual.ParentId, expected.ParentId);
+            Assert.AreEqual(actual.Type, expected.Type);
+            Assert.AreEqual(actual.RemoteObjectId, expected.RemoteObjectId);
+            Assert.AreEqual(actual.LastChangeToken, expected.LastChangeToken);
+            Assert.AreEqual(actual.LastRemoteWriteTimeUtc, expected.LastRemoteWriteTimeUtc);
+            Assert.AreEqual(actual.LastLocalWriteTimeUtc, expected.LastLocalWriteTimeUtc);
+            Assert.AreEqual(actual.LastChecksum, expected.LastChecksum);
+            Assert.AreEqual(actual.ChecksumAlgorithmName, expected.ChecksumAlgorithmName);
+            Assert.AreEqual(actual.Name, expected.Name);
+            Assert.AreNotEqual(actual.Guid, Guid.Empty);
+            return true;
         }
     }
 }
