@@ -37,6 +37,8 @@ namespace TestLibrary.EventsTests
 
     using NUnit.Framework;
 
+    using TestLibrary.IntegrationTests;
+
     [TestFixture]
     public class SyncStrategyInitializerTest
     {
@@ -179,7 +181,7 @@ namespace TestLibrary.EventsTests
             return new RepoInfo
             {
                 Address = new Uri("http://example.com"),
-                LocalPath = Path.GetTempPath(),
+                LocalPath = ITUtils.GetConfig()[1].ToString(),
                 RemotePath = "/"
             };
         }
