@@ -83,10 +83,11 @@ namespace CmisSync.Lib.Sync.Strategy {
             Logger.Debug("Fetching remote Object for " + e);
             string id = this.FetchIdFromStorage(e);
             if(id != null) {
+                Logger.Debug("Fetching remote Object with id " + id);
                 try {
                     remote = this.session.GetObject(id, this.operationContext);
                 } catch (CmisObjectNotFoundException) {
-                    // Deleted on Server, this is ok
+                    Logger.Debug("Was already deleted on server, could not fetch");
                     return false;
                 }
 

@@ -51,6 +51,7 @@ namespace TestLibrary.IntegrationTests
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Threading;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
@@ -292,13 +293,17 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             this.localRootDir.GetFiles().First().Delete();
-
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            
+            while(this.repo.SingleStepQueue.Queue.IsEmpty)
+            {
+                //Wait for Watcher to kick in
+                Thread.Sleep(100);
+            }
 
             this.repo.Run();
 
-            Assert.That(this.localRootDir.GetFiles(), Is.Empty);
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
+            Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
         private class CmisRepoMock : CmisRepo
