@@ -124,8 +124,8 @@ namespace CmisSync.Lib.Sync.Strategy
             this.CreateRemoteEvents(storedObjectsForRemote, remoteTree, eventMap);
             this.CreateLocalEvents(storedObjectsForLocal, localTree, eventMap);
 
-            List<IFileSystemInfo> removedLocalObjects = new List<IFileSystemInfo>();
-            List<IFileSystemInfo> removedRemoteObjects = new List<IFileSystemInfo>();
+            Dictionary<string, IFileSystemInfo> removedLocalObjects = new Dictionary<string, IFileSystemInfo>();
+            Dictionary<string, IFileSystemInfo> removedRemoteObjects = new Dictionary<string, IFileSystemInfo>();
 
             storedObjectsForLocal.Remove(storedTree.Item);
             storedObjectsForRemote.Remove(storedTree.Item);
@@ -133,20 +133,20 @@ namespace CmisSync.Lib.Sync.Strategy
             foreach (var localDeleted in storedObjectsForLocal) {
                 string path = this.storage.GetLocalPath(localDeleted);
                 IFileSystemInfo info = localDeleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
-                removedLocalObjects.Add(info);
+                removedLocalObjects.Add(localDeleted.RemoteObjectId, info);
             }
 
             foreach (var remoteDeleted in storedObjectsForRemote) {
                 string path = this.storage.GetLocalPath(remoteDeleted);
                 IFileSystemInfo info = remoteDeleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
-                removedRemoteObjects.Add(info);
+                removedRemoteObjects.Add(remoteDeleted.RemoteObjectId, info);
             }
 
             this.MergeAndSendEvents(eventMap);
 
             // Send out Events to queue
-            this.InformAboutRemoteObjectsDeleted(removedRemoteObjects);
-            this.InformAboutLocalObjectsDeleted(removedLocalObjects);
+            this.InformAboutRemoteObjectsDeleted(removedRemoteObjects.Values);
+            this.InformAboutLocalObjectsDeleted(removedLocalObjects.Values);
         }
 
         private void CreateLocalEvents(
@@ -318,7 +318,7 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
-        private void InformAboutLocalObjectsDeleted(IList<IFileSystemInfo> objects) {
+        private void InformAboutLocalObjectsDeleted(IEnumerable<IFileSystemInfo> objects) {
             foreach (var deleted in objects) {
                 if (deleted is IDirectoryInfo) {
                     this.Queue.AddEvent(new FolderEvent(deleted as IDirectoryInfo, null, this) { Local = MetaDataChangeType.DELETED });
@@ -328,7 +328,7 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
-        private void InformAboutRemoteObjectsDeleted(IList<IFileSystemInfo> objects) {
+        private void InformAboutRemoteObjectsDeleted(IEnumerable<IFileSystemInfo> objects) {
             foreach (var deleted in objects) {
                 AbstractFolderEvent deletedEvent = FileOrFolderEventFactory.CreateEvent(null, deleted, MetaDataChangeType.DELETED, src: this);
                 this.Queue.AddEvent(deletedEvent);
