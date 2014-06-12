@@ -54,6 +54,9 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.Name).Returns(name);
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
             newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
+            // This next line is a hack for a test in AllHandlersIT ContentChangeIndicatesFolderRenameOfExistingFolder, for this the ParentId is not relevant
+            // If you need a real move-mock this has to be made better...
+            newRemoteObject.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns(newRemoteObject.Object);
             return newRemoteObject;
         }
     }

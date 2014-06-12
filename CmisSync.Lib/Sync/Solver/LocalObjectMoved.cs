@@ -28,11 +28,14 @@ namespace CmisSync.Lib.Sync.Solver
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// A Local object has been moved. => Move the corresponding object on the server.
     /// </summary>
     public class LocalObjectMoved : ISolver
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectMoved));
         /// <summary>
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
         /// </summary>
@@ -49,6 +52,7 @@ namespace CmisSync.Lib.Sync.Solver
             var targetId = storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
             var src = session.GetObject(mappedObject.ParentId);
             var target = session.GetObject(targetId);
+            Logger.Debug(string.Format("Moving from folder {0} to folder {1}", src.Name, target.Name));
             remoteObject = remoteObject.Move(src, target);
             if(localFile.Name != remoteObject.Name) {
                 remoteObject.Rename(localFile.Name, true);

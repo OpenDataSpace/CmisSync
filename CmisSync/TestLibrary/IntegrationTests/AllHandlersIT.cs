@@ -65,7 +65,7 @@ namespace TestLibrary.IntegrationTests
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
 
             // Use Newtonsoft.Json as Serializator
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
@@ -74,9 +74,9 @@ namespace TestLibrary.IntegrationTests
         {
             this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
         }
-        
+
         [TearDown]
-        public void DestroyEngine() 
+        public void DestroyEngine()
         {
             this.engine.Dispose();
         }
@@ -123,7 +123,7 @@ namespace TestLibrary.IntegrationTests
             // storage.AddLocalFile(path.Object, id);
             var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(mappedObject);
-            
+
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
@@ -179,14 +179,18 @@ namespace TestLibrary.IntegrationTests
             dirInfo.Setup(d => d.FullName).Returns(path);
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(r => r.FullName == this.localRoot));
             fsFactory.AddIDirectoryInfo(dirInfo.Object);
-            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
+            var mappedRootObject = new MappedObject("/", parentId, MappedObjectType.Folder, null, storage.ChangeLogToken);
+            storage.SaveMappedObject(mappedRootObject);
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, parentId, null);
             storage.SaveMappedObject(mappedObject);
             storage.ChangeLogToken = "oldChangeToken";
+            Console.WriteLine(storage.ToFindString());
 
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, id, newName, Path.Combine(this.remoteRoot, newName), parentId, lastChangeToken);
 
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
-            dirInfo.Setup(d => d.MoveTo(It.IsAny<string>())).Callback(() => queue.AddEvent(Mock.Of<IFSMovedEvent>(fs => fs.IsDirectory() == true && fs.OldPath == path && fs.Path == newPath)));
+            dirInfo.Setup(d => d.MoveTo(It.IsAny<string>()))
+                .Callback(() => queue.AddEvent(Mock.Of<IFSMovedEvent>(fs => fs.IsDirectory() == true && fs.OldPath == path && fs.Path == newPath)));
 
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
@@ -235,7 +239,6 @@ namespace TestLibrary.IntegrationTests
         public void ContentChangeIndicatesFolderMove()
         {
             // Moves /a/b to /b
-
             string rootFolderId = "rootId";
             string folderAName = "a";
             string folderAId = "aid";
@@ -247,7 +250,7 @@ namespace TestLibrary.IntegrationTests
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
             var folderBInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderAName, folderBName));
 
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, folderBId, folderBName, remoteRoot + "/" + folderBName, rootFolderId, lastChangeToken);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, folderBId, folderBName, this.remoteRoot + "/" + folderBName, rootFolderId, lastChangeToken);
 
             var storage = this.GetInitializedStorage();
             storage.ChangeLogToken = "oldtoken";
@@ -265,7 +268,7 @@ namespace TestLibrary.IntegrationTests
             folderBInfo.Verify(d => d.MoveTo(Path.Combine(this.localRoot, folderBName)), Times.Once());
         }
 
-        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage) 
+        private SingleStepEventQueue CreateQueue(Mock<ISession> session, IMetaDataStorage storage)
         {
             return this.CreateQueue(session, storage, new ObservableHandler());
         }
