@@ -204,7 +204,7 @@ if test "$OSNAME" = "Linux" ; then
 	PKG_CHECK_MODULES(LOG4NET, log4net, have_log4net=yes, have_log4net=no)
 	if test "x$have_log4net" = "xno" ; then
         if test "$log4net_dll" != "no" ; then
-            LOG4NET_LIBS=['[$](LOG4NETLIBS)']
+            LOG4NET_LIBS=$LOG4NETLIBS
         else
 		    AC_ERROR([log4net is a required dependency: you need to install the appropriate devel package before you can compile])
         fi
@@ -238,7 +238,11 @@ if test "$OSNAME" = "Linux" ; then
 	cocoa=false
 	macos=false
     OSOK=yes
-    PACKAGE_TARGET=debian-package
+    if test -f /etc/redhat-release; then
+        PACKAGE_TARGET=rpm-package
+    else
+        PACKAGE_TARGET=debian-package
+    fi
 fi
 
 if test "$OSNAME" = "Darwin" ; then
