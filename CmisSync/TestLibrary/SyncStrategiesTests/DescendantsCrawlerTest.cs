@@ -61,7 +61,7 @@ namespace TestLibrary.SyncStrategiesTests
         public void InitCustomSerializator()
         {
             // Use Newtonsoft.Json as Serializator
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
@@ -356,8 +356,9 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void OneRemoteAndTheSameLocalFolderRemoved()
         {
-            var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "folderName"));
-            var storedFolder = new MappedObject("folderName", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken");
+            string folderName = "folderName";
+            var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, folderName));
+            var storedFolder = new MappedObject(folderName, "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken");
             this.storage.SaveMappedObject(storedFolder);
             var crawler = this.CreateCrawler();
 
