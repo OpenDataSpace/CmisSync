@@ -136,6 +136,7 @@ namespace TestLibrary.TestUtils
             var session = PrepareSessionMockForSingleChange(type, id);
             var newRemoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, changetoken);
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);
+            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(newRemoteObject.Object);
          
             return session;
         }
