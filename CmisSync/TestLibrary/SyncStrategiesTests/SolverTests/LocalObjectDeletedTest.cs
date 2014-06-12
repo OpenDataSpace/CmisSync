@@ -57,7 +57,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new LocalObjectDeleted();
         }
 
-        [Test, Category("Medium"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver")]
         public void LocalFileDeleted()
         {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
@@ -89,7 +89,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Assert.IsTrue(remoteObjectDeleted);
         }
 
-        [Test, Category("Medium"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver")]
         public void LocalFolderDeleted()
         {
             string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
@@ -121,7 +121,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Assert.IsTrue(remoteObjectDeleted);
         }
 
-        [Test, Category("Medium"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(CmisConnectionException))]
         public void LocalFileDeletedWhileNetworkError()
         {
@@ -134,7 +134,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
         }
 
-        [Test, Category("Medium"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(CmisRuntimeException))]
         public void LocalFileDeletedWhileServerError()
         {
