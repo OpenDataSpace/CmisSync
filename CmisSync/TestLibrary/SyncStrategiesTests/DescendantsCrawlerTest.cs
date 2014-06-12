@@ -364,6 +364,8 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.NONE && e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.Local == MetaDataChangeType.NONE && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Never());
         }
 
         private DescendantsCrawler CreateCrawler()

@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Sync.Strategy
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using CmisSync.Lib.Data;
@@ -143,6 +144,8 @@ namespace CmisSync.Lib.Sync.Strategy
             }
 
             this.MergeAndSendEvents(eventMap);
+            
+            this.FindReportAndRemoveMutualDeletedObjects(removedRemoteObjects, removedLocalObjects);
 
             // Send out Events to queue
             this.InformAboutRemoteObjectsDeleted(removedRemoteObjects.Values);
@@ -332,6 +335,21 @@ namespace CmisSync.Lib.Sync.Strategy
             foreach (var deleted in objects) {
                 AbstractFolderEvent deletedEvent = FileOrFolderEventFactory.CreateEvent(null, deleted, MetaDataChangeType.DELETED, src: this);
                 this.Queue.AddEvent(deletedEvent);
+            }
+        }
+        
+        private void FindReportAndRemoveMutualDeletedObjects(IDictionary<string, IFileSystemInfo> removedRemoteObjects, IDictionary<string, IFileSystemInfo> removedLocalObjects) {
+            IEnumerable<string> intersect = removedRemoteObjects.Keys.Intersect(removedLocalObjects.Keys);
+            IList<string> mutualIds = new List<string>();
+            foreach (var id in intersect) {
+                AbstractFolderEvent deletedEvent = FileOrFolderEventFactory.CreateEvent(null, removedLocalObjects[id], MetaDataChangeType.DELETED, MetaDataChangeType.DELETED, src: this);
+                mutualIds.Add(id);
+                this.Queue.AddEvent(deletedEvent);
+            }
+            
+            foreach(var id in mutualIds) {
+                removedLocalObjects.Remove(id);
+                removedRemoteObjects.Remove(id);
             }
         }
 
