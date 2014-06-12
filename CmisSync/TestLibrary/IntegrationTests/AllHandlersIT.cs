@@ -186,7 +186,7 @@ namespace TestLibrary.IntegrationTests
             Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, id, newName, Path.Combine(this.remoteRoot, newName), parentId, lastChangeToken);
 
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
-            dirInfo.Setup(d => d.MoveTo(It.IsAny<string>())).Callback(delegate { queue.AddEvent(new FSMovedEvent(path, newPath)); });
+            dirInfo.Setup(d => d.MoveTo(It.IsAny<string>())).Callback(() => queue.AddEvent(Mock.Of<IFSMovedEvent>(fs => fs.IsDirectory() == true && fs.OldPath == path && fs.Path == newPath)));
 
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
