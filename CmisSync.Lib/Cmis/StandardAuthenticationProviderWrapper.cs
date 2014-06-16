@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Cmis
 {
     using System;
+    using System.Net;
 
     using DotCMIS.Binding;
 
@@ -41,6 +42,14 @@ namespace CmisSync.Lib.Cmis
         /// </remarks>
         public void Dispose()
         {
+        }
+
+        /// <summary>
+        /// Deletes all cookies.
+        /// </summary>
+        public void DeleteAllCookies()
+        {
+            this.Cookies = new CookieContainer();
         }
     }
 }

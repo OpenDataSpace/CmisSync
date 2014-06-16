@@ -28,5 +28,9 @@ namespace CmisSync.Lib.Cmis
     /// </summary>
     public interface IDisposableAuthProvider : IAuthenticationProvider, IDisposable
     {
+        /// <summary>
+        /// Deletes all cookies.
+        /// </summary>
+        void DeleteAllCookies();
     }
 }
