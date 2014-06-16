@@ -88,7 +88,7 @@ namespace TestLibrary.SyncStrategiesTests
                 MappedObjectType.Folder,
                 null,
                 "changeToken") {
-                Guid = rootGuid,
+                Guid = this.rootGuid,
                 LastLocalWriteTimeUtc = this.lastLocalWriteTime
             };
             this.storage = new MetaDataStorage(this.storageEngine, this.matcher);
@@ -240,7 +240,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "oldFolder"));
             oldLocalFolder.Setup(f => f.Exists).Returns(false);
-            var remoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("oldFolderId", "oldFolder", remoteRootPath + "oldFolder" , remoteRootId, "oldChange");
+            var remoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("oldFolderId", "oldFolder", this.remoteRootPath + "oldFolder", this.remoteRootId, "oldChange");
             var storedFolder = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
                 Guid = Guid.NewGuid()
             };
@@ -260,7 +260,7 @@ namespace TestLibrary.SyncStrategiesTests
             var newLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
             oldLocalFolder.Setup(f => f.Exists).Returns(false);
             newLocalFolder.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(uuid.ToString());
-            var remoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("oldFolderId", "oldFolder", remoteRootPath + "oldFolder" , remoteRootId, "oldChange");
+            var remoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("oldFolderId", "oldFolder", this.remoteRootPath + "oldFolder", this.remoteRootId, "oldChange");
             var storedFolder = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
                 Guid = uuid
             };
@@ -333,22 +333,28 @@ namespace TestLibrary.SyncStrategiesTests
                 e =>
                 e.Remote == MetaDataChangeType.CHANGED &&
                 e.Local == MetaDataChangeType.NONE &&
-                e.RemoteFolder.Equals(renamedRemoteFolder.Object))), Times.Once());
+                e.RemoteFolder.Equals(renamedRemoteFolder.Object))),
+                Times.Once());
         }
 
         [Test, Category("Fast")]
         public void OneRemoteFolderMoved()
         {
-            // TODO correctly setup descendants for folder to move to
             string oldFolderName = "folderName";
             string folderId = "folderId";
             var localGuid = Guid.NewGuid();
+            var localTargetGuid = Guid.NewGuid();
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, oldFolderName));
+            var localTargetFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "target"));
             var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localGuid };
-            this.localFolder.SetupDirectories(oldLocalFolder.Object);
+            var storedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localTargetGuid };
+            this.localFolder.SetupDirectories(oldLocalFolder.Object, localTargetFolder.Object);
             this.storage.SaveMappedObject(storedFolder);
-            var renamedRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, oldFolderName, this.remoteRootPath + oldFolderName, "otherId", "newChangeToken");
-            this.remoteFolder.SetupDescendants(renamedRemoteFolder.Object);
+            this.storage.SaveMappedObject(storedTargetFolder);
+            var targetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", this.remoteRootPath + "target", this.remoteRootId, "changeToken");
+            var renamedRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, oldFolderName, this.remoteRootPath + oldFolderName, "targetId", "newChangeToken");
+            targetFolder.SetupDescendants(renamedRemoteFolder.Object);
+            this.remoteFolder.SetupDescendants(targetFolder.Object);
             Assert.That(this.CreateCrawler().Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(
                 q =>
@@ -357,7 +363,8 @@ namespace TestLibrary.SyncStrategiesTests
                 e =>
                 e.Remote == MetaDataChangeType.MOVED &&
                 e.Local == MetaDataChangeType.NONE &&
-                e.RemoteFolder.Equals(renamedRemoteFolder.Object))), Times.Once());
+                e.RemoteFolder.Equals(renamedRemoteFolder.Object))),
+                Times.Once());
         }
 
         [Test, Category("Fast")]
