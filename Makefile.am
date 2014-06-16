@@ -10,6 +10,7 @@ EXTRA_DIST = \
 	legal/LICENSE.txt \
 	legal/TRADEMARK.txt \
 	legal/AUTHORS.txt \
+	Extras/log4net.dll \
 	Extras/DotCMIS.dll \
 	Extras/Newtonsoft.Json.dll \
 	Extras/nunit.framework.dll
@@ -32,6 +33,12 @@ debian-package:
 	rm -rf $(top_builddir)/debian/usr
 	make DESTDIR=$(abs_top_builddir)/debian install
 	make VERSION=`git describe --match linux* | cut -d - -f 2` -C debian build
+
+rpm-package:
+	tar zcf $(distdir).tar.gz $(distdir)
+	mkdir -p $(builddir)/rpm/SOURCES
+	cp $(distdir).tar.gz $(top_builddir)/rpm/SOURCES
+	(cd rpm; rpmtopdir=$(abs_top_builddir)/rpm; rpmbuild -D"_topdir $$rpmtopdir" -ba ../dataspace-sync.spec; cd ..)
 
 apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
