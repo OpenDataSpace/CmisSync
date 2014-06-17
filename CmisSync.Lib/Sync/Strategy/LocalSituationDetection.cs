@@ -69,6 +69,11 @@ namespace CmisSync.Lib.Sync.Strategy
                 }
                 return SituationType.CHANGED;
             case MetaDataChangeType.NONE:
+                if(actualEvent is FileEvent && (actualEvent as FileEvent).LocalContent != ContentChangeType.NONE) {
+                    return SituationType.CHANGED;
+                } else {
+                    return SituationType.NOCHANGE;
+                }
             default:
                 return SituationType.NOCHANGE;
             }

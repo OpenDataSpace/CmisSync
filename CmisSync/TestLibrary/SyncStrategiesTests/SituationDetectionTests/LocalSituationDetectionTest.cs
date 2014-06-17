@@ -55,6 +55,15 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
+        public void FileContentChangedDetection()
+        {
+            var fileInfo = Mock.Of<IFileInfo>(f => f.Exists == true);
+            var FileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.NONE, LocalContent = ContentChangeType.CHANGED };
+
+            Assert.That(new LocalSituationDetection().Analyse(Mock.Of<IMetaDataStorage>(), FileEvent), Is.EqualTo(SituationType.CHANGED));
+        }
+
+        [Test, Category("Fast"), Category("SituationDetection")]
         public void FileRemovedDetection()
         {
             var fileInfo = Mock.Of<IFileInfo>(f => f.Exists == false);
