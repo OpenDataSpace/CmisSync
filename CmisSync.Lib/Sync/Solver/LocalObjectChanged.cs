@@ -21,7 +21,10 @@ namespace CmisSync.Lib.Sync.Solver
 {
     using System;
     using System.IO;
+    using System.Linq;
+    using System.Security.Cryptography;
 
+    using CmisSync.Lib.ContentTasks;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -47,18 +50,44 @@ namespace CmisSync.Lib.Sync.Solver
         }
 
         /// <summary>
-        /// Solve the specified situation by using the session, storage, localFile and remoteId.
+        /// Solve the specified situation by using the storage, localFile and remoteId.
+        /// Uploads the file content if content has been changed. Otherwise simply saves the
+        /// last modification date.
         /// </summary>
         /// <param name="session">Cmis session instance.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="localFile">Local file.</param>
-        /// <param name="remoteId">Remote identifier.</param>
         /// <param name="localFileSystemInfo">Local file system info.</param>
+        /// <param name="remoteId">Remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
             // Match local changes to remote changes and updated them remotely
             var mappedObject = storage.GetObjectByLocalPath(localFileSystemInfo);
-            var localFile = localFileSystemInfo as IFileInfo;
+            IFileInfo localFile = localFileSystemInfo as IFileInfo;
+            if (localFile != null) {
+                bool isChanged = false;
+                if (localFile.Length == mappedObject.LastContentSize) {
+                    using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
+                        byte[] fileHash = SHA1Managed.Create().ComputeHash(file);
+                        isChanged = !fileHash.SequenceEqual(mappedObject.LastChecksum);
+                    }
+                } else {
+                    isChanged = true;
+                }
+
+                if (isChanged) {
+                    IFileUploader uploader = ContentTasks.ContentTaskUtils.CreateUploader();
+                    FileTransmissionEvent statusEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    this.queue.AddEvent(statusEvent);
+                    statusEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
+                    using (var hashAlg = new SHA1Managed())
+                    using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
+                        uploader.UploadFile(remoteId as IDocument, file, statusEvent, hashAlg);
+                        mappedObject.LastChecksum = hashAlg.Hash;
+                    }
+                    statusEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                }
+            }
+
             mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
             storage.SaveMappedObject(mappedObject);
         }

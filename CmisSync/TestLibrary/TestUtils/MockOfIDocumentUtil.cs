@@ -67,20 +67,20 @@ namespace TestLibrary.TestUtils
             doc.Setup(d => d.Parents).Returns(parents);
         }
 
-        public static void VerifySetContentStream(this Mock<IDocument> doc, byte[] content, bool overwrite = true, bool refresh = true, string mimeType = null) {
-            doc.Verify(d => d.SetContentStream(It.Is<IContentStream>(s => VerifyContentStream(s, content, content.Length, mimeType, doc.Name)), overwrite, refresh));
+        public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {
+            doc.VerifySetContentStream(Times.Once(), overwrite, refresh, mimeType);
         }
 
-        private static bool VerifyContentStream(IContentStream s, byte[] expectedContent, int length, string mimeType, string fileName) {
+        public static void VerifySetContentStream(this Mock<IDocument> doc, Times times, bool overwrite = true, bool refresh = true, string mimeType = null) {
+            doc.Verify(d => d.SetContentStream(It.Is<IContentStream>(s => VerifyContentStream(s, mimeType, doc.Object.Name)), overwrite, refresh), times);
+        }
+
+        private static bool VerifyContentStream(IContentStream s, string mimeType, string fileName) {
             if (mimeType != null) {
                 Assert.That(s.MimeType, Is.EqualTo(mimeType));
             }
-            Assert.That(s.Length, Is.EqualTo(length));
+            Assert.That(s.Length, Is.Null);
             Assert.That(s.FileName, Is.EqualTo(fileName));
-            using(var mem = new MemoryStream()) {
-                s.Stream.CopyTo(mem);
-                Assert.That(expectedContent, Is.EqualTo(mem.ToArray()));
-            }
             return true;
         }
     }

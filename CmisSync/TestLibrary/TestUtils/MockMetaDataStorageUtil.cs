@@ -118,11 +118,9 @@ namespace TestLibrary.TestUtils
             Assert.That(o.LastChangeToken, Is.EqualTo(changeToken));
             Assert.That(o.Type, Is.EqualTo(type));
             if (extendedAttributeAvailable) {
-                Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty));
-            }
-            else
-            {
-                Assert.That(o.Guid, Is.EqualTo(Guid.Empty));
+                Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty), "Given Guid must not be empty");
+            } else {
+                Assert.That(o.Guid, Is.EqualTo(Guid.Empty), "Given Guid must be empty");
             }
 
             if (lastModification != null) {
@@ -132,7 +130,7 @@ namespace TestLibrary.TestUtils
             
             if(checksum != null) {
                 Assert.That(o.ChecksumAlgorithmName, Is.EqualTo("SHA1"));
-                Assert.That(o.LastChecksum, Is.EqualTo(checksum));
+                Assert.That(o.LastChecksum, Is.EqualTo(checksum), "Given checksum is not equal to last saved checksum");
             }
 
             return true;
