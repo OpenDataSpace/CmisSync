@@ -106,5 +106,13 @@ namespace CmisSync.Lib.Data
         /// </summary>
         /// <value><c>true</c> if ignored; otherwise, <c>false</c>.</value>
         bool Ignored { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last size of the file or the last size of the folder content. Default value is -1.
+        /// </summary>
+        /// <value>
+        /// The last size of the file or folder content.
+        /// </value>
+        long LastContentSize { get; set; }
     }
 }
