@@ -30,12 +30,12 @@ SOURCES =  \
 	ContentTasks/AbortException.cs \
 	ContentTasks/ChunkedDownloader.cs \
 	ContentTasks/ChunkedUploader.cs \
+	ContentTasks/ContentTaskUtils.cs \
 	ContentTasks/IFileDownloader.cs \
 	ContentTasks/IFileUploader.cs \
 	ContentTasks/SimpleFileDownloader.cs \
 	ContentTasks/SimpleFileUploader.cs \
 	ContentTasks/UploadFailedException.cs \
-	ContentTasks/ContentTaskUtils.cs \
 	Credentials.cs \
 	Data/IMappedObject.cs \
 	Data/IObjectTree.cs \
@@ -74,13 +74,13 @@ SOURCES =  \
 	Events/EventTypes/FSEvent.cs \
 	Events/EventTypes/FSMovedEvent.cs \
 	Events/EventTypes/FullSyncCompletedEvent.cs \
+	Events/EventTypes/IFilterableEvent.cs \
+	Events/EventTypes/IFilterableNameEvent.cs \
+	Events/EventTypes/IFilterablePathEvent.cs \
+	Events/EventTypes/IFilterableRemoteObjectEvent.cs \
 	Events/EventTypes/IFSEvent.cs \
 	Events/EventTypes/IFSMovedEvent.cs \
 	Events/EventTypes/ISyncEvent.cs \
-	Events/EventTypes/IFilterableEvent.cs \
-	Events/EventTypes/IFilterablePathEvent.cs \
-	Events/EventTypes/IFilterableNameEvent.cs \
-	Events/EventTypes/IFilterableRemoteObjectEvent.cs \
 	Events/EventTypes/PermissionDeniedEvent.cs \
 	Events/EventTypes/ProxyAuthRequiredEvent.cs \
 	Events/EventTypes/RecentChangedEvent.cs \
@@ -88,8 +88,8 @@ SOURCES =  \
 	Events/EventTypes/RequestIgnoredEvent.cs \
 	Events/EventTypes/StartNextSyncEvent.cs \
 	Events/EventTypes/SuccessfulLoginEvent.cs \
-	Events/FileOrFolderEventFactory.cs \
 	Events/FileDownloadRequest.cs \
+	Events/FileOrFolderEventFactory.cs \
 	Events/GenericSyncEventHandler.cs \
 	Events/IDisposableSyncEventQueue.cs \
 	Events/ISyncEventManager.cs \
@@ -157,9 +157,9 @@ SOURCES =  \
 	Sync/Strategy/RemoteObjectMovedOrRenamedAccumulator.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/SyncMechanism.cs \
+	Sync/Strategy/Watcher/IWatcherProducer.cs \
 	Sync/Strategy/Watcher/MacWatcher.cs \
 	Sync/Strategy/Watcher/NetWatcher.cs \
-	Sync/Strategy/Watcher/IWatcherProducer.cs \
 	Sync/Strategy/Watcher/WatcherConsumer.cs \
 	Utils.cs
 
