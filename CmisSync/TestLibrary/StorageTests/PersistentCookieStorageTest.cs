@@ -107,7 +107,23 @@ namespace TestLibrary.StorageTests
                 Expired = false,
                 Expires = DateTime.Now.AddDays(1)
             });
-            storage.Cookies = collection; 
+            storage.Cookies = collection;
+
+            Assert.That(storage.Cookies, Is.EqualTo(collection));
+        }
+
+        [Test, Category("Fast")]
+        public void SaveCookieWithoutExpirationDate()
+        {
+            var storage = new PersistentCookieStorage(this.engine);
+            var collection = new CookieCollection();
+            collection.Add(new Cookie {
+                Name = "JSESSIONID",
+                Value = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                Path = "/cmis",
+                Expired = false
+            });
+            storage.Cookies = collection;
 
             Assert.That(storage.Cookies, Is.EqualTo(collection));
         }
