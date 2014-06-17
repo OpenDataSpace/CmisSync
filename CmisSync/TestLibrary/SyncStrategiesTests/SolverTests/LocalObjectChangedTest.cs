@@ -24,6 +24,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Solver;
 
@@ -41,7 +42,13 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectChanged();
+            new LocalObjectChanged(Mock.Of<ISyncEventQueue>());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfQueueIsNull() {
+            new LocalObjectChanged(null);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -52,6 +59,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var localDirectory = Mock.Of<IDirectoryInfo>(
                 f =>
                 f.LastWriteTimeUtc == modificationDate.AddMinutes(1));
+            var queue = new Mock<ISyncEventQueue>();
 
             var mappedObject = new MappedObject(
                 "name",
@@ -61,11 +69,11 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 "changeToken")
             {
                 Guid = Guid.NewGuid(),
-                LastRemoteWriteTimeUtc = modificationDate
+                LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1)
             };
             storage.AddMappedFolder(mappedObject);
 
-            new LocalObjectChanged().Solve(Mock.Of<ISession>(), storage.Object, localDirectory, Mock.Of<IFolder>());
+            new LocalObjectChanged(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, localDirectory, Mock.Of<IFolder>());
 
             storage.VerifySavedMappedObject(
                 MappedObjectType.Folder,
@@ -75,6 +83,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 mappedObject.LastChangeToken,
                 true,
                 localDirectory.LastWriteTimeUtc);
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -85,7 +94,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             int fileLength = 20;
             byte[] content = new byte[fileLength];
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
-
+            var queue = new Mock<ISyncEventQueue>();
             var localFile = new Mock<IFileInfo>();
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
             localFile.Setup(f => f.Length).Returns(fileLength);
@@ -103,14 +112,15 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 fileLength)
             {
                 Guid = Guid.NewGuid(),
-                LastRemoteWriteTimeUtc = modificationDate,
+                LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
                 LastLocalWriteTimeUtc = modificationDate,
-                LastChecksum = expectedHash
+                LastChecksum = expectedHash,
+                ChecksumAlgorithmName = "SHA1"
             };
 
             storage.AddMappedFile(mappedObject);
 
-            new LocalObjectChanged().Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, Mock.Of<IDocument>());
+            new LocalObjectChanged(Mock.Of<ISyncEventQueue>()).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, Mock.Of<IDocument>());
 
             storage.VerifySavedMappedObject(
                 MappedObjectType.File,
@@ -121,6 +131,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 true,
                 localFile.Object.LastWriteTimeUtc,
                 expectedHash);
+            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -131,6 +142,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             int fileLength = 20;
             byte[] content = new byte[fileLength];
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
+            var queue = new Mock<ISyncEventQueue>();
 
             var localFile = new Mock<IFileInfo>();
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
@@ -156,7 +168,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             storage.AddMappedFile(mappedObject);
             var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
 
-            new LocalObjectChanged().Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
+            new LocalObjectChanged(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
 
             storage.VerifySavedMappedObject(
                 MappedObjectType.File,
@@ -168,6 +180,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 localFile.Object.LastWriteTimeUtc,
                 expectedHash);
             remoteFile.VerifySetContentStream(content);
+            queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Path == localFile.Object.FullName && e.Type == FileTransmissionType.UPLOAD_MODIFIED_FILE)), Times.Once());
         }
     }
 }

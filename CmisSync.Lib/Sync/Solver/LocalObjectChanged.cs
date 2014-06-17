@@ -32,6 +32,28 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class LocalObjectChanged : ISolver
     {
+        private ISyncEventQueue queue;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.LocalObjectChanged"/> class.
+        /// </summary>
+        /// <param name="queue">Event queue for publishing upload transmission.</param>
+        public LocalObjectChanged(ISyncEventQueue queue) {
+            if (queue == null) {
+                throw new ArgumentNullException("Given queue is null");
+            }
+
+            this.queue = queue;
+        }
+
+        /// <summary>
+        /// Solve the specified situation by using the session, storage, localFile and remoteId.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="remoteId">Remote identifier.</param>
+        /// <param name="localFileSystemInfo">Local file system info.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
             // Match local changes to remote changes and updated them remotely
