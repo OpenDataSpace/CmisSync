@@ -37,12 +37,8 @@ namespace CmisSync.Lib.Sync.Solver
             // Match local changes to remote changes and updated them remotely
             var mappedObject = storage.GetObjectByLocalPath(localFileSystemInfo);
             var localFile = localFileSystemInfo as IFileInfo;
-            if(localFile != null) {
-                throw new NotImplementedException();
-            } else {
-                mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
-                storage.SaveMappedObject(mappedObject);
-            }
+            mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+            storage.SaveMappedObject(mappedObject);
         }
     }
 }

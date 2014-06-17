@@ -272,7 +272,7 @@ namespace TestLibrary.IntegrationTests
             content += content;
             doc.SetContent(content);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
 
             this.repo.Run();
 
@@ -293,7 +293,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             this.localRootDir.GetFiles().First().Delete();
-            
+
             while(this.repo.SingleStepQueue.Queue.IsEmpty)
             {
                 //Wait for Watcher to kick in
