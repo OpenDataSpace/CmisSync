@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="SetupWizardController.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,9 +88,6 @@ namespace CmisSync
                         case PageType.Customize:
                             ShowCustomizePage();
                             break;
-                        case PageType.Syncing:
-                            ShowSyncingPage();
-                            break;
                         case PageType.Finished:
                             ShowFinishedPage();
                             break;
@@ -136,22 +151,6 @@ namespace CmisSync
             Description.StringValue = String.Empty;
             SubController = new SetupSubCustomizeController (Controller);
             Content.ContentView = SubController.View;
-        }
-
-        void ShowSyncingPage()
-        {
-            Header.StringValue = Properties_Resources.AddingFolder + " ‘" + Controller.SyncingReponame + "’…";
-            Description.StringValue = Properties_Resources.MayTakeTime;
-            NSProgressIndicator progress = new NSProgressIndicator() {
-                Frame = new RectangleF(0, 140, 300, 20),
-                Style = NSProgressIndicatorStyle.Bar,
-                MinValue = 0.0,
-                MaxValue = 100.0,
-                Indeterminate = false,
-                DoubleValue = Controller.ProgressBarPercentage
-            };
-            progress.StartAnimation(this);
-            Content.ContentView = progress;
         }
 
         void ShowFinishedPage()

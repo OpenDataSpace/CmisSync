@@ -1,29 +1,43 @@
+//-----------------------------------------------------------------------
+// <copyright file="MacWatcherTest.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 #if __COCOA__
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-
-using MonoMac.Foundation;
-using MonoMac.AppKit;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Sync.Strategy;
-
-using NUnit.Framework;
-
-using Moq;
 
 namespace TestLibrary.SyncStrategiesTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using MonoMac.Foundation;
+    using MonoMac.AppKit;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class MacWatcherTest : BaseWatcherTest
     {
-        private bool StopRunLoop = false;
-        private NSRunLoop RunLoop = null;
-        private Thread RunLoopThread = null;
-
         [TestFixtureSetUp]
         public void ClassSetUp()
         {
@@ -54,7 +68,6 @@ namespace TestLibrary.SyncStrategiesTests
             using (var watcher = new MacWatcher(localFolder.FullName, queue.Object))
             {
                 Assert.False(watcher.EnableEvents);
-                Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
             }
         }
 
@@ -80,6 +93,7 @@ namespace TestLibrary.SyncStrategiesTests
         {
             private ISyncEventQueue Queue;
             public List<FSEvent> Events = new List<FSEvent>();
+            public ISyncEventManager EventManager { get; private set; }
 
             public EventQueue(ISyncEventQueue queue)
             {
@@ -93,6 +107,7 @@ namespace TestLibrary.SyncStrategiesTests
                     if (fsEvent != null) {
                         Events.Add (fsEvent);
                     }
+
                     Queue.AddEvent (newEvent);
                 }
             }

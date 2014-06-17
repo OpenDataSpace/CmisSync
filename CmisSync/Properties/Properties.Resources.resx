@@ -429,4 +429,7 @@ This could lead to a lot of conflict files!</value>
   <data name="LoginSuccess" xml:space="preserve">
     <value>login successful</value>
   </data>
+  <data name="TransmissionFailedOnRepo" xml:space="preserve">
+    <value>[{0}] Transmission failed:</value>
+  </data>
 </root>

@@ -1,28 +1,33 @@
-using System;
-using System.IO;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Events;
+//-----------------------------------------------------------------------
+// <copyright file="FileSynchronizer.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace CmisSync.Lib.Sync
 {
+    using System;
+    using System.IO;
+    
+    using CmisSync.Lib.Events;
+    
+    using DotCMIS.Client;
+
     public abstract class AbstractFileSynchronizer : ReportingSyncEventHandler
     {
-        /// <summary>
-        /// Gets the path on which the File Synchronizer is working on.
-        /// </summary>
-        /// <value>
-        /// The path.
-        /// </value>
-        public FileInfo Path { get; private set; }
-        /// <summary>
-        /// Gets the session.
-        /// </summary>
-        /// <value>
-        /// The session.
-        /// </value>
-        protected ISession Session { get; private set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.AbstractFileSynchronizer"/> class.
         /// </summary>
@@ -35,25 +40,45 @@ namespace CmisSync.Lib.Sync
         /// <param name='queue'>
         /// Queue where the status/failures should be reported to.
         /// </param>
-        public AbstractFileSynchronizer (FileInfo path, ISession session, SyncEventQueue queue) : base(queue)
+        public AbstractFileSynchronizer(FileInfo path, ISession session, SyncEventQueue queue) : base(queue)
         {
-            if (path == null)
-                throw new ArgumentException ("Given path cannot be null");
-            if (session == null)
-                throw new ArgumentNullException ("The given session must not be null");
-            Path = path;
-            Session = session;
+            if (path == null) {
+                throw new ArgumentException("Given path cannot be null");
+            }
+  
+            if (session == null) {
+                throw new ArgumentNullException("The given session must not be null");
+            }
+            
+            this.Path = path;
+            this.Session = session;
         }
 
-        public abstract void start ();
+        /// <summary>
+        /// Gets the path on which the File Synchronizer is working on.
+        /// </summary>
+        /// <value>
+        /// The path.
+        /// </value>
+        public FileInfo Path { get; private set; }
 
-        public abstract void abort ();
+        /// <summary>
+        /// Gets the session.
+        /// </summary>
+        /// <value>
+        /// The session.
+        /// </value>
+        protected ISession Session { get; private set; }
 
-        public abstract void pause ();
+        public abstract void Start();
 
-        public abstract void resume ();
+        public abstract void Abort();
 
-        public abstract void inform ();
+        public abstract void Pause();
+
+        public abstract void Resume();
+
+        public abstract void Inform();
 
         /*
         /// <summary>
@@ -130,4 +155,3 @@ namespace CmisSync.Lib.Sync
         }*/
     }
 }
-

@@ -8,6 +8,7 @@ A: CmisSync, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
 R: Gendarme.Rules.BadPractice.AvoidVisibleConstantFieldRule
 T: CmisSync.Defines
 T: CmisSync.Lib.Defines
+T: CmisSync.Lib.Config.Config
 
 #Cross reference between CmisSync.Lib.Sync.CmisRepo and CmisSync.Lib.Sync.CmisRepo/SynchronizedFolder
 R: Gendarme.Rules.Correctness.DisposableFieldsShouldBeDisposedRule
@@ -32,23 +33,37 @@ M: System.Void CmisSync.CmisSyncMenuItem::.ctor(System.String)
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 M: System.Void CmisSync.UI::.cctor()
 M: System.Void TestLibrary.DataTests.PathMatcherTest::SetUp()
+T: TestLibrary.EventsTests.EventsFilterTests.IgnoredFolderNamesFilterTest
 
 #Required to be type long for error code
 R: Gendarme.Rules.Design.EnumsShouldUseInt32Rule
 T: CmisSync.CertPolicyHandler/CertificateProblem
 
 #Top level widget does not need dispose pattern (Linux)
-R: Gendarme.Rules.Correctness.TypesWithDisposableFieldsShouldBeDisposableRule
+R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: CmisSync.UI
 T: CmisSync.StatusIcon
 T: CmisSync.ControllerBase
 
+# Disposed in TearDown
+R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
+T: TestLibrary.IntegrationTests.FullRepoTests
+T: TestLibrary.SyncStrategiesTests.WatcherData
+T: TestLibrary.SyncStrategiesTests.DescendantsCrawlerTest
+T: TestLibrary.StorageTests.PersistentCookieStorageTest
+T: TestLibrary.StorageTests.MetaDataStorageTest
+T: TestLibrary.IntegrationTests.DBreezeTests
+T: TestLibrary.IntegrationTests.AllHandlersIT
+T: TestLibrary.AuthenticationProviderTests.AuthProviderFactoryTest
 #Ignore dispose pattern for UI widget (Windows)
 R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: CmisSync.ControllerBase
 T: CmisSync.StatusIconController
 T: CmisSync.UI
 T: CmisSync.CmisTree.AsyncNodeLoader
+#Disposed in CmisRepo:
+T: CmisSync.Lib.Storage.PersistentCookieStorage
+T: CmisSync.Lib.Storage.MetaDataStorage
 
 #Windows Gendarme bug? XmlNodeList is not an IDisposal object at all
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
@@ -77,3 +92,17 @@ M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::ResumeDownloadTest(
 R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
 T: CmisSync.Lib.Events.ProxyAuthRequiredEvent
 T: CmisSync.Lib.Events.PermissionDeniedEvent
+
+#Ignore DoNotExposeNestedGenericSignaturesRule where DotCmis forces us
+R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
+T: CmisSync.Lib.Cmis.CmisUtils/NodeTree
+
+#Ignore DoNotHardCodePaths
+R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
+T: TestLibrary.LegacyCodeTests.RepoInfoTests
+# Install dir
+T: CmisSync.Controller
+
+# Test for Events which have nested exceptions
+R: Gendarme.Rules.BadPractice.CheckNewExceptionWithoutThrowingRule
+T: TestLibrary.EventsTests.EventsFilterTests.GenericHandleDublicatedEventsFilterTest

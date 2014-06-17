@@ -1,27 +1,45 @@
-using System;
-using System.IO;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Sync.Strategy;
-
-using NUnit.Framework;
-
-using Moq;
-
+//-----------------------------------------------------------------------
+// <copyright file="NetWatcherTest.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
+#if ! __COCOA__
 namespace TestLibrary.SyncStrategiesTests
 {
+    using System;
+    using System.IO;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using Moq;
+
+    using NUnit.Framework;
+
     [TestFixture]
     public class NetWatcherTest : BaseWatcherTest
     {
-
         [SetUp]
         public new void SetUp() {
-            base.SetUp ();
+            base.SetUp();
         }
 
         [TearDown]
         public new void TearDown() {
-            base.TearDown ();
+            base.TearDown();
         }
 
         [Test, Category("Fast")]
@@ -30,86 +48,91 @@ namespace TestLibrary.SyncStrategiesTests
             using (var watcher = new NetWatcher(fswatcher, queue.Object))
             {
                 Assert.False(watcher.EnableEvents);
-                Assert.AreEqual(Watcher.DEFAULT_FS_WATCHER_SYNC_STRATEGY_PRIORITY, watcher.Priority);
             }
         }
 
         [Test, Category("Fast")]
-        [ExpectedException( typeof( ArgumentNullException ) )]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithNullWatcher() {
-            using (new NetWatcher(null, queue.Object));
+            using (new NetWatcher(null, queue.Object))
+            {
+            }
         }
 
         [Test, Category("Fast")]
-        [ExpectedException( typeof( ArgumentNullException ) )]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithNullQueue() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            using (new NetWatcher(fswatcher, null));
+            using (new NetWatcher(fswatcher, null))
+            {
+            }
         }
 
         [Test, Category("Fast")]
-        [ExpectedException( typeof( ArgumentException ) )]
+        [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFailsWithWatcherOnNullPath() {
             var fswatcher = new Mock<FileSystemWatcher>().Object;
-            using (new NetWatcher(fswatcher, queue.Object));
+            using (new NetWatcher(fswatcher, queue.Object))
+            {
+            }
         }
 
-        protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
-            WatcherData watcherData = new WatcherData ();
-            watcherData.Data = new FileSystemWatcher (pathname);
-            watcherData.Watcher = new NetWatcher (watcherData.Data as FileSystemWatcher, queue);
+        [Test, Category("Medium")]
+        public void ReportFSFileAddedEventTest() {
+            this.ReportFSFileAddedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFileChangedEventTest() {
+            this.ReportFSFileChangedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFileRenamedEventTest() {
+            this.ReportFSFileRenamedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFileRemovedEventTest() {
+            this.ReportFSFileRemovedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFolderAddedEventTest() {
+            this.ReportFSFolderAddedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFolderChangedEventTest() {
+            this.ReportFSFolderChangedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFolderRemovedEventTest() {
+            this.ReportFSFolderRemovedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFolderRenamedEventTest() {
+            this.ReportFSFolderRenamedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFolderMovedEventTest() {
+            this.ReportFSFolderMovedEvent();
+        }
+
+        protected override WatcherData GetWatcherData(string pathname, ISyncEventQueue queue) {
+            WatcherData watcherData = new WatcherData();
+            watcherData.Data = new FileSystemWatcher(pathname);
+            watcherData.Watcher = new NetWatcher(watcherData.Data as FileSystemWatcher, queue);
             return watcherData;
         }
 
-        protected override void WaitWatcherData (WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
+        protected override void WaitWatcherData(WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
             FileSystemWatcher watcher = watcherData.Data as FileSystemWatcher;
-            watcher.WaitForChanged (types, milliseconds);
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFileAddedEventTest () {
-            ReportFSFileAddedEvent ();
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFileChangedEventTest () {
-            ReportFSFileChangedEvent ();
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFileRenamedEventTest () {
-            ReportFSFileRenamedEvent ();
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFileRemovedEventTest () {
-            ReportFSFileRemovedEvent ();
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFolderAddedEventTest () {
-            ReportFSFolderAddedEvent ();
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFolderChangedEventTest () {
-            ReportFSFolderChangedEvent ();
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFolderRemovedEventTest () {
-            ReportFSFolderRemovedEvent ();
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFolderRenamedEventTest () {
-            ReportFSFolderRenamedEvent ();
-        }
-
-        [Test, Category("Medium")]
-        public void ReportFSFolderMovedEventTest () {
-            ReportFSFolderMovedEvent ();
+            watcher.WaitForChanged(types, milliseconds);
         }
     }
 }
-
+#endif

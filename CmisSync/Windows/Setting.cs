@@ -1,4 +1,22 @@
-﻿using System;
+//-----------------------------------------------------------------------
+// <copyright file="Setting.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +28,7 @@ using System.Windows.Controls;
 using System.Windows.Forms.Integration;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 
 
 namespace CmisSync
@@ -64,18 +83,18 @@ namespace CmisSync
 
             FinishButton.Click += delegate
             {
-                Config.ProxySettings proxy = new Config.ProxySettings();
+                ProxySettings proxy = new ProxySettings();
                 if (ProxyNone.IsChecked.GetValueOrDefault())
                 {
-                    proxy.Selection = Config.ProxySelection.NOPROXY;
+                    proxy.Selection = ProxySelection.NOPROXY;
                 }
                 else if (ProxySystem.IsChecked.GetValueOrDefault())
                 {
-                    proxy.Selection = Config.ProxySelection.SYSTEM;
+                    proxy.Selection = ProxySelection.SYSTEM;
                 }
                 else
                 {
-                    proxy.Selection = Config.ProxySelection.CUSTOM;
+                    proxy.Selection = ProxySelection.CUSTOM;
                 }
                 proxy.LoginRequired = LoginCheck.IsChecked.GetValueOrDefault();
                 string server = Controller.GetServer(AddressText.Text);
@@ -125,13 +144,13 @@ namespace CmisSync
 
             switch (ConfigManager.CurrentConfig.Proxy.Selection)
             {
-                case Config.ProxySelection.NOPROXY:
+                case ProxySelection.NOPROXY:
                     Controller.CheckProxyNone();
                     break;
-                case Config.ProxySelection.SYSTEM:
+                case ProxySelection.SYSTEM:
                     Controller.CheckProxySystem();
                     break;
-                case Config.ProxySelection.CUSTOM:
+                case ProxySelection.CUSTOM:
                     Controller.CheckProxyCustom();
                     break;
                 default:

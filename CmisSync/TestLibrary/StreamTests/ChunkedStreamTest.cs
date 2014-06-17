@@ -1,33 +1,203 @@
-using System;
-using System.IO;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Cmis;
-
-using NUnit.Framework;
-
+//-----------------------------------------------------------------------
+// <copyright file="ChunkedStreamTest.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace TestLibrary.StreamTests
 {
-    [TestFixture]
-    class ChunkedStreamTest
-    {
-        private readonly string TestFilePath = Path.Combine(ConfigManager.CurrentConfig.FoldersPath, "ChunkedStreamTest.txt");
-        private readonly string DatabasePath = Path.Combine(ConfigManager.CurrentConfig.FoldersPath, "ChunkedStreamTest.cmissync");
-        private readonly int ChunkSize = 1024;
+    using System;
+    using System.IO;
 
-        [TestFixtureSetUp]
-        public void ClassInit()
+    using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
+
+    using NUnit.Framework;
+
+    [TestFixture]
+    public class ChunkedStreamTest
+    {
+        private readonly int chunkSize = 1024;
+
+        [Test, Category("Fast"), Category("Streams")]
+        public void TestWrite()
         {
-            //File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
-            //log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
+            using (MemoryStream file = new MemoryStream())
+            using (ChunkedStream chunked = new ChunkedStream(file, this.chunkSize))
+            {
+                byte[] buffer = new byte[2 * this.chunkSize];
+                this.FillArray<byte>(buffer, (byte)'a');
+
+                Assert.AreEqual(0, chunked.ChunkPosition);
+                Assert.AreEqual(0, chunked.Position);
+                Assert.AreEqual(0, chunked.Length);
+
+                chunked.Write(buffer, 0, 1);
+                Assert.AreEqual(1, file.Position);
+                Assert.AreEqual(1, chunked.Position);
+                Assert.AreEqual(1, chunked.Length);
+
+                System.ArgumentOutOfRangeException e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, this.chunkSize));
+                Assert.AreEqual("count", e.ParamName);
+                Assert.AreEqual(this.chunkSize, e.ActualValue);
+                Assert.AreEqual(1, file.Position);
+                Assert.AreEqual(1, chunked.Position);
+                Assert.AreEqual(1, chunked.Length);
+
+                chunked.Write(buffer, 1, this.chunkSize - 1);
+                Assert.AreEqual(this.chunkSize, file.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, 1));
+                Assert.AreEqual("count", e.ParamName);
+                Assert.AreEqual(1, e.ActualValue);
+                Assert.AreEqual(this.chunkSize, file.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                chunked.ChunkPosition = this.chunkSize;
+                Assert.AreEqual(this.chunkSize, chunked.ChunkPosition);
+                Assert.AreEqual(this.chunkSize, file.Position);
+                Assert.AreEqual(0, chunked.Position);
+                Assert.AreEqual(0, chunked.Length);
+
+                chunked.Write(buffer, 0, this.chunkSize);
+                Assert.AreEqual(2 * this.chunkSize, file.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, 1));
+                Assert.AreEqual("count", e.ParamName);
+                Assert.AreEqual(1, e.ActualValue);
+                Assert.AreEqual(2 * this.chunkSize, file.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                chunked.ChunkPosition = 4 * this.chunkSize;
+                Assert.AreEqual(4 * this.chunkSize, chunked.ChunkPosition);
+                Assert.AreEqual(4 * this.chunkSize, file.Position);
+                Assert.AreEqual(0, chunked.Position);
+                Assert.AreEqual(0, chunked.Length);
+
+                chunked.Write(buffer, 1, this.chunkSize - 1);
+                Assert.AreEqual((5 * this.chunkSize) - 1, file.Position);
+                Assert.AreEqual(this.chunkSize - 1, chunked.Position);
+                Assert.AreEqual(this.chunkSize - 1, chunked.Length);
+
+                e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, this.chunkSize));
+                Assert.AreEqual("count", e.ParamName);
+                Assert.AreEqual(this.chunkSize, e.ActualValue);
+                Assert.AreEqual((5 * this.chunkSize) - 1, file.Position);
+                Assert.AreEqual(this.chunkSize - 1, chunked.Position);
+                Assert.AreEqual(this.chunkSize - 1, chunked.Length);
+
+                chunked.Write(buffer, 0, 1);
+                Assert.AreEqual(5 * this.chunkSize, file.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, 1));
+                Assert.AreEqual("count", e.ParamName);
+                Assert.AreEqual(1, e.ActualValue);
+                Assert.AreEqual(5 * this.chunkSize, file.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+            }
         }
 
-        [SetUp]
-        public void TestInit()
+        [Test, Category("Fast"), Category("Streams")]
+        public void TestRead()
         {
-            File.Delete(DatabasePath);
-            File.Delete(TestFilePath);
+            byte[] content = null;
+            using (MemoryStream file = new MemoryStream())
+            {
+                byte[] buffer = new byte[this.chunkSize];
+
+                this.FillArray<byte>(buffer, (byte)'1');
+                file.Write(buffer, 0, this.chunkSize);
+
+                this.FillArray<byte>(buffer, (byte)'2');
+                file.Write(buffer, 0, this.chunkSize);
+
+                this.FillArray<byte>(buffer, (byte)'3');
+                file.Write(buffer, 0, 3);
+                content = file.ToArray();
+            }
+
+            using (Stream file = new MemoryStream(content))
+            using (ChunkedStream chunked = new ChunkedStream(file, this.chunkSize))
+            {
+                byte[] buffer = new byte[this.chunkSize];
+                byte[] result = new byte[this.chunkSize];
+
+                Assert.AreEqual(0, chunked.ChunkPosition);
+                Assert.AreEqual(0, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                this.FillArray<byte>(buffer, (byte)'1');
+
+                Assert.AreEqual(1, chunked.Read(result, 0, 1));
+                Assert.IsTrue(this.EqualArray(buffer, result, 1));
+                Assert.AreEqual(0, chunked.ChunkPosition);
+                Assert.AreEqual(1, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                Assert.AreEqual(this.chunkSize - 1, chunked.Read(result, 1, this.chunkSize));
+                Assert.IsTrue(this.EqualArray(buffer, result, this.chunkSize));
+                Assert.AreEqual(0, chunked.ChunkPosition);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                Assert.AreEqual(0, chunked.Read(result, 0, this.chunkSize));
+                Assert.AreEqual(0, chunked.ChunkPosition);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                chunked.ChunkPosition = 2 * this.chunkSize;
+                Assert.AreEqual(2 * this.chunkSize, chunked.ChunkPosition);
+                Assert.AreEqual(0, chunked.Position);
+                Assert.AreEqual(3, chunked.Length);
+
+                this.FillArray<byte>(buffer, (byte)'3');
+
+                Assert.AreEqual(3, chunked.Read(result, 0, this.chunkSize));
+                Assert.IsTrue(this.EqualArray(buffer, result, 3));
+                Assert.AreEqual(2 * this.chunkSize, chunked.ChunkPosition);
+                Assert.AreEqual(3, chunked.Position);
+                Assert.AreEqual(3, chunked.Length);
+
+                chunked.ChunkPosition = this.chunkSize;
+                Assert.AreEqual(this.chunkSize, chunked.ChunkPosition);
+                Assert.AreEqual(0, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+
+                this.FillArray<byte>(buffer, (byte)'2');
+
+                for (int i = 0; i < this.chunkSize; ++i)
+                {
+                    Assert.AreEqual(1, chunked.Read(result, i, 1));
+                }
+
+                Assert.IsTrue(this.EqualArray(buffer, result, this.chunkSize));
+                Assert.AreEqual(this.chunkSize, chunked.ChunkPosition);
+                Assert.AreEqual(this.chunkSize, chunked.Position);
+                Assert.AreEqual(this.chunkSize, chunked.Length);
+            }
         }
 
         private void FillArray<T>(T[] array, T value)
@@ -47,206 +217,8 @@ namespace TestLibrary.StreamTests
                     return false;
                 }
             }
+
             return true;
         }
-
-        [Test]
-        [Ignore]
-        public void TestSeek()
-        {
-            //Assert.Fail("TODO");
-        }
-
-        [Test, Category("Fast"), Category("Streams")]
-        public void TestWrite()
-        {
-            //using (Database database = new Database(DatabasePath))
-            using (Stream file = new FileStream(TestFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-            using (ChunkedStream chunked = new ChunkedStream(file, ChunkSize))
-            {
-                byte[] buffer = new byte[2 * ChunkSize];
-                FillArray<byte>(buffer, (byte)'a');
-
-
-                Assert.AreEqual(0, chunked.ChunkPosition);
-                Assert.AreEqual(0, chunked.Position);
-                Assert.AreEqual(0, chunked.Length);
-
-                chunked.Write(buffer, 0, 1);
-                Assert.AreEqual(1, file.Position);
-                Assert.AreEqual(1, chunked.Position);
-                Assert.AreEqual(1, chunked.Length);
-
-                System.ArgumentOutOfRangeException e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, ChunkSize));
-                Assert.AreEqual("count", e.ParamName);
-                Assert.AreEqual(ChunkSize, e.ActualValue);
-                Assert.AreEqual(1, file.Position);
-                Assert.AreEqual(1, chunked.Position);
-                Assert.AreEqual(1, chunked.Length);
-
-                chunked.Write(buffer, 1, ChunkSize - 1);
-                Assert.AreEqual(ChunkSize, file.Position);
-                Assert.AreEqual(ChunkSize, chunked.Position);
-                Assert.AreEqual(ChunkSize, chunked.Length);
-
-                e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, 1));
-                Assert.AreEqual("count", e.ParamName);
-                Assert.AreEqual(1, e.ActualValue);
-                Assert.AreEqual(ChunkSize, file.Position);
-                Assert.AreEqual(ChunkSize, chunked.Position);
-                Assert.AreEqual(ChunkSize, chunked.Length);
-
-
-                chunked.ChunkPosition = ChunkSize;
-                Assert.AreEqual(ChunkSize, chunked.ChunkPosition);
-                Assert.AreEqual(ChunkSize, file.Position);
-                Assert.AreEqual(0, chunked.Position);
-                Assert.AreEqual(0, chunked.Length);
-
-                chunked.Write(buffer, 0, ChunkSize);
-                Assert.AreEqual(2 * ChunkSize, file.Position);
-                Assert.AreEqual(ChunkSize, chunked.Position);
-                Assert.AreEqual(ChunkSize, chunked.Length);
-
-                e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, 1));
-                Assert.AreEqual("count", e.ParamName);
-                Assert.AreEqual(1, e.ActualValue);
-                Assert.AreEqual(2 * ChunkSize, file.Position);
-                Assert.AreEqual(ChunkSize, chunked.Position);
-                Assert.AreEqual(ChunkSize, chunked.Length);
-
-                
-                chunked.ChunkPosition = 4 * ChunkSize;
-                Assert.AreEqual(4 * ChunkSize, chunked.ChunkPosition);
-                Assert.AreEqual(4 * ChunkSize, file.Position);
-                Assert.AreEqual(0, chunked.Position);
-                Assert.AreEqual(0, chunked.Length);
-
-                chunked.Write(buffer, 1, ChunkSize - 1);
-                Assert.AreEqual(5 * ChunkSize - 1, file.Position);
-                Assert.AreEqual(ChunkSize - 1, chunked.Position);
-                Assert.AreEqual(ChunkSize - 1, chunked.Length);
-
-                e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, ChunkSize));
-                Assert.AreEqual("count", e.ParamName);
-                Assert.AreEqual(ChunkSize, e.ActualValue);
-                Assert.AreEqual(5 * ChunkSize - 1, file.Position);
-                Assert.AreEqual(ChunkSize - 1, chunked.Position);
-                Assert.AreEqual(ChunkSize - 1, chunked.Length);
-
-                chunked.Write(buffer, 0, 1);
-                Assert.AreEqual(5 * ChunkSize, file.Position);
-                Assert.AreEqual(ChunkSize, chunked.Position);
-                Assert.AreEqual(ChunkSize, chunked.Length);
-
-                e = Assert.Catch<System.ArgumentOutOfRangeException>(() => chunked.Write(buffer, 0, 1));
-                Assert.AreEqual("count", e.ParamName);
-                Assert.AreEqual(1, e.ActualValue);
-                Assert.AreEqual(5 * ChunkSize, file.Position);
-                Assert.AreEqual(ChunkSize, chunked.Position);
-                Assert.AreEqual(ChunkSize, chunked.Length);
-            }
-        }
-
-        [Test, Category("Fast"), Category("Streams")]
-        public void TestRead()
-        {
-            //using (Database database = new Database(DatabasePath))
-            {
-                using (Stream file = File.OpenWrite(TestFilePath))
-                {
-                    byte[] buffer = new byte[ChunkSize];
-
-                    FillArray<byte>(buffer, (byte)'1');
-                    file.Write(buffer, 0, ChunkSize);
-
-                    FillArray<byte>(buffer, (byte)'2');
-                    file.Write(buffer, 0, ChunkSize);
-
-                    FillArray<byte>(buffer, (byte)'3');
-                    file.Write(buffer, 0, 3);
-                }
-
-                using (Stream file = new FileStream(TestFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                using (ChunkedStream chunked = new ChunkedStream(file, ChunkSize))
-                {
-                    byte[] buffer = new byte[ChunkSize];
-                    byte[] result = new byte[ChunkSize];
-
-
-                    Assert.AreEqual(0, chunked.ChunkPosition);
-                    Assert.AreEqual(0, chunked.Position);
-                    Assert.AreEqual(ChunkSize, chunked.Length);
-
-                    FillArray<byte>(buffer, (byte)'1');
-
-                    Assert.AreEqual(1, chunked.Read(result, 0, 1));
-                    Assert.IsTrue(EqualArray(buffer, result, 1));
-                    Assert.AreEqual(0, chunked.ChunkPosition);
-                    Assert.AreEqual(1, chunked.Position);
-                    Assert.AreEqual(ChunkSize, chunked.Length);
-
-                    Assert.AreEqual(ChunkSize - 1, chunked.Read(result, 1, ChunkSize));
-                    Assert.IsTrue(EqualArray(buffer, result, ChunkSize));
-                    Assert.AreEqual(0, chunked.ChunkPosition);
-                    Assert.AreEqual(ChunkSize, chunked.Position);
-                    Assert.AreEqual(ChunkSize, chunked.Length);
-
-                    Assert.AreEqual(0, chunked.Read(result, 0, ChunkSize));
-                    Assert.AreEqual(0, chunked.ChunkPosition);
-                    Assert.AreEqual(ChunkSize, chunked.Position);
-                    Assert.AreEqual(ChunkSize, chunked.Length);
-
-
-                    chunked.ChunkPosition = 2 * ChunkSize;
-                    Assert.AreEqual(2 * ChunkSize, chunked.ChunkPosition);
-                    Assert.AreEqual(0, chunked.Position);
-                    Assert.AreEqual(3, chunked.Length);
-
-                    FillArray<byte>(buffer, (byte)'3');
-
-                    Assert.AreEqual(3, chunked.Read(result, 0, ChunkSize));
-                    Assert.IsTrue(EqualArray(buffer, result, 3));
-                    Assert.AreEqual(2 * ChunkSize, chunked.ChunkPosition);
-                    Assert.AreEqual(3, chunked.Position);
-                    Assert.AreEqual(3, chunked.Length);
-
-
-                    chunked.ChunkPosition = ChunkSize;
-                    Assert.AreEqual(ChunkSize, chunked.ChunkPosition);
-                    Assert.AreEqual(0, chunked.Position);
-                    Assert.AreEqual(ChunkSize, chunked.Length);
-
-                    FillArray<byte>(buffer, (byte)'2');
-
-                    for (int i = 0; i < ChunkSize; ++i)
-                    {
-                        Assert.AreEqual(1, chunked.Read(result, i, 1));
-                    }
-                    Assert.IsTrue(EqualArray(buffer, result, ChunkSize));
-                    Assert.AreEqual(ChunkSize, chunked.ChunkPosition);
-                    Assert.AreEqual(ChunkSize, chunked.Position);
-                    Assert.AreEqual(ChunkSize, chunked.Length);
-                }
-            }
-        }
-
-        [Test]
-        [Ignore]
-        public void TestWriteResume()
-        {
-            //Assert.Fail("TODO");
-        }
-
-        [Test]
-        [Ignore]
-        public void TestReadResume()
-        {
-            //Assert.Fail("TODO");
-        }
     }
-
-
-
-
 }

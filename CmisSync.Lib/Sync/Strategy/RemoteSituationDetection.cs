@@ -1,81 +1,144 @@
-using System;
-
-using CmisSync.Lib.Storage;
-
-using DotCMIS.Client;
-using DotCMIS.Exceptions;
-using System.Collections.Generic;
+//-----------------------------------------------------------------------
+// <copyright file="RemoteSituationDetection.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace CmisSync.Lib.Sync.Strategy
 {
-    public class RemoteSituationDetection : ISituationDetection<IObjectId>
+    using System;
+    using System.Collections.Generic;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+    using DotCMIS.Exceptions;
+
+    using log4net;
+
+    /// <summary>
+    /// Remote situation detection.
+    /// </summary>
+    public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-        private ISession Session;
-        public RemoteSituationDetection(ISession session)
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
+
+        /// <summary>
+        /// Analyse the specified actual event.
+        /// </summary>
+        /// <param name="storage">Storage of saved MappedObjects.</param>
+        /// <param name="actualEvent">Actual event.</param>
+        /// <returns>The detected situation type</returns>
+        public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            if(session == null)
-                throw new ArgumentNullException("The given session is null");
-            Session = session;
+            SituationType type = this.DoAnalyse(storage, actualEvent);
+            Logger.Debug(string.Format("Remote Situation is: {0}", type));
+            return type;
         }
 
-        public SituationType Analyse(IMetaDataStorage storage, IObjectId objectId)
+        private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            try {
-                ICmisObject remoteObject = Session.GetObject(objectId);
-                if(storage.GetFilePath(objectId.Id) == null && storage.GetFolderPath(objectId.Id) == null)
+            switch (actualEvent.Remote) 
+            {
+            case MetaDataChangeType.CREATED:
+                if (this.IsChangeEventAHintForMove(storage, actualEvent)) {
+                    return SituationType.MOVED;
+                }
+
+                if (this.IsChangeEventAHintForRename(storage, actualEvent)) {
+                    return SituationType.RENAMED;
+                }
+
+                if (actualEvent is FileEvent) {
+                    return this.IsSavedFileEqual(storage, (actualEvent as FileEvent).RemoteFile) ? SituationType.NOCHANGE : SituationType.ADDED;
+                } else {
                     return SituationType.ADDED;
-                var document = remoteObject as IDocument;
-                if(document != null)
-                {
-                    var savedPath = storage.GetFilePath(objectId.Id);
-                    if(savedPath == null)
-                        return SituationType.ADDED;
-                    if(DocumentRenamed(savedPath, document.Paths))
-                        return SituationType.RENAMED;
-                    if(DocumentMoved(savedPath, document.Paths))
-                        return SituationType.MOVED;
-                    return SituationType.NOCHANGE;
                 }
-                var folder = remoteObject as IFolder;
-                if(folder != null)
-                {
-                    var savedPath = storage.GetFolderPath(objectId.Id);
-                    if(savedPath == null)
-                        return SituationType.ADDED;
-                    if(FolderRenamed(savedPath, folder.Path))
-                        return SituationType.RENAMED;
-                    if(FolderMoved(savedPath, folder.Path))
-                        return SituationType.MOVED;
-                    return SituationType.NOCHANGE;
+
+            case MetaDataChangeType.DELETED:
+                return SituationType.REMOVED;
+            case MetaDataChangeType.MOVED:
+                return SituationType.MOVED;
+            case MetaDataChangeType.CHANGED:
+                if (this.IsChangeEventAHintForMove(storage, actualEvent)) {
+                    return SituationType.MOVED;
                 }
-            }catch(CmisObjectNotFoundException) {
-                if(storage.GetFilePath(objectId.Id) == null && storage.GetFolderPath(objectId.Id) == null)
-                {
-                    return SituationType.NOCHANGE;
+
+                if (this.IsChangeEventAHintForRename(storage, actualEvent)) {
+                    return SituationType.RENAMED;
                 }
-                else
-                {
-                    return SituationType.REMOVED;
+
+                return SituationType.CHANGED;
+            case MetaDataChangeType.NONE:
+            default:
+                return SituationType.NOCHANGE;
+            }
+        }
+
+        private bool IsSavedFileEqual(IMetaDataStorage storage, IDocument doc)
+        {
+            var mappedFile = storage.GetObjectByRemoteId(doc.Id) as IMappedObject;
+            if(mappedFile != null &&
+               mappedFile.Type == MappedObjectType.File &&
+               mappedFile.LastRemoteWriteTimeUtc == doc.LastModificationDate &&
+               mappedFile.Name == doc.Name &&
+               mappedFile.LastChangeToken == doc.ChangeToken)
+            {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private bool IsChangeEventAHintForMove(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
+        {
+            if(actualEvent is FolderEvent)
+            {
+                var folderEvent = actualEvent as FolderEvent;
+                var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
+                if (storedFolder != null) {
+                    if(storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.ParentId != folderEvent.RemoteFolder.ParentId) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
                 }
             }
-            return SituationType.NOCHANGE;
+
+            return false;
         }
 
-        private bool DocumentRenamed(string savedPath, IList<string> actualPaths) {
-            throw new NotImplementedException();
-        }
+        private bool IsChangeEventAHintForRename(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
+        {
+            if(actualEvent is FolderEvent)
+            {
+                var folderEvent = actualEvent as FolderEvent;
+                var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
+                if (storedFolder != null) {
+                    return storedFolder.Name != folderEvent.RemoteFolder.Name;
+                } else {
+                    return false;
+                }
+            }
 
-        private bool DocumentMoved(string savedPath, IList<string> actualPaths) {
-            throw new NotImplementedException();
-        }
-
-        private bool FolderRenamed(string savedPath, string actualPath) {
-            throw new NotImplementedException();
-        }
-
-        private bool FolderMoved(string savedPath, string actualPath) {
-            throw new NotImplementedException();
+            return false;
         }
     }
 }
-

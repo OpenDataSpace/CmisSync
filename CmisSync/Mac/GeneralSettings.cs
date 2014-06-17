@@ -1,15 +1,34 @@
-﻿using System;
+//-----------------------------------------------------------------------
+// <copyright file="GeneralSettings.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MonoMac.Foundation;
 using MonoMac.AppKit;
 using CmisSync.Lib;
+using CmisSync.Lib.Config;
 
 namespace CmisSync
 {
     public partial class GeneralSettings : MonoMac.AppKit.NSWindow
     {
-        Config.ProxySettings ProxySettings
+        CmisSync.Lib.Config.ProxySettings ProxySettings
         {
             get;
             set;
@@ -176,13 +195,13 @@ namespace CmisSync
 
         partial void OnSave(NSObject sender)
         {
-            Config.ProxySettings settings = this.ProxySettings;
+            CmisSync.Lib.Config.ProxySettings settings = this.ProxySettings;
             if (NoProxyButton.State == NSCellStateValue.On) {
-                settings.Selection = Config.ProxySelection.NOPROXY;
+                settings.Selection = ProxySelection.NOPROXY;
             } else if(SystemDefaultProxyButton.State == NSCellStateValue.On) {
-                settings.Selection = Config.ProxySelection.SYSTEM;
+                settings.Selection = ProxySelection.SYSTEM;
             } else if(ManualProxyButton.State == NSCellStateValue.On) {
-                settings.Selection = Config.ProxySelection.CUSTOM;
+                settings.Selection = ProxySelection.CUSTOM;
             }
             string server = Controller.GetServer(this.ProxyServer.StringValue);
             if (server!=null)
@@ -244,11 +263,11 @@ namespace CmisSync
             this.ProxyUsername.StringValue = (ProxySettings.Username != null) ? ProxySettings.Username : String.Empty;
             this.ProxyPassword.StringValue = (ProxySettings.ObfuscatedPassword != null) ? Crypto.Deobfuscate(ProxySettings.ObfuscatedPassword) : String.Empty;
             Controller.CheckLogin (ProxySettings.LoginRequired);
-            if (ProxySettings.Selection == Config.ProxySelection.NOPROXY) {
+            if (ProxySettings.Selection == ProxySelection.NOPROXY) {
                 Controller.CheckProxyNone ();
-            } else if (ProxySettings.Selection == Config.ProxySelection.SYSTEM) {
+            } else if (ProxySettings.Selection == ProxySelection.SYSTEM) {
                 Controller.CheckProxySystem ();
-            } else if (ProxySettings.Selection == Config.ProxySelection.CUSTOM) {
+            } else if (ProxySettings.Selection == ProxySelection.CUSTOM) {
                 Controller.CheckProxyCustom ();
             } else {
                 Controller.CheckProxyNone ();

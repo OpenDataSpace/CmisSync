@@ -1,108 +1,146 @@
-using System;
-using System.IO;
-using System.Collections.Generic;
-
-using DotCMIS.Client;
-
-using CmisSync.Lib.Data;
+//-----------------------------------------------------------------------
+// <copyright file="IMetaDataStorage.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace CmisSync.Lib.Storage
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// I meta data storage.
+    /// </summary>
     public interface IMetaDataStorage
     {
-
-        MappedFolder RootFolder { get; set; }
-
+        /// <summary>
+        /// Gets the matcher.
+        /// </summary>
+        /// <value>
+        /// The matcher.
+        /// </value>
         IPathMatcher Matcher { get; }
 
         /// <summary>
-        /// Add a file to the storage.
+        /// Gets or sets the change log token that was stored at the end of the last successful CmisSync synchronization.
         /// </summary>
-        void AddFile(FileInfo localFile, IDocument remoteFile);
+        /// <value>
+        /// The change log token.
+        /// </value>
+        string ChangeLogToken { get; set; }
 
         /// <summary>
-        /// Add a folder to the storage.
+        /// Gets the object by passing the local path.
         /// </summary>
-        void AddFolder(DirectoryInfo localFolder, IFolder remoteFolder);
+        /// <returns>
+        /// The object saved for the local path or <c>null</c>
+        /// </returns>
+        /// <param name='path'>
+        /// Local path from the saved object
+        /// </param>
+        IMappedObject GetObjectByLocalPath(IFileSystemInfo path);
 
         /// <summary>
-        /// Remove a file from the storage.
+        /// Gets the object by remote identifier.
         /// </summary>
-        void RemoveFile(string path);
-
+        /// <returns>
+        /// The saved object with the given remote identifier.
+        /// </returns>
+        /// <param name='id'>
+        /// CMIS Object Id.
+        /// </param>
+        IMappedObject GetObjectByRemoteId(string id);
 
         /// <summary>
-        /// move a file from the storage.
+        /// Saves the mapped object.
         /// </summary>
-        void MoveFile(string oldPath, string newPath);
-
+        /// <param name='obj'>
+        /// MappedObject instance.
+        /// </param>
+        void SaveMappedObject(IMappedObject obj);
 
         /// <summary>
-        /// Remove a folder from the storage.
+        /// Removes the given object and recursive all its children from Db
         /// </summary>
-        void RemoveFolder(string path);
-
+        /// <param name='obj'>
+        /// Object with the Remote object id, which should be removed.
+        /// </param>
+        void RemoveObject(IMappedObject obj);
 
         /// <summary>
-        /// move a folder from the storage.
+        /// Gets the remote path. Returns null if not exists.
         /// </summary>
-        void MoveFolder(string oldPath, string newPath);
-
+        /// <returns>
+        /// The remote path.
+        /// </returns>
+        /// <param name='mappedObject'>
+        /// Mapped object. Must not be null.
+        /// </param>
+        string GetRemotePath(IMappedObject mappedObject);
 
         /// <summary>
-        /// Get the time at which the file was last modified.
-        /// This is the time on the CMIS server side, in UTC. Client-side time does not matter.
+        /// Gets the local path. Return null if not exists.
         /// </summary>
-        DateTime? GetServerSideModificationDate(string path);
-
+        /// <returns>
+        /// The local path.
+        /// </returns>
+        /// <param name='mappedObject'>
+        /// Mapped object. Must not be null.
+        /// </param>
+        string GetLocalPath(IMappedObject mappedObject);
 
         /// <summary>
-        /// Set the last modification date of a file.
-        /// This is the time on the CMIS server side, in UTC. Client-side time does not matter.
+        /// Gets the children of the given parent object.
         /// </summary>
-        void SetFileServerSideModificationDate(IDocument remoteDocument);
+        /// <returns>
+        /// The saved children.
+        /// </returns>
+        /// <param name='parent'>
+        /// Parent, which should be used to request its children.
+        /// </param>
+        List<IMappedObject> GetChildren(IMappedObject parent);
 
         /// <summary>
-        /// Checks whether the storage contains a given file.
+        /// Prints the file/folder structure like unix "find" command.
         /// </summary>
-        bool ContainsFile(string path);
+        /// <returns>The find string.</returns>
+        string ToFindString();
 
         /// <summary>
-        /// <returns>path field in files table for <paramref name="id"/></returns>
+        /// Validates the object structure. If the structure is not fine, the DB content will be printed and an exception will be thrown.
         /// </summary>
-        string GetFilePath(string id);
+        void ValidateObjectStructure();
 
         /// <summary>
-        /// Checks whether the storage contains a given folder.
+        /// Gets the object by GUID.
         /// </summary>
-        bool ContainsFolder(string path);
+        /// <returns>The object by GUID.</returns>
+        /// <param name="guid">GUID of the requested object.</param>
+        IMappedObject GetObjectByGuid(Guid guid);
 
         /// <summary>
-        /// Checks whether the storage contains a given folder.
+        /// Gets the tree of mapped objects.
         /// </summary>
-        bool ContainsFolder(DirectoryInfo folder);
-
-        /// <summary>
-        /// <returns>path field in folders table for <paramref name="id"/></returns>
-        /// </summary>
-        string GetFolderPath(string id);
-
-        bool TryGetMappedFolder (DirectoryInfo localFolder, out MappedFolder savedFolder);
-
-        bool TryGetMappedObjectByRemoteId(string remoteId, out AbstractMappedObject savedObject);
-
-        bool TryGetMappedFileByRemoteId(string remoteId, out MappedFile savedFile);
-
-        bool TryGetMappedFolderByRemoteId(string remoteId, out MappedFolder savedFolder);
-
-        /// <summary>
-        /// Check whether a file's content has changed locally since it was last synchronized.
-        /// This happens when the user edits a file on the local computer.
-        /// This method does not communicate with the CMIS server, it just checks whether the checksum has changed.
-        /// </summary>
-        bool LocalFileHasChanged(string path);
-
-        string CreatePathFromRemoteFolder (IFolder remoteFolder);
+        /// <returns>The object tree.</returns>
+        IObjectTree<IMappedObject> GetObjectTree();
     }
 }
-

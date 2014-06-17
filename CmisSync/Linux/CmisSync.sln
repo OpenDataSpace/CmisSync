@@ -9,11 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataSpaceSync.Console", "..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotCMIS", "..\..\Extras\OpenDataSpaceDotCMIS\DotCMIS\DotCMIS.csproj", "{529EF90F-A34C-4426-A4F9-65113AC23841}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "log4net.vs2010", "..\..\Extras\log4net-1.2.11\src\log4net.vs2010.csproj", "{181FE707-E161-4722-9F38-6AAAB6FAA106}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary", "..\TestLibrary\TestLibrary.csproj", "{295D2B18-B6EB-4EF4-9862-4E3C0C383888}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibraryRunner", "..\TestLibraryRunner\TestLibraryRunner.csproj", "{706E0389-CE33-4695-A830-38E961BBFDD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +19,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{181FE707-E161-4722-9F38-6AAAB6FAA106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{181FE707-E161-4722-9F38-6AAAB6FAA106}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{181FE707-E161-4722-9F38-6AAAB6FAA106}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{181FE707-E161-4722-9F38-6AAAB6FAA106}.Release|Any CPU.Build.0 = Release|Any CPU
 		{295D2B18-B6EB-4EF4-9862-4E3C0C383888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{295D2B18-B6EB-4EF4-9862-4E3C0C383888}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{295D2B18-B6EB-4EF4-9862-4E3C0C383888}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,14 +31,6 @@ Global
 		{529EF90F-A34C-4426-A4F9-65113AC23841}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{529EF90F-A34C-4426-A4F9-65113AC23841}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{529EF90F-A34C-4426-A4F9-65113AC23841}.Release|Any CPU.Build.0 = Release|Any CPU
-		{706E0389-CE33-4695-A830-38E961BBFDD8}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{706E0389-CE33-4695-A830-38E961BBFDD8}.Debug|Any CPU.Build.0 = Debug|x86
-		{706E0389-CE33-4695-A830-38E961BBFDD8}.Debug|x86.ActiveCfg = Debug|x86
-		{706E0389-CE33-4695-A830-38E961BBFDD8}.Debug|x86.Build.0 = Debug|x86
-		{706E0389-CE33-4695-A830-38E961BBFDD8}.Release|Any CPU.ActiveCfg = Release|x86
-		{706E0389-CE33-4695-A830-38E961BBFDD8}.Release|Any CPU.Build.0 = Release|x86
-		{706E0389-CE33-4695-A830-38E961BBFDD8}.Release|x86.ActiveCfg = Release|x86
-		{706E0389-CE33-4695-A830-38E961BBFDD8}.Release|x86.Build.0 = Release|x86
 		{728483AA-E34B-4441-BF2C-C8BC2901E4E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{728483AA-E34B-4441-BF2C-C8BC2901E4E0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F62D4C7B-3A91-41A6-A758-8CEB95DEB629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -63,6 +47,20 @@ Global
 		$1.inheritsSet = null
 		$1.scope = text/x-csharp
 		$0.CSharpFormattingPolicy = $2
+		$2.AnonymousMethodBraceStyle = NextLine
+		$2.StatementBraceStyle = NextLine
+		$2.ElseNewLinePlacement = NewLine
+		$2.ElseIfNewLinePlacement = SameLine
+		$2.CatchNewLinePlacement = NewLine
+		$2.FinallyNewLinePlacement = NewLine
+		$2.WhileNewLinePlacement = NewLine
+		$2.BeforeMethodDeclarationParentheses = False
+		$2.BeforeMethodCallParentheses = False
+		$2.BeforeConstructorDeclarationParentheses = False
+		$2.BeforeIndexerDeclarationBracket = False
+		$2.BeforeDelegateDeclarationParentheses = False
+		$2.NewParentheses = False
+		$2.SpacesBeforeBrackets = False
 		$2.inheritsSet = Mono
 		$2.inheritsScope = text/x-csharp
 		$2.scope = text/x-csharp

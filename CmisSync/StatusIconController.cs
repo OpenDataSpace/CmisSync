@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="StatusIconController.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -22,9 +40,11 @@ using System.Timers;
 using Threading = System.Threading;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Sync;
 using System.Globalization;
 
 using System.Diagnostics;
+using CmisSync.Lib.Config;
 
 namespace CmisSync {
 
@@ -115,25 +135,6 @@ namespace CmisSync {
                     return new string [0];
             }
         }
-
-
-        /// <summary>
-        /// Total disk space taken by the sum of the remote folders.
-        /// </summary>
-        public string FolderSize {
-            get {
-                double size = 0;
-
-                foreach (RepoBase repo in Program.Controller.Repositories)
-                    size += repo.Size;
-
-                if (size == 0)
-                    return "";
-                else
-                    return "— " + CmisSync.Lib.Utils.FormatSize(size);
-            }
-        }
-
 
         /// <summary>
         /// Timer for the animation that appears when downloading/uploading a file.

@@ -1,184 +1,230 @@
-using System;
-using System.IO;
-
-using CmisSync.Lib.Data;
-
-using DotCMIS.Client;
-
-using NUnit.Framework;
-
-using Moq;
+//-----------------------------------------------------------------------
+// <copyright file="MappedObjectsTest.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace TestLibrary.DataTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage;
+
+    using DotCMIS.Client;
+
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestUtils;
+    
     [TestFixture]
-    public class MappedFolderTest
+    public class MappedObjectsTest
     {
-        private string localRootPath;
-        private string remoteRootPath;
+        private readonly string localRootPathName = "folder";
+        private readonly string localRootPath = Path.Combine("local", "test", "folder");
+        private readonly string localFileName = "file.test";
+        private readonly string localFilePath = Path.Combine("local", "test", "folder", "file.test");
 
-        [SetUp]
-        public void SetUp() {
-            this.localRootPath = Path.GetTempPath();
-            this.remoteRootPath = "/";
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesData()
+        {
+            var data = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
+
+            var file = new MappedObject(data);
+
+            Assert.AreEqual(data, file as MappedObject);
         }
 
-        [Test, Category("Fast")]
-        public void ConstructorTest () {
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
-            Assert.IsNull(rootFolder.Parent);
-            string child = "child";
-            var childFolder = new MappedFolder(rootFolder, child);
-            Assert.AreEqual(rootFolder, childFolder.Parent);
-            Assert.AreEqual(new DirectoryInfo(this.localRootPath).Name, rootFolder.Name);
-            Assert.AreEqual(child, childFolder.Name);
-        }
-
-        [Test, Category("Fast")]
-        public void GetLocalPathTest() {
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
-            Assert.AreEqual(this.localRootPath, rootFolder.GetLocalPath());
-            string child = "child";
-            var childFolder = new MappedFolder(rootFolder, child);
-            Assert.AreEqual(Path.Combine(this.localRootPath, child), childFolder.GetLocalPath());
-            string sub = "sub";
-            var subFolder = new MappedFolder(childFolder, sub);
-            Assert.AreEqual(Path.Combine(this.localRootPath, child, sub), subFolder.GetLocalPath());
-        }
-
-        [Test, Category("Fast")]
-        public void ExistsLocallyTest() {
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
-            string child = "child";
-            var childFolder = new MappedFolder(rootFolder, child);
-            Assert.IsTrue(rootFolder.ExistsLocally());
-            Assert.IsFalse(childFolder.ExistsLocally());
-        }
-    }
-
-    [TestFixture]
-    public class MappedFileTest
-    {
-        private string localRootPath;
-        private string remoteRootPath;
-
-        [SetUp]
-        public void SetUp() {
-            this.localRootPath = Path.GetTempPath();
-            this.remoteRootPath = "/";
-        }
-
-        [Test, Category("Fast")]
-        public void ConstructorTest () {
-            var parent = new MappedFolder(this.localRootPath, this.remoteRootPath);
-            var file = new MappedFile(parent);
-            Assert.AreEqual(parent, file.Parents[0]);
-            file = new MappedFile(parent, null);
-            Assert.AreEqual(parent, file.Parents[0]);
-            Assert.AreEqual (1, file.Parents.Count);
-            var secondParent = new MappedFolder(parent, "sub");
-            file = new MappedFile(parent, secondParent);
-            Assert.AreEqual(2, file.Parents.Count);
-            Assert.IsTrue(file.Parents.Contains(parent));
-            Assert.IsTrue(file.Parents.Contains(secondParent));
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorSetsDefaultParamsToNull()
+        {
+            var file = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
             Assert.IsNull(file.ChecksumAlgorithmName);
-            string checksum = "SHA1";
-            file.ChecksumAlgorithmName = checksum;
-            Assert.AreEqual(checksum, file.ChecksumAlgorithmName);
             Assert.IsNull(file.Description);
-            string desc = "desc";
-            file.Description = desc;
-            Assert.AreEqual(desc, file.Description);
-            Assert.IsNull(file.LastChangeToken);
             Assert.IsNull(file.LastChecksum);
-            Assert.IsNull (file.LastLocalWriteTimeUtc);
-            Assert.IsNull (file.LastRemoteWriteTimeUtc);
-            Assert.IsNull (file.Name);
-            Assert.AreEqual(this.localRootPath, file.LocalSyncTargetPath);
-            Assert.AreEqual(this.remoteRootPath, file.RemoteSyncTargetPath);
-            try{
-                new MappedFile(null);
-                Assert.Fail ();
-            }catch(Exception){}
+            Assert.IsNull(file.LastLocalWriteTimeUtc);
+            Assert.IsNull(file.LastRemoteWriteTimeUtc);
+            Assert.AreEqual(-1, file.LastContentSize);
+            Assert.That(file.Ignored, Is.False);
+            Assert.That(file.ActualOperation, Is.EqualTo(OperationType.No));
+            Assert.That(file.Retries, Is.Empty);
         }
 
-        [Test, Category("Fast")]
-        public void GetLocalPathTest () {
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
-            var subFolder = new MappedFolder(rootFolder, "sub");
-            var file = new MappedFile(rootFolder);
-            string filename = "testfile";
-            file.Name = filename;
-            Assert.AreEqual(Path.Combine(this.localRootPath, filename), file.GetLocalPath());
-            file.Parents.Add(subFolder);
-            Assert.AreEqual(Path.Combine(this.localRootPath, filename), file.GetLocalPath(rootFolder));
-            Assert.AreEqual(Path.Combine(this.localRootPath, subFolder.Name ,filename), file.GetLocalPath(subFolder));
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesName()
+        {
+            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
+            Assert.That(obj.Name, Is.EqualTo("name"));
         }
 
-        [Test, Category("Fast")]
-        public void ExistsLocallyTest() {
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
-            var file = new MappedFile(rootFolder);
-            string filename = Path.GetRandomFileName();
-            file.Name = filename;
-            Assert.IsFalse(file.ExistsLocally());
-            using (File.Create(file.GetLocalPath()));
-            Assert.IsTrue(file.ExistsLocally());
-            File.Delete(file.GetLocalPath());
-            Assert.IsFalse(file.ExistsLocally());
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionOnEmptyName()
+        {
+            new MappedObject(string.Empty, "remoteId", MappedObjectType.File, null, null);
         }
 
-        [Test, Category("Fast")]
-        public void HasBeenChangeRemotelyTest () {
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfNameIsNull()
+        {
+            new MappedObject(null, "remoteId", MappedObjectType.File, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesRemoteId()
+        {
+            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
+            Assert.That(obj.RemoteObjectId, Is.EqualTo("remoteId"));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionOnEmptyRemoteId()
+        {
+            new MappedObject("name", string.Empty, MappedObjectType.File, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfRemoteIdIsNull()
+        {
+            new MappedObject("name", null, MappedObjectType.File, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void ConstructorThrowsExceptionIfTypeIsUnknown()
+        {
+            new MappedObject("name", "remoteId", MappedObjectType.Unkown, null, null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesFileType()
+        {
+            var obj = new MappedObject("name", "remoteId", MappedObjectType.File, null, null);
+            Assert.That(obj.Type, Is.EqualTo(MappedObjectType.File));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesFolderType()
+        {
+            var obj = new MappedObject("name", "remoteId", MappedObjectType.Folder, null, null);
+            Assert.That(obj.Type, Is.EqualTo(MappedObjectType.Folder));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesNullParentId()
+        {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null);
+            Assert.That(obj.ParentId, Is.Null);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesParentId()
+        {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, "parentId", null);
+            Assert.That(obj.ParentId, Is.EqualTo("parentId"));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ConstructorTakesChangeLogToken()
+        {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, "parentId", "changes");
+            Assert.That(obj.LastChangeToken, Is.EqualTo("changes"));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void HashAlgorithmProperty()
+        {
+            var file = new MappedObject("name", "remoteId", MappedObjectType.File, null, null) { ChecksumAlgorithmName = "MD5" };
+            Assert.AreEqual("MD5", file.ChecksumAlgorithmName);
+
+            file.ChecksumAlgorithmName = "SHA1";
+            Assert.AreEqual("SHA1", file.ChecksumAlgorithmName);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void DescriptionProperty()
+        {
+            var file = new MappedObject("name", "remoteId", MappedObjectType.File, null, null) { Description = "desc" };
+            Assert.AreEqual("desc", file.Description);
+
+            file.Description = "other desc";
+            Assert.AreEqual("other desc", file.Description);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void IgnoredProperty()
+        {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Ignored = true };
+            Assert.That(obj.Ignored, Is.True);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void RetriesDictionaryProperty()
+        {
+            var dict = new Dictionary<OperationType, int>();
+            dict.Add(OperationType.Download, 1);
+            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Retries = dict };
+            Assert.That(obj.Retries, Is.EqualTo(dict));
+            Assert.That(obj.Retries[OperationType.Download], Is.EqualTo(1));
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void IFolderConstructor()
+        {
+            string folderName = "a";
+            string path = Path.Combine(Path.GetTempPath(), folderName);
             string id = "id";
-            string changeToken = "changeToken";
-            long filesize = 1024;
-            DateTime remoteDate = DateTime.Now;
-            DateTime date = remoteDate.ToUniversalTime();
-
-            var rootFolder = new MappedFolder(this.localRootPath, this.remoteRootPath);
-            var file = new MappedFile(rootFolder);
-            string filename = Path.GetRandomFileName();
-            file.RemoteObjectId = id;
-            file.Name = filename;
-            file.LastRemoteWriteTimeUtc = date;
-            file.LastFileSize = filesize;
-            var remoteDocument = new Mock<IDocument>();
-            remoteDocument.Setup (r => r.Id).Returns(id);
-            remoteDocument.Setup (r => r.ChangeToken).Returns((string)null);
-            remoteDocument.Setup (r => r.ContentStreamLength).Returns(filesize);
-            remoteDocument.Setup (r => r.LastModificationDate).Returns(remoteDate);
-            remoteDocument.Setup (r => r.Name).Returns(filename);
-            Assert.IsFalse(file.HasBeenChangeRemotely(remoteDocument.Object));
-            file.Name = "changed";
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object), file.Name.Equals(filename).ToString() + " " + filename);
-            file.Name = filename;
-            file.LastRemoteWriteTimeUtc = DateTime.UtcNow.AddDays(1);
-            Assert.IsFalse(file.HasBeenChangeRemotely(remoteDocument.Object));
-            remoteDocument.Setup(r => r.LastModificationDate).Returns(remoteDate.AddDays(2));
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object));
-            file.LastFileSize = 0;
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object));
-            file.LastFileSize = filesize;
-            file.LastChangeToken = "oldToken";
-            Assert.IsTrue(file.HasBeenChangeRemotely(remoteDocument.Object));
-            file.LastChangeToken = changeToken;
-            remoteDocument.Setup(r => r.LastModificationDate).Returns(remoteDate);
-            remoteDocument.Setup (r => r.ChangeToken).Returns(changeToken);
-            file.LastChangeToken = changeToken;
-            Assert.IsFalse(file.HasBeenChangeRemotely(remoteDocument.Object));
-            remoteDocument.Setup (r => r.Id).Returns("wrongID");
-            try{
-                file.HasBeenChangeRemotely(remoteDocument.Object);
-                Assert.Fail();
-            }catch(ArgumentException){}
+            string parentId = "papa";
+            string lastChangeToken = "token";
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, lastChangeToken);
+            MappedObject mappedObject = new MappedObject(remoteObject.Object);
+            Assert.That(mappedObject.RemoteObjectId, Is.EqualTo(id), "RemoteObjectId incorrect");
+            Assert.That(mappedObject.Name, Is.EqualTo(folderName), "Name incorrect");
+            Assert.That(mappedObject.ParentId, Is.EqualTo(parentId), "ParentId incorrect");
+            Assert.That(mappedObject.LastChangeToken, Is.EqualTo(lastChangeToken), "LastChangeToken incorrect");
+            Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
         }
 
-        [Ignore]
-        [Test, Category("Fast")]
-        public void HasBeenChangedLocallyTest() {
-            Assert.Fail ("TODO");
+        private Mock<IFileSystemInfoFactory> CreateFactoryWithLocalPathInfos()
+        {
+            return MappedObjectMockUtils.CreateFsFactory(this.localRootPath, this.localRootPathName, this.localFilePath, this.localFileName);
+        }
+
+        public class MappedObjectMockUtils
+        {
+            public static Mock<IFileSystemInfoFactory> CreateFsFactory(string localRootPath, string localRootPathName, string localFilePath = null, string localFileName = null)
+            {
+                var factory = new Mock<IFileSystemInfoFactory>();
+                var dirinfo = new Mock<IDirectoryInfo>();
+                dirinfo.Setup(dir => dir.Name).Returns(localRootPathName);
+                dirinfo.Setup(dir => dir.Exists).Returns(true);
+                factory.Setup(f => f.CreateDirectoryInfo(It.Is<string>(path => path == localRootPath))).Returns(dirinfo.Object);
+                var fileInfo = new Mock<IFileInfo>();
+                fileInfo.Setup(file => file.Name).Returns(localFileName);
+                fileInfo.Setup(file => file.Exists).Returns(true);
+                factory.Setup(f => f.CreateFileInfo(It.Is<string>(path => path == localFilePath))).Returns(fileInfo.Object);
+                return factory;
+            }
         }
     }
 }
-

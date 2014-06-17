@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="SetupController.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -25,6 +43,7 @@ using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
 using log4net;
 using CmisSync.Lib.Credentials;
+using CmisSync.Lib.Config;
 
 namespace CmisSync
 {
@@ -39,7 +58,6 @@ namespace CmisSync
         Add1,
         Add2,
         Customize,
-        Syncing,
         Finished,
         Tutorial // This particular one contains sub-steps that are tracked via a number.
     }
@@ -202,8 +220,7 @@ namespace CmisSync
 
             Program.Controller.ShowSetupWindowEvent += delegate(PageType page)
             {
-                if (this.FolderAdditionWizardCurrentPage == PageType.Syncing ||
-                    this.FolderAdditionWizardCurrentPage == PageType.Finished)
+                if (this.FolderAdditionWizardCurrentPage == PageType.Finished)
                 {
                     ShowWindowEvent();
                     return;
@@ -477,74 +494,45 @@ namespace CmisSync
             SyncingReponame = repoName;
             saved_local_path = localrepopath;
 
-            bool enableFetch = false;
-
-            if (enableFetch)
+            RepoInfo repoInfo = new RepoInfo
             {
-                ChangePageEvent (PageType.Syncing);
+                DisplayName = repoName,
+                Address = saved_address,
+                User = saved_user.TrimEnd(),
+                ObfuscatedPassword = new Password(saved_password.TrimEnd()).ObfuscatedPassword,
+                RepositoryId = PreviousRepository,
+                RemotePath = PreviousPath,
+                LocalPath = localrepopath
+            };
 
-                Program.Controller.FolderFetched += AddPageFetchedDelegate;
+            foreach (string ignore in ignoredPaths)
+            {
+                repoInfo.AddIgnorePath(ignore);
+            }
 
-                // Add the remote folder to the configuration and start syncing.
-                try
-                {
-                    new Thread (() =>
-                    {
-                        Program.Controller.StartFetcher (
-                            repoName,
-                            saved_address,
-                            saved_user.TrimEnd (),
-                            saved_password.TrimEnd (),
-                            PreviousRepository,
-                            PreviousPath,
-                            localrepopath,
-                            ignoredPaths);
-                    }).Start ();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Fatal (ex.ToString ());
-                }
+            // Check that the folder exists.
+            if (Directory.Exists(repoInfo.LocalPath))
+            {
+                Logger.Info(String.Format("DataSpace Repository Folder {0} already exist, this could lead to sync conflicts", repoInfo.LocalPath));
             }
             else
             {
-                RepoInfo repoInfo = new RepoInfo(repoName, ConfigManager.CurrentConfig.ConfigPath);
-                repoInfo.Address = saved_address;
-                repoInfo.User = saved_user.TrimEnd ();
-                repoInfo.Password = saved_password.TrimEnd ();
-                repoInfo.RepoID = PreviousRepository;
-                repoInfo.RemotePath = PreviousPath;
-                repoInfo.TargetDirectory = localrepopath;
-                repoInfo.PollInterval = 5000;
-                repoInfo.MaxUploadRetries = 2;
-                foreach (string ignore in ignoredPaths)
-                    repoInfo.AddIgnorePath(ignore);
-
-                // Check that the folder exists.
-                if (Directory.Exists(repoInfo.TargetDirectory))
-                {
-                    Logger.Info(String.Format("DataSpace Repository Folder {0} already exist, this could lead to sync conflicts", repoInfo.TargetDirectory));
-                }
-                else
-                {
-                    // Create the local folder.
-                    Directory.CreateDirectory(repoInfo.TargetDirectory);
-                }
-
-                try
-                {
-                    new Thread (() =>
-                    {
-                        Program.Controller.AddRepo (repoInfo);
-                    }).Start ();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Fatal (ex.ToString ());
-                }
-
-                ChangePageEvent (PageType.Finished);
+                // Create the local folder.
+                Directory.CreateDirectory(repoInfo.LocalPath);
             }
+
+            try
+            {
+                new Thread (() => {
+                    Program.Controller.AddRepo(repoInfo);
+                }).Start ();
+            }
+            catch (Exception ex)
+            {
+                Logger.Fatal (ex.ToString ());
+            }
+
+            ChangePageEvent (PageType.Finished);
         }
 
 

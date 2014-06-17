@@ -352,4 +352,7 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="ViewLog" xml:space="preserve">
     <value>Protokoll anzeigen</value>
   </data>
+  <data name="TransmissionFailedOnRepo" xml:space="preserve">
+    <value>[{0}] Übertragung fehlgeschlagen:</value>
+  </data>
 </root>

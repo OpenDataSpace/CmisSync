@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="Controller.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -13,18 +31,16 @@
 //
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-
-using System;
-using System.Reflection;
-using System.Diagnostics;
-using System.IO;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Cmis;
-using CmisSync.Notifications;
-
 namespace CmisSync {
+    using System;
+    using System.Reflection;
+    using System.Diagnostics;
+    using System.IO;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Notifications;
+    using CmisSync.Lib.Config;
 
     public class Controller : ControllerBase {
 
@@ -45,9 +61,12 @@ namespace CmisSync {
             this.ShowChangePassword += delegate(string reponame) {
                 NotificationUtils.NotifyAsync(reponame, String.Format(Properties_Resources.NotificationCredentialsError, reponame));
             };
+
+            this.ShowException += delegate(string title, string msg) {
+                NotificationUtils.NotifyAsync(title, msg);
+            };
+
             base.Initialize(firstRun);
-
-
         }
 
         // Creates a .desktop entry in autostart folder to
@@ -173,29 +192,23 @@ namespace CmisSync {
         
         public void OpenCmisSyncFolder()
         {
-            Utils.OpenFolder(ConfigManager.CurrentConfig.FoldersPath);
+            Utils.OpenFolder(ConfigManager.CurrentConfig.GetFoldersPath());
         }
 
         public void OpenCmisSyncFolder(string name)
         {
-            Config.SyncConfig.Folder f = ConfigManager.CurrentConfig.getFolder(name);
-            if(f!=null)
+            var f = ConfigManager.CurrentConfig.GetRepoInfo(name);
+            if (f != null)
+            {
                 Utils.OpenFolder(f.LocalPath);
-            else if(String.IsNullOrWhiteSpace(name)){
-                OpenCmisSyncFolder();
-            }else{
-                Logger.Warn("Folder not found: "+name);
             }
-        }
-
-        public void OpenRemoteFolder(string name)
-        {
-            Config.SyncConfig.Folder f = ConfigManager.CurrentConfig.getFolder(name);
-            if(f!=null){
-                RepoInfo repo = f.GetRepoInfo();
-                Process.Start(CmisUtils.GetBrowsableURL(repo));
-            } else {
-                Logger.Warn("Repo not found: "+name);
+            else if (string.IsNullOrWhiteSpace(name))
+            {
+                OpenCmisSyncFolder();
+            }
+            else
+            {
+                Logger.Warn("Folder not found: " + name);
             }
         }
 
@@ -206,7 +219,5 @@ namespace CmisSync {
             process.StartInfo.Arguments = "-title \"DataSpace Sync Log\" -e tail -f \"" + path + "\"";
             process.Start ();
         }
-
-
     }
 }

@@ -1,16 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-
-using log4net;
-using log4net.Config;
-using CmisSync.Lib;
-using CmisSync.Lib.Sync;
-
+//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace DataSpaceSync.Console
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Sync;
+
+    using log4net;
+    using log4net.Config;
+
+
     class ActivityListener : IActivityListener
     {
         public void ActivityStarted()
@@ -67,17 +88,17 @@ namespace DataSpaceSync.Console
 
             Logger.Info("Starting.");
 
-            List<RepoBase> repositories = new List<RepoBase>();
+            List<CmisRepo> repositories = new List<CmisRepo>();
 
-            foreach (Config.SyncConfig.Folder folder in ConfigManager.CurrentConfig.Folder)
+            foreach (RepoInfo repoInfo in ConfigManager.CurrentConfig.Folders)
             {
-                string path = folder.LocalPath;
+                string path = repoInfo.LocalPath;
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
                 }
 
-                RepoBase repo = new CmisSync.Lib.Sync.CmisRepo(folder.GetRepoInfo(),new ActivityListener());
+                CmisRepo repo = new CmisRepo(repoInfo, new ActivityListener());
                 repositories.Add(repo);
                 repo.Initialize();
             }

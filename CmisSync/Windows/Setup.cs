@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="Setup.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -294,7 +312,7 @@ namespace CmisSync
                         slide_image = LoadXAML.FindName("slide_image") as WPF.Image;
                         continue_button = LoadXAML.FindName("continue_button") as Button;
                         check_box = LoadXAML.FindName("check_box") as WPF.CheckBox;
-                        
+
                         ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
@@ -579,8 +597,8 @@ namespace CmisSync
             continue_button.IsEnabled = !firstRepo;
 
             ContentCanvas.Children.Add(LoadXAML);
-       
-            // Actions 
+
+            // Actions
             cancel_button.Click += delegate
             {
                 SelectRepoCancelAction();
@@ -697,7 +715,7 @@ namespace CmisSync
             localrepopath_box.Text = Path.Combine(parentFolder, localfolder_box.Text);
 
             ContentCanvas.Children.Add(LoadXAML);
-            
+
             localfolder_box.TextChanged += delegate
             {
                 try
@@ -807,7 +825,7 @@ namespace CmisSync
 
             TaskbarItemInfo.ProgressValue = 0.0;
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-            
+
             Button finish_button = new Button()
             {
                 Content = Properties_Resources.Finish

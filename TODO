@@ -1,0 +1,27 @@
+This file is to track the open TODO's and their dependencies for the implementation of the event design.
+
+RemoteSituation Detection now assume that IFolder and IDocument are prefetched. If is null it can assume that it is deleted when the event contains this information (set in accumulator). Change interface of RemoteSituation Detection to get Event instead of ID. Check whether it is better to have two situationdetection classes depending on file and folders.
+
+Important Next Steps:
+- Refactoring of the file filter =>
+ - The filters should not work like now, reporting the reason to a queue. They should work without a queue and initialized by one Reporting class which is aggregating all normal filters and reports their reasons to the queue.
+  => the filters could also be used by the DescendantsCrawler to filter the created tree while creating them. This could also be used by a future version of the normal Crawler.
+
+- Using cache files while downloading new files
+- Writing integration tests and stabilize them
+- Implement conflict solver
+
+Important for Migration:
+- Migration procedure from old sqlite db to new DBreeze db.
+
+Features:
+- GetDescendants Crawler
+- Retry Counter
+- Ignore Filter/Sync with Server
+- Extended Attributes
+- Branding
+- ChunkedUpload
+
+NiceToHave Refactorings:
+- Config class should be rewritten to enable events by using ObservableCollections and implements the Observable Pattern
+- CmisSync.Lib.Utils.FindNextConflictFreeFilename() should be refactored to be available via IFileSystemFactory

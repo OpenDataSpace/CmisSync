@@ -1,73 +1,122 @@
-﻿using System;
-using DotCMIS.Client;
-using System.Security.Cryptography;
-using System.IO;
-using CmisSync.Lib.Streams;
-using CmisSync.Lib.Events;
+//-----------------------------------------------------------------------
+// <copyright file="SimpleFileDownloader.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace CmisSync.Lib.ContentTasks
 {
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Streams;
+
+    using DotCMIS.Client;
+
+    /// <summary>
+    /// Simple file downloader.
+    /// </summary>
     public class SimpleFileDownloader : IFileDownloader
     {
         private bool disposed = false;
 
-        private object DisposeLock = new object();
+        private object disposeLock = new object();
 
-        public void DownloadFile (IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent TransmissionStatus, HashAlgorithm hashAlg)
+        /// <summary>
+        /// Downloads the file and returns the SHA1 hash of the content of the saved file
+        /// </summary>
+        /// <param name="remoteDocument">Remote document.</param>
+        /// <param name="localFileStream">Local taget file stream.</param>
+        /// <param name="status">Transmission status.</param>
+        /// <param name="hashAlg">Hash algoritm, which should be used to calculate hash of the uploaded stream content</param>
+        /// <exception cref="IOException">On any disc or network io exception</exception>
+        /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
+        /// <exception cref="AbortException">If download is aborted</exception>
+        /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
         {
             long? fileLength = remoteDocument.ContentStreamLength;
-            DotCMIS.Data.IContentStream contentStream = remoteDocument.GetContentStream ();
+            DotCMIS.Data.IContentStream contentStream = remoteDocument.GetContentStream();
 
             // Skip downloading empty content, just go on with an empty file
             if (null == fileLength || fileLength == 0 || contentStream == null) {
                 hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 return;
             }
-            using (ProgressStream progressStream = new ProgressStream(localFileStream, TransmissionStatus))
+
+            using (ProgressStream progressStream = new ProgressStream(localFileStream, status))
             using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
             using (Stream remoteStream = contentStream.Stream) {
-                TransmissionStatus.ReportProgress (new TransmissionProgressEventArgs () {
+                status.ReportProgress(new TransmissionProgressEventArgs {
                     Length = remoteDocument.ContentStreamLength,
                     ActualPosition = 0
-                }
-                );
+                });
                 byte[] buffer = new byte[8 * 1024];
                 int len;
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
-                    lock(DisposeLock){
+                    lock(this.disposeLock)
+                    {
                         if(this.disposed) {
-                            TransmissionStatus.ReportProgress(new TransmissionProgressEventArgs(){Aborted = true});
-                            throw new ObjectDisposedException(TransmissionStatus.Path);
+                            status.ReportProgress(new TransmissionProgressEventArgs { Aborted = true });
+                            throw new ObjectDisposedException(status.Path);
                         }
-                        hashstream.Write (buffer, 0, len);
+
+                        hashstream.Write(buffer, 0, len);
                         hashstream.Flush();
                     }
                 }
             }
         }
 
-        // Implement IDisposable.
-        // Do not make this method virtual.
-        // A derived class should not be able to override this method.
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.Lib.ContentTasks.SimpleFileDownloader"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the
+        /// <see cref="CmisSync.Lib.ContentTasks.SimpleFileDownloader"/>. The <see cref="Dispose"/> method leaves the
+        /// <see cref="CmisSync.Lib.ContentTasks.SimpleFileDownloader"/> in an unusable state. After calling
+        /// <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.ContentTasks.SimpleFileDownloader"/> so the garbage collector can reclaim the memory
+        /// that the <see cref="CmisSync.Lib.ContentTasks.SimpleFileDownloader"/> was occupying.</remarks>
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
         }
 
-        // Dispose(bool disposing) executes in two distinct scenarios.
-        // If disposing equals true, the method has been called directly
-        // or indirectly by a user's code. Managed and unmanaged resources
-        // can be disposed.
-        // If disposing equals false, the method has been called by the
-        // runtime from inside the finalizer and you should not reference
-        // other objects. Only unmanaged resources can be disposed.
+        /// <summary>
+        /// Dispose(bool disposing) executes in two distinct scenarios.
+        /// If disposing equals true, the method has been called directly
+        /// or indirectly by a user's code. Managed and unmanaged resources
+        /// can be disposed.
+        /// If disposing equals false, the method has been called by the
+        /// runtime from inside the finalizer and you should not reference
+        /// other objects. Only unmanaged resources can be disposed.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected virtual void Dispose(bool disposing)
         {
-            lock(DisposeLock) {
-            // Check to see if Dispose has already been called.
-            if(!this.disposed)
-                // Note disposing has been done.
-                disposed = true;
+            lock(this.disposeLock)
+            {
+                // Check to see if Dispose has already been called.
+                if(!this.disposed)
+                {
+                    // Note disposing has been done.
+                    this.disposed = true;
+                }
             }
         }
     }

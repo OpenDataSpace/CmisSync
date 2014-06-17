@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="Setup.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -31,7 +49,8 @@ using CmisSync.Lib.Credentials;
 using CmisSync.CmisTree;
 
 namespace CmisSync {
-
+ 
+    [CLSCompliant(false)]
     public class Setup : SetupWindow {
 
         public SetupController Controller = new SetupController ();
@@ -316,8 +335,8 @@ namespace CmisSync {
 
         private void ShowAdd2Page()
         {
-            CmisTreeStore cmisStore = new CmisTreeStore ();
-            Gtk.TreeView treeView = new Gtk.TreeView (cmisStore.CmisStore);
+            CmisTreeStore cmisStore = new CmisTreeStore();
+            Gtk.TreeView treeView = new Gtk.TreeView(cmisStore);
 
             bool firstRepo = true;
             List<RootFolder> repositories = new List<RootFolder>();
@@ -394,7 +413,6 @@ namespace CmisSync {
                 Controller.BackToPage1();
             };
 
-            Gtk.TreeIter iter;
             treeView.HeadersVisible = false;
             treeView.Selection.Mode = SelectionMode.Single;
 
@@ -408,13 +426,13 @@ namespace CmisSync {
             column.AddAttribute (renderToggle, "radio", (int)CmisTreeStore.Column.ColumnRoot);
             renderToggle.Toggled += delegate (object render, ToggledArgs args) {
                 TreeIter iterToggled;
-                if (! cmisStore.CmisStore.GetIterFromString (out iterToggled, args.Path))
+                if (! cmisStore.GetIterFromString (out iterToggled, args.Path))
                 {
                     Console.WriteLine("Toggled GetIter Error " + args.Path);
                     return;
                 }
 
-                Node node = cmisStore.CmisStore.GetValue(iterToggled,(int)CmisTreeStore.Column.ColumnNode) as Node;
+                Node node = cmisStore.GetValue(iterToggled,(int)CmisTreeStore.Column.ColumnNode) as Node;
                 if (node == null)
                 {
                     Console.WriteLine("Toggled GetValue Error " + args.Path);
@@ -460,7 +478,7 @@ namespace CmisSync {
             treeView.AppendColumn ("Status", new StatusCellRenderer (), "text", (int)CmisTreeStore.Column.ColumnStatus);
 
             treeView.RowExpanded += delegate (object o, RowExpandedArgs args) {
-                Node node = cmisStore.CmisStore.GetValue(args.Iter, (int)CmisTreeStore.Column.ColumnNode) as Node;
+                Node node = cmisStore.GetValue(args.Iter, (int)CmisTreeStore.Column.ColumnNode) as Node;
                 Node parent = node;
                 while (parent.Parent != null)
                 {
@@ -817,10 +835,6 @@ namespace CmisSync {
 
                         case PageType.Customize:
                         ShowCustomizePage();
-                        break;
-
-                        case PageType.Syncing:
-                        ShowSyncingPage();
                         break;
 
                         case PageType.Finished:

@@ -1,4 +1,22 @@
-﻿using CmisSync.Lib.Credentials;
+//-----------------------------------------------------------------------
+// <copyright file="NodeLoader.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
+using CmisSync.Lib.Credentials;
 using CmisSync.Lib.Cmis;
 using System;
 using System.Collections.Generic;
@@ -125,7 +143,20 @@ namespace CmisSync.CmisTree
             else
             {
                 this.actualNode.Status = LoadingStatus.DONE;
-                MergeFolderTrees(this.actualNode, e.Result as List<Node>);
+                List<Node> children = e.Result as List<Node>;
+                MergeFolderTrees(this.actualNode, children);
+                foreach (Node oldChild in this.actualNode.Children)
+                {
+                    try
+                    {
+                        Node newChild = children.First(x => x.Name.Equals(oldChild.Name));
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // this node exists locally or is ignored, mark it as <code>LoadingStatus.DONE</code>
+                        SetNodeTreeStatus(oldChild, LoadingStatus.DONE);
+                    }
+                }
             }
             UpdateNodeEvent ();
             Load();
@@ -152,18 +183,6 @@ namespace CmisSync.CmisTree
                         newChild.Selected = false;
                     node.Children.Add(newChild);
                     newChild.Parent = node;
-                }
-            }
-            foreach (Node oldChild in node.Children)
-            {
-                try
-                {
-                    Node newChild = children.First(x => x.Name.Equals(oldChild.Name));
-                }
-                catch (InvalidOperationException)
-                {
-                    /// this node exists locally or is ignored, mark it as <code>LoadingStatus.DONE</code>
-                    SetNodeTreeStatus(oldChild, LoadingStatus.DONE);
                 }
             }
         }

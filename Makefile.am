@@ -11,8 +11,10 @@ EXTRA_DIST = \
 	legal/TRADEMARK.txt \
 	legal/AUTHORS.txt \
 	Extras/DotCMIS.dll \
-	Extras/Newtonsoft.Json.dll \
-	Extras/nunit.framework.dll
+	$(JSON_PATH) \
+	$(NUNIT_PATH) \
+	$(DBREEZE_PATH) \
+	$(LOG4NET_PATH)
 
 DISTCLEANFILES = \
 	intltool-extract \
@@ -27,6 +29,7 @@ MAINTAINERCLEANFILES = \
 
 bootstrap:
 	autoreconf -f -s -i
+	nuget restore CmisSync/Linux/CmisSync.sln
 
 debian-package:
 	rm -rf $(top_builddir)/debian/usr
@@ -36,27 +39,13 @@ debian-package:
 apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
-	(cd build; ./dmg-creator.sh ../bin/DataSpace\ Sync.app/; cd ..)
+	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
 
 none:
-
-entityframework: System.Data.SQLite.Linq.dll
-
-System.Data.SQLite.dll:
-	xbuild Extras/OpenDataSpace.System.Data.SQLite/System.Data.SQLite/System.Data.SQLite.2012.csproj /p:UseInteropDll=false /p:UseSqliteStandard=true /p:InteropLog=false /t:Rebuild
-	cp -f Extras/OpenDataSpace.System.Data.SQLite/bin/2012/Debug/bin/System.Data.SQLite.* Extras
-
-EntityFramework.dll:
-	xbuild Extras/OpenDataSpace.entityframework/src/EntityFramework/EntityFramework.OpenDataSpace.mono.csproj /t:Rebuild
-	cp -f Extras/OpenDataSpace.entityframework/src/EntityFramework/bin/Debug/EntityFramework.* Extras
-
-System.Data.SQLite.Linq.dll: System.Data.SQLite.dll EntityFramework.dll
-	xbuild Extras/OpenDataSpace.System.Data.SQLite.Linq/System.Data.SQLite.Linq.OpenDataSpace.mono.csproj /t:Rebuild
-	cp -f Extras/OpenDataSpace.System.Data.SQLite.Linq/bin/Debug/System.Data.SQLite.Linq.dll* Extras
 
 DotCMIS.dll:
 	xbuild Extras/OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
 	cp -f Extras/OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* Extras
 
-dist-hook:
+package:
 	make $(PACKAGE_TARGET)

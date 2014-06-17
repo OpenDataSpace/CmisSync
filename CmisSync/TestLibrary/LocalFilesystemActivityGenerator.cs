@@ -1,14 +1,33 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+//-----------------------------------------------------------------------
+// <copyright file="LocalFilesystemActivityGenerator.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace TestLibrary
 {
-    class LocalFilesystemActivityGenerator
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+
+    public class LocalFilesystemActivityGenerator
     {
-        public static int id = 1;
+        private static int id = 1;
 
         public static void CreateDirectoriesAndFiles(string path)
         {
@@ -24,6 +43,7 @@ namespace TestLibrary
                 {
                     Directory.CreateDirectory(path1);
                 }
+
                 CreateRandomFile(path1, 3);
                 CreateRandomFile(path1, 3);
                 CreateRandomFile(path1, 3);
@@ -34,6 +54,7 @@ namespace TestLibrary
                 {
                     Directory.CreateDirectory(path2);
                 }
+
                 CreateRandomFile(path2, 3);
             }
             catch (IOException ex)
@@ -59,7 +80,7 @@ namespace TestLibrary
         {
             Random rng = new Random();
             string filename = GetNextFileName();
-            ++ id;
+            ++id;
             byte[] data = new byte[1024];
 
             try

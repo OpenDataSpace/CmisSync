@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="StatusIcon.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -28,14 +46,13 @@ using System.Globalization;
 using CmisSync.Lib.Events;
 using System.Collections.Generic;
 using log4net;
+
 using CmisSync.Lib;
+using CmisSync.Lib.Sync;
 
 namespace CmisSync {
 
     public class StatusIcon {
-
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(StatusIcon));
-
         public StatusIconController Controller = new StatusIconController ();
 
         private Gdk.Pixbuf [] animation_frames;
@@ -124,7 +141,7 @@ namespace CmisSync {
                     {
                         if(menuItem is CmisSyncMenuItem && reponame.Equals(((CmisSyncMenuItem)menuItem).RepoName))
                         {
-                            foreach (RepoBase aRepo in Program.Controller.Repositories)
+                            foreach (CmisRepo aRepo in Program.Controller.Repositories)
                             {
                                 if (aRepo.Name.Equals(reponame))
                                 {
@@ -220,7 +237,7 @@ namespace CmisSync {
                             CmisSync.Properties_Resources.PauseSync) {
                         RepoName = folder_name
                     };
-                    foreach (RepoBase aRepo in Program.Controller.Repositories)
+                    foreach (CmisRepo aRepo in Program.Controller.Repositories)
                     {
                         if (aRepo.Name.Equals(folder_name))
                         {
@@ -368,7 +385,7 @@ namespace CmisSync {
 #endif
     }
 
-
+    [CLSCompliant(false)]
     public class CmisSyncMenuItem : ImageMenuItem {
         public string RepoName {get;set;}
         public CmisSyncMenuItem (string text) : base (text)
@@ -376,7 +393,8 @@ namespace CmisSync {
             SetProperty ("always-show-image", new GLib.Value (true));
         }
     }
-
+ 
+    [CLSCompliant(false)]
     public class TransmissionMenuItem : ImageMenuItem {
 
         public FileTransmissionType Type { get; private set; }

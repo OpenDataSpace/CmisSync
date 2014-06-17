@@ -1,253 +1,215 @@
-using System;
-using System.Collections.Generic;
-
-using CmisSync.Lib.Sync.Strategy;
-using CmisSync.Lib.Storage;
-
-using DotCMIS.Client;
-using DotCMIS.Exceptions;
-
-using NUnit.Framework;
-
-using Moq;
+//-----------------------------------------------------------------------
+// <copyright file="RemoteSituationDetectionTest.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+
+    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
+
+    using DotCMIS.Client;
+    using DotCMIS.Exceptions;
+
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
+
     [TestFixture]
     public class RemoteSituationDetectionTest
     {
-        private Mock<ISession> SessionMock;
-        private Mock<IMetaDataStorage> StorageMock;
-        private string RemoteChangeToken = "changeToken";
-        private readonly IObjectId ObjectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
-        private string RemotePath = "/object/path";
-        private string RemoteName = "path";
+        private readonly IObjectId objectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
+        private readonly string remotePath = "/object/path";
+        private Mock<IMetaDataStorage> storageMock;
+        private string remoteChangeToken = "changeToken";
 
         [SetUp]
         public void SetUp() {
-            this.SessionMock = new Mock<ISession>();
-            this.StorageMock = new Mock<IMetaDataStorage>();
-
+            this.storageMock = new Mock<IMetaDataStorage>();
         }
 
         [Test, Category("Fast")]
-        public void ConstructorFailsOnNullSessionTest() {
-            try{
-                new RemoteSituationDetection(null);
-                Assert.Fail();
-            }catch (ArgumentNullException) {}
+        public void ConstructorWithSession() {
+            new RemoteSituationDetection();
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWithSessionTest() {
-            new RemoteSituationDetection(SessionMock.Object);
-        }
-
-        [Ignore]
-        [Test, Category("Fast")]
-        public void NoChangeDetectionTest()
-        {
-
-            // Test is incomplete
-            var lastModificationDate = DateTime.Now;
-            var remoteObject = new Mock<ICmisObject>();
-            remoteObject.Setup(remote => remote.ChangeToken).Returns(RemoteChangeToken);
-            remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
-            remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(StorageMock.Object, ObjectId));
-        }
-
-        [Test, Category("Fast")]
-        public void FileAddedDetectionTest()
+        public void NoChangeDetectionForFile()
         {
             var lastModificationDate = DateTime.Now;
             var remoteObject = new Mock<IDocument>();
-            remoteObject.Setup(remote => remote.ChangeToken).Returns(RemoteChangeToken);
-            remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
-            remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
-            remoteObject.Setup (remote => remote.Name).Returns(RemoteName);
-            IList<string> paths = new List<string>();
-            paths.Add(this.RemotePath);
-            remoteObject.Setup (remote => remote.Paths).Returns(paths);
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns((DateTime?)null);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns((string) null);
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.ADDED, detector.Analyse(StorageMock.Object, ObjectId));
+            var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
+            fileEvent.Remote = MetaDataChangeType.NONE;
+
+            var detector = new RemoteSituationDetection();
+
+            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(this.storageMock.Object, fileEvent));
         }
 
         [Test, Category("Fast")]
-        public void FolderAddedDetectionTest()
+        public void NoChangeDetectionForFileOnAddedEvent()
         {
             var lastModificationDate = DateTime.Now;
+            var remoteObject = new Mock<IDocument>();
+            var remotePaths = new List<string>();
+            remotePaths.Add(this.remotePath);
+            remoteObject.Setup(remote => remote.ChangeToken).Returns(this.remoteChangeToken);
+            remoteObject.Setup(remote => remote.Id).Returns(this.objectId.Id);
+            remoteObject.Setup(remote => remote.LastModificationDate).Returns(lastModificationDate);
+            remoteObject.Setup(remote => remote.Paths).Returns(remotePaths);
+            var file = Mock.Of<IMappedObject>(f =>
+                                              f.LastRemoteWriteTimeUtc == lastModificationDate &&
+                                              f.RemoteObjectId == this.objectId.Id &&
+                                              f.LastChangeToken == this.remoteChangeToken &&
+                                              f.Type == MappedObjectType.File);
+            this.storageMock.AddMappedFile(file);
+            var fileEvent = new FileEvent(remoteFile: remoteObject.Object) { Remote = MetaDataChangeType.CREATED };
+
+            var detector = new RemoteSituationDetection();
+
+            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(this.storageMock.Object, fileEvent));
+        }
+
+        [Test, Category("Fast")]
+        public void NoChangeDetectedForFolder()
+        {
             var remoteObject = new Mock<IFolder>();
-            remoteObject.Setup(remote => remote.ChangeToken).Returns(RemoteChangeToken);
-            remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
-            remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
-            remoteObject.Setup (remote => remote.Name).Returns(RemoteName);
-            IList<string> paths = new List<string>();
-            paths.Add(RemotePath);
-            remoteObject.Setup (remote => remote.Paths).Returns(paths);
-            remoteObject.Setup (remote => remote.Path).Returns(RemotePath);
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns((DateTime?)null);
-            StorageMock.Setup(storage => storage.GetFolderPath(ObjectId.Id)).Returns((string) null);
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.ADDED, detector.Analyse(StorageMock.Object, ObjectId));
+            var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
+            folderEvent.Remote = MetaDataChangeType.NONE;
+
+            var detector = new RemoteSituationDetection();
+
+            Assert.AreEqual(SituationType.NOCHANGE, detector.Analyse(this.storageMock.Object, folderEvent));
         }
 
-        // Not yet implemented by detector
-        [Ignore]
         [Test, Category("Fast")]
-        public void FileChangedDetectionTest()
+        public void FileAddedDetection()
         {
-            var lastModificationDate = DateTime.Now;
-            var actualModificationDate = DateTime.Now.AddDays(1);
             var remoteObject = new Mock<IDocument>();
-            var newChangeToken = RemoteChangeToken + "changed";
-            remoteObject.Setup (remote => remote.ChangeToken).Returns(newChangeToken);
-            remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
-            remoteObject.Setup (remote => remote.LastModificationDate).Returns(actualModificationDate);
-            remoteObject.Setup (remote => remote.Name).Returns(RemoteName);
-            IList<string> paths = new List<string>();
-            paths.Add(RemotePath);
-            remoteObject.Setup (remote => remote.Paths).Returns(paths);
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
 
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns(RemotePath);
+            var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
+            fileEvent.Remote = MetaDataChangeType.CREATED;
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.CHANGED, detector.Analyse(StorageMock.Object, ObjectId));
+            var detector = new RemoteSituationDetection();
+
+            Assert.AreEqual(SituationType.ADDED, detector.Analyse(this.storageMock.Object, fileEvent));
         }
 
-        // Not yet implemented by detector
-        [Ignore]
         [Test, Category("Fast")]
-        public void FileRenamedDetectionTest()
+        public void FolderAddedDetection()
         {
-            var lastModificationDate = DateTime.Now;
-            var actualModificationDate = DateTime.Now.AddDays(1);
+            var remoteObject = new Mock<IFolder>();
+            var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
+            folderEvent.Remote = MetaDataChangeType.CREATED;
+
+            var detector = new RemoteSituationDetection();
+
+            Assert.AreEqual(SituationType.ADDED, detector.Analyse(this.storageMock.Object, folderEvent));
+        }
+
+        [Test, Category("Fast")]
+        public void FileRemovedDetection()
+        {
             var remoteObject = new Mock<IDocument>();
-            var newName = RemoteName + "renamed";
-            var newPath = RemotePath + "renamed";
-            var newChangeToken = RemoteChangeToken + "renamed";
-            remoteObject.Setup (remote => remote.ChangeToken).Returns(newChangeToken);
-            remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
-            remoteObject.Setup (remote => remote.LastModificationDate).Returns(actualModificationDate);
-            remoteObject.Setup (remote => remote.Name).Returns(newName);
-            IList<string> paths = new List<string>();
-            paths.Add(newPath);
-            remoteObject.Setup (remote => remote.Paths).Returns(paths);
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
 
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns(RemotePath);
+            var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
+            fileEvent.Remote = MetaDataChangeType.DELETED;
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.CHANGED, detector.Analyse(StorageMock.Object, ObjectId));
-        }
+            var detector = new RemoteSituationDetection();
 
-        // Not yet implemented by detector
-        [Ignore]
-        [Test, Category("Fast")]
-        public void FolderRenamedDetectionTest()
-        {
-            var lastModificationDate = DateTime.Now;
-            var actualModificationDate = DateTime.Now.AddDays(1);
-            var newPath = RemotePath + "renamed";
-            var newName = RemoteName + "renamed";
-            var newChangeToken = RemoteChangeToken + "renamed";
-            var remoteFolder = Mock.Of<IFolder>( folder =>
-                             folder.ChangeToken == newChangeToken &&
-                             folder.Name == newName &&
-                             folder.Path == newPath &&
-                             folder.Id == ObjectId.Id &&
-                             folder.LastModificationDate == actualModificationDate);
-            SessionMock.Setup(s => s.GetObject(ObjectId.Id)).Returns(remoteFolder);
-
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFolderPath(It.Is<string>(id => id == ObjectId.Id))).Returns(RemotePath);
-
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.RENAMED, detector.Analyse(StorageMock.Object, ObjectId));
-        }
-
-        // Not yet implemented by detector
-        [Ignore]
-        [Test, Category("Fast")]
-        public void FileMovedDetectionTest()
-        {
-            var lastModificationDate = DateTime.Now;
-            var remoteObject = new Mock<IDocument>();
-            remoteObject.Setup (remote => remote.ChangeToken).Returns(RemoteChangeToken);
-            remoteObject.Setup (remote => remote.Id ).Returns(ObjectId.Id);
-            remoteObject.Setup (remote => remote.LastModificationDate).Returns(lastModificationDate);
-            remoteObject.Setup (remote => remote.Name).Returns(RemoteName);
-            var newPath = "/new" + RemotePath;
-            IList<string> paths = new List<string>();
-            paths.Add(newPath);
-            remoteObject.Setup (remote => remote.Paths).Returns(paths);
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteObject.Object);
-
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns(RemotePath);
-
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.MOVED, detector.Analyse(StorageMock.Object, ObjectId));
-        }
-
-        // Not yet implemented by detector
-        [Ignore]
-        [Test, Category("Fast")]
-        public void FolderMovedDetectionTest()
-        {
-            var lastModificationDate = DateTime.Now;
-            var newPath = "/new" + RemotePath;
-            var remoteFolder = Mock.Of<IFolder>( folder =>
-                                                folder.ChangeToken == RemoteChangeToken &&
-                                                folder.Name == RemoteName &&
-                                                folder.Path == newPath &&
-                                                folder.Id == ObjectId.Id &&
-                                                folder.LastModificationDate == lastModificationDate);
-
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Returns(remoteFolder);
-
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFolderPath(ObjectId.Id)).Returns(RemotePath);
-
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.MOVED, detector.Analyse(StorageMock.Object, ObjectId));
+            Assert.AreEqual(SituationType.REMOVED, detector.Analyse(this.storageMock.Object, fileEvent));
         }
 
         [Test, Category("Fast")]
-        public void FileRemovedDetectionTest()
+        public void FolderRemovedDetection()
         {
-            var lastModificationDate = DateTime.Now;
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Throws(new CmisObjectNotFoundException());
+            var remoteObject = new Mock<IFolder>();
+            var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
+            folderEvent.Remote = MetaDataChangeType.DELETED;
 
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFilePath(ObjectId.Id)).Returns(RemotePath);
+            var detector = new RemoteSituationDetection();
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, ObjectId));
+            Assert.AreEqual(SituationType.REMOVED, detector.Analyse(this.storageMock.Object, folderEvent));
         }
 
         [Test, Category("Fast")]
-        public void FolderRemovedDetectionTest()
+        public void FolderMovedDetectionOnFolderMovedEvent()
         {
-            var lastModificationDate = DateTime.Now;
-            SessionMock.Setup(s => s.GetObject(ObjectId)).Throws(new CmisObjectNotFoundException());
+            var remoteObject = new Mock<IFolder>();
+            var folderEvent = new FolderMovedEvent(null, null, null, remoteObject.Object) { Remote = MetaDataChangeType.MOVED };
 
-            StorageMock.Setup(storage => storage.GetServerSideModificationDate(RemotePath)).Returns(lastModificationDate);
-            StorageMock.Setup(storage => storage.GetFolderPath(ObjectId.Id)).Returns(RemotePath);
+            var detector = new RemoteSituationDetection();
 
-            var detector = new RemoteSituationDetection(SessionMock.Object);
-            Assert.AreEqual(SituationType.REMOVED, detector.Analyse(StorageMock.Object, ObjectId));
+            Assert.AreEqual(SituationType.MOVED, detector.Analyse(this.storageMock.Object, folderEvent));
+        }
+
+        [Test, Category("Fast")]
+        public void FolderMovedDetectionOnChangeEvent()
+        {
+            string folderName = "old";
+            string oldLocalPath = Path.Combine(Path.GetTempPath(), folderName);
+            string remoteId = "remoteId";
+            string oldParentId = "oldParentId";
+            string newParentId = "newParentId";
+            var remoteFolder = new Mock<IFolder>();
+            remoteFolder.Setup(f => f.Name).Returns(folderName);
+            remoteFolder.Setup(f => f.Path).Returns("/new/" + folderName);
+            remoteFolder.Setup(f => f.Id).Returns(remoteId);
+            remoteFolder.Setup(f => f.ParentId).Returns(newParentId);
+            var mappedParentFolder = Mock.Of<IMappedObject>(p =>
+                                                            p.RemoteObjectId == oldParentId &&
+                                                            p.Type == MappedObjectType.Folder);
+            var mappedFolder = this.storageMock.AddLocalFolder(oldLocalPath, remoteId);
+            mappedFolder.Setup(f => f.Name).Returns(folderName);
+            mappedFolder.Setup(f => f.ParentId).Returns(mappedParentFolder.RemoteObjectId);
+            var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
+
+            var detector = new RemoteSituationDetection();
+
+            Assert.AreEqual(SituationType.MOVED, detector.Analyse(this.storageMock.Object, folderEvent));
+        }
+
+        [Test, Category("Fast")]
+        public void FolderRenameDetectionOnChangeEvent()
+        {
+            string remoteId = "remoteId";
+            string oldName = "old";
+            string newName = "new";
+            var remoteFolder = new Mock<IFolder>();
+            remoteFolder.Setup(f => f.Name).Returns(newName);
+            remoteFolder.Setup(f => f.Id).Returns(remoteId);
+            var mappedFolder = Mock.Of<IMappedObject>(f =>
+                                                      f.RemoteObjectId == remoteId &&
+                                                      f.Name == oldName &&
+                                                      f.Type == MappedObjectType.Folder);
+            this.storageMock.AddMappedFolder(mappedFolder);
+            var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object) { Remote = MetaDataChangeType.CHANGED };
+
+            var detector = new RemoteSituationDetection();
+
+            Assert.AreEqual(SituationType.RENAMED, detector.Analyse(this.storageMock.Object, folderEvent));
         }
     }
 }
-

@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [1.2.1])
+m4_define([cmissync_version], [1.3.1])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
@@ -37,60 +37,20 @@ SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
 ])]
 )
 
-AC_ARG_WITH([nunit],
-            AS_HELP_STRING([--with-nunit=PATH],[Specify path to nunit.framework.dll]),
-            [nunit_dll=${withval}],[nunit_dll=no])
-if test "x$nunit_dll" = "xno" ; then
-    PKG_CHECK_MODULES(NUNIT, nunit >= 2.6.0, have_nunit=yes, have_nunit=no)
-    if test "x$have_nunit" = "xno" ; then
-      dnl On som distro's the package is named mono-nunit
-      PKG_CHECK_MODULES(NUNIT, mono-nunit >= 2.6.0, have_nunit=yes, have_nunit=no)
-      if test "x$have_nunit" = "xno" ; then
-          AC_ERROR("nunit is a required dependency: you need to install the appropriate devel package before you can compile")
-      fi
-    fi
-    AC_SUBST(NUNIT_LIBS)
-else
- if test -f ${nunit_dll} ; then
-        case ${nunit_dll} in
-            /*)
-            AC_SUBST(NUNIT_LIBS,[-r:${nunit_dll}])
-            AC_SUBST(NUNIT_PATH,[${nunit_dll}])
-            ;;
-            *)
-            AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/${nunit_dll}]])
-            AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/${nunit_dll}]])
-            ;;
-        esac
-    else
-        AC_ERROR([${nunit_dll} not found])
-    fi
-fi
+AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
+AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
 
-AC_ARG_WITH([newtonsoft-json],
-            AS_HELP_STRING([--with-newtonsoft-json=PATH],[Specify path to NewtonSoft.Json.dll]),
-            [newtonsoft_json_dll=${withval}],[newtonsoft_json_dll=no])
-if test "x$newtonsoft_json_dll" = "xno" ; then
-    PKG_CHECK_MODULES(JSON, [newtonsoft-json >= 4.5r6], have_newtonsoft_json=yes, have_newtonsoft_json=no)
-    if test "x$have_newtonsoft_json" = "xno" ; then
-        AC_ERROR("newtonsoft-json is a required dependency: you need to install the appropriate devel package before you can compile")
-    fi
-else
-    if test -f ${newtonsoft_json_dll} ; then
-        case ${newtonsoft_json_dll} in
-            /*)
-            AC_SUBST(JSON_LIBS,[-r:${newtonsoft_json_dll}])
-            AC_SUBST(JSON_PATH,[${newtonsoft_json_dll}])
-            ;;
-            *)
-            AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/${newtonsoft_json_dll}]])
-            AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/${newtonsoft_json_dll}]])
-            ;;
-        esac
-    else
-        AC_ERROR([${newtonsoft_json_dll} not found])
-    fi
-fi
+AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
+
+AC_SUBST(LOG4NET_LIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
+AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
+
+AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
+AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
+
+AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
 
 CMISSYNC_CHECK_NOTIFY_SHARP
 CMISSYNC_CHECK_GTK_SHARP
@@ -134,23 +94,8 @@ else
     AC_ERROR([${dotcmis_dll} not found])
 fi
 
-AC_ARG_WITH([log4net],
-            AS_HELP_STRING([--with-log4net=PATH],[Specify path to log4net.dll]),
-            [log4net_dll=${withval}],[log4net_dll=no])
-if test ${log4net_dll} != "no" ; then
-    case ${log4net_dll} in
-        /*)
-        AC_SUBST(LOG4NETLIBS,[-r:${log4net_dll}])
-        AC_SUBST(LOG4NETPATH,[${log4net_dll}])
-        ;;
-        *)
-        AC_SUBST(LOG4NETLIBS,[[-r:\$\(top_srcdir\)/${log4net_dll}]])
-        AC_SUBST(LOG4NETPATH,[[\$\(top_srcdir\)/${log4net_dll}]])
-        ;;
-    esac
-fi
 
-TEST_URL="https://devel.dataspace.cc/cmis/atom"
+TEST_URL="https://devel.dataspace.cc/cmis/atom11"
 AC_ARG_WITH([test-url],
     AS_HELP_STRING([--with-test-url=URL],[Specify server URL for testing]),
     TEST_URL=${withval})
@@ -186,6 +131,25 @@ AC_ARG_WITH([test-repoid],
     TEST_REPOID=${withval})
 AC_SUBST(TEST_REPOID)
 
+TEST_PROXY_USER=""
+AC_ARG_WITH([test-proxy-user],
+    AS_HELP_STRING([--with-test-proxy-user=PATH],[Specify user for authetication required proxy for testing]),
+    TEST_PROXY_USER=${withval})
+AC_SUBST(TEST_PROXY_USER)
+
+TEST_PROXY_PASSWORD=""
+AC_ARG_WITH([test-proxy-password],
+    AS_HELP_STRING([--with-test-proxy-password=PATH],[Specify password for authetication required proxy for testing]),
+    TEST_PROXY_PASSWORD=${withval})
+AC_SUBST(TEST_PROXY_PASSWORD)
+
+TEST_PROXY_URL=""
+AC_ARG_WITH([test-proxy-url],
+    AS_HELP_STRING([--with-test-proxy-url=PATH],[Specify proxy url for testing]),
+    TEST_PROXY_URL=${withval})
+AC_SUBST(TEST_PROXY_URL)
+
+
 OSNAME=`uname -s`
 OSOK=no
 
@@ -200,17 +164,7 @@ if test "$OSNAME" = "Linux" ; then
 	fi
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
-    dnl check for log4net
-	PKG_CHECK_MODULES(LOG4NET, log4net, have_log4net=yes, have_log4net=no)
-	if test "x$have_log4net" = "xno" ; then
-        if test "$log4net_dll" != "no" ; then
-            LOG4NET_LIBS=['[$](LOG4NETLIBS)']
-        else
-		    AC_ERROR([log4net is a required dependency: you need to install the appropriate devel package before you can compile])
-        fi
-	fi
-	AC_SUBST(LOG4NET_LIBS)
-
+	dnl check for appindicator
 	APPINDICATOR_REQUIRED=0.0.7
 	if test x$enable_appindicator = xauto ; then
 			PKG_CHECK_EXISTS([appindicator-sharp-0.1 >= $APPINDICATOR_REQUIRED],
@@ -232,6 +186,7 @@ if test "$OSNAME" = "Linux" ; then
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
 
+
     AC_SUBST(BUILD_DEFINES,"${BUILD_DEFINES}")
     GUISUBDIRS=CmisSync
     enable_gtkui=yes
@@ -246,18 +201,6 @@ if test "$OSNAME" = "Darwin" ; then
 
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
-	dnl check for log4net
-        LOG4NET_LIBS=
-	PKG_CHECK_MODULES(LOG4NET, log4net, have_log4net=yes, have_log4net=no)
-	if test "x$have_log4net" = "xno" ; then
-        if test "x$log4net_dll" != "xno" ; then
-            LOG4NET_LIBS=$LOG4NETLIBS
-        else
-            AC_ERROR([log4net is a required dependency: you need to install the appropriate devel package before you can compile])
-        fi
-	fi
-	AC_SUBST(LOG4NET_LIBS)
-	
 
     AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
@@ -333,6 +276,7 @@ AC_OUTPUT([
 build/cmissync.spec
 build/Makefile
 build/m4/Makefile
+build/dmg-creator.sh
 CmisSync.Lib/Defines.cs
 CmisSync.Lib/Makefile
 CmisSync/Common/Makefile
@@ -350,10 +294,11 @@ CmisSync/Mac/Info.plist
 CmisSync/Mac/Pixmaps/Makefile
 CmisSync/TestLibrary/Makefile
 CmisSync/TestLibrary/test-servers.json
-CmisSync/TestLibraryRunner/Makefile
+CmisSync/TestLibrary/proxy-server.json
 CmisSync/Linux/dataspacesync
 DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli
+debian/Makefile
 CmisSync/Makefile
 Makefile
 ])
