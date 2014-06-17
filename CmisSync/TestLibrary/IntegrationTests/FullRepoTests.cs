@@ -272,6 +272,8 @@ namespace TestLibrary.IntegrationTests
             content += content;
             doc.SetContent(content);
 
+            Thread.Sleep(500);
+
             this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
 
             this.repo.Run();
