@@ -1,5 +1,5 @@
 light_theme = ubuntu-mono-light
-light_themedir = /usr/share/icons/$(light_theme)
+light_themedir = $(datadir)/icons/$(light_theme)
 
 light_theme_icons = \
 	status,process-syncing-i-24.png \

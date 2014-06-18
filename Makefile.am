@@ -1,20 +1,15 @@
 ACLOCAL_AMFLAGS = -I build/m4/cmissync -I build/m4/shamrock
 
-basedirs = build CmisSync.Lib DataSpaceSync.Console
+basedirs = build Extras CmisSync.Lib DataSpaceSync.Console
 
 SUBDIRS = $(basedirs) $(GUISUBDIRS)
 DIST_SUBDIRS = $(basedirs) CmisSync
 
 EXTRA_DIST = \
 	README.md \
-	legal/LICENSE.txt \
-	legal/TRADEMARK.txt \
-	legal/AUTHORS.txt \
-	Extras/DotCMIS.dll \
-	$(JSON_PATH) \
-	$(NUNIT_PATH) \
-	$(DBREEZE_PATH) \
-	$(LOG4NET_PATH)
+	legal \
+	debian \
+	packages
 
 DISTCLEANFILES = \
 	intltool-extract \
@@ -31,6 +26,23 @@ bootstrap:
 	autoreconf -f -s -i
 	nuget restore CmisSync/Linux/CmisSync.sln
 
+install-exec-local:
+	$(INSTALL) -m 0755 $(JSON_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(NUNIT_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(MOQ_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(DBREEZE_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(LOG4NET_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(DOTCMIS_PATH) $(DESTDIR)$(pkglibdir)
+
+uninstall-local:
+	$(RM) \
+		$(DESTDIR)$(pkglibdir)/$(notdir $(JSON_PATH)) \
+		$(DESTDIR)$(pkglibdir)/$(notdir $(NUNIT_PATH)) \
+		$(DESTDIR)$(pkglibdir)/$(notdir $(MOQ_PATH)) \
+		$(DESTDIR)$(pkglibdir)/$(notdir $(DBREEZE_PATH)) \
+		$(DESTDIR)$(pkglibdir)/$(notdir $(LOG4NET_PATH)) \
+		$(DESTDIR)$(pkglibdir)/$(notdir $(DOTCMIS_PATH))
+
 debian-package:
 	rm -rf $(top_builddir)/debian/usr
 	make DESTDIR=$(abs_top_builddir)/debian install
@@ -42,10 +54,6 @@ apple-package:
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
 
 none:
-
-DotCMIS.dll:
-	xbuild Extras/OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
-	cp -f Extras/OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* Extras
 
 package:
 	make $(PACKAGE_TARGET)
