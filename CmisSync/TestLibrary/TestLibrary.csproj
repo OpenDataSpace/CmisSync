@@ -12,6 +12,8 @@
     <AssemblyName>TestLibrary</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <ReleaseVersion>
+    </ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -172,6 +174,7 @@
     <Compile Include="DataTests\ObjectTreeTest.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
     <Compile Include="StorageTests\ExtendedAttributeReaderDosTest.cs" />
+    <Compile Include="StorageTests\Utf8FileNameNormaizationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -203,19 +206,4 @@
   </Target>
   -->
   <ItemGroup />
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="True" RelativeConfigureInPath="../..">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
-          <DeployFilesVar />
-          <ResourcesVar />
-          <OthersVar />
-          <GacRefVar Name="LIBS" Prefix="-r:" />
-          <AsmRefVar Name="LIBS" Prefix="-r:" />
-          <ProjectRefVar Name="LIBS" Prefix="-r:" />
-        </MonoDevelop.Autotools.MakefileInfo>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
 </Project>
