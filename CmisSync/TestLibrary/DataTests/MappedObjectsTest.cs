@@ -45,11 +45,13 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast"), Category("MappedObjects")]
         public void ConstructorTakesData()
         {
-            var data = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken");
+            var data = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken") {
+                LastChecksum = new byte[20]
+            };
 
             var file = new MappedObject(data);
 
-            Assert.AreEqual(data, file as MappedObject);
+            Assert.That(data, Is.EqualTo(file));
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]

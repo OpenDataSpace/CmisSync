@@ -355,7 +355,7 @@ namespace CmisSync.Lib.Data
                 this.LastChangeToken,
                 this.LastRemoteWriteTimeUtc,
                 this.LastLocalWriteTimeUtc,
-                this.LastChecksum,
+                this.LastChecksum == null ? "null" : BitConverter.ToString(this.LastChecksum),
                 this.ChecksumAlgorithmName,
                 this.Name,
                 this.Description,

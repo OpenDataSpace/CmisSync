@@ -242,7 +242,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Fast")]
-        public void SaveObjectAndGetObjectReturnEqualObject()
+        public void SaveFolderObjectAndGetObjectReturnEqualObject()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
             string remoteId = "remoteId";
@@ -256,6 +256,25 @@ namespace TestLibrary.StorageTests
             var obj = storage.GetObjectByRemoteId(remoteId);
 
             Assert.That(obj.Equals(folder));
+        }
+
+        [Test, Category("Fast")]
+        public void SaveFileObjectAndGetObjectReturnsEqualObject()
+        {
+            var storage = new MetaDataStorage(this.engine, this.matcher);
+            string remoteId = "remoteId";
+            var file = new MappedObject("file", remoteId, MappedObjectType.File, null, null)
+            {
+                Description = "desc",
+                Guid = Guid.NewGuid(),
+                LastChecksum = new byte[20]
+            };
+
+            storage.SaveMappedObject(file);
+            var obj = storage.GetObjectByRemoteId(remoteId);
+
+            Assert.That(obj.LastChecksum, Is.Not.Null);
+            Assert.That(obj.Equals(file));
         }
 
         [Test, Category("Fast")]
