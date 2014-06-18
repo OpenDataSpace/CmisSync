@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ExtendedAttributeReaderUnixTest.cs" company="GRAU DATA AG">
+// <copyright file="ExtendedAttributeReaderDosTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,21 +16,20 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-#if __MonoCS__
-using System;
-using System.IO;
-using CmisSync.Lib.Storage;
-
-using NUnit.Framework;
-
-using Moq;
-
-using TestLibrary.IntegrationTests;
-
+#if !__MonoCS__
 namespace TestLibrary.StorageTests
 {
+    using System.IO;
+    using CmisSync.Lib.Storage;
+
+    using Moq;
+
+    using NUnit.Framework;
+
+    using TestLibrary.IntegrationTests;
+
     [TestFixture]
-    public class ExtendedAttributeReaderUnixTest
+    public class ExtendedAttributeReaderDosTest
     {
         private string path = string.Empty;
 
@@ -39,9 +38,9 @@ namespace TestLibrary.StorageTests
         {
             var config = ITUtils.GetConfig();
             string localPath = config[1].ToString();
-            path = Path.Combine(localPath, Path.GetRandomFileName());
-            var reader = new ExtendedAttributeReaderUnix();
-            if(!reader.IsFeatureAvailable(localPath)) {
+            this.path = Path.Combine(localPath, Path.GetRandomFileName());
+            var reader = new ExtendedAttributeReaderDos();
+            if (!reader.IsFeatureAvailable(localPath)) {
                 Assert.Ignore("Extended Attribute not available on this machine");
             }
         }
@@ -49,17 +48,19 @@ namespace TestLibrary.StorageTests
         [TearDown]
         public void CleanUp()
         {
-            if(File.Exists(path))
+            if (File.Exists(path)) {
                 File.Delete(path);
+            }
 
-            if(Directory.Exists(path))
+            if (Directory.Exists(path)) {
                 Directory.Delete(path);
+            }
         }
 
         [Test, Category("Fast")]
         public void DefaultConstructorWorks()
         {
-            new ExtendedAttributeReaderUnix();
+            new ExtendedAttributeReaderDos();
         }
 
         [Test, Category("Medium")]
@@ -68,7 +69,7 @@ namespace TestLibrary.StorageTests
         {
             using (File.Create(path));
             string key = "test";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             Assert.That(reader.GetExtendedAttribute(path, key) == null);
         }
 
@@ -79,7 +80,7 @@ namespace TestLibrary.StorageTests
             using (File.Create(path));
             string key = "test";
             string value = "value";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value));
         }
@@ -92,7 +93,7 @@ namespace TestLibrary.StorageTests
             string key = "test";
             string value = "value";
             string value2 = "value2";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             reader.SetExtendedAttribute(path, key, value);
             reader.SetExtendedAttribute(path, key, value2);
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value2));
@@ -105,7 +106,7 @@ namespace TestLibrary.StorageTests
             using (File.Create(path));
             string key = "test";
             string value = "value";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value));
             reader.RemoveExtendedAttribute(path, key);
@@ -119,7 +120,7 @@ namespace TestLibrary.StorageTests
             using (File.Create(path));
             string key = "test";
             string value = "value";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             Assert.That(reader.ListAttributeKeys(path).Count == 0);
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.ListAttributeKeys(path).Count == 1);
@@ -132,7 +133,7 @@ namespace TestLibrary.StorageTests
         {
             Directory.CreateDirectory(path);
             string key = "test";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             Assert.That(reader.GetExtendedAttribute(path, key) == null);
         }
 
@@ -143,7 +144,7 @@ namespace TestLibrary.StorageTests
             Directory.CreateDirectory(path);
             string key = "test";
             string value = "value";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value));
         }
@@ -156,7 +157,7 @@ namespace TestLibrary.StorageTests
             string key = "test";
             string value = "value";
             string value2 = "value2";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             reader.SetExtendedAttribute(path, key, value);
             reader.SetExtendedAttribute(path, key, value2);
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value2));
@@ -169,7 +170,7 @@ namespace TestLibrary.StorageTests
             Directory.CreateDirectory(path);
             string key = "test";
             string value = "value";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value));
             reader.RemoveExtendedAttribute(path, key);
@@ -183,7 +184,7 @@ namespace TestLibrary.StorageTests
             Directory.CreateDirectory(path);
             string key = "test";
             string value = "value";
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             Assert.That(reader.ListAttributeKeys(path).Count == 0);
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.ListAttributeKeys(path).Count == 1);
@@ -194,7 +195,7 @@ namespace TestLibrary.StorageTests
         [Category("ExtendedAttribute")]
         public void CheckAvailableOnPath()
         {
-            var reader = new ExtendedAttributeReaderUnix();
+            var reader = new ExtendedAttributeReaderDos();
             reader.IsFeatureAvailable(Environment.CurrentDirectory);
         }
     }

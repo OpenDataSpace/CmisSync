@@ -58,6 +58,7 @@ SOURCES =  \
 	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
 	RepoInfoTests.cs \
+	StorageTests/ExtendedAttributeReaderDosTest.cs \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/MetaDataStorageTest.cs \
