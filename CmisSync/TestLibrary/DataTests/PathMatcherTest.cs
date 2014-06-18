@@ -255,33 +255,33 @@ namespace TestLibrary.DataTests
         [Test, Category("Fast")]
         public void RootFolderCanBeRemotelyCreatedWithoutTrailingDenominator()
         {
-            var matcher = new PathMatcher("/tmp/", "/");
+            var matcher = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, "/");
 
-            Assert.That(matcher.CanCreateRemotePath("/tmp"), Is.True);
+            Assert.That(matcher.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.True);
         }
 
         [Test, Category("Fast")]
         public void RootFolderCanBeRemotelyCreatedWithTrailingDenominator()
         {
-            var matcher = new PathMatcher("/tmp", "/");
+            var matcher = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar), "/");
 
-            Assert.That(matcher.CanCreateRemotePath("/tmp/"), Is.True);
+            Assert.That(matcher.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar), Is.True);
         }
 
         [Test, Category("Fast")]
         public void RootFolderMatchesItselfWithTrailingDenominator()
         {
-            var matcher = new PathMatcher("/tmp", "/");
+            var matcher = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar), "/");
 
-            Assert.That(matcher.CanCreateRemotePath("/tmp/"), Is.True);
+            Assert.That(matcher.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar), Is.True);
         }
 
         [Test, Category("Fast")]
         public void RootFolderMatchesItselfWithoutTrailingDenominator()
         {
-            var matcher = new PathMatcher("/tmp/", "/");
+            var matcher = new PathMatcher(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, "/");
 
-            Assert.That(matcher.CanCreateRemotePath("/tmp"), Is.True);
+            Assert.That(matcher.CanCreateRemotePath(Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar)), Is.True);
         }
 
         [Test, Category("Fast")]
