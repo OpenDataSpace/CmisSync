@@ -51,7 +51,7 @@ namespace TestLibrary.EventsTests
         public void FsEventStoresDirectoryState()
         {
             var path = Path.Combine(Path.GetTempPath(), "nonexisting");
-            var info = Directory.CreateDirectory(path);
+            Directory.CreateDirectory(path);
             var e = new FSEvent(WatcherChangeTypes.Created, path, true);
 
             Assert.That(e.IsDirectory(), Is.True, "It is a Directory");
