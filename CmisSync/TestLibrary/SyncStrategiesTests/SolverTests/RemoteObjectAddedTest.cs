@@ -81,9 +81,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            var solver = new RemoteObjectAdded(Mock.Of<ISyncEventQueue>());
-
-            solver.Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
+            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>()).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.Create(), Times.Once());
             storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, false, this.creationDate);
@@ -106,9 +104,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            var solver = new RemoteObjectAdded(Mock.Of<ISyncEventQueue>());
-
-            solver.Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
+            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>()).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
             storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
@@ -134,9 +130,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            var solver = new RemoteObjectAdded(queue.Object);
-
-            solver.Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
+            new RemoteObjectAdded(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
 
             fileInfo.Verify(f => f.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read), Times.Once());
             fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());

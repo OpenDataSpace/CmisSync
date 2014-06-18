@@ -100,17 +100,62 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(remotePath);
         }
 
-        public static void VerifySavedMappedObject(this Mock<IMetaDataStorage> db, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, bool extendedAttributeAvailable = true, DateTime? lastModification = null, byte[] checksum = null)
+        public static void VerifySavedMappedObject(
+            this Mock<IMetaDataStorage> db,
+            MappedObjectType type,
+            string remoteId,
+            string name,
+            string parentId,
+            string changeToken,
+            bool extendedAttributeAvailable = true,
+            DateTime? lastModification = null,
+            byte[] checksum = null,
+            long contentSize = -1)
         {
-            VerifySavedMappedObject(db, type, remoteId, name, parentId, changeToken, Times.Once(), extendedAttributeAvailable, lastModification, checksum);
+            VerifySavedMappedObject(
+                db,
+                type,
+                remoteId,
+                name,
+                parentId,
+                changeToken,
+                Times.Once(),
+                extendedAttributeAvailable,
+                lastModification,
+                checksum,
+                contentSize);
         }
 
-        public static void VerifySavedMappedObject(this Mock<IMetaDataStorage> db, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, Times times, bool extendedAttributeAvailable = true, DateTime? lastModification = null, byte[] checksum = null)
+        public static void VerifySavedMappedObject(
+            this Mock<IMetaDataStorage> db,
+            MappedObjectType type,
+            string remoteId,
+            string name,
+            string parentId,
+            string changeToken,
+            Times times,
+            bool extendedAttributeAvailable = true,
+            DateTime? lastModification = null,
+            byte[] checksum = null,
+            long contentSize = -1)
         {
-            db.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, times, extendedAttributeAvailable, lastModification, checksum))), times);
+            db.Verify(
+                s =>
+                s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, extendedAttributeAvailable, lastModification, checksum, contentSize))),
+                times);
         }
 
-        private static bool VerifyMappedObject(IMappedObject o, MappedObjectType type, string remoteId, string name, string parentId, string changeToken, Times times, bool extendedAttributeAvailable, DateTime? lastModification, byte[] checksum)
+        private static bool VerifyMappedObject(
+            IMappedObject o,
+            MappedObjectType type,
+            string remoteId,
+            string name,
+            string parentId,
+            string changeToken,
+            bool extendedAttributeAvailable,
+            DateTime? lastModification,
+            byte[] checksum,
+            long contentSize)
         {
             Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId));
             Assert.That(o.Name, Is.EqualTo(name));
@@ -119,7 +164,9 @@ namespace TestLibrary.TestUtils
             Assert.That(o.Type, Is.EqualTo(type));
             if (extendedAttributeAvailable) {
                 Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty), "Given Guid must not be empty");
-            } else {
+            }
+            else
+            {
                 Assert.That(o.Guid, Is.EqualTo(Guid.Empty), "Given Guid must be empty");
             }
 
@@ -128,13 +175,14 @@ namespace TestLibrary.TestUtils
                 Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastModification));
             }
 
-            if(checksum != null) {
+            if (checksum != null) {
                 Assert.That(o.ChecksumAlgorithmName, Is.EqualTo("SHA1"));
                 Assert.That(o.LastChecksum, Is.EqualTo(checksum), "Given checksum is not equal to last saved checksum");
             }
 
             if (type == MappedObjectType.File) {
                 Assert.That(o.LastContentSize, Is.GreaterThanOrEqualTo(0));
+                Assert.That(o.LastContentSize, Is.EqualTo(contentSize));
             }
 
             return true;
