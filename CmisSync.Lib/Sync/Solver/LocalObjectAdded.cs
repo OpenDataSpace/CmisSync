@@ -60,16 +60,18 @@ namespace CmisSync.Lib.Sync.Solver
             localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
 
             MappedObject mapped = new MappedObject(
-                    localFileSystemInfo.Name,
-                    addedObject.Id,
-                    localFileSystemInfo is IDirectoryInfo ? MappedObjectType.Folder : MappedObjectType.File,
-                    parentId,
-                    addedObject.ChangeToken)
-                {
-                    Guid = uuid,
-                    LastRemoteWriteTimeUtc = addedObject.LastModificationDate,
-                    LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc
-                };
+                localFileSystemInfo.Name,
+                addedObject.Id,
+                localFileSystemInfo is IDirectoryInfo ? MappedObjectType.Folder : MappedObjectType.File,
+                parentId,
+                addedObject.ChangeToken)
+            {
+                Guid = uuid,
+                LastRemoteWriteTimeUtc = addedObject.LastModificationDate,
+                LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc,
+                LastChangeToken = addedObject.ChangeToken,
+                LastContentSize = localFileSystemInfo is IDirectoryInfo ? -1 : 0
+            };
             storage.SaveMappedObject(mapped);
 
             var localFile = localFileSystemInfo as IFileInfo;
@@ -84,6 +86,14 @@ namespace CmisSync.Lib.Sync.Solver
                     mapped.ChecksumAlgorithmName = "SHA1";
                     mapped.LastChecksum = hashAlg.Hash;
                 }
+
+                mapped.LastContentSize = localFile.Length;
+                localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
+                mapped.LastChangeToken = addedObject.ChangeToken;
+                mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
+                mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+
+                storage.SaveMappedObject(mapped);
             }
         }
 

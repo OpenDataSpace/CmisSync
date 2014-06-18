@@ -30,11 +30,15 @@ namespace CmisSync.Lib.Sync.Solver
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// A local object has been changed and should be uploaded (if necessary) to server or updated on the server.
     /// </summary>
     public class LocalObjectChanged : ISolver
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
+
         private ISyncEventQueue queue;
 
         /// <summary>
@@ -65,16 +69,23 @@ namespace CmisSync.Lib.Sync.Solver
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null) {
                 bool isChanged = false;
-                if (localFile.Length == mappedObject.LastContentSize) {
+                if (localFile.Length == mappedObject.LastContentSize && localFile.LastWriteTimeUtc != mappedObject.LastLocalWriteTimeUtc) {
+                    Logger.Debug("Scanning for differences");
                     using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
                         byte[] fileHash = SHA1Managed.Create().ComputeHash(file);
                         isChanged = !fileHash.SequenceEqual(mappedObject.LastChecksum);
+                        if (isChanged) {
+                            Logger.Debug(string.Format("{0}: actual hash{1}{2}: stored hash", BitConverter.ToString(fileHash), Environment.NewLine, BitConverter.ToString(mappedObject.LastChecksum)));
+                        }
                     }
-                } else {
+                } else if(localFile.Length != mappedObject.LastContentSize) {
+                    Logger.Debug("lastContentSize: " + mappedObject.LastContentSize);
+                    Logger.Debug("actualContentSize: " + localFile.Length);
                     isChanged = true;
                 }
 
                 if (isChanged) {
+                    Logger.Debug(string.Format("Local file \"{0}\" has been changed: {1}", localFile.FullName, mappedObject.ToString()));
                     IFileUploader uploader = ContentTasks.ContentTaskUtils.CreateUploader();
                     var doc = remoteId as IDocument;
                     FileTransmissionEvent statusEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
@@ -93,6 +104,7 @@ namespace CmisSync.Lib.Sync.Solver
                     mappedObject.LastChangeToken = doc.ChangeToken;
                     mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
                     mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+                    mappedObject.LastContentSize = localFile.Length;
 
                     statusEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
