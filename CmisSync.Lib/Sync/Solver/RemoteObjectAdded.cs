@@ -126,7 +126,7 @@ namespace CmisSync.Lib.Sync.Solver
                     MappedObjectType.File,
                     remoteDoc.Parents[0].Id,
                     remoteDoc.ChangeToken,
-                    file.Length)
+                    (long)remoteDoc.ContentStreamLength)
                 {
                     Guid = guid,
                     LastLocalWriteTimeUtc = file.LastWriteTimeUtc,

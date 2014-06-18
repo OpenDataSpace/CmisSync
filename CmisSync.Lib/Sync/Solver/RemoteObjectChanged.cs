@@ -114,6 +114,7 @@ namespace CmisSync.Lib.Sync.Solver
                     }
 
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+                    obj.LastContentSize = (long)remoteDocument.ContentStreamLength;
                 }
 
                 obj.LastChangeToken = remoteDocument.ChangeToken;

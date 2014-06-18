@@ -117,7 +117,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
             var fileInfo = new Mock<IFileInfo>();
-
             byte[] content = Encoding.UTF8.GetBytes("content");
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
             fileInfo.SetupAllProperties();
