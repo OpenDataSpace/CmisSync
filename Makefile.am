@@ -1,20 +1,15 @@
 ACLOCAL_AMFLAGS = -I build/m4/cmissync -I build/m4/shamrock
 
-basedirs = build CmisSync.Lib DataSpaceSync.Console
+basedirs = build Extras CmisSync.Lib DataSpaceSync.Console
 
 SUBDIRS = $(basedirs) $(GUISUBDIRS)
 DIST_SUBDIRS = $(basedirs) CmisSync
 
 EXTRA_DIST = \
 	README.md \
-	legal/LICENSE.txt \
-	legal/TRADEMARK.txt \
-	legal/AUTHORS.txt \
-	Extras/DotCMIS.dll \
-	$(JSON_PATH) \
-	$(NUNIT_PATH) \
-	$(DBREEZE_PATH) \
-	$(LOG4NET_PATH)
+	legal \
+	debian \
+	packages
 
 DISTCLEANFILES = \
 	intltool-extract \
@@ -42,10 +37,6 @@ apple-package:
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
 
 none:
-
-DotCMIS.dll:
-	xbuild Extras/OpenDataSpaceDotCMIS/DotCMIS/DotCMIS.csproj /t:Rebuild
-	cp -f Extras/OpenDataSpaceDotCMIS/DotCMIS/bin/Debug/DotCMIS.* Extras
 
 package:
 	make $(PACKAGE_TARGET)

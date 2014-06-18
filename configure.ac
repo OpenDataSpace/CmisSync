@@ -5,7 +5,7 @@ AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
 AC_CONFIG_SRCDIR([CmisSync/Program.cs])
 AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-zip no-dist-gzip])
+AM_INIT_AUTOMAKE([foreign tar-ustar dist-bzip2 dist-zip no-dist-gzip])
 AM_MAINTAINER_MODE
 
 dnl Export Version Info
@@ -24,10 +24,10 @@ SHAMROCK_EXPAND_DATADIR
 AC_PROG_INSTALL
 
 dnl Mono and gmcs
-SHAMROCK_CHECK_MONO_MODULE(2.8)
+SHAMROCK_CHECK_MONO_MODULE(3.2)
 SHAMROCK_FIND_MONO_RUNTIME
     
-PKG_CHECK_EXISTS([mono >= 2.8],
+PKG_CHECK_EXISTS([mono >= 3.2],
 [SHAMROCK_FIND_MONO_4_0_COMPILER
 SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
     System
@@ -52,6 +52,9 @@ AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreez
 AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
 AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
 
+AC_SUBST(DOTCMIS_LIBS,[[-r:\$\(top_srcdir\)/Extras/DotCMIS.dll]])
+AC_SUBST(DOTCMIS_PATH,[[\$\(top_srcdir\)/Extras/DotCMIS.dll]])
+
 CMISSYNC_CHECK_NOTIFY_SHARP
 CMISSYNC_CHECK_GTK_SHARP
 
@@ -72,28 +75,6 @@ AC_ARG_ENABLE(appindicator,
 	AS_HELP_STRING([--enable-appindicator[=@<:@no/auto/yes@:>@]],[Build support for application indicators ]),
 	[enable_appindicator=$enableval],
 	[enable_appindicator="auto"])
-
-AC_ARG_WITH([dotcmis],
-            AS_HELP_STRING([--with-dotcmis=PATH],[Specify path to DotCMIS.dll]),
-            [dotcmis_dll=${withval}],[dotcmis_dll=no])
-if test "x$dotcmis_dll" = "xno" ; then
-    AC_ERROR([Please specify the path to DotCMIS.dll using --with-dotcmis (use --help for more information.)])
-fi
-if test -f ${dotcmis_dll} ; then
-    case ${dotcmis_dll} in
-        /*)
-        AC_SUBST(DOTCMISLIBS,[-r:${dotcmis_dll}])
-        AC_SUBST(DOTCMISPATH,[${dotcmis_dll}])
-        ;;
-        *)
-        AC_SUBST(DOTCMISLIBS,[[-r:\$\(top_srcdir\)/${dotcmis_dll}]])
-        AC_SUBST(DOTCMISPATH,[[\$\(top_srcdir\)/${dotcmis_dll}]])
-        ;;
-    esac
-else
-    AC_ERROR([${dotcmis_dll} not found])
-fi
-
 
 TEST_URL="https://devel.dataspace.cc/cmis/atom11"
 AC_ARG_WITH([test-url],
@@ -300,6 +281,7 @@ DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli
 debian/Makefile
 CmisSync/Makefile
+Extras/Makefile
 Makefile
 ])
 
