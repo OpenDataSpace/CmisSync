@@ -127,10 +127,14 @@ namespace TestLibrary.TestUtils
                 Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastModification));
                 Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastModification));
             }
-            
+
             if(checksum != null) {
                 Assert.That(o.ChecksumAlgorithmName, Is.EqualTo("SHA1"));
                 Assert.That(o.LastChecksum, Is.EqualTo(checksum), "Given checksum is not equal to last saved checksum");
+            }
+
+            if (type == MappedObjectType.File) {
+                Assert.That(o.LastContentSize, Is.GreaterThanOrEqualTo(0));
             }
 
             return true;

@@ -70,15 +70,13 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             fileInfo.Setup(f => f.Length).Returns(1);
             var fileContent = new byte[1];
             var localFileStream = new MemoryStream(fileContent);
-            byte[] hash;
-            using (SHA1 hashAlg = new SHA1Managed()){
-                hash = hashAlg.ComputeHash(fileContent);
-            }
+            byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
+
             fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, null, hash);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, hash);
             this.session.Verify(
                 s => s.CreateDocument(
                     It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
@@ -90,6 +88,39 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+            document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void Local1ByteFileAddedWithExtAttr() {
+            string fileName = "fileName";
+            string fileId = "fileId";
+            string parentId = "parentId";
+            string lastChangeToken = "token";
+            bool extendedAttributes = true;
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(1);
+            var fileContent = new byte[1];
+            var localFileStream = new MemoryStream(fileContent);
+            byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
+
+            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
+
+            Mock<IDocument> document;
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, hash);
+            this.session.Verify(
+                s => s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
+                It.Is<IObjectId>(o => o.Id == parentId),
+                It.Is<IContentStream>(st => st == null),
+                null,
+                null,
+                null,
+                null),
+                Times.Once());
+            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
         }
 
