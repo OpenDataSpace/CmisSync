@@ -76,14 +76,23 @@ namespace CmisSync.Lib.Sync.Solver
 
                 if (isChanged) {
                     IFileUploader uploader = ContentTasks.ContentTaskUtils.CreateUploader();
+                    var doc = remoteId as IDocument;
                     FileTransmissionEvent statusEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                     this.queue.AddEvent(statusEvent);
                     statusEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
                     using (var hashAlg = new SHA1Managed())
                     using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                        uploader.UploadFile(remoteId as IDocument, file, statusEvent, hashAlg);
+                        uploader.UploadFile(doc, file, statusEvent, hashAlg);
                         mappedObject.LastChecksum = hashAlg.Hash;
                     }
+
+                    if (doc.LastModificationDate != null) {
+                        localFile.LastWriteTimeUtc = (DateTime)doc.LastModificationDate;
+                    }
+
+                    mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
+                    mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+
                     statusEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
             }

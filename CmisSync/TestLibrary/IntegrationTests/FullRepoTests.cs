@@ -332,8 +332,11 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
-            Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(newContent.Length));
-            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(newContent.Length));
+            var remoteDoc = this.remoteRootDir.GetChildren().First() as IDocument;
+            var localDoc = this.localRootDir.GetFiles().First();
+            Assert.That(remoteDoc.ContentStreamLength, Is.EqualTo(newContent.Length));
+            Assert.That(localDoc.Length, Is.EqualTo(newContent.Length));
+            Assert.That(localDoc.LastWriteTimeUtc, Is.EqualTo(remoteDoc.LastModificationDate));
 
         }
 

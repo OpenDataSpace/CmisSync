@@ -141,6 +141,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         public void LocalFileContentChanged()
         {
             var modificationDate = DateTime.UtcNow;
+            var newModificationDate = modificationDate.AddHours(1);
             var storage = new Mock<IMetaDataStorage>();
             int fileLength = 20;
             byte[] content = new byte[fileLength];
@@ -172,7 +173,12 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             storage.AddMappedFile(mappedObject, "path");
             var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
             using (var uploadedContent = new MemoryStream()) {
-                remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Callback<IContentStream, bool, bool>((s, o, r) => s.Stream.CopyTo(uploadedContent));
+                remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Callback<IContentStream, bool, bool>(
+                    (s, o, r) =>
+                    { s.Stream.CopyTo(uploadedContent);
+                    remoteFile.Setup(f => f.LastModificationDate).Returns(newModificationDate);
+                }
+                );
 
                 new LocalObjectChanged(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
 
@@ -188,6 +194,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 remoteFile.VerifySetContentStream();
                 queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Path == localFile.Object.FullName && e.Type == FileTransmissionType.UPLOAD_MODIFIED_FILE)), Times.Once());
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
+                Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(newModificationDate));
             }
         }
     }
