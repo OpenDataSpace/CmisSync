@@ -3,7 +3,7 @@
 //
 //   Copyright (C) 2012  Nicolas Raoul &lt;nicolas.raoul@aegif.jp&gt;
 //   Copyright (C) 2014 GRAU DATA &lt;info@graudata.com&gt;
-//   
+//
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
 //   the Free Software Foundation, either version 3 of the License, or
@@ -128,7 +128,7 @@ namespace CmisSync.Lib.Sync
         private ContentChangeEventTransformer transformer;
 
         private DBreezeEngine db;
-  
+
         /// <summary>
         /// The storage.
         /// </summary>
@@ -149,7 +149,7 @@ namespace CmisSync.Lib.Sync
         public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener) : this(repoInfo, activityListener, false, CreateQueue())
         {
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class.
         /// </summary>
@@ -178,9 +178,9 @@ namespace CmisSync.Lib.Sync
             this.RemoteUrl = repoInfo.Address;
 
             this.Queue = queue;
-   
+
             this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
-            
+
             // Create Database connection
             this.db = new DBreezeEngine(new DBreezeConfiguration {
                 DBreezeDataFolderName = inMemory ? string.Empty : repoInfo.GetDatabasePath(),
@@ -237,7 +237,7 @@ namespace CmisSync.Lib.Sync
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class and releases unmanaged 
+        /// Finalizes an instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class and releases unmanaged
         /// resources and performs other cleanup operations before the is reclaimed by garbage collection.
         /// </summary>
         ~CmisRepo()
@@ -281,7 +281,7 @@ namespace CmisSync.Lib.Sync
         /// Gets the watcherproducer of the local filesystem for changes.
         /// </summary>
         public IWatcherProducer WatcherProducer { get; private set; }
-        
+
         /// <summary>
         /// Gets the watcherconsumer of the local filesystem for changes.
         /// </summary>
@@ -309,7 +309,7 @@ namespace CmisSync.Lib.Sync
         }
 
         /// <summary>
-        /// Implement IDisposable interface. 
+        /// Implement IDisposable interface.
         /// </summary>
         public void Dispose()
         {
@@ -366,10 +366,10 @@ namespace CmisSync.Lib.Sync
                 this.disposed = true;
             }
         }
-               
+
         private static IDisposableSyncEventQueue CreateQueue() {
             var manager = new SyncEventManager();
-            return new SyncEventQueue(manager);    
+            return new SyncEventQueue(manager);
         }
 
         private bool RepoInfoChanged(ISyncEvent e)
@@ -380,6 +380,7 @@ namespace CmisSync.Lib.Sync
                 this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.GetIgnoredPaths());
                 this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
                 this.ignoredFolderNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames;
+                this.authProvider.DeleteAllCookies();
                 return true;
             }
 

@@ -108,6 +108,14 @@ namespace CmisSync.Lib.Cmis
         }
 
         /// <summary>
+        /// Deletes all cookies.
+        /// </summary>
+        public void DeleteAllCookies()
+        {
+            this.Cookies = new CookieContainer();
+        }
+
+        /// <summary>
         /// Dispose the specified disposing.
         /// </summary>
         /// <param name='disposing'>

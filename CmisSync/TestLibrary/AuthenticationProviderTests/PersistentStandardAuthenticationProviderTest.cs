@@ -122,5 +122,18 @@ namespace TestLibrary.AuthenticationProviderTests
                 auth.HandleResponse(new Mock<WebResponse>().Object);
             }
         }
+
+        [Test, Category("Fast")]
+        public void DeleteAllCookies()
+        {
+            using (var auth = new PersistentStandardAuthenticationProvider(this.storage.Object, this.url))
+            {
+                auth.Cookies.Add(this.url, new Cookie("test", "value"));
+                Assert.That(auth.Cookies.Count, Is.EqualTo(1));
+
+                auth.DeleteAllCookies();
+                Assert.That(auth.Cookies.Count, Is.EqualTo(0));
+            }
+        }
     }
 }
