@@ -24,12 +24,14 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System.Security.Cryptography;
     using System.Text;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Solver;
 
     using DotCMIS.Client;
+    using DotCMIS.Data;
 
     using Moq;
 
@@ -165,7 +167,90 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
         [Test, Category("Fast")]
         public void RemoteDocumentChangedAndLocalFileGotChangedWhileDownloadingCreatesAConfictFile() {
-            Assert.Fail("TODO");
+            DateTime creationDate = DateTime.UtcNow;
+            string fileName = "a";
+            string path = Path.Combine(Path.GetTempPath(), fileName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+            string newChangeToken = "newToken";
+            string confictFilePath = Utils.FindNextConflictFreeFilename(path);
+            byte[] newContent = Encoding.UTF8.GetBytes("content");
+            byte[] oldContent = Encoding.UTF8.GetBytes("older content");
+            byte[] changedContent = Encoding.UTF8.GetBytes("change content");
+            long oldContentSize = oldContent.Length;
+            long newContentSize = newContent.Length;
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(newContent);
+            byte[] oldHash = SHA1Managed.Create().ComputeHash(oldContent);
+            var queue = new Mock<ISyncEventQueue>();
+            var storage = new Mock<IMetaDataStorage>();
+            var mappedObject = new MappedObject(
+                fileName,
+                id,
+                MappedObjectType.File,
+                parentId,
+                lastChangeToken,
+                oldContentSize)
+            {
+                Guid = Guid.NewGuid(),
+                LastLocalWriteTimeUtc = new DateTime(0),
+                LastRemoteWriteTimeUtc = new DateTime(0),
+                LastChecksum = oldHash
+            };
+
+            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
+            var cacheFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
+            cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(new MemoryStream());
+            var backupFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
+
+            storage.AddMappedFile(mappedObject, path);
+
+            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, fileName, parentId, newContentSize, newContent, newChangeToken);
+            remoteObject.Setup(r => r.LastModificationDate).Returns(creationDate);
+
+            Mock<IFileInfo> localFile = new Mock<IFileInfo>();
+            localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
+            localFile.Setup(f => f.FullName).Returns(path);
+
+            this.SetupContentWithCallBack(remoteObject, newContent, fileName).Callback(
+                () =>
+                {
+                localFile.Setup(f => f.LastWriteTimeUtc).Returns(creationDate);
+            });
+
+            cacheFile.Setup(
+                c =>
+                c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
+                () =>
+                backupFile.Setup(
+                b =>
+                b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(new MemoryStream(changedContent)));
+
+            new RemoteObjectChanged(queue.Object, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteObject.Object);
+
+            storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
+            Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
+            queue.Verify(
+                q =>
+                q.AddEvent(It.Is<FileTransmissionEvent>(
+                e =>
+                e.Type == FileTransmissionType.DOWNLOAD_MODIFIED_FILE &&
+                e.CachePath == cacheFile.Object.FullName &&
+                e.Path == localFile.Object.FullName)),
+                Times.Once());
+            cacheFile.Verify(c => c.Replace(localFile.Object, backupFile.Object, true), Times.Once());
+            backupFile.Verify(b => b.MoveTo(confictFilePath), Times.Once());
+            backupFile.Verify(b => b.Delete(), Times.Never());
+        }
+
+        private Moq.Language.Flow.IReturnsResult<IDocument> SetupContentWithCallBack(Mock<IDocument> doc, byte[] content, string fileName, string mimeType = "application/octet-stream") {
+            var stream = Mock.Of<IContentStream>(
+                s =>
+                s.Length == content.Length &&
+                s.MimeType == mimeType &&
+                s.FileName == fileName &&
+                s.Stream == new MemoryStream(content));
+            return doc.Setup(d => d.GetContentStream()).Returns(stream);
         }
     }
 }
