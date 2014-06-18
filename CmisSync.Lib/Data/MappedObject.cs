@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Data
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Linq;
 
     using DotCMIS.Client;
     using Newtonsoft.Json;
@@ -153,6 +154,12 @@ namespace CmisSync.Lib.Data
                 this.LastContentSize = data.LastContentSize;
                 this.ActualOperation = data.ActualOperation;
                 this.Retries = data.Retries ?? new Dictionary<OperationType, int>();
+                if (data.LastChecksum == null) {
+                    this.LastChecksum = null;
+                } else {
+                    this.LastChecksum = new byte[data.LastChecksum.Length];
+                    Buffer.BlockCopy(data.LastChecksum, 0, this.LastChecksum, 0, data.LastChecksum.Length);
+                }
             }
         }
 
@@ -322,11 +329,11 @@ namespace CmisSync.Lib.Data
                     object.Equals(this.LastChangeToken, p.LastChangeToken) &&
                     object.Equals(this.LastRemoteWriteTimeUtc, p.LastRemoteWriteTimeUtc) &&
                     object.Equals(this.LastLocalWriteTimeUtc, p.LastLocalWriteTimeUtc) &&
-                    object.Equals(this.LastChecksum, p.LastChecksum) &&
                     object.Equals(this.ChecksumAlgorithmName, p.ChecksumAlgorithmName) &&
                     object.Equals(this.Name, p.Name) &&
                     object.Equals(this.Guid, p.Guid) &&
-                    object.Equals(this.LastContentSize, p.LastContentSize);
+                    object.Equals(this.LastContentSize, p.LastContentSize) &&
+                    ((this.LastChecksum == null && p.LastChecksum == null) || (this.LastChecksum != null && p.LastChecksum != null && this.LastChecksum.SequenceEqual(p.LastChecksum)));
         }
 
         /// <summary>
