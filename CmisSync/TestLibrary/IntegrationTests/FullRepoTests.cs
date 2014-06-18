@@ -338,7 +338,7 @@ namespace TestLibrary.IntegrationTests
             var localDoc = this.localRootDir.GetFiles().First();
             Assert.That(remoteDoc.ContentStreamLength, Is.EqualTo(newContent.Length));
             Assert.That(localDoc.Length, Is.EqualTo(newContent.Length));
-            Assert.That(localDoc.LastWriteTimeUtc, Is.EqualTo(remoteDoc.LastModificationDate));
+            Assert.That((localDoc.LastWriteTimeUtc - remoteDoc.LastModificationDate).Value.Seconds, Is.EqualTo(0));
 
         }
 
