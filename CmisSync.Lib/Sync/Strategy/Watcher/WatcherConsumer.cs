@@ -108,6 +108,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 }
             }
 
+            Logger.Debug("Adding Event: " + folderEvent);
             Queue.AddEvent(folderEvent);
         }
 
@@ -128,6 +129,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     newfile,
                     null,
                     null);
+                Logger.Debug("Adding Event: " + newEvent);
                 Queue.AddEvent(newEvent);
             } else {
                 var file = this.fsFactory.CreateFileInfo(e.Path);
@@ -145,6 +147,8 @@ namespace CmisSync.Lib.Sync.Strategy
                     newEvent.LocalContent = ContentChangeType.DELETED;
                     break;
                 }
+
+                Logger.Debug("Adding Event: " + newEvent);
 
                 Queue.AddEvent(newEvent);
             }

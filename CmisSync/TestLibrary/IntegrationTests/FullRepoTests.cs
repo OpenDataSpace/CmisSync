@@ -207,6 +207,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
+            Thread.Sleep(5000);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
 
@@ -272,7 +273,8 @@ namespace TestLibrary.IntegrationTests
             content += content;
             doc.SetContent(content);
 
-            Thread.Sleep(500);
+
+            Thread.Sleep(5000);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
 
