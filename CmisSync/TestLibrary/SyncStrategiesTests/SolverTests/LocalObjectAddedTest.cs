@@ -76,7 +76,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, hash);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, hash, 1);
             this.session.Verify(
                 s => s.CreateDocument(
                     It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
@@ -109,7 +109,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, hash);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, hash, 1);
             this.session.Verify(
                 s => s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
@@ -138,7 +138,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, contentSize: 0);
             this.session.Verify(
                 s => s.CreateDocument(
                     It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
@@ -166,7 +166,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, contentSize: 0);
             this.session.Verify(
                 s => s.CreateDocument(
                     It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),

@@ -133,7 +133,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 mappedObject.LastChangeToken,
                 true,
                 localFile.Object.LastWriteTimeUtc,
-                expectedHash);
+                expectedHash,
+                fileLength);
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
@@ -192,7 +193,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     newChangeToken,
                     true,
                     localFile.Object.LastWriteTimeUtc,
-                    expectedHash);
+                    expectedHash,
+                    fileLength);
                 remoteFile.VerifySetContentStream();
                 queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Path == localFile.Object.FullName && e.Type == FileTransmissionType.UPLOAD_MODIFIED_FILE)), Times.Once());
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
