@@ -127,7 +127,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
             var cacheFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
-            cacheFile.Setup(c => c.Open(FileMode.Truncate, FileAccess.Write, FileShare.None)).Returns(new MemoryStream());
+            cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(new MemoryStream());
             var backupFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
 
             storage.AddMappedFile(mappedObject, path);
