@@ -26,6 +26,13 @@ bootstrap:
 	autoreconf -f -s -i
 	nuget restore CmisSync/Linux/CmisSync.sln
 
+install-exec-local:
+	$(INSTALL) -m 0755 $(JSON_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(NUNIT_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(DBREEZE_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(LOG4NET_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(DOTCMIS_PATH) $(DESTDIR)$(pkglibdir)
+
 debian-package:
 	rm -rf $(top_builddir)/debian/usr
 	make DESTDIR=$(abs_top_builddir)/debian install
