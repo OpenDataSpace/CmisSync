@@ -147,12 +147,6 @@ namespace CmisSync
                             LoadAddCustomizeWPF();
                             break;
 
-                        // Fourth page of the remote folder addition dialog: starting to sync.
-                        // TODO: This step should be removed. Now it appears just a brief instant, because sync is asynchronous.
-                        case PageType.Syncing:
-                            SetupAddSyncing();
-                            break;
-
                         // Final page of the remote folder addition dialog: end of the addition wizard.
                         case PageType.Finished:
                             SetupAddFinish();
