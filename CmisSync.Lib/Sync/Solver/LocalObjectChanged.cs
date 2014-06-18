@@ -90,6 +90,7 @@ namespace CmisSync.Lib.Sync.Solver
                         localFile.LastWriteTimeUtc = (DateTime)doc.LastModificationDate;
                     }
 
+                    mappedObject.LastChangeToken = doc.ChangeToken;
                     mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
                     mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
 

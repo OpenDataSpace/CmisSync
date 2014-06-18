@@ -142,6 +142,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         {
             var modificationDate = DateTime.UtcNow;
             var newModificationDate = modificationDate.AddHours(1);
+            var newChangeToken = "newChangeToken";
             var storage = new Mock<IMetaDataStorage>();
             int fileLength = 20;
             byte[] content = new byte[fileLength];
@@ -177,6 +178,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     (s, o, r) =>
                     { s.Stream.CopyTo(uploadedContent);
                     remoteFile.Setup(f => f.LastModificationDate).Returns(newModificationDate);
+                    remoteFile.Setup(f => f.ChangeToken).Returns(newChangeToken);
                 }
                 );
 
@@ -187,7 +189,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     "remoteId",
                     mappedObject.Name,
                     mappedObject.ParentId,
-                    mappedObject.LastChangeToken,
+                    newChangeToken,
                     true,
                     localFile.Object.LastWriteTimeUtc,
                     expectedHash);
