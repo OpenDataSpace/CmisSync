@@ -105,6 +105,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             mappedFile.SetupProperty(f => f.Name, oldName);
             mappedFile.SetupProperty(f => f.RemoteObjectId, id);
             mappedFile.Setup(f => f.Type).Returns(MappedObjectType.File);
+            mappedFile.Setup(f => f.LastContentSize).Returns(0);
 
             var storage = new Mock<IMetaDataStorage>();
             storage.AddMappedFile(mappedFile.Object);
@@ -113,7 +114,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == newName), It.Is<bool>(b => b == true)), Times.Once());
 
-            storage.VerifySavedMappedObject(MappedObjectType.File, id, newName, null, newChangeToken, true, modificationDate);
+            storage.VerifySavedMappedObject(MappedObjectType.File, id, newName, null, newChangeToken, true, modificationDate, contentSize: 0);
         }
     }
 }

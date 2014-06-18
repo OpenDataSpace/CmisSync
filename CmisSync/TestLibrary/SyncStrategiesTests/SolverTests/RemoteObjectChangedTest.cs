@@ -149,7 +149,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             new RemoteObjectChanged(queue.Object, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteObject.Object);
 
-            storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash);
+            storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
             Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
             queue.Verify(
                 q =>
