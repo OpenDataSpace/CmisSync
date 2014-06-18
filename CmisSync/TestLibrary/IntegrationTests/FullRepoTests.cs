@@ -308,6 +308,35 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
+        [Test, Category("Slow")]
+        public void OneLocalFileContentIsChanged()
+        {
+            string fileName = "file.txt";
+            string content = "cat";
+            string newContent = "new born citty";
+            this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            using (var filestream = this.localRootDir.GetFiles().First().CreateText()) {
+                filestream.Write(newContent);
+            }
+
+            while (this.repo.SingleStepQueue.Queue.IsEmpty)
+            {
+                //Wait for Watcher to kick in
+                Thread.Sleep(100);
+            }
+
+            this.repo.Run();
+
+            Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(newContent.Length));
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(newContent.Length));
+
+        }
+
         private class CmisRepoMock : CmisRepo
         {
             public SingleStepEventQueue SingleStepQueue;
