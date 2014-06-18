@@ -89,7 +89,7 @@ namespace CmisSync.Lib.Sync.Solver
                     var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName, cacheFile.FullName);
                     this.queue.AddEvent(transmissionEvent);
                     using (SHA1 hashAlg = new SHA1Managed())
-                    using (var filestream = cacheFile.Open(FileMode.Truncate, FileAccess.Write, FileShare.None))
+                    using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
                     using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                         download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
                         obj.ChecksumAlgorithmName = "SHA1";
