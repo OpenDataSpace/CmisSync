@@ -69,7 +69,7 @@ namespace CmisSync.Lib.Events
         /// <value>The path.</value>
         public string Path {
             get {
-                return this.RemoteFile != null ? this.RemoteFile.Paths[0] : null;
+                return this.RemoteFile != null && this.RemoteFile.Paths != null ? this.RemoteFile.Paths[0] : null;
             }
         }
 

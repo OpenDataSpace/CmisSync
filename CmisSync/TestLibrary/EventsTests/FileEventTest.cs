@@ -73,5 +73,13 @@ namespace TestLibrary.EventsTests
             Assert.That(fe.LocalFile, Is.Null);
             Assert.That(fe, Is.EqualTo(fe));
         }
+
+        [Test, Category("Fast")]
+        public void ToStringWithEmptyPathsTest()
+        {
+            var remoteFile = Mock.Of<IDocument>();
+            var fe = new FileEvent(null, remoteFile);
+            fe.ToString();
+        }
     }
 }
