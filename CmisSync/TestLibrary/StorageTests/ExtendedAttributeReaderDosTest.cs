@@ -19,6 +19,7 @@
 #if !__MonoCS__
 namespace TestLibrary.StorageTests
 {
+    using System;
     using System.IO;
     using CmisSync.Lib.Storage;
 

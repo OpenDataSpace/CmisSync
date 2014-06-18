@@ -26,7 +26,7 @@ namespace CmisSync.Lib.Storage
 
     using Microsoft.Win32.SafeHandles;
 
-    class ExtendedAttributeReaderDos : IExtendedAttributeReader
+    public class ExtendedAttributeReaderDos : IExtendedAttributeReader
     {
 #if ! __MonoCS__
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -122,13 +122,22 @@ namespace CmisSync.Lib.Storage
 
         public List<string> ListAttributeKeys(string path)
         {
+#if ! __MonoCS__
             throw new NotImplementedException();
+#else
+            throw new WrongPlatformException();
+#endif
         }
 
         public bool IsFeatureAvailable(string path)
         {
-            // TODO implement check (for FAT32)
-            return true;
+#if ! __MonoCS__
+            string fullPath = new FileInfo(path).FullName;
+            DriveInfo info = new DriveInfo(Path.GetPathRoot(fullPath));
+            return info.DriveFormat.Equals("NTFS", StringComparison.OrdinalIgnoreCase);
+#else
+            throw new WrongPlatformException();
+#endif
         }
     }
 }
