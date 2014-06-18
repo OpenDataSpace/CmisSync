@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Events
 {
     using System;
     using System.IO;
- 
+
     /// <summary>
     /// FS event.
     /// </summary>
@@ -30,6 +30,8 @@ namespace CmisSync.Lib.Events
     /// </exception>
     public class FSEvent : IFSEvent
     {
+        bool isDirectory;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FSEvent"/> class.
         /// </summary>
@@ -42,7 +44,7 @@ namespace CmisSync.Lib.Events
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
-        public FSEvent(WatcherChangeTypes type, string path)
+        public FSEvent(WatcherChangeTypes type, string path, bool isDirectory)
         {
             if (path == null) {
                 throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
@@ -52,8 +54,9 @@ namespace CmisSync.Lib.Events
             this.Path = path;
             path = path.Trim(System.IO.Path.DirectorySeparatorChar);
             this.Name = path.Substring(path.LastIndexOf(System.IO.Path.DirectorySeparatorChar.ToString()) + 1);
+            this.isDirectory = isDirectory;
         }
-  
+
         /// <summary>
         /// Gets the type.
         /// </summary>
@@ -61,7 +64,7 @@ namespace CmisSync.Lib.Events
         /// The type.
         /// </value>
         public WatcherChangeTypes Type { get; private set; }
-  
+
         /// <summary>
         /// Gets the path.
         /// </summary>
@@ -82,7 +85,7 @@ namespace CmisSync.Lib.Events
         {
             return string.Format("FSEvent with type \"{0}\" on path \"{1}\"", this.Type, this.Path);
         }
-  
+
         /// <summary>
         /// Determines whether this instance is directory.
         /// </summary>
@@ -91,15 +94,7 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public bool IsDirectory()
         {
-            // detect whether its a directory or file
-            try
-            {
-                return (File.GetAttributes(this.Path) & FileAttributes.Directory) == FileAttributes.Directory;
-            }
-            catch(IOException)
-            {
-                return false;
-            }
+            return this.isDirectory;
         }
     }
 }

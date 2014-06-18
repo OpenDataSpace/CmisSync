@@ -35,7 +35,7 @@ namespace TestLibrary.EventsTests
         {
             string name = "test";
             string path = Path.Combine(Path.GetTempPath(), name);
-            var e = new FSEvent(WatcherChangeTypes.Created, path);
+            var e = new FSEvent(WatcherChangeTypes.Created, path, false);
             Assert.That(e.Name, Is.EqualTo(name));
             Assert.That(e.Path, Is.EqualTo(path));
         }
@@ -44,7 +44,17 @@ namespace TestLibrary.EventsTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionInNullPath()
         {
-            new FSEvent(WatcherChangeTypes.Created, null);
+            new FSEvent(WatcherChangeTypes.Created, null, false);
+        }
+
+        [Test, Category("Medium")]
+        public void FsEventStoresDirectoryState()
+        {
+            var path = Path.Combine(Path.GetTempPath(), "nonexisting");
+            var info = Directory.CreateDirectory(path);
+            var e = new FSEvent(WatcherChangeTypes.Created, path, true);
+
+            Assert.That(e.IsDirectory(), Is.True, "It is a Directory");
         }
     }
 }

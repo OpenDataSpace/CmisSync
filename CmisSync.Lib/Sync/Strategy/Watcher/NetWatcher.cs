@@ -126,7 +126,14 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </param>
         private void OnCreatedChangedDeleted(object source, FileSystemEventArgs e)
         {
-            this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath));
+            bool isDirectory;
+            if(e.ChangeType == WatcherChangeTypes.Deleted) {
+                //we can not know it but is not relevant
+                isDirectory = false;
+            } else {
+                isDirectory = (File.GetAttributes(e.FullPath) & FileAttributes.Directory) == FileAttributes.Directory;
+            }
+            this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath, isDirectory));
         }
 
         /// <summary>
@@ -142,13 +149,14 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             string oldname = e.OldFullPath;
             string newname = e.FullPath;
+            bool isDirectory = (File.GetAttributes(e.FullPath) & FileAttributes.Directory) == FileAttributes.Directory;
             if (oldname.StartsWith(this.fileSystemWatcher.Path) && newname.StartsWith(this.fileSystemWatcher.Path))
             {
-                this.queue.AddEvent(new FSMovedEvent(oldname, newname));
+                this.queue.AddEvent(new FSMovedEvent(oldname, newname, isDirectory));
             } else if (oldname.StartsWith(this.fileSystemWatcher.Path)) {
-                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname));
+                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname, isDirectory));
             } else if (newname.StartsWith(this.fileSystemWatcher.Path)) {
-                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname));
+                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname, isDirectory));
             }
         }
     }

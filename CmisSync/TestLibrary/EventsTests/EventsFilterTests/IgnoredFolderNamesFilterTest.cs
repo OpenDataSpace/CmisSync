@@ -136,7 +136,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         {
             var queue = new Mock<ISyncEventQueue>();
             var filter = new IgnoredFolderNameFilter(queue.Object);
-            var fsEvent = new FSEvent(WatcherChangeTypes.Deleted, Path.Combine(Path.GetTempPath(), ".cache"));
+            var fsEvent = new FSEvent(WatcherChangeTypes.Deleted, Path.Combine(Path.GetTempPath(), ".cache"), true);
             var wildcards = new List<string>();
             wildcards.Add(".tmp");
             filter.Wildcards = wildcards;

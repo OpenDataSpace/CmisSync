@@ -97,7 +97,7 @@ namespace TestLibrary.SyncStrategiesTests
                 .Callback((ISyncEvent f) => this.returnedFileEvent = f as AbstractFolderEvent);
             var watcher = new WatcherConsumer(this.queue.Object);
 
-            var fileCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, this.localFile.FullName);
+            var fileCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, this.localFile.FullName, false);
             Assert.True(watcher.Handle(fileCreatedFSEvent));
             Assert.AreEqual(MetaDataChangeType.CREATED, this.returnedFileEvent.Local);
             Assert.AreEqual(ContentChangeType.CREATED, (this.returnedFileEvent as FileEvent).LocalContent);
@@ -113,8 +113,8 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFileEvent = f as AbstractFolderEvent);
             var watcher = new WatcherConsumer(this.queue.Object);
-            
-            var fileChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, this.localFile.FullName);
+
+            var fileChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, this.localFile.FullName, false);
             Assert.True(watcher.Handle(fileChangedFSEvent));
             Assert.AreEqual(MetaDataChangeType.NONE, this.returnedFileEvent.Local);
             Assert.AreEqual(ContentChangeType.CHANGED, (this.returnedFileEvent as FileEvent).LocalContent);
@@ -130,8 +130,8 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFileEvent = f as AbstractFolderEvent);
             var watcher = new WatcherConsumer(this.queue.Object);
-            
-            var fileRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, this.localFile.FullName);
+
+            var fileRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, this.localFile.FullName, false);
             Assert.True(watcher.Handle(fileRemovedFSEvent));
             Assert.AreEqual(MetaDataChangeType.DELETED, this.returnedFileEvent.Local);
             Assert.AreEqual(ContentChangeType.DELETED, (this.returnedFileEvent as FileEvent).LocalContent);
@@ -148,8 +148,8 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFileEvent = f as AbstractFolderEvent);
             var watcher = new WatcherConsumer(this.queue.Object);
-            
-            var fileRenamedFSEvent = new FSMovedEvent(oldpath, this.localFile.FullName);
+
+            var fileRenamedFSEvent = new FSMovedEvent(oldpath, this.localFile.FullName, false);
             Assert.True(watcher.Handle(fileRenamedFSEvent));
             Assert.AreEqual(MetaDataChangeType.MOVED, this.returnedFileEvent.Local);
             Assert.AreEqual(ContentChangeType.NONE, (this.returnedFileEvent as FileMovedEvent).LocalContent);
@@ -166,8 +166,8 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFolderEvent = f as AbstractFolderEvent);
             var watcher = new WatcherConsumer(this.queue.Object);
-            
-            var folderCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, this.localFolder.FullName);
+
+            var folderCreatedFSEvent = new FSEvent(WatcherChangeTypes.Created, this.localFolder.FullName, true);
             Assert.True(watcher.Handle(folderCreatedFSEvent));
             Assert.AreEqual(MetaDataChangeType.CREATED, this.returnedFolderEvent.Local);
             Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
@@ -181,8 +181,8 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFolderEvent = f as AbstractFolderEvent);
             var watcher = new WatcherConsumer(this.queue.Object);
-            
-            var folderChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, this.localFolder.FullName);
+
+            var folderChangedFSEvent = new FSEvent(WatcherChangeTypes.Changed, this.localFolder.FullName, true);
             Assert.True(watcher.Handle(folderChangedFSEvent));
             Assert.AreEqual(MetaDataChangeType.CHANGED, this.returnedFolderEvent.Local);
             Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
@@ -196,8 +196,8 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFolderEvent = f as AbstractFolderEvent);
             var watcher = new WatcherConsumer(this.queue.Object);
-            
-            var folderRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, this.localFolder.FullName);
+
+            var folderRemovedFSEvent = new FSEvent(WatcherChangeTypes.Deleted, this.localFolder.FullName, true);
             Assert.True(watcher.Handle(folderRemovedFSEvent));
             Assert.AreEqual(MetaDataChangeType.DELETED, this.returnedFolderEvent.Local);
             Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);
@@ -212,8 +212,8 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Setup(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()))
                 .Callback((ISyncEvent f) => this.returnedFolderEvent = f as AbstractFolderEvent);
             var watcher = new WatcherConsumer(this.queue.Object);
-            
-            var folderRenamedFSEvent = new FSMovedEvent(oldpath, this.localFolder.FullName);
+
+            var folderRenamedFSEvent = new FSMovedEvent(oldpath, this.localFolder.FullName, true);
             Assert.True(watcher.Handle(folderRenamedFSEvent));
             Assert.AreEqual(MetaDataChangeType.MOVED, this.returnedFolderEvent.Local);
             Assert.AreEqual(this.localFolder.FullName, (this.returnedFolderEvent as FolderEvent).LocalFolder.FullName);

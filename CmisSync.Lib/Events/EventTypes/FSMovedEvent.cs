@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Events
 {
     using System;
     using System.IO;
- 
+
     /// <summary>
     /// FS moved event.
     /// </summary>
@@ -36,11 +36,11 @@ namespace CmisSync.Lib.Events
         /// <param name='newPath'>
         /// New path.
         /// </param>
-        public FSMovedEvent(string oldPath, string newPath) : base(WatcherChangeTypes.Renamed, newPath)
+        public FSMovedEvent(string oldPath, string newPath, bool isDirectory) : base(WatcherChangeTypes.Renamed, newPath, isDirectory)
         {
             this.OldPath = oldPath;
         }
-        
+
         /// <summary>
         /// Gets the old path.
         /// </summary>
