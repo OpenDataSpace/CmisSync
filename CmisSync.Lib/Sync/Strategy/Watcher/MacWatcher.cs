@@ -196,7 +196,8 @@ namespace CmisSync.Lib.Sync.Strategy
         private void CleanLastRenameEvent() {
             if (this.LastRenameEvent != null)
             {
-                this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Deleted, this.LastRenameEvent.Value.Path, this.LastRenameEvent.IsDirectory()));
+                bool isFile = (((MonoMac.CoreServices.FSEvent)this.LastRenameEvent).Flags & FSEventStreamEventFlags.ItemIsFile) != 0;
+                this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Deleted, this.LastRenameEvent.Value.Path, !isFile));
                 this.LastRenameEvent = null;
             }
         }
