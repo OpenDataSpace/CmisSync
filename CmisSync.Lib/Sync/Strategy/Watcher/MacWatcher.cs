@@ -196,7 +196,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private void CleanLastRenameEvent() {
             if (this.LastRenameEvent != null)
             {
-                this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Deleted, this.LastRenameEvent.Value.Path));
+                this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Deleted, this.LastRenameEvent.Value.Path, this.LastRenameEvent.IsDirectory()));
                 this.LastRenameEvent = null;
             }
         }
