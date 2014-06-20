@@ -298,16 +298,91 @@ namespace TestLibrary.IntegrationTests
 
             this.localRootDir.GetFiles().First().Delete();
 
-            while(this.repo.SingleStepQueue.Queue.IsEmpty)
-            {
-                //Wait for Watcher to kick in
-                Thread.Sleep(100);
-            }
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
             this.repo.Run();
 
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConfictFileIsCreated()
+        {
+            string fileName = "fileConflictTest.txt";
+            string remoteContent = "remote";
+            string localContent = "local";
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            this.remoteRootDir.CreateDocument(fileName, remoteContent);
+            var localDoc = Path.Combine(this.localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(localDoc);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(localContent);
+            }
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(2));
+            Assert.That(new FileInfo(localDoc).Length, Is.EqualTo(remoteContent.Length));
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved()
+        {
+            string fileName = "fileConflictTest.txt";
+            string remoteContent = "remote";
+            string localContent = "local";
+            var localPath = Path.Combine(this.localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(localPath);
+
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(remoteContent);
+            }
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            this.remoteRootDir.GetChildren().First().Delete(true);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(localContent);
+            }
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles(), Is.Empty);
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalAndTheRemoteFileAreBothRenamed() {
+            string originalName = "original.txt";
+            string localName = "local.txt";
+            string remoteName = "remote.txt";
+
+            this.remoteRootDir.CreateDocument(originalName, string.Empty);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            this.localRootDir.MoveTo(Path.Combine(this.localRootDir.FullName, localName));
+            this.remoteRootDir.GetChildren().First().Rename(remoteName);
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(remoteName));
         }
 
         [Test, Category("Slow")]
@@ -326,11 +401,7 @@ namespace TestLibrary.IntegrationTests
                 filestream.Write(newContent);
             }
 
-            while (this.repo.SingleStepQueue.Queue.IsEmpty)
-            {
-                //Wait for Watcher to kick in
-                Thread.Sleep(100);
-            }
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
             this.repo.Run();
 
@@ -360,6 +431,14 @@ namespace TestLibrary.IntegrationTests
                 base.Initialize();
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
                 this.Scheduler.Stop();
+            }
+        }
+
+        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue) {
+            while (queue.Queue.IsEmpty)
+            {
+                //Wait for event to kick in
+                Thread.Sleep(20);
             }
         }
     }
