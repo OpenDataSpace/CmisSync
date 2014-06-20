@@ -165,6 +165,24 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
+        public void OneLocalFolderRemoved()
+        {
+            this.localRootDir.CreateSubdirectory("Cat");
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            this.localRootDir.GetDirectories().First().Delete();
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Run();
+
+            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
+        }
+
+        [Test, Category("Slow")]
         public void OneRemoteFolderCreated()
         {
             this.remoteRootDir.CreateFolder("Cat");
