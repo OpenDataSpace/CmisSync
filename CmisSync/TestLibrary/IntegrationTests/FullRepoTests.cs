@@ -242,6 +242,27 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
+        public void OneLocalFileIsRemoved()
+        {
+            string fileName = "removingFile.txt";
+            string content = string.Empty;
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            new FileInfo(filePath).Delete();
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Run();
+
+            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
+        }
+
+        [Test, Category("Slow")]
         public void OneRemoteFileCreated()
         {
             string fileName = "file";
