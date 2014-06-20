@@ -367,7 +367,6 @@ namespace TestLibrary.IntegrationTests
             emptyDoc.DeleteAllVersions();
         }
 
-        [Ignore]
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void EnsureFileNameStaysEqualWhileUploading(
             string canonical_name,
