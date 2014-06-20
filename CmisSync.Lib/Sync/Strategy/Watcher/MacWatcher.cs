@@ -159,27 +159,27 @@ namespace CmisSync.Lib.Sync.Strategy
             foreach (MonoMac.CoreServices.FSEvent fsEvent in e.Events) {
                 bool isFile = (fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0;
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRemoved) != 0 && !FileOrDirectoryExists(fsEvent.Path, isFile)) {
-                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path));
+                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent (WatcherChangeTypes.Deleted, fsEvent.Path, !isFile));
                     continue;
                 }
 
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemCreated) != 0 && FileOrDirectoryExists(fsEvent.Path, isFile)) {
-                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Created, fsEvent.Path));
+                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Created, fsEvent.Path, !isFile));
                 }
 
                 if (((fsEvent.Flags & FSEventStreamEventFlags.ItemModified) != 0
                     || (fsEvent.Flags & FSEventStreamEventFlags.ItemInodeMetaMod) != 0)
                     && FileOrDirectoryExists(fsEvent.Path, isFile)) {
-                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Changed, fsEvent.Path));
+                    this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Changed, fsEvent.Path, !isFile));
                 }
 
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRenamed) != 0) {
                     if (FileOrDirectoryExists(fsEvent.Path, isFile)) {
                         if (this.LastRenameEvent != null && this.LastRenameEvent.Value.Id == fsEvent.Id - 1) {
-                            this.Queue.AddEvent(new CmisSync.Lib.Events.FSMovedEvent(this.LastRenameEvent.Value.Path, fsEvent.Path));
+                            this.Queue.AddEvent(new CmisSync.Lib.Events.FSMovedEvent(this.LastRenameEvent.Value.Path, fsEvent.Path, !isFile));
                             this.LastRenameEvent = null;
                         } else {
-                            this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Created, fsEvent.Path));
+                            this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Created, fsEvent.Path, !isFile));
                         }
                     } else {
                         this.LastRenameEvent = fsEvent;
