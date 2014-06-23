@@ -189,17 +189,11 @@ namespace CmisSync.Lib.Sync.Strategy
 
                         if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                             // Renamed, Updated or Equal
-                            if (child.Item.Name == storedMappedChild.Name) {
-                                // Updated or Equal
-                                if (child.Item.LastWriteTimeUtc != storedMappedChild.LastLocalWriteTimeUtc) {
-                                    // Updated
-                                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CHANGED, src: this);
-                                } else {
-                                    // Equal
-                                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, src: this);
-                                }
+                            if (child.Item.Name == storedMappedChild.Name && child.Item.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                                // Equal
+                                createdEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.NONE, src: this);
                             } else {
-                                // Renamed
+                                // Updated or Renamed
                                 createdEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CHANGED, src: this);
                             }
                         } else {
