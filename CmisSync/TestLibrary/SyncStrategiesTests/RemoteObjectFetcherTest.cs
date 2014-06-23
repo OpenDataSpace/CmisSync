@@ -166,7 +166,7 @@ namespace TestLibrary.SyncStrategiesTests
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(folderEvent), Is.False);
-            OperationContextFactoryTest.VerifyThatCachingIsDisabled(session);
+            session.VerifyThatCachingIsDisabled();
         }
     }
 }

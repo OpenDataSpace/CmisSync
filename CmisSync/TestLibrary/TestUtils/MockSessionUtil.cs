@@ -33,6 +33,7 @@ namespace TestLibrary.TestUtils
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Data.Extensions;
+    using DotCMIS.Enums;
 
     using Moq;
 
@@ -175,6 +176,79 @@ namespace TestLibrary.TestUtils
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);
          
             return session;
+        }
+
+        public static void VerifyThatCachingIsDisabled(this Mock<ISession> session)
+        {
+            session.Verify(
+                s => s.CreateOperationContext(
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<IncludeRelationshipsFlag>(),
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.Is<bool>(b => b == false),
+                It.IsAny<int>()),
+                Times.Once());
+        }
+
+        public static void VerifyThatAllDefaultValuesAreSet(this Mock<ISession> session) {
+            session.Verify(
+                s => s.CreateOperationContext(
+                It.Is<HashSet<string>>(set =>
+                                   set.Contains("cmis:name") &&
+                                   set.Contains("cmis:parentId") &&
+                                   set.Contains("cmis:objectId") &&
+                                   set.Contains("cmis:changeToken") &&
+                                   set.Contains("cmis:contentStreamFileName") &&
+                                   set.Contains("cmis:lastModificationDate")),
+                It.Is<bool>(acls => acls == false),
+                It.Is<bool>(includeAllowableActions => includeAllowableActions == true),
+                It.Is<bool>(includePolicies => includePolicies == false),
+                It.Is<IncludeRelationshipsFlag>(relationship => relationship == IncludeRelationshipsFlag.None),
+                It.Is<HashSet<string>>(set => set.Contains("cmis:none") && set.Count == 1),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.Is<int>(i => i > 1)),
+                Times.Once());
+        }
+
+        public static void VerifyThatCrawlValuesAreSet(this Mock<ISession> session) {
+            session.Verify(
+                s => s.CreateOperationContext(
+                It.Is<HashSet<string>>(set =>
+                                   !set.Contains("cmis:path")),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<IncludeRelationshipsFlag>(),
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<int>()),
+                Times.Once());
+        }
+
+        public static void VerifyThatFilterContainsPath(this Mock<ISession> session) {
+            session.Verify(
+                s => s.CreateOperationContext(
+                It.Is<HashSet<string>>(set =>
+                                   set.Contains("cmis:path")),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<IncludeRelationshipsFlag>(),
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<int>()),
+                Times.Once());
         }
 
         private static List<IChangeEvent> GenerateSingleChangeListMock(DotCMIS.Enums.ChangeType type, string objectId = "objId") {

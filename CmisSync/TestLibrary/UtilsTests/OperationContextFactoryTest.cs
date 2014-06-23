@@ -31,82 +31,11 @@ namespace TestLibrary.UtilsTests
 
     using NUnit.Framework;
 
+    using TestUtils;
+
     [TestFixture]
     public class OperationContextFactoryTest
     {
-        public static void VerifyThatCachingIsDisabled(Mock<ISession> session)
-        {
-            session.Verify(
-                s => s.CreateOperationContext(
-                It.IsAny<HashSet<string>>(),
-                It.IsAny<bool>(),
-                It.IsAny<bool>(),
-                It.IsAny<bool>(),
-                It.IsAny<IncludeRelationshipsFlag>(),
-                It.IsAny<HashSet<string>>(),
-                It.IsAny<bool>(),
-                It.IsAny<string>(),
-                It.Is<bool>(b => b == false),
-                It.IsAny<int>()),
-                Times.Once());
-        }
-
-        public static void VerifyThatAllDefaultValuesAreSet(Mock<ISession> session) {
-            session.Verify(
-                s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   set.Contains("cmis:name") &&
-                                   set.Contains("cmis:parentId") &&
-                                   set.Contains("cmis:objectId") &&
-                                   set.Contains("cmis:changeToken") &&
-                                   set.Contains("cmis:contentStreamFileName") &&
-                                   set.Contains("cmis:lastModificationDate")),
-                It.Is<bool>(acls => acls == false),
-                It.Is<bool>(includeAllowableActions => includeAllowableActions == true),
-                It.Is<bool>(includePolicies => includePolicies == false),
-                It.Is<IncludeRelationshipsFlag>(relationship => relationship == IncludeRelationshipsFlag.None),
-                It.Is<HashSet<string>>(set => set.Contains("cmis:none") && set.Count == 1),
-                It.IsAny<bool>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>(),
-                It.Is<int>(i => i > 1)),
-                Times.Once());
-        }
-
-        public static void VerifyThatCrawlValuesAreSet(Mock<ISession> session) {
-            session.Verify(
-                s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   !set.Contains("cmis:path")),
-                It.IsAny<bool>(),
-                It.IsAny<bool>(),
-                It.IsAny<bool>(),
-                It.IsAny<IncludeRelationshipsFlag>(),
-                It.IsAny<HashSet<string>>(),
-                It.IsAny<bool>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>(),
-                It.IsAny<int>()),
-                Times.Once());
-        }
-
-        public static void VerifyThatFilterContainsPath(Mock<ISession> session) {
-            session.Verify(
-                s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   set.Contains("cmis:path")),
-                It.IsAny<bool>(),
-                It.IsAny<bool>(),
-                It.IsAny<bool>(),
-                It.IsAny<IncludeRelationshipsFlag>(),
-                It.IsAny<HashSet<string>>(),
-                It.IsAny<bool>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>(),
-                It.IsAny<int>()),
-                Times.Once());
-        }
-
         [Test, Category("Fast")]
         public void CreateContentChangeEventContext()
         {
@@ -115,7 +44,7 @@ namespace TestLibrary.UtilsTests
 
             var context = OperationContextFactory.CreateContentChangeEventContext(session.Object);
 
-            VerifyThatAllDefaultValuesAreSet(session);
+            session.VerifyThatAllDefaultValuesAreSet();
             Assert.That(context, Is.EqualTo(result));
         }
 
@@ -127,8 +56,8 @@ namespace TestLibrary.UtilsTests
 
             var context = OperationContextFactory.CreateCrawlContext(session.Object);
 
-            VerifyThatAllDefaultValuesAreSet(session);
-            VerifyThatCrawlValuesAreSet(session);
+            session.VerifyThatAllDefaultValuesAreSet();
+            session.VerifyThatCrawlValuesAreSet();
             Assert.That(context, Is.EqualTo(result));
         }
 
@@ -140,8 +69,8 @@ namespace TestLibrary.UtilsTests
 
             var context = OperationContextFactory.CreateDefaultContext(session.Object);
 
-            VerifyThatAllDefaultValuesAreSet(session);
-            VerifyThatFilterContainsPath(session);
+            session.VerifyThatAllDefaultValuesAreSet();
+            session.VerifyThatFilterContainsPath();
             Assert.That(context, Is.EqualTo(result));
         }
 
@@ -153,9 +82,9 @@ namespace TestLibrary.UtilsTests
 
             var context = OperationContextFactory.CreateNonCachingPathIncludingContext(session.Object);
 
-            VerifyThatAllDefaultValuesAreSet(session);
-            VerifyThatFilterContainsPath(session);
-            VerifyThatCachingIsDisabled(session);
+            session.VerifyThatAllDefaultValuesAreSet();
+            session.VerifyThatFilterContainsPath();
+            session.VerifyThatCachingIsDisabled();
             Assert.That(context, Is.EqualTo(result));
         }
 
