@@ -93,7 +93,7 @@ namespace CmisSync.Lib.Sync.Solver
             if (localFile != null) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 this.queue.AddEvent(transmissionEvent);
-                if ( localFile.Length > 0) {
+                if (localFile.Length > 0) {
                     Logger.Debug("Uploading file content");
                     IFileUploader uploader = ContentTaskUtils.CreateUploader();
                     using (SHA1 hashAlg = new SHA1Managed())
@@ -110,9 +110,9 @@ namespace CmisSync.Lib.Sync.Solver
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
 
                     storage.SaveMappedObject(mapped);
-                } else {
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
+
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
         }
 
