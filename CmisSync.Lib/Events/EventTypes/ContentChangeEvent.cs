@@ -22,6 +22,8 @@ namespace CmisSync.Lib.Events
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Cmis;
+
     using DotCMIS.Client;
 
     /// <summary>
@@ -97,7 +99,7 @@ namespace CmisSync.Lib.Events
         /// </param>
         public void UpdateObject(ISession session)
         {
-           this.CmisObject = session.GetObject(this.ObjectId);
+           this.CmisObject = session.GetObject(this.ObjectId, OperationContextFactory.CreateNonCachingPathIncludingContext(session));
         }
     }
 }

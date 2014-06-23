@@ -109,7 +109,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == remoteId))).Returns(mappedObject);
             var remoteObject = Mock.Of<ICmisObject>(o =>
                                                     o.ChangeToken == newToken);
-            session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId))).Returns(remoteObject);
+            session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId), It.IsAny<IOperationContext>())).Returns(remoteObject);
             var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Updated, remoteId);
 
             Assert.That(filter.Handle(contentChangeEvent), Is.False);
@@ -150,7 +150,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == remoteId))).Returns(mappedObject);
             var remoteObject = Mock.Of<ICmisObject>(o =>
                                                     o.ChangeToken == changeToken);
-            session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId))).Returns(remoteObject);
+            session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId), It.IsAny<IOperationContext>())).Returns(remoteObject);
             var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Updated, remoteId);
 
             Assert.That(filter.Handle(contentChangeEvent), Is.True);

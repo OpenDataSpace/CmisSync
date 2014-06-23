@@ -43,6 +43,20 @@ namespace CmisSync.Lib.Sync.Solver
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
 
+        private ISyncEventQueue queue;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.LocalObjectAdded"/> class.
+        /// </summary>
+        /// <param name="queue">Queue to report transmission events to.</param>
+        public LocalObjectAdded(ISyncEventQueue queue) {
+            if (queue == null) {
+                throw new ArgumentNullException("Given queue is null");
+            }
+
+            this.queue = queue;
+        }
+
         /// <summary>
         /// Solve the situation of a local object added and should be uploaded by using the session, storage, localFile and remoteId.
         /// </summary>
