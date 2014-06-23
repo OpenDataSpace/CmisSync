@@ -155,12 +155,32 @@ namespace CmisSync.Lib.Sync.Strategy
             }
 
             this.MergeAndSendEvents(eventMap);
-            
+
             this.FindReportAndRemoveMutualDeletedObjects(removedRemoteObjects, removedLocalObjects);
 
             // Send out Events to queue
             this.InformAboutRemoteObjectsDeleted(removedRemoteObjects.Values);
             this.InformAboutLocalObjectsDeleted(removedLocalObjects.Values);
+        }
+
+        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo cmisObject, IMappedObject storedParent, IMappedObject storedMappedChild)
+        {
+            AbstractFolderEvent createdEvent = null;
+            if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
+                // Renamed, Updated or Equal
+                if (cmisObject.Name == storedMappedChild.Name && cmisObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                    // Equal
+                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, cmisObject, localChange: MetaDataChangeType.NONE, src: this);
+                } else {
+                    // Updated or Renamed
+                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, cmisObject, localChange: MetaDataChangeType.CHANGED, src: this);
+                }
+            } else {
+                // Moved
+                IFileSystemInfo oldLocalPath = cmisObject is IFileInfo ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedMappedChild)) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedMappedChild));
+                createdEvent = FileOrFolderEventFactory.CreateEvent(null, cmisObject, localChange: MetaDataChangeType.MOVED, oldLocalObject: oldLocalPath, src: this);
+            }
+            return createdEvent;
         }
 
         private void CreateLocalEvents(
@@ -184,22 +204,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     if (storedMappedChild != null) {
                         // Moved, Renamed, Updated or Equal
                         AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
-                        AbstractFolderEvent createdEvent = null;
-
-                        if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
-                            // Renamed, Updated or Equal
-                            if (child.Item.Name == storedMappedChild.Name && child.Item.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
-                                // Equal
-                                createdEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.NONE, src: this);
-                            } else {
-                                // Updated or Renamed
-                                createdEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CHANGED, src: this);
-                            }
-                        } else {
-                            // Moved
-                            IFileSystemInfo oldLocalPath = child.Item is IFileInfo ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedMappedChild)) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedMappedChild));
-                            createdEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.MOVED, oldLocalObject: oldLocalPath, src: this);
-                        }
+                        AbstractFolderEvent createdEvent = CreateLocalEventBasedOnStorage (child.Item, storedParent, storedMappedChild);
 
                         eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
                     } else {
@@ -342,7 +347,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 this.Queue.AddEvent(deletedEvent);
             }
         }
-        
+
         private void FindReportAndRemoveMutualDeletedObjects(IDictionary<string, IFileSystemInfo> removedRemoteObjects, IDictionary<string, IFileSystemInfo> removedLocalObjects) {
             IEnumerable<string> intersect = removedRemoteObjects.Keys.Intersect(removedLocalObjects.Keys);
             IList<string> mutualIds = new List<string>();
