@@ -276,6 +276,70 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
         }
 
+        [Test, Category("Slow")]
+        public void OneLocalFileRenamed()
+        {
+            string fileName = "file";
+            string newFileName = "renamedFile";
+            string content = "content";
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(filePath);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(content);
+            }
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Run();
+
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
+            var doc = child as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
+            Assert.That(doc.Name, Is.EqualTo(newFileName));
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalFileRenamedAndMoved()
+        {
+            string fileName = "file";
+            string newFileName = "renamedFile";
+            string folderName = "folder";
+            string content = "content";
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(filePath);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(content);
+            }
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+            new DirectoryInfo(Path.Combine(this.localRootDir.FullName, folderName)).Create();
+            fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, folderName, newFileName));
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Run();
+
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(IFolder)));
+            Assert.That((child as IFolder).GetChildren().TotalNumItems, Is.EqualTo(1));
+            var doc = (child as IFolder).GetChildren().First() as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(fileInfo.Length), "ContentStream not set");
+            Assert.That(doc.Name, Is.EqualTo(newFileName));
+        }
+
         // Ignored because it works but the IT is unpredictable
         [Ignore]
         [Test, Category("Slow")]
