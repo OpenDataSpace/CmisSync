@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Events.Filter
     /// <summary>
     /// Ignored file names filter.
     /// </summary>
-    public class IgnoredFileNamesFilter : AbstractFileFilter
+    public class IgnoredFileNamesFilter
     {
         /// <summary>
         /// The wildcards of the ignored file names.
@@ -38,16 +38,6 @@ namespace CmisSync.Lib.Events.Filter
         /// The wild card lock for concurrent access.
         /// </summary>
         private object wildCardLock = new object();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoredFileNamesFilter"/> class.
-        /// </summary>
-        /// <param name='queue'>
-        /// Queue where the filter should report its reason of the filtering.
-        /// </param>
-        public IgnoredFileNamesFilter(ISyncEventQueue queue) : base(queue)
-        {
-        }
 
         /// <summary>
         /// Sets the wildcards as strings and transforms them internally into Regex instances.
@@ -71,35 +61,6 @@ namespace CmisSync.Lib.Events.Filter
         }
 
         /// <summary>
-        /// Handles FSEvents and FileDownloadRequest events.
-        /// </summary>
-        /// <param name='e'>
-        /// If a filename contains invalid patterns, <c>true</c> is returned and the filtering is reported to the queue. Otherwise <c>false</c> is returned.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if any regex matches the file name, otherwise <c>false</c>
-        /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
-            try {
-                if (e is IFilterableNameEvent && !(e as IFilterableNameEvent).IsDirectory()) {
-                    return this.CheckFile((e as IFilterableNameEvent));
-                }
-            } catch (System.IO.FileNotFoundException)
-            {
-                // Only happens, if the deleted file/folder does not exists anymore
-                // To be sure, this event is not misinterpreted, just let it pass
-                return false;
-            }
-            catch (System.IO.DirectoryNotFoundException)
-            {
-                return false;
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Checks the filename for valid regex.
         /// </summary>
         /// <returns>
@@ -111,21 +72,22 @@ namespace CmisSync.Lib.Events.Filter
         /// <param name='fileName'>
         /// If set to <c>true</c> file name.
         /// </param>
-        private bool CheckFile(IFilterableNameEvent e)
+        public virtual bool CheckFile(string name, out string reason)
         {
             lock (this.wildCardLock)
             {
-                if (!Utils.WorthSyncing(e.Name, new List<string>()))
+                reason = string.Empty;
+                if (!Utils.WorthSyncing(name, new List<string>()))
                 {
-                    Queue.AddEvent(new RequestIgnoredEvent(e, source: this));
+                    reason = string.Format("Invalid file name: {0}", name);
                     return true;
                 }
 
                 foreach (var wildcard in this.wildcards)
                 {
-                    if (wildcard.IsMatch(e.Name))
+                    if (wildcard.IsMatch(name))
                     {
-                        Queue.AddEvent(new RequestIgnoredEvent(e, reason: string.Format("filename matches: {0}", wildcard.ToString()), source: this));
+                        reason = string.Format("filename matches: {0}", wildcard.ToString());
                         return true;
                     }
                 }

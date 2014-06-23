@@ -21,48 +21,18 @@ namespace CmisSync.Lib.Events.Filter
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Invalid folder name filter.
     /// </summary>
-    public class InvalidFolderNameFilter : AbstractFileFilter
+    public class InvalidFolderNameFilter
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.InvalidFolderNameFilter"/> class.
+        /// Regular expression to check whether a folder name is valid or not.
         /// </summary>
-        /// <param name='queue'>
-        /// Queue where filtered events will be reported to.
-        /// </param>
-        public InvalidFolderNameFilter(ISyncEventQueue queue) : base(queue)
-        {
-        }
-
-        /// <summary>
-        /// Handles the specified events which are containing paths.
-        /// If the path contains invalid folder names, true is returned. Otherwise false.
-        /// </summary>
-        /// <param name='e'>
-        /// Events to be checked.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if the path contains an invalid folder name.
-        /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
-            FileDownloadRequest request = e as FileDownloadRequest;
-            if (request != null)
-            {
-                return this.CheckPath(request, request.LocalPath);
-            }
-
-            IFSEvent fsevent = e as IFSEvent;
-            if (fsevent != null)
-            {
-                return this.CheckPath(fsevent, fsevent.Path);
-            }
-
-            return false;
-        }
+        private static Regex invalidFolderNameRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidPathChars()) + "\"?:/\\|<>*") + "]");
 
         /// <summary>
         /// Checks the path for containing invalid folder names.
@@ -71,21 +41,20 @@ namespace CmisSync.Lib.Events.Filter
         /// <returns>
         /// true if the path contains invalid folder names.
         /// </returns>
-        /// <param name='e'>
-        /// Event which should be reported as filtered, if the path contains invalid folder names.
-        /// </param>
         /// <param name='path'>
         /// Path to be checked for containing invalid folder names.
         /// </param>
-        private bool CheckPath(ISyncEvent e, string path)
+        /// <param name='reason'>Reason for the invalid folder name, or empty string.</param>
+        public virtual bool CheckPath(string path, out string reason)
         {
-            if (Utils.IsInvalidFolderName(path.Replace("/", string.Empty).Replace("\"", string.Empty), new List<string>()))
-            {
-                Queue.AddEvent(new RequestIgnoredEvent(e, source: this));
+            if (string.IsNullOrEmpty(path)) {
+                reason = "Given Path is null or empty";
                 return true;
-            }
-            else
-            {
+            } else if (invalidFolderNameRegex.IsMatch(path.Replace("/", string.Empty).Replace("\"", string.Empty))) {
+                reason = string.Format("Path \"{0}\" contains one of the illegal characters \"{1}\"", path, invalidFolderNameRegex.ToString());
+                return true;
+            } else {
+                reason = string.Empty;
                 return false;
             }
         }

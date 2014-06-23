@@ -68,11 +68,8 @@ namespace CmisSync.Lib.Events
         {
             map[typeof(DebugLoggingHandler)] = DEBUG;
 
-            map[typeof(IgnoredFileNamesFilter)] = FILTER;
-            map[typeof(IgnoredFilesFilter)] = FILTER;
-            map[typeof(IgnoredFolderNameFilter)] = FILTER;
+            map[typeof(ReportingFilter)] = FILTER;
             map[typeof(InvalidFolderNameFilter)] = FILTER;
-            map[typeof(IgnoredFoldersFilter)] = FILTER;
             map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
             map[typeof(IgnoreAlreadyHandledFsEventsFilter)] = FILTER;
             map[typeof(IgnoreAlreadyHandledContentChangeEventsFilter)] = FILTER;

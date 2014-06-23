@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Events.Filter
     /// <summary>
     /// Ignored folder name filter.
     /// </summary>
-    public class IgnoredFolderNameFilter : AbstractFileFilter
+    public class IgnoredFolderNameFilter
     {
         /// <summary>
         /// The lock to prevent multiple parallel access on the wildcard list
@@ -38,16 +38,6 @@ namespace CmisSync.Lib.Events.Filter
         /// The list of all wildcard regexes.
         /// </summary>
         private List<Regex> wildcards = new List<Regex>();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoredFolderNameFilter"/> class.
-        /// </summary>
-        /// <param name='queue'>
-        /// Queue where ignores and their reasons are reported to.
-        /// </param>
-        public IgnoredFolderNameFilter(ISyncEventQueue queue) : base(queue)
-        {
-        }
 
         /// <summary>
         /// Sets the wildcards.
@@ -75,42 +65,15 @@ namespace CmisSync.Lib.Events.Filter
             }
         }
 
-        /// <summary>
-        /// Handle the passed events and filters all FSEvents which containing a matching folder name.
-        /// </summary>
-        /// <param name='e'>
-        /// Event to be checked
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if folder name matches any wildcard, otherwise <c>false</c>
-        /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
-            if (e is IFilterableNameEvent)
-            {
-                IFilterableNameEvent filterable = e as IFilterableNameEvent;
-                return this.CheckFolderName(e, filterable.Name);
-            } else if (e is IFilterablePathEvent) {
-                IFilterablePathEvent filterable = e as IFilterablePathEvent;
-                string path = (e as IFilterablePathEvent).Path;
-
-
-                if (!filterable.IsDirectory()) {
-                    return this.CheckFolderName(e, Path.GetDirectoryName(path));
-                }
-            }
-
-            return false;
-        }
-
-        private bool CheckFolderName(ISyncEvent e, string name) {
+        public bool CheckFolderName(string name, out string reason) {
             lock (this.listLock)
             {
+                reason = string.Empty;
                 foreach (Regex wildcard in this.wildcards)
                 {
                     if (wildcard.IsMatch(name))
                     {
-                        Queue.AddEvent(new RequestIgnoredEvent(e, string.Format("Folder \"{0}\" matches regex {1}", name, wildcard.ToString()), this));
+                        reason = string.Format("Folder \"{0}\" matches regex {1}", name, wildcard.ToString());
                         return true;
                     }
                 }

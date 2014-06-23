@@ -328,21 +328,18 @@ namespace TestLibrary.IntegrationTests
             var ignoreContentChangesFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage, session.Object);
             manager.AddEventHandler(ignoreContentChangesFilter);
 
-            var invalidFolderNameFilter = new InvalidFolderNameFilter(queue);
-            manager.AddEventHandler(invalidFolderNameFilter);
-
-            var ignoreFolderFilter = new IgnoredFoldersFilter(queue);
-            manager.AddEventHandler(ignoreFolderFilter);
+            var ignoreFolderFilter = new IgnoredFoldersFilter();
+            var ignoreFolderNameFilter = new IgnoredFolderNameFilter();
+            var ignoreFileNamesFilter = new IgnoredFileNamesFilter();
+            var invalidFolderNameFilter = new InvalidFolderNameFilter();
 
             /* This is not implemented yet
-            var ignoreFileFilter = new IgnoredFilesFilter(queue);
-            manager.AddEventHandler(ignoreFileFilter);
-
             var failedOperationsFilder = new FailedOperationsFilter(queue);
             manager.AddEventHandler(failedOperationsFilder);
             */
-            var ignoreFileNamesFilter = new IgnoredFileNamesFilter(queue);
-            manager.AddEventHandler(ignoreFileNamesFilter);
+
+            var reportingFilter = new ReportingFilter(queue, ignoreFolderFilter, ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter);
+            manager.AddEventHandler(reportingFilter);
 
             var debugHandler = new DebugLoggingHandler();
             manager.AddEventHandler(debugHandler);

@@ -57,6 +57,7 @@ SOURCES =  \
 	Events/EventFilter/IgnoredFolderNameFilter.cs \
 	Events/EventFilter/IgnoredFoldersFilter.cs \
 	Events/EventFilter/InvalidFolderNameFilter.cs \
+	Events/EventFilter/ReportingFilter.cs \
 	Events/EventHandlerPriorities.cs \
 	Events/EventTypes/AbstractFolderEvent.cs \
 	Events/EventTypes/BubbledEvent.cs \

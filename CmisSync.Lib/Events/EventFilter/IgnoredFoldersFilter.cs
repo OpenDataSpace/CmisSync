@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Events.Filter
     /// <summary>
     /// Ignored folders filter.
     /// </summary>
-    public class IgnoredFoldersFilter : AbstractFileFilter
+    public class IgnoredFoldersFilter
     {
         /// <summary>
         /// The ignored paths.
@@ -41,16 +41,6 @@ namespace CmisSync.Lib.Events.Filter
         /// The wildcards list lock.
         /// </summary>
         private object listLock = new object();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoredFoldersFilter"/> class.
-        /// </summary>
-        /// <param name='queue'>
-        /// Queue where the reasons are reported to.
-        /// </param>
-        public IgnoredFoldersFilter(ISyncEventQueue queue) : base(queue)
-        {
-        }
 
         /// <summary>
         /// Sets the ignored paths.
@@ -87,58 +77,25 @@ namespace CmisSync.Lib.Events.Filter
         }
 
         /// <summary>
-        /// Handles FSEvents and FileDownloadRequest events.
-        /// If the path starts with an ignored path, <c>true</c> will be returned and an ignored event is added to the queue.
-        /// Otherwise <c>false</c> is returned.
-        /// </summary>
-        /// <param name='e'>
-        /// Is checked for FSEvent events and FileDownloadRequest events
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if this event occured on an ignored path, otherwise <c>false</c>
-        /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
-            FileDownloadRequest request = e as FileDownloadRequest;
-            if (request != null)
-            {
-                return this.CheckPath(request, request.LocalPath);
-            }
-
-            IFSEvent fsevent = e as IFSEvent;
-            if (fsevent != null)
-            {
-                return this.CheckPath(fsevent, fsevent.Path);
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Checks the path if it begins with any path, which is ignored. Reports ignores to the queue.
         /// </summary>
         /// <returns>
         /// <c>true</c> if path starts with an ignored path, otherwise <c>false</c> is returned.
         /// </returns>
-        /// <param name='e'>
-        /// ISyncEvent which is reported to queue, if filtered.
-        /// </param>
         /// <param name='localPath'>
         /// The local path which should be checked, if it should be ignored.
         /// </param>
-        private bool CheckPath(ISyncEvent e, string localPath)
+        public virtual bool CheckPath(string localPath, out string reason)
         {
             lock (this.listLock)
             {
-                bool result = !string.IsNullOrEmpty(this.ignoredPaths.Find(delegate(string ignore)
-                                                                           {
-                    return localPath.StartsWith(ignore);
+                string r = string.Empty;
+                bool result = !string.IsNullOrEmpty(this.ignoredPaths.Find(delegate(string ignore) {
+                    bool found = localPath.StartsWith(ignore);
+                    r = found ? ignore : string.Empty;
+                    return found;
                 }));
-                if (result)
-                {
-                    Queue.AddEvent(new RequestIgnoredEvent(e, source: this));
-                }
-
+                reason = r;
                 return result;
             }
         }

@@ -101,9 +101,19 @@ namespace CmisSync.Lib.Sync
         private Events.Filter.IgnoredFolderNameFilter ignoredFolderNameFilter;
 
         /// <summary>
+        /// The invalid folder name filter.
+        /// </summary>
+        private Events.Filter.InvalidFolderNameFilter invalidFolderNameFilter;
+
+        /// <summary>
         /// The already added objects filter.
         /// </summary>
         private Events.Filter.IgnoreAlreadyHandledFsEventsFilter alreadyAddedFilter;
+
+        /// <summary>
+        /// The reporting filter.
+        /// </summary>
+        private Events.Filter.ReportingFilter reportingFilter;
 
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
@@ -195,13 +205,18 @@ namespace CmisSync.Lib.Sync
             this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
 
             // Add ignore file/folder filter
-            this.ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter(this.Queue) { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
-            this.ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
-            this.ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter(this.Queue) { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
+            this.ignoredFoldersFilter = new Events.Filter.IgnoredFoldersFilter { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
+            this.ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
+            this.ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
+            this.invalidFolderNameFilter = new Events.Filter.InvalidFolderNameFilter();
+            this.reportingFilter = new Events.Filter.ReportingFilter(
+                this.Queue,
+                this.ignoredFoldersFilter,
+                this.ignoredFileNameFilter,
+                this.ignoredFolderNameFilter,
+                this.invalidFolderNameFilter);
+            this.Queue.EventManager.AddEventHandler(this.reportingFilter);
             this.alreadyAddedFilter = new Events.Filter.IgnoreAlreadyHandledFsEventsFilter(this.storage, this.fileSystemFactory);
-            this.Queue.EventManager.AddEventHandler(this.ignoredFoldersFilter);
-            this.Queue.EventManager.AddEventHandler(this.ignoredFileNameFilter);
-            this.Queue.EventManager.AddEventHandler(this.ignoredFolderNameFilter);
             this.Queue.EventManager.AddEventHandler(this.alreadyAddedFilter);
 
             // Add handler for repo config changes

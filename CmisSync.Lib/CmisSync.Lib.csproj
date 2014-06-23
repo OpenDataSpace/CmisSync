@@ -214,6 +214,7 @@
     <Compile Include="Data\ObjectTree.cs" />
     <Compile Include="Events\FileOrFolderEventFactory.cs" />
     <Compile Include="ContentTasks\ContentTaskUtils.cs" />
+    <Compile Include="Events\EventFilter\ReportingFilter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
