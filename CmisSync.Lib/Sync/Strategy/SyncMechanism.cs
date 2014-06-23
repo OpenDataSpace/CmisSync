@@ -117,7 +117,7 @@ namespace CmisSync.Lib.Sync.Strategy
             int dim = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[dim, dim];
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = new NothingToDoSolver();
-            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded();
+            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.Queue);
             solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.Queue);
             solver[(int)SituationType.MOVED, (int)SituationType.NOCHANGE] = new LocalObjectMoved();
             solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed();

@@ -26,6 +26,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Solver;
 
@@ -44,18 +45,27 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private Mock<ISyncEventQueue> queue;
 
         [SetUp]
         public void SetUp()
         {
             this.session = new Mock<ISession>();
             this.storage = new Mock<IMetaDataStorage>();
+            this.queue = new Mock<ISyncEventQueue>();
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void DefaultConstructorTest()
+        public void ConstructorWithGivenQueue()
         {
-            new LocalObjectAdded();
+            new LocalObjectAdded(Mock.Of<ISyncEventQueue>());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfQueueIsNull()
+        {
+            new LocalObjectAdded(null);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -89,6 +99,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -122,6 +133,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -151,6 +163,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -179,6 +192,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -267,7 +281,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
-            var solver = new LocalObjectAdded();
+            var solver = new LocalObjectAdded(this.queue.Object);
 
             solver.Solve(this.session.Object, this.storage.Object, fileInfo.Object, null);
             documentMock = Mock.Get(futureRemoteDoc);
@@ -295,7 +309,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
-            var solver = new LocalObjectAdded();
+            var solver = new LocalObjectAdded(this.queue.Object);
 
             solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
             return dirInfo;
