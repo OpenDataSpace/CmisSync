@@ -174,7 +174,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     int newLocalSituation = (int)this.LocalSituation.Analyse(this.storage, actualEvent);
                     int newRemoteSituation = (int)this.RemoteSituation.Analyse(this.storage, actualEvent);
                     solver = this.Solver[newLocalSituation, newRemoteSituation];
-                    if(solver != null) {
+                    if (solver != null) {
                         this.Solve(solver, actualEvent);
                     }
                 }
