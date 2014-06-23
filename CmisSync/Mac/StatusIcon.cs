@@ -379,7 +379,7 @@ namespace CmisSync {
                 Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-error-active.png"));
 
             this.folder_image       = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "cmissync-folder.icns"));
-            this.caution_image      = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-error.icns"));
+            this.caution_image      = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-error.png"));
             this.cmissync_image     = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "cmissync-app.icns"));
             this.pause_image        = new NSImage(Path.Combine(NSBundle.MainBundle.ResourcePath, "Pixmaps", "media_playback_pause.png"));
             this.resume_image       = new NSImage(Path.Combine(NSBundle.MainBundle.ResourcePath, "Pixmaps", "media_playback_start.png"));
@@ -455,7 +455,8 @@ namespace CmisSync {
             }
         }
 
-        public TransmissionMenuItem(FileTransmissionEvent transmission) {
+        public TransmissionMenuItem(FileTransmissionEvent transmission)
+        {
             Activated += delegate
             {
                 NSWorkspace.SharedWorkspace.OpenFile (System.IO.Directory.GetParent (transmission.Path).FullName);
@@ -465,7 +466,19 @@ namespace CmisSync {
             updateTime = DateTime.Now;
 
             Title = TransmissionStatus (transmission.Status);
-
+            switch (transmission.Type) {
+            case FileTransmissionType.DOWNLOAD_NEW_FILE:
+                Image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "Downloading.png"));
+                break;
+            case FileTransmissionType.UPLOAD_NEW_FILE:
+                Image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "Uploading.png"));
+                break;
+            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
+                goto case FileTransmissionType.UPLOAD_MODIFIED_FILE;
+            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
+                Image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "Updating.png"));
+                break;
+            }
             transmissionEvent.TransmissionStatus += TransmissionEvent;
         }
 
