@@ -311,7 +311,7 @@ namespace TestLibrary.SyncStrategiesTests
             var e = new ContentChangeEvent(type, Id);
             var remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(hasContentStream ? "streamId" : null, Id, "name", (string)null);
             var session = new Mock<ISession>();
-            session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(remoteObject.Object);
+            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(remoteObject.Object);
 
             e.UpdateObject(session.Object);
             return e;
@@ -321,7 +321,7 @@ namespace TestLibrary.SyncStrategiesTests
             var e = new ContentChangeEvent(type, Id);
             var remoteObject = new Mock<IFolder>();
             var session = new Mock<ISession>();
-            session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(remoteObject.Object);
+            session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(remoteObject.Object);
 
             e.UpdateObject(session.Object);
             return e;

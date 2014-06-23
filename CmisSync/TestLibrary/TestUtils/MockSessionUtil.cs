@@ -173,8 +173,9 @@ namespace TestLibrary.TestUtils
             var session = MockSessionUtil.PrepareSessionMockForSingleChange(type, id);
 
             var newRemoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(documentContentStreamId, id, "name", (string)null);
-            session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);
-         
+            session.Setup(s => s.GetObject(id, It.IsAny<IOperationContext>())).Returns(newRemoteObject.Object);
+            session.Setup(s => s.GetObject(id)).Returns(newRemoteObject.Object);
+
             return session;
         }
 
