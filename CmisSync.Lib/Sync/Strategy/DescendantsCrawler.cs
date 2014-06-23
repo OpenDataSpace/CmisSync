@@ -98,6 +98,18 @@ namespace CmisSync.Lib.Sync.Strategy
             return false;
         }
 
+        private static AbstractFolderEvent GetCorrespondingRemoteEvent(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap, IMappedObject storedMappedChild)
+        {
+            AbstractFolderEvent correspondingRemoteEvent = null;
+            Tuple<AbstractFolderEvent, AbstractFolderEvent> tuple;
+            if (eventMap.TryGetValue(storedMappedChild.RemoteObjectId, out tuple))
+            {
+                correspondingRemoteEvent = tuple.Item2;
+            }
+
+            return correspondingRemoteEvent;
+        }
+
         private void CrawlDescendants()
         {
             IObjectTree<IMappedObject> storedTree = null;
@@ -172,11 +184,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     storedMappedChild = storedObjects.Find(o => o.Guid == childGuid);
                     if (storedMappedChild != null) {
                         // Moved, Renamed, Updated or Equal
-                        AbstractFolderEvent correspondingRemoteEvent = null;
-                        Tuple<AbstractFolderEvent, AbstractFolderEvent> tuple;
-                        if (eventMap.TryGetValue(storedMappedChild.RemoteObjectId, out tuple)) {
-                            correspondingRemoteEvent = tuple.Item2;
-                        }
+                        AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
 
                         if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                             // Renamed, Updated or Equal
@@ -346,7 +354,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 mutualIds.Add(id);
                 this.Queue.AddEvent(deletedEvent);
             }
-            
+
             foreach(var id in mutualIds) {
                 removedLocalObjects.Remove(id);
                 removedRemoteObjects.Remove(id);
