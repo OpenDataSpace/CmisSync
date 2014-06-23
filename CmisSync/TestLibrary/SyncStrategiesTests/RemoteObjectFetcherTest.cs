@@ -37,7 +37,7 @@ namespace TestLibrary.SyncStrategiesTests
     using TestLibrary.UtilsTests;
 
     [TestFixture]
-    public class RemoteObjectFetcherTest 
+    public class RemoteObjectFetcherTest
     {
         private static readonly string Path = "/path";
         private static readonly string Id = "myId";
@@ -87,18 +87,43 @@ namespace TestLibrary.SyncStrategiesTests
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
-            var fileEvent = new FileEvent(new Mock<IFileInfo>().Object, new Mock<IDocument>().Object); 
+            var fileEvent = new FileEvent(new Mock<IFileInfo>().Object, new Mock<IDocument>().Object);
             fetcher.Handle(fileEvent);
+            session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
+        }
+
+        [Test, Category("Fast")]
+        public void FileMovedEventWithoutObjectId() {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, Id, "name", (string)null).Object;
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
+
+            var storage = new Mock<IMetaDataStorage>();
+            storage.AddLocalFile(Path, Id);
+
+            var fileEvent = new FileMovedEvent(new FileInfoWrapper(new FileInfo(Path)), new FileInfoWrapper(new FileInfo("/newPath")));
+            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
+
+            Assert.That(fetcher.Handle(fileEvent), Is.False);
+            Assert.That(fileEvent.RemoteFile, Is.Not.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void FileMovedEventWithoutLocalPath() {
+            var session = new Mock<ISession>();
+            var fetcher = new RemoteObjectFetcher(session.Object, Mock.Of<IMetaDataStorage>());
+            var fileMovedEvent = new FileMovedEvent(null, null, Path, Mock.Of<IDocument>());
+            Assert.That(fetcher.Handle(fileMovedEvent), Is.False);
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 
         [Test, Category("Fast")]
         public void FolderEventWithIFolder() {
             var session = new Mock<ISession>();
-            var storage = new Mock<IMetaDataStorage>();
-            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
-            var fileEvent = new FolderEvent(new Mock<IDirectoryInfo>().Object, new Mock<IFolder>().Object); 
-            fetcher.Handle(fileEvent);
+            var fetcher = new RemoteObjectFetcher(session.Object, Mock.Of<IMetaDataStorage>());
+            var folderEvent = new FolderEvent(new Mock<IDirectoryInfo>().Object, new Mock<IFolder>().Object);
+            fetcher.Handle(folderEvent);
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
         }
 

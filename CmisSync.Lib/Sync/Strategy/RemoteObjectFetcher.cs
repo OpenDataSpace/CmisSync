@@ -122,12 +122,18 @@ namespace CmisSync.Lib.Sync.Strategy {
 
         private string FetchIdFromStorage(ISyncEvent e) {
             IFileSystemInfo path = null;
-            if(e is FileEvent) {
+            if(e is FileMovedEvent) {
+                path = (e as FileMovedEvent).OldLocalFile;
+            }
+            else if(e is FileEvent) {
                 path = (e as FileEvent).LocalFile;
             }
             else if (e is CrawlRequestEvent)
             {
                 path = (e as CrawlRequestEvent).LocalFolder;
+            }
+            else if (e is FolderMovedEvent) {
+                path = (e as FolderMovedEvent).OldLocalFolder;
             }
             else if (e is FolderEvent)
             {
