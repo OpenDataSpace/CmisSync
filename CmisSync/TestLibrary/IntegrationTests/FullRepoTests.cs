@@ -374,12 +374,9 @@ namespace TestLibrary.IntegrationTests
         public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConfictFileIsCreated()
         {
             string fileName = "fileConflictTest.txt";
-            string remoteContent = "remote";
+            string remoteContent = "remotecontent";
             string localContent = "local";
 
-            this.repo.Initialize();
-
-            this.repo.Run();
 
             this.remoteRootDir.CreateDocument(fileName, remoteContent);
             var localDoc = Path.Combine(this.localRootDir.FullName, fileName);
@@ -388,9 +385,10 @@ namespace TestLibrary.IntegrationTests
                 sw.WriteLine(localContent);
             }
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            Thread.Sleep(200);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.repo.Initialize();
+
             this.repo.Run();
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(2));
             Assert.That(new FileInfo(localDoc).Length, Is.EqualTo(remoteContent.Length));
