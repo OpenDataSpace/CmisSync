@@ -473,11 +473,17 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue) {
+        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 5000) {
+            int waited = 0;
             while (queue.Queue.IsEmpty)
             {
+                int interval = 20;
                 //Wait for event to kick in
-                Thread.Sleep(20);
+                Thread.Sleep(interval);
+                waited += interval;
+                if(waited > timeout) {
+                    Assert.Fail("Timeout exceeded");
+                }
             }
         }
     }
