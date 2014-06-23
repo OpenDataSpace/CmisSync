@@ -90,24 +90,29 @@ namespace CmisSync.Lib.Sync.Solver
 
             var localFile = localFileSystemInfo as IFileInfo;
 
-            if(localFile != null && localFile.Length > 0) {
-                Logger.Debug("Uploading File");
-                IFileUploader uploader = ContentTaskUtils.CreateUploader();
+            if (localFile != null) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
-                using (SHA1 hashAlg = new SHA1Managed())
-                using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
-                    uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
-                    mapped.ChecksumAlgorithmName = "SHA1";
-                    mapped.LastChecksum = hashAlg.Hash;
+                this.queue.AddEvent(transmissionEvent);
+                if ( localFile.Length > 0) {
+                    Logger.Debug("Uploading file content");
+                    IFileUploader uploader = ContentTaskUtils.CreateUploader();
+                    using (SHA1 hashAlg = new SHA1Managed())
+                    using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
+                        uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
+                        mapped.ChecksumAlgorithmName = "SHA1";
+                        mapped.LastChecksum = hashAlg.Hash;
+                    }
+
+                    mapped.LastContentSize = localFile.Length;
+                    localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
+                    mapped.LastChangeToken = addedObject.ChangeToken;
+                    mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
+                    mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+
+                    storage.SaveMappedObject(mapped);
+                } else {
+                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
-
-                mapped.LastContentSize = localFile.Length;
-                localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
-                mapped.LastChangeToken = addedObject.ChangeToken;
-                mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
-                mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
-
-                storage.SaveMappedObject(mapped);
             }
         }
 
