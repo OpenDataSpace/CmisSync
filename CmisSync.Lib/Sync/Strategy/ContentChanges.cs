@@ -81,13 +81,14 @@ namespace CmisSync.Lib.Sync.Strategy
                 }
                 else
                 {
-                    if (dropNextSyncEvents) {
+                    if (this.dropNextSyncEvents) {
                         Logger.Debug("Dropping: " + e.ToString());
                         return true;
                     }
+
                     Logger.Debug("Starting ContentChange Sync");
                     bool result = this.StartSync();
-                    dropNextSyncEvents = true;
+                    this.dropNextSyncEvents = true;
                     Queue.AddEvent(new ResetStartNextSyncFilterEvent());
                     return result;
                 }
@@ -104,7 +105,7 @@ namespace CmisSync.Lib.Sync.Strategy
             }
 
             if(e is ResetStartNextSyncFilterEvent) {
-                dropNextSyncEvents = false;
+                this.dropNextSyncEvents = false;
                 return true;
             }
 
