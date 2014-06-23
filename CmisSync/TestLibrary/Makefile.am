@@ -62,6 +62,7 @@ SOURCES =  \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/MetaDataStorageTest.cs \
+	StorageTests/Utf8FileNameNormalizationTest.cs \
 	StorageTests/PersistentCookieStorageTest.cs \
 	StorageTests/PersistentStorageTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \

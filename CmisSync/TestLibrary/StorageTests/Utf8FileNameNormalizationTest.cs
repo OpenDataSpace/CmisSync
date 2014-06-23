@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="Utf8FileNameNormaizationTest.cs" company="GRAU DATA AG">
+// <copyright file="Utf8FileNameNormalizationTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -25,7 +25,7 @@ namespace TestLibrary.IntegrationTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class Utf8FileNameNormaizationTest
+    public class Utf8FileNameNormalizationTest
     {
         private string directoryPath;
 

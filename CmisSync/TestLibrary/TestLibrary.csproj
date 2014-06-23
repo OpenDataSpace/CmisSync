@@ -174,7 +174,7 @@
     <Compile Include="DataTests\ObjectTreeTest.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
     <Compile Include="StorageTests\ExtendedAttributeReaderDosTest.cs" />
-    <Compile Include="StorageTests\Utf8FileNameNormaizationTest.cs" />
+    <Compile Include="StorageTests\Utf8FileNameNormalizationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
