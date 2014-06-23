@@ -499,6 +499,47 @@ namespace TestLibrary.IntegrationTests
             newFolder.Delete(true);
         }
 
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void RenameRemoteFolderChangesChangeLogToken(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            IFolder rootFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string folderName = "1";
+            string newFolderName = "2";
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, folderName);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+            try {
+                IFolder folder = session.GetObjectByPath(remoteFolderPath + "/" + folderName) as IFolder;
+                if (folder != null) {
+                    folder.Delete(true);
+                }
+
+                folder = session.GetObjectByPath(remoteFolderPath + "/" + newFolderName) as IFolder;
+                if (folder != null) {
+                    folder.Delete(true);
+                }
+            }
+            catch (CmisObjectNotFoundException) {
+            }
+
+            IFolder newFolder = rootFolder.CreateFolder(properties);
+            string changeLogToken = session.RepositoryInfo.LatestChangeLogToken;
+            string changeToken = newFolder.ChangeToken;
+            newFolder.Rename(newFolderName, true);
+
+            Assert.That(newFolder.ChangeToken, Is.Not.EqualTo(changeToken));
+
+            newFolder.Delete(true);
+        }
+
         private class AssertingStream : StreamWrapper {
             private Action verification;
 
