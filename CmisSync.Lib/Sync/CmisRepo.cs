@@ -215,7 +215,7 @@ namespace CmisSync.Lib.Sync
             #if __COCOA__
             this.WatcherProducer = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
             #else
-            this.WatcherProducer = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue);
+            this.WatcherProducer = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue, this.storage);
             #endif
             this.WatcherConsumer = new WatcherConsumer(this.Queue);
             this.Queue.EventManager.AddEventHandler(this.WatcherConsumer);

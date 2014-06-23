@@ -23,6 +23,7 @@ namespace CmisSync.Lib.Sync.Strategy
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
 
     /// <summary>
     /// .Net file system watcher.
@@ -41,13 +42,19 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </summary>
         private bool disposed = false;
 
+        private IMetaDataStorage storage;
+
+        private IFileSystemInfoFactory fsFactory;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.NetWatcher"/> class.
         /// Takes the given file system watcher and listens for events and passes them to the given queue
         /// </summary>
         /// <param name="watcher">File System Watcher.</param>
         /// <param name="queue">Queue for the occured events.</param>
-        public NetWatcher(FileSystemWatcher watcher, ISyncEventQueue queue)
+        /// <param name="storage">Meta Data Storage to verify, if a deleted object is a file or folder.</param>
+        /// <param name="fsFactory">File system info factory. If factory is null, the normal file system is used, otherwise the given factory.</param>
+        public NetWatcher(FileSystemWatcher watcher, ISyncEventQueue queue, IMetaDataStorage storage, FileSystemInfoFactory fsFactory = null)
         {
             if (watcher == null) {
                 throw new ArgumentNullException("The given fs watcher must not be null");
@@ -61,7 +68,14 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException("The given queue must not be null");
             }
 
+            if (storage == null) {
+                throw new ArgumentNullException("The given storage must not be null");
+            }
+
+            this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
+
             this.queue = queue;
+            this.storage = storage;
 
             this.fileSystemWatcher = watcher;
             this.fileSystemWatcher.IncludeSubdirectories = true;
@@ -128,11 +142,17 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             bool isDirectory;
             if(e.ChangeType == WatcherChangeTypes.Deleted) {
-                //we can not know it but is not relevant
-                isDirectory = false;
+                var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
+                if (obj != null) {
+                    isDirectory = obj.Type == CmisSync.Lib.Data.MappedObjectType.Folder;
+                } else {
+                    // we can not know it but is not relevant
+                    isDirectory = false;
+                }
             } else {
                 isDirectory = (File.GetAttributes(e.FullPath) & FileAttributes.Directory) == FileAttributes.Directory;
             }
+
             this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath, isDirectory));
         }
 

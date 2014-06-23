@@ -16,25 +16,33 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 #if ! __COCOA__
 namespace TestLibrary.SyncStrategiesTests
 {
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
 
     using Moq;
 
     using NUnit.Framework;
 
+    using TestLibrary.TestUtils;
+
     [TestFixture]
     public class NetWatcherTest : BaseWatcherTest
     {
+        private Mock<IMetaDataStorage> storage;
+
         [SetUp]
         public new void SetUp() {
             base.SetUp();
+            this.storage = new Mock<IMetaDataStorage>();
         }
 
         [TearDown]
@@ -45,7 +53,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         public void ConstructorSuccessTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            using (var watcher = new NetWatcher(fswatcher, queue.Object))
+            using (var watcher = new NetWatcher(fswatcher, queue.Object, Mock.Of<IMetaDataStorage>()))
             {
                 Assert.False(watcher.EnableEvents);
             }
@@ -54,7 +62,7 @@ namespace TestLibrary.SyncStrategiesTests
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithNullWatcher() {
-            using (new NetWatcher(null, queue.Object))
+            using (new NetWatcher(null, queue.Object, Mock.Of<IMetaDataStorage>()))
             {
             }
         }
@@ -63,7 +71,7 @@ namespace TestLibrary.SyncStrategiesTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithNullQueue() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
-            using (new NetWatcher(fswatcher, null))
+            using (new NetWatcher(fswatcher, null, Mock.Of<IMetaDataStorage>()))
             {
             }
         }
@@ -72,7 +80,16 @@ namespace TestLibrary.SyncStrategiesTests
         [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFailsWithWatcherOnNullPath() {
             var fswatcher = new Mock<FileSystemWatcher>().Object;
-            using (new NetWatcher(fswatcher, queue.Object))
+            using (new NetWatcher(fswatcher, queue.Object, null))
+            {
+            }
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorFailsWithNullStorage() {
+            var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
+            using (new NetWatcher(fswatcher, queue.Object, null))
             {
             }
         }
@@ -109,6 +126,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Medium")]
         public void ReportFSFolderRemovedEventTest() {
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(Mock.Of<IMappedObject>(o => o.Type == MappedObjectType.Folder));
             this.ReportFSFolderRemovedEvent();
         }
 
@@ -124,13 +142,13 @@ namespace TestLibrary.SyncStrategiesTests
 
         protected override WatcherData GetWatcherData(string pathname, ISyncEventQueue queue) {
             WatcherData watcherData = new WatcherData();
-            watcherData.Data = new FileSystemWatcher(pathname);
-            watcherData.Watcher = new NetWatcher(watcherData.Data as FileSystemWatcher, queue);
+            watcherData.Data = new Tuple<FileSystemWatcher, IMetaDataStorage>(new FileSystemWatcher(pathname), this.storage.Object);
+            watcherData.Watcher = new NetWatcher((watcherData.Data as Tuple<FileSystemWatcher, IMetaDataStorage>).Item1, queue, this.storage.Object);
             return watcherData;
         }
 
         protected override void WaitWatcherData(WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
-            FileSystemWatcher watcher = watcherData.Data as FileSystemWatcher;
+            FileSystemWatcher watcher = (watcherData.Data as Tuple<FileSystemWatcher, IMetaDataStorage>).Item1;
             watcher.WaitForChanged(types, milliseconds);
         }
     }

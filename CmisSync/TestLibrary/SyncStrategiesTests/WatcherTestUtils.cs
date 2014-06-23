@@ -250,6 +250,7 @@ namespace TestLibrary.SyncStrategiesTests
             {
                 Assert.AreEqual(this.localSubFolder.FullName, this.returnedFSEvent.Path);
                 Assert.AreEqual(WatcherChangeTypes.Deleted, this.returnedFSEvent.Type);
+                Assert.That(this.returnedFSEvent.IsDirectory(), Is.True);
             }
             else
             {
