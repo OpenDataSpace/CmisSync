@@ -102,8 +102,7 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             AbstractFolderEvent correspondingRemoteEvent = null;
             Tuple<AbstractFolderEvent, AbstractFolderEvent> tuple;
-            if (eventMap.TryGetValue(storedMappedChild.RemoteObjectId, out tuple))
-            {
+            if (eventMap.TryGetValue(storedMappedChild.RemoteObjectId, out tuple)) {
                 correspondingRemoteEvent = tuple.Item2;
             }
 
@@ -201,6 +200,7 @@ namespace CmisSync.Lib.Sync.Strategy
                             IFileSystemInfo oldLocalPath = child.Item is IFileInfo ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedMappedChild)) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedMappedChild));
                             createdEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.MOVED, oldLocalObject: oldLocalPath, src: this);
                         }
+
                         eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
                     } else {
                         // Added
@@ -220,6 +220,32 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
+        private AbstractFolderEvent CreateRemoteEventBasedOnStorage(IFileableCmisObject cmisObject, IMappedObject storedParent, IMappedObject storedMappedChild)
+        {
+            AbstractFolderEvent newEvent = null;
+            if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
+                // Renamed or Equal
+                if (storedMappedChild.Name == cmisObject.Name) {
+                    // Equal or property update
+                    if (storedMappedChild.LastChangeToken != cmisObject.ChangeToken) {
+                        // Update
+                        newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.CHANGED, src: this);
+                    } else {
+                        // Equal
+                        newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.NONE, src: this);
+                    }
+                } else {
+                    // Renamed
+                    newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.CHANGED, src: this);
+                }
+            } else {
+                // Moved
+                newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.MOVED, oldRemotePath: this.storage.GetRemotePath(storedMappedChild), src: this);
+            }
+
+            return newEvent;
+        }
+
         private void CreateRemoteEvents(List<IMappedObject> storedObjects, IObjectTree<IFileableCmisObject> remoteTree, Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
         {
             var storedParent = storedObjects.Find(o => o.RemoteObjectId == remoteTree.Item.Id);
@@ -227,26 +253,7 @@ namespace CmisSync.Lib.Sync.Strategy
             foreach (var child in remoteTree.Children) {
                 var storedMappedChild = storedObjects.Find(o => o.RemoteObjectId == child.Item.Id);
                 if (storedMappedChild != null) {
-                    AbstractFolderEvent newEvent = null;
-                    if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
-                        // Renamed or Equal
-                        if (storedMappedChild.Name == child.Item.Name) {
-                            // Equal or property update
-                            if (storedMappedChild.LastChangeToken != child.Item.ChangeToken) {
-                                // Update
-                                newEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.CHANGED, src: this);
-                            } else {
-                                // Equal
-                                newEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.NONE, src: this);
-                            }
-                        } else {
-                            // Renamed
-                            newEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.CHANGED, src: this);
-                        }
-                    } else {
-                        // Moved
-                        newEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.MOVED, oldRemotePath: this.storage.GetRemotePath(storedMappedChild), src: this);
-                    }
+                    AbstractFolderEvent newEvent = this.CreateRemoteEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
                     eventMap[child.Item.Id] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, newEvent);
                 } else {
                     // Added
