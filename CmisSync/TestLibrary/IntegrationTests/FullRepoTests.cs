@@ -345,7 +345,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConfictFileIsCreated()
         {
             string fileName = "fileConflictTest.txt";
@@ -372,7 +372,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
         }
 
-        [Test, Category("Slow")]
+        [Ignore]
+        [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved()
         {
             string fileName = "fileConflictTest.txt";
@@ -402,7 +403,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
-        [Test, Category("Slow")]
+        [Ignore]
+        [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalAndTheRemoteFileAreBothRenamed() {
             string originalName = "original.txt";
             string localName = "local.txt";
