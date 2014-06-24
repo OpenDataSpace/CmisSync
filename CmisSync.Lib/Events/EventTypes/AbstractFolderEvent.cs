@@ -51,5 +51,13 @@ namespace CmisSync.Lib.Events
         /// </summary>
         /// <value>The remote change type.</value>
         public MetaDataChangeType Remote { get; set; }
+
+        /// <summary>
+        /// Gets the remote path.
+        /// </summary>
+        /// <value>
+        /// The path.
+        /// </value>
+        public abstract string Path { get; }
     }
 }
