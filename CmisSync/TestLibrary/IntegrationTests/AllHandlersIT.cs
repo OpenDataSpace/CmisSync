@@ -173,6 +173,7 @@ namespace TestLibrary.IntegrationTests
             string newPath = Path.Combine(this.localRoot, newName);
             string id = "1";
             string lastChangeToken = "changeToken";
+            Guid guid = Guid.NewGuid();
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Exists).Returns(true);
@@ -181,7 +182,7 @@ namespace TestLibrary.IntegrationTests
             fsFactory.AddIDirectoryInfo(dirInfo.Object);
             var mappedRootObject = new MappedObject("/", parentId, MappedObjectType.Folder, null, storage.ChangeLogToken);
             storage.SaveMappedObject(mappedRootObject);
-            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, parentId, null);
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, parentId, null) { Guid = guid };
             storage.SaveMappedObject(mappedObject);
             storage.ChangeLogToken = "oldChangeToken";
             Console.WriteLine(storage.ToFindString());
@@ -190,7 +191,15 @@ namespace TestLibrary.IntegrationTests
 
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
             dirInfo.Setup(d => d.MoveTo(It.IsAny<string>()))
-                .Callback(() => queue.AddEvent(Mock.Of<IFSMovedEvent>(fs => fs.IsDirectory() == true && fs.OldPath == path && fs.Path == newPath)));
+                .Callback(() => {
+                    queue.AddEvent(Mock.Of<IFSMovedEvent>(fs => fs.IsDirectory() == true && fs.OldPath == path && fs.Path == newPath && fs.Type == WatcherChangeTypes.Renamed));
+                    var newDirInfo = new Mock<IDirectoryInfo>();
+                    newDirInfo.Setup(d => d.Exists).Returns(true);
+                    newDirInfo.Setup(d => d.FullName).Returns(newPath);
+                    newDirInfo.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+                    newDirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(r => r.FullName == this.localRoot));
+                    fsFactory.AddIDirectoryInfo(newDirInfo.Object);
+                });
 
             queue.RunStartSyncEvent();
             dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
