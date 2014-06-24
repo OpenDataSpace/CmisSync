@@ -288,47 +288,6 @@ namespace CmisSync.Lib
         }
 
         /// <summary>
-        /// Find an available conflict free filename for this file.
-        /// For instance:
-        /// - if /dir/file does not exist, return the same path
-        /// - if /dir/file exists, return /dir/file (1)
-        /// - if /dir/file (1) also exists, return /dir/file (2)
-        /// - etc
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public static string FindNextConflictFreeFilename(string path, String user = null)
-        {
-            if (!File.Exists(path))
-            {
-                return path;
-            }
-
-            if (user == null) {
-                user = Environment.UserName;
-            }
-
-            string extension = Path.GetExtension(path);
-            string filepath = path.Substring(0, path.Length - extension.Length);
-            string ret = string.Format("{0}_{1}-version{2}", filepath, user, extension);
-            if (!File.Exists(ret)) {
-                return ret;
-            }
-
-            int index = 1;
-            do
-            {
-                ret = string.Format("{0}_{1}-version ({2}){3}", filepath, user, index.ToString(), extension);
-                if (!File.Exists(ret)) {
-                    return ret;
-                }
-
-                index++;
-            }
-            while (true);
-        }
-
-        /// <summary>
         /// Format a file size nicely.
         /// Example: 1048576 becomes "1 MB"
         /// </summary>

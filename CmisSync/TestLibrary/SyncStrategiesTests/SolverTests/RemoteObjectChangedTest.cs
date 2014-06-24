@@ -174,7 +174,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             string parentId = "papa";
             string lastChangeToken = "token";
             string newChangeToken = "newToken";
-            string confictFilePath = Utils.FindNextConflictFreeFilename(path);
+            string confictFilePath = Path.Combine(Path.GetTempPath(), fileName + ".conflict");
             byte[] newContent = Encoding.UTF8.GetBytes("content");
             byte[] oldContent = Encoding.UTF8.GetBytes("older content");
             byte[] changedContent = Encoding.UTF8.GetBytes("change content");
@@ -199,6 +199,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             };
 
             Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
+            fsFactory.Setup(f => f.CreateConflictFileInfo(It.IsAny<IFileInfo>())).Returns(Mock.Of<IFileInfo>(i => i.FullName == confictFilePath));
             var cacheFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
             cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(new MemoryStream());
             var backupFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);

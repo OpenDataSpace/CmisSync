@@ -102,7 +102,7 @@ namespace CmisSync.Lib.Sync.Solver
                     using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
                         byte[] checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
                         if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
-                            backupFile.MoveTo(Utils.FindNextConflictFreeFilename(file.FullName));
+                            backupFile.MoveTo(this.fsFactory.CreateConflictFileInfo(file).FullName);
                         } else {
                             backupFile.Delete();
                         }
