@@ -16,13 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Security.Cryptography;
 
 namespace CmisSync.Lib.Sync.Solver
 {
     using System;
     using System.IO;
- 
+    using System.Security.Cryptography;
+
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
@@ -37,19 +37,21 @@ namespace CmisSync.Lib.Sync.Solver
     public class RemoteObjectAdded : ISolver
     {
         private ISyncEventQueue queue;
+        private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.RemoteObjectAdded"/> class.
         /// </summary>
         /// <param name="queue">Queue to report new transmissions to.</param>
-        public RemoteObjectAdded(ISyncEventQueue queue) {
+        /// <param name="fsFactory">File system factory.</param>
+        public RemoteObjectAdded(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
 
+            this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
             this.queue = queue;
         }
-
 
         /// <summary>
         /// Adds the Object to Disk and Database
@@ -102,12 +104,14 @@ namespace CmisSync.Lib.Sync.Solver
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
 
+                var cacheFile = this.fsFactory.CreateFileInfo(Path.Combine(file.Directory.FullName, file.Name + ".sync"));
+
                 IDocument remoteDoc = remoteId as IDocument;
-                var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName);
+                var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
                 this.queue.AddEvent(transmissionEvent);
                 byte[] hash = null;
                 using (var hashAlg = new SHA1Managed())
-                using (var fileStream = file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                using (var fileStream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
                 using (var downloader = ContentTasks.ContentTaskUtils.CreateDownloader())
                 {
                     downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
@@ -115,7 +119,9 @@ namespace CmisSync.Lib.Sync.Solver
                 }
 
                 Guid guid = Guid.NewGuid();
-                file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString());
+                cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString());
+                cacheFile.MoveTo(file.FullName);
+                file.Refresh();
                 if (remoteDoc.LastModificationDate != null) {
                     file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
                 }
