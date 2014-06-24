@@ -152,6 +152,7 @@ namespace CmisSync.Lib.Events
                         manager.Handle(syncEvent);
                     } catch(Exception e) {
                         Logger.Error("Exception in EventHandler");
+                        Logger.Error("Event was: " + syncEvent);
                         Logger.Error(e);
                         Logger.Error(e.StackTrace);
                     }
