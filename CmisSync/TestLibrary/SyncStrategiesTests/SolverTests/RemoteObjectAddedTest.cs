@@ -16,13 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Text;
-using System.Security.Cryptography;
 
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
     using System;
     using System.IO;
+    using System.Security.Cryptography;
+    using System.Text;
 
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
@@ -51,7 +51,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [SetUp]
         public void SetUpPath()
         {
-            path = Path.Combine(Path.GetTempPath(), this.objectName);
+            this.path = Path.Combine(Path.GetTempPath(), this.objectName);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -116,24 +116,33 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         {
             var storage = new Mock<IMetaDataStorage>();
             var queue = new Mock<ISyncEventQueue>();
+            var cacheFileInfo = new Mock<IFileInfo>();
+            var fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
             var fileInfo = new Mock<IFileInfo>();
+            var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
+            fileInfo.SetupAllProperties();
+            fileInfo.Setup(f => f.FullName).Returns(this.path);
+            fileInfo.Setup(f => f.Name).Returns(this.objectName);
+            fileInfo.Setup(f => f.Directory).Returns(parentDir);
             byte[] content = Encoding.UTF8.GetBytes("content");
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
-            fileInfo.SetupAllProperties();
-            fileInfo.Setup(d => d.FullName).Returns(this.path);
-            fileInfo.Setup(d => d.Name).Returns(this.objectName);
-            fileInfo.Setup(d => d.Directory).Returns(Mock.Of<IDirectoryInfo>());
-            fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
-            fileInfo.Setup(d => d.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read)).Returns(new MemoryStream());
+            cacheFileInfo.SetupAllProperties();
+            cacheFileInfo.Setup(f => f.FullName).Returns(this.path + ".sync");
+            cacheFileInfo.Setup(f => f.Name).Returns(this.objectName + ".sync");
+            cacheFileInfo.Setup(f => f.Directory).Returns(parentDir);
+            cacheFileInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
+            cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(new MemoryStream());
+            fsFactory.AddIFileInfo(cacheFileInfo.Object);
 
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            new RemoteObjectAdded(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
+            new RemoteObjectAdded(queue.Object, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
 
-            fileInfo.Verify(f => f.Open(FileMode.CreateNew, FileAccess.Write, FileShare.Read), Times.Once());
+            cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
+            cacheFileInfo.Verify(f => f.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>()), Times.Once());
+            cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
             fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-            fileInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>()), Times.Once());
             queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Type == FileTransmissionType.DOWNLOAD_NEW_FILE)), Times.Once());
             storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, expectedHash, content.Length);
         }
