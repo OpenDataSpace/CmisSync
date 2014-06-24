@@ -7,10 +7,6 @@ Important Next Steps:
  - The filters should not work like now, reporting the reason to a queue. They should work without a queue and initialized by one Reporting class which is aggregating all normal filters and reports their reasons to the queue.
   => the filters could also be used by the DescendantsCrawler to filter the created tree while creating them. This could also be used by a future version of the normal Crawler.
 
-- Using cache files while downloading new files
-- Writing integration tests and stabilize them
-- Implement conflict solver
-
 Important for Migration:
 - Migration procedure from old sqlite db to new DBreeze db.
 
