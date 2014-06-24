@@ -81,5 +81,13 @@ namespace TestLibrary.EventsTests
             var fe = new FileEvent(null, remoteFile);
             fe.ToString();
         }
+
+        [Test, Category("Fast")]
+        public void AbstractFolderEventHasPathAttribute()
+        {
+            var localFile = new Mock<IFileInfo>();
+            AbstractFolderEvent fe = new FileEvent(localFile.Object);
+            Assert.That(fe.Path, Is.Null);;
+        }
     }
 }
