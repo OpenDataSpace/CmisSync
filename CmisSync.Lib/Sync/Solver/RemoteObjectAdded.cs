@@ -120,7 +120,17 @@ namespace CmisSync.Lib.Sync.Solver
 
                 Guid guid = Guid.NewGuid();
                 cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString());
-                cacheFile.MoveTo(file.FullName);
+                try {
+                    cacheFile.MoveTo(file.FullName);
+                } catch (IOException) {
+                    file.Refresh();
+                    if (file.Exists) {
+                        cacheFile.Replace(file, this.fsFactory.CreateConflictFileInfo(file), true);
+                    } else {
+                        throw;
+                    }
+                }
+
                 file.Refresh();
                 if (remoteDoc.LastModificationDate != null) {
                     file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
