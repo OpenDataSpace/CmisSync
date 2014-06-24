@@ -153,6 +153,8 @@ namespace CmisSync
             Loader.Load(Repo);
             lock(loginLock)
                 isClosed = false;
+
+            OnPasswordChanged (this);
         }
 
         void InsertEvent ()
