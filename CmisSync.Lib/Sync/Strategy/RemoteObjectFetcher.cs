@@ -128,20 +128,17 @@ namespace CmisSync.Lib.Sync.Strategy {
             else if(e is FileEvent) {
                 path = (e as FileEvent).LocalFile;
             }
-            else if (e is CrawlRequestEvent)
-            {
+            else if (e is CrawlRequestEvent) {
                 path = (e as CrawlRequestEvent).LocalFolder;
             }
             else if (e is FolderMovedEvent) {
                 path = (e as FolderMovedEvent).OldLocalFolder;
             }
-            else if (e is FolderEvent)
-            {
+            else if (e is FolderEvent) {
                 path = (e as FolderEvent).LocalFolder;
             }
 
-            if (path != null)
-            {
+            if (path != null) {
                 IMappedObject savedObject = this.storage.GetObjectByLocalPath(path);
                 if(savedObject != null) {
                     return savedObject.RemoteObjectId;
