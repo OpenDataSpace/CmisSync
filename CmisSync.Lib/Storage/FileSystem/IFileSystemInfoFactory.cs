@@ -26,8 +26,25 @@ namespace CmisSync.Lib.Storage
     /// </summary>
     public interface IFileSystemInfoFactory
     {
+        /// <summary>
+        /// Creates a directory info.
+        /// </summary>
+        /// <returns>The directory info.</returns>
+        /// <param name="path">Full path to the directory.</param>
         IDirectoryInfo CreateDirectoryInfo(string path);
 
+        /// <summary>
+        /// Creates a file info.
+        /// </summary>
+        /// <returns>The file info.</returns>
+        /// <param name="fileName">Full path with file name.</param>
         IFileInfo CreateFileInfo(string fileName);
+
+        /// <summary>
+        /// Creates a conflict file info for the given file.
+        /// </summary>
+        /// <returns>The conflict file info.</returns>
+        /// <param name="file">File for which a new conflict file should be created.</param>
+        IFileInfo CreateConflictFileInfo(IFileInfo file);
     }
 }

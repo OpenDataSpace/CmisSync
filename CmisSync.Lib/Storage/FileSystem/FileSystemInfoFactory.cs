@@ -32,8 +32,7 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         /// <returns>The directory info.</returns>
         /// <param name="path">For this path.</param>
-        public IDirectoryInfo CreateDirectoryInfo(string path)
-        {
+        public IDirectoryInfo CreateDirectoryInfo(string path) {
             return new DirectoryInfoWrapper(new DirectoryInfo(path));
         }
 
@@ -42,9 +41,39 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         /// <returns>The file info.</returns>
         /// <param name="path">For this path.</param>
-        public IFileInfo CreateFileInfo(string path)
-        {
+        public IFileInfo CreateFileInfo(string path) {
             return new FileInfoWrapper(new FileInfo(path));
+        }
+
+        /// <summary>
+        /// Creates a conflict file info for the given file.
+        /// </summary>
+        /// <returns>The conflict file info.</returns>
+        /// <param name="file">File for which a new conflict file should be created.</param>
+        public IFileInfo CreateConflictFileInfo(IFileInfo file) {
+            if (!file.Exists) {
+                return file;
+            }
+
+            string user = Environment.UserName;
+            string extension = Path.GetExtension(file.FullName);
+            string suffix = file.Name.Substring(0, file.Name.Length - extension.Length);
+            string filename = string.Format("{0}_{1}-version{2}", suffix, user, extension);
+
+            IFileInfo conflictFile = this.CreateFileInfo(Path.Combine(file.Directory.FullName, filename));
+            if (!conflictFile.Exists) {
+                return conflictFile;
+            }
+
+            int index = 1;
+            do
+            {
+                filename = string.Format("{0}_{1}-version ({2}){3}", suffix, user, index.ToString(), extension);
+                conflictFile = this.CreateFileInfo(Path.Combine(file.Directory.FullName, filename));
+                index++;
+            }
+            while (conflictFile.Exists);
+            return conflictFile;
         }
     }
 }

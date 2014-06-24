@@ -269,5 +269,50 @@ namespace TestLibrary.StorageTests
             backupInfo.Refresh();
             Assert.That(backupInfo.GetExtendedAttribute("test"), Is.Null);
         }
+
+        [Test, Category("Fast")]
+        public void CreatesFirstConflictFile()
+        {
+            string fileName = "test1.txt";
+            string fullPath = Path.Combine(this.testFolder.FullName, fileName);
+            var fileInfo = Factory.CreateFileInfo(fullPath);
+            using (new FileInfo(fullPath).Create()) {
+            }
+
+            fileInfo = Factory.CreateFileInfo(fullPath);
+
+            var conflictFile = Factory.CreateConflictFileInfo(fileInfo);
+
+            Assert.That(conflictFile.Exists, Is.False);
+            Assert.That(conflictFile.Directory.FullName, Is.EqualTo(fileInfo.Directory.FullName));
+            Assert.That(Path.GetExtension(conflictFile.FullName), Is.EqualTo(Path.GetExtension(fileInfo.FullName)), "The file extension must be kept the same as in the original file");
+            Assert.That(conflictFile.Name, Is.Not.EqualTo(fileInfo.Name));
+            Console.WriteLine(conflictFile.FullName);
+        }
+
+        // Not implemented yet
+        [Ignore]
+        [Test, Category("Fast")]
+        public void CreateNextConflictFile()
+        {
+            Assert.Fail("TODO");
+            /*
+            for (int i = 0; i < 10; i++)
+            {
+                using (FileStream s = File.Create(conflictFilePath))
+                {
+                }
+
+                conflictFilePath = Utils.FindNextConflictFreeFilename(path, user);
+                Assert.AreNotEqual(path, conflictFilePath, "The conflict file must differ from original file");
+                Assert.True(conflictFilePath.Contains(user), "The username should be added to the conflict file name");
+                Assert.True(conflictFilePath.EndsWith(Path.GetExtension(path)), "The file extension must be kept the same as in the original file");
+                string filename = Path.GetFileName(conflictFilePath);
+                string originalFilename = Path.GetFileNameWithoutExtension(path);
+                Assert.True(filename.StartsWith(originalFilename), string.Format("The conflict file \"{0}\" must start with \"{1}\"", filename, originalFilename));
+                string conflictParent = Directory.GetParent(conflictFilePath).FullName;
+                Assert.AreEqual(originalParent, conflictParent, "The conflict file must exists in the same directory like the orignial file");
+            } */
+        }
     }
 }
