@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Events.Filter
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
 
     /// <summary>
@@ -65,12 +66,30 @@ namespace CmisSync.Lib.Events.Filter
         /// <returns><c>true</c> if the storage contains an entry for this object</returns>
         public override bool Handle(ISyncEvent e)
         {
-            if(e is IFSEvent) {
+            if (e is IFSEvent) {
                 var fsEvent = e as IFSEvent;
                 IFileSystemInfo path = fsEvent.IsDirectory() ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(fsEvent.Path) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(fsEvent.Path);
-                switch(fsEvent.Type) {
+                switch (fsEvent.Type) {
                 case WatcherChangeTypes.Created:
                     return this.storage.GetObjectByLocalPath(path) != null;
+                case WatcherChangeTypes.Renamed:
+                    var obj = this.storage.GetObjectByLocalPath(path);
+                    if (obj != null) {
+                        if (obj.Guid != Guid.Empty) {
+                            string guid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                            Guid fsGuid;
+                            if (Guid.TryParse(guid, out fsGuid)) {
+                                return fsGuid == obj.Guid;
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+
                 case WatcherChangeTypes.Deleted:
                     return this.storage.GetObjectByLocalPath(path) == null;
                 default:
