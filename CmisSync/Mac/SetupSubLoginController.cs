@@ -128,7 +128,8 @@ namespace CmisSync
             PasswordText.Enabled = false;
             ContinueButton.Enabled = false;
             CancelButton.Enabled = false;
-            LoginProgress.StartAnimation(this);
+            //  monomac bug: animation GUI effect will cause GUI to hang, when backend thread is busy
+//            LoginProgress.StartAnimation(this);
             Thread check = new Thread(() => {
                 Tuple<CmisServer, Exception> fuzzyResult = CmisUtils.GetRepositoriesFuzzy(credentials);
                 CmisServer cmisServer = fuzzyResult.Item1;
