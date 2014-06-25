@@ -199,12 +199,31 @@ namespace TestLibrary.SyncStrategiesTests
                 Times.Once());
         }
 
-        [Ignore]
         [Test, Category("Fast")]
-        public void HandleErrorOnSolver()
+        [ExpectedException(typeof(NotImplementedException))]
+        public void ThrowNotImplementedOnMissingSolver()
         {
-            // If a solver fails to solve the situation, the situation should be rescanned and if it not changed an Exception Event should be published on Queue
-            Assert.Fail("TODO");
+            var detection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
+            ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
+
+            detection.Setup(d => d.Analyse(
+                It.Is<IMetaDataStorage>(db => db == this.storage.Object),
+                It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
+
+            var mechanism = new SyncMechanism(
+                detection.Object,
+                detection.Object,
+                this.queue.Object,
+                this.session.Object,
+                this.storage.Object,
+                solver);
+
+            var localFolder = Mock.Of<IDirectoryInfo>();
+            var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
+
+            mechanism.Handle(folderEvent);
+
         }
     }
 }

@@ -163,13 +163,16 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private void DoHandle(AbstractFolderEvent actualEvent)
         {
-            int localSituation = (int)this.LocalSituation.Analyse(this.storage, actualEvent);
-            int remoteSituation = (int)this.RemoteSituation.Analyse(this.storage, actualEvent);
-            ISolver solver = this.Solver[localSituation, remoteSituation];
-            if (solver != null) {
-                Logger.Debug("Using Solver: " + solver.GetType());
-                this.Solve(solver, actualEvent);
+            SituationType localSituation = this.LocalSituation.Analyse(this.storage, actualEvent);
+            SituationType remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
+            ISolver solver = this.Solver[(int)localSituation, (int)remoteSituation];
+
+            if(solver == null) {
+                throw new NotImplementedException(String.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));
             }
+
+            Logger.Debug("Using Solver: " + solver.GetType());
+            this.Solve(solver, actualEvent);
         }
 
         private void Solve(ISolver s, AbstractFolderEvent e)
