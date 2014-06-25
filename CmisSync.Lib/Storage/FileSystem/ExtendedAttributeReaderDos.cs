@@ -29,13 +29,13 @@ namespace CmisSync.Lib.Storage
     public class ExtendedAttributeReaderDos : IExtendedAttributeReader
     {
 #if ! __MonoCS__
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern IntPtr CreateFile(
-            string fileName,
+            string name,
             FILE_ACCESS_RIGHTS access,
             FileShare share,
-            int securityAttributes,
-            FileMode creation,
+            IntPtr security,
+            FileMode mode,
             FILE_FLAGS flags,
             IntPtr templateFile);
 
@@ -51,7 +51,7 @@ namespace CmisSync.Lib.Storage
             GENERIC_WRITE = 0x40000000
         }
 
-        private enum FILE_FLAGS : uint
+        private enum FILE_FLAGS : Int32
         {
             WriteThrough = 0x80000000,
             Overlapped = 0x40000000,
@@ -74,7 +74,10 @@ namespace CmisSync.Lib.Storage
                 throw new ArgumentException("Empty or null key is not allowed");
             }
 
-            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_READ, FileShare.Read, 0, FileMode.Open, 0, IntPtr.Zero);
+            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_READ, FileShare.Read, IntPtr.Zero, FileMode.Open, 0, IntPtr.Zero);
+            if (fileHandle.IsInvalid) {
+                throw new IOException("Could not open file stream.");
+            }
             TextReader reader = new StreamReader(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Read));
 
             string result = reader.ReadToEnd();
@@ -96,7 +99,7 @@ namespace CmisSync.Lib.Storage
                 throw new ArgumentException("Empty or null key is not allowed");
             }
 
-            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, 0, FileMode.Create, 0, IntPtr.Zero);
+            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, IntPtr.Zero, FileMode.Create, 0, IntPtr.Zero);
             TextWriter writer = new StreamWriter(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Write));
             writer.Write(value);
             writer.Close();
@@ -123,7 +126,15 @@ namespace CmisSync.Lib.Storage
         public List<string> ListAttributeKeys(string path)
         {
 #if ! __MonoCS__
-            throw new NotImplementedException();
+            List<StreamInfo> streams = new List<StreamInfo>(FileStreamSearcher.GetStreams(new FileInfo(path)));
+            foreach (StreamInfo stream in streams)
+            {
+                if (stream.Type == StreamType.AlternateData ||
+                        stream.Type == StreamType.Data)
+                {
+                    yield return stream.Name;
+                }
+            }
 #else
             throw new WrongPlatformException();
 #endif
@@ -140,4 +151,105 @@ namespace CmisSync.Lib.Storage
 #endif
         }
     }
+
+#if ! __MonoCS__
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
+    public struct Win32StreamID
+    {
+        public StreamType dwStreamId;
+        public int dwStreamAttributes;
+        public long Size;
+        public int dwStreamNameSize;
+    }
+
+    public enum StreamType
+    {
+        Data = 1,
+        ExternalData = 2,
+        SecurityData = 3,
+        AlternateData = 4,
+        Link = 5,
+        PropertyData = 6,
+        ObjectID = 7,
+        ReparseData = 8,
+        SparseDock = 9
+    }
+
+    public struct StreamInfo
+    {
+        public StreamInfo(string name, StreamType type, long size)
+        {
+            Name = name;
+            Type = type;
+            Size = size;
+        }
+        public readonly string Name;
+        public readonly StreamType Type;
+        public readonly long Size;
+    }
+
+    private class FileStreamSearcher
+    {
+        [DllImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool BackupRead(SafeFileHandle hFile, IntPtr lpBuffer,
+            uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead,
+            [MarshalAs(UnmanagedType.Bool)] bool bAbort,
+            [MarshalAs(UnmanagedType.Bool)] bool bProcessSecurity,
+            ref IntPtr lpContext);
+
+        [DllImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool BackupSeek(SafeFileHandle hFile,
+            uint dwLowBytesToSeek, uint dwHighBytesToSeek,
+            out uint lpdwLowByteSeeked, out uint lpdwHighByteSeeked,
+            ref IntPtr lpContext);
+
+        public static IEnumerable<StreamInfo> GetStreams(FileInfo file)
+        {
+            const int bufferSize = 4096;
+            using (FileStream fs = file.OpenRead())
+            {
+                IntPtr context = IntPtr.Zero;
+                IntPtr buffer = Marshal.AllocHGlobal(bufferSize);
+                try
+                {
+                    while (true)
+                    {
+                        uint numRead;
+                        if (!BackupRead(fs.SafeFileHandle, buffer, (uint)Marshal.SizeOf(typeof(Win32StreamID)),
+                            out numRead, false, true, ref context)) throw new Win32Exception();
+                        if (numRead > 0)
+                        {
+                            Win32StreamID streamID = (Win32StreamID)Marshal.PtrToStructure(buffer, typeof(Win32StreamID));
+                            string name = null;
+                            if (streamID.dwStreamNameSize > 0)
+                            {
+                                if (!BackupRead(fs.SafeFileHandle, buffer, (uint)Math.Min(bufferSize, streamID.dwStreamNameSize),
+                                    out numRead, false, true, ref context)) throw new Win32Exception();
+                                name = Marshal.PtrToStringUni(buffer, (int)numRead / 2);
+                            }
+
+                            yield return new StreamInfo(name, streamID.dwStreamId, streamID.Size);
+
+                            if (streamID.Size > 0)
+                            {
+                                uint lo, hi;
+                                BackupSeek(fs.SafeFileHandle, uint.MaxValue, int.MaxValue, out lo, out hi, ref context);
+                            }
+                        }
+                        else break;
+                    }
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
+                    uint numRead;
+                    if (!BackupRead(fs.SafeFileHandle, IntPtr.Zero, 0, out numRead, true, false, ref context)) throw new Win32Exception();
+                }
+            }
+        }
+    }
+#endif
+
 }
