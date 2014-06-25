@@ -112,7 +112,7 @@ namespace TestLibrary.IntegrationTests
             this.repoInfo = new RepoInfo {
                 AuthenticationType = AuthenticationType.BASIC,
                 LocalPath = Path.Combine(config[1].ToString(), Subfolder),
-                RemotePath = config[2].ToString() + "/" + Subfolder,
+                RemotePath = config[2].ToString().EndsWith("/") ? config[2].ToString() + Subfolder : config[2].ToString() + "/" + Subfolder,
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
                 RepositoryId = config[6].ToString()
