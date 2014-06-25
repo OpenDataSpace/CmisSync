@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Storage
     using System.Runtime.InteropServices;
     using System.Security.Permissions;
     using System.Text.RegularExpressions;
+    using System.Text.StringBuilder;
 
     using Microsoft.Win32.SafeHandles;
 
