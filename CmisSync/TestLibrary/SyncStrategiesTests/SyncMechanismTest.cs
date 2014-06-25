@@ -147,63 +147,6 @@ namespace TestLibrary.SyncStrategiesTests
             remoteDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>()), Times.Never());
         }
 
-        // Ignore until the local situation detection implements local move
-        [Ignore]
-        [Test, Category("Fast"), Category("IT")]
-        public void LocalFolderMoveAndRemoteFolderRenameSituation()
-        {
-            string remoteId = Guid.NewGuid().ToString();
-            string oldFolderName = "oldName";
-            string newRemoteName = "newName";
-            string oldLocalPath = Path.Combine(Path.GetTempPath(), oldFolderName);
-            string newLocalPath = Path.Combine(Path.GetTempPath(), "new", oldFolderName);
-            string newRemotePath = "/" + newRemoteName;
-            string oldLastChangeToken = Guid.NewGuid().ToString();
-            string newLastChangeToken = Guid.NewGuid().ToString();
-            DateTime? oldWriteTime = DateTime.UtcNow;
-            DateTime? newWriteTime = ((DateTime)oldWriteTime).AddMilliseconds(500);
-
-            var oldLocalFolder = Mock.Of<IDirectoryInfo>(d =>
-                                                         d.Name == oldFolderName &&
-                                                         d.FullName == oldLocalPath);
-            var newLocalFolder = Mock.Of<IDirectoryInfo>(d =>
-                                                         d.Name == oldFolderName &&
-                                                         d.FullName == newLocalPath);
-            var oldLocalParent = Mock.Of<IMappedObject>(p =>
-                                                        p.Name == "/" &&
-                                                        p.ParentId == null &&
-                                                        p.LastRemoteWriteTimeUtc == oldWriteTime);
-            this.storage.AddMappedFolder(Mock.Of<IMappedObject>(f =>
-                                                                f.RemoteObjectId == remoteId &&
-                                                                f.Name == oldFolderName &&
-                                                                f.ParentId == oldLocalParent.RemoteObjectId &&
-                                                                f.LastChangeToken == oldLastChangeToken &&
-                                                                f.LastRemoteWriteTimeUtc == oldWriteTime));
-            this.session.AddRemoteObject(Mock.Of<IFolder>(f =>
-                                                          f.Id == remoteId &&
-                                                          f.Name == newRemoteName &&
-                                                          f.Path == newRemotePath &&
-                                                          f.ChangeToken == newLastChangeToken &&
-                                                          f.LastModificationDate == ((DateTime)newWriteTime).AddMilliseconds(500)));
-
-            var localDetection = new LocalSituationDetection();
-            var remoteDetection = new RemoteSituationDetection();
-            var folderEvent = new FolderMovedEvent(oldLocalFolder, newLocalFolder, null, null);
-            var localMoveRemoteRenameSolver = new Mock<ISolver>();
-            var mechanism = new SyncMechanism(localDetection, remoteDetection, this.queue.Object, this.session.Object, this.storage.Object);
-            mechanism.Solver[(int)SituationType.MOVED, (int)SituationType.RENAMED] = localMoveRemoteRenameSolver.Object;
-
-            Assert.IsTrue(mechanism.Handle(folderEvent));
-
-            localMoveRemoteRenameSolver.Verify(
-                s => s.Solve(
-                It.Is<ISession>(session => session == this.session.Object),
-                It.Is<IMetaDataStorage>(storage => storage == this.storage.Object),
-                It.IsAny<IFileSystemInfo>(),
-                It.IsAny<IObjectId>()),
-                Times.Once());
-        }
-
         [Test, Category("Fast"), Category("IT")]
         public void RemoteFolderAddedSituation()
         {
