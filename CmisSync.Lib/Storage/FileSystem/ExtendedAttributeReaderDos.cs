@@ -67,7 +67,7 @@ namespace CmisSync.Lib.Storage
             SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, FILE_FLAGS.BackupSemantics, IntPtr.Zero);
             if (handle.IsInvalid)
             {
-                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Syscall.GetLastError().ToString(), path))
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Syscall.GetLastError().ToString(), path));
             }
             return handle;
 #else
@@ -78,7 +78,7 @@ namespace CmisSync.Lib.Storage
         private static FileStream CreateFileStream(string path, FileAccess access, FileMode mode, FileShare share)
         {
 #if ! __MonoCS__
-            return new FileStream(CreateFileHandle(path, access, mode, share));
+            return new FileStream(CreateFileHandle(path, access, mode, share), access);
 #else
             throw new WrongPlatformException();
 #endif
@@ -165,7 +165,7 @@ namespace CmisSync.Lib.Storage
             }
             path = Path.GetFullPath(path);
             new FileIOPermission(FileIOPermissionAccess.Read, path).Demand();
-            return List<string>(GetKeys(path);
+            return List<string>(GetKeys(path));
 #else
             throw new WrongPlatformException();
 #endif
