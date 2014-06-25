@@ -110,3 +110,7 @@ T: TestLibrary.EventsTests.EventsFilterTests.GenericHandleDublicatedEventsFilter
 # Ignore disturbing Rule
 R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
 T: CmisSync.CircularProgressBar
+
+#Ignore Correct nested generic type warning
+R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
+T: CmisSync.Lib.Data.ObjectTree
