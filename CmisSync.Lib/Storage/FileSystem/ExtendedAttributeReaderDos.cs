@@ -64,10 +64,10 @@ namespace CmisSync.Lib.Storage
         private static FileStream CreateFileStream(string path, FileAccess access, FileMode mode, FileShare share)
         {
 #if ! __MonoCS__
-            SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, 0, IntPtr.Zero);
+            SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, FILE_FLAGS.BackupSemantics, IntPtr.Zero);
             if (handle.IsInvalid)
             {
-                throw new IOException("Could not open file stream.");
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Syscall.GetLastError().ToString(), path))
             }
             return new FileStream(handle, access);
 #else
@@ -125,11 +125,11 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
-        private static IEnumerable<string> GetKeys(FileInfo file)
+        private static IEnumerable<string> GetKeys(string path)
         {
 #if ! __MonoCS__
             Regex rx = new Regex(@":([^:]+):\$DATA");
-            List<StreamInfo> streams = new List<StreamInfo>(FileStreamSearcher.GetStreams(file));
+            List<StreamInfo> streams = new List<StreamInfo>(FileStreamSearcher.GetStreams(path));
 
             foreach (StreamInfo stream in streams)
             {
@@ -147,7 +147,13 @@ namespace CmisSync.Lib.Storage
         public List<string> ListAttributeKeys(string path)
         {
 #if ! __MonoCS__
-            return new List<string>(GetKeys(new FileInfo(path)));
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException("path");
+            }
+            path = Path.GetFullPath(path);
+            new FileIOPermission(FileIOPermissionAccess.Read, path).Demand();
+            return List<string>(GetKeys(path);
 #else
             throw new WrongPlatformException();
 #endif
@@ -218,10 +224,10 @@ namespace CmisSync.Lib.Storage
             out uint lpdwLowByteSeeked, out uint lpdwHighByteSeeked,
             ref IntPtr lpContext);
 
-        public static IEnumerable<StreamInfo> GetStreams(FileInfo file)
+        public static IEnumerable<StreamInfo> GetStreams(string path)
         {
             const int bufferSize = 4096;
-            using (FileStream fs = file.OpenRead())
+            using (SafeFileHandle fh = CreateFile(path, FileAccess.Read, FileShare.Read, IntPtr.Zero, FileMode.Open, FILE_FLAGS.BackupSemantics, IntPtr.Zero))
             {
                 IntPtr context = IntPtr.Zero;
                 IntPtr buffer = Marshal.AllocHGlobal(bufferSize);
@@ -230,7 +236,7 @@ namespace CmisSync.Lib.Storage
                     while (true)
                     {
                         uint numRead;
-                        if (!BackupRead(fs.SafeFileHandle, buffer, (uint)Marshal.SizeOf(typeof(Win32StreamID)),
+                        if (!BackupRead(fh, buffer, (uint)Marshal.SizeOf(typeof(Win32StreamID)),
                             out numRead, false, true, ref context))
                         {
                             throw new IOException("Cannot read stream info");
@@ -241,7 +247,7 @@ namespace CmisSync.Lib.Storage
                             string name = null;
                             if (streamID.dwStreamNameSize > 0)
                             {
-                                if (!BackupRead(fs.SafeFileHandle, buffer, (uint)Math.Min(bufferSize, streamID.dwStreamNameSize),
+                                if (!BackupRead(fh, buffer, (uint)Math.Min(bufferSize, streamID.dwStreamNameSize),
                                     out numRead, false, true, ref context))
                                 {
                                     throw new IOException("Cannot read stream info");
@@ -249,12 +255,15 @@ namespace CmisSync.Lib.Storage
                                 name = Marshal.PtrToStringUni(buffer, (int)numRead / 2);
                             }
 
-                            yield return new StreamInfo(name, streamID.dwStreamId, streamID.Size);
+                            if (!string.IsNullOrEmpty(name))
+                            {
+                                yield return new StreamInfo(name, streamID.dwStreamId, streamID.Size);
+                            }
 
                             if (streamID.Size > 0)
                             {
                                 uint lo, hi;
-                                BackupSeek(fs.SafeFileHandle, uint.MaxValue, int.MaxValue, out lo, out hi, ref context);
+                                BackupSeek(fh, uint.MaxValue, int.MaxValue, out lo, out hi, ref context);
                             }
                         }
                         else break;
@@ -264,7 +273,7 @@ namespace CmisSync.Lib.Storage
                 {
                     Marshal.FreeHGlobal(buffer);
                     uint numRead;
-                    if (!BackupRead(fs.SafeFileHandle, IntPtr.Zero, 0, out numRead, true, false, ref context))
+                    if (!BackupRead(fh, IntPtr.Zero, 0, out numRead, true, false, ref context))
                     {
                         throw new IOException("Cannot read stream info");
                     }
