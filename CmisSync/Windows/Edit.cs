@@ -167,7 +167,7 @@ namespace CmisSync
                 UserName = Credentials.UserName,
                 Password = passwordBox.Password
             };
-            new TaskFactory().StartNew(() =>
+            using (new TaskFactory().StartNew(() =>
             {
                 Dispatcher.BeginInvoke((Action)delegate
                 {
@@ -190,7 +190,9 @@ namespace CmisSync
                     passwordBox.IsEnabled = true;
                     passwordProgress.Visibility = Visibility.Hidden;
                 });
-            });
+            }))
+            {
+            }
         }
 
         private void CreateTreeView()
