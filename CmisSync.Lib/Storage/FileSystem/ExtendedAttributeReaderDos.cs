@@ -51,7 +51,7 @@ namespace CmisSync.Lib.Storage
             GENERIC_WRITE = 0x40000000
         }
 
-        private enum FILE_FLAGS : Int32
+        private enum FILE_FLAGS : uint
         {
             WriteThrough = 0x80000000,
             Overlapped = 0x40000000,
@@ -66,6 +66,20 @@ namespace CmisSync.Lib.Storage
         }
 #endif
 
+        private static FileStream CreateFileStream(string path, FileAccess access, FileMode mode, FileShare share)
+        {
+#if ! __MonoCS__
+            SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, 0, IntPtr.Zero);
+            if (handle.IsInvalid)
+            {
+                throw new IOException("Could not open file stream.");
+            }
+            return new FileStream(handle, access);
+#else
+            throw new WrongPlatformException();
+#endif
+        }
+
         public string GetExtendedAttribute(string path, string key)
         {
 #if ! __MonoCS__
@@ -73,12 +87,8 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-
-            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_READ, FileShare.Read, IntPtr.Zero, FileMode.Open, 0, IntPtr.Zero);
-            if (fileHandle.IsInvalid) {
-                throw new IOException("Could not open file stream.");
-            }
-            TextReader reader = new StreamReader(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Read));
+            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_READ, FileShare.Read, FileMode.Open);
+            TextReader reader = new StreamReader(stream);
 
             string result = reader.ReadToEnd();
             reader.Close();
@@ -98,9 +108,8 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-
-            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, IntPtr.Zero, FileMode.Create, 0, IntPtr.Zero);
-            TextWriter writer = new StreamWriter(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Write));
+            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, FileMode.Create);
+            TextWriter writer = new StreamWriter(stream);
             writer.Write(value);
             writer.Close();
             CloseHandle(fileHandle);
@@ -188,7 +197,7 @@ namespace CmisSync.Lib.Storage
         public readonly long Size;
     }
 
-    private class FileStreamSearcher
+    public class FileStreamSearcher
     {
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
