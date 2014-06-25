@@ -199,10 +199,7 @@ namespace TestLibrary.SyncStrategiesTests
                 Times.Once());
         }
 
-        [Test, Category("Fast")]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void ThrowNotImplementedOnMissingSolver()
-        {
+        private void TriggerNonExistingSolver() {
             var detection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
@@ -223,7 +220,24 @@ namespace TestLibrary.SyncStrategiesTests
             var folderEvent = new FolderEvent(localFolder: localFolder) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
 
             mechanism.Handle(folderEvent);
+        }
 
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(NotImplementedException))]
+        public void ThrowNotImplementedOnMissingSolver()
+        {
+            this.TriggerNonExistingSolver();
+        }
+
+        [Test, Category("Fast")]
+        public void RequestFullSyncOnMissingSolver()
+        {
+            try{
+                this.TriggerNonExistingSolver();
+            }catch(Exception e){
+                //Just Swallow
+            }
+            this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)));
         }
     }
 }

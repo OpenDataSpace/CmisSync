@@ -105,7 +105,13 @@ namespace CmisSync.Lib.Sync.Strategy
             if (e is AbstractFolderEvent) {
                 var folderEvent = e as AbstractFolderEvent;
 
-                this.DoHandle(folderEvent);
+                try{
+                    this.DoHandle(folderEvent);
+                }catch(Exception){
+                    Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing");
+                    this.Queue.AddEvent(new StartNextSyncEvent(true));
+                    throw;
+                }
                 return true;
             }
 
