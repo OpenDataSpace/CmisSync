@@ -16,7 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using DotCMIS.Data;
 
 namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
@@ -30,6 +29,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using CmisSync.Lib.Sync.Solver;
 
     using DotCMIS.Client;
+    using DotCMIS.Data;
 
     using Moq;
 
@@ -101,41 +101,42 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns(path);
+            using (var stream = new MemoryStream(content)) {
+                localFile.Setup(
+                    f =>
+                    f.Open(System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)).Returns(stream);
 
-            localFile.Setup(
-                f =>
-                f.Open(System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)).Returns(new MemoryStream(content));
+                var mappedObject = new MappedObject(
+                    "name",
+                    "remoteId",
+                    MappedObjectType.File,
+                    "parentId",
+                    "changeToken",
+                    fileLength)
+                {
+                    Guid = Guid.NewGuid(),
+                    LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
+                    LastLocalWriteTimeUtc = modificationDate,
+                    LastChecksum = expectedHash,
+                    ChecksumAlgorithmName = "SHA1"
+                };
 
-            var mappedObject = new MappedObject(
-                "name",
-                "remoteId",
-                MappedObjectType.File,
-                "parentId",
-                "changeToken",
-                fileLength)
-            {
-                Guid = Guid.NewGuid(),
-                LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
-                LastLocalWriteTimeUtc = modificationDate,
-                LastChecksum = expectedHash,
-                ChecksumAlgorithmName = "SHA1"
-            };
+                storage.AddMappedFile(mappedObject, path);
 
-            storage.AddMappedFile(mappedObject, path);
+                new LocalObjectChanged(Mock.Of<ISyncEventQueue>()).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, Mock.Of<IDocument>());
 
-            new LocalObjectChanged(Mock.Of<ISyncEventQueue>()).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, Mock.Of<IDocument>());
-
-            storage.VerifySavedMappedObject(
-                MappedObjectType.File,
-                "remoteId",
-                mappedObject.Name,
-                mappedObject.ParentId,
-                mappedObject.LastChangeToken,
-                true,
-                localFile.Object.LastWriteTimeUtc,
-                expectedHash,
-                fileLength);
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+                storage.VerifySavedMappedObject(
+                    MappedObjectType.File,
+                    "remoteId",
+                    mappedObject.Name,
+                    mappedObject.ParentId,
+                    mappedObject.LastChangeToken,
+                    true,
+                    localFile.Object.LastWriteTimeUtc,
+                    expectedHash,
+                    fileLength);
+                queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            }
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -154,34 +155,34 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns("path");
-            localFile.Setup(
-                f =>
-                f.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(() => { return new MemoryStream(content);});
+            using (var uploadedContent = new MemoryStream())
+            using (var stream = new MemoryStream(content)) {
+                localFile.Setup(
+                    f =>
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(() => { return stream; });
 
-            var mappedObject = new MappedObject(
-                "name",
-                "remoteId",
-                MappedObjectType.File,
-                "parentId",
-                "changeToken",
-                fileLength)
-            {
-                Guid = Guid.NewGuid(),
-                LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
-                LastLocalWriteTimeUtc = modificationDate,
-                LastChecksum = new byte[20],
-                ChecksumAlgorithmName = "SHA1"
-            };
-            storage.AddMappedFile(mappedObject, "path");
-            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
-            using (var uploadedContent = new MemoryStream()) {
+                var mappedObject = new MappedObject(
+                    "name",
+                    "remoteId",
+                    MappedObjectType.File,
+                    "parentId",
+                    "changeToken",
+                    fileLength)
+                {
+                    Guid = Guid.NewGuid(),
+                    LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
+                    LastLocalWriteTimeUtc = modificationDate,
+                    LastChecksum = new byte[20],
+                    ChecksumAlgorithmName = "SHA1"
+                };
+                storage.AddMappedFile(mappedObject, "path");
+                var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
                 remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Callback<IContentStream, bool, bool>(
                     (s, o, r) =>
                     { s.Stream.CopyTo(uploadedContent);
                     remoteFile.Setup(f => f.LastModificationDate).Returns(newModificationDate);
                     remoteFile.Setup(f => f.ChangeToken).Returns(newChangeToken);
-                }
-                );
+                });
 
                 new LocalObjectChanged(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
 
