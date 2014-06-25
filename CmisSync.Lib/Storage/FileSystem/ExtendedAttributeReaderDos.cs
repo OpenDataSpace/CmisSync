@@ -166,7 +166,7 @@ namespace CmisSync.Lib.Storage
             }
             path = Path.GetFullPath(path);
             new FileIOPermission(FileIOPermissionAccess.Read, path).Demand();
-            return List<string>(GetKeys(path));
+            return new List<string>(GetKeys(path));
 #else
             throw new WrongPlatformException();
 #endif
