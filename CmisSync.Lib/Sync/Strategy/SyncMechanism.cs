@@ -167,17 +167,8 @@ namespace CmisSync.Lib.Sync.Strategy
             int remoteSituation = (int)this.RemoteSituation.Analyse(this.storage, actualEvent);
             ISolver solver = this.Solver[localSituation, remoteSituation];
             if (solver != null) {
-                try {
-                    Logger.Debug("Using Solver: " + solver.GetType());
-                    this.Solve(solver, actualEvent);
-                } catch(DotCMIS.Exceptions.CmisBaseException) {
-                    int newLocalSituation = (int)this.LocalSituation.Analyse(this.storage, actualEvent);
-                    int newRemoteSituation = (int)this.RemoteSituation.Analyse(this.storage, actualEvent);
-                    solver = this.Solver[newLocalSituation, newRemoteSituation];
-                    if (solver != null) {
-                        this.Solve(solver, actualEvent);
-                    }
-                }
+                Logger.Debug("Using Solver: " + solver.GetType());
+                this.Solve(solver, actualEvent);
             }
         }
 

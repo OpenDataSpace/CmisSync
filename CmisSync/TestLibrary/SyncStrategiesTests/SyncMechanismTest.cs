@@ -147,61 +147,6 @@ namespace TestLibrary.SyncStrategiesTests
             remoteDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>()), Times.Never());
         }
 
-        // Not yet implemented correctly, remove ignore to test if all situations do have got a default solver
-        [Ignore]
-        [Test, Category("Fast")]
-        public void DefaultSolverCreatedForEverySituation()
-        {
-            var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object);
-            int solverCount = 0;
-            foreach (ISolver s in mechanism.Solver)
-            {
-                if (s != null) {
-                    solverCount++;
-                } 
-            }
-
-            Assert.AreEqual((int)Math.Pow(Enum.GetNames(typeof(SituationType)).Length, 2), solverCount);
-        }
-
-        // If a solver fails to solve the situation, the situation should be rescanned and if it changed, the new situation should be handled
-        [Test, Category("Fast")]
-        public void HandleErrorsOnSolverBecauseOfAChangedSituation()
-        {
-            var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            localDetection.Setup(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
-            remoteDetection.Setup(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>())).ReturnsInOrder(SituationType.CHANGED, SituationType.REMOVED);
-            var failingSolver = new Mock<ISolver>();
-            failingSolver.Setup(
-                s => s.Solve(
-                It.Is<ISession>((se) => se == this.session.Object),
-                It.IsAny<IMetaDataStorage>(),
-                It.IsAny<IFileSystemInfo>(),
-                It.IsAny<IObjectId>()))
-                .Throws(new DotCMIS.Exceptions.CmisObjectNotFoundException());
-            var successfulSolver = new Mock<ISolver>();
-            successfulSolver.Setup(
-                s => s.Solve(
-                It.Is<ISession>((se) => se == this.session.Object),
-                It.IsAny<IMetaDataStorage>(),
-                It.IsAny<IFileSystemInfo>(),
-                It.IsAny<IObjectId>()));
-
-            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object);
-            var remoteDocument = new Mock<IDocument>();
-            var remoteEvent = new Mock<FileEvent>(new Mock<IFileInfo>().Object, remoteDocument.Object).Object;
-            mechanism.Solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = failingSolver.Object;
-            mechanism.Solver[(int)SituationType.NOCHANGE, (int)SituationType.REMOVED] = successfulSolver.Object;
-
-            Assert.IsTrue(mechanism.Handle(remoteEvent));
-
-            localDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>()), Times.Exactly(2));
-            remoteDetection.Verify(d => d.Analyse(It.IsAny<IMetaDataStorage>(), It.IsAny<AbstractFolderEvent>()), Times.Exactly(2));
-        }
-
         // Ignore until the local situation detection implements local move
         [Ignore]
         [Test, Category("Fast"), Category("IT")]
