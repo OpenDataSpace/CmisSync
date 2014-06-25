@@ -229,7 +229,7 @@ namespace CmisSync {
                                 notificationCenter.DeliverNotification (notification);
 
                                 transmissionFiles.Add (transmission.Path, NSDate.Now);
-                                UpdateFileStatus (transmission, null);
+                                //UpdateFileStatus (transmission, null);
                                 transmission.TransmissionStatus += TransmissionReport;
                             }
                         }
@@ -315,7 +315,7 @@ namespace CmisSync {
                         }
                         transmissionFiles [transmission.Path] = NSDate.Now;
                     }
-                    UpdateFileStatus (transmission, e);
+                    // UpdateFileStatus (transmission, e);
                 }
                 notificationCenter.BeginInvokeOnMainThread (delegate
                 {
