@@ -19,6 +19,7 @@
 
 namespace TestLibrary
 {
+    using System;
     using System.Collections.Concurrent;
 
     using CmisSync.Lib.Events;
@@ -47,6 +48,8 @@ namespace TestLibrary
             }
         }
 
+        public bool SwallowExceptions { get; set;}
+
         public void AddEvent(ISyncEvent e) {
             this.Queue.Enqueue(e);
         }
@@ -55,7 +58,15 @@ namespace TestLibrary
 
             ISyncEvent e;
             if(this.Queue.TryDequeue(out e)){
-                this.Manager.Handle(e);
+                try{
+                    this.Manager.Handle(e);
+                }catch(Exception exp){
+                    if(!SwallowExceptions) {
+                        throw;
+                    }else{
+                        Console.WriteLine(exp.ToString());
+                    }
+                }
             }
         }
 

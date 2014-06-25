@@ -19,6 +19,8 @@
 
 namespace TestLibrary.SyncStrategiesTests
 {
+    using System;
+
     using CmisSync.Lib.Events;
 
     using Moq;
@@ -45,7 +47,7 @@ namespace TestLibrary.SyncStrategiesTests
             queue.Step();
             Assert.That(queue.IsStopped, Is.True, "Queue should be Stopped if empty again");
         }
-        
+
         [Test, Category("Fast")]
         public void EventsGetForwarded() {
             var manager = new Mock<ISyncEventManager>();
@@ -70,6 +72,24 @@ namespace TestLibrary.SyncStrategiesTests
             queue.Step();
             manager.Verify(m => m.Handle(syncEvent1.Object), Times.Once());
             manager.Verify(m => m.Handle(syncEvent2.Object), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(Exception))]
+        public void QueueRethrowsExceptionsByDefault() {
+            var manager = new Mock<ISyncEventManager>();
+            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Exception());
+            var queue = new SingleStepEventQueue(manager.Object);
+            queue.RunStartSyncEvent();
+        }
+
+        [Test, Category("Fast")]
+        public void QueueSwallowsExceptionsIfConfigured() {
+            var manager = new Mock<ISyncEventManager>();
+            manager.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Exception());
+            var queue = new SingleStepEventQueue(manager.Object);
+            queue.SwallowExceptions = true;
+            queue.RunStartSyncEvent();
         }
     }
 }
