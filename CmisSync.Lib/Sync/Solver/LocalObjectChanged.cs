@@ -79,8 +79,12 @@ namespace CmisSync.Lib.Sync.Solver
                         }
                     }
                 } else if(localFile.Length != mappedObject.LastContentSize) {
-                    Logger.Debug("lastContentSize: " + mappedObject.LastContentSize);
-                    Logger.Debug("actualContentSize: " + localFile.Length);
+                    Logger.Debug(
+                        string.Format(
+                        "lastContentSize: {0}{1}actualContentSize: {2}",
+                        mappedObject.LastContentSize.ToString(),
+                        Environment.NewLine,
+                        localFile.Length.ToString()));
                     isChanged = true;
                 }
 
