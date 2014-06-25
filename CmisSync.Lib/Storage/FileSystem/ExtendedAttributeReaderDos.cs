@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Storage
     {
 #if ! __MonoCS__
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern IntPtr CreateFile(
+        private static extern SafeFileHandle CreateFile(
             string name,
             FileAccess access,
             FileShare share,
@@ -86,7 +86,6 @@ namespace CmisSync.Lib.Storage
 
             string result = reader.ReadToEnd();
             reader.Close();
-            CloseHandle(fileHandle);
 
             // int error = Marshal.GetLastWin32Error();
             return result;
@@ -106,7 +105,6 @@ namespace CmisSync.Lib.Storage
             TextWriter writer = new StreamWriter(stream);
             writer.Write(value);
             writer.Close();
-            CloseHandle(fileHandle);
 #else
             throw new WrongPlatformException();
 #endif
@@ -221,7 +219,10 @@ namespace CmisSync.Lib.Storage
                     {
                         uint numRead;
                         if (!BackupRead(fs.SafeFileHandle, buffer, (uint)Marshal.SizeOf(typeof(Win32StreamID)),
-                            out numRead, false, true, ref context)) throw new Win32Exception();
+                            out numRead, false, true, ref context))
+                        {
+                            throw new IOException("Cannot read stream info");
+                        }
                         if (numRead > 0)
                         {
                             Win32StreamID streamID = (Win32StreamID)Marshal.PtrToStructure(buffer, typeof(Win32StreamID));
@@ -229,7 +230,10 @@ namespace CmisSync.Lib.Storage
                             if (streamID.dwStreamNameSize > 0)
                             {
                                 if (!BackupRead(fs.SafeFileHandle, buffer, (uint)Math.Min(bufferSize, streamID.dwStreamNameSize),
-                                    out numRead, false, true, ref context)) throw new Win32Exception();
+                                    out numRead, false, true, ref context))
+                                {
+                                    throw new IOException("Cannot read stream info");
+                                }
                                 name = Marshal.PtrToStringUni(buffer, (int)numRead / 2);
                             }
 
@@ -248,7 +252,10 @@ namespace CmisSync.Lib.Storage
                 {
                     Marshal.FreeHGlobal(buffer);
                     uint numRead;
-                    if (!BackupRead(fs.SafeFileHandle, IntPtr.Zero, 0, out numRead, true, false, ref context)) throw new Win32Exception();
+                    if (!BackupRead(fs.SafeFileHandle, IntPtr.Zero, 0, out numRead, true, false, ref context))
+                    {
+                        throw new IOException("Cannot read stream info");
+                    }
                 }
             }
         }
