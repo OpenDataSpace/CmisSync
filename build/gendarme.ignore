@@ -106,3 +106,7 @@ T: CmisSync.Controller
 # Test for Events which have nested exceptions
 R: Gendarme.Rules.BadPractice.CheckNewExceptionWithoutThrowingRule
 T: TestLibrary.EventsTests.EventsFilterTests.GenericHandleDublicatedEventsFilterTest
+
+# Ignore disturbing Rule
+R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
+T: CmisSync.CircularProgressBar
