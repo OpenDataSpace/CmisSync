@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Storage
     using System.Runtime.InteropServices;
     using System.Security.Permissions;
     using System.Text.RegularExpressions;
-    using System.Text.StringBuilder;
+    using System.Text;
 
     using Microsoft.Win32.SafeHandles;
 
@@ -47,6 +47,16 @@ namespace CmisSync.Lib.Storage
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool DeleteFile(string fileName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+        private static extern int FormatMessage(
+                        uint dwFlags, 
+                        IntPtr lpSource, 
+                        uint dwMessageId, 
+                        uint dwLanguageId, 
+                        StringBuilder lpBuffer, 
+                        uint nSize, 
+                        IntPtr vaListArguments);
 
         private enum FILE_FLAGS : uint
         {
