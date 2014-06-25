@@ -23,6 +23,7 @@ namespace CmisSync.Lib.Storage
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Text.RegularExpressions;
 
     using Microsoft.Win32.SafeHandles;
 
@@ -127,6 +128,7 @@ namespace CmisSync.Lib.Storage
         private static IEnumerable<string> GetKeys(FileInfo file)
         {
 #if ! __MonoCS__
+            Regex rx = new Regex(@":([^:]+):\$DATA");
             List<StreamInfo> streams = new List<StreamInfo>(FileStreamSearcher.GetStreams(file));
 
             foreach (StreamInfo stream in streams)
@@ -134,7 +136,7 @@ namespace CmisSync.Lib.Storage
                 if (stream.Type == StreamType.AlternateData ||
                         stream.Type == StreamType.Data)
                 {
-                    yield return stream.Name;
+                    yield return rx.Replace(stream.Name, "$1");
                 }
             }
 #else
