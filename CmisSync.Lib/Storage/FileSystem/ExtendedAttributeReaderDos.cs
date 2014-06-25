@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Storage
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern IntPtr CreateFile(
             string name,
-            FILE_ACCESS_RIGHTS access,
+            FileAccess access,
             FileShare share,
             IntPtr security,
             FileMode mode,
@@ -44,12 +44,6 @@ namespace CmisSync.Lib.Storage
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool DeleteFile(string fileName);
-
-        private enum FILE_ACCESS_RIGHTS : uint
-        {
-            GENERIC_READ = 0x80000000,
-            GENERIC_WRITE = 0x40000000
-        }
 
         private enum FILE_FLAGS : uint
         {
@@ -87,7 +81,7 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_READ, FileShare.Read, FileMode.Open);
+            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Read, FileMode.Open, FileShare.Read);
             TextReader reader = new StreamReader(stream);
 
             string result = reader.ReadToEnd();
@@ -108,7 +102,7 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, FileMode.Create);
+            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write);
             TextWriter writer = new StreamWriter(stream);
             writer.Write(value);
             writer.Close();
