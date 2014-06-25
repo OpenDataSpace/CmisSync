@@ -439,7 +439,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Conflict")]
-        public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConfictFileIsCreated()
+        public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConflictFileIsCreated()
         {
             string fileName = "fileConflictTest.txt";
             string remoteContent = "remotecontent";
