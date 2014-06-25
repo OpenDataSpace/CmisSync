@@ -52,10 +52,10 @@ namespace CmisSync.Lib.Storage
         private static extern int FormatMessage(
                         uint dwFlags, 
                         IntPtr lpSource, 
-                        uint dwMessageId, 
+                        int dwMessageId, 
                         uint dwLanguageId, 
                         StringBuilder lpBuffer, 
-                        uint nSize, 
+                        int nSize, 
                         IntPtr vaListArguments);
 
         private enum FILE_FLAGS : uint
@@ -75,6 +75,7 @@ namespace CmisSync.Lib.Storage
 
         private static string GetLastErrorMessage()
         {
+#if ! __MonoCS__
             int errorCode = Marshal.GetLastWin32Error();
             var lpBuffer = new StringBuilder(0x200);
             if (0 != FormatMessage(0x3200, IntPtr.Zero, errorCode, 0, lpBuffer, lpBuffer.Capacity, IntPtr.Zero))
@@ -82,6 +83,9 @@ namespace CmisSync.Lib.Storage
                 return lpBuffer.ToString();
             }
             return string.Format("0x{0:X8}", errorCode);
+#else
+            throw new WrongPlatformException();
+#endif
         }
 
         private static SafeFileHandle CreateFileHandle(string path, FileAccess access, FileMode mode, FileShare share)
