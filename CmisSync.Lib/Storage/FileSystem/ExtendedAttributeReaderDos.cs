@@ -23,6 +23,7 @@ namespace CmisSync.Lib.Storage
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Security.Permissions;
     using System.Text.RegularExpressions;
 
     using Microsoft.Win32.SafeHandles;
@@ -67,7 +68,7 @@ namespace CmisSync.Lib.Storage
             SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, FILE_FLAGS.BackupSemantics, IntPtr.Zero);
             if (handle.IsInvalid)
             {
-                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Syscall.GetLastError().ToString(), path));
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Marshal.GetLastWin32Error().ToString(), path));
             }
             return handle;
 #else
