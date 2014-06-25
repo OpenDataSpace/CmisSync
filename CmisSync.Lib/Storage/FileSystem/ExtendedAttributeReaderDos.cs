@@ -62,13 +62,24 @@ namespace CmisSync.Lib.Storage
         }
 #endif
 
+        private static string GetLastErrorMessage()
+        {
+            int errorCode = Marshal.GetLastWin32Error();
+            var lpBuffer = new StringBuilder(0x200);
+            if (0 != FormatMessage(0x3200, IntPtr.Zero, errorCode, 0, lpBuffer, lpBuffer.Capacity, IntPtr.Zero))
+            {
+                return lpBuffer.ToString();
+            }
+            return string.Format("0x{0:X8}", errorCode);
+        }
+
         private static SafeFileHandle CreateFileHandle(string path, FileAccess access, FileMode mode, FileShare share)
         {
 #if ! __MonoCS__
             SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, FILE_FLAGS.BackupSemantics, IntPtr.Zero);
             if (handle.IsInvalid)
             {
-                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", Marshal.GetLastWin32Error().ToString(), path));
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", GetLastErrorMessage(), path));
             }
             return handle;
 #else
