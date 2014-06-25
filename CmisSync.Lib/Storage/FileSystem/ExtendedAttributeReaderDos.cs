@@ -124,10 +124,11 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
-        public List<string> ListAttributeKeys(string path)
+        private static IEnumerable<string> GetKeys(FileInfo file)
         {
 #if ! __MonoCS__
-            List<StreamInfo> streams = new List<StreamInfo>(FileStreamSearcher.GetStreams(new FileInfo(path)));
+            List<StreamInfo> streams = new List<StreamInfo>(FileStreamSearcher.GetStreams(file));
+
             foreach (StreamInfo stream in streams)
             {
                 if (stream.Type == StreamType.AlternateData ||
@@ -136,6 +137,15 @@ namespace CmisSync.Lib.Storage
                     yield return stream.Name;
                 }
             }
+#else
+            throw new WrongPlatformException();
+#endif
+        }
+
+        public List<string> ListAttributeKeys(string path)
+        {
+#if ! __MonoCS__
+            return new List<string>(GetKeys(new FileInfo(path)));
 #else
             throw new WrongPlatformException();
 #endif
