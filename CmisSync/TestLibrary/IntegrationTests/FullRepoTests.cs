@@ -322,6 +322,8 @@ namespace TestLibrary.IntegrationTests
                 sw.WriteLine(content);
             }
 
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+
             this.repo.Initialize();
 
             this.repo.Run();
