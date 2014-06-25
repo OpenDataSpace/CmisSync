@@ -91,7 +91,13 @@ namespace CmisSync.Lib.Sync.Solver
                     using (SHA1 hashAlg = new SHA1Managed())
                     using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
                     using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
-                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        try {
+                            download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        } catch(Exception ex) {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                            throw;
+                        }
+
                         obj.ChecksumAlgorithmName = "SHA1";
                         obj.LastChecksum = hashAlg.Hash;
                     }
@@ -115,6 +121,7 @@ namespace CmisSync.Lib.Sync.Solver
 
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                     obj.LastContentSize = (long)remoteDocument.ContentStreamLength;
+                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
 
                 obj.LastChangeToken = remoteDocument.ChangeToken;
