@@ -404,7 +404,6 @@ namespace TestLibrary.IntegrationTests
             content += content;
             doc.SetContent(content);
 
-
             Thread.Sleep(5000);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
@@ -445,7 +444,6 @@ namespace TestLibrary.IntegrationTests
             string fileName = "fileConflictTest.txt";
             string remoteContent = "remotecontent";
             string localContent = "local";
-
 
             this.remoteRootDir.CreateDocument(fileName, remoteContent);
             var localDoc = Path.Combine(this.localRootDir.FullName, fileName);
@@ -545,7 +543,46 @@ namespace TestLibrary.IntegrationTests
             Assert.That(remoteDoc.ContentStreamLength, Is.EqualTo(newContent.Length));
             Assert.That(localDoc.Length, Is.EqualTo(newContent.Length));
             Assert.That((localDoc.LastWriteTimeUtc - remoteDoc.LastModificationDate).Value.Seconds, Is.EqualTo(0));
+        }
 
+        // Ignored because it works but it takes a long time
+        [Ignore]
+        [Test, Category("Slow"), Timeout(1800000)]
+        public void CreateHundredFilesAndSync()
+        {
+            int count = 100;
+            this.repo.Initialize();
+            this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+
+            for (int i = 1; i <= count; i++) {
+                var filePath = Path.Combine(this.localRootDir.FullName, string.Format("file_{0}.bin", i.ToString()));
+                var fileInfo = new FileInfo(filePath);
+                using (StreamWriter sw = fileInfo.CreateText()) {
+                    sw.WriteLine(string.Format("content of file \"{0}\"", filePath));
+                }
+            }
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Run();
+
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
+        }
+
+        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 5000) {
+            int waited = 0;
+            while (queue.Queue.IsEmpty)
+            {
+                int interval = 20;
+
+                // Wait for event to kick in
+                Thread.Sleep(interval);
+                waited += interval;
+                if (waited > timeout) {
+                    Assert.Fail("Timeout exceeded");
+                }
+            }
         }
 
         private class CmisRepoMock : CmisRepo
@@ -566,20 +603,6 @@ namespace TestLibrary.IntegrationTests
                 base.Initialize();
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
                 this.Scheduler.Stop();
-            }
-        }
-
-        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 5000) {
-            int waited = 0;
-            while (queue.Queue.IsEmpty)
-            {
-                int interval = 20;
-                //Wait for event to kick in
-                Thread.Sleep(interval);
-                waited += interval;
-                if(waited > timeout) {
-                    Assert.Fail("Timeout exceeded");
-                }
             }
         }
     }

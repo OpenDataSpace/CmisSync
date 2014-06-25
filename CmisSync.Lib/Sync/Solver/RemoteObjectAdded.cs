@@ -114,7 +114,12 @@ namespace CmisSync.Lib.Sync.Solver
                 using (var fileStream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
                 using (var downloader = ContentTasks.ContentTaskUtils.CreateDownloader())
                 {
-                    downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
+                    try{
+                        downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
+                    } catch(Exception ex) {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex});
+                        throw;
+                    }
                     hash = hashAlg.Hash;
                 }
 
@@ -151,6 +156,7 @@ namespace CmisSync.Lib.Sync.Solver
                     ChecksumAlgorithmName = "SHA1"
                 };
                 storage.SaveMappedObject(mappedObject);
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
         }
     }
