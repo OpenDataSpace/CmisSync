@@ -23,6 +23,7 @@ namespace CmisSync.Lib.Storage
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Text.RegularExpressions;
 
     using Microsoft.Win32.SafeHandles;
 
@@ -30,9 +31,9 @@ namespace CmisSync.Lib.Storage
     {
 #if ! __MonoCS__
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern IntPtr CreateFile(
+        private static extern SafeFileHandle CreateFile(
             string name,
-            FILE_ACCESS_RIGHTS access,
+            FileAccess access,
             FileShare share,
             IntPtr security,
             FileMode mode,
@@ -45,13 +46,7 @@ namespace CmisSync.Lib.Storage
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool DeleteFile(string fileName);
 
-        private enum FILE_ACCESS_RIGHTS : uint
-        {
-            GENERIC_READ = 0x80000000,
-            GENERIC_WRITE = 0x40000000
-        }
-
-        private enum FILE_FLAGS : Int32
+        private enum FILE_FLAGS : uint
         {
             WriteThrough = 0x80000000,
             Overlapped = 0x40000000,
@@ -66,6 +61,20 @@ namespace CmisSync.Lib.Storage
         }
 #endif
 
+        private static FileStream CreateFileStream(string path, FileAccess access, FileMode mode, FileShare share)
+        {
+#if ! __MonoCS__
+            SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, 0, IntPtr.Zero);
+            if (handle.IsInvalid)
+            {
+                throw new IOException("Could not open file stream.");
+            }
+            return new FileStream(handle, access);
+#else
+            throw new WrongPlatformException();
+#endif
+        }
+
         public string GetExtendedAttribute(string path, string key)
         {
 #if ! __MonoCS__
@@ -73,16 +82,11 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-
-            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_READ, FileShare.Read, IntPtr.Zero, FileMode.Open, 0, IntPtr.Zero);
-            if (fileHandle.IsInvalid) {
-                throw new IOException("Could not open file stream.");
-            }
-            TextReader reader = new StreamReader(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Read));
+            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Read, FileMode.Open, FileShare.Read);
+            TextReader reader = new StreamReader(stream);
 
             string result = reader.ReadToEnd();
             reader.Close();
-            CloseHandle(fileHandle);
 
             // int error = Marshal.GetLastWin32Error();
             return result;
@@ -98,12 +102,10 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-
-            IntPtr fileHandle = CreateFile(string.Format("{0}:{1}", path, key), FILE_ACCESS_RIGHTS.GENERIC_WRITE, FileShare.Write, IntPtr.Zero, FileMode.Create, 0, IntPtr.Zero);
-            TextWriter writer = new StreamWriter(new FileStream(new SafeFileHandle(fileHandle, true), FileAccess.Write));
+            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write);
+            TextWriter writer = new StreamWriter(stream);
             writer.Write(value);
             writer.Close();
-            CloseHandle(fileHandle);
 #else
             throw new WrongPlatformException();
 #endif
@@ -123,18 +125,29 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
-        public List<string> ListAttributeKeys(string path)
+        private static IEnumerable<string> GetKeys(FileInfo file)
         {
 #if ! __MonoCS__
-            List<StreamInfo> streams = new List<StreamInfo>(FileStreamSearcher.GetStreams(new FileInfo(path)));
+            Regex rx = new Regex(@":([^:]+):\$DATA");
+            List<StreamInfo> streams = new List<StreamInfo>(FileStreamSearcher.GetStreams(file));
+
             foreach (StreamInfo stream in streams)
             {
                 if (stream.Type == StreamType.AlternateData ||
                         stream.Type == StreamType.Data)
                 {
-                    yield return stream.Name;
+                    yield return rx.Replace(stream.Name, "$1");
                 }
             }
+#else
+            throw new WrongPlatformException();
+#endif
+        }
+
+        public List<string> ListAttributeKeys(string path)
+        {
+#if ! __MonoCS__
+            return new List<string>(GetKeys(new FileInfo(path)));
 #else
             throw new WrongPlatformException();
 #endif
@@ -188,7 +201,7 @@ namespace CmisSync.Lib.Storage
         public readonly long Size;
     }
 
-    private class FileStreamSearcher
+    public class FileStreamSearcher
     {
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -218,7 +231,10 @@ namespace CmisSync.Lib.Storage
                     {
                         uint numRead;
                         if (!BackupRead(fs.SafeFileHandle, buffer, (uint)Marshal.SizeOf(typeof(Win32StreamID)),
-                            out numRead, false, true, ref context)) throw new Win32Exception();
+                            out numRead, false, true, ref context))
+                        {
+                            throw new IOException("Cannot read stream info");
+                        }
                         if (numRead > 0)
                         {
                             Win32StreamID streamID = (Win32StreamID)Marshal.PtrToStructure(buffer, typeof(Win32StreamID));
@@ -226,7 +242,10 @@ namespace CmisSync.Lib.Storage
                             if (streamID.dwStreamNameSize > 0)
                             {
                                 if (!BackupRead(fs.SafeFileHandle, buffer, (uint)Math.Min(bufferSize, streamID.dwStreamNameSize),
-                                    out numRead, false, true, ref context)) throw new Win32Exception();
+                                    out numRead, false, true, ref context))
+                                {
+                                    throw new IOException("Cannot read stream info");
+                                }
                                 name = Marshal.PtrToStringUni(buffer, (int)numRead / 2);
                             }
 
@@ -245,7 +264,10 @@ namespace CmisSync.Lib.Storage
                 {
                     Marshal.FreeHGlobal(buffer);
                     uint numRead;
-                    if (!BackupRead(fs.SafeFileHandle, IntPtr.Zero, 0, out numRead, true, false, ref context)) throw new Win32Exception();
+                    if (!BackupRead(fs.SafeFileHandle, IntPtr.Zero, 0, out numRead, true, false, ref context))
+                    {
+                        throw new IOException("Cannot read stream info");
+                    }
                 }
             }
         }
