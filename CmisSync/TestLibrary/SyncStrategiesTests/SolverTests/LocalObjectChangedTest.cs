@@ -155,11 +155,10 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns("path");
-            using (var uploadedContent = new MemoryStream())
-            using (var stream = new MemoryStream(content)) {
+            using (var uploadedContent = new MemoryStream()) {
                 localFile.Setup(
                     f =>
-                    f.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(() => { return stream; });
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(() => { return new MemoryStream(content); });
 
                 var mappedObject = new MappedObject(
                     "name",
