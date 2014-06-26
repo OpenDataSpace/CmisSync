@@ -138,6 +138,8 @@ namespace CmisSync.Lib.Storage
 
         private static SafeFileHandle CreateFileHandle(string path, FileAccess access, FileMode mode, FileShare share)
         {
+            // FILE_FLAGS.BackupSemantics is required in order to support directories.
+            // Otherwise we get an Access denied, if the  path points to a directory. 
             SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, FILE_FLAGS.BackupSemantics, IntPtr.Zero);
             if (handle.IsInvalid)
             {
@@ -227,6 +229,7 @@ namespace CmisSync.Lib.Storage
         /// <summary>
         /// Retrieves the extended attribute.
         /// </summary>
+        /// <returns>The attribute value orr <c>null</c> if the attribute does not exist.</returns>
         /// <param name="path">Retrrieves attribute of this path.</param>
         /// <param name="key">Key of the attribute, which should be retrieved.</param>
         public string GetExtendedAttribute(string path, string key)
@@ -241,14 +244,15 @@ namespace CmisSync.Lib.Storage
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or dirrectory", path));
             }
             try {
-            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Read, FileMode.Open, FileShare.Read);
-            TextReader reader = new StreamReader(stream);
+                FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Read, FileMode.Open, FileShare.Read);
+                TextReader reader = new StreamReader(stream);
 
-            string result = reader.ReadToEnd();
-            reader.Close();
-            return result;
+                string result = reader.ReadToEnd();
+                reader.Close();
+                return result;
             } catch (ExtendedAttributeException e) {
                 if (2 == Marshal.GetLastWin32Error()) {
+                    // Stream not found.
                     return null;
                 }
                 throw e;
@@ -263,6 +267,7 @@ namespace CmisSync.Lib.Storage
         /// </summary>
         /// <param name="path">Sets attribute of this path.</param>
         /// <param name="key">Key of the attribute, which should be set.</param>
+        /// <param name="value">The value to set.</param>
         public void SetExtendedAttribute(string path, string key, string value)
         {
 #if ! __MonoCS__
@@ -318,6 +323,7 @@ namespace CmisSync.Lib.Storage
                 throw new ArgumentNullException("path");
             }
             path = Path.GetFullPath(path);
+            // Explicitely request read permission in order to support directories.
             new FileIOPermission(FileIOPermissionAccess.Read, path).Demand();
             return new List<string>(GetKeys(path));
 #else
