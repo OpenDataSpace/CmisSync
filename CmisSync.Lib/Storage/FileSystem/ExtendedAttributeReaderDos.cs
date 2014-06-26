@@ -90,6 +90,8 @@ namespace CmisSync.Lib.Storage
             OpenNoRecall = 0x100000
         }
 
+        private const int ErrorFileNotFound = 2;
+
         [StructLayout(LayoutKind.Sequential, Pack=1)]
         private struct Win32StreamID
         {
@@ -252,7 +254,7 @@ namespace CmisSync.Lib.Storage
                     return result;
                 }
             } catch (ExtendedAttributeException e) {
-                if (2 == Marshal.GetLastWin32Error()) {
+                if (ErrorFileNotFound == Marshal.GetLastWin32Error()) {
                     // Stream not found.
                     return null;
                 }
@@ -307,7 +309,13 @@ namespace CmisSync.Lib.Storage
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
             }
-            DeleteFile(string.Format("{0}:{1}:{2}", path, key, "$DATA"));
+            new FileIOPermission(FileIOPermissionAccess.Write, path).Demand();
+            if (!DeleteFile(string.Format("{0}:{1}:{2}", path, key, "$DATA"))) {
+                if (FileNotFound != Marshal.GetLastWin32Error()) {
+                    throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", GetLastErrorMessage(),
+                                string.Format("{0}:{1}:{2}", path, key, "$DATA")));
+                }
+            }
 #else
             throw new WrongPlatformException();
 #endif
