@@ -244,12 +244,13 @@ namespace CmisSync.Lib.Storage
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or dirrectory", path));
             }
             try {
-                FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Read, FileMode.Open, FileShare.Read);
-                TextReader reader = new StreamReader(stream);
-
-                string result = reader.ReadToEnd();
-                reader.Close();
-                return result;
+                using (FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Read, FileMode.Open, FileShare.Read))
+                {
+                    TextReader reader = new StreamReader(stream);
+                    string result = reader.ReadToEnd();
+                    reader.Close();
+                    return result;
+                }
             } catch (ExtendedAttributeException e) {
                 if (2 == Marshal.GetLastWin32Error()) {
                     // Stream not found.
@@ -279,10 +280,12 @@ namespace CmisSync.Lib.Storage
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
             }
-            FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write);
-            TextWriter writer = new StreamWriter(stream);
-            writer.Write(value);
-            writer.Close();
+            using (FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write))
+            {
+                TextWriter writer = new StreamWriter(stream);
+                writer.Write(value);
+                writer.Close();
+            }
 #else
             throw new WrongPlatformException();
 #endif
