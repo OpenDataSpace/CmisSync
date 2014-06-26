@@ -240,7 +240,7 @@ namespace TestLibrary.StorageTests
         }
 
         [Test, Category("Medium")]
-        public void ReplaceFileContentButNotExtendedAttributes() {
+        public void ReplaceFileContentAndExtendedAttributes() {
             if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
                 Assert.Ignore("Extended Attributes are not available => test skipped.");
             }
@@ -265,9 +265,10 @@ namespace TestLibrary.StorageTests
             targetInfo.Refresh();
 
             var newFileInfo = sourceInfo.Replace(targetInfo, backupInfo, true);
-            Assert.That(newFileInfo.GetExtendedAttribute("test"), Is.EqualTo(targetFile));
+            Assert.That(newFileInfo.GetExtendedAttribute("test"), Is.EqualTo(sourceFile));
             backupInfo.Refresh();
-            Assert.That(backupInfo.GetExtendedAttribute("test"), Is.Null);
+            Assert.That(backupInfo.Exists, Is.True);
+            Assert.That(backupInfo.GetExtendedAttribute("test"), Is.EqualTo(targetFile));
         }
 
         [Test, Category("Fast")]

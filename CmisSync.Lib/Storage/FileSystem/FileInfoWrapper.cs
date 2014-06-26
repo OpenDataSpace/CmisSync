@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Storage
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
     /// <summary>
@@ -119,7 +120,32 @@ namespace CmisSync.Lib.Storage
         /// <returns>A IFileInfo object that encapsulates information about the file described by the destFileName parameter.</returns>
         public IFileInfo Replace(IFileInfo destinationFile, IFileInfo destinationBackupFileName, bool ignoreMetadataErrors)
         {
-            return new FileInfoWrapper(this.original.Replace(destinationFile.FullName, destinationBackupFileName.FullName, ignoreMetadataErrors));
+#if __MonoCS__
+            var reader = new ExtendedAttributeReaderUnix();
+            var oldSourceEAs = new Dictionary<string, string>();
+            var oldTargetEAs = new Dictionary<string, string>();
+            if (reader.IsFeatureAvailable(this.FullName)) {
+                foreach (var key in reader.ListAttributeKeys(this.FullName)) {
+                    oldSourceEAs.Add(key, this.GetExtendedAttribute(key));
+                }
+
+                foreach (var key in reader.ListAttributeKeys(destinationFile.FullName)) {
+                    oldTargetEAs.Add(key, destinationFile.GetExtendedAttribute(key));
+                }
+            }
+#endif
+            var result = new FileInfoWrapper(this.original.Replace(destinationFile.FullName, destinationBackupFileName.FullName, ignoreMetadataErrors));
+
+#if __MonoCS__
+            foreach (var entry in oldSourceEAs) {
+                result.SetExtendedAttribute(entry.Key, entry.Value);
+            }
+
+            foreach (var entry in oldTargetEAs) {
+                destinationBackupFileName.SetExtendedAttribute(entry.Key, entry.Value);
+            }
+#endif
+            return result;
         }
     }
 }

@@ -152,6 +152,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedAndLocalFileIsCreatedWhileDownloadIsInProgress()
         {
+            string uuid = Guid.NewGuid().ToString();
             string conflictPath = this.path + ".conflict";
             var conflictFileInfo = Mock.Of<IFileInfo>(i => i.FullName == conflictPath);
             var storage = new Mock<IMetaDataStorage>();
@@ -164,6 +165,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             fileInfo.Setup(f => f.FullName).Returns(this.path);
             fileInfo.Setup(f => f.Name).Returns(this.objectName);
             fileInfo.Setup(f => f.Directory).Returns(parentDir);
+            fileInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid);
             byte[] content = Encoding.UTF8.GetBytes("content");
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
             cacheFileInfo.SetupAllProperties();
@@ -171,6 +173,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             cacheFileInfo.Setup(f => f.Name).Returns(this.objectName + ".sync");
             cacheFileInfo.Setup(f => f.Directory).Returns(parentDir);
             cacheFileInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
+            cacheFileInfo.Setup(f => f.Replace(fileInfo.Object, conflictFileInfo, true)).Returns(fileInfo.Object);
             using (var stream = new MemoryStream()) {
                 cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(stream).Callback(() => fileInfo.Setup(f => f.Exists).Returns(true));
                 cacheFileInfo.Setup(f => f.MoveTo(this.path)).Throws(new IOException());
@@ -189,6 +192,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
                 queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Type == FileTransmissionType.DOWNLOAD_NEW_FILE)), Times.Once());
                 storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, expectedHash, content.Length);
+                Mock.Get(conflictFileInfo).Verify(c => c.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null), Times.Once());
             }
         }
     }

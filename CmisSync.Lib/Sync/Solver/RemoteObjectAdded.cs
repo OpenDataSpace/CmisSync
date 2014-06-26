@@ -114,12 +114,13 @@ namespace CmisSync.Lib.Sync.Solver
                 using (var fileStream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
                 using (var downloader = ContentTasks.ContentTaskUtils.CreateDownloader())
                 {
-                    try{
+                    try {
                         downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
                     } catch(Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex});
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
                     }
+
                     hash = hashAlg.Hash;
                 }
 
@@ -130,7 +131,10 @@ namespace CmisSync.Lib.Sync.Solver
                 } catch (IOException) {
                     file.Refresh();
                     if (file.Exists) {
-                        cacheFile.Replace(file, this.fsFactory.CreateConflictFileInfo(file), true);
+                        IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
+                        IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
+                        targetFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString());
+                        conflictFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null);
                     } else {
                         throw;
                     }
