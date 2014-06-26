@@ -104,9 +104,9 @@ namespace TestLibrary.SyncStrategiesTests
             this.ReportFSFileChangedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         //This test fails on current build slave, retest when these are FC20 or higher
-        [Category("BrokenOnFC18")]
+        [Category("BrokenOnFC18", "Medium")]
         public void ReportFSFileRenamedEventTest() {
             this.ReportFSFileRenamedEvent();
         }
@@ -132,9 +132,9 @@ namespace TestLibrary.SyncStrategiesTests
             this.ReportFSFolderRemovedEvent();
         }
 
-        [Test, Category("Medium")]
+        [Test]
         //This test fails on current build slave, retest when these are FC20 or higher
-        [Category("BrokenOnFC18")]
+        [Category("BrokenOnFC18", "Medium")]
         public void ReportFSFolderRenamedEventTest() {
             this.ReportFSFolderRenamedEvent();
         }
