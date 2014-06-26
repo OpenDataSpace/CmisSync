@@ -19,6 +19,7 @@ BuildRequires: notify-sharp-devel
 BuildRequires: libtool intltool desktop-file-utils
 
 Requires: mono-data-sqlite
+Requires: curl
 
 %description
 DataSpace Sync allows you to keep in sync with your CMIS repository.
