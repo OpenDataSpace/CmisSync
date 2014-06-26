@@ -78,7 +78,7 @@ namespace CmisSync.Lib.Storage
 #if ! __MonoCS__
             int errorCode = Marshal.GetLastWin32Error();
             var lpBuffer = new StringBuilder(0x200);
-            if (0 != FormatMessage(0x3200, IntPtr.Zero, errorCode, 0, lpBuffer, lpBuffer.Capacity, IntPtr.Zero))
+            if (0 != FormatMessage(0x3200, IntPtr.Zero, errorCode, 1033, lpBuffer, lpBuffer.Capacity, IntPtr.Zero))
             {
                 return lpBuffer.ToString();
             }
@@ -118,14 +118,23 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
+            path = Path.getFullPath(path);
+            if (!File.Exists(path) || !DirectoryExists(path)) {
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or dirrectory", path));
+            }
+            try {
             FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Read, FileMode.Open, FileShare.Read);
             TextReader reader = new StreamReader(stream);
 
             string result = reader.ReadToEnd();
             reader.Close();
-
-            // int error = Marshal.GetLastWin32Error();
             return result;
+            } catch (ExtendedAttributeException e) {
+                if (2 == Marshal.GetLastWin32Error()) {
+                    return null;
+                }
+                throw e;
+            }
 #else
             throw new WrongPlatformException();
 #endif
@@ -137,6 +146,9 @@ namespace CmisSync.Lib.Storage
             if (string.IsNullOrEmpty(key))
             {
                 throw new ArgumentException("Empty or null key is not allowed");
+            }
+            if (!File.Exists(path) || !DirectoryExists(path)) {
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
             }
             FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write);
             TextWriter writer = new StreamWriter(stream);
@@ -154,7 +166,9 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
-
+            if (!File.Exists(path) || !DirectoryExists(path)) {
+                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
+            }
             DeleteFile(string.Format("{0}:{1}", path, key));
 #else
             throw new WrongPlatformException();
