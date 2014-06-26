@@ -114,12 +114,13 @@ namespace CmisSync.Lib.Sync.Solver
                 using (var fileStream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
                 using (var downloader = ContentTasks.ContentTaskUtils.CreateDownloader())
                 {
-                    try{
+                    try {
                         downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
                     } catch(Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex});
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
                     }
+
                     hash = hashAlg.Hash;
                 }
 
