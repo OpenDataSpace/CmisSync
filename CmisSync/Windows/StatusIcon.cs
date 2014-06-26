@@ -96,6 +96,7 @@ namespace CmisSync
                         repoCreditsErrorList.Add(reponame);
                     }
                 }
+                Controller.Warning = true;
                 this.trayicon.ShowBalloonTip(30000,
                     String.Format(Properties_Resources.NotificationCredentialsError, reponame),
                     Properties_Resources.NotificationChangeCredentials,
@@ -128,6 +129,7 @@ namespace CmisSync
                 }
                 repoCreditsErrorList.Clear();
             }
+            Controller.Warning = false;
         }
 
 
@@ -168,7 +170,7 @@ namespace CmisSync
                             this.trayicon.Icon = animationFrames[icon_frame];
                             return;
                         }
-                        if (repoCreditsErrorList.Count > 0)
+                        if (Controller.Warning)
                         {
                             this.trayicon.Icon = SystemIcons.Warning;
                             return;
@@ -579,7 +581,6 @@ namespace CmisSync
             {
                 if (disposed)
                     return;
-
                 TimeSpan diff = DateTime.Now - updateTime;
                 if (diff.Seconds < updateInterval)
                 {

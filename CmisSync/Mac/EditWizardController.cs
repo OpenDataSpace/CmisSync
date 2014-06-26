@@ -171,6 +171,8 @@ namespace CmisSync
             Loader.Load(Repo);
             lock(loginLock)
                 isClosed = false;
+
+            OnPasswordChanged (this);
         }
 
         void InsertEvent ()
@@ -260,14 +262,16 @@ namespace CmisSync
 
         partial void OnPasswordChanged(NSObject sender)
         {
-            this.LoginStatusLabel.StringValue = "logging in";
+            this.LoginStatusLabel.StringValue = "logging in...";
             this.LoginStatusLabel.Hidden = false;
-            this.LoginStatusProgress.StartAnimation(this);
+            //  monomac bug: animation GUI effect will cause GUI to hang, when backend thread is busy
+//            this.LoginStatusProgress.StartAnimation(this);
             ServerCredentials cred = new ServerCredentials() {
                 Address = Credentials.Address,
                 UserName = Credentials.UserName,
                 Password = PasswordText.StringValue
             };
+            PasswordText.Enabled = false;
             new TaskFactory().StartNew(() => {
                 try{
                     CmisUtils.GetRepositories(cred);
@@ -291,6 +295,7 @@ namespace CmisSync
                 InvokeOnMainThread(() => {
                     lock (loginLock)
                     {
+                        PasswordText.Enabled = true;
                         if(!isClosed)
                             this.LoginStatusProgress.StopAnimation(this);
                     }

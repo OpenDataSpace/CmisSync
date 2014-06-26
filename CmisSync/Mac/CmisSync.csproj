@@ -289,6 +289,9 @@
     <BundleResource Include="Pixmaps\media_playback_pause.png" />
     <BundleResource Include="Pixmaps\media_playback_start.png" />
     <BundleResource Include="Pixmaps\process-syncing-error.icns" />
+    <BundleResource Include="Pixmaps\Downloading.png" />
+    <BundleResource Include="Pixmaps\Updating.png" />
+    <BundleResource Include="Pixmaps\Uploading.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

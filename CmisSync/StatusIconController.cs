@@ -89,6 +89,27 @@ namespace CmisSync {
 
 
         /// <summary>
+        /// Warn some anormal cases
+        /// </summary>
+        public bool Warning
+        {
+            get
+            {
+                return warning;
+            }
+            set
+            {
+                warning = value;
+                if (CurrentState == IconState.Idle)
+                {
+                    UpdateIconEvent(0);
+                }
+            }
+        }
+        private bool warning;
+
+
+        /// <summary>
         /// Short text shown at the top of the menu of the CmisSync tray icon.
         /// </summary>
         public string StateText = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
