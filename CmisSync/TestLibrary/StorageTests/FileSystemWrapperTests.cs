@@ -110,7 +110,7 @@ namespace TestLibrary.StorageTests
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             this.testFolder.CreateSubdirectory(fileName);
             IFileSystemInfo fileInfo = Factory.CreateDirectoryInfo(fullPath);
-            Assert.That(fileInfo.Attributes, Is.EqualTo(FileAttributes.Directory));
+            Assert.That(fileInfo.Attributes & FileAttributes.Directory, Is.EqualTo(FileAttributes.Directory));
         }
 
         [Test, Category("Medium")]
