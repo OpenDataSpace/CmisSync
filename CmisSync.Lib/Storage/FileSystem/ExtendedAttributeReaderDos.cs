@@ -311,7 +311,7 @@ namespace CmisSync.Lib.Storage
             }
             new FileIOPermission(FileIOPermissionAccess.Write, path).Demand();
             if (!DeleteFile(string.Format("{0}:{1}:{2}", path, key, "$DATA"))) {
-                if (FileNotFound != Marshal.GetLastWin32Error()) {
+                if (ErrorFileNotFound != Marshal.GetLastWin32Error()) {
                     throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", GetLastErrorMessage(),
                                 string.Format("{0}:{1}:{2}", path, key, "$DATA")));
                 }
