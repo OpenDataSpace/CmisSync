@@ -153,11 +153,6 @@ namespace CmisSync.Lib.Events
             Logger.Debug("Starting to listen on SyncEventQueue");
             while (!queue.IsCompleted)
             {
-                if (this.suspend)
-                {
-                    waitHandle.WaitOne();
-                }
-
                 ISyncEvent syncEvent = null;
 
                 // Blocks if number.Count == 0
@@ -173,6 +168,10 @@ namespace CmisSync.Lib.Events
 
                 if (syncEvent != null) {
                     try {
+                        if (this.suspend) {
+                            waitHandle.WaitOne();
+                        }
+
                         manager.Handle(syncEvent);
                     } catch(Exception e) {
                         Logger.Error("Exception in EventHandler");
