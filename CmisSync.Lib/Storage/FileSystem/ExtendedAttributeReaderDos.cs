@@ -29,6 +29,9 @@ namespace CmisSync.Lib.Storage
 
     using Microsoft.Win32.SafeHandles;
 
+    /// <summary>
+    /// Extended attribute reader for Windows.
+    /// </summary>
     public class ExtendedAttributeReaderDos : IExtendedAttributeReader
     {
 #if ! __MonoCS__
@@ -111,6 +114,11 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
+        /// <summary>
+        /// Retrieves the extended attribute.
+        /// </summary>
+        /// <param name="path">Retrrieves attribute of this path.</param>
+        /// <param name="key">Key of the attribute, which should be retrieved.</param>
         public string GetExtendedAttribute(string path, string key)
         {
 #if ! __MonoCS__
@@ -119,7 +127,7 @@ namespace CmisSync.Lib.Storage
                 throw new ArgumentException("Empty or null key is not allowed");
             }
             path = Path.GetFullPath(path);
-            if (!File.Exists(path) || !Directory.Exists(path)) {
+            if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or dirrectory", path));
             }
             try {
@@ -140,6 +148,11 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
+        /// <summary>
+        /// Sets the extended attribute.
+        /// </summary>
+        /// <param name="path">Sets attribute of this path.</param>
+        /// <param name="key">Key of the attribute, which should be set.</param>
         public void SetExtendedAttribute(string path, string key, string value)
         {
 #if ! __MonoCS__
@@ -148,7 +161,7 @@ namespace CmisSync.Lib.Storage
                 throw new ArgumentException("Empty or null key is not allowed");
             }
             path = Path.GetFullPath(path);
-            if (!File.Exists(path) || !Directory.Exists(path)) {
+            if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
             }
             FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write);
@@ -160,6 +173,11 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
+        /// <summary>
+        /// Removes the extended attribute.
+        /// </summary>
+        /// <param name="path">Removes attribute from this path.</param>
+        /// <param name="key">Key of the attribute, which should be removed.</param>
         public void RemoveExtendedAttribute(string path, string key)
         {
 #if ! __MonoCS__
@@ -168,7 +186,7 @@ namespace CmisSync.Lib.Storage
                 throw new ArgumentException("Empty or null key is not allowed");
             }
             path = Path.GetFullPath(path);
-            if (!File.Exists(path) || !Directory.Exists(path)) {
+            if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
             }
             DeleteFile(string.Format("{0}:{1}:{2}", path, key, "$DATA"));
@@ -199,6 +217,11 @@ namespace CmisSync.Lib.Storage
 #endif
         }
 
+        /// <summary>
+        /// Lists the attribute keys.
+        /// </summary>
+        /// <returns>The attribute keys.</returns>
+        /// <param name="path">Path which should be read.</param>
         public List<string> ListAttributeKeys(string path)
         {
 #if ! __MonoCS__
