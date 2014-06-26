@@ -124,7 +124,6 @@
     <Compile Include="Sync\Strategy\ContentChangeEventAccumulator.cs" />
     <Compile Include="Sync\Strategy\ContentChangeEventTransformer.cs" />
     <Compile Include="Sync\Strategy\ContentChanges.cs" />
-    <Compile Include="Sync\Strategy\Crawler.cs" />
     <Compile Include="Sync\Strategy\FileSynchronizer.cs" />
     <Compile Include="Sync\Strategy\ISituationDetection.cs" />
     <Compile Include="Sync\Strategy\LocalSituationDetection.cs" />

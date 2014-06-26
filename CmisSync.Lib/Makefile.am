@@ -148,7 +148,6 @@ SOURCES =  \
 	Sync/Strategy/ContentChangeEventAccumulator.cs \
 	Sync/Strategy/ContentChangeEventTransformer.cs \
 	Sync/Strategy/ContentChanges.cs \
-	Sync/Strategy/Crawler.cs \
 	Sync/Strategy/DescendantsCrawler.cs \
 	Sync/Strategy/FileSynchronizer.cs \
 	Sync/Strategy/ISituationDetection.cs \

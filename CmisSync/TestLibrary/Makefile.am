@@ -73,7 +73,6 @@ SOURCES =  \
 	SyncStrategiesTests/ContentChangeEventAccumulatorTest.cs \
 	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
 	SyncStrategiesTests/ContentChangesTest.cs \
-	SyncStrategiesTests/CrawlerTest.cs \
 	SyncStrategiesTests/DescendantsCrawlerTest.cs \
 	SyncStrategiesTests/LocalObjectFetcherTest.cs \
 	SyncStrategiesTests/MacWatcherTest.cs \

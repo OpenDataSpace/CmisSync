@@ -12,8 +12,6 @@
     <AssemblyName>TestLibrary</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <UseMSBuildEngine>False</UseMSBuildEngine>
-    <ReleaseVersion>
-    </ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -119,7 +117,6 @@
     <Compile Include="SyncStrategiesTests\ContentChangeEventAccumulatorTest.cs" />
     <Compile Include="SyncStrategiesTests\ContentChangeEventTransformerTest.cs" />
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
-    <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
     <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />

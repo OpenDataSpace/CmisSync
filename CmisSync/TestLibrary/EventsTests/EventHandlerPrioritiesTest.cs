@@ -45,7 +45,7 @@ namespace TestLibrary.EventsTests
         public void ContentChangeHigherThanCrawler()
         {
             int contentChange = EventHandlerPriorities.GetPriority(typeof(ContentChanges));
-            int crawler = EventHandlerPriorities.GetPriority(typeof(Crawler));
+            int crawler = EventHandlerPriorities.GetPriority(typeof(DescendantsCrawler));
             Assert.That(contentChange, Is.GreaterThan(crawler));
         }
 
