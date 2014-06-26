@@ -81,7 +81,6 @@ namespace CmisSync
         public static void Main(string[] args)
         {
 #if __MonoCS__
-            Environment.SetEnvironmentVariable("MONO_MANAGED_WATCHER", "enabled");
             Environment.SetEnvironmentVariable("MONO_XMLSERIALIZER_THS", "no");
 #endif
 
@@ -146,7 +145,7 @@ namespace CmisSync
                     Console.Error.WriteLine(message);
                     Environment.Exit(-1);
                 }
-            
+
 
                 // Increase the number of concurrent requests to each server,
                 // as an unsatisfying workaround until this DotCMIS bug 632 is solved.
