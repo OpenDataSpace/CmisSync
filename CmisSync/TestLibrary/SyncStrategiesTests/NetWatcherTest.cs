@@ -108,6 +108,7 @@ namespace TestLibrary.SyncStrategiesTests
         //This test fails on current build slave, retest when these are FC20 or higher
         [Ignore] //The  category exclusion also fails...
         public void ReportFSFileRenamedEventTest() {
+            Assert.Fail();
             this.ReportFSFileRenamedEvent();
         }
 
