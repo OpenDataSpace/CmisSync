@@ -32,10 +32,10 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 using System;
 using System.Diagnostics;
 using CmisSync.Notifications;
+using CmisSync.Lib.Config;
 
 #if HAVE_APP_INDICATOR
 using AppIndicator;
@@ -425,9 +425,14 @@ namespace CmisSync {
 
             double percent = (e.Status.Percent==null)? 0:(double) e.Status.Percent;
             Label text = this.Child as Label;
-            if(text != null)
+            if (text != null) {
                 text.Text = String.Format("{0}: {1} ({2})", TypeString, System.IO.Path.GetFileName(Path), CmisSync.Lib.Utils.FormatPercent(percent));
-            NotificationUtils.NotifyAsync(String.Format("{0}: {1}", TypeString, System.IO.Path.GetFileName(Path)), Path);
+            }
+
+            if (ConfigManager.CurrentConfig.Notifications) {
+                NotificationUtils.NotifyAsync(String.Format("{0}: {1}", TypeString, System.IO.Path.GetFileName(Path)), Path);
+            }
+
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
                 percent = (status.Percent != null)? (double) status.Percent: 0;
                 long? bitsPerSecond = status.BitsPerSecond;
