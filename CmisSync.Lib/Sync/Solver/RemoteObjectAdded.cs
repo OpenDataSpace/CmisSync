@@ -130,7 +130,8 @@ namespace CmisSync.Lib.Sync.Solver
                 } catch (IOException) {
                     file.Refresh();
                     if (file.Exists) {
-                        cacheFile.Replace(file, this.fsFactory.CreateConflictFileInfo(file), true);
+                        IFileInfo targetFile = cacheFile.Replace(file, this.fsFactory.CreateConflictFileInfo(file), true);
+                        targetFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString());
                     } else {
                         throw;
                     }
