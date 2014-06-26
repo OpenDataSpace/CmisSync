@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Events
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using log4net;
@@ -32,7 +33,9 @@ namespace CmisSync.Lib.Events
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
         private Task consumer;
+        private AutoResetEvent suspendHandle = new AutoResetEvent(false);
         private bool alreadyDisposed = false;
+        private bool suspend = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.SyncEventQueue"/> class.
@@ -44,7 +47,7 @@ namespace CmisSync.Lib.Events
             }
 
             this.EventManager = manager;
-            this.consumer = new Task(() => Listen(this.queue, this.EventManager));
+            this.consumer = new Task(() => Listen(this.queue, this.EventManager, this.suspendHandle));
             this.consumer.Start();
         }
 
@@ -70,6 +73,7 @@ namespace CmisSync.Lib.Events
                 throw new ObjectDisposedException("SyncEventQueue", "Called AddEvent on Disposed object");
             }
 
+            Logger.Debug(string.Format("Adding Event: {0}", newEvent.ToString()));
             this.queue.Add(newEvent);
         }
 
@@ -114,6 +118,21 @@ namespace CmisSync.Lib.Events
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Suspend the queue consumer thread after finished the processing of the actual event.
+        /// </summary>
+        public void Suspend() {
+            this.suspend = true;
+        }
+
+        /// <summary>
+        /// Continue the queue consumer if it is suspended.
+        /// </summary>
+        public void Continue() {
+            this.suspend = false;
+            this.suspendHandle.Set();
+        }
+
         protected virtual void Dispose(bool isDisposing) {
             if (this.alreadyDisposed) {
                 return;
@@ -130,10 +149,15 @@ namespace CmisSync.Lib.Events
             this.alreadyDisposed = true;
         }
 
-        private static void Listen(BlockingCollection<ISyncEvent> queue, ISyncEventManager manager) {
+        private void Listen(BlockingCollection<ISyncEvent> queue, ISyncEventManager manager, WaitHandle waitHandle) {
             Logger.Debug("Starting to listen on SyncEventQueue");
             while (!queue.IsCompleted)
             {
+                if (this.suspend)
+                {
+                    waitHandle.WaitOne();
+                }
+
                 ISyncEvent syncEvent = null;
 
                 // Blocks if number.Count == 0

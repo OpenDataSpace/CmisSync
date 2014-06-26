@@ -313,6 +313,7 @@ namespace CmisSync.Lib.Sync
         public void Suspend()
         {
             this.Status = SyncStatus.Suspend;
+            this.Queue.Suspend();
         }
 
         /// <summary>
@@ -321,6 +322,7 @@ namespace CmisSync.Lib.Sync
         public void Resume()
         {
             this.Status = SyncStatus.Idle;
+            this.Queue.Continue();
         }
 
         /// <summary>

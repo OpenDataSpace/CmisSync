@@ -23,7 +23,7 @@ namespace CmisSync.Lib.Events
     using System.Threading.Tasks;
 
     using log4net;
-    
+
     /// <summary>
     /// Interface for all implementations of SyncEventQueues.
     /// This interface is the "usage interface" which does not contain lifecyle related Methods.
@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Events
         /// <c>true</c> if this instance is stopped; otherwise, <c>false</c>.
         /// </value>
         bool IsStopped { get; } 
-        
+
         /// <summary>
         /// Gets the event manager.
         /// </summary>
@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Events
         /// The event manager.
         /// </value>
         ISyncEventManager EventManager { get; }
-        
+
         /// <summary>
         /// Adds the event.
         /// </summary>
@@ -53,6 +53,16 @@ namespace CmisSync.Lib.Events
         /// New event.
         /// </param>
         /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
-        void AddEvent(ISyncEvent newEvent); 
+        void AddEvent(ISyncEvent newEvent);
+
+        /// <summary>
+        /// Suspend the queue consumer thread after finished the processing of the actual event.
+        /// </summary>
+        void Suspend();
+
+        /// <summary>
+        /// Continue the queue consumer if it is suspended.
+        /// </summary>
+        void Continue();
     }
 }
