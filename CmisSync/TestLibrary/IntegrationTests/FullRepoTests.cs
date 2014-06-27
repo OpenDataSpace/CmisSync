@@ -496,7 +496,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
-        // [Ignore]
+        // Conflict solver is not yet implemented
+        [Ignore]
         [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalAndTheRemoteFileAreBothRenamed() {
             string originalName = "original.txt";
@@ -509,7 +510,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
-            this.localRootDir.MoveTo(Path.Combine(this.localRootDir.FullName, localName));
+            this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, localName));
             this.remoteRootDir.GetChildren().First().Rename(remoteName);
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);

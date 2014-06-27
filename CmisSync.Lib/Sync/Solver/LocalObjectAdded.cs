@@ -41,8 +41,7 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class LocalObjectAdded : ISolver
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
-
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private ISyncEventQueue queue;
 
         /// <summary>
@@ -68,7 +67,7 @@ namespace CmisSync.Lib.Sync.Solver
         {
             string parentId = this.GetParentId(localFileSystemInfo, storage);
             ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, session);
-
+            OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
             Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFileSystemInfo);
 
             localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
@@ -94,7 +93,7 @@ namespace CmisSync.Lib.Sync.Solver
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 this.queue.AddEvent(transmissionEvent);
                 if (localFile.Length > 0) {
-                    Logger.Debug("Uploading file content");
+                    OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                     IFileUploader uploader = ContentTaskUtils.CreateUploader();
                     using (SHA1 hashAlg = new SHA1Managed())
                     using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
@@ -110,6 +109,7 @@ namespace CmisSync.Lib.Sync.Solver
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
 
                     storage.SaveMappedObject(mapped);
+                    OperationsLogger.Debug(string.Format("Uploaded file content of {0}", localFile.FullName));
                 }
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
