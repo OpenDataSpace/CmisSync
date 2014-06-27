@@ -107,18 +107,30 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private bool IsChangeEventAHintForMove(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            if(actualEvent is FolderEvent)
+            if (actualEvent is FolderEvent)
             {
                 var folderEvent = actualEvent as FolderEvent;
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
-                if (storedFolder != null) {
-                    if(storedFolder.Name == folderEvent.RemoteFolder.Name && storedFolder.ParentId != folderEvent.RemoteFolder.ParentId) {
+                if (storedFolder != null)
+                {
+                    if (storedFolder.ParentId != folderEvent.RemoteFolder.ParentId)
+                    {
                         return true;
-                    } else {
-                        return false;
                     }
-                } else {
+                }
+            }
+            else if (actualEvent is FileEvent)
+            {
+                var fileEvent = actualEvent as FileEvent;
+                if (fileEvent.RemoteFile.Parents == null || fileEvent.RemoteFile.Parents.Count == 0)
+                {
                     return false;
+                }
+
+                var storedFile = storage.GetObjectByRemoteId(fileEvent.RemoteFile.Id);
+                if (storedFile != null && storedFile.ParentId != fileEvent.RemoteFile.Parents[0].Id)
+                {
+                    return true;
                 }
             }
 
@@ -127,17 +139,24 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private bool IsChangeEventAHintForRename(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            if(actualEvent is FolderEvent)
+            if (actualEvent is FolderEvent)
             {
                 var folderEvent = actualEvent as FolderEvent;
                 var storedFolder = storage.GetObjectByRemoteId(folderEvent.RemoteFolder.Id);
-                if (storedFolder != null) {
+                if (storedFolder != null)
+                {
                     return storedFolder.Name != folderEvent.RemoteFolder.Name;
-                } else {
-                    return false;
                 }
             }
-
+            else if (actualEvent is FileEvent)
+            {
+                var fileEvent = actualEvent as FileEvent;
+                var storedFile = storage.GetObjectByRemoteId(fileEvent.RemoteFile.Id);
+                if (storedFile != null)
+                {
+                    return storedFile.Name != fileEvent.RemoteFile.Name;
+                }
+            }
             return false;
         }
     }
