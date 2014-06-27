@@ -105,13 +105,14 @@ namespace CmisSync.Lib.Sync.Strategy
             if (e is AbstractFolderEvent) {
                 var folderEvent = e as AbstractFolderEvent;
 
-                try{
+                try {
                     this.DoHandle(folderEvent);
-                }catch(Exception){
+                } catch(Exception) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing");
                     this.Queue.AddEvent(new StartNextSyncEvent(true));
                     throw;
                 }
+
                 return true;
             }
 
@@ -174,7 +175,7 @@ namespace CmisSync.Lib.Sync.Strategy
             ISolver solver = this.Solver[(int)localSituation, (int)remoteSituation];
 
             if(solver == null) {
-                throw new NotImplementedException(String.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));
+                throw new NotImplementedException(string.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));
             }
 
             Logger.Debug("Using Solver: " + solver.GetType());
