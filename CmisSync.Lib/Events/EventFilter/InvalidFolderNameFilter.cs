@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Events.Filter
             if (string.IsNullOrEmpty(path)) {
                 reason = "Given Path is null or empty";
                 return true;
-            } else if (invalidFolderNameRegex.IsMatch(path.Replace("/", string.Empty).Replace("\"", string.Empty))) {
+            } else if (invalidFolderNameRegex.IsMatch(path.Replace("/", string.Empty).Replace("\\", string.Empty))) {
                 reason = string.Format("Path \"{0}\" contains one of the illegal characters \"{1}\"", path, invalidFolderNameRegex.ToString());
                 return true;
             } else {
