@@ -17,7 +17,7 @@ DISTCLEANFILES = \
 	intltool-update \
 	gnome-doc-utils.make
 
-CLEANFILES = -r $(top_builddir)/bin
+CLEANFILES = -r $(top_builddir)/bin SOURCES SRPMS SPECS RPMS BUILD BUILDROOT tmpinst
 
 MAINTAINERCLEANFILES = \
 	aclocal.m4 config.* configure install-sh ltmain* missing Makefile.in
@@ -52,6 +52,17 @@ apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
+
+rpm-package:
+	rm -rf tmpinst
+	$(MAKE) DESTDIR=$(abs_top_builddir)/tmpinst install
+	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT
+	mkdir SOURCES
+	tar cjCf tmpinst SOURCES/dataspacesync.tar.bz2 usr
+	rm -rf tmpinst
+	rpmbuild -bb --define "_topdir $(abs_top_builddir)" build/cmissync.spec
+	mv `find RPMS -name *.rpm` .
+	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT
 
 none:
 
