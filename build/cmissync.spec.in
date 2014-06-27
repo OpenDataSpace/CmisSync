@@ -1,8 +1,6 @@
-%global _lib lib
-%global _libdir %{_prefix}/lib
 %global debug_package %{nil}
 
-Name: dataspcasesync
+Name: dataspacesync
 Version: @VERSION@
 Release: 1%{?dist}
 Summary: A DataSpace Sync tool
@@ -10,53 +8,79 @@ Summary: A DataSpace Sync tool
 Group: Applications/Internet
 License: GPLv3
 URL: http://graudata.com/
-Source0: %{name}-%{version}.tar.bz2
+Source0: %{name}.tar.bz2
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: gtk-sharp2-devel mono-core mono-devel
-BuildRequires: notify-sharp-devel
+BuildRequires: gtk-sharp2-devel mono-core >= 3.4 mono-devel >= 3.4
+BuildRequires: notify-sharp-devel libappindicator-sharp-devel
 BuildRequires: libtool intltool desktop-file-utils
 
-Requires: mono-data-sqlite
-Requires: curl
+Requires: %{name}-common = %{version}-%{release}
 
 %description
 DataSpace Sync allows you to keep in sync with your CMIS repository.
+Static variant
+More information is available at http://graudata.com/ .
 
+%package common
+Summary: A DataSpace Sync tool
+Group: Applications/Internet
+Requires: curl
+
+%description common
+Common files for %{name}
+
+%package dynamic
+Summary: A DataSpace Sync tool
+Group: Applications/Internet
+Requires: mono-core >= 3.4
+Requires: gtk-sharp2
+Requires: notify-sharp
+Requires: libappindicator-sharp
+Requires: %{name}-common = %{version}-%{release}
+
+%description dynamic
+DataSpace Sync allows you to keep in sync with your CMIS repository.
+Dynamic variant
 More information is available at http://graudata.com/ .
 
 %prep
-%setup -q
+%setup -c -q
 
 %build
-#./configure --prefix=%{_prefix}
-%configure
-make
+cd .%{_libdir}/dataspace-sync
+rm -f Moq.dll nunit.framework.dll TestLibrary.*
+mkbundle --static -o DataSpaceSync DataSpaceSync.exe --deps CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtonsoft.Json.dll --machine-config /etc/mono/4.5/machine.config -z
+mkbundle --static -o DataSpaceSync.Console DataSpaceSync.Console.exe --deps CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtonsoft.Json.dll --machine-config /etc/mono/4.5/machine.config -z
 
 %install
 rm -rf %{buildroot}
-make install DESTDIR=%{buildroot}
-%__install -m 0755 Extras/Newtonsoft.Json.dll %{buildroot}%{_libdir}/dataspace-sync/
-%__install -m 0755 Extras/DotCMIS.dll %{buildroot}%{_libdir}/dataspace-sync/
-
-rm -f %{buildroot}%{_libdir}/dataspace-sync/TestLibrary*
+mkdir -p %{buildroot}
+cp -av * %{buildroot}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/dataspace-sync
-%{_libdir}/dataspace-sync/*.dll
-%{_libdir}/dataspace-sync/*.exe
-%{_libdir}/dataspace-sync/*.mdb
+%{_libdir}/dataspace-sync/DataSpaceSync
+%{_libdir}/dataspace-sync/DataSpaceSync.Console
+
+%files common
+%defattr(-,root,root,-)
+%{_bindir}/dataspacesync
+%{_bindir}/dsscli
 %{_datadir}/dataspace-sync
 %{_datadir}/applications/*.desktop
 %{_datadir}/icons/*
 
+%files dynamic
+%defattr(-,root,root,-)
+%{_libdir}/dataspace-sync/*.dll
+%{_libdir}/dataspace-sync/*.exe
+%{_libdir}/dataspace-sync/*.mdb
+
 %changelog
 * Mon Jun 10 2013 Fritz Elfert <fritz.elfert@graudata.com> @VERSION@-1
-- initial rpm 
-
-# end of file
+- initial rpm

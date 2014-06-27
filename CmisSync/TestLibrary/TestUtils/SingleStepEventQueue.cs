@@ -91,5 +91,11 @@ namespace TestLibrary
 
         public void StopListener() {
         }
+
+        public void Suspend() {
+        }
+
+        public void Continue() {
+        }
     }
 }

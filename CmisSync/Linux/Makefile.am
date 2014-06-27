@@ -1,6 +1,6 @@
 SUBDIRS = Pixmaps
 
-ASSEMBLY = CmisSync
+ASSEMBLY = DataSpaceSync
 TARGET = exe
 
 ASSEMBLY_INFO_SOURCE = Defines.cs

@@ -112,10 +112,15 @@ namespace TestLibrary.SyncStrategiesTests
                 }
             }
 
-            public bool IsStopped
-            {
+            public bool IsStopped {
                 get { return Queue.IsStopped; }
-            } 
+            }
+
+            public void Suspend() {
+            }
+
+            public void Continue() {
+            }
         }
 
         protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
