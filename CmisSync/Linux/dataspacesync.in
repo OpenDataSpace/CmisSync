@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [[ $UID -eq 0 ]]; then
+if [ `id -u` = "0" ] ; then
   echo "DataSpace Sync can't be run as root. Things would go utterly wrong."
   exit 1
 fi
