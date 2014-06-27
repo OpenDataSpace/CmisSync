@@ -16,13 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib.Data;
 
 namespace CmisSync.Lib.Sync.Strategy
 {
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -67,6 +67,7 @@ namespace CmisSync.Lib.Sync.Strategy
                         return SituationType.RENAMED;
                     }
                 }
+
                 return SituationType.CHANGED;
             case MetaDataChangeType.NONE:
                 if(actualEvent is FileEvent && (actualEvent as FileEvent).LocalContent != ContentChangeType.NONE) {
@@ -74,6 +75,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 } else {
                     return SituationType.NOCHANGE;
                 }
+
             default:
                 return SituationType.NOCHANGE;
             }

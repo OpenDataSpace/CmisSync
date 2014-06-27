@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
     using CmisSync.Lib.Storage;
     using DotCMIS.Client;
 
@@ -41,6 +42,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private IDirectoryInfo localFolder;
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
+        private IFilterAggregator filter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.DescendantsCrawler"/> class.
@@ -49,12 +51,14 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="remoteFolder">Remote folder.</param>
         /// <param name="localFolder">Local folder.</param>
         /// <param name="storage">Meta data storage.</param>
+        /// <param name="filter">Aggregated filter.</param>
         /// <param name="fsFactory">File system info factory.</param>
         public DescendantsCrawler(
             ISyncEventQueue queue,
             IFolder remoteFolder,
             IDirectoryInfo localFolder,
             IMetaDataStorage storage,
+            IFilterAggregator filter,
             IFileSystemInfoFactory fsFactory = null)
             : base(queue)
         {
@@ -70,9 +74,14 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException("Given storage is null");
             }
 
+            if (filter == null) {
+                throw new ArgumentNullException("Given filter is null");
+            }
+
             this.storage = storage;
             this.remoteFolder = remoteFolder;
             this.localFolder = localFolder;
+            this.filter = filter;
 
             if (fsFactory == null) {
                 this.fsFactory = new FileSystemInfoFactory();
@@ -118,7 +127,7 @@ namespace CmisSync.Lib.Sync.Strategy
             // Request 3 trees in parallel
             Task[] tasks = new Task[3];
             tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
-            tasks[1] = Task.Factory.StartNew(() => localTree = GetLocalDirectoryTree(this.localFolder));
+            tasks[1] = Task.Factory.StartNew(() => localTree = GetLocalDirectoryTree(this.localFolder, this.filter));
             tasks[2] = Task.Factory.StartNew(() => remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1)));
 
             // Wait until all tasks are finished
@@ -180,6 +189,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 IFileSystemInfo oldLocalPath = cmisObject is IFileInfo ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedMappedChild)) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedMappedChild));
                 createdEvent = FileOrFolderEventFactory.CreateEvent(null, cmisObject, localChange: MetaDataChangeType.MOVED, oldLocalObject: oldLocalPath, src: this);
             }
+
             return createdEvent;
         }
 
@@ -204,7 +214,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     if (storedMappedChild != null) {
                         // Moved, Renamed, Updated or Equal
                         AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
-                        AbstractFolderEvent createdEvent = CreateLocalEventBasedOnStorage (child.Item, storedParent, storedMappedChild);
+                        AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
 
                         eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
                     } else {
@@ -363,17 +373,26 @@ namespace CmisSync.Lib.Sync.Strategy
             }
         }
 
-        public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent) {
+        /// <summary>
+        /// Gets the local directory tree.
+        /// </summary>
+        /// <returns>The local directory tree.</returns>
+        /// <param name="parent">Parent directory.</param>
+        /// <param name="filter">Filter for files.</param>
+        public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
             var children = new List<IObjectTree<IFileSystemInfo>>();
             foreach (var child in parent.GetDirectories()) {
-                children.Add(GetLocalDirectoryTree(child));
+                children.Add(GetLocalDirectoryTree(child, filter));
             }
 
             foreach (var file in parent.GetFiles()) {
-                children.Add(new ObjectTree<IFileSystemInfo> {
-                    Item = file,
-                    Children = new List<IObjectTree<IFileSystemInfo>>()
-                });
+                string reason;
+                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
+                    children.Add(new ObjectTree<IFileSystemInfo> {
+                        Item = file,
+                        Children = new List<IObjectTree<IFileSystemInfo>>()
+                    });
+                }
             }
 
             IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {
@@ -383,8 +402,13 @@ namespace CmisSync.Lib.Sync.Strategy
             return tree;
         }
 
-        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants)
-        {
+        /// <summary>
+        /// Gets the remote directory tree.
+        /// </summary>
+        /// <returns>The remote directory tree.</returns>
+        /// <param name="parent">Parent folder.</param>
+        /// <param name="descendants">Descendants.</param>
+        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants) {
             IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
             if (descendants != null) {
                 foreach (var child in descendants) {

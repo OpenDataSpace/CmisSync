@@ -134,4 +134,3 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         }
     }
 }
-

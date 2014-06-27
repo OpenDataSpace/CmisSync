@@ -324,8 +324,14 @@ namespace TestLibrary.IntegrationTests
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
+            var ignoreFolderFilter = new IgnoredFoldersFilter();
+            var ignoreFolderNameFilter = new IgnoredFolderNameFilter();
+            var ignoreFileNamesFilter = new IgnoredFileNamesFilter();
+            var invalidFolderNameFilter = new InvalidFolderNameFilter();
+
+            var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
             var localFolder = new Mock<IDirectoryInfo>();
-            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, fsFactory);
+            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, filterAggregator, fsFactory);
             manager.AddEventHandler(crawler);
 
             var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();
@@ -337,10 +343,7 @@ namespace TestLibrary.IntegrationTests
             var ignoreContentChangesFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage, session.Object);
             manager.AddEventHandler(ignoreContentChangesFilter);
 
-            var ignoreFolderFilter = new IgnoredFoldersFilter();
-            var ignoreFolderNameFilter = new IgnoredFolderNameFilter();
-            var ignoreFileNamesFilter = new IgnoredFileNamesFilter();
-            var invalidFolderNameFilter = new InvalidFolderNameFilter();
+
 
             /* This is not implemented yet
             var failedOperationsFilder = new FailedOperationsFilter(queue);
