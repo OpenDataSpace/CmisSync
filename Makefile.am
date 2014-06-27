@@ -43,23 +43,23 @@ uninstall-local:
 		$(DESTDIR)$(pkglibdir)/$(notdir $(LOG4NET_PATH)) \
 		$(DESTDIR)$(pkglibdir)/$(notdir $(DOTCMIS_PATH))
 
-debian-package:
-	rm -rf $(top_builddir)/debian/usr
-	make DESTDIR=$(abs_top_builddir)/debian install
-	make VERSION=`git describe --match linux* | cut -d - -f 2` -C debian build
-
-apple-package:
-	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
-	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
-	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
-
-rpm-package:
+tmpinst:
 	rm -rf tmpinst
 	$(MAKE) DESTDIR=$(abs_top_builddir)/tmpinst install
 	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT
 	mkdir SOURCES
 	tar cjCf tmpinst SOURCES/dataspacesync.tar.bz2 usr
 	rm -rf tmpinst
+
+debian-package: tmpinst
+	make BASEDIR=$(abs_top_builddir)/debian VERSION=`git describe --match linux* | cut -d - -f 2` -C debian build
+
+apple-package:
+	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
+	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
+	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
+
+rpm-package: tmpinst
 	rpmbuild -bb --define "_topdir $(abs_top_builddir)" build/cmissync.spec
 	mv `find RPMS -name *.rpm` .
 	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT

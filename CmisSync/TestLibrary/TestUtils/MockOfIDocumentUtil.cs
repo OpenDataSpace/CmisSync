@@ -67,6 +67,11 @@ namespace TestLibrary.TestUtils
             doc.Setup(d => d.Parents).Returns(parents);
         }
 
+        public static void SetupPath(this Mock<IDocument> doc, params string[] path) {
+            List<string> paths = new List<string>(path);
+            doc.Setup(d => d.Paths).Returns(paths);
+        }
+
         public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {
             doc.VerifySetContentStream(Times.Once(), overwrite, refresh, mimeType);
         }
