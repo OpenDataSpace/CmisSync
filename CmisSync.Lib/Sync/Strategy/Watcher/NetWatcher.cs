@@ -150,7 +150,11 @@ namespace CmisSync.Lib.Sync.Strategy
                     isDirectory = false;
                 }
             } else {
-                isDirectory = (File.GetAttributes(e.FullPath) & FileAttributes.Directory) == FileAttributes.Directory;
+                try {
+                    isDirectory = (File.GetAttributes(e.FullPath) & FileAttributes.Directory) == FileAttributes.Directory;
+                } catch (FileNotFoundException) {
+                    return;
+                }
             }
 
             this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath, isDirectory));

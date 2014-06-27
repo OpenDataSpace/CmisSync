@@ -115,6 +115,8 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         private Events.Filter.ReportingFilter reportingFilter;
 
+        private Events.Filter.FilterAggregator filters;
+
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
@@ -209,6 +211,7 @@ namespace CmisSync.Lib.Sync
             this.ignoredFileNameFilter = new Events.Filter.IgnoredFileNamesFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames };
             this.ignoredFolderNameFilter = new Events.Filter.IgnoredFolderNameFilter { Wildcards = ConfigManager.CurrentConfig.IgnoreFolderNames };
             this.invalidFolderNameFilter = new Events.Filter.InvalidFolderNameFilter();
+            this.filters = new Events.Filter.FilterAggregator(this.ignoredFileNameFilter, this.ignoredFolderNameFilter, this.invalidFolderNameFilter, this.ignoredFoldersFilter);
             this.reportingFilter = new Events.Filter.ReportingFilter(
                 this.Queue,
                 this.ignoredFoldersFilter,
@@ -248,7 +251,7 @@ namespace CmisSync.Lib.Sync
                 this.Status = status;
             };
 
-            this.Queue.EventManager.AddEventHandler(new SyncStrategyInitializer(this.Queue, this.storage, this.RepoInfo, this.fileSystemFactory));
+            this.Queue.EventManager.AddEventHandler(new SyncStrategyInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, this.fileSystemFactory));
         }
 
         /// <summary>
@@ -313,6 +316,7 @@ namespace CmisSync.Lib.Sync
         public void Suspend()
         {
             this.Status = SyncStatus.Suspend;
+            this.Scheduler.Stop();
             this.Queue.Suspend();
         }
 
@@ -323,6 +327,7 @@ namespace CmisSync.Lib.Sync
         {
             this.Status = SyncStatus.Idle;
             this.Queue.Continue();
+            this.Scheduler.Start();
         }
 
         /// <summary>

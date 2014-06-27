@@ -288,7 +288,6 @@ namespace TestLibrary.StorageTests
             Assert.That(conflictFile.Directory.FullName, Is.EqualTo(fileInfo.Directory.FullName));
             Assert.That(Path.GetExtension(conflictFile.FullName), Is.EqualTo(Path.GetExtension(fileInfo.FullName)), "The file extension must be kept the same as in the original file");
             Assert.That(conflictFile.Name, Is.Not.EqualTo(fileInfo.Name));
-            Console.WriteLine(conflictFile.FullName);
         }
 
         // Not implemented yet

@@ -65,7 +65,13 @@ namespace CmisSync.Lib.Events.Filter
             }
         }
 
-        public bool CheckFolderName(string name, out string reason) {
+        /// <summary>
+        /// Checks the name of the folder.
+        /// </summary>
+        /// <returns><c>true</c>, if folder name should be ignored, <c>false</c> otherwise.</returns>
+        /// <param name="name">Name of the folder.</param>
+        /// <param name="reason">Reason why <c>true</c> was returned.</param>
+        public virtual bool CheckFolderName(string name, out string reason) {
             lock (this.listLock)
             {
                 reason = string.Empty;

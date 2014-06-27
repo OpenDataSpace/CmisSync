@@ -25,6 +25,7 @@ namespace TestLibrary.SyncStrategiesTests
 
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
 
@@ -56,6 +57,7 @@ namespace TestLibrary.SyncStrategiesTests
         private IPathMatcher matcher;
         private DBreezeEngine storageEngine;
         private DateTime lastLocalWriteTime = DateTime.Now;
+        private IFilterAggregator filter;
 
         [TestFixtureSetUp]
         public void InitCustomSerializator()
@@ -93,40 +95,41 @@ namespace TestLibrary.SyncStrategiesTests
             };
             this.storage = new MetaDataStorage(this.storageEngine, this.matcher);
             this.storage.SaveMappedObject(this.mappedRootObject);
+            this.filter = MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object;
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfLocalFolderIsNull()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), null, Mock.Of<IMetaDataStorage>());
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), null, Mock.Of<IMetaDataStorage>(), this.filter);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfRemoteFolderIsNull()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>());
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new DescendantsCrawler(null, Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>());
+            new DescendantsCrawler(null, Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), null);
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), null, this.filter);
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithoutFsInfoFactory()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>());
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter);
         }
 
         [Test, Category("Fast")]
@@ -403,6 +406,7 @@ namespace TestLibrary.SyncStrategiesTests
                 this.remoteFolder.Object,
                 this.localFolder.Object,
                 this.storage,
+                this.filter,
                 this.fsFactory.Object);
         }
     }

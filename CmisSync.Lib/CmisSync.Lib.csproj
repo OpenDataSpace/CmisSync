@@ -214,6 +214,8 @@
     <Compile Include="Events\FileOrFolderEventFactory.cs" />
     <Compile Include="ContentTasks\ContentTaskUtils.cs" />
     <Compile Include="Events\EventFilter\ReportingFilter.cs" />
+    <Compile Include="Events\EventFilter\FilterAggregator.cs" />
+    <Compile Include="Events\EventFilter\IFilterAggregator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

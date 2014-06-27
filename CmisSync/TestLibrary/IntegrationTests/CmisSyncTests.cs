@@ -329,7 +329,6 @@ namespace TestLibrary.IntegrationTests
             foreach (ICmisObject child in children)
             {
                 string childFileName = (string)child.GetPropertyValue(PropertyIds.Name);
-                Console.WriteLine(childFileName);
                 if (childFileName.Equals(fileName))
                 {
                     found = true;

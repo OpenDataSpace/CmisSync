@@ -28,6 +28,7 @@ SOURCES =  \
 	EventsTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
+	EventsTests/EventsFilterTests/FilterAggregatorTest.cs \
 	EventsTests/EventsFilterTests/GenericHandleDublicatedEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreAlreadyHandledFsEventsFilterTest.cs \
@@ -95,6 +96,7 @@ SOURCES =  \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/WatcherTestUtils.cs \
 	TestUtils/CmisConvenienceExtenders.cs \
+	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIDocumentUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \

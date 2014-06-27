@@ -62,18 +62,16 @@ namespace TestLibrary.StorageTests
             new ExtendedAttributeReaderUnix();
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void GetNullAttributeFromNewFile()
         {
             using (File.Create(path));
             string key = "test";
             var reader = new ExtendedAttributeReaderUnix();
-            Assert.That(reader.GetExtendedAttribute(path, key) == null);
+            Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void SetAttributeToFile()
         {
             using (File.Create(path));
@@ -84,8 +82,7 @@ namespace TestLibrary.StorageTests
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value));
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void OverwriteAttributeOnFile()
         {
             using (File.Create(path));
@@ -98,8 +95,7 @@ namespace TestLibrary.StorageTests
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value2));
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void RemoveAttributeFromFile()
         {
             using (File.Create(path));
@@ -109,11 +105,10 @@ namespace TestLibrary.StorageTests
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value));
             reader.RemoveExtendedAttribute(path, key);
-            Assert.That(reader.GetExtendedAttribute(path, key) == null);
+            Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void ListAttributesOfFile()
         {
             using (File.Create(path));
@@ -126,18 +121,16 @@ namespace TestLibrary.StorageTests
             Assert.Contains("test", reader.ListAttributeKeys(path));
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void GetNullAttributeFromNewFolder()
         {
             Directory.CreateDirectory(path);
             string key = "test";
             var reader = new ExtendedAttributeReaderUnix();
-            Assert.That(reader.GetExtendedAttribute(path, key) == null);
+            Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void SetAttributeToFolder()
         {
             Directory.CreateDirectory(path);
@@ -148,8 +141,7 @@ namespace TestLibrary.StorageTests
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value));
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void OverwriteAttributeOnFolder()
         {
             Directory.CreateDirectory(path);
@@ -162,8 +154,7 @@ namespace TestLibrary.StorageTests
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value2));
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void RemoveAttributeFromFolder()
         {
             Directory.CreateDirectory(path);
@@ -173,11 +164,10 @@ namespace TestLibrary.StorageTests
             reader.SetExtendedAttribute(path, key, value);
             Assert.That(reader.GetExtendedAttribute(path, key).Equals(value));
             reader.RemoveExtendedAttribute(path, key);
-            Assert.That(reader.GetExtendedAttribute(path, key) == null);
+            Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void ListAttributesOfFolder()
         {
             Directory.CreateDirectory(path);
@@ -190,12 +180,31 @@ namespace TestLibrary.StorageTests
             Assert.Contains("test", reader.ListAttributeKeys(path));
         }
 
-        [Test, Category("Medium")]
-        [Category("ExtendedAttribute")]
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void CheckAvailableOnPath()
         {
             var reader = new ExtendedAttributeReaderUnix();
             reader.IsFeatureAvailable(Environment.CurrentDirectory);
+        }
+
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
+        public void RemoveNonExistingAttributeFromFile()
+        {
+            using (File.Create(path));
+            string key = "test";
+            var reader = new ExtendedAttributeReaderUnix();
+            reader.RemoveExtendedAttribute(path, key);
+            Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
+        }
+
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
+        public void RemoveNonExistingAttributeFromFolder()
+        {
+            Directory.CreateDirectory(path);
+            string key = "test";
+            var reader = new ExtendedAttributeReaderUnix();
+            reader.RemoveExtendedAttribute(path, key);
+            Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
         }
     }
 }
