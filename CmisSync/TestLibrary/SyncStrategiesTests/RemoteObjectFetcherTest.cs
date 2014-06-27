@@ -39,7 +39,7 @@ namespace TestLibrary.SyncStrategiesTests
     [TestFixture]
     public class RemoteObjectFetcherTest
     {
-        private static readonly string Path = "/path";
+        private static readonly string Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "path");
         private static readonly string Id = "myId";
 
         [Test, Category("Fast")]
@@ -102,7 +102,7 @@ namespace TestLibrary.SyncStrategiesTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFile(Path, Id);
 
-            var fileEvent = new FileMovedEvent(new FileInfoWrapper(new FileInfo(Path)), new FileInfoWrapper(new FileInfo("/newPath")));
+            var fileEvent = new FileMovedEvent(new FileInfoWrapper(new FileInfo(Path)), new FileInfoWrapper(new FileInfo("newPath")));
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(fileEvent), Is.False);
