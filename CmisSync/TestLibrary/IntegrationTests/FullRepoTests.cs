@@ -457,8 +457,9 @@ namespace TestLibrary.IntegrationTests
             Thread.Sleep(200);
 
             this.repo.Initialize();
-
+            this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
+
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(2));
             Assert.That(new FileInfo(localDoc).Length, Is.EqualTo(remoteContent.Length));
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
