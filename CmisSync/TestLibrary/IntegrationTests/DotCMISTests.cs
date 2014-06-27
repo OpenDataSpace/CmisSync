@@ -122,7 +122,6 @@ namespace TestLibrary.IntegrationTests
                 IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
-                    Console.WriteLine("Old file deleted");
                 }
             } catch (Exception) {
             }
@@ -230,7 +229,6 @@ namespace TestLibrary.IntegrationTests
                 IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
-                    Console.WriteLine("Old file deleted");
                 }
             } catch (CmisObjectNotFoundException) {
             }
@@ -316,7 +314,6 @@ namespace TestLibrary.IntegrationTests
                 IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
-                    Console.WriteLine("Old file deleted");
                 }
             } catch (CmisObjectNotFoundException)
             {
@@ -430,7 +427,6 @@ namespace TestLibrary.IntegrationTests
                 IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
-                    Console.WriteLine("Old file deleted");
                 }
             }
             catch (CmisObjectNotFoundException) {
@@ -451,7 +447,6 @@ namespace TestLibrary.IntegrationTests
 
             using (var memstream = new MemoryStream(content)) {
                 contentStream.Stream = memstream;
-                Console.WriteLine("content: " + memstream.Length.ToString());
                 emptyDoc.SetContentStream(contentStream, true, true);
             }
 
