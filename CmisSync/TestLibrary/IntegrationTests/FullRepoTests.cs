@@ -159,7 +159,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFolderCreated()
         {
@@ -173,7 +173,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFolderRemoved()
         {
@@ -193,7 +193,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFolderCreated()
         {
@@ -208,7 +208,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFolderIsRenamedAndOneCrawlSyncShouldDetectIt()
         {
@@ -229,7 +229,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFolderIsMovedIntoAnotherRemoteFolder()
         {
@@ -254,7 +254,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFileCreated()
         {
@@ -278,7 +278,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFileRenamed()
         {
@@ -311,7 +311,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFileRenamedAndMoved()
         {
@@ -348,7 +348,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFileIsRemoved()
         {
@@ -371,7 +371,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFileCreated()
         {
@@ -391,7 +391,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFileUpdated()
         {
@@ -418,7 +418,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void RemoteCreatedFileIsDeletedLocally()
         {
@@ -465,7 +465,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
         }
 
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved()
         {
@@ -496,7 +496,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalAndTheRemoteFileAreBothRenamed() {
             string originalName = "original.txt";
@@ -520,7 +520,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         // Ignored because it works but the IT is unpredictable
-        [Ignore]
+        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFileContentIsChanged()
         {
