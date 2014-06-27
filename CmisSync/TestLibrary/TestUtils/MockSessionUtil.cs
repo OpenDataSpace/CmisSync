@@ -134,6 +134,10 @@ namespace TestLibrary.TestUtils
         }
 
         public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid", string folderName = "name", string path = "path", string parentId = "", string changetoken = "changetoken") {
+            if (path.Contains("\\")) {
+                throw new ArgumentException("Given remote path: " + path + " contains \\");
+            }
+
             var session = PrepareSessionMockForSingleChange(type, id);
             var newRemoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, changetoken);
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);

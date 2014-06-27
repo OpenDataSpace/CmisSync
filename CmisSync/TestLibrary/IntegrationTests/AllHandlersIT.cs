@@ -187,7 +187,7 @@ namespace TestLibrary.IntegrationTests
             storage.ChangeLogToken = "oldChangeToken";
             Console.WriteLine(storage.ToFindString());
 
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, id, newName, Path.Combine(this.remoteRoot, newName), parentId, lastChangeToken);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Updated, id, newName, this.remoteRoot + "/" + newName, parentId, lastChangeToken);
 
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
             dirInfo.Setup(d => d.MoveTo(It.IsAny<string>()))
@@ -221,7 +221,7 @@ namespace TestLibrary.IntegrationTests
             var dirInfo = fsFactory.AddDirectory(Path.Combine(this.localRoot, folderName));
 
             string id = "1";
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, folderName, Path.Combine(this.remoteRoot, folderName), parentId, lastChangeToken);
+            Mock<ISession> session = MockSessionUtil.GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType.Created, id, folderName, this.remoteRoot + "/" + folderName, parentId, lastChangeToken);
             var storage = this.GetInitializedStorage();
             storage.ChangeLogToken = "oldtoken";
             storage.SaveMappedObject(new MappedObject(rootFolderName, rootFolderId, MappedObjectType.Folder, null, "oldtoken"));
