@@ -111,10 +111,12 @@ namespace CmisSync.Lib.Storage
             long ret = Syscall.removexattr (path, prefix + key);
             if(ret != 0)
             {
+#if! __COCOA__
                 Errno errno = Syscall.GetLastError();
                 if (errno != Errno.ENODATA) {
                     throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", errno.ToString(), path));
                 }
+#endif
             }
 #else
             throw new WrongPlatformException();
