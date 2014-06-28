@@ -60,7 +60,7 @@ apple-package:
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
 
 rpm-package: tmpinst
-	rpmbuild -bb --define "_topdir $(abs_top_builddir)" build/cmissync.spec
+	rpmbuild -bb --define "_topdir $(abs_top_builddir)" --define "_libdir $(libdir)" build/cmissync.spec
 	mv `find RPMS -name *.rpm` .
 	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT
 
