@@ -61,7 +61,8 @@ apple-package:
 
 rpm-package: tmpinst
 	rpmbuild -bb --define "_topdir $(abs_top_builddir)" --define "_libdir $(libdir)" build/cmissync.spec
-	mv `find RPMS -name *.rpm` .
+	pwd
+	cd $(abs_top_builddir) && mv `find RPMS -name *.rpm` .
 	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT
 
 none:
