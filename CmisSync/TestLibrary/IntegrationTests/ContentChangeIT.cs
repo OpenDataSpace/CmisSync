@@ -40,18 +40,12 @@ namespace TestLibrary.IntegrationTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class ContentChangeIT
+    public class ContentChangeIT : IsTestWithConfiguredLog4Net
     {
         private static readonly string DefaultId = "defaultId";
 
         private readonly bool isPropertyChangesSupported = false;
         private readonly int maxNumberOfContentChanges = 1000;
-
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-        }
 
         [Test, Category("Fast"), Category("ContentChange")]
         public void RemoteSecurityChangeOfExistingFile()

@@ -34,16 +34,12 @@ namespace TestLibrary.EventsTests
 
     using NUnit.Framework;
 
+    using TestLibrary.TestUtils;
+
     [TestFixture]
-    public class SyncEventQueueTest
+    public class SyncEventQueueTest : IsTestWithConfiguredLog4Net
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueueTest));
-
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-        }
 
         [Test, Category("Fast")]
         public void EventlessStartStop()

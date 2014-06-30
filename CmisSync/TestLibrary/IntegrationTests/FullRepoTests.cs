@@ -78,7 +78,7 @@ namespace TestLibrary.IntegrationTests
 
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000)]
-    public class FullRepoTests
+    public class FullRepoTests : IsTestWithConfiguredLog4Net
     {
         private static readonly string Subfolder = "FullRepoTests";
         private RepoInfo repoInfo;
@@ -92,8 +92,6 @@ namespace TestLibrary.IntegrationTests
         {
             // Disable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
 
         [TestFixtureTearDown]

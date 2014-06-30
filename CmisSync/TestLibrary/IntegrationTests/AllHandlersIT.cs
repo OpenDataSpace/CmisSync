@@ -49,7 +49,7 @@ namespace TestLibrary.IntegrationTests
     using Strategy = CmisSync.Lib.Sync.Strategy;
 
     [TestFixture]
-    public class AllHandlersIT
+    public class AllHandlersIT : IsTestWithConfiguredLog4Net
     {
         private readonly string localRoot = Path.GetTempPath();
         private readonly string remoteRoot = "remoteroot";
@@ -62,8 +62,6 @@ namespace TestLibrary.IntegrationTests
         [TestFixtureSetUp]
         public void ClassInit()
         {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-
             // Use Newtonsoft.Json as Serializator
             DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
