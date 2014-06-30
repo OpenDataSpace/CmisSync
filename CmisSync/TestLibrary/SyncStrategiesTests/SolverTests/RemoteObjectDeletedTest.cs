@@ -71,5 +71,42 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             fileInfo.Verify(f => f.Delete(), Times.Once());
             storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
         }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileDeletedButLocalFileHasBeenChangedBeforeBeingHandled()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "a");
+            var storage = new Mock<IMetaDataStorage>();
+            Mock<IMappedObject> file = storage.AddLocalFile(path, "id");
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.FullName).Returns(path);
+
+            new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, null);
+
+            fileInfo.Verify(f => f.Delete(), Times.Never());
+            fileInfo.Verify(f => f.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null));
+            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFolderDeletedButNotAllContainingFilesAreSyncedYet()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "a");
+            string fileName = "fileName";
+            string filePath = Path.Combine(path, fileName);
+            var storage = new Mock<IMetaDataStorage>();
+            Mock<IMappedObject> folder = storage.AddLocalFolder(path, "id");
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.FullName).Returns(filePath);
+            fileInfo.Setup(f => f.Name).Returns(fileName);
+            dirInfo.SetupFiles(fileInfo.Object);
+
+            new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, null);
+
+            dirInfo.Verify(d => d.Delete(true), Times.Never());
+            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
+        }
     }
 }
