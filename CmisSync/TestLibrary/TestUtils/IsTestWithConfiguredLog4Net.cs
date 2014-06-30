@@ -16,44 +16,30 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using System.IO;
 
 namespace TestLibrary.TestUtils
 {
     using System;
 
+    using CmisSync.Lib.Config;
+
     using log4net;
-    using log4net.Appender;
-    using log4net.Core;
-    using log4net.Layout;
-    using log4net.Repository.Hierarchy;
+
+    using TestUtils;
 
     public class IsTestWithConfiguredLog4Net
     {
-        private static bool initialized = false;
-        private static object initLock = new object();
+
+        private static readonly string fileName = "log4net.config";
 
         public IsTestWithConfiguredLog4Net() {
-            lock (initLock) {
-                if (!initialized) {
-                    InitLog4NetConfig();
-                    initialized = true;
-                }
+            string path = Path.Combine("..", "..", fileName);
+            if (!File.Exists(path)) {
+                path = Path.Combine("..", "CmisSync", "TestLibrary", fileName);
             }
-        }
 
-        private static void InitLog4NetConfig() {
-            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository();
-
-            PatternLayout patternLayout = new PatternLayout();
-            patternLayout.ConversionPattern = "%-4timestamp %-5level %logger - %message%newline";
-            patternLayout.ActivateOptions();
-
-            ConsoleAppender console = new ConsoleAppender();
-            console.ActivateOptions();
-            hierarchy.Root.AddAppender(console);
-
-            hierarchy.Root.Level = Level.Debug;
-            hierarchy.Configured = true;
+            log4net.Config.XmlConfigurator.Configure(new FileInfo(path));
         }
     }
 }
