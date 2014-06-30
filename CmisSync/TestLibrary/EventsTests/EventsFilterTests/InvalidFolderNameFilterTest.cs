@@ -20,6 +20,7 @@
 namespace TestLibrary.EventsTests.EventsFilterTests
 {
     using System;
+    using System.IO;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Events.Filter;
@@ -64,6 +65,14 @@ namespace TestLibrary.EventsTests.EventsFilterTests
 
             Assert.That(filter.CheckPath("test Test/ test", out reason), Is.False);
             Assert.That(string.IsNullOrEmpty(reason), Is.True);
+        }
+
+        [Test, Category("Fast"), Category("EventFilter")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void FilterThrowsExceptionOnPassingAbsolutPath() {
+            InvalidFolderNameFilter filter = new InvalidFolderNameFilter();
+            string reason;
+            filter.CheckPath(Path.GetTempPath(), out reason);
         }
     }
 }

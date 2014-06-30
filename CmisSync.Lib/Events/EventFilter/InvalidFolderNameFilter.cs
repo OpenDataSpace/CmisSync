@@ -50,6 +50,8 @@ namespace CmisSync.Lib.Events.Filter
             if (string.IsNullOrEmpty(path)) {
                 reason = "Given Path is null or empty";
                 return true;
+            } else if (Path.GetFullPath(path).Equals(path)) {
+                throw new ArgumentException(string.Format("Given path {0} is an absolut path, but must be a relative path", path));
             } else if (invalidFolderNameRegex.IsMatch(path.Replace("/", string.Empty).Replace("\\", string.Empty))) {
                 reason = string.Format("Path \"{0}\" contains one of the illegal characters \"{1}\"", path, invalidFolderNameRegex.ToString());
                 return true;
