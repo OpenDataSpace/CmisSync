@@ -43,13 +43,19 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         public void InvalidFolderNames() {
             InvalidFolderNameFilter filter = new InvalidFolderNameFilter();
             string reason;
-            Assert.That(filter.CheckPath("*", out reason), Is.True);
+            Assert.That(filter.CheckFolderName("*", out reason), Is.True);
             Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
 
-            Assert.That(filter.CheckPath("?", out reason), Is.True);
+            Assert.That(filter.CheckFolderName("?", out reason), Is.True);
             Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
 
-            Assert.That(filter.CheckPath(":", out reason), Is.True);
+            Assert.That(filter.CheckFolderName(":", out reason), Is.True);
+            Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
+
+            Assert.That(filter.CheckFolderName("test Test/ test", out reason), Is.True);
+            Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
+
+            Assert.That(filter.CheckFolderName(@"test Test\ test", out reason), Is.True);
             Assert.That(string.IsNullOrEmpty(reason), Is.False, reason);
         }
 
@@ -57,22 +63,11 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         public void ValidFolderNames() {
             InvalidFolderNameFilter filter = new InvalidFolderNameFilter();
             string reason;
-            Assert.That(filter.CheckPath("test", out reason), Is.False);
-            Assert.That(string.IsNullOrEmpty(reason), Is.True);
+            Assert.That(filter.CheckFolderName("test", out reason), Is.False);
+            Assert.That(string.IsNullOrEmpty(reason), Is.True, reason);
 
-            Assert.That(filter.CheckPath("test_test", out reason), Is.False);
-            Assert.That(string.IsNullOrEmpty(reason), Is.True);
-
-            Assert.That(filter.CheckPath("test Test/ test", out reason), Is.False);
-            Assert.That(string.IsNullOrEmpty(reason), Is.True);
-        }
-
-        [Test, Category("Fast"), Category("EventFilter")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void FilterThrowsExceptionOnPassingAbsolutPath() {
-            InvalidFolderNameFilter filter = new InvalidFolderNameFilter();
-            string reason;
-            filter.CheckPath(Path.GetTempPath(), out reason);
+            Assert.That(filter.CheckFolderName("test_test", out reason), Is.False);
+            Assert.That(string.IsNullOrEmpty(reason), Is.True, reason);
         }
     }
 }

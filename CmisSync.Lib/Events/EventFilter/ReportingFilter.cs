@@ -113,9 +113,12 @@ namespace CmisSync.Lib.Events.Filter
                         return true;
                     }
 
-                    if (this.invalidFolderNameFilter.CheckPath(pathEvent.Path, out reason)) {
-                        this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
-                        return true;
+                    string[] folderNames = pathEvent.Path.Split('/');
+                    foreach(var name in folderNames) {
+                        if (this.invalidFolderNameFilter.CheckFolderName(name, out reason)) {
+                            this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
+                            return true;
+                        }
                     }
                 }
             } catch (System.IO.DirectoryNotFoundException) {

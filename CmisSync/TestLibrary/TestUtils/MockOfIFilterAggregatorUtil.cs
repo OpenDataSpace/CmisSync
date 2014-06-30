@@ -39,7 +39,7 @@ namespace TestLibrary.TestUtils
                 i.CheckFolderName(It.IsAny<string>(), out reason) == false) &&
                 f.InvalidFolderNamesFilter == Mock.Of<InvalidFolderNameFilter>(
                 i =>
-                i.CheckPath(It.IsAny<string>(), out reason) == false) &&
+                i.CheckFolderName(It.IsAny<string>(), out reason) == false) &&
                 f.IgnoredFolderFilter == Mock.Of<IgnoredFoldersFilter>(
                 i =>
                 i.CheckPath(It.IsAny<string>(), out reason) == false));
