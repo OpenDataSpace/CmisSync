@@ -37,7 +37,7 @@ namespace TestLibrary.EventsTests
             string path = Path.Combine(Path.GetTempPath(), name);
             var e = new FSEvent(WatcherChangeTypes.Created, path, false);
             Assert.That(e.Name, Is.EqualTo(name));
-            Assert.That(e.Path, Is.EqualTo(path));
+            Assert.That(e.LocalPath, Is.EqualTo(path));
         }
 
         [Test, Category("Fast")]

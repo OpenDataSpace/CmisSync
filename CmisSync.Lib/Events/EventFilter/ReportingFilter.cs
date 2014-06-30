@@ -107,13 +107,13 @@ namespace CmisSync.Lib.Events.Filter
                 }
 
                 var pathEvent = e as IFilterablePathEvent;
-                if (pathEvent != null && pathEvent.Path != null) {
-                    if (this.ignoredFoldersFilter.CheckPath(pathEvent.Path, out reason)) {
+                if (pathEvent != null && pathEvent.RemotePath != null) {
+                    if (this.ignoredFoldersFilter.CheckPath(pathEvent.RemotePath, out reason)) {
                         this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
                         return true;
                     }
 
-                    string[] folderNames = pathEvent.Path.Split('/');
+                    string[] folderNames = pathEvent.RemotePath.Split('/');
                     foreach(var name in folderNames) {
                         if (this.invalidFolderNameFilter.CheckFolderName(name, out reason)) {
                             this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));

@@ -68,7 +68,7 @@ namespace CmisSync.Lib.Events.Filter
         {
             if (e is IFSEvent) {
                 var fsEvent = e as IFSEvent;
-                IFileSystemInfo path = fsEvent.IsDirectory() ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(fsEvent.Path) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(fsEvent.Path);
+                IFileSystemInfo path = fsEvent.IsDirectory() ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(fsEvent.LocalPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(fsEvent.LocalPath);
                 switch (fsEvent.Type) {
                 case WatcherChangeTypes.Created:
                     return this.storage.GetObjectByLocalPath(path) != null;

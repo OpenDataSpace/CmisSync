@@ -87,7 +87,7 @@ namespace TestLibrary.EventsTests
         {
             var localFile = new Mock<IFileInfo>();
             AbstractFolderEvent fe = new FileEvent(localFile.Object);
-            Assert.That(fe.Path, Is.Null);;
+            Assert.That(fe.RemotePath, Is.Null);;
         }
     }
 }

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IFSEvent.cs" company="GRAU DATA AG">
+// <copyright file="IFilterableLocalPathEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,21 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Events
+
+namespace CmisSync.Lib
 {
-    using System.IO;
-    
-    /// <summary>
-    /// Interface for FileSystem Events.
-    /// </summary>
-    public interface IFSEvent : IFilterableLocalPathEvent, IFilterableNameEvent
+    using System;
+
+    public interface IFilterableLocalPathEvent
     {
-        /// <summary>
-        /// Gets the type.
-        /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        WatcherChangeTypes Type { get; }
+        string LocalPath { get; }
     }
 }
+

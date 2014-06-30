@@ -67,7 +67,7 @@ namespace CmisSync.Lib.Events
         /// Gets the remote path.
         /// </summary>
         /// <value>The path.</value>
-        public override string Path {
+        public override string RemotePath {
             get {
                 return this.RemoteFile != null && this.RemoteFile.Paths != null  && this.RemoteFile.Paths.Count > 0 ? this.RemoteFile.Paths[0] : null;
             }
@@ -130,7 +130,7 @@ namespace CmisSync.Lib.Events
                 this.Name,
                 this.Remote,
                 this.RemoteContent,
-                this.Path);
+                this.RemotePath);
         }
 
         /// <summary>

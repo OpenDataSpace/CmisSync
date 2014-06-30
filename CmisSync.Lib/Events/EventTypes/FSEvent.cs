@@ -54,10 +54,10 @@ namespace CmisSync.Lib.Events
             }
 
             this.Type = type;
-            this.Path = path;
-            path = path.Trim(System.IO.Path.DirectorySeparatorChar);
+            FileSystemInfo fileSystemInfo = isDirectory ? (FileSystemInfo)new DirectoryInfo(path) : (FileSystemInfo)new FileInfo(path);
+            this.LocalPath = fileSystemInfo.FullName;
             this.isDirectory = isDirectory;
-            this.Name = System.IO.Path.GetFileName(path);
+            this.Name = fileSystemInfo.Name;
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The path.
         /// </value>
-        public string Path { get; private set; }
+        public string LocalPath { get; private set; }
 
         /// <summary>
         /// Gets the name of the file or directory.
@@ -90,7 +90,7 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format("FSEvent with type \"{0}\" on path \"{1}\" and the name \"{2}\"", this.Type, this.Path, this.Name);
+            return string.Format("FSEvent with type \"{0}\" on path \"{1}\" and the name \"{2}\"", this.Type, this.LocalPath, this.Name);
         }
 
         /// <summary>

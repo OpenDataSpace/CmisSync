@@ -30,6 +30,6 @@ namespace CmisSync.Lib.Events
         /// Gets the remote path.
         /// </summary>
         /// <value>The path.</value>
-        string Path { get; }
+        string RemotePath { get; }
     }
 }

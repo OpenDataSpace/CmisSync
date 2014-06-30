@@ -190,7 +190,7 @@ namespace TestLibrary.IntegrationTests
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
             dirInfo.Setup(d => d.MoveTo(It.IsAny<string>()))
                 .Callback(() => {
-                    queue.AddEvent(Mock.Of<IFSMovedEvent>(fs => fs.IsDirectory() == true && fs.OldPath == path && fs.Path == newPath && fs.Type == WatcherChangeTypes.Renamed));
+                    queue.AddEvent(Mock.Of<IFSMovedEvent>(fs => fs.IsDirectory() == true && fs.OldPath == path && fs.LocalPath == newPath && fs.Type == WatcherChangeTypes.Renamed));
                     var newDirInfo = new Mock<IDirectoryInfo>();
                     newDirInfo.Setup(d => d.Exists).Returns(true);
                     newDirInfo.Setup(d => d.FullName).Returns(newPath);
@@ -226,7 +226,7 @@ namespace TestLibrary.IntegrationTests
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
             var fsFolderCreatedEvent = new Mock<IFSEvent>();
             fsFolderCreatedEvent.Setup(f => f.IsDirectory()).Returns(true);
-            fsFolderCreatedEvent.Setup(f => f.Path).Returns(Path.Combine(this.localRoot, folderName));
+            fsFolderCreatedEvent.Setup(f => f.LocalPath).Returns(Path.Combine(this.localRoot, folderName));
             fsFolderCreatedEvent.Setup(f => f.Type).Returns(WatcherChangeTypes.Created);
             dirInfo.Setup(d => d.Create()).Callback(delegate { queue.AddEvent(fsFolderCreatedEvent.Object); });
 

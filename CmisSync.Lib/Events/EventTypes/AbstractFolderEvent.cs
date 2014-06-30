@@ -58,6 +58,6 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The path.
         /// </value>
-        public abstract string Path { get; }
+        public abstract string RemotePath { get; }
     }
 }
