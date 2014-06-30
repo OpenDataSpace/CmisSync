@@ -80,8 +80,8 @@ SOURCES =  \
 	Events/EventTypes/IFilterableEvent.cs \
 	Events/EventTypes/IFilterableLocalPathEvent.cs \
 	Events/EventTypes/IFilterableNameEvent.cs \
-	Events/EventTypes/IFilterablePathEvent.cs \
 	Events/EventTypes/IFilterableRemoteObjectEvent.cs \
+	Events/EventTypes/IFilterableRemotePathEvent.cs \
 	Events/EventTypes/IFSEvent.cs \
 	Events/EventTypes/IFSMovedEvent.cs \
 	Events/EventTypes/ISyncEvent.cs \

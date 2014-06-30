@@ -106,7 +106,7 @@ namespace CmisSync.Lib.Events.Filter
                     }
                 }
 
-                var pathEvent = e as IFilterablePathEvent;
+                var pathEvent = e as IFilterableRemotePathEvent;
                 if (pathEvent != null && pathEvent.RemotePath != null) {
                     if (this.ignoredFoldersFilter.CheckPath(pathEvent.RemotePath, out reason)) {
                         this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));

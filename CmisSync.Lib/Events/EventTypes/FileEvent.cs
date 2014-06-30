@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// File event.
     /// </summary>
-    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterablePathEvent, IFilterableRemoteObjectEvent
+    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileEvent"/> class.

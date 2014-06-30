@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Folder event. Should be added to the Queue if anything on a folder could have been changed.
     /// </summary>
-    public class FolderEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterablePathEvent, IFilterableRemoteObjectEvent
+    public class FolderEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FolderEvent"/> class.
