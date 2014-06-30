@@ -93,6 +93,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
         }
 
+        // TODO
+        [Ignore]
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFolderDeletedButNotAllContainingFilesAreSyncedYet()
         {
