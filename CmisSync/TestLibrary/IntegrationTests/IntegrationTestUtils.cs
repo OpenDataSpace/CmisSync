@@ -77,19 +77,6 @@ namespace TestLibrary.IntegrationTests
             return JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
         }
 
-        private static string GetServerPath()
-        {
-            string path = "../../test-servers.json";
-            bool exists = File.Exists(path);
-
-            if (!exists)
-            {
-                path = "../CmisSync/TestLibrary/test-servers.json";
-            }
-
-            return path;
-        }
-
         /// <summary>
         /// Gets the proxy server settings saved in "proxy-server.json" file.
         /// </summary>
@@ -109,6 +96,19 @@ namespace TestLibrary.IntegrationTests
                 return JsonConvert.DeserializeObject<List<object[]>>(
                     File.ReadAllText(path));
             }
+        }
+
+        private static string GetServerPath()
+        {
+            string path = "../../test-servers.json";
+            bool exists = File.Exists(path);
+
+            if (!exists)
+            {
+                path = "../CmisSync/TestLibrary/test-servers.json";
+            }
+
+            return path;
         }
     }
 }
