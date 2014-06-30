@@ -50,11 +50,22 @@ namespace TestLibrary.EventsTests
         [Test, Category("Medium")]
         public void FsEventStoresDirectoryState()
         {
-            var path = Path.Combine(Path.GetTempPath(), "nonexisting");
+            var path = Path.Combine(Path.GetTempPath(), "newPath");
             Directory.CreateDirectory(path);
             var e = new FSEvent(WatcherChangeTypes.Created, path, true);
 
             Assert.That(e.IsDirectory(), Is.True, "It is a Directory");
+        }
+
+        [Test, Category("Medium")]
+        public void FsEventExtractsDirectoryName()
+        {
+            string name = "newPath";
+            var path = Path.Combine(Path.GetTempPath(), name);
+            Directory.CreateDirectory(path);
+            var e = new FSEvent(WatcherChangeTypes.Created, path, true);
+
+            Assert.That(e.Name, Is.EqualTo(name));
         }
     }
 }
