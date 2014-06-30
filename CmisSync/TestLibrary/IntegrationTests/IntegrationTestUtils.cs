@@ -71,12 +71,6 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        public static dynamic GetConfig()
-        {
-            var path = GetServerPath();
-            return JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
-        }
-
         /// <summary>
         /// Gets the proxy server settings saved in "proxy-server.json" file.
         /// </summary>
@@ -96,6 +90,12 @@ namespace TestLibrary.IntegrationTests
                 return JsonConvert.DeserializeObject<List<object[]>>(
                     File.ReadAllText(path));
             }
+        }
+
+        public static dynamic GetConfig()
+        {
+            var path = GetServerPath();
+            return JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
         }
 
         private static string GetServerPath()
