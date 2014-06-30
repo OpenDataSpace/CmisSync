@@ -60,16 +60,21 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileDeleted()
         {
+            DateTime lastModified = DateTime.UtcNow;
             string path = Path.Combine(Path.GetTempPath(), "a");
             var storage = new Mock<IMetaDataStorage>();
-            Mock<IMappedObject> file = storage.AddLocalFile(path, "id");
             var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.FullName).Returns(path);
+            fileInfo.Setup(f => f.LastWriteTimeUtc).Returns(lastModified);
+            var mappedObject = new MappedObject("a", "id", MappedObjectType.File, "parentId", "changeToken", 0) {
+                LastLocalWriteTimeUtc = lastModified
+            };
+            storage.AddMappedFile(mappedObject, path);
 
             new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, null);
 
             fileInfo.Verify(f => f.Delete(), Times.Once());
-            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
+            storage.Verify(s => s.RemoveObject(mappedObject), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
