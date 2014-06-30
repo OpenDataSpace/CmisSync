@@ -47,10 +47,13 @@ namespace CmisSync.Lib.Sync.Solver
             } else if(localFileInfo is IFileInfo) {
                 var file = localFileInfo as IFileInfo;
                 var mappedFile = storage.GetObjectByLocalPath(file);
-                if (file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
+                if (mappedFile != null && file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
                     file.Delete();
                 } else {
                     file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null);
+                    if (mappedFile == null) {
+                        return;
+                    }
                 }
             }
 

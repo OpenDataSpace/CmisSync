@@ -93,6 +93,20 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileDeletedButLocalFileDoesNotExistsInStorage()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "a");
+            var storage = new Mock<IMetaDataStorage>();
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.FullName).Returns(path);
+
+            new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, null);
+
+            fileInfo.Verify(f => f.Delete(), Times.Never());
+            storage.Verify(s => s.RemoveObject(It.IsAny<IMappedObject>()), Times.Never());
+        }
+
         // TODO
         [Ignore]
         [Test, Category("Fast"), Category("Solver")]
