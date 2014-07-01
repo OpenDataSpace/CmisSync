@@ -107,13 +107,14 @@ namespace CmisSync.Lib.Sync.Solver
                     cacheFile.Replace(file, backupFile, true);
                     file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid);
                     backupFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null);
+                    byte[] checksumOfOldFile = null;
                     using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
-                        byte[] checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
-                        if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
-                            backupFile.MoveTo(this.fsFactory.CreateConflictFileInfo(file).FullName);
-                        } else {
-                            backupFile.Delete();
-                        }
+                        checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
+                    }
+                    if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
+                        backupFile.MoveTo(this.fsFactory.CreateConflictFileInfo(file).FullName);
+                    } else {
+                        backupFile.Delete();
                     }
 
                     obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
