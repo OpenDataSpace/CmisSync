@@ -107,7 +107,7 @@ namespace CmisSync.Lib.Events.Filter
                 {
                     if (wildcard.IsMatch(name))
                     {
-                        reason = string.Format("filename matches: {0}", wildcard.ToString());
+                        reason = string.Format("filename {1} matches: {0}", wildcard.ToString(), name);
                         return true;
                     }
                 }
