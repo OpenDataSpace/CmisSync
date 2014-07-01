@@ -486,6 +486,8 @@ namespace TestLibrary.IntegrationTests
             using (StreamWriter sw = fileInfo.CreateText()) {
                 sw.WriteLine(changedLocalContent);
             }
+            fileInfo.Refresh();
+            int expectedLength = fileInfo.Length;
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
@@ -494,7 +496,7 @@ namespace TestLibrary.IntegrationTests
 
             Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
-            Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(changedLocalContent.Length));
+            Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(expectedLength));
         }
 
         // Conflict solver is not yet implemented
