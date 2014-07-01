@@ -33,39 +33,52 @@ namespace TestLibrary
     [TestFixture]
     public class ConfigurationTest
     {
-        [Test, Category("Slow")]
-        public void TestConfig()
-        {
-            string configpath = Path.GetFullPath("testconfig.conf");
-            try
-            {
-                // Create new config file with default values
-                Config config = Config.CreateInitialConfig(configpath);
+        private readonly string configPath = Path.Combine(Path.GetTempPath(), "testconfig.conf");
 
-                // Notifications should be switched on by default
-                Assert.IsTrue(config.Notifications);
-                Assert.AreEqual(config.Folders.Count, 0);
-                Assert.That(config.Log4Net, Is.Not.Null);
-                Assert.That(config.GetLog4NetConfig(), Is.Not.Null);
-                config.Save();
-                config = Config.CreateOrLoadByPath(configpath);
+        [SetUp, TearDown]
+        public void CleanUp() {
+            if (File.Exists(this.configPath)) {
+                File.Delete(this.configPath);
             }
-            catch (Exception)
-            {
-                if (File.Exists(configpath)) {
-                    File.Delete(configpath);
-                }
-
-                throw;
-            }
-
-            File.Delete(configpath);
         }
 
-        [Ignore]
-        [Test, Category("Fast")]
-        public void IgnoreFoldersTest() {
-            Assert.Fail("TODO");
+        [Test, Category("Medium")]
+        public void TestConfig()
+        {
+            // Create new config file with default values
+            Config config = Config.CreateInitialConfig(this.configPath);
+
+            // Notifications should be switched on by default
+            Assert.IsTrue(config.Notifications);
+            Assert.AreEqual(config.Folders.Count, 0);
+            Assert.That(config.Log4Net, Is.Not.Null);
+            Assert.That(config.GetLog4NetConfig(), Is.Not.Null);
+            config.Save();
+            config = Config.CreateOrLoadByPath(this.configPath);
+        }
+
+        [Test, Category("Medium")]
+        public void IgnoreFoldersAreSavedAndLoadedAgain() {
+            // Create new config file with default values
+            Config config = Config.CreateInitialConfig(this.configPath);
+            string ignoreFolderPattern = ".*";
+            config.IgnoreFileNames = new List<string>(new string[] { ignoreFolderPattern });
+            Assert.That(config.IgnoreFolderNames.Contains(ignoreFolderPattern));
+            config.Save();
+            config = Config.CreateOrLoadByPath(this.configPath);
+            Assert.That(config.IgnoreFolderNames.Contains(ignoreFolderPattern));
+        }
+
+        [Test, Category("Medium")]
+        public void IgnoreFileNamesAreSavedAndLoadedAgain() {
+            // Create new config file with default values
+            Config config = Config.CreateInitialConfig(this.configPath);
+            string ignoreFileNames = ".*";
+            config.IgnoreFileNames = new List<string>(new string[] { ignoreFileNames });
+            Assert.That(config.IgnoreFileNames.Contains(ignoreFileNames));
+            config.Save();
+            config = Config.CreateOrLoadByPath(this.configPath);
+            Assert.That(config.IgnoreFileNames.Contains(ignoreFileNames));
         }
     }
 }

@@ -36,6 +36,15 @@ namespace TestLibrary.EventsTests.EventsFilterTests
     public class IgnoreFileNamesFilterTest
     {
         [Test, Category("Fast"), Category("EventFilter")]
+        public void DefaultConstrutorAddsRequiredFilter()
+        {
+            var filter = new IgnoredFileNamesFilter();
+            string reason;
+            Assert.That(filter.CheckFile("bla.sync", out reason), Is.True);
+            Assert.That(reason, Is.Not.Null);
+        }
+
+        [Test, Category("Fast"), Category("EventFilter")]
         public void AllowCorrectEventsTest()
         {
             var filter = new IgnoredFileNamesFilter();
