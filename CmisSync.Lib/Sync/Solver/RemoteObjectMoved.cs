@@ -28,11 +28,15 @@ namespace CmisSync.Lib.Sync.Solver
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// Remote object has been moved. => Move the corresponding local object.
     /// </summary>
     public class RemoteObjectMoved : ISolver
     {
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
         /// <summary>
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
         /// Moves the local file/folder to the new location.
@@ -48,12 +52,16 @@ namespace CmisSync.Lib.Sync.Solver
             string newPath = remoteId is IFolder ? storage.Matcher.CreateLocalPath(remoteId as IFolder) : storage.Matcher.CreateLocalPath(remoteId as IDocument);
             if (remoteId is IFolder) {
                 IDirectoryInfo dirInfo = localFile as IDirectoryInfo;
+                string oldPath = dirInfo.FullName;
                 dirInfo.MoveTo(newPath);
                 dirInfo.LastWriteTimeUtc = (remoteId as IFolder).LastModificationDate != null ? (DateTime)(remoteId as IFolder).LastModificationDate : dirInfo.LastWriteTimeUtc;
+                OperationsLogger.Info(string.Format("Moved local folder {0} to {1}", oldPath, newPath));
             } else if (remoteId is IDocument) {
                 IFileInfo fileInfo = localFile as IFileInfo;
+                string oldPath = fileInfo.FullName;
                 fileInfo.MoveTo(newPath);
                 fileInfo.LastWriteTimeUtc = (remoteId as IDocument).LastModificationDate != null ? (DateTime)(remoteId as IDocument).LastModificationDate : fileInfo.LastWriteTimeUtc;
+                OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
             }
 
             savedObject.Name = (remoteId as ICmisObject).Name;

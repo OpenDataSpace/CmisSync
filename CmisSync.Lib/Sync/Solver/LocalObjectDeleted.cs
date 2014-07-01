@@ -27,17 +27,29 @@ namespace CmisSync.Lib.Sync.Solver
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// A Local object has been deleted. => Delete the corresponding object on the server, if possible
     /// </summary>
     public class LocalObjectDeleted : ISolver
     {
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
+        /// <summary>
+        /// Solves the situation by deleting the corresponding remote object.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="remoteId">Remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
             string id = remoteId.Id;
             var mappedObject = storage.GetObjectByRemoteId(id);
             session.Delete(remoteId, true);
             storage.RemoveObject(mappedObject);
+            OperationsLogger.Info(string.Format("Deleted the corresponding remote object {0} of locally deleted object {1}", remoteId.Id, mappedObject.Name));
         }
     }
 }

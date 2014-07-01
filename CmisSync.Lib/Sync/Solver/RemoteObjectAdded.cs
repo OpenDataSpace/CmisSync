@@ -36,6 +36,8 @@ namespace CmisSync.Lib.Sync.Solver
     /// </summary>
     public class RemoteObjectAdded : ISolver
     {
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
 
@@ -98,6 +100,7 @@ namespace CmisSync.Lib.Sync.Solver
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
                 storage.SaveMappedObject(mappedObject);
+                OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
                 var file = localFile as IFileInfo;
                 if (!(remoteId is IDocument)) {
@@ -160,6 +163,7 @@ namespace CmisSync.Lib.Sync.Solver
                     ChecksumAlgorithmName = "SHA1"
                 };
                 storage.SaveMappedObject(mappedObject);
+                OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
         }

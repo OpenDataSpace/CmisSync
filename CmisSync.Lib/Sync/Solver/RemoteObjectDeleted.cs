@@ -28,11 +28,15 @@ namespace CmisSync.Lib.Sync.Solver
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// Remote object has been deleted. => Delete the corresponding local object as well.
     /// </summary>
     public class RemoteObjectDeleted : ISolver
     {
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
         /// <summary>
         /// Deletes the given localFileInfo on file system and removes the stored object from storage.
         /// </summary>
@@ -44,16 +48,20 @@ namespace CmisSync.Lib.Sync.Solver
         {
             if (localFileInfo is IDirectoryInfo) {
                 (localFileInfo as IDirectoryInfo).Delete(true);
+                OperationsLogger.Info(string.Format("Deleted local folder {0} because the mapped remote folder has been deleted", localFileInfo.FullName));
             } else if(localFileInfo is IFileInfo) {
                 var file = localFileInfo as IFileInfo;
                 var mappedFile = storage.GetObjectByLocalPath(file);
                 if (mappedFile != null && file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
                     file.Delete();
+                    OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", file.FullName, mappedFile.RemoteObjectId));
                 } else {
                     file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null);
                     if (mappedFile == null) {
                         return;
                     }
+
+                    OperationsLogger.Info(string.Format("Deletion of local file {0} skipped because of not yet uploaded changes", file.FullName));
                 }
             }
 

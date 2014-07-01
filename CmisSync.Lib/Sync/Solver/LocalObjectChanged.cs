@@ -38,6 +38,7 @@ namespace CmisSync.Lib.Sync.Solver
     public class LocalObjectChanged : ISolver
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         private ISyncEventQueue queue;
 
@@ -89,7 +90,8 @@ namespace CmisSync.Lib.Sync.Solver
                 }
 
                 if (isChanged) {
-                    Logger.Debug(string.Format("Local file \"{0}\" has been changed: {1}", localFile.FullName, mappedObject.ToString()));
+                    Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
+                    OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                     IFileUploader uploader = ContentTasks.ContentTaskUtils.CreateUploader();
                     var doc = remoteId as IDocument;
                     FileTransmissionEvent statusEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
@@ -109,6 +111,8 @@ namespace CmisSync.Lib.Sync.Solver
                     mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
                     mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                     mappedObject.LastContentSize = localFile.Length;
+
+                    OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
 
                     statusEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
