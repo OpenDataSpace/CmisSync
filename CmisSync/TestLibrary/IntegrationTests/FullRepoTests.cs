@@ -183,7 +183,7 @@ namespace TestLibrary.IntegrationTests
 
             this.localRootDir.GetDirectories().First().Delete();
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue, 15000);
 
             this.repo.Run();
 
