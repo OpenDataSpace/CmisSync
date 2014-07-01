@@ -128,7 +128,7 @@ namespace CmisSync.Lib.Sync.Strategy
             Task[] tasks = new Task[3];
             tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
             tasks[1] = Task.Factory.StartNew(() => localTree = GetLocalDirectoryTree(this.localFolder, this.filter));
-            tasks[2] = Task.Factory.StartNew(() => remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1)));
+            tasks[2] = Task.Factory.StartNew(() => remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter));
 
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
@@ -382,7 +382,12 @@ namespace CmisSync.Lib.Sync.Strategy
         public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
             var children = new List<IObjectTree<IFileSystemInfo>>();
             foreach (var child in parent.GetDirectories()) {
-                children.Add(GetLocalDirectoryTree(child, filter));
+                string reason;
+                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
+                    children.Add(GetLocalDirectoryTree(child, filter));
+                } else {
+                    Logger.Debug(reason);
+                }
             }
 
             foreach (var file in parent.GetFiles()) {
@@ -392,6 +397,8 @@ namespace CmisSync.Lib.Sync.Strategy
                         Item = file,
                         Children = new List<IObjectTree<IFileSystemInfo>>()
                     });
+                } else {
+                    Logger.Debug(reason);
                 }
             }
 
@@ -407,18 +414,29 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </summary>
         /// <returns>The remote directory tree.</returns>
         /// <param name="parent">Parent folder.</param>
-        /// <param name="descendants">Descendants.</param>
-        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants) {
+        /// <param name="descendants">Descendants of remote object.</param>
+        /// <param name="filter">Filter of ignored or invalid files and folder</param>
+        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants, IFilterAggregator filter) {
             IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
             if (descendants != null) {
                 foreach (var child in descendants) {
-                    if(child.Item is IFolder) {
-                        children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children));
-                    } else if(child.Item is IDocument) {
-                        children.Add(new ObjectTree<IFileableCmisObject> {
-                            Item = child.Item,
-                            Children = new List<IObjectTree<IFileableCmisObject>>()
-                        });
+                    if (child.Item is IFolder) {
+                        string reason;
+                        if (!filter.FolderNamesFilter.CheckFolderName(child.Item.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(child.Item.Name, out reason)) {
+                            children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children, filter));
+                        } else {
+                            Logger.Debug(reason);
+                        }
+                    } else if (child.Item is IDocument) {
+                        string reason;
+                        if (!filter.FileNamesFilter.CheckFile(child.Item.Name, out reason)) {
+                            children.Add(new ObjectTree<IFileableCmisObject> {
+                                Item = child.Item,
+                                Children = new List<IObjectTree<IFileableCmisObject>>()
+                            });
+                        } else {
+                            Logger.Debug(reason);
+                        }
                     }
                 }
             }
