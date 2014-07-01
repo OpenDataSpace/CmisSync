@@ -199,6 +199,29 @@ namespace TestLibrary.StorageTests
             var reader = new ExtendedAttributeReaderDos();
             reader.IsFeatureAvailable(Environment.CurrentDirectory);
         }
+
+        [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
+        public void RemoveExtendedAttributeOfDirectoryByPassingNull()
+        {
+            Directory.CreateDirectory(path);
+            string key = "test";
+            var reader = new ExtendedAttributeReaderDos();
+            reader.SetExtendedAttribute(path, key, null);
+            Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
+            Assert.That(reader.ListAttributeKeys(path).Count == 0);
+        }
+
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
+        public void RemoveExtendedAttributeOfFileByPassingNull()
+        {
+            using (File.Create(path));
+            string key = "test";
+            var reader = new ExtendedAttributeReaderDos();
+            reader.SetExtendedAttribute(path, key, null);
+            Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
+            Assert.That(reader.ListAttributeKeys(path).Count == 0);
+        }
     }
 }
 #endif
