@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Events
     using CmisSync.Lib.Storage;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     /// <summary>
     /// File event.
@@ -69,7 +70,19 @@ namespace CmisSync.Lib.Events
         /// <value>The path.</value>
         public override string RemotePath {
             get {
-                return this.RemoteFile != null && this.RemoteFile.Paths != null  && this.RemoteFile.Paths.Count > 0 ? this.RemoteFile.Paths[0] : null;
+                if (this.RemoteFile == null) {
+                    return null;
+                }
+
+                try {
+                    if (this.RemoteFile.Paths == null) {
+                        return null;
+                    }
+                } catch (CmisRuntimeException) {
+                    return null;
+                }
+
+                return this.RemoteFile.Paths.Count > 0 ? this.RemoteFile.Paths[0] : null;
             }
         }
 
