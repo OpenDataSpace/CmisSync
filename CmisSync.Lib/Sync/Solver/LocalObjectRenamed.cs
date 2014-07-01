@@ -27,11 +27,15 @@ namespace CmisSync.Lib.Sync.Solver
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// Local object has been renamed. => Rename the corresponding object on the server.
     /// </summary>
     public class LocalObjectRenamed : ISolver
     {
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
         /// <summary>
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
         /// </summary>
@@ -46,9 +50,13 @@ namespace CmisSync.Lib.Sync.Solver
 
             // Rename remote object
             if(remoteId is IFolder) {
+                string oldName = (remoteId as IFolder).Name;
                 remoteObject = (remoteId as IFolder).Rename(localFile.Name, true) as IFolder;
+                OperationsLogger.Info(string.Format("Renamed remote folder {0} from {1} to {2}", remoteObject.Id, oldName, localFile.Name));
             } else if (remoteId is IDocument) {
+                string oldName = (remoteId as IDocument).Name;
                 remoteObject = (remoteId as IDocument).Rename(localFile.Name, true) as IDocument;
+                OperationsLogger.Info(string.Format("Renamed remote document {0} from {1} to {2}", remoteObject.Id, oldName, localFile.Name));
             } else {
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
             }

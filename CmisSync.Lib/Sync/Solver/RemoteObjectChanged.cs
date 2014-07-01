@@ -31,11 +31,15 @@ namespace CmisSync.Lib.Sync.Solver
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// Remote object has been changed. => update the metadata locally.
     /// </summary>
     public class RemoteObjectChanged : ISolver
     {
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
 
@@ -112,9 +116,12 @@ namespace CmisSync.Lib.Sync.Solver
                         checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
                     }
                     if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
-                        backupFile.MoveTo(this.fsFactory.CreateConflictFileInfo(file).FullName);
+                        var conflictFile = this.fsFactory.CreateConflictFileInfo(file);
+                        backupFile.MoveTo(conflictFile.FullName);
+                        OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", file.FullName, remoteId.Id, conflictFile.FullName));
                     } else {
                         backupFile.Delete();
+                        OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", file.FullName, remoteId.Id));
                     }
 
                     obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
@@ -129,6 +136,7 @@ namespace CmisSync.Lib.Sync.Solver
 
                 obj.LastChangeToken = remoteDocument.ChangeToken;
                 obj.LastRemoteWriteTimeUtc = lastModified;
+
             }
 
             storage.SaveMappedObject(obj);

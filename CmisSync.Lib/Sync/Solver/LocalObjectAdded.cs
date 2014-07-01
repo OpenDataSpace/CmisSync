@@ -109,7 +109,7 @@ namespace CmisSync.Lib.Sync.Solver
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
 
                     storage.SaveMappedObject(mapped);
-                    OperationsLogger.Debug(string.Format("Uploaded file content of {0}", localFile.FullName));
+                    OperationsLogger.Info(string.Format("Uploaded file content of {0}", localFile.FullName));
                 }
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
