@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Sync.Strategy {
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
-    
+
     using log4net;
 
     /// <summary>
@@ -79,7 +79,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             if (remote != null) {
                 return false;
             }
-   
+
             Logger.Debug("Fetching remote Object for " + e);
             string id = this.FetchIdFromStorage(e);
             if(id != null) {
