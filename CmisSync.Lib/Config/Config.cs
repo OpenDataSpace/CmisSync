@@ -209,27 +209,7 @@ namespace CmisSync.Lib.Config
         /// </value>
         [XmlArray("ignoreFileNames")]
         [XmlArrayItem("pattern")]
-        public List<string> IgnoreFileNames
-        { 
-            get
-            {
-                List<string> copy = new List<string>(this.ignoreFileNames);
-                if (!copy.Contains("*.sync")) {
-                    copy.Add("*.sync");
-                }
-
-                if (!copy.Contains("*.cmissync")) {
-                    copy.Add("*.cmissync");
-                }
-
-                return copy;
-            }
-
-            set
-            {
-                this.ignoreFileNames = value;
-            }
-        }
+        public List<string> IgnoreFileNames { get; set; }
 
         /// <summary>
         /// Gets or sets the hidden repo names.
