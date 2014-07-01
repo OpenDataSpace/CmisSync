@@ -214,13 +214,11 @@ namespace CmisSync.Lib.Config
             get
             {
                 List<string> copy = new List<string>(this.ignoreFileNames);
-                if (!copy.Contains("*.sync"))
-                {
+                if (!copy.Contains("*.sync")) {
                     copy.Add("*.sync");
                 }
 
-                if (!copy.Contains("*.cmissync"))
-                {
+                if (!copy.Contains("*.cmissync")) {
                     copy.Add("*.cmissync");
                 }
 
