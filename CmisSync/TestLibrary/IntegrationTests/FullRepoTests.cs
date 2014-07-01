@@ -474,7 +474,7 @@ namespace TestLibrary.IntegrationTests
             var fileInfo = new FileInfo(localPath);
 
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(changedLocalContent);
+                sw.WriteLine(localContent);
             }
 
             this.repo.Initialize();
@@ -484,7 +484,7 @@ namespace TestLibrary.IntegrationTests
             this.remoteRootDir.GetChildren().First().Delete(true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(localContent);
+                sw.WriteLine(changedLocalContent);
             }
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
