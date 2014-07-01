@@ -278,15 +278,24 @@ namespace CmisSync.Lib.Storage
             {
                 throw new ArgumentException("Empty or null key is not allowed");
             }
+
             path = Path.GetFullPath(path);
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
             }
-            using (FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write))
+
+            if (value == null)
             {
-                TextWriter writer = new StreamWriter(stream);
-                writer.Write(value);
-                writer.Close();
+                RemoveExtendedAttribute(path, key);
+            }
+            else
+            {
+                using (FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write))
+                {
+                    TextWriter writer = new StreamWriter(stream);
+                    writer.Write(value);
+                    writer.Close();
+                }
             }
 #else
             throw new WrongPlatformException();
