@@ -96,6 +96,7 @@ SOURCES =  \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/WatcherTestUtils.cs \
 	TestUtils/CmisConvenienceExtenders.cs \
+	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIDocumentUtil.cs \

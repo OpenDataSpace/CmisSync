@@ -86,12 +86,12 @@ namespace CmisSync.Lib.Sync.Strategy
             if (movedEvent != null) {
                 folderEvent = new FolderMovedEvent(
                     this.fsFactory.CreateDirectoryInfo(movedEvent.OldPath),
-                    this.fsFactory.CreateDirectoryInfo(movedEvent.Path),
+                    this.fsFactory.CreateDirectoryInfo(movedEvent.LocalPath),
                     null,
                     null)
                 { Local = MetaDataChangeType.MOVED };
             } else {
-                folderEvent = new FolderEvent(this.fsFactory.CreateDirectoryInfo(e.Path), null, this);
+                folderEvent = new FolderEvent(this.fsFactory.CreateDirectoryInfo(e.LocalPath), null, this);
                 switch (e.Type) {
                 case WatcherChangeTypes.Created:
                     folderEvent.Local = MetaDataChangeType.CREATED;
@@ -123,7 +123,7 @@ namespace CmisSync.Lib.Sync.Strategy
             var movedEvent = e as IFSMovedEvent;
             if (movedEvent != null) {
                 var oldfile = this.fsFactory.CreateFileInfo(movedEvent.OldPath);
-                var newfile = this.fsFactory.CreateFileInfo(movedEvent.Path);
+                var newfile = this.fsFactory.CreateFileInfo(movedEvent.LocalPath);
                 var newEvent = new FileMovedEvent(
                     oldfile,
                     newfile,
@@ -132,7 +132,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 Logger.Debug("Adding Event: " + newEvent);
                 Queue.AddEvent(newEvent);
             } else {
-                var file = this.fsFactory.CreateFileInfo(e.Path);
+                var file = this.fsFactory.CreateFileInfo(e.LocalPath);
                 var newEvent = new FileEvent(file, null);
                 switch (e.Type) {
                 case WatcherChangeTypes.Created:

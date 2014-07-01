@@ -175,6 +175,7 @@
     <Compile Include="EventsTests\EventsFilterTests\ReportingFilterTest.cs" />
     <Compile Include="TestUtils\MockOfIFilterAggregatorUtil.cs" />
     <Compile Include="EventsTests\EventsFilterTests\FilterAggregatorTest.cs" />
+    <Compile Include="TestUtils\IsTestWithConfiguredLog4Net.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

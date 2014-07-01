@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IFSEvent.cs" company="GRAU DATA AG">
+// <copyright file="IsTestWithConfiguredLog4Net.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,21 +16,30 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Events
+using System.IO;
+
+namespace TestLibrary.TestUtils
 {
-    using System.IO;
-    
-    /// <summary>
-    /// Interface for FileSystem Events.
-    /// </summary>
-    public interface IFSEvent : IFilterableLocalPathEvent, IFilterableNameEvent
+    using System;
+
+    using CmisSync.Lib.Config;
+
+    using log4net;
+
+    using TestUtils;
+
+    public class IsTestWithConfiguredLog4Net
     {
-        /// <summary>
-        /// Gets the type.
-        /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        WatcherChangeTypes Type { get; }
+
+        private static readonly string fileName = "log4net.config";
+
+        public IsTestWithConfiguredLog4Net() {
+            string path = Path.Combine("..", "..", fileName);
+            if (!File.Exists(path)) {
+                path = Path.Combine("..", "CmisSync", "TestLibrary", fileName);
+            }
+
+            log4net.Config.XmlConfigurator.Configure(new FileInfo(path));
+        }
     }
 }

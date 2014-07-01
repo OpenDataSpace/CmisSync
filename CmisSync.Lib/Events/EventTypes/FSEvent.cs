@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Events
     /// </exception>
     public class FSEvent : IFSEvent
     {
-        bool isDirectory;
+        private bool isDirectory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FSEvent"/> class.
@@ -40,6 +40,9 @@ namespace CmisSync.Lib.Events
         /// </param>
         /// <param name='path'>
         /// The Path.
+        /// </param>
+        /// <param name="isDirectory">
+        /// Signalizes if the target of the path is a directory or file.
         /// </param>
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
@@ -51,10 +54,10 @@ namespace CmisSync.Lib.Events
             }
 
             this.Type = type;
-            this.Path = path;
-            path = path.Trim(System.IO.Path.DirectorySeparatorChar);
-            this.Name = path.Substring(path.LastIndexOf(System.IO.Path.DirectorySeparatorChar.ToString()) + 1);
+            FileSystemInfo fileSystemInfo = isDirectory ? (FileSystemInfo)new DirectoryInfo(path) : (FileSystemInfo)new FileInfo(path);
+            this.LocalPath = fileSystemInfo.FullName;
             this.isDirectory = isDirectory;
+            this.Name = fileSystemInfo.Name;
         }
 
         /// <summary>
@@ -71,8 +74,12 @@ namespace CmisSync.Lib.Events
         /// <value>
         /// The path.
         /// </value>
-        public string Path { get; private set; }
+        public string LocalPath { get; private set; }
 
+        /// <summary>
+        /// Gets the name of the file or directory.
+        /// </summary>
+        /// <value>The name.</value>
         public string Name { get; private set; }
 
         /// <summary>
@@ -83,7 +90,7 @@ namespace CmisSync.Lib.Events
         /// </returns>
         public override string ToString()
         {
-            return string.Format("FSEvent with type \"{0}\" on path \"{1}\"", this.Type, this.Path);
+            return string.Format("FSEvent with type \"{0}\" on path \"{1}\" and the name \"{2}\"", this.Type, this.LocalPath, this.Name);
         }
 
         /// <summary>

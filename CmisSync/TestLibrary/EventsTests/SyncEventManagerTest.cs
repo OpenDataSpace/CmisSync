@@ -33,15 +33,11 @@ namespace TestLibrary.EventsTests
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class SyncEventManagerTest
-    {
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-        }
+    using TestLibrary.TestUtils;
 
+    [TestFixture]
+    public class SyncEventManagerTest : IsTestWithConfiguredLog4Net
+    {
         [Test, Category("Fast")]
         public void DefaultConstructorWithoutParamWorks()
         {

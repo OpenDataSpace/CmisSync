@@ -76,7 +76,7 @@ namespace TestLibrary.IntegrationTests
 
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000)]
-    public class CmisSyncTests
+    public class CmisSyncTests : IsTestWithConfiguredLog4Net
     {
         private readonly string cmisSyncDir = ConfigManager.CurrentConfig.GetFoldersPath();
         private readonly int heavyNumber = 10;
@@ -123,8 +123,6 @@ namespace TestLibrary.IntegrationTests
                 File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
             } catch (IOException) {
             }
-
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
         }
 
         [TearDown]

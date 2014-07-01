@@ -30,6 +30,8 @@ namespace TestLibrary.EventsTests
 
     using NUnit.Framework;
 
+    using TestUtils;
+
     [TestFixture]
     public class FileEventTest
     {
@@ -87,7 +89,45 @@ namespace TestLibrary.EventsTests
         {
             var localFile = new Mock<IFileInfo>();
             AbstractFolderEvent fe = new FileEvent(localFile.Object);
-            Assert.That(fe.Path, Is.Null);;
+            Assert.That(fe.RemotePath, Is.Null);;
+        }
+
+        [Test, Category("Fast")]
+        public void ReturnedRemotePathIsEqualRemoteObjectPath() {
+            string remotePath = "/path";
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.SetupPath(remotePath);
+            var fileEvent = new FileEvent(remoteFile: remoteFile.Object);
+            Assert.That(fileEvent.RemotePath, Is.EqualTo(remotePath));
+        }
+
+        [Test, Category("Fast")]
+        public void RemotePathIsEqualToFirstRemoteObjectPath() {
+            string remotePath = "/path";
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.SetupPath(remotePath, "/bla", "/blubb");
+            var fileEvent = new FileEvent(remoteFile: remoteFile.Object);
+            Assert.That(fileEvent.RemotePath, Is.EqualTo(remotePath));
+        }
+
+        [Test, Category("Fast")]
+        public void RemotePathIsNullIfNoRemoteFileIsSet() {
+            var fileEvent = new FileEvent(localFile: Mock.Of<IFileInfo>());
+            Assert.That(fileEvent.RemotePath, Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void RemotePathIsNullIfRemoteObjectDoesNotContainAPath() {
+            var fileEvent = new FileEvent(remoteFile: Mock.Of<IDocument>());
+            Assert.That(fileEvent.RemotePath, Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void RemotePathRequestFailsReturnsNull() {
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.Setup(r => r.Paths).Throws(new DotCMIS.Exceptions.CmisRuntimeException());
+            var fileEvent = new FileEvent(remoteFile: remoteFile.Object);
+            Assert.That(fileEvent.RemotePath, Is.Null);
         }
     }
 }

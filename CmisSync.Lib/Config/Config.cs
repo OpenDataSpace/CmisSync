@@ -209,29 +209,7 @@ namespace CmisSync.Lib.Config
         /// </value>
         [XmlArray("ignoreFileNames")]
         [XmlArrayItem("pattern")]
-        public List<string> IgnoreFileNames
-        { 
-            get
-            {
-                List<string> copy = new List<string>(this.ignoreFileNames);
-                if (!copy.Contains("*.sync"))
-                {
-                    copy.Add("*.sync");
-                }
-
-                if (!copy.Contains("*.cmissync"))
-                {
-                    copy.Add("*.cmissync");
-                }
-
-                return copy;
-            }
-
-            set
-            {
-                this.ignoreFileNames = value;
-            }
-        }
+        public List<string> IgnoreFileNames { get; set; }
 
         /// <summary>
         /// Gets or sets the hidden repo names.
@@ -358,7 +336,7 @@ namespace CmisSync.Lib.Config
                     Name = userName
                 },
                 Notifications = true,
-                Log4Net = CreateDefaultLog4NetElement(GetLogFilePath(Path.GetDirectoryName(fullPath))),
+                Log4Net = CreateDefaultLog4NetElement(GetLogFilePath(Path.GetDirectoryName(fullPath)), GetOperationsLogFilePath(Path.GetDirectoryName(fullPath))),
                 DeviceId = Guid.NewGuid(),
                 IgnoreFileNames = CreateInitialListOfGloballyIgnoredFileNames(),
                 IgnoreFolderNames = CreateInitialListOfGloballyIgnoredFolderNames(),
@@ -420,6 +398,16 @@ namespace CmisSync.Lib.Config
         public static string GetLogFilePath(string configPath)
         {
             return Path.Combine(configPath, "debug_log.txt");
+        }
+
+        /// <summary>
+        /// Gets the operations log file path.
+        /// </summary>
+        /// <returns>The operations log file path.</returns>
+        /// <param name="configPath">Config path.</param>
+        public static string GetOperationsLogFilePath(string configPath)
+        {
+            return Path.Combine(configPath, "operations_log.txt");
         }
 
         /// <summary>
@@ -547,7 +535,7 @@ namespace CmisSync.Lib.Config
             return config;
         }
 
-        private static XmlElement CreateDefaultLog4NetElement(string logFilePath)
+        private static XmlElement CreateDefaultLog4NetElement(string logFilePath, string operationsLogFilePath)
         {
             XmlSerializer deserializer = new XmlSerializer(typeof(XmlElement));
             using (TextReader textReader = new StringReader(@"
@@ -569,11 +557,26 @@ namespace CmisSync.Lib.Config
         <conversionPattern value=""%-4timestamp [%thread] %-5level %logger [%property{NDC}] - %message%newline"" />
       </layout>
     </appender>
+    <appender name=""OperationsAppender"" type=""log4net.Appender.RollingFileAppender"">
+      <file value=""" + operationsLogFilePath + @""" />
+      <appendToFile value=""true"" />
+       <rollingStyle value=""Size"" />
+      <maxSizeRollBackups value=""10"" />
+      <maximumFileSize value=""5MB"" />
+      <staticLogFileName value=""true"" />
+      <layout type=""log4net.Layout.PatternLayout"">
+        <conversionPattern value=""%date - %property{repo}: %message%newline"" />
+      </layout>
+    </appender>
     <root>
       <level value=""INFO"" />
       <appender-ref ref=""CmisSyncFileAppender"" />
       <!-- <appender-ref ref=""ConsoleAppender"" /> -->
     </root>
+    <logger name=""OperationsLogger"">
+      <level value=""INFO"" />
+      <appender-ref ref=""OperationsAppender"" />
+    </logger>
   </log4net>"))
             {
                 XmlElement result = (XmlElement)deserializer.Deserialize(textReader);

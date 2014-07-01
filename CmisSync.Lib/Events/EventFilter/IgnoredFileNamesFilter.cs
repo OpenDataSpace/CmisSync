@@ -30,6 +30,11 @@ namespace CmisSync.Lib.Events.Filter
     public class IgnoredFileNamesFilter
     {
         /// <summary>
+        /// The required wildcards are at the moment *.sync files
+        /// </summary>
+        private readonly string[] requiredWildcards = new string[] { "*.sync" };
+
+        /// <summary>
         /// The wildcards of the ignored file names.
         /// </summary>
         private List<Regex> wildcards = new List<Regex>();
@@ -38,6 +43,15 @@ namespace CmisSync.Lib.Events.Filter
         /// The wild card lock for concurrent access.
         /// </summary>
         private object wildCardLock = new object();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoredFileNamesFilter"/> class.
+        /// </summary>
+        public IgnoredFileNamesFilter() {
+            foreach (var required in this.requiredWildcards) {
+                this.wildcards.Add(Utils.IgnoreLineToRegex(required));
+            }
+        }
 
         /// <summary>
         /// Sets the wildcards as strings and transforms them internally into Regex instances.
@@ -52,6 +66,12 @@ namespace CmisSync.Lib.Events.Filter
                 lock (this.wildCardLock)
                 {
                     this.wildcards.Clear();
+                    foreach (var required in this.requiredWildcards) {
+                        if (!value.Contains(required)) {
+                            this.wildcards.Add(Utils.IgnoreLineToRegex(required));
+                        }
+                    }
+
                     foreach (var wildcard in value)
                     {
                         this.wildcards.Add(Utils.IgnoreLineToRegex(wildcard));
@@ -64,13 +84,13 @@ namespace CmisSync.Lib.Events.Filter
         /// Checks the filename for valid regex.
         /// </summary>
         /// <returns>
-        /// The file.
+        /// <c>true</c> if the file should be ignored, otherwise <c>false</c>.
         /// </returns>
-        /// <param name='e'>
-        /// If set to <c>true</c> e.
+        /// <param name='name'>
+        /// The file name
         /// </param>
-        /// <param name='fileName'>
-        /// If set to <c>true</c> file name.
+        /// <param name='reason'>
+        /// Is set to the reason if <c>true</c> is returned.
         /// </param>
         public virtual bool CheckFile(string name, out string reason)
         {
@@ -87,7 +107,7 @@ namespace CmisSync.Lib.Events.Filter
                 {
                     if (wildcard.IsMatch(name))
                     {
-                        reason = string.Format("filename matches: {0}", wildcard.ToString());
+                        reason = string.Format("filename {1} matches: {0}", wildcard.ToString(), name);
                         return true;
                     }
                 }

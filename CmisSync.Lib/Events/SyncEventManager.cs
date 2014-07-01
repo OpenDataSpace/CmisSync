@@ -20,9 +20,9 @@ namespace CmisSync.Lib.Events
 {
     using System;
     using System.Collections.Generic;
-    
+
     using log4net;
- 
+
     /// <summary>
     /// Sync event manager which has a list of all Handlers and forwards events to them.
     /// </summary>
@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Events
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventManager));
         private List<SyncEventHandler> handler = new List<SyncEventHandler>();
-  
+
         /// <summary>
         /// Adds the event handler to the manager.
         /// </summary>
@@ -39,21 +39,19 @@ namespace CmisSync.Lib.Events
         /// </param>
         public void AddEventHandler(SyncEventHandler handler)
         {
-            Logger.Debug("Adding Eventhandler " + handler);
-            
-            // The zero-based index of item in the sorted List<T>, 
-            // if item is found; otherwise, a negative number that 
-            // is the bitwise complement of the index of the next 
+            // The zero-based index of item in the sorted List<T>,
+            // if item is found; otherwise, a negative number that
+            // is the bitwise complement of the index of the next
             // element that is larger than item or.
             int pos = this.handler.BinarySearch(handler);
             if (pos < 0)
             {
                 pos = ~pos;
             }
-            
+
             this.handler.Insert(pos, handler);
         }
-  
+
         /// <summary>
         /// Handle the specified event.
         /// </summary>
@@ -67,11 +65,12 @@ namespace CmisSync.Lib.Events
                 var h = this.handler[i];
                 if (this.handler[i].Handle(e))
                 {
+                    Logger.Debug(String.Format("Event {0} was handled by {1}", e.ToString(), this.handler[i].GetType()));
                     return;
                 }
             }
         }
-  
+
         /// <summary>
         /// Removes the event handler.
         /// </summary>

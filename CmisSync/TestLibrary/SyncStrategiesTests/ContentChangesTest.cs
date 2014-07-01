@@ -40,19 +40,13 @@ namespace TestLibrary.SyncStrategiesTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class ContentChangesTest
+    public class ContentChangesTest : IsTestWithConfiguredLog4Net
     {
         private readonly bool isPropertyChangesSupported = false;
         private readonly string changeLogToken = "token";
         private readonly string latestChangeLogToken = "latestChangeLogToken";
         private readonly string repoId = "repoId";
         private readonly int maxNumberOfContentChanges = 1000;
-
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-        }
 
         [Test, Category("Fast"), Category("ContentChange")]
         public void ConstructorWithVaildEntriesTest()

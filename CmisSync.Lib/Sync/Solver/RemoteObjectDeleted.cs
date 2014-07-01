@@ -42,10 +42,19 @@ namespace CmisSync.Lib.Sync.Solver
         /// <param name="remoteId">Remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileInfo, IObjectId remoteId)
         {
-            if(localFileInfo is IDirectoryInfo) {
+            if (localFileInfo is IDirectoryInfo) {
                 (localFileInfo as IDirectoryInfo).Delete(true);
             } else if(localFileInfo is IFileInfo) {
-                (localFileInfo as IFileInfo).Delete();
+                var file = localFileInfo as IFileInfo;
+                var mappedFile = storage.GetObjectByLocalPath(file);
+                if (mappedFile != null && file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
+                    file.Delete();
+                } else {
+                    file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null);
+                    if (mappedFile == null) {
+                        return;
+                    }
+                }
             }
 
             storage.RemoveObject(storage.GetObjectByLocalPath(localFileInfo));

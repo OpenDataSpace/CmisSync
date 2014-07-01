@@ -31,15 +31,11 @@ namespace TestLibrary
 
     using NUnit.Framework;
 
-    [TestFixture]
-    public class DebugLoggingHandlerTest
-    {
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
-        }
+    using TestLibrary.TestUtils;
 
+    [TestFixture]
+    public class DebugLoggingHandlerTest : IsTestWithConfiguredLog4Net
+    {
         [Test, Category("Fast")]
         public void ToStringTest()
         {

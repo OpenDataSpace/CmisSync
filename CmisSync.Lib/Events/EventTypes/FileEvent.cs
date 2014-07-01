@@ -25,11 +25,12 @@ namespace CmisSync.Lib.Events
     using CmisSync.Lib.Storage;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     /// <summary>
     /// File event.
     /// </summary>
-    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterablePathEvent, IFilterableRemoteObjectEvent
+    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileEvent"/> class.
@@ -67,9 +68,21 @@ namespace CmisSync.Lib.Events
         /// Gets the remote path.
         /// </summary>
         /// <value>The path.</value>
-        public override string Path {
+        public override string RemotePath {
             get {
-                return this.RemoteFile != null && this.RemoteFile.Paths != null  && this.RemoteFile.Paths.Count > 0 ? this.RemoteFile.Paths[0] : null;
+                if (this.RemoteFile == null) {
+                    return null;
+                }
+
+                try {
+                    if (this.RemoteFile.Paths == null) {
+                        return null;
+                    }
+                } catch (CmisRuntimeException) {
+                    return null;
+                }
+
+                return this.RemoteFile.Paths.Count > 0 ? this.RemoteFile.Paths[0] : null;
             }
         }
 
@@ -130,7 +143,7 @@ namespace CmisSync.Lib.Events
                 this.Name,
                 this.Remote,
                 this.RemoteContent,
-                this.Path);
+                this.RemotePath);
         }
 
         /// <summary>

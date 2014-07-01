@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Folder event. Should be added to the Queue if anything on a folder could have been changed.
     /// </summary>
-    public class FolderEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterablePathEvent, IFilterableRemoteObjectEvent
+    public class FolderEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FolderEvent"/> class.
@@ -81,7 +81,7 @@ namespace CmisSync.Lib.Events
         /// Gets the remote path.
         /// </summary>
         /// <value>The path.</value>
-        public override string Path {
+        public override string RemotePath {
             get {
                 return this.RemoteFolder != null ? this.RemoteFolder.Path : null;
             }

@@ -35,23 +35,14 @@ namespace CmisSync.Lib.Events.Filter
         private static Regex invalidFolderNameRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidPathChars()) + "\"?:/\\|<>*") + "]");
 
         /// <summary>
-        /// Checks the path for containing invalid folder names.
-        /// Reports every filtered event to the queue.
+        /// Checks the name of the folder.
         /// </summary>
-        /// <returns>
-        /// true if the path contains invalid folder names.
-        /// </returns>
-        /// <param name='path'>
-        /// Path to be checked for containing invalid folder names.
-        /// </param>
-        /// <param name='reason'>Reason for the invalid folder name, or empty string.</param>
-        public virtual bool CheckPath(string path, out string reason)
-        {
-            if (string.IsNullOrEmpty(path)) {
-                reason = "Given Path is null or empty";
-                return true;
-            } else if (invalidFolderNameRegex.IsMatch(path.Replace("/", string.Empty).Replace("\\", string.Empty))) {
-                reason = string.Format("Path \"{0}\" contains one of the illegal characters \"{1}\"", path, invalidFolderNameRegex.ToString());
+        /// <returns><c>true</c>, if folder name contains invalid characters, <c>false</c> otherwise.</returns>
+        /// <param name="name">Name of the folder.</param>
+        /// <param name="reason">Reason why the answer was <c>true</c>.</param>
+        public virtual bool CheckFolderName(string name, out string reason) {
+            if (invalidFolderNameRegex.IsMatch(name)) {
+                reason = string.Format("Folder name \"{0}\" contains one of the illegal characters \"{1}\"", name, invalidFolderNameRegex.ToString());
                 return true;
             } else {
                 reason = string.Empty;
