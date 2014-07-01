@@ -468,13 +468,13 @@ namespace TestLibrary.IntegrationTests
         public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved()
         {
             string fileName = "fileConflictTest.txt";
-            string remoteContent = "remote";
+            string changedLocalContent = "changedContent";
             string localContent = "local";
             var localPath = Path.Combine(this.localRootDir.FullName, fileName);
             var fileInfo = new FileInfo(localPath);
 
             using (StreamWriter sw = fileInfo.CreateText()) {
-                sw.WriteLine(remoteContent);
+                sw.WriteLine(changedLocalContent);
             }
 
             this.repo.Initialize();
@@ -482,6 +482,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             this.remoteRootDir.GetChildren().First().Delete(true);
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             using (StreamWriter sw = fileInfo.CreateText()) {
                 sw.WriteLine(localContent);
             }
@@ -491,7 +492,9 @@ namespace TestLibrary.IntegrationTests
             this.repo.Queue.AddEvent(new StartNextSyncEvent());
             this.repo.Run();
 
-            Assert.That(this.localRootDir.GetFiles(), Is.Empty);
+            Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(changedLocalContent.Length));
         }
 
         // Conflict solver is not yet implemented
