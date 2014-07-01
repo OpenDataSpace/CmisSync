@@ -478,7 +478,7 @@ namespace TestLibrary.IntegrationTests
             }
 
             this.repo.Initialize();
-
+            this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
 
             this.remoteRootDir.GetChildren().First().Delete(true);
