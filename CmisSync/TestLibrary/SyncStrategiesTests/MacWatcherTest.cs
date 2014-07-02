@@ -138,7 +138,7 @@ namespace TestLibrary.SyncStrategiesTests
                     events = queue.Events.ToArray ();
                 }
                 foreach (FSEvent fsEvent in events) {
-                    if (fsEvent.Path == pathname && fsEvent.Type == types) {
+                    if (fsEvent.LocalPath == pathname && fsEvent.Type == types) {
                         return;
                     }
                 }

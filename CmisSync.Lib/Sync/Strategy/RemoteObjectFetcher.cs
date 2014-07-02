@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Sync.Strategy {
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
-    
+
     using log4net;
 
     /// <summary>
@@ -79,10 +79,15 @@ namespace CmisSync.Lib.Sync.Strategy {
             if (remote != null) {
                 return false;
             }
-   
+
             Logger.Debug("Fetching remote Object for " + e);
-            string id = this.FetchIdFromStorage(e);
+            string id = this.FetchIdFromExtendedAttribute(e);
             if(id != null) {
+                if(this.storage.GetObjectByRemoteId(id) == null) {
+                    Logger.Debug("Extended Attribute does exist on File but it is not in Storage: Ignoring");
+                    return false;
+                }
+
                 Logger.Debug("Fetching remote Object with id " + id);
                 try {
                     remote = this.session.GetObject(id, this.operationContext);
@@ -120,29 +125,20 @@ namespace CmisSync.Lib.Sync.Strategy {
             }
         }
 
-        private string FetchIdFromStorage(ISyncEvent e) {
+        private string FetchIdFromExtendedAttribute(ISyncEvent e) {
             IFileSystemInfo path = null;
-            if(e is FileMovedEvent) {
-                path = (e as FileMovedEvent).OldLocalFile;
-            }
-            else if(e is FileEvent) {
+            if(e is FileEvent) {
                 path = (e as FileEvent).LocalFile;
             }
             else if (e is CrawlRequestEvent) {
                 path = (e as CrawlRequestEvent).LocalFolder;
-            }
-            else if (e is FolderMovedEvent) {
-                path = (e as FolderMovedEvent).OldLocalFolder;
             }
             else if (e is FolderEvent) {
                 path = (e as FolderEvent).LocalFolder;
             }
 
             if (path != null) {
-                IMappedObject savedObject = this.storage.GetObjectByLocalPath(path);
-                if(savedObject != null) {
-                    return savedObject.RemoteObjectId;
-                }
+                return path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
             }
 
             return null;
