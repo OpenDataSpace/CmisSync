@@ -51,6 +51,26 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
+        public void DoNotGetExtendedAttributeIfFileDoesNotExist() {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, Id, "name", (string)null).Object;
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
+
+            var storage = new Mock<IMetaDataStorage>();
+            storage.AddLocalFile(Path, Id);
+
+            var fileInfoMock = new Mock<IFileInfo>();
+            fileInfoMock.Setup(f => f.Exists).Returns(false);
+
+            var fileEvent = new FileEvent(fileInfoMock.Object);
+            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
+            fetcher.Handle(fileEvent);
+
+            fileInfoMock.Verify(f => f.GetExtendedAttribute(It.IsAny<string>()), Times.Never());
+        }
+
+        [Test, Category("Fast")]
         public void DoNotFetchIfExtendedAttributeIsMissing() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -97,6 +117,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var fileInfoMock = new Mock<IFileInfo>();
             fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Id);
+            fileInfoMock.Setup(f => f.Exists).Returns(true);
             var fileEvent = new FileEvent(fileInfoMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
@@ -161,6 +182,7 @@ namespace TestLibrary.SyncStrategiesTests
             storage.AddLocalFolder(Path, Id);
 
             var dirMock = new Mock<IDirectoryInfo>();
+            dirMock.Setup(d => d.Exists).Returns(true);
             dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
 
             var folderEvent = new FolderEvent(dirMock.Object);
@@ -200,6 +222,7 @@ namespace TestLibrary.SyncStrategiesTests
             storage.AddLocalFolder(Path, Id);
 
             var dirMock = new Mock<IDirectoryInfo>();
+            dirMock.Setup(d => d.Exists).Returns(true);
             dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
             var crawlEvent = new CrawlRequestEvent(localFolder: dirMock.Object, remoteFolder: null);
 
@@ -219,6 +242,7 @@ namespace TestLibrary.SyncStrategiesTests
             storage.AddLocalFolder(Path, Id);
 
             var dirMock = new Mock<IDirectoryInfo>();
+            dirMock.Setup(d => d.Exists).Returns(true);
             dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
             var folderEvent = new FolderEvent(dirMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);

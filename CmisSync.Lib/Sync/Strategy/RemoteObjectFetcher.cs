@@ -137,7 +137,7 @@ namespace CmisSync.Lib.Sync.Strategy {
                 path = (e as FolderEvent).LocalFolder;
             }
 
-            if (path != null) {
+            if (path != null && path.Exists) {
                 return path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
             }
 

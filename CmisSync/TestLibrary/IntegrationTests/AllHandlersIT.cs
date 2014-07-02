@@ -129,6 +129,8 @@ namespace TestLibrary.IntegrationTests
             var queue = this.CreateQueue(session, storage);
             var fileInfoMock = new Mock<IFileInfo>();
             fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(id);
+            fileInfoMock.Setup(f => f.Exists).Returns(true);
+
             var fileEvent = new FileEvent(fileInfoMock.Object) {Local = MetaDataChangeType.DELETED};
             queue.AddEvent(fileEvent);
             queue.Run();
