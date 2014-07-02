@@ -537,7 +537,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
-            using (var filestream = this.localRootDir.GetFiles().First().CreateText()) {
+            using (var filestream = this.localRootDir.GetFiles().First().Open()) {
                 filestream.Write(newContent);
             }
 
