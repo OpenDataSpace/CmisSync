@@ -51,6 +51,7 @@ namespace TestLibrary.IntegrationTests
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Text;
     using System.Threading;
 
     using CmisSync.Lib;
@@ -486,6 +487,7 @@ namespace TestLibrary.IntegrationTests
             using (StreamWriter sw = fileInfo.CreateText()) {
                 sw.WriteLine(changedLocalContent);
             }
+
             fileInfo.Refresh();
             long expectedLength = fileInfo.Length;
 
@@ -530,15 +532,15 @@ namespace TestLibrary.IntegrationTests
         {
             string fileName = "file.txt";
             string content = "cat";
-            string newContent = "new born citty";
+            byte[] newContent = Encoding.UTF8.GetBytes("new born citty");
             this.remoteRootDir.CreateDocument(fileName, content);
 
             this.repo.Initialize();
 
             this.repo.Run();
 
-            using (var filestream = this.localRootDir.GetFiles().First().Open()) {
-                filestream.Write(newContent);
+            using (var filestream = this.localRootDir.GetFiles().First().Open(FileMode.Truncate, FileAccess.Write, FileShare.None)) {
+                filestream.Write(newContent, 0, newContent.Length);
             }
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
