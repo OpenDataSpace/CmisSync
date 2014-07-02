@@ -56,6 +56,16 @@ namespace TestLibrary.TestUtils
             return db.AddLocalFile(file, id);
         }
 
+        public static void AddLocalFile(this Mock<IMetaDataStorage> db, string path, string id, Guid uuid)
+        {
+            var file = Mock.Of<IMappedObject>(f =>
+                                              f.RemoteObjectId == id &&
+                                              f.Name == Path.GetFileName(path) &&
+                                              f.Guid == uuid &&
+                                              f.Type == MappedObjectType.File);
+            db.AddMappedFile(file, path);
+        }
+
         public static Mock<IMappedObject> AddLocalFile(this Mock<IMetaDataStorage> db, IFileInfo path, string id)
         {
             var file = Mock.Of<IMappedObject>(f =>
@@ -72,6 +82,15 @@ namespace TestLibrary.TestUtils
                                                  d.FullName == path &&
                                                  d.Name == Path.GetDirectoryName(path));
             return db.AddLocalFolder(folder, id);
+        }            
+        
+        public static void AddLocalFolder(this Mock<IMetaDataStorage> storage, string path, string id, Guid uuid){
+            var folder = new Mock<IMappedObject>();
+            folder.Setup(f => f.Name).Returns(System.IO.Path.GetDirectoryName(path));
+            folder.Setup(f => f.RemoteObjectId).Returns(id);
+            folder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
+            folder.Setup(f => f.Guid).Returns(uuid);
+            storage.AddMappedFolder(folder.Object, path);
         }
 
         public static Mock<IMappedObject> AddLocalFolder(this Mock<IMetaDataStorage> db, IDirectoryInfo path, string id)
@@ -90,6 +109,9 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == file.RemoteObjectId))).Returns(file);
             db.Setup(foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns(localPath);
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns(remotePath);
+            if(!file.Guid.Equals(Guid.Empty)) {
+                db.Setup(foo => foo.GetObjectByGuid(It.Is<Guid>(g => g.Equals(file.Guid)))).Returns(file);
+            }
         }
 
         // Don't use this method twice per test
@@ -98,6 +120,9 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == folder.RemoteObjectId))).Returns(folder);
             db.Setup(foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(localPath);
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(remotePath);
+            if(!folder.Guid.Equals(Guid.Empty)) {
+                db.Setup(foo => foo.GetObjectByGuid(It.Is<Guid>(g => g.Equals(folder.Guid)))).Returns(folder);
+            }
         }
 
         public static void VerifySavedMappedObject(

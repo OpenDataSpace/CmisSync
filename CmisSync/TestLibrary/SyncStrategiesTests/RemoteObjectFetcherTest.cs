@@ -42,6 +42,7 @@ namespace TestLibrary.SyncStrategiesTests
     {
         private static readonly string Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "path");
         private static readonly string Id = "myId";
+        private static readonly Guid Uuid = Guid.NewGuid();
 
         [Test, Category("Fast")]
         public void ConstructorTest() {
@@ -58,7 +59,7 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile(Path, Id);
+            storage.AddLocalFile(Path, Id, Uuid);
 
             var fileInfoMock = new Mock<IFileInfo>();
             fileInfoMock.Setup(f => f.Exists).Returns(false);
@@ -78,7 +79,7 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile(Path, Id);
+            storage.AddLocalFile(Path, Id, Uuid);
 
             var fileEvent = new FileEvent(Mock.Of<IFileInfo>());
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
@@ -97,12 +98,31 @@ namespace TestLibrary.SyncStrategiesTests
             var storage = new Mock<IMetaDataStorage>();
 
             var fileInfoMock = new Mock<IFileInfo>();
-            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Id);
+            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Uuid.ToString());
             var fileEvent = new FileEvent(fileInfoMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             fetcher.Handle(fileEvent);
 
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
+        }
+
+        [Test, Category("Fast")]
+        public void FileDeletedEventWithoutObjectId() {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, Id, "name", (string)null).Object;
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
+
+            var storage = new Mock<IMetaDataStorage>();
+            storage.AddLocalFile(Path, Id, Uuid);
+
+            var fileInfoMock = new Mock<IFileInfo>();
+            fileInfoMock.Setup(f => f.FullName).Returns(Path);
+            var fileEvent = new FileEvent(fileInfoMock.Object) {Local= MetaDataChangeType.DELETED};
+            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
+
+            Assert.That(fetcher.Handle(fileEvent), Is.False);
+            Assert.That(fileEvent.RemoteFile, Is.Not.Null);
         }
 
         [Test, Category("Fast")]
@@ -113,10 +133,10 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile(Path, Id);
+            storage.AddLocalFile(Path, Id, Uuid);
 
             var fileInfoMock = new Mock<IFileInfo>();
-            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Id);
+            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Uuid.ToString());
             fileInfoMock.Setup(f => f.Exists).Returns(true);
             var fileEvent = new FileEvent(fileInfoMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
@@ -135,7 +155,7 @@ namespace TestLibrary.SyncStrategiesTests
             storage.AddLocalFile(Path, Id);
 
             var fileInfoMock = new Mock<IFileInfo>();
-            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Id);
+            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Uuid.ToString());
             var fileEvent = new FileEvent(fileInfoMock.Object);
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
@@ -179,11 +199,11 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder(Path, Id);
+            storage.AddLocalFolder(Path, Id, Uuid);
 
             var dirMock = new Mock<IDirectoryInfo>();
             dirMock.Setup(d => d.Exists).Returns(true);
-            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
+            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Uuid.ToString());
 
             var folderEvent = new FolderEvent(dirMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
@@ -202,7 +222,7 @@ namespace TestLibrary.SyncStrategiesTests
             storage.AddLocalFolder(Path, Id);
 
             var dirMock = new Mock<IDirectoryInfo>();
-            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
+            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Uuid.ToString());
 
             var folderEvent = new FolderEvent(dirMock.Object);
 
@@ -219,11 +239,11 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder(Path, Id);
+            storage.AddLocalFolder(Path, Id, Uuid);
 
             var dirMock = new Mock<IDirectoryInfo>();
             dirMock.Setup(d => d.Exists).Returns(true);
-            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
+            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Uuid.ToString());
             var crawlEvent = new CrawlRequestEvent(localFolder: dirMock.Object, remoteFolder: null);
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
@@ -239,16 +259,17 @@ namespace TestLibrary.SyncStrategiesTests
             session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
 
             var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFolder(Path, Id);
+            storage.AddLocalFolder(Path, Id, Uuid);
 
             var dirMock = new Mock<IDirectoryInfo>();
             dirMock.Setup(d => d.Exists).Returns(true);
-            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
+            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Uuid.ToString());
             var folderEvent = new FolderEvent(dirMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(folderEvent), Is.False);
             session.VerifyThatCachingIsDisabled();
         }
+        
     }
 }

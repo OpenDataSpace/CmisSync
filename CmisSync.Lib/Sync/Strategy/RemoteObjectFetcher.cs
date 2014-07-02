@@ -87,7 +87,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             } else {
                 id = this.FetchIdFromExtendedAttribute(e);
             }
-            
+
             if(id != null) {
                 if(this.storage.GetObjectByRemoteId(id) == null) {
                     Logger.Debug("Extended Attribute does exist on File but it is not in Storage: Ignoring");
@@ -164,7 +164,13 @@ namespace CmisSync.Lib.Sync.Strategy {
             }
 
             if (path != null && path.Exists) {
-                return path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                string uuid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                if(uuid != null){
+                    var mappedObject = storage.GetObjectByGuid(Guid.Parse(uuid));
+                    if(mappedObject != null) {
+                        return mappedObject.RemoteObjectId;
+                    }
+                }
             }
 
             return null;
