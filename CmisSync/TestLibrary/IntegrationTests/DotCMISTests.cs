@@ -26,6 +26,7 @@ namespace TestLibrary.IntegrationTests
     using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
+    using System.Text.RegularExpressions;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
@@ -259,6 +260,61 @@ namespace TestLibrary.IntegrationTests
 
             Assert.IsTrue(propertyFound);
             emptyDoc.DeleteAllVersions();
+        }
+
+        /*
+        [Ignore]
+        [Test, Category("Fast")]
+        public void RegexTestForRemoteHashProperty() {
+            Regex entryRegex = new Regex(@"^\{.+\}[0-9a-fA-F]+$");
+            Assert.That(entryRegex.IsMatch("{sha-1}2fd4e1c67a2d28fced849ee1bb76e7391b93eb1233f80f8a"), Is.True);
+            Assert.That(entryRegex.IsMatch("{sha-256}e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"), Is.True);
+            Assert.That(entryRegex.IsMatch("{}1234567"), Is.False);
+            Assert.That(entryRegex.IsMatch("sha-1}1234567"), Is.False);
+            Assert.That(entryRegex.IsMatch("{sadf24er35}"), Is.False);
+        } */
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void GetContentStreamHash(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId) {
+            Regex entryRegex = new Regex(@"^\{.+\}[0-9a-fA-F]+$");
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string filename = "hashedfile.txt";
+            try {
+                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc != null) {
+                    doc.Delete(true);
+                }
+            } catch (CmisObjectNotFoundException) {
+            }
+
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            using (var emptyStream = new MemoryStream(new byte[0])) {
+                ContentStream contentStream = new ContentStream();
+                contentStream.MimeType = MimeType.GetMIMEType(filename);
+                contentStream.Length = 0;
+                contentStream.Stream = emptyStream;
+                var emptyDoc = folder.CreateDocument(properties, contentStream, null);
+                var context = new OperationContext();
+                IDocument requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
+                foreach (var prop in requestedDoc.Properties) {
+                    if (prop.Id == "cmis:contentStreamHash") {
+                        Assert.That(prop.IsMultiValued, Is.True);
+                        foreach (string entry in prop.Values) {
+                            Assert.That(entryRegex.IsMatch(entry));
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
