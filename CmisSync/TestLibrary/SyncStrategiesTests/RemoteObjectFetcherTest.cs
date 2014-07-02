@@ -24,6 +24,7 @@ namespace TestLibrary.SyncStrategiesTests
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Sync.Strategy;
 
     using DotCMIS.Client;
@@ -50,6 +51,41 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
+        public void DoNotFetchIfExtendedAttributeIsMissing() {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, Id, "name", (string)null).Object;
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
+
+            var storage = new Mock<IMetaDataStorage>();
+            storage.AddLocalFile(Path, Id);
+
+            var fileEvent = new FileEvent(Mock.Of<IFileInfo>());
+            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
+            fetcher.Handle(fileEvent);
+
+            session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
+        }
+
+        [Test, Category("Fast")]
+        public void DoNotFetchIfDatabaseEntryIsMissing() {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, Id, "name", (string)null).Object;
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
+
+            var storage = new Mock<IMetaDataStorage>();
+
+            var fileInfoMock = new Mock<IFileInfo>();
+            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Id);
+            var fileEvent = new FileEvent(fileInfoMock.Object);
+            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
+            fetcher.Handle(fileEvent);
+
+            session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
+        }
+
+        [Test, Category("Fast")]
         public void FileEventWithoutObjectId() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();
@@ -59,7 +95,9 @@ namespace TestLibrary.SyncStrategiesTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFile(Path, Id);
 
-            var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(Path)));
+            var fileInfoMock = new Mock<IFileInfo>();
+            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Id);
+            var fileEvent = new FileEvent(fileInfoMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(fileEvent), Is.False);
@@ -75,7 +113,9 @@ namespace TestLibrary.SyncStrategiesTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFile(Path, Id);
 
-            var fileEvent = new FileEvent(new FileInfoWrapper(new FileInfo(Path)));
+            var fileInfoMock = new Mock<IFileInfo>();
+            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Id);
+            var fileEvent = new FileEvent(fileInfoMock.Object);
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             Assert.That(fetcher.Handle(fileEvent), Is.False);
@@ -90,23 +130,6 @@ namespace TestLibrary.SyncStrategiesTests
             var fileEvent = new FileEvent(new Mock<IFileInfo>().Object, new Mock<IDocument>().Object);
             fetcher.Handle(fileEvent);
             session.Verify(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>()), Times.Never());
-        }
-
-        [Test, Category("Fast")]
-        public void FileMovedEventWithoutObjectId() {
-            var session = new Mock<ISession>();
-            session.SetupSessionDefaultValues();
-            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, Id, "name", (string)null).Object;
-            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
-
-            var storage = new Mock<IMetaDataStorage>();
-            storage.AddLocalFile(Path, Id);
-
-            var fileEvent = new FileMovedEvent(new FileInfoWrapper(new FileInfo(Path)), new FileInfoWrapper(new FileInfo("newPath")));
-            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
-
-            Assert.That(fetcher.Handle(fileEvent), Is.False);
-            Assert.That(fileEvent.RemoteFile, Is.Not.Null);
         }
 
         [Test, Category("Fast")]
@@ -137,7 +160,10 @@ namespace TestLibrary.SyncStrategiesTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id);
 
-            var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(Path)));
+            var dirMock = new Mock<IDirectoryInfo>();
+            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
+
+            var folderEvent = new FolderEvent(dirMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(folderEvent), Is.False);
@@ -153,7 +179,10 @@ namespace TestLibrary.SyncStrategiesTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id);
 
-            var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(Path)));
+            var dirMock = new Mock<IDirectoryInfo>();
+            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
+
+            var folderEvent = new FolderEvent(dirMock.Object);
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             Assert.That(fetcher.Handle(folderEvent), Is.False);
@@ -170,7 +199,9 @@ namespace TestLibrary.SyncStrategiesTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id);
 
-            var crawlEvent = new CrawlRequestEvent(localFolder: new DirectoryInfoWrapper(new DirectoryInfo(Path)), remoteFolder: null);
+            var dirMock = new Mock<IDirectoryInfo>();
+            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
+            var crawlEvent = new CrawlRequestEvent(localFolder: dirMock.Object, remoteFolder: null);
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
             Assert.That(fetcher.Handle(crawlEvent), Is.False);
@@ -187,7 +218,9 @@ namespace TestLibrary.SyncStrategiesTests
             var storage = new Mock<IMetaDataStorage>();
             storage.AddLocalFolder(Path, Id);
 
-            var folderEvent = new FolderEvent(new DirectoryInfoWrapper(new DirectoryInfo(Path)));
+            var dirMock = new Mock<IDirectoryInfo>();
+            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Id);
+            var folderEvent = new FolderEvent(dirMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(folderEvent), Is.False);
