@@ -590,7 +590,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
         }
 
-        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 5000) {
+        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
             int waited = 0;
             while (queue.Queue.IsEmpty)
             {
