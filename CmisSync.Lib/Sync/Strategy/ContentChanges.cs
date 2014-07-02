@@ -43,6 +43,14 @@ namespace CmisSync.Lib.Sync.Strategy
         private bool isPropertyChangesSupported;
         private bool dropNextSyncEvents = false;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.ContentChanges"/> class.
+        /// </summary>
+        /// <param name="session">Cmis Session.</param>
+        /// <param name="storage">Meta Data Storage.</param>
+        /// <param name="queue">Event Queue.</param>
+        /// <param name="maxNumberOfContentChanges">Max number of content changes.</param>
+        /// <param name="isPropertyChangesSupported">If set to <c>true</c> is property changes supported.</param>
         public ContentChanges(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base(queue) {
             if(session == null) {
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
@@ -72,7 +80,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     // Get last change log token on server side.
                     this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);    // refresh
                     string lastRemoteChangeLogTokenBeforeFullCrawlSync = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
-                    if(this.storage.ChangeLogToken == null) {
+                    if (this.storage.ChangeLogToken == null) {
                         syncEvent.LastTokenOnServer = lastRemoteChangeLogTokenBeforeFullCrawlSync;
                     }
 
@@ -126,8 +134,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);    // refresh
                 string lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
 
-                if(lastTokenOnClient != lastTokenOnServer)
-                {
+                if (lastTokenOnClient != lastTokenOnServer) {
                     this.Sync();
                 }
 
