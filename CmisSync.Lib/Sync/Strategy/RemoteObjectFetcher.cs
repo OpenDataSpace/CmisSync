@@ -84,7 +84,7 @@ namespace CmisSync.Lib.Sync.Strategy {
             string id = this.FetchIdFromExtendedAttribute(e);
             if(id != null) {
                 if(this.storage.GetObjectByRemoteId(id) == null) {
-                    Logger.Debug("Extended Attribute exist on Event but is not in Storage, Ignoring");
+                    Logger.Debug("Extended Attribute does exist on File but it is not in Storage: Ignoring");
                     return false;
                 }
 
