@@ -81,7 +81,13 @@ namespace CmisSync.Lib.Sync.Strategy {
             }
 
             Logger.Debug("Fetching remote Object for " + e);
-            string id = this.FetchIdFromExtendedAttribute(e);
+            string id;
+            if(e is AbstractFolderEvent && (e as AbstractFolderEvent).Local == MetaDataChangeType.DELETED) {
+                id = this.FetchIdFromStorage(e);
+            } else {
+                id = this.FetchIdFromExtendedAttribute(e);
+            }
+            
             if(id != null) {
                 if(this.storage.GetObjectByRemoteId(id) == null) {
                     Logger.Debug("Extended Attribute does exist on File but it is not in Storage: Ignoring");
@@ -124,6 +130,26 @@ namespace CmisSync.Lib.Sync.Strategy {
                 (e as FolderEvent).RemoteFolder = remote as IFolder;
             }
         }
+        
+        private string FetchIdFromStorage(ISyncEvent e) {
+            IFileSystemInfo path = null;
+            if(e is FileEvent) {
+                path = (e as FileEvent).LocalFile;
+            }
+            else if (e is FolderEvent) {
+                path = (e as FolderEvent).LocalFolder;
+            }
+
+            if (path != null) {
+                IMappedObject savedObject = this.storage.GetObjectByLocalPath(path);
+                if(savedObject != null) {
+                    return savedObject.RemoteObjectId;
+                }
+            }
+
+            return null;
+        }
+
 
         private string FetchIdFromExtendedAttribute(ISyncEvent e) {
             IFileSystemInfo path = null;

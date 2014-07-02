@@ -118,6 +118,7 @@ namespace TestLibrary.IntegrationTests
             path.Setup(p => p.FullName).Returns(Path.Combine(this.localRoot, name));
             string id = "id";
 
+            // storage.AddLocalFile(path.Object, id);
             var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
             storage.SaveMappedObject(mappedObject);
 
@@ -126,13 +127,9 @@ namespace TestLibrary.IntegrationTests
             session.SetupChangeLogToken("default");
             IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, name, (string)null).Object;
             session.Setup(s => s.GetObject(id, It.IsAny<IOperationContext>())).Returns(remote);
+            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName, false);
             var queue = this.CreateQueue(session, storage);
-            var fileInfoMock = new Mock<IFileInfo>();
-            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(id);
-            fileInfoMock.Setup(f => f.Exists).Returns(true);
-
-            var fileEvent = new FileEvent(fileInfoMock.Object) {Local = MetaDataChangeType.DELETED};
-            queue.AddEvent(fileEvent);
+            queue.AddEvent(myEvent);
             queue.Run();
 
             session.Verify(f => f.Delete(It.Is<IObjectId>(i => i.Id == id), true), Times.Once());
@@ -315,7 +312,7 @@ namespace TestLibrary.IntegrationTests
             var localFetcher = new LocalObjectFetcher(storage.Matcher, fsFactory);
             manager.AddEventHandler(localFetcher);
 
-            var watcher = new WatcherConsumer(queue);
+            var watcher = new Strategy.WatcherConsumer(queue);
             manager.AddEventHandler(watcher);
 
             var localDetection = new LocalSituationDetection();
