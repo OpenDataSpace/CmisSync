@@ -89,11 +89,6 @@ namespace CmisSync.Lib.Sync.Strategy {
             }
 
             if(id != null) {
-                if(this.storage.GetObjectByRemoteId(id) == null) {
-                    Logger.Debug("Extended Attribute does exist on File but it is not in Storage: Ignoring");
-                    return false;
-                }
-
                 Logger.Debug("Fetching remote Object with id " + id);
                 try {
                     remote = this.session.GetObject(id, this.operationContext);
@@ -169,6 +164,8 @@ namespace CmisSync.Lib.Sync.Strategy {
                     var mappedObject = storage.GetObjectByGuid(Guid.Parse(uuid));
                     if(mappedObject != null) {
                         return mappedObject.RemoteObjectId;
+                    } else {
+                        Logger.Debug("Uuid found in Extended Attribute but not in DataBase, do not fetch");
                     }
                 }
             }
