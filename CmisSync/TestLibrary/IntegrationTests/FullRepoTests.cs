@@ -551,6 +551,8 @@ namespace TestLibrary.IntegrationTests
         public void CreateHundredFilesAndSync()
         {
             int count = 100;
+
+            this.repo.Initialize();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             for (int i = 1; i <= count; i++) {
