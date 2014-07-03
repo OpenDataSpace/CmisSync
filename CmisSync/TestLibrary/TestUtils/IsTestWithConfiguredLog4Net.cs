@@ -16,12 +16,14 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.IO;
 
 namespace TestLibrary.TestUtils
 {
     using System;
+    using System.Diagnostics;
+    using System.IO;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
 
     using log4net;
@@ -30,13 +32,17 @@ namespace TestLibrary.TestUtils
 
     public class IsTestWithConfiguredLog4Net
     {
+        private static readonly string FileName = "log4net.config";
 
-        private static readonly string fileName = "log4net.config";
+        static IsTestWithConfiguredLog4Net() {
+            DotCMIS.Util.DotCMISDebug.DotCMISTraceLevel = System.Diagnostics.TraceLevel.Verbose;
+            Trace.Listeners.Add(new DotCMISLogListener());
+        }
 
         public IsTestWithConfiguredLog4Net() {
-            string path = Path.Combine("..", "..", fileName);
+            string path = Path.Combine("..", "..", FileName);
             if (!File.Exists(path)) {
-                path = Path.Combine("..", "CmisSync", "TestLibrary", fileName);
+                path = Path.Combine("..", "CmisSync", "TestLibrary", FileName);
             }
 
             log4net.Config.XmlConfigurator.Configure(new FileInfo(path));
