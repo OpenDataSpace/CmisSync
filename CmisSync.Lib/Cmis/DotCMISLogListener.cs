@@ -74,7 +74,7 @@ namespace CmisSync.Lib.Cmis
 
         private void SetLog4NetLevelToTraceLevel()
         {
-            if(this.log.IsDebugEnabled) 
+            if (this.log.IsDebugEnabled)
             {
                 DotCMIS.Util.DotCMISDebug.DotCMISTraceLevel = System.Diagnostics.TraceLevel.Info;
             }
