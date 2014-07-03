@@ -187,9 +187,7 @@ namespace TestLibrary.IntegrationTests
             Assert.AreEqual(children.TotalNumItems, 1);
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Erratic")]
         public void OneLocalFolderRemoved()
         {
             this.localRootDir.CreateSubdirectory("Cat");
@@ -207,8 +205,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFolderCreated()
         {
@@ -222,9 +218,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Erratic")]
         public void OneRemoteFolderIsRenamedAndOneCrawlSyncShouldDetectIt()
         {
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
@@ -243,9 +237,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Dog"));
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Erratic")]
         public void OneRemoteFolderIsMovedIntoAnotherRemoteFolder()
         {
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
@@ -268,8 +260,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFileCreated()
         {
@@ -292,9 +282,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Erratic")]
         public void OneLocalFileRenamed()
         {
             string fileName = "file";
@@ -325,9 +313,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.Name, Is.EqualTo(newFileName));
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Erratic")]
         public void OneLocalFileRenamedAndMoved()
         {
             string fileName = "file";
@@ -362,8 +348,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.Name, Is.EqualTo(newFileName));
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFileIsRemoved()
         {
@@ -385,8 +369,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFileCreated()
         {
@@ -405,8 +387,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Length, Is.EqualTo(content.Length));
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFileUpdated()
         {
@@ -432,8 +412,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(file.Length, Is.EqualTo(content.Length));
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
         [Test, Category("Slow")]
         public void RemoteCreatedFileIsDeletedLocally()
         {
@@ -455,7 +433,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
-        [Test, Category("Slow"), Category("Conflict")]
+        [Test, Category("Slow"), Category("Conflict"), Category("Erratic")]
         public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConflictFileIsCreated()
         {
             string fileName = "fileConflictTest.txt";
@@ -480,8 +458,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
         }
 
-        // [Ignore]
-        [Test, Category("Slow"), Category("Conflict")]
+        [Test, Category("Slow"), Category("Conflict"), Category("Erratic")]
         public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved()
         {
             string fileName = "fileConflictTest.txt";
@@ -541,9 +518,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(remoteName));
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Category("Erratic")]
         public void OneLocalFileContentIsChanged()
         {
             string fileName = "file.txt";
@@ -576,8 +551,6 @@ namespace TestLibrary.IntegrationTests
         public void CreateHundredFilesAndSync()
         {
             int count = 100;
-            this.repo.Initialize();
-            this.repo.Run();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             for (int i = 1; i <= count; i++) {
