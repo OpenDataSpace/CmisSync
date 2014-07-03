@@ -48,6 +48,8 @@ namespace CmisSync.Lib
         /// Number of processes that have been started but not stopped yet.
         /// </summary>
         private int numberOfActiveProcesses;
+
+        private object countingLock = new object();
         
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.ActivityListenerAggregator"/> class.
@@ -65,7 +67,10 @@ namespace CmisSync.Lib
         /// </summary>
         public void ActivityStarted()
         {
-            this.numberOfActiveProcesses++;
+            lock(this.countingLock) {
+                this.numberOfActiveProcesses++;
+            }
+
             this.overall.ActivityStarted();
         }
 
@@ -74,10 +79,12 @@ namespace CmisSync.Lib
         /// </summary>
         public void ActivityStopped()
         {
-            this.numberOfActiveProcesses--;
-            if (this.numberOfActiveProcesses == 0)
-            {
-                this.overall.ActivityStopped();
+            lock (this.countingLock) {
+                this.numberOfActiveProcesses--;
+                if (this.numberOfActiveProcesses == 0)
+                {
+                    this.overall.ActivityStopped();
+                }
             }
         }
     }
