@@ -92,10 +92,15 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
+        private static dynamic config = null;
+
         public static dynamic GetConfig()
         {
-            var path = GetServerPath();
-            return JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
+            if(config == null){
+                var path = GetServerPath();
+                config = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
+            }
+            return config;
         }
 
         private static string GetServerPath()
