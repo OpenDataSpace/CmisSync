@@ -66,6 +66,10 @@ namespace TestLibrary.IntegrationTests
 
     using log4net;
 
+    #if __COCOA__
+    using MonoMac.AppKit;
+    #endif
+
     using Moq;
 
     using NUnit.Framework;
@@ -93,6 +97,12 @@ namespace TestLibrary.IntegrationTests
         {
             // Disable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            #if __COCOA__
+            try {
+                NSApplication.Init();
+            } catch (InvalidOperationException) {
+            }
+            #endif
         }
 
         [TestFixtureTearDown]
@@ -126,6 +136,7 @@ namespace TestLibrary.IntegrationTests
             // Repo
             var activityListener = new Mock<IActivityListener>();
             var queue = new SingleStepEventQueue(new SyncEventManager());
+
             this.repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
 
             // Session
@@ -220,7 +231,7 @@ namespace TestLibrary.IntegrationTests
             remoteFolder.Rename("Dog", true);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
-
+            this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
@@ -579,7 +590,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
         }
 
-        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 5000) {
+        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
             int waited = 0;
             while (queue.Queue.IsEmpty)
             {

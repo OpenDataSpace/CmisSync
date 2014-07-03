@@ -41,7 +41,10 @@ namespace TestLibrary.SyncStrategiesTests
         [TestFixtureSetUp]
         public void ClassSetUp()
         {
-            NSApplication.Init ();
+            try {
+                NSApplication.Init();
+            } catch (InvalidOperationException) {
+            }
         }
 
         [SetUp]

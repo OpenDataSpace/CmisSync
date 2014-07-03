@@ -160,8 +160,9 @@ namespace CmisSync.Lib.Sync.Strategy {
 
             if (path != null && path.Exists) {
                 string uuid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                if(uuid != null){
-                    var mappedObject = storage.GetObjectByGuid(Guid.Parse(uuid));
+                Guid guid;
+                if (uuid != null && Guid.TryParse(uuid, out guid)){
+                    var mappedObject = storage.GetObjectByGuid(guid);
                     if(mappedObject != null) {
                         return mappedObject.RemoteObjectId;
                     } else {
