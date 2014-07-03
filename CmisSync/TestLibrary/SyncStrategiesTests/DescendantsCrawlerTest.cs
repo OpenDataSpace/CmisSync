@@ -424,6 +424,31 @@ namespace TestLibrary.SyncStrategiesTests
             this.VerifyThatListenerHasBeenUsed();
         }
 
+        [Test, Category("Fast")]
+        public void DropAllStartNextSyncEventsInQueueWhichAreAvailableUntilRequestIsDone()
+        {
+            var crawler = this.CreateCrawler();
+
+            var startSyncEvent = new StartNextSyncEvent(true);
+
+            ISyncEvent resetToken = null;
+            queue.Setup(q => q.AddEvent(It.Is<ISyncEvent>(e => e.ToString() == "[ResetStartNextCrawlSyncFilterEvent]"))).Callback<ISyncEvent>(e => resetToken = e);
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            Assert.That(resetToken, Is.Not.Null);
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+
+            this.remoteFolder.Verify(r => r.GetDescendants(-1), Times.Once);
+
+            // Handle reset event
+            Assert.That(crawler.Handle(resetToken), Is.True);
+
+            // Executes next sync and passes a new reset token to queue
+            Assert.That(crawler.Handle(startSyncEvent), Is.True);
+            this.remoteFolder.Verify(r => r.GetDescendants(-1), Times.Exactly(2));
+        }
+
         private DescendantsCrawler CreateCrawler()
         {
             return new DescendantsCrawler(

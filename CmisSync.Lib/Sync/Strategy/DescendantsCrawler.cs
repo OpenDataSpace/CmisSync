@@ -44,6 +44,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private IFileSystemInfoFactory fsFactory;
         private IFilterAggregator filter;
         private IActivityListener activityListener;
+        private bool dropNextSyncEvents = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.DescendantsCrawler"/> class.
@@ -106,12 +107,27 @@ namespace CmisSync.Lib.Sync.Strategy
         public override bool Handle(ISyncEvent e)
         {
             if(e is StartNextSyncEvent) {
+                if (this.dropNextSyncEvents) {
+                    Logger.Debug("Dropping: " + e.ToString());
+                    return true;
+                }
+
                 Logger.Debug("Starting DecendantsCrawlSync upon " + e);
-                using (var activity = new ActivityListenerResource(this.activityListener)) {
-                    this.CrawlDescendants();
+                try {
+                    using (var activity = new ActivityListenerResource(this.activityListener)) {
+                        this.CrawlDescendants();
+                    }
+                } finally {
+                    this.dropNextSyncEvents = true;
+                    Queue.AddEvent(new ResetStartNextCrawlSyncFilterEvent());
                 }
 
                 this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
+                return true;
+            }
+
+            if(e is ResetStartNextCrawlSyncFilterEvent) {
+                this.dropNextSyncEvents = false;
                 return true;
             }
 
@@ -458,6 +474,13 @@ namespace CmisSync.Lib.Sync.Strategy
             };
 
             return tree;
+        }
+
+        private class ResetStartNextCrawlSyncFilterEvent : ISyncEvent {
+            public override string ToString()
+            {
+                return string.Format("[ResetStartNextCrawlSyncFilterEvent]");
+            }
         }
     }
 }
