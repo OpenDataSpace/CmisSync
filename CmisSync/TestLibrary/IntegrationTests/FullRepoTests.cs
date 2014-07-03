@@ -85,12 +85,15 @@ namespace TestLibrary.IntegrationTests
     [TestFixture, Timeout(900000)]
     public class FullRepoTests : IsTestWithConfiguredLog4Net
     {
-        private static readonly string Subfolder = "FullRepoTests";
+        private static readonly string SubfolderBase = "FullRepoTests_";
+        private static dynamic config;
+        private string Subfolder;
         private RepoInfo repoInfo;
         private DirectoryInfo localRootDir;
         private IFolder remoteRootDir;
         private ISession session;
         private CmisRepoMock repo;
+
 
         [TestFixtureSetUp]
         public void ClassInit()
@@ -103,6 +106,7 @@ namespace TestLibrary.IntegrationTests
             } catch (InvalidOperationException) {
             }
             #endif
+            config = ITUtils.GetConfig();
         }
 
         [TestFixtureTearDown]
@@ -115,7 +119,8 @@ namespace TestLibrary.IntegrationTests
         [SetUp]
         public void Init()
         {
-            var config = ITUtils.GetConfig();
+            Subfolder = SubfolderBase + Guid.NewGuid().ToString();
+            Console.WriteLine("Working on " + Subfolder);
 
             // RepoInfo
             this.repoInfo = new RepoInfo {
@@ -163,13 +168,13 @@ namespace TestLibrary.IntegrationTests
         [TearDown]
         public void TestDown()
         {
-            this.localRootDir.Delete(true);
+            if(this.localRootDir.Exists){
+                this.localRootDir.Delete(true);
+            }
             this.remoteRootDir.DeleteTree(true, null, true);
             this.repo.Dispose();
         }
 
-        // Ignored because it works but the IT is unpredictable
-        // [Ignore]
         [Test, Category("Slow")]
         public void OneLocalFolderCreated()
         {
