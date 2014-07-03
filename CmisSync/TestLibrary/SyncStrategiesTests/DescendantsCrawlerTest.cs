@@ -23,6 +23,7 @@ namespace TestLibrary.SyncStrategiesTests
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Events.Filter;
@@ -58,6 +59,7 @@ namespace TestLibrary.SyncStrategiesTests
         private DBreezeEngine storageEngine;
         private DateTime lastLocalWriteTime = DateTime.Now;
         private IFilterAggregator filter;
+        private Mock<IActivityListener> listener;
 
         [TestFixtureSetUp]
         public void InitCustomSerializator()
@@ -96,40 +98,48 @@ namespace TestLibrary.SyncStrategiesTests
             this.storage = new MetaDataStorage(this.storageEngine, this.matcher);
             this.storage.SaveMappedObject(this.mappedRootObject);
             this.filter = MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object;
+            this.listener = new Mock<IActivityListener>();
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfLocalFolderIsNull()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), null, Mock.Of<IMetaDataStorage>(), this.filter);
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), null, Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfRemoteFolderIsNull()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter);
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new DescendantsCrawler(null, Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter);
+            new DescendantsCrawler(null, Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), null, this.filter);
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), null, this.filter, this.listener.Object);
+        }
+
+        [Test, Category("Fast")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfListenerIsNull()
+        {
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, null);
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithoutFsInfoFactory()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter);
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object);
         }
 
         [Test, Category("Fast")]
@@ -151,6 +161,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
             Assert.That(crawler.Handle(Mock.Of<ISyncEvent>()), Is.False);
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            this.listener.Verify(l => l.ActivityStarted(), Times.Never);
         }
 
         [Test, Category("Fast")]
@@ -160,6 +171,7 @@ namespace TestLibrary.SyncStrategiesTests
             var startEvent = new StartNextSyncEvent();
             Assert.That(crawler.Handle(startEvent), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FullSyncCompletedEvent>(e => e.StartEvent.Equals(startEvent))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -171,6 +183,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteFolder))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -182,6 +195,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.RemoteFile.Equals(newRemoteDocument))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -196,6 +210,7 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteFolder.Object))), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteSubFolder.Object))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -207,6 +222,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder.Equals(newFolderMock.Object))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -218,6 +234,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.Equals(newFileMock.Object))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -236,6 +253,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile != null && e.LocalFile.Equals(oldLocalFile.Object) && e.Local.Equals(MetaDataChangeType.DELETED))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -253,6 +271,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder != null && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -283,6 +302,7 @@ namespace TestLibrary.SyncStrategiesTests
                 e.RemoteFolder.Equals(remoteSubFolder.Object) &&
                 e.Local.Equals(MetaDataChangeType.CHANGED))),
                 Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -313,6 +333,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<AbstractFolderEvent>(e => e.Local != MetaDataChangeType.NONE && e.Remote != MetaDataChangeType.NONE)), Times.Never());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -338,6 +359,7 @@ namespace TestLibrary.SyncStrategiesTests
                 e.Local == MetaDataChangeType.NONE &&
                 e.RemoteFolder.Equals(renamedRemoteFolder.Object))),
                 Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -368,6 +390,7 @@ namespace TestLibrary.SyncStrategiesTests
                 e.Local == MetaDataChangeType.NONE &&
                 e.RemoteFolder.Equals(renamedRemoteFolder.Object))),
                 Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -382,6 +405,7 @@ namespace TestLibrary.SyncStrategiesTests
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
@@ -397,6 +421,7 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.NONE && e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Never());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.Local == MetaDataChangeType.NONE && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Never());
+            this.VerifyThatListenerHasBeenUsed();
         }
 
         private DescendantsCrawler CreateCrawler()
@@ -407,7 +432,13 @@ namespace TestLibrary.SyncStrategiesTests
                 this.localFolder.Object,
                 this.storage,
                 this.filter,
+                this.listener.Object,
                 this.fsFactory.Object);
+        }
+
+        private void VerifyThatListenerHasBeenUsed() {
+            this.listener.Verify(l => l.ActivityStarted(), Times.AtLeastOnce());
+            this.listener.Verify(l => l.ActivityStopped(), Times.AtLeastOnce());
         }
     }
 }

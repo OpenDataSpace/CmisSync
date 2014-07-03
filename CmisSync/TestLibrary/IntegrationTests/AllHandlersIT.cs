@@ -317,7 +317,7 @@ namespace TestLibrary.IntegrationTests
 
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage);
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IActivityListener>());
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
@@ -329,7 +329,7 @@ namespace TestLibrary.IntegrationTests
 
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
             var localFolder = new Mock<IDirectoryInfo>();
-            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, filterAggregator, fsFactory);
+            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, filterAggregator, Mock.Of<IActivityListener>(), fsFactory);
             manager.AddEventHandler(crawler);
 
             var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();

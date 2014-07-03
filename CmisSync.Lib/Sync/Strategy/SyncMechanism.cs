@@ -44,6 +44,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private ISession session;
         private IMetaDataStorage storage;
+        private IActivityListener activityListener;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.SyncMechanism"/> class.
@@ -53,6 +54,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="queue">Sync event queue.</param>
         /// <param name="session">CMIS Session.</param>
         /// <param name="storage">Meta data storage.</param>
+        /// <param name="activityListener">Active sync progress listener.</param>
         /// <param name="solver">Solver for custom solver matrix.</param>
         public SyncMechanism(
             ISituationDetection<AbstractFolderEvent> localSituation,
@@ -60,6 +62,7 @@ namespace CmisSync.Lib.Sync.Strategy
             ISyncEventQueue queue,
             ISession session,
             IMetaDataStorage storage,
+            IActivityListener activityListener,
             ISolver[,] solver = null) : base(queue)
         {
             if (session == null) {
@@ -78,10 +81,15 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException("Given remote situation detection is null");
             }
 
+            if (activityListener == null) {
+                throw new ArgumentNullException("Given activity listener is null");
+            }
+
             this.session = session;
             this.storage = storage;
             this.LocalSituation = localSituation;
             this.RemoteSituation = remoteSituation;
+            this.activityListener = activityListener;
             this.Solver = solver == null ? this.CreateSolver() : solver;
         }
 
@@ -184,12 +192,14 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private void Solve(ISolver s, AbstractFolderEvent e)
         {
+            using(var activity = new ActivityListenerResource(this.activityListener)) {
             if(e is FolderEvent) {
                 s.Solve(this.session, this.storage, (e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder);
                 // this.storage.ValidateObjectStructure();
             } else if (e is FileEvent) {
                 s.Solve(this.session, this.storage, (e as FileEvent).LocalFile, (e as FileEvent).RemoteFile);
                 // this.storage.ValidateObjectStructure();
+            }
             }
         }
     }

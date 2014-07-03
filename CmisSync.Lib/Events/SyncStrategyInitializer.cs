@@ -51,6 +51,7 @@ namespace CmisSync.Lib
         private IgnoreAlreadyHandledContentChangeEventsFilter alreadyHandledFilter;
         private RemoteObjectMovedOrRenamedAccumulator romaccumulator;
         private IFilterAggregator filter;
+        private IActivityListener activityListener;
   
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.SyncStrategyInitializer"/> class.
@@ -64,13 +65,22 @@ namespace CmisSync.Lib
         /// <param name='repoInfo'>
         /// Repo info.
         /// </param>
+        /// <param name='activityListner'>
+        /// Listener for Sync activities.
+        /// </param>
         /// <param name='fsFactory'>
         /// Fs factory.
         /// </param>
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
-        public SyncStrategyInitializer(ISyncEventQueue queue, IMetaDataStorage storage, RepoInfo repoInfo, IFilterAggregator filter, IFileSystemInfoFactory fsFactory = null) : base(queue)
+        public SyncStrategyInitializer(
+            ISyncEventQueue queue,
+            IMetaDataStorage storage,
+            RepoInfo repoInfo,
+            IFilterAggregator filter,
+            IActivityListener activityListener,
+            IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null) {
                 throw new ArgumentNullException("storage null");
@@ -84,7 +94,11 @@ namespace CmisSync.Lib
                 throw new ArgumentNullException("Filter null");
             }
 
-            if(fsFactory == null) {
+            if (activityListener == null) {
+                throw new ArgumentNullException("Given activityListener is null");
+            }
+
+            if (fsFactory == null) {
                 this.fileSystemFactory = new FileSystemInfoFactory();
             } else {
                 this.fileSystemFactory = fsFactory;
@@ -93,6 +107,7 @@ namespace CmisSync.Lib
             this.filter = filter;
             this.repoInfo = repoInfo;
             this.storage = storage;
+            this.activityListener = activityListener;
         }
 
         /// <summary>
@@ -152,7 +167,7 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.crawler);
                 }
 
-                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.fileSystemFactory);
+                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener, this.fileSystemFactory);
                 this.Queue.EventManager.AddEventHandler(this.crawler);
 
                 // Add remote object moved accumulator
@@ -171,7 +186,7 @@ namespace CmisSync.Lib
                 var localDetection = new LocalSituationDetection();
                 var remoteDetection = new RemoteSituationDetection();
 
-                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage);
+                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.activityListener);
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);

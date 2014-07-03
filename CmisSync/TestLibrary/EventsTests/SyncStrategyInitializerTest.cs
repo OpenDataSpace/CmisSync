@@ -46,30 +46,28 @@ namespace TestLibrary.EventsTests
         [Test, Category("Fast")]
         public void ConstructorTakesQueueAndManagerAndStorage()
         {
-            var queue = new Mock<ISyncEventQueue>();
-            var storage = new Mock<IMetaDataStorage>();
-            new SyncStrategyInitializer(queue.Object, storage.Object, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object);
+            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, Mock.Of<IActivityListener>());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new SyncStrategyInitializer(null, Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object);
+            new SyncStrategyInitializer(null, Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, Mock.Of<IActivityListener>());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull()
         {
-            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), null, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object);
+            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), null, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, Mock.Of<IActivityListener>());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfRepoInfoIsNull()
         {
-            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object);
+            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, Mock.Of<IActivityListener>());
         }
 
         [Test, Category("Fast")]
@@ -77,7 +75,7 @@ namespace TestLibrary.EventsTests
         {
             var queue = new Mock<ISyncEventQueue>();
             var storage = new Mock<IMetaDataStorage>();
-            var handler = new SyncStrategyInitializer(queue.Object, storage.Object, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object);
+            var handler = new SyncStrategyInitializer(queue.Object, storage.Object, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, Mock.Of<IActivityListener>());
 
             var e = new Mock<ISyncEvent>();
             Assert.False(handler.Handle(e.Object));
@@ -208,7 +206,7 @@ namespace TestLibrary.EventsTests
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(s => s.EventManager).Returns(manager);
 
-            return new SyncStrategyInitializer(queue.Object, storage, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object);
+            return new SyncStrategyInitializer(queue.Object, storage, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, Mock.Of<IActivityListener>());
         }
 
         private static void VerifyNonContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times)

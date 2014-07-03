@@ -43,6 +43,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
         private IFilterAggregator filter;
+        private IActivityListener activityListener;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.DescendantsCrawler"/> class.
@@ -52,6 +53,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="localFolder">Local folder.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="filter">Aggregated filter.</param>
+        /// <param name ="activityListener">Activity listner.</param>
         /// <param name="fsFactory">File system info factory.</param>
         public DescendantsCrawler(
             ISyncEventQueue queue,
@@ -59,6 +61,7 @@ namespace CmisSync.Lib.Sync.Strategy
             IDirectoryInfo localFolder,
             IMetaDataStorage storage,
             IFilterAggregator filter,
+            IActivityListener activityListener,
             IFileSystemInfoFactory fsFactory = null)
             : base(queue)
         {
@@ -78,10 +81,15 @@ namespace CmisSync.Lib.Sync.Strategy
                 throw new ArgumentNullException("Given filter is null");
             }
 
+            if (activityListener == null) {
+                throw new ArgumentNullException("Given activityListener is null");
+            }
+
             this.storage = storage;
             this.remoteFolder = remoteFolder;
             this.localFolder = localFolder;
             this.filter = filter;
+            this.activityListener = activityListener;
 
             if (fsFactory == null) {
                 this.fsFactory = new FileSystemInfoFactory();
@@ -99,7 +107,10 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             if(e is StartNextSyncEvent) {
                 Logger.Debug("Starting DecendantsCrawlSync upon " + e);
-                this.CrawlDescendants();
+                using (var activity = new ActivityListenerResource(this.activityListener)) {
+                    this.CrawlDescendants();
+                }
+
                 this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
                 return true;
             }

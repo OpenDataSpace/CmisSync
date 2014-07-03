@@ -251,7 +251,7 @@ namespace CmisSync.Lib.Sync
                 this.Status = status;
             };
 
-            this.Queue.EventManager.AddEventHandler(new SyncStrategyInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, this.fileSystemFactory));
+            this.Queue.EventManager.AddEventHandler(new SyncStrategyInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
         }
 
         /// <summary>
