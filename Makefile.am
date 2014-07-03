@@ -52,7 +52,7 @@ tmpinst:
 	rm -rf tmpinst
 
 debian-package: tmpinst
-	make BASEDIR=$(abs_top_builddir)/debian VERSION=`git describe --match linux* | cut -d - -f 2` -C debian build
+	make BASEDIR=$(abs_top_builddir)/packaging VERSION=$(VERSION) -C packaging build
 
 apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release -t:Clean
