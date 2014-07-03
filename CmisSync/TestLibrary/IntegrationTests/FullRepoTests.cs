@@ -94,7 +94,6 @@ namespace TestLibrary.IntegrationTests
         private ISession session;
         private CmisRepoMock repo;
 
-
         [TestFixtureSetUp]
         public void ClassInit()
         {
@@ -119,14 +118,14 @@ namespace TestLibrary.IntegrationTests
         [SetUp]
         public void Init()
         {
-            Subfolder = SubfolderBase + Guid.NewGuid().ToString();
-            Console.WriteLine("Working on " + Subfolder);
+            this.Subfolder = SubfolderBase + Guid.NewGuid().ToString();
+            Console.WriteLine("Working on " + this.Subfolder);
 
             // RepoInfo
             this.repoInfo = new RepoInfo {
                 AuthenticationType = AuthenticationType.BASIC,
-                LocalPath = Path.Combine(config[1].ToString(), Subfolder),
-                RemotePath = config[2].ToString() + "/" + Subfolder,
+                LocalPath = Path.Combine(config[1].ToString(), this.Subfolder),
+                RemotePath = config[2].ToString() + "/" + this.Subfolder,
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
                 RepositoryId = config[6].ToString()
@@ -157,20 +156,21 @@ namespace TestLibrary.IntegrationTests
 
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
             foreach (var child in root.GetChildren()) {
-                if (child is IFolder && child.Name == Subfolder) {
+                if (child is IFolder && child.Name == this.Subfolder) {
                     (child as IFolder).DeleteTree(true, null, true);
                 }
             }
 
-            this.remoteRootDir = root.CreateFolder(Subfolder);
+            this.remoteRootDir = root.CreateFolder(this.Subfolder);
         }
 
         [TearDown]
         public void TestDown()
         {
-            if(this.localRootDir.Exists){
+            if (this.localRootDir.Exists) {
                 this.localRootDir.Delete(true);
             }
+
             this.remoteRootDir.DeleteTree(true, null, true);
             this.repo.Dispose();
         }
@@ -553,6 +553,7 @@ namespace TestLibrary.IntegrationTests
             int count = 100;
 
             this.repo.Initialize();
+            this.repo.Run();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             for (int i = 1; i <= count; i++) {
