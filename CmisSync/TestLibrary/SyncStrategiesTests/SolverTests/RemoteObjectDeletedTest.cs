@@ -115,6 +115,9 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             string path = Path.Combine(Path.GetTempPath(), "a");
             string fileName = "fileName";
             string filePath = Path.Combine(path, fileName);
+            string syncedFileName = "syncedFileName";
+            string syncedFilePath = Path.Combine(path, syncedFileName);
+            Guid syncedFileGuid = Guid.NewGuid();
             var storage = new Mock<IMetaDataStorage>();
             Mock<IMappedObject> folder = storage.AddLocalFolder(path, "id");
             var dirInfo = new Mock<IDirectoryInfo>();
@@ -122,11 +125,19 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.FullName).Returns(filePath);
             fileInfo.Setup(f => f.Name).Returns(fileName);
-            dirInfo.SetupFiles(fileInfo.Object);
+            var syncedFileInfo = new Mock<IFileInfo>();
+            syncedFileInfo.Setup(s => s.FullName).Returns(syncedFilePath);
+            syncedFileInfo.Setup(s => s.Name).Returns(syncedFileName);
+            syncedFileInfo.Setup(s => s.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(syncedFileGuid.ToString());
+            dirInfo.SetupFiles(fileInfo.Object, syncedFileInfo.Object);
+            var mappedSyncedFile = new MappedObject(syncedFileName, "id", MappedObjectType.File, "parentId", "changeToken", 0) { Guid = syncedFileGuid };
+            storage.AddMappedFile(mappedSyncedFile, syncedFilePath);
 
             new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, null);
 
             dirInfo.Verify(d => d.Delete(true), Times.Never());
+            syncedFileInfo.Verify(s => s.Delete(), Times.Once());
+            fileInfo.Verify(f => f.Delete(), Times.Never());
             storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
         }
     }
