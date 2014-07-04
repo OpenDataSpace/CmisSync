@@ -32,30 +32,30 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Collections.ObjectModel;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Config;
-using CmisSync.Lib.Cmis;
-using log4net;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Events.Filter;
-using CmisSync.Lib.Sync;
-
-#if __COCOA__
-using Edit = CmisSync.EditWizardController;
-#endif
-
 namespace CmisSync
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Events.Filter;
+    using CmisSync.Lib.Sync;
+
+    using log4net;
+
+    #if __COCOA__
+    using Edit = CmisSync.EditWizardController;
+    #endif
+
     /// <summary>
     /// Platform-independant part of the main CmisSync controller.
     /// </summary>
@@ -66,30 +66,25 @@ namespace CmisSync
         /// </summary>
         protected static readonly ILog Logger = LogManager.GetLogger(typeof(ControllerBase));
 
-
         /// <summary>
         /// Whether it is the first time that CmisSync is being run.
         /// </summary>
         private bool firstRun;
-
 
         /// <summary>
         /// All the info about the CmisSync synchronized folder being created.
         /// </summary>
         private RepoInfo repoInfo;
 
-
         /// <summary>
         /// Whether the reporsitories have finished loading.
         /// </summary>
         public bool RepositoriesLoaded { get; private set; }
 
-
         /// <summary>
         /// List of the CmisSync synchronized folders.
         /// </summary>
         private List<CmisRepo> repositories = new List<CmisRepo>();
-
 
         /// <summary>
         /// Dictionary of the edit folder diaglogs
@@ -98,12 +93,10 @@ namespace CmisSync
         /// </summary>
         private Dictionary<string, Edit> edits = new Dictionary<string, Edit>();
 
-
         /// <summary>
         /// Path where the CmisSync synchronized folders are by default.
         /// </summary>
         public string FoldersPath { get; private set; }
-
 
         public event ShowSetupWindowEventHandler ShowSetupWindowEvent = delegate { };
         public delegate void ShowSetupWindowEventHandler(PageType page_type);
@@ -126,7 +119,6 @@ namespace CmisSync
         public event Action OnSyncing = delegate { };
         public event Action OnError = delegate { };
 
-
         public event AlertNotificationRaisedEventHandler AlertNotificationRaised = delegate { };
         public delegate void AlertNotificationRaisedEventHandler(string title, string message);
 
@@ -142,7 +134,6 @@ namespace CmisSync
         public delegate void ProxyAuthRequiredEventHandler (string reponame);
         public event ProxyAuthRequiredEventHandler ProxyAuthReqired = delegate { };
 
-
         /// <summary>
         /// Get the repositories configured in CmisSync.
         /// </summary>
@@ -150,11 +141,11 @@ namespace CmisSync
         {
             get
             {
-                lock (this.repo_lock)
+                lock (this.repo_lock) {
                     return this.repositories.GetRange(0, this.repositories.Count).ToArray();
+                }
             }
         }
-
 
         /// <summary>
         /// Whether it is the first time that CmisSync is being run.
@@ -163,10 +154,9 @@ namespace CmisSync
         {
             get
             {
-                return firstRun;
+                return this.firstRun;
             }
         }
-
 
         /// <summary>
         /// The list of synchronized folders.
@@ -176,67 +166,59 @@ namespace CmisSync
             get
             {
                 List<string> folders = new List<string>();
-                foreach (RepoInfo f in ConfigManager.CurrentConfig.Folders)
-                {
+                foreach (RepoInfo f in ConfigManager.CurrentConfig.Folders) {
                     folders.Add(f.DisplayName);
                 }
+
                 folders.Sort();
 
                 return folders;
             }
         }
 
-
         /// <summary>
         /// Add CmisSync to the list of programs to be started up when the user logs into Windows.
         /// </summary>
         public abstract void CreateStartupItem();
-
 
         /// <summary>
         /// Add CmisSync to the user's Windows Explorer bookmarks.
         /// </summary>
         public abstract void AddToBookmarks();
 
-
         /// <summary>
         /// Creates the CmisSync folder in the user's home folder.
         /// </summary>
         public abstract bool CreateCmisSyncFolder();
-
 
         /// <summary>
         /// Keeps track of whether a download or upload is going on, for display of the task bar animation.
         /// </summary>
         private IActivityListener activityListenerAggregator;
 
-
         private ActiveActivitiesManager activitiesManager;
-
 
         /// <summary>
         /// Concurrency locks.
         /// </summary>
         private Object repo_lock = new Object();
 
-
         /// <summary>
         /// Constructor.
         /// </summary>
         public ControllerBase()
         {
-            activityListenerAggregator = new ActivityListenerAggregator(this);
-            FoldersPath = ConfigManager.CurrentConfig.GetFoldersPath();
-            activitiesManager = new ActiveActivitiesManager();
+            this.activityListenerAggregator = new ActivityListenerAggregator(this);
+            this.FoldersPath = ConfigManager.CurrentConfig.GetFoldersPath();
+            this.activitiesManager = new ActiveActivitiesManager();
             this.activitiesManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
-                OnTransmissionListChanged();
+                this.OnTransmissionListChanged();
             };
         }
 
         public List<FileTransmissionEvent> ActiveTransmissions() {
             return this.activitiesManager.ActiveTransmissionsAsList();
         }
-
 
         /// <summary>
         /// Initialize the controller.
@@ -247,37 +229,33 @@ namespace CmisSync
             this.firstRun = firstRun;
 
             // Create the CmisSync folder and add it to the bookmarks
-            if (CreateCmisSyncFolder())
-                AddToBookmarks();
+            if (this.CreateCmisSyncFolder()) {
+                this.AddToBookmarks();
+            }
 
-            if (firstRun)
-            {
+            if (firstRun) {
                 ConfigManager.CurrentConfig.Notifications = true;
             }
         }
-
 
         /// <summary>
         /// Once the UI has loaded, show setup window if it is the first run, or check the repositories.
         /// </summary>
         public void UIHasLoaded()
         {
-            if (firstRun)
-            {
-                ShowSetupWindow(PageType.Setup);
-            }
-            else
-            {
+            if (this.firstRun) {
+                this.ShowSetupWindow(PageType.Setup);
+            } else {
                 new Thread(() =>
                 {
                     CheckRepositories();
                     RepositoriesLoaded = true;
+
                     // Update UI.
                     FolderListChanged();
                 }).Start();
             }
         }
-
 
         /// <summary>
         /// Initialize (in the UI and syncing mechanism) an existing CmisSync synchronized folder.
@@ -285,15 +263,17 @@ namespace CmisSync
         /// <param name="folderPath">Synchronized folder path</param>
         private void AddRepository(RepoInfo repositoryInfo)
         {
-            CmisRepo repo = new CmisRepo(repositoryInfo, activityListenerAggregator);
+            CmisRepo repo = new CmisRepo(repositoryInfo, this.activityListenerAggregator);
 
             repo.SyncStatusChanged += delegate(SyncStatus status)
             {
-                UpdateState();
+                this.UpdateState();
             };
 
             repo.Queue.EventManager.AddEventHandler(
-                new GenericSyncEventHandler<FileTransmissionEvent>( 50, delegate(ISyncEvent e){
+                new GenericSyncEventHandler<FileTransmissionEvent>(
+                50,
+                delegate(ISyncEvent e) {
                 this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 FileTransmissionEvent transEvent = e as FileTransmissionEvent;
                 transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args)
@@ -309,16 +289,25 @@ namespace CmisSync
             }));
             repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
             repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
-            repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ProxyAuthRequiredEvent>(0, delegate(ISyncEvent e) {
-                ProxyAuthReqired(repositoryInfo.DisplayName);
+            repo.Queue.EventManager.AddEventHandler(
+                new GenericSyncEventHandler<ProxyAuthRequiredEvent>(
+                0,
+                delegate(ISyncEvent e) {
+                this.ProxyAuthReqired(repositoryInfo.DisplayName);
                 return true;
             }));
-            repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<PermissionDeniedEvent>(0, delegate(ISyncEvent e) {
-                ShowChangePassword(repositoryInfo.DisplayName);
+            repo.Queue.EventManager.AddEventHandler(
+                new GenericSyncEventHandler<PermissionDeniedEvent>(
+                0,
+                delegate(ISyncEvent e) {
+                this.ShowChangePassword(repositoryInfo.DisplayName);
                 return true;
             }));
-            repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<SuccessfulLoginEvent>( 0, delegate(ISyncEvent e) {
-                SuccessfulLogin(repositoryInfo.DisplayName);
+            repo.Queue.EventManager.AddEventHandler(
+                new GenericSyncEventHandler<SuccessfulLoginEvent>(
+                0,
+                delegate(ISyncEvent e) {
+                this.SuccessfulLogin(repositoryInfo.DisplayName);
                 return false;
             }));
             this.repositories.Add(repo);
@@ -330,38 +319,35 @@ namespace CmisSync
             lock (this.repo_lock)
             {
                 RepoInfo f = ConfigManager.CurrentConfig.GetRepoInfo(reponame);
-                if (f != null)
-                {
+                if (f != null) {
                     Edit edit = null;
-                    if (edits.TryGetValue(reponame, out edit))
-                    {
+                    if (this.edits.TryGetValue(reponame, out edit)) {
                         edit.Controller.CloseWindow();
                     }
-                    RemoveRepository(f);
+
+                    this.RemoveRepository(f);
                     ConfigManager.CurrentConfig.Folders.Remove(f);
                     ConfigManager.CurrentConfig.Save();
-                }
-                else
-                {
+                } else {
                     Logger.Warn("Reponame \"" + reponame + "\" could not be found: Removing Repository failed");
                 }
             }
 
             // Update UI.
-            FolderListChanged();
+            this.FolderListChanged();
         }
 
         public void EditRepositoryFolder(string reponame)
         {
-            EditRepository (reponame, Edit.EditType.EditFolder);
+            this.EditRepository(reponame, Edit.EditType.EditFolder);
         }
 
         public void EditRepositoryCredentials(string reponame)
         {
-            EditRepository (reponame, Edit.EditType.EditCredentials);
+            this.EditRepository(reponame, Edit.EditType.EditCredentials);
         }
 
-        private void EditRepository(string reponame,Edit.EditType type)
+        private void EditRepository(string reponame, Edit.EditType type)
         {
             RepoInfo folder;
 
@@ -375,18 +361,16 @@ namespace CmisSync
                 }
 
                 Edit edit = null;
-                if (edits.TryGetValue(reponame, out edit))
-                {
+                if (this.edits.TryGetValue(reponame, out edit)) {
                     edit.Controller.OpenWindow();
                     return;
                 }
-
 
                 CmisSync.Lib.Credentials.CmisRepoCredentials credentials = new CmisSync.Lib.Credentials.CmisRepoCredentials()
                 {
                     Address = folder.Address,
                     UserName = folder.User,
-                    Password = new Lib.Credentials.Password(){
+                    Password = new Lib.Credentials.Password() {
                         ObfuscatedPassword = folder.ObfuscatedPassword
                     },
                     RepoId = folder.RepositoryId
@@ -394,22 +378,23 @@ namespace CmisSync
                 List<string> oldIgnores = new List<string>();
                 foreach (var ignore in folder.IgnoredFolders)
                 {
-                    if (!String.IsNullOrEmpty (ignore.Path)) {
+                    if (!string.IsNullOrEmpty(ignore.Path)) {
                         oldIgnores.Add(ignore.Path);
                     }
                 }
+
                 edit = new Edit(type, credentials, folder.DisplayName, folder.RemotePath, oldIgnores, folder.LocalPath);
-                edits.Add(reponame, edit);
+                this.edits.Add(reponame, edit);
 
                 edit.Controller.SaveFolderEvent += delegate
                 {
                     lock (this.repo_lock)
                     {
                         folder.IgnoredFolders.Clear();
-                        foreach (string ignore in edit.Ignores)
-                        {
+                        foreach (string ignore in edit.Ignores) {
                             folder.AddIgnorePath(ignore);
                         }
+
                         folder.SetPassword(edit.Credentials.Password);
                         ConfigManager.CurrentConfig.Save();
                         foreach (CmisRepo repo in this.repositories)
@@ -426,7 +411,7 @@ namespace CmisSync
                 {
                     lock (this.repo_lock)
                     {
-                        edits.Remove(reponame);
+                        this.edits.Remove(reponame);
                     }
                 };
                 edit.Controller.OpenWindow();
@@ -440,15 +425,14 @@ namespace CmisSync
         /// <param name="folder">The synchronized folder to remove</param>
         private void RemoveRepository(RepoInfo folder)
         {
-            foreach (CmisRepo repo in this.repositories)
-            {
-                if (repo.LocalPath.Equals(folder.LocalPath))
-                {
+            foreach (CmisRepo repo in this.repositories) {
+                if (repo.LocalPath.Equals(folder.LocalPath)) {
                     repo.Dispose();
                     this.repositories.Remove(repo);
                     break;
                 }
             }
+
             // Remove DBreeze DB folder
             Directory.Delete(folder.GetDatabasePath(), true);
 
@@ -456,9 +440,8 @@ namespace CmisSync
             string dbfilename = folder.DisplayName;
             dbfilename = dbfilename.Replace("\\", "_");
             dbfilename = dbfilename.Replace("/", "_");
-            RemoveDatabase(dbfilename);
+            this.RemoveDatabase(dbfilename);
         }
-
 
         /// <summary>
         /// Remove the local database associated with a CmisSync synchronized folder.
@@ -467,9 +450,10 @@ namespace CmisSync
         private void RemoveDatabase(string folder_path)
         {
             string databasefile = Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), Path.GetFileName(folder_path) + ".cmissync");
-            if (File.Exists(databasefile)) File.Delete(databasefile);
+            if (File.Exists(databasefile)) {
+                File.Delete(databasefile);
+            }
         }
-
 
         /// <summary>
         /// Pause or un-pause synchronization for a particular folder.
@@ -479,19 +463,19 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
-                foreach (CmisRepo aRepo in this.repositories)
+                foreach (CmisRepo repo in this.repositories)
                 {
-                    if (aRepo.Name == repoName)
+                    if (repo.Name == repoName)
                     {
-                        if (aRepo.Status != SyncStatus.Suspend)
+                        if (repo.Status != SyncStatus.Suspend)
                         {
-                            aRepo.Suspend();
-                            Logger.Debug("Requested to syspend sync of repo " + aRepo.Name);
+                            repo.Suspend();
+                            Logger.Debug("Requested to syspend sync of repo " + repo.Name);
                         }
                         else
                         {
-                            aRepo.Resume();
-                            Logger.Debug("Requested to resume sync of repo " + aRepo.Name);
+                            repo.Resume();
+                            Logger.Debug("Requested to resume sync of repo " + repo.Name);
                         }
                     }
                 }
@@ -502,30 +486,26 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
-                foreach (CmisRepo aRepo in this.repositories)
-                {
-                    aRepo.Stopped = true;
+                foreach (CmisRepo repo in this.repositories) {
+                    repo.Stopped = true;
                 }
+
                 Logger.Debug("Start to stop all active file transmissions");
                 do {
-                    List<FileTransmissionEvent> activeList = activitiesManager.ActiveTransmissionsAsList();
-                    foreach (FileTransmissionEvent transmissionEvent in activeList)
-                    {
-                        if (transmissionEvent.Status.Aborted.GetValueOrDefault())
-                        {
+                    List<FileTransmissionEvent> activeList = this.activitiesManager.ActiveTransmissionsAsList();
+                    foreach (FileTransmissionEvent transmissionEvent in activeList) {
+                        if (transmissionEvent.Status.Aborted.GetValueOrDefault()) {
                             continue;
                         }
-                        if (!transmissionEvent.Status.Aborting.GetValueOrDefault())
-                        {
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs(){Aborting=true});
+
+                        if (!transmissionEvent.Status.Aborting.GetValueOrDefault()) {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
                         }
                     }
-                    if (activeList.Count > 0)
-                    {
+
+                    if (activeList.Count > 0) {
                         Thread.Sleep(100);
-                    }
-                    else
-                    {
+                    } else {
                         break;
                     }
                 } while (true);
@@ -537,54 +517,48 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
-                foreach (CmisRepo aRepo in this.repositories)
-                {
-                    aRepo.Stopped = false;
+                foreach (CmisRepo repo in this.repositories) {
+                    repo.Stopped = false;
                 }
             }
         }
-
 
         /// <summary>
         /// Check the configured CmisSync synchronized folders.
         /// Remove the ones whose folders have been deleted.
         /// </summary>
-        private void CheckRepositories()
-        {
+        private void CheckRepositories() {
             lock (this.repo_lock)
             {
                 List<RepoInfo> toBeDeleted = new List<RepoInfo>();
+
                 // If folder has been deleted, remove it from configuration too.
-                foreach (var f in ConfigManager.CurrentConfig.Folders)
-                {
+                foreach (var f in ConfigManager.CurrentConfig.Folders) {
                     string folder_name = f.DisplayName;
                     string folder_path = f.LocalPath;
 
-                    if (!Directory.Exists(folder_path))
-                    {
-                        RemoveRepository(f);
+                    if (!Directory.Exists(folder_path)) {
+                        this.RemoveRepository(f);
                         toBeDeleted.Add(f);
 
                         Logger.Info("Controller | Removed folder '" + folder_name + "' from config");
-
-                    }
-                    else
-                    {
-                        AddRepository(f);
+                    } else {
+                        this.AddRepository(f);
                     }
                 }
 
-                foreach(var f in toBeDeleted){
+                foreach(var f in toBeDeleted) {
                     ConfigManager.CurrentConfig.Folders.Remove(f);
                 }
-                if(toBeDeleted.Count>0)
+
+                if (toBeDeleted.Count > 0) {
                     ConfigManager.CurrentConfig.Save();
+                }
             }
 
             // Update UI.
-            FolderListChanged();
+            this.FolderListChanged();
         }
-
 
         /// <summary>
         /// Fires events for the current syncing state.
@@ -593,18 +567,17 @@ namespace CmisSync
         {
             bool has_unsynced_repos = false;
 
-            foreach (CmisRepo repo in Repositories)
-            {
+            foreach (CmisRepo repo in this.Repositories) {
 //                repo.SyncInBackground();
 //                TODO
             }
 
-            if (has_unsynced_repos)
-                OnError();
-            else
-                OnIdle();
+            if (has_unsynced_repos) {
+                this.OnError();
+            } else {
+                this.OnIdle();
+            }
         }
-
 
         /// <summary>
         /// Fix the file attributes of a folder, recursively.
@@ -612,19 +585,23 @@ namespace CmisSync
         /// <param name="path">Folder to fix</param>
         private void ClearFolderAttributes(string path)
         {
-            if (!Directory.Exists(path))
+            if (!Directory.Exists(path)) {
                 return;
+            }
 
             string[] folders = Directory.GetDirectories(path);
 
-            foreach (string folder in folders)
-                ClearFolderAttributes(folder);
+            foreach (string folder in folders) {
+                this.ClearFolderAttributes(folder);
+            }
 
             string[] files = Directory.GetFiles(path);
 
-            foreach (string file in files)
-                if (!CmisSync.Lib.Utils.IsSymlink(file))
+            foreach (string file in files) {
+                if (!CmisSync.Lib.Utils.IsSymlink(file)) {
                     File.SetAttributes(file, FileAttributes.Normal);
+                }
+            }
         }
 
         public void AddRepo(RepoInfo info)
@@ -636,38 +613,35 @@ namespace CmisSync
                 ConfigManager.CurrentConfig.Save();
 
                 // Initialize in the UI.
-                AddRepository(info);
+                this.AddRepository(info);
             }
 
             // Update UI.
-            FolderListChanged();
+            this.FolderListChanged();
         }
-
 
         /// <summary>
         /// Show first-time wizard.
         /// </summary>
         public void ShowSetupWindow(PageType page_type)
         {
-            ShowSetupWindowEvent(page_type);
+            this.ShowSetupWindowEvent(page_type);
         }
-
 
         /// <summary>
         /// Show setting dialog
         /// </summary>
         public void ShowSettingWindow()
         {
-            ShowSettingWindowEvent();
+            this.ShowSettingWindowEvent();
         }
-
 
         /// <summary>
         /// Show info about DataSpace Sync
         /// </summary>
         public void ShowAboutWindow()
         {
-            ShowAboutWindowEvent();
+            this.ShowAboutWindowEvent();
         }
 
         public bool IsEditWindowVisible
@@ -676,10 +650,12 @@ namespace CmisSync
             {
                 lock (this.repo_lock)
                 {
-                    return (this.edits.Count > 0);
+                    return this.edits.Count > 0;
                 }
             }
-            private set { }
+
+            private set {
+            }
         }
 
         /// <summary>
@@ -687,19 +663,19 @@ namespace CmisSync
         /// </summary>
         public virtual void Quit()
         {
-            foreach (CmisRepo repo in Repositories)
+            foreach (CmisRepo repo in this.Repositories) {
                 repo.Dispose();
+            }
 
             Environment.Exit(0);
         }
-
 
         /// <summary>
         /// A download or upload has started, so run task icon animation.
         /// </summary>
         public void ActivityStarted()
         {
-            OnSyncing();
+            this.OnSyncing();
         }
 
         /// <summary>
@@ -707,7 +683,7 @@ namespace CmisSync
         /// </summary>
         public void ActivityStopped()
         {
-            OnIdle();
+            this.OnIdle();
         }
     }
 }

@@ -87,7 +87,7 @@ namespace TestLibrary.IntegrationTests
     {
         private static readonly string SubfolderBase = "FullRepoTests_";
         private static dynamic config;
-        private string Subfolder;
+        private string subfolder;
         private RepoInfo repoInfo;
         private DirectoryInfo localRootDir;
         private IFolder remoteRootDir;
@@ -118,14 +118,14 @@ namespace TestLibrary.IntegrationTests
         [SetUp]
         public void Init()
         {
-            this.Subfolder = SubfolderBase + Guid.NewGuid().ToString();
-            Console.WriteLine("Working on " + this.Subfolder);
+            this.subfolder = SubfolderBase + Guid.NewGuid().ToString();
+            Console.WriteLine("Working on " + this.subfolder);
 
             // RepoInfo
             this.repoInfo = new RepoInfo {
                 AuthenticationType = AuthenticationType.BASIC,
-                LocalPath = Path.Combine(config[1].ToString(), this.Subfolder),
-                RemotePath = config[2].ToString() + "/" + this.Subfolder,
+                LocalPath = Path.Combine(config[1].ToString(), this.subfolder),
+                RemotePath = config[2].ToString() + "/" + this.subfolder,
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
                 RepositoryId = config[6].ToString()
@@ -156,12 +156,12 @@ namespace TestLibrary.IntegrationTests
 
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
             foreach (var child in root.GetChildren()) {
-                if (child is IFolder && child.Name == this.Subfolder) {
+                if (child is IFolder && child.Name == this.subfolder) {
                     (child as IFolder).DeleteTree(true, null, true);
                 }
             }
 
-            this.remoteRootDir = root.CreateFolder(this.Subfolder);
+            this.remoteRootDir = root.CreateFolder(this.subfolder);
         }
 
         [TearDown]

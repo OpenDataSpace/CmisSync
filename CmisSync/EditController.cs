@@ -16,24 +16,28 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
 namespace CmisSync
 {
+    using System;
+
     /// <summary>
     /// Controller for the Edit diaglog.
     /// </summary>
     public class EditController
     {
-        //===== Actions =====
+        // ===== Actions =====
+
         /// <summary>
         /// Open Edit Window Action
         /// </summary>
         public event Action OpenWindowEvent = delegate { };
+
         /// <summary>
         /// Save Folder Action
         /// </summary>
         public event Action SaveFolderEvent = delegate { };
+
         /// <summary>
         /// Close Edit Window Action
         /// </summary>
@@ -44,7 +48,7 @@ namespace CmisSync
         /// </summary>
         public void OpenWindow()
         {
-            OpenWindowEvent();
+            this.OpenWindowEvent();
         }
 
         /// <summary>
@@ -52,7 +56,7 @@ namespace CmisSync
         /// </summary>
         public void SaveFolder()
         {
-            SaveFolderEvent();
+            this.SaveFolderEvent();
         }
 
         /// <summary>
@@ -60,7 +64,7 @@ namespace CmisSync
         /// </summary>
         public void CloseWindow()
         {
-            CloseWindowEvent();
+            this.CloseWindowEvent();
         }
     }
 }

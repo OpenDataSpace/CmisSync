@@ -32,21 +32,19 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+namespace CmisSync
+{
+    using System;
+    using System.Net;
+    using System.Threading;
 
-using System;
-using System.Net;
-using System.Threading;
-
-using CmisSync.Lib;
-
-namespace CmisSync {
+    using CmisSync.Lib;
 
     /// <summary>
     /// Controller for the About dialog.
     /// </summary>
     public class AboutController {
-
-        //===== Actions =====
+        // ===== Actions =====
         /// <summary>
         /// Show About Windows Action
         /// </summary>

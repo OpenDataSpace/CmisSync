@@ -32,25 +32,27 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Threading;
-
-using CmisSync.Lib;
-using CmisSync.Lib.Config;
-using CmisSync.Lib.Sync;
-
-using log4net;
-using log4net.Config;
 
 [assembly: CLSCompliant(true)]
 
 namespace CmisSync
 {
-    // The CmisSync main class.
+    using System.Diagnostics;
+    using System.IO;
+    using System.Net;
+    using System.Threading;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Sync;
+
+    using log4net;
+    using log4net.Config;
+
+    /// <summary>
+    /// Main Program.
+    /// </summary>
     [CLSCompliant(false)]
     public class Program
     {
@@ -67,16 +69,17 @@ namespace CmisSync
         /// <summary>
         /// Mutex checking whether CmisSync is already running or not.
         /// </summary>
-        private static Mutex program_mutex = new Mutex(false, "DataSpaceSync");
+        private static Mutex programMutex = new Mutex(false, "DataSpaceSync");
 
         /// <summary>
         /// Logging.
         /// </summary>
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Program));
 
-        //
-        // Main method for DataSpace Sync.
-        //
+        /// <summary>
+        /// The entry point of DataSpace Sync, where the program control starts and ends.
+        /// </summary>
+        /// <param name="args">The command-line arguments.</param>
         [STAThread]
         public static void Main(string[] args)
         {
@@ -84,13 +87,14 @@ namespace CmisSync
             Environment.SetEnvironmentVariable("MONO_XMLSERIALIZER_THS", "no");
 #endif
 
-            bool firstRun = ! File.Exists(ConfigManager.CurrentConfigFile);
+            bool firstRun = !File.Exists(ConfigManager.CurrentConfigFile);
 
             ServicePointManager.CertificatePolicy = new CertPolicyHandler();
 
             // Migrate config.xml from past versions, if necessary.
-            if ( ! firstRun )
+            if (!firstRun) {
                 ConfigMigration.Migrate();
+            }
 
             FileInfo alternativeLog4NetConfigFile = new FileInfo(Path.Combine(Directory.GetParent(ConfigManager.CurrentConfigFile).FullName, "log4net.config"));
             if(alternativeLog4NetConfigFile.Exists)
@@ -110,7 +114,6 @@ namespace CmisSync
                 Backend.Platform != PlatformID.MacOSX &&
                 Backend.Platform != PlatformID.Win32NT)
                 {
-
                     string n = Environment.NewLine;
 
                     Console.WriteLine(n + Properties_Resources.ApplicationName +
@@ -130,11 +133,11 @@ namespace CmisSync
                 }
 
                 // Only allow one instance of CmisSync (on Windows)
-                if (!program_mutex.WaitOne(0, false))
-                {
+                if (!programMutex.WaitOne(0, false)) {
                     Logger.Error(Properties_Resources.ApplicationName + " is already running.");
                     Environment.Exit(-1);
                 }
+
                 try
                 {
                     CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
@@ -145,7 +148,6 @@ namespace CmisSync
                     Console.Error.WriteLine(message);
                     Environment.Exit(-1);
                 }
-
 
                 // Increase the number of concurrent requests to each server,
                 // as an unsatisfying workaround until this DotCMIS bug 632 is solved.

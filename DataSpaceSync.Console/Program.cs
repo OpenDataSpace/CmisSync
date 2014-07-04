@@ -31,7 +31,6 @@ namespace DataSpaceSync.Console
     using log4net;
     using log4net.Config;
 
-
     class ActivityListener : IActivityListener
     {
         public void ActivityStarted()
@@ -48,7 +47,7 @@ namespace DataSpaceSync.Console
         /// <summary>
         /// Mutex checking whether CmisSync is already running or not.
         /// </summary>
-        private static Mutex program_mutex = new Mutex(false, "DataSpaceSync");
+        private static Mutex programMutex = new Mutex(false, "DataSpaceSync");
 
         /// <summary>
         /// Logging.
@@ -60,41 +59,45 @@ namespace DataSpaceSync.Console
         /// </summary>
         private static bool verbose = false;
 
+        /// <summary>
+        /// The entry point of the program, where the program control starts and ends.
+        /// </summary>
+        /// <param name="args">The command-line arguments.</param>
         static void Main(string[] args)
         {
-
             // Only allow one instance of DataSpace Sync (on Windows)
-            if (!program_mutex.WaitOne(0, false))
-            {
+            if (!programMutex.WaitOne(0, false)) {
                 System.Console.WriteLine("DataSpaceSync is already running.");
                 Environment.Exit(-1);
             }
-            if (File.Exists(ConfigManager.CurrentConfigFile))
+
+            if (File.Exists(ConfigManager.CurrentConfigFile)) {
                 ConfigMigration.Migrate();
+            }
 
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
             CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
-            if (args.Length != 0)
-            {
-                foreach(string arg in args) {
+            if (args.Length != 0) {
+                foreach (string arg in args) {
                     // Check, if the user would like to read console logs
-                    if (arg.Equals("-v") || arg.Equals("--verbose"))
+                    if (arg.Equals("-v") || arg.Equals("--verbose")) {
                         verbose = true;
+                    }
                 }
             }
+
             // Add Console Logging if user wants to
-            if (verbose)
+            if (verbose) {
                 BasicConfigurator.Configure();
+            }
 
             Logger.Info("Starting.");
 
             List<CmisRepo> repositories = new List<CmisRepo>();
 
-            foreach (RepoInfo repoInfo in ConfigManager.CurrentConfig.Folders)
-            {
+            foreach (RepoInfo repoInfo in ConfigManager.CurrentConfig.Folders) {
                 string path = repoInfo.LocalPath;
-                if (!Directory.Exists(path))
-                {
+                if (!Directory.Exists(path)) {
                     Directory.CreateDirectory(path);
                 }
 
@@ -103,8 +106,7 @@ namespace DataSpaceSync.Console
                 repo.Initialize();
             }
 
-            while(true)
-            {
+            while (true) {
                 System.Threading.Thread.Sleep(100);
             }
         }
