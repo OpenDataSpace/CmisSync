@@ -571,10 +571,13 @@ namespace TestLibrary.IntegrationTests
             Assert.That((localDoc.LastWriteTimeUtc - remoteDoc.LastModificationDate).Value.Seconds, Is.EqualTo(0));
         }
 
+        /// <summary>
+        /// Creates the hundred files and sync.
+        /// </summary>
         [Test, Category("Slow"), Category("Erratic"), Timeout(1800000)]
         public void CreateHundredFilesAndSync()
         {
-            int count = 1000;
+            int count = 100;
 
             this.repo.Initialize();
             this.repo.Run();
