@@ -53,7 +53,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, null);
 
-            dirInfo.Verify(d => d.Delete(true), Times.Once());
+            dirInfo.Verify(d => d.Delete(false), Times.Once());
             storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
         }
 
@@ -107,9 +107,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             storage.Verify(s => s.RemoveObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 
-        // TODO
-        [Ignore]
         [Test, Category("Fast"), Category("Solver")]
+        [ExpectedException(typeof(IOException))]
         public void RemoteFolderDeletedButNotAllContainingFilesAreSyncedYet()
         {
             string path = Path.Combine(Path.GetTempPath(), "a");
@@ -117,6 +116,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             string filePath = Path.Combine(path, fileName);
             string syncedFileName = "syncedFileName";
             string syncedFilePath = Path.Combine(path, syncedFileName);
+            DateTime lastModified = DateTime.UtcNow;
             Guid syncedFileGuid = Guid.NewGuid();
             var storage = new Mock<IMetaDataStorage>();
             Mock<IMappedObject> folder = storage.AddLocalFolder(path, "id");
@@ -129,16 +129,20 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             syncedFileInfo.Setup(s => s.FullName).Returns(syncedFilePath);
             syncedFileInfo.Setup(s => s.Name).Returns(syncedFileName);
             syncedFileInfo.Setup(s => s.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(syncedFileGuid.ToString());
+            syncedFileInfo.Setup(s => s.LastWriteTimeUtc).Returns(lastModified);
             dirInfo.SetupFiles(fileInfo.Object, syncedFileInfo.Object);
-            var mappedSyncedFile = new MappedObject(syncedFileName, "id", MappedObjectType.File, "parentId", "changeToken", 0) { Guid = syncedFileGuid };
+            var mappedSyncedFile = new MappedObject(syncedFileName, "id", MappedObjectType.File, "parentId", "changeToken", 0) { Guid = syncedFileGuid, LastLocalWriteTimeUtc = lastModified };
             storage.AddMappedFile(mappedSyncedFile, syncedFilePath);
 
-            new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, null);
-
-            dirInfo.Verify(d => d.Delete(true), Times.Never());
-            syncedFileInfo.Verify(s => s.Delete(), Times.Once());
-            fileInfo.Verify(f => f.Delete(), Times.Never());
-            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
+            try {
+                new RemoteObjectDeleted().Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, null);
+            } catch(IOException) {
+                dirInfo.Verify(d => d.Delete(true), Times.Never());
+                syncedFileInfo.Verify(s => s.Delete(), Times.Once());
+                fileInfo.Verify(f => f.Delete(), Times.Never());
+                storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
+                throw;
+            }
         }
     }
 }

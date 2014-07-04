@@ -218,6 +218,32 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
+        [Test, Category("Slow"), Category("Conflict")]
+        public void OneRemoteFolderIsDeletedAndOneUnsyncedFileExistsInTheCorrespondingLocalFolder()
+        {
+            string folderName = "Cat";
+            string fileName = "localFile.bin";
+            var folder = this.remoteRootDir.CreateFolder(folderName);
+            folder.CreateDocument("foo.txt", "bar");
+            this.repo.Initialize();
+            this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+
+            using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create));
+            this.remoteRootDir.GetChildren().First().Delete(true);
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(folderName));
+            Assert.That(this.localRootDir.GetDirectories().First().GetFiles().First().Name, Is.EqualTo(fileName));
+            Assert.That(this.localRootDir.GetDirectories().First().GetFiles().Count(), Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(folderName));
+            Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().First().Name, Is.EqualTo(fileName));
+            Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().Count(), Is.EqualTo(1));
+        }
+
         [Test, Category("Slow"), Category("Erratic")]
         public void OneRemoteFolderIsRenamedAndOneCrawlSyncShouldDetectIt()
         {
