@@ -59,6 +59,9 @@ namespace TestLibrary.IntegrationTests
         [TestFixtureSetUp]
         public void ClassInit()
         {
+#if __MonoCS__
+            Environment.SetEnvironmentVariable("MONO_XMLSERIALIZER_THS", "no");
+#endif
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
         }
 
