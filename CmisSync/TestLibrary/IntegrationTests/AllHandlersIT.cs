@@ -156,7 +156,7 @@ namespace TestLibrary.IntegrationTests
 
             var queue = this.CreateQueue(session, storage, fsFactory.Object);
             queue.RunStartSyncEvent();
-            dirInfo.Verify(d => d.Delete(true), Times.Once());
+            dirInfo.Verify(d => d.Delete(false), Times.Once());
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
 
