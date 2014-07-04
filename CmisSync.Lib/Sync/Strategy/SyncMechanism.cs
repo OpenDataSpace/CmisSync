@@ -115,7 +115,10 @@ namespace CmisSync.Lib.Sync.Strategy
 
                 try {
                     this.DoHandle(folderEvent);
-                } catch(Exception) {
+                } catch (RetryException retry) {
+                    Logger.Debug(string.Format("RetryException[{0}] thrown for event {1} => enqueue event", retry.Message, folderEvent.ToString()));
+                    this.Queue.AddEvent(folderEvent);
+                } catch (Exception) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing");
                     this.Queue.AddEvent(new StartNextSyncEvent(true));
                     throw;

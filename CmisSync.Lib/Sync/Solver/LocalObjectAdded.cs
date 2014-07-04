@@ -28,6 +28,7 @@ namespace CmisSync.Lib.Sync.Solver
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Sync.Strategy;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -66,9 +67,10 @@ namespace CmisSync.Lib.Sync.Solver
         public void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
             string parentId = this.GetParentId(localFileSystemInfo, storage);
+            Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFileSystemInfo);
+
             ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, session);
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
-            Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFileSystemInfo);
 
             localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
 
@@ -122,7 +124,11 @@ namespace CmisSync.Lib.Sync.Solver
             if (localFile.IsExtendedAttributeAvailable())
             {
                 uuid = Guid.NewGuid();
-                localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
+                try {
+                    localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
+                } catch (ExtendedAttributeException ex) {
+                    throw new RetryException(ex.Message, ex);
+                }
             }
 
             return uuid;

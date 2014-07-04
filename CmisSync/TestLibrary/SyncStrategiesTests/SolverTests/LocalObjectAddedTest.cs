@@ -29,6 +29,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Solver;
+    using CmisSync.Lib.Sync.Strategy;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -225,6 +226,32 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
             dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k == MappedObject.ExtendedAttributeKey), It.Is<string>(v => !v.Equals(Guid.Empty))), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        [ExpectedException(typeof(RetryException))]
+        public void LocalFileIsUsedByAnotherProcess() {
+            string fileName = "fileName";
+            string fileId = "fileId";
+            string parentId = "parentId";
+            string lastChangeToken = "token";
+            bool extendedAttributes = true;
+            Exception exception = new ExtendedAttributeException();
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+            fileInfo.Setup(f => f.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>())).Throws(exception);
+
+            try {
+                Mock<IDocument> document;
+                this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
+            } catch (RetryException e) {
+                Assert.That(e.InnerException, Is.EqualTo(exception));
+                fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+                this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+                this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Never());
+                throw;
+            }
         }
 
         private IDirectoryInfo SetupParentFolder(string parentId)

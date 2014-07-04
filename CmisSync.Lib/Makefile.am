@@ -159,6 +159,7 @@ SOURCES =  \
 	Sync/Strategy/RemoteObjectFetcher.cs \
 	Sync/Strategy/RemoteObjectMovedOrRenamedAccumulator.cs \
 	Sync/Strategy/RemoteSituationDetection.cs \
+	Sync/Strategy/RetryException.cs \
 	Sync/Strategy/SyncMechanism.cs \
 	Sync/Strategy/Watcher/IWatcherProducer.cs \
 	Sync/Strategy/Watcher/MacWatcher.cs \

@@ -217,6 +217,7 @@
     <Compile Include="Events\EventFilter\FilterAggregator.cs" />
     <Compile Include="Events\EventFilter\IFilterAggregator.cs" />
     <Compile Include="Events\EventTypes\IFilterableLocalPathEvent.cs" />
+    <Compile Include="Sync\Strategy\RetryException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

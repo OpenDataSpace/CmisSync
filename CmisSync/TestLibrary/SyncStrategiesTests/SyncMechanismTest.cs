@@ -225,6 +225,26 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)));
         }
 
+        [Test, Category("Fast")]
+        public void AddingEventBackToQueueOnRetryExceptionInSolver()
+        {
+            var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
+            ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
+            var retryProducer = new Mock<ISolver>();
+            retryProducer.Setup(r => r.Solve(this.session.Object, this.storage.Object, It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>())).Throws(new RetryException("reason"));
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = retryProducer.Object;
+            var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener.Object, solver);
+            localDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
+            remoteDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
+            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(), Mock.Of<IFolder>()) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
+
+            Assert.That(mechanism.Handle(folderEvent), Is.True);
+
+            this.queue.Verify(q => q.AddEvent(folderEvent), Times.Once());
+        }
+
         private void TriggerNonExistingSolver() {
             var detection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
