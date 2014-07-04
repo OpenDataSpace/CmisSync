@@ -545,12 +545,10 @@ namespace TestLibrary.IntegrationTests
             Assert.That((localDoc.LastWriteTimeUtc - remoteDoc.LastModificationDate).Value.Seconds, Is.EqualTo(0));
         }
 
-        // Ignored because it works but it takes a long time
-        [Ignore]
-        [Test, Category("Slow"), Timeout(1800000)]
+        [Test, Category("Slow"), Category("Erratic"), Timeout(1800000)]
         public void CreateHundredFilesAndSync()
         {
-            int count = 100;
+            int count = 1000;
 
             this.repo.Initialize();
             this.repo.Run();
