@@ -1,5 +1,5 @@
 all:
 
 install:
-        install -d $(DESTDIR)
-        cp -av $(BASEDIR)/usr $(DESTDIR)
+	install -d $(DESTDIR)
+	cp -av $(BASEDIR)/usr $(DESTDIR)
