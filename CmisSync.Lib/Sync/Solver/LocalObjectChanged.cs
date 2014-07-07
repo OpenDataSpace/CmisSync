@@ -104,7 +104,12 @@ namespace CmisSync.Lib.Sync.Solver
                     }
 
                     if (doc.LastModificationDate != null) {
-                        localFile.LastWriteTimeUtc = (DateTime)doc.LastModificationDate;
+                        try {
+                            localFile.LastWriteTimeUtc = (DateTime)doc.LastModificationDate;
+                        } catch (IOException e) {
+                            Logger.Info("Could not write LastWriteTimeUtc due to: " + e.Message);
+                        }
+
                     }
 
                     mappedObject.LastChangeToken = doc.ChangeToken;
