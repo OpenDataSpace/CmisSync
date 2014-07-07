@@ -306,7 +306,7 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         [Test, Category("Fast")]
-        public void NoChangeOnExistingFileAndFolder()
+        public void NoChangeOnExistingFileAndFolderCreatesNoEventsInQueue()
         {
             DateTime changeTime = DateTime.UtcNow;
             string changeToken = "token";
@@ -332,7 +332,7 @@ namespace TestLibrary.SyncStrategiesTests
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<AbstractFolderEvent>(e => e.Local != MetaDataChangeType.NONE && e.Remote != MetaDataChangeType.NONE)), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.Is<AbstractFolderEvent>(e => e.Local == MetaDataChangeType.NONE && e.Remote == MetaDataChangeType.NONE)), Times.Never());
             this.VerifyThatListenerHasBeenUsed();
         }
 

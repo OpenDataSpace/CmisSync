@@ -335,6 +335,11 @@ namespace CmisSync.Lib.Sync.Strategy
                 } else {
                     var localEvent = entry.Value.Item1;
                     var remoteEvent = entry.Value.Item2;
+
+                    if(IsSymmetricNoneTuple(localEvent, remoteEvent)) {
+                        continue;
+                    }
+
                     var newEvent = FileOrFolderEventFactory.CreateEvent(
                         remoteEvent is FileEvent ? (IFileableCmisObject)(remoteEvent as FileEvent).RemoteFile : (IFileableCmisObject)(remoteEvent as FolderEvent).RemoteFolder,
                         localEvent is FileEvent ? (IFileSystemInfo)(localEvent as FileEvent).LocalFile : (IFileSystemInfo)(localEvent as FolderEvent).LocalFolder,
@@ -346,6 +351,34 @@ namespace CmisSync.Lib.Sync.Strategy
                     this.Queue.AddEvent(newEvent);
                 }
             }
+        }
+
+        private bool IsSymmetricNoneTuple(AbstractFolderEvent local, AbstractFolderEvent remote){
+            if(local.Local != MetaDataChangeType.NONE) {
+                return false;
+            }
+
+            if(local.Remote != MetaDataChangeType.NONE) {
+                return false;
+            }
+
+            FileEvent localFileEvent = local as FileEvent;
+            if(localFileEvent != null) {
+                if(localFileEvent.LocalContent != ContentChangeType.NONE) {
+                    return false;
+                }
+
+            }
+
+            FileEvent remoteFileEvent = remote as FileEvent;
+            if(remoteFileEvent != null) {
+                if(remoteFileEvent.RemoteContent != ContentChangeType.NONE) {
+                    return false;
+                }
+
+            }
+
+            return true;
         }
 
         private void InformAboutRemoteObjectsAdded(IList<IFileableCmisObject> objects) {
