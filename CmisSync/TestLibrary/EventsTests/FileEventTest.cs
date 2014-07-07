@@ -77,11 +77,12 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        public void ToStringWithEmptyPathsTest()
+        public void ToStringDoesNotCallPathsBecauseThisIsDamnExpensive()
         {
             var remoteFile = Mock.Of<IDocument>();
             var fe = new FileEvent(null, remoteFile);
             fe.ToString();
+            Mock.Get(remoteFile).VerifyGet(f => f.Paths, Times.Never());
         }
 
         [Test, Category("Fast")]

@@ -137,13 +137,12 @@ namespace CmisSync.Lib.Events
         public override string ToString()
         {
             return string.Format(
-                "[FileEvent: Local={0}, LocalContent={1} on {2}, Remote={3}, RemoteContent={4} on {5}]",
+                "[FileEvent: Local={0}, LocalContent={1} on {2}, Remote={3}, RemoteContent={4}]",
                 this.Local,
                 this.LocalContent,
                 this.Name,
                 this.Remote,
-                this.RemoteContent,
-                this.RemotePath);
+                this.RemoteContent);
         }
 
         /// <summary>
