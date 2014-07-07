@@ -42,7 +42,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectAddedTest
+    public class LocalObjectAddedTest : IsTestWithConfiguredLog4Net
     {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -267,9 +267,27 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             fileInfo.Setup(f => f.Length).Returns(0);
 
             Mock<IDocument> document;
-            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document, false);
 
             fileInfo.VerifySet(f => f.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void DoNotDieIfNotAbleToWriteUtcTime()
+        {
+            string fileName = "fileName";
+            string fileId = "fileId";
+            string parentId = "parentId";
+            string lastChangeToken = "token";
+            bool extendedAttributes = true;
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+            fileInfo.SetupSet(f => f.LastWriteTimeUtc).Throws(new IOException());
+
+            Mock<IDocument> document;
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document, true);
+
         }
 
         private IDirectoryInfo SetupParentFolder(string parentId)
@@ -284,7 +302,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             return parentDirInfo;
         }
 
-        private void RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, Mock<IFileInfo> fileInfo, out Mock<IDocument> documentMock)
+        private void RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, Mock<IFileInfo> fileInfo, out Mock<IDocument> documentMock, bool returnLastModificationDate = false)
         {
             var parentDirInfo = this.SetupParentFolder(parentId);
 
@@ -320,6 +338,9 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                         s.Stream.CopyTo(temp);
                     }
                 });
+            if(returnLastModificationDate) {
+                Mock.Get(futureRemoteDoc).Setup(doc => doc.LastModificationDate).Returns(new DateTime());
+            }
             fileInfo.Setup(d => d.FullName).Returns(path);
             fileInfo.Setup(d => d.Name).Returns(fileName);
             fileInfo.Setup(d => d.Exists).Returns(true);

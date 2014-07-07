@@ -43,6 +43,7 @@ namespace CmisSync.Lib.Sync.Solver
     public class LocalObjectAdded : ISolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
         private ISyncEventQueue queue;
 
         /// <summary>
@@ -73,7 +74,11 @@ namespace CmisSync.Lib.Sync.Solver
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
 
             if(addedObject.LastModificationDate != null) {
-                localFileSystemInfo.LastWriteTimeUtc = (DateTime)addedObject.LastModificationDate;
+                try{
+                    localFileSystemInfo.LastWriteTimeUtc = (DateTime)addedObject.LastModificationDate;
+                } catch (IOException e) {
+                    Logger.Info("Could not write LastWriteTimeUtc due to: " + e.Message);
+                }
             }
 
             MappedObject mapped = new MappedObject(
