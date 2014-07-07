@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Sync.Solver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -47,7 +48,12 @@ namespace CmisSync.Lib.Sync.Solver
         {
             string id = remoteId.Id;
             var mappedObject = storage.GetObjectByRemoteId(id);
-            session.Delete(remoteId, true);
+            if (mappedObject.Type == MappedObjectType.Folder) {
+                (remoteId as IFolder).DeleteTree(true, null, true);
+            } else {
+                session.Delete(remoteId, true);
+            }
+
             storage.RemoveObject(mappedObject);
             OperationsLogger.Info(string.Format("Deleted the corresponding remote object {0} of locally deleted object {1}", remoteId.Id, mappedObject.Name));
         }

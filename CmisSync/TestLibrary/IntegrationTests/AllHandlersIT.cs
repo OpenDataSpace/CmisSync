@@ -110,7 +110,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Fast")]
-        public void RunFSEventDeleted()
+        public void RunFSEventFileDeleted()
         {
             var storage = this.GetInitializedStorage();
             var path = new Mock<IFileInfo>();
@@ -118,8 +118,7 @@ namespace TestLibrary.IntegrationTests
             path.Setup(p => p.FullName).Returns(Path.Combine(this.localRoot, name));
             string id = "id";
 
-            // storage.AddLocalFile(path.Object, id);
-            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
+            var mappedObject = new MappedObject(name, id, MappedObjectType.File, null, null);
             storage.SaveMappedObject(mappedObject);
 
             var session = new Mock<ISession>();
@@ -133,6 +132,32 @@ namespace TestLibrary.IntegrationTests
             queue.Run();
 
             session.Verify(f => f.Delete(It.Is<IObjectId>(i => i.Id == id), true), Times.Once());
+            Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void RunFSEventFolderDeleted()
+        {
+            var storage = this.GetInitializedStorage();
+            var path = new Mock<IFileInfo>();
+            var name = "a";
+            path.Setup(p => p.FullName).Returns(Path.Combine(this.localRoot, name));
+            string id = "id";
+
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
+            storage.SaveMappedObject(mappedObject);
+
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            session.SetupChangeLogToken("default");
+            IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(id, name, (string)null).Object;
+            session.Setup(s => s.GetObject(id, It.IsAny<IOperationContext>())).Returns(remote);
+            var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName, true);
+            var queue = this.CreateQueue(session, storage);
+            queue.AddEvent(myEvent);
+            queue.Run();
+
+            Mock.Get(remote).Verify(d => d.DeleteTree(true, null, true), Times.Once());
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
 

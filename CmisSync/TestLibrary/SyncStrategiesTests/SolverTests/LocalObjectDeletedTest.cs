@@ -94,31 +94,19 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         {
             string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
 
-            bool remoteObjectDeleted = false;
-
             string remoteFolderId = "FolderId";
 
-            this.session.When(
-                () => remoteObjectDeleted).Setup(
-                s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteFolderId))).Throws(new InvalidOperationException());
-            this.session.When(
-                () => remoteObjectDeleted).Setup(
-                s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteFolderId), It.IsAny<bool>())).Throws(new InvalidOperationException());
-            this.session.When(
-                () => !remoteObjectDeleted).Setup(s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteFolderId))).Callback(() => remoteObjectDeleted = true);
-            this.session.When(
-                () => !remoteObjectDeleted).Setup(
-                s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteFolderId), It.IsAny<bool>())).Callback(() => remoteObjectDeleted = true);
-
-            var docId = new Mock<IObjectId>(MockBehavior.Strict);
-            docId.Setup(d => d.Id).Returns(remoteFolderId);
+            var folder = new Mock<IFolder>();
+            folder.Setup(d => d.Id).Returns(remoteFolderId);
+            folder.Setup(f => f.DeleteTree(true, null, true)).Returns(new List<string>());
+            this.session.AddRemoteObject(folder.Object);
             this.storage.AddLocalFolder(tempFolder, remoteFolderId);
             this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
 
-            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), docId.Object);
+            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), folder.Object);
 
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteFolderId)), Times.Once());
-            Assert.IsTrue(remoteObjectDeleted);
+            folder.Verify(f => f.DeleteTree(true, null, true), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
