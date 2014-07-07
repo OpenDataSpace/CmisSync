@@ -98,7 +98,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             var folder = new Mock<IFolder>();
             folder.Setup(d => d.Id).Returns(remoteFolderId);
-            folder.Setup(f => f.DeleteTree(true, null, true)).Returns(new List<string>());
+            folder.Setup(f => f.DeleteTree(false, UnfileObject.DeleteSinglefiled, true)).Returns(new List<string>());
             this.session.AddRemoteObject(folder.Object);
             this.storage.AddLocalFolder(tempFolder, remoteFolderId);
             this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
@@ -106,7 +106,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), folder.Object);
 
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteFolderId)), Times.Once());
-            folder.Verify(f => f.DeleteTree(true, null, true), Times.Once());
+            folder.Verify(f => f.DeleteTree(false, UnfileObject.DeleteSinglefiled, true), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]

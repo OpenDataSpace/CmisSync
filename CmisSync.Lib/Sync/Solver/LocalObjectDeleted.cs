@@ -27,6 +27,7 @@ namespace CmisSync.Lib.Sync.Solver
     using CmisSync.Lib.Storage;
 
     using DotCMIS.Client;
+    using DotCMIS.Enums;
 
     using log4net;
 
@@ -49,7 +50,7 @@ namespace CmisSync.Lib.Sync.Solver
             string id = remoteId.Id;
             var mappedObject = storage.GetObjectByRemoteId(id);
             if (mappedObject.Type == MappedObjectType.Folder) {
-                (remoteId as IFolder).DeleteTree(true, null, true);
+                (remoteId as IFolder).DeleteTree(false, UnfileObject.DeleteSinglefiled, true);
             } else {
                 session.Delete(remoteId, true);
             }

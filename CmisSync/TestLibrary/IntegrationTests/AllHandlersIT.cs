@@ -37,6 +37,7 @@ namespace TestLibrary.IntegrationTests
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Data.Extensions;
+    using DotCMIS.Enums;
 
     using Moq;
 
@@ -157,7 +158,7 @@ namespace TestLibrary.IntegrationTests
             queue.AddEvent(myEvent);
             queue.Run();
 
-            Mock.Get(remote).Verify(d => d.DeleteTree(true, null, true), Times.Once());
+            Mock.Get(remote).Verify(d => d.DeleteTree(false, UnfileObject.DeleteSinglefiled, true), Times.Once());
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
 
