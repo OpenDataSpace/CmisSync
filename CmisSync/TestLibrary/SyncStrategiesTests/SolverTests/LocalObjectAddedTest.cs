@@ -254,6 +254,24 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             }
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void DoNotWriteLastWriteTimeUtcIfNotNecessary()
+        {
+            string fileName = "fileName";
+            string fileId = "fileId";
+            string parentId = "parentId";
+            string lastChangeToken = "token";
+            bool extendedAttributes = true;
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+
+            Mock<IDocument> document;
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
+
+            fileInfo.VerifySet(f => f.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
+
         private IDirectoryInfo SetupParentFolder(string parentId)
         {
             var parentDirInfo = Mock.Of<IDirectoryInfo>(d =>

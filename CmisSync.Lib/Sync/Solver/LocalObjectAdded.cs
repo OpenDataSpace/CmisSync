@@ -72,7 +72,9 @@ namespace CmisSync.Lib.Sync.Solver
             ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, session);
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
 
-            localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
+            if(addedObject.LastModificationDate != null) {
+                localFileSystemInfo.LastWriteTimeUtc = (DateTime)addedObject.LastModificationDate;
+            }
 
             MappedObject mapped = new MappedObject(
                 localFileSystemInfo.Name,
