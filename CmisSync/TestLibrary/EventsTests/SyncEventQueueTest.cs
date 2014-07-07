@@ -72,8 +72,7 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void AddEventToStoppedQueue()
+        public void AddEventToStoppedQueueDoesNotRaise()
         {
             using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
             {
@@ -81,6 +80,15 @@ namespace TestLibrary.EventsTests
                 WaitFor(queue, (q) => { return q.IsStopped; });
                 queue.AddEvent(new Mock<ISyncEvent>().Object);
             }
+        }
+
+        [Test, Category("Fast")]
+        public void AddEventToDisposedQueueDoesNotRaise()
+        {
+            SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object);
+            queue.Dispose();
+
+            queue.AddEvent(new Mock<ISyncEvent>().Object);
         }
 
         [Test, Category("Fast")]

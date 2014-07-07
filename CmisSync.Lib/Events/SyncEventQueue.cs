@@ -70,11 +70,22 @@ namespace CmisSync.Lib.Events
         /// <exception cref="InvalidOperationException">When Listener is already stopped</exception>
         public virtual void AddEvent(ISyncEvent newEvent) {
             if (this.alreadyDisposed) {
-                throw new ObjectDisposedException("SyncEventQueue", "Called AddEvent on Disposed object");
+                Logger.Info(string.Format("Queue was already Disposed. Dropping Event: {0}", newEvent.ToString()));
+                return;
             }
 
-            Logger.Debug(string.Format("Adding Event: {0}", newEvent.ToString()));
-            this.queue.Add(newEvent);
+            if (this.IsStopped) {
+                Logger.Info(string.Format("Queue was already Stopped. Dropping Event: {0}", newEvent.ToString()));
+                return;
+            }
+
+            try {
+                this.queue.Add(newEvent);
+                Logger.Debug(string.Format("Added Event: {0}", newEvent.ToString()));
+            } catch(InvalidOperationException) {
+                Logger.Info(string.Format("Queue was already Stopped. Dropping Event: {0}", newEvent.ToString()));
+
+            }
         }
 
         /// <summary>
