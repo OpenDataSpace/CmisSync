@@ -44,6 +44,11 @@ namespace CmisSync.Lib.Storage
 
         public string GetExtendedAttribute(string path, string key)
         {
+            path = Path.GetFullPath(path);
+            if (!File.Exists(path) && !Directory.Exists(path)) {
+                throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
+            }
+
 #if __MonoCS__
             byte[] value;
             long ret = Syscall.getxattr(path, prefix + key, out value);
@@ -81,6 +86,11 @@ namespace CmisSync.Lib.Storage
         public void SetExtendedAttribute(string path, string key, string value)
         {
 #if __MonoCS__
+            path = Path.GetFullPath(path);
+            if (!File.Exists(path) && !Directory.Exists(path)) {
+                throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
+            }
+
             long ret;
             if(value == null)
             {
@@ -107,6 +117,11 @@ namespace CmisSync.Lib.Storage
         /// <param name="key">Key of the attribute, which should be removed.</param>
         public void RemoveExtendedAttribute(string path, string key)
         {
+            path = Path.GetFullPath(path);
+            if (!File.Exists(path) && !Directory.Exists(path)) {
+                throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
+            }
+
 #if __MonoCS__
             long ret = Syscall.removexattr (path, prefix + key);
             if(ret != 0)

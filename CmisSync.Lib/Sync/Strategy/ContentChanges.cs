@@ -213,7 +213,7 @@ namespace CmisSync.Lib.Sync.Strategy
             while (!lastTokenOnServer.Equals(lastTokenOnClient));
         }
 
-        private class ResetStartNextSyncFilterEvent : ISyncEvent {
+        private class ResetStartNextSyncFilterEvent : ISyncEvent, IRemoveFromLoggingEvent {
             public override string ToString()
             {
                 return string.Format("[ResetStartNextSyncFilterEvent]");

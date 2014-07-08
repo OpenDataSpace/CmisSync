@@ -84,6 +84,7 @@ SOURCES =  \
 	Events/EventTypes/IFilterableRemotePathEvent.cs \
 	Events/EventTypes/IFSEvent.cs \
 	Events/EventTypes/IFSMovedEvent.cs \
+	Events/EventTypes/IRemoveFromLoggingEvent.cs \
 	Events/EventTypes/ISyncEvent.cs \
 	Events/EventTypes/PermissionDeniedEvent.cs \
 	Events/EventTypes/ProxyAuthRequiredEvent.cs \

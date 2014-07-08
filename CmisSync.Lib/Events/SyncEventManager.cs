@@ -65,7 +65,10 @@ namespace CmisSync.Lib.Events
                 var h = this.handler[i];
                 if (this.handler[i].Handle(e))
                 {
-                    Logger.Debug(String.Format("Event {0} was handled by {1}", e.ToString(), this.handler[i].GetType()));
+                    if(!(e is IRemoveFromLoggingEvent)) {
+                        Logger.Debug(String.Format("Event {0} was handled by {1}", e.ToString(), this.handler[i].GetType()));
+                    }
+
                     return;
                 }
             }

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="DebugLoggingHandler.cs" company="GRAU DATA AG">
+// <copyright file="IRemoveFromLoggingEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,39 +16,12 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
 namespace CmisSync.Lib.Events
 {
-    using System;
-
-    using log4net;
-
     /// <summary>
-    /// Debug logging handler. Does nothing else then calling each toString method of every incoming event.
+    /// Events implementing this Interface are removed from default Logging.
     /// </summary>
-    public class DebugLoggingHandler : SyncEventHandler
+    public interface IRemoveFromLoggingEvent
     {
-        /// <summary>
-        /// The logger.
-        /// </summary>
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(DebugLoggingHandler));
-
-        /// <summary>
-        /// Handle the specified e.
-        /// </summary>
-        /// <param name='e'>
-        /// Each event will be logged
-        /// </param>
-        /// <returns>
-        /// <c>false</c>
-        /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
-            if(!(e is IRemoveFromLoggingEvent)) {
-                Logger.Debug("Incomming Event: " + e.ToString());
-            }
-
-            return false;
-        }
     }
 }
