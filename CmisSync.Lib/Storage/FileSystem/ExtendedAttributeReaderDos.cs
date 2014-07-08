@@ -243,7 +243,7 @@ namespace CmisSync.Lib.Storage
             }
             path = Path.GetFullPath(path);
             if (!File.Exists(path) && !Directory.Exists(path)) {
-                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or dirrectory", path));
+                throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
             }
             try {
                 using (FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Read, FileMode.Open, FileShare.Read))
@@ -281,7 +281,7 @@ namespace CmisSync.Lib.Storage
 
             path = Path.GetFullPath(path);
             if (!File.Exists(path) && !Directory.Exists(path)) {
-                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
+                throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
             }
 
             if (value == null)
@@ -316,7 +316,7 @@ namespace CmisSync.Lib.Storage
             }
             path = Path.GetFullPath(path);
             if (!File.Exists(path) && !Directory.Exists(path)) {
-                throw new ExtendedAttributeException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path));
+                throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
             }
             new FileIOPermission(FileIOPermissionAccess.Write, path).Demand();
             if (!DeleteFile(string.Format("{0}:{1}:{2}", path, key, "$DATA"))) {

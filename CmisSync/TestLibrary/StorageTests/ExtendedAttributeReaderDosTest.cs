@@ -222,6 +222,33 @@ namespace TestLibrary.StorageTests
             Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
             Assert.That(reader.ListAttributeKeys(path).Count == 0);
         }
+
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
+        [ExpectedException(typeof(FileNotFoundException))]
+        public void SetExtendedAttributeOnNonExistingFileThrowsIOException()
+        {
+            string key = "test";
+            var reader = new ExtendedAttributeReaderDos();
+            reader.SetExtendedAttribute(path, key, null);
+        }
+
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
+        [ExpectedException(typeof(FileNotFoundException))]
+        public void GetExtendedAttributeOnNonExistingFileThrowsIOException()
+        {
+            string key = "test";
+            var reader = new ExtendedAttributeReaderDos();
+            reader.GetExtendedAttribute(path, key);
+        }
+
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
+        [ExpectedException(typeof(FileNotFoundException))]
+        public void RemoveExtendedAttributeOnNonExistingFileThrowsIOException()
+        {
+            string key = "test";
+            var reader = new ExtendedAttributeReaderDos();
+            reader.RemoveExtendedAttribute(path, key);
+        }
     }
 }
 #endif
