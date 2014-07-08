@@ -45,17 +45,23 @@ namespace CmisSync.Lib.Sync.Solver
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
         private ISyncEventQueue queue;
+        private ActiveActivitiesManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.LocalObjectAdded"/> class.
         /// </summary>
         /// <param name="queue">Queue to report transmission events to.</param>
-        public LocalObjectAdded(ISyncEventQueue queue) {
+        public LocalObjectAdded(ISyncEventQueue queue, ActiveActivitiesManager manager) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
 
+            if (manager == null) {
+                throw new ArgumentNullException("Given transmission manager is null");
+            }
+
             this.queue = queue;
+            this.transmissionManager = manager;
         }
 
         /// <summary>
@@ -101,6 +107,7 @@ namespace CmisSync.Lib.Sync.Solver
             if (localFile != null) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 this.queue.AddEvent(transmissionEvent);
+                this.transmissionManager.AddTransmission(transmissionEvent);
                 if (localFile.Length > 0) {
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                     IFileUploader uploader = ContentTaskUtils.CreateUploader();

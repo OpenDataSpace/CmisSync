@@ -343,7 +343,9 @@ namespace TestLibrary.IntegrationTests
 
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IActivityListener>());
+            var transmissionManager = new ActiveActivitiesManager();
+            var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator);
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();

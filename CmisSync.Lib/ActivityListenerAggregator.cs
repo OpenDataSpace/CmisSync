@@ -16,13 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    
+
+    using CmisSync.Lib.Events;
+
     /// <summary>
     /// Aggregates the activity status of multiple processes
     /// The overall activity is considered "started" if any of the processes is "started";
@@ -50,16 +53,26 @@ namespace CmisSync.Lib
         private int numberOfActiveProcesses;
 
         private object countingLock = new object();
-        
+
+        public ActiveActivitiesManager TransmissionManager { get; private set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.ActivityListenerAggregator"/> class.
         /// </summary>
-        /// <param name='overallListener'>
-        /// The activity listener to which aggregated activity will be sent
-        /// </param>
-        public ActivityListenerAggregator(IActivityListener overallListener)
+        /// <param name="overallListener">The activity listener to which aggregated activity will be sent.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
+        public ActivityListenerAggregator(IActivityListener overallListener, ActiveActivitiesManager transmissionManager)
         {
+            if (overallListener == null) {
+                throw new ArgumentNullException("Given listener is null");
+            }
+
+            if (transmissionManager == null) {
+                throw new ArgumentNullException("Given transmission manager is null");
+            }
+
             this.overall = overallListener;
+            this.TransmissionManager = transmissionManager;
         }
 
         /// <summary>

@@ -26,6 +26,7 @@ namespace DataSpaceSync.Console
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Sync;
 
     using log4net;
@@ -94,14 +95,14 @@ namespace DataSpaceSync.Console
             Logger.Info("Starting.");
 
             List<CmisRepo> repositories = new List<CmisRepo>();
-
+            var transmissionManager = new ActiveActivitiesManager();
             foreach (RepoInfo repoInfo in ConfigManager.CurrentConfig.Folders) {
                 string path = repoInfo.LocalPath;
                 if (!Directory.Exists(path)) {
                     Directory.CreateDirectory(path);
                 }
 
-                CmisRepo repo = new CmisRepo(repoInfo, new ActivityListener());
+                CmisRepo repo = new CmisRepo(repoInfo, new ActivityListenerAggregator(new ActivityListener(), transmissionManager));
                 repositories.Add(repo);
                 repo.Initialize();
             }

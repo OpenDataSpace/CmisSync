@@ -42,17 +42,31 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     [TestFixture]
     public class RemoteObjectChangedTest
     {
+        private ActiveActivitiesManager manager;
+
+        [SetUp]
+        public void SetUp() {
+            this.manager = new ActiveActivitiesManager();
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new RemoteObjectChanged(null);
+            new RemoteObjectChanged(null, this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorTakesQueue()
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
         {
-            new RemoteObjectChanged(Mock.Of<ISyncEventQueue>());
+            new RemoteObjectChanged(Mock.Of<ISyncEventQueue>(), null);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorTakesQueueAndTransmissionManager()
+        {
+            new RemoteObjectChanged(Mock.Of<ISyncEventQueue>(), this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -88,7 +102,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
-            new RemoteObjectChanged(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
+            new RemoteObjectChanged(queue.Object, this.manager).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
 
             storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
@@ -151,7 +165,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     b =>
                     b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(oldContentStream));
 
-                new RemoteObjectChanged(queue.Object, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteObject.Object);
+                new RemoteObjectChanged(queue.Object, this.manager, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteObject.Object);
 
                 storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
@@ -232,7 +246,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     b =>
                     b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(changedContentStream));
 
-                new RemoteObjectChanged(queue.Object, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteObject.Object);
+                new RemoteObjectChanged(queue.Object, this.manager, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteObject.Object);
 
                 storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));

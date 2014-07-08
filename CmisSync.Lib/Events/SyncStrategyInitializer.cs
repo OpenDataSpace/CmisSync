@@ -51,7 +51,7 @@ namespace CmisSync.Lib
         private IgnoreAlreadyHandledContentChangeEventsFilter alreadyHandledFilter;
         private RemoteObjectMovedOrRenamedAccumulator romaccumulator;
         private IFilterAggregator filter;
-        private IActivityListener activityListener;
+        private ActivityListenerAggregator activityListener;
   
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.SyncStrategyInitializer"/> class.
@@ -79,7 +79,7 @@ namespace CmisSync.Lib
             IMetaDataStorage storage,
             RepoInfo repoInfo,
             IFilterAggregator filter,
-            IActivityListener activityListener,
+            ActivityListenerAggregator activityListener,
             IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null) {

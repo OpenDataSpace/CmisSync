@@ -158,7 +158,7 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
-        public CmisRepo(RepoInfo repoInfo, IActivityListener activityListener) : this(repoInfo, activityListener, false, CreateQueue())
+        public CmisRepo(RepoInfo repoInfo, ActivityListenerAggregator activityListener) : this(repoInfo, activityListener, false, CreateQueue())
         {
         }
 
@@ -169,7 +169,7 @@ namespace CmisSync.Lib.Sync
         /// <param name="activityListener">Activity listener.</param>
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="queue">Event Queue.</param>
-        protected CmisRepo(RepoInfo repoInfo, IActivityListener activityListener, bool inMemory, IDisposableSyncEventQueue queue)
+        protected CmisRepo(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, IDisposableSyncEventQueue queue)
         {
             if (repoInfo == null)
             {

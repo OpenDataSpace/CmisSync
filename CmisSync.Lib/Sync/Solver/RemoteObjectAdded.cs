@@ -40,19 +40,25 @@ namespace CmisSync.Lib.Sync.Solver
 
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
+        private ActiveActivitiesManager manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.RemoteObjectAdded"/> class.
         /// </summary>
         /// <param name="queue">Queue to report new transmissions to.</param>
         /// <param name="fsFactory">File system factory.</param>
-        public RemoteObjectAdded(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null) {
+        public RemoteObjectAdded(ISyncEventQueue queue, ActiveActivitiesManager transmissonManager, IFileSystemInfoFactory fsFactory = null) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
 
+            if (transmissonManager == null) {
+                throw new ArgumentNullException("Given transmission manager is null");
+            }
+
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
             this.queue = queue;
+            this.manager = transmissonManager;
         }
 
         /// <summary>
@@ -83,14 +89,12 @@ namespace CmisSync.Lib.Sync.Solver
                 IDirectoryInfo localFolder = localFile as IDirectoryInfo;
                 localFolder.Create();
 
-                if(remoteFolder.LastModificationDate != null)
-                {
+                if(remoteFolder.LastModificationDate != null) {
                     localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 }
 
                 Guid uuid = Guid.Empty;
-                if (localFolder.IsExtendedAttributeAvailable())
-                {
+                if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
                     localFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
                 }
@@ -112,6 +116,7 @@ namespace CmisSync.Lib.Sync.Solver
                 IDocument remoteDoc = remoteId as IDocument;
                 var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
                 this.queue.AddEvent(transmissionEvent);
+                this.manager.AddTransmission(transmissionEvent);
                 byte[] hash = null;
                 using (var hashAlg = new SHA1Managed())
                 using (var fileStream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.Read))

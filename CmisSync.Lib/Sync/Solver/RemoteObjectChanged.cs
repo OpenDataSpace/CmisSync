@@ -42,19 +42,25 @@ namespace CmisSync.Lib.Sync.Solver
 
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
+        private ActiveActivitiesManager transmissonManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.RemoteObjectChanged"/> class.
         /// </summary>
         /// <param name="queue">Event Queue to report transmission events to.</param>
         /// <param name="fsFactory">File System Factory.</param>
-        public RemoteObjectChanged(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null)
+        public RemoteObjectChanged(ISyncEventQueue queue, ActiveActivitiesManager transmissonManager, IFileSystemInfoFactory fsFactory = null)
         {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
 
+            if (transmissonManager == null) {
+                throw new ArgumentNullException("Given transmission manager is null");
+            }
+
             this.queue = queue;
+            this.transmissonManager = transmissonManager;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 
@@ -92,6 +98,7 @@ namespace CmisSync.Lib.Sync.Solver
                     var cacheFile = this.fsFactory.CreateFileInfo(file.FullName + ".sync");
                     var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName, cacheFile.FullName);
                     this.queue.AddEvent(transmissionEvent);
+                    this.transmissonManager.AddTransmission(transmissionEvent);
                     using (SHA1 hashAlg = new SHA1Managed())
                     using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
                     using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {

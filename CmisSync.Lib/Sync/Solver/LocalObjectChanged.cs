@@ -41,17 +41,23 @@ namespace CmisSync.Lib.Sync.Solver
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         private ISyncEventQueue queue;
+        private ActiveActivitiesManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.LocalObjectChanged"/> class.
         /// </summary>
         /// <param name="queue">Event queue for publishing upload transmission.</param>
-        public LocalObjectChanged(ISyncEventQueue queue) {
+        public LocalObjectChanged(ISyncEventQueue queue, ActiveActivitiesManager transmissionManager) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
 
+            if(transmissionManager == null) {
+                throw new ArgumentNullException("Given transmission manager is null");
+            }
+
             this.queue = queue;
+            this.transmissionManager = transmissionManager;
         }
 
         /// <summary>

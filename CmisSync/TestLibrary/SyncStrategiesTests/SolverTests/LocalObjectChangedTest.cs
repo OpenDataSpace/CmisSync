@@ -40,16 +40,29 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     [TestFixture]
     public class LocalObjectChangedTest
     {
+        private ActiveActivitiesManager manager;
+
+        [SetUp]
+        public void SetUp() {
+            this.manager = new ActiveActivitiesManager();
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectChanged(Mock.Of<ISyncEventQueue>());
+            new LocalObjectChanged(Mock.Of<ISyncEventQueue>(), this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            new LocalObjectChanged(null);
+            new LocalObjectChanged(null, this.manager);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
+            new LocalObjectChanged(Mock.Of<ISyncEventQueue>(), null);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -74,7 +87,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             };
             storage.AddMappedFolder(mappedObject);
 
-            new LocalObjectChanged(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, localDirectory, Mock.Of<IFolder>());
+            new LocalObjectChanged(queue.Object, this.manager).Solve(Mock.Of<ISession>(), storage.Object, localDirectory, Mock.Of<IFolder>());
 
             storage.VerifySavedMappedObject(
                 MappedObjectType.Folder,
@@ -96,7 +109,6 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var storage = new Mock<IMetaDataStorage>();
             int fileLength = 20;
             byte[] content = new byte[fileLength];
-            byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
             var queue = new Mock<ISyncEventQueue>();
 
             var localFile = new Mock<IFileInfo>();
@@ -132,7 +144,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     remoteFile.Setup(f => f.ChangeToken).Returns(newChangeToken);
                 });
 
-                new LocalObjectChanged(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
+                new LocalObjectChanged(queue.Object, this.manager).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
             }
         }
 
@@ -172,7 +184,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
                 storage.AddMappedFile(mappedObject, path);
 
-                new LocalObjectChanged(Mock.Of<ISyncEventQueue>()).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, Mock.Of<IDocument>());
+                new LocalObjectChanged(Mock.Of<ISyncEventQueue>(), this.manager).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, Mock.Of<IDocument>());
 
                 storage.VerifySavedMappedObject(
                     MappedObjectType.File,
@@ -232,7 +244,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     remoteFile.Setup(f => f.ChangeToken).Returns(newChangeToken);
                 });
 
-                new LocalObjectChanged(queue.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
+                new LocalObjectChanged(queue.Object, this.manager).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
 
                 storage.VerifySavedMappedObject(
                     MappedObjectType.File,

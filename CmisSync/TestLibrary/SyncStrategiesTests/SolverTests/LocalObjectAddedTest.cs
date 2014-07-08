@@ -57,16 +57,23 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorWithGivenQueue()
+        public void ConstructorWithGivenQueueAndActivityManager()
         {
-            new LocalObjectAdded(Mock.Of<ISyncEventQueue>());
+            new LocalObjectAdded(Mock.Of<ISyncEventQueue>(), new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new LocalObjectAdded(null);
+            new LocalObjectAdded(null, new ActiveActivitiesManager());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
+        {
+            new LocalObjectAdded(Mock.Of<ISyncEventQueue>(), null);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -347,22 +354,26 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
-            var solver = new LocalObjectAdded(this.queue.Object);
+            var transmissionManager = new ActiveActivitiesManager();
+            var solver = new LocalObjectAdded(this.queue.Object, transmissionManager);
 
             solver.Solve(this.session.Object, this.storage.Object, fileInfo.Object, null);
             documentMock = Mock.Get(futureRemoteDoc);
+            Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
         }
 
         private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes)
         {
             string path = Path.Combine(Path.GetTempPath(), folderName);
-            var futureRemoteFolder = Mock.Of<IFolder>(f =>
-                                                   f.Name == folderName &&
-                                                   f.Id == id &&
-                                                   f.ParentId == parentId &&
-                                                   f.ChangeToken == lastChangeToken);
-            var futureRemoteFolderId = Mock.Of<IObjectId>(o =>
-                                                       o.Id == id);
+            var futureRemoteFolder = Mock.Of<IFolder>(
+                f =>
+                f.Name == folderName &&
+                f.Id == id &&
+                f.ParentId == parentId &&
+                f.ChangeToken == lastChangeToken);
+            var futureRemoteFolderId = Mock.Of<IObjectId>(
+                o =>
+                o.Id == id);
 
             this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolderId);
             this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteFolderId))).Returns(futureRemoteFolder);
@@ -375,7 +386,8 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
-            var solver = new LocalObjectAdded(this.queue.Object);
+            var transmissionManager = new ActiveActivitiesManager();
+            var solver = new LocalObjectAdded(this.queue.Object, transmissionManager);
 
             solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
             return dirInfo;

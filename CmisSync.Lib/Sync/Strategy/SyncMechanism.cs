@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private ISession session;
         private IMetaDataStorage storage;
-        private IActivityListener activityListener;
+        private ActivityListenerAggregator activityListener;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.SyncMechanism"/> class.
@@ -62,7 +62,7 @@ namespace CmisSync.Lib.Sync.Strategy
             ISyncEventQueue queue,
             ISession session,
             IMetaDataStorage storage,
-            IActivityListener activityListener,
+            ActivityListenerAggregator activityListener,
             ISolver[,] solver = null) : base(queue)
         {
             if (session == null) {
@@ -135,20 +135,20 @@ namespace CmisSync.Lib.Sync.Strategy
             int dim = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[dim, dim];
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = new NothingToDoSolver();
-            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.Queue);
-            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.Queue);
+            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.Queue, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.Queue, this.activityListener.TransmissionManager);
             solver[(int)SituationType.MOVED, (int)SituationType.NOCHANGE] = new LocalObjectMoved();
             solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed();
             solver[(int)SituationType.REMOVED, (int)SituationType.NOCHANGE] = new LocalObjectDeleted();
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.Queue);
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.Queue, this.activityListener.TransmissionManager);
             solver[(int)SituationType.ADDED, (int)SituationType.ADDED] = null;
             solver[(int)SituationType.CHANGED, (int)SituationType.ADDED] = null;
             solver[(int)SituationType.MOVED, (int)SituationType.ADDED] = null;
             solver[(int)SituationType.RENAMED, (int)SituationType.ADDED] = null;
             solver[(int)SituationType.REMOVED, (int)SituationType.ADDED] = null;
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.Queue);
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.Queue, this.activityListener.TransmissionManager);
             solver[(int)SituationType.ADDED, (int)SituationType.CHANGED] = null;
             solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = null;
             solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = null;

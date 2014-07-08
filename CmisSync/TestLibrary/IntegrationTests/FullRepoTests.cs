@@ -139,9 +139,11 @@ namespace TestLibrary.IntegrationTests
 
             // Repo
             var activityListener = new Mock<IActivityListener>();
+            var transmissionManager = new ActiveActivitiesManager();
+            var activityAggregator = new ActivityListenerAggregator(activityListener.Object, transmissionManager);
             var queue = new SingleStepEventQueue(new SyncEventManager());
 
-            this.repo = new CmisRepoMock(this.repoInfo, activityListener.Object, queue);
+            this.repo = new CmisRepoMock(this.repoInfo, activityAggregator, queue);
 
             // Session
             var cmisParameters = new Dictionary<string, string>();
@@ -617,7 +619,7 @@ namespace TestLibrary.IntegrationTests
         {
             public SingleStepEventQueue SingleStepQueue;
 
-            public CmisRepoMock(RepoInfo repoInfo, IActivityListener activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
+            public CmisRepoMock(RepoInfo repoInfo, ActivityListenerAggregator activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
             {
                 this.SingleStepQueue = queue;
             }

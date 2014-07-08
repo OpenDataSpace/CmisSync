@@ -47,23 +47,31 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         private readonly string lastChangeToken = "token";
 
         private string path;
+        private ActiveActivitiesManager manager;
 
         [SetUp]
         public void SetUpPath()
         {
             this.path = Path.Combine(Path.GetTempPath(), this.objectName);
+            this.manager = new ActiveActivitiesManager();
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesQueue()
         {
-            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>());
+            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>(), this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            new RemoteObjectAdded(null);
+            new RemoteObjectAdded(null, this.manager);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
+            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>(), null);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -81,7 +89,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>()).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
+            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>(), this.manager).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.Create(), Times.Once());
             storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, false, this.creationDate);
@@ -104,7 +112,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>()).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
+            new RemoteObjectAdded(Mock.Of<ISyncEventQueue>(), this.manager).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
             storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
@@ -138,7 +146,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
                 remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-                new RemoteObjectAdded(queue.Object, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
+                new RemoteObjectAdded(queue.Object, this.manager, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
 
                 cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
                 cacheFileInfo.Verify(f => f.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>()), Times.Once());
@@ -183,7 +191,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
                 remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-                new RemoteObjectAdded(queue.Object, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
+                new RemoteObjectAdded(queue.Object, this.manager, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, fileInfo.Object, remoteObject.Object);
 
                 cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
                 cacheFileInfo.Verify(f => f.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>()), Times.Once());

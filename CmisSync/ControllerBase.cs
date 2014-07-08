@@ -194,9 +194,9 @@ namespace CmisSync
         /// <summary>
         /// Keeps track of whether a download or upload is going on, for display of the task bar animation.
         /// </summary>
-        private IActivityListener activityListenerAggregator;
+        private ActivityListenerAggregator activityListenerAggregator;
 
-        private ActiveActivitiesManager activitiesManager;
+        private ActiveActivitiesManager transmissionManager;
 
         /// <summary>
         /// Concurrency locks.
@@ -208,16 +208,16 @@ namespace CmisSync
         /// </summary>
         public ControllerBase()
         {
-            this.activityListenerAggregator = new ActivityListenerAggregator(this);
             this.FoldersPath = ConfigManager.CurrentConfig.GetFoldersPath();
-            this.activitiesManager = new ActiveActivitiesManager();
-            this.activitiesManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            this.transmissionManager = new ActiveActivitiesManager();
+            this.activityListenerAggregator = new ActivityListenerAggregator(this, this.transmissionManager);
+            this.transmissionManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 this.OnTransmissionListChanged();
             };
         }
 
         public List<FileTransmissionEvent> ActiveTransmissions() {
-            return this.activitiesManager.ActiveTransmissionsAsList();
+            return this.transmissionManager.ActiveTransmissionsAsList();
         }
 
         /// <summary>
@@ -274,7 +274,6 @@ namespace CmisSync
                 new GenericSyncEventHandler<FileTransmissionEvent>(
                 50,
                 delegate(ISyncEvent e) {
-                this.activitiesManager.AddTransmission(e as FileTransmissionEvent);
                 FileTransmissionEvent transEvent = e as FileTransmissionEvent;
                 transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args)
                 {
@@ -492,7 +491,7 @@ namespace CmisSync
 
                 Logger.Debug("Start to stop all active file transmissions");
                 do {
-                    List<FileTransmissionEvent> activeList = this.activitiesManager.ActiveTransmissionsAsList();
+                    List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
                     foreach (FileTransmissionEvent transmissionEvent in activeList) {
                         if (transmissionEvent.Status.Aborted.GetValueOrDefault()) {
                             continue;
