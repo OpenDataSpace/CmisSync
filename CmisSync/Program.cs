@@ -154,8 +154,7 @@ namespace CmisSync
                 // See https://github.com/nicolas-raoul/CmisSync/issues/140
                 ServicePointManager.DefaultConnectionLimit = 1000;
 
-                try
-                    {
+                try {
                     Controller = new Controller();
                     Controller.Initialize(firstRun);
 
