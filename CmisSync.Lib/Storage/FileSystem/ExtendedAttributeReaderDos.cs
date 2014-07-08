@@ -53,12 +53,12 @@ namespace CmisSync.Lib.Storage
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, BestFitMapping = false, ThrowOnUnmappableChar = true)]
         private static extern int FormatMessage(
-                        uint dwFlags, 
-                        IntPtr lpSource, 
-                        int dwMessageId, 
-                        uint dwLanguageId, 
-                        StringBuilder lpBuffer, 
-                        int nSize, 
+                        uint dwFlags,
+                        IntPtr lpSource,
+                        int dwMessageId,
+                        uint dwLanguageId,
+                        StringBuilder lpBuffer,
+                        int nSize,
                         IntPtr vaListArguments);
 
         [DllImport("kernel32.dll")]
@@ -141,7 +141,7 @@ namespace CmisSync.Lib.Storage
         private static SafeFileHandle CreateFileHandle(string path, FileAccess access, FileMode mode, FileShare share)
         {
             // FILE_FLAGS.BackupSemantics is required in order to support directories.
-            // Otherwise we get an Access denied, if the  path points to a directory. 
+            // Otherwise we get an Access denied, if the  path points to a directory.
             SafeFileHandle handle = CreateFile(path, access, share, IntPtr.Zero, mode, FILE_FLAGS.BackupSemantics, IntPtr.Zero);
             if (handle.IsInvalid)
             {
