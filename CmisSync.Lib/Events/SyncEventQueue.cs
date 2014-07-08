@@ -81,10 +81,11 @@ namespace CmisSync.Lib.Events
 
             try {
                 this.queue.Add(newEvent);
-                Logger.Debug(string.Format("Added Event: {0}", newEvent.ToString()));
+                if(!(newEvent is IRemoveFromLoggingEvent)) {
+                    Logger.Debug(string.Format("Added Event: {0}", newEvent.ToString()));
+                }
             } catch(InvalidOperationException) {
                 Logger.Info(string.Format("Queue was already Stopped. Dropping Event: {0}", newEvent.ToString()));
-
             }
         }
 

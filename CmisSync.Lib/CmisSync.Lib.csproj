@@ -93,6 +93,7 @@
     <Compile Include="Events\EventFilter\InvalidFolderNameFilter.cs" />
     <Compile Include="Events\FileDownloadRequest.cs" />
     <Compile Include="Events\ISyncEventQueue.cs" />
+    <Compile Include="Events\EventTypes\IRemoveFromLoggingEvent.cs" />
     <Compile Include="Events\ReportingSyncEventHandler.cs" />
     <Compile Include="Events\SyncEventHandler.cs" />
     <Compile Include="Events\SyncEventManager.cs" />
