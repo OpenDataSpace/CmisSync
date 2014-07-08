@@ -108,7 +108,6 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             if(e is StartNextSyncEvent) {
                 if (this.dropNextSyncEvents) {
-                    Logger.Debug("Dropping: " + e.ToString());
                     return true;
                 }
 
@@ -509,7 +508,7 @@ namespace CmisSync.Lib.Sync.Strategy
             return tree;
         }
 
-        private class ResetStartNextCrawlSyncFilterEvent : ISyncEvent {
+        private class ResetStartNextCrawlSyncFilterEvent : ISyncEvent, IRemoveFromLoggingEvent {
             public override string ToString()
             {
                 return string.Format("[ResetStartNextCrawlSyncFilterEvent]");

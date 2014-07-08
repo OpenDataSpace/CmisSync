@@ -90,7 +90,6 @@ namespace CmisSync.Lib.Sync.Strategy
                 else
                 {
                     if (this.dropNextSyncEvents) {
-                        Logger.Debug("Dropping: " + e.ToString());
                         return true;
                     }
 
