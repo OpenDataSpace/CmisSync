@@ -28,8 +28,7 @@ namespace CmisSync.Lib.Sync.Solver
     {
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
-            string id = remoteId.Id;
-            var mappedObject = storage.GetObjectByRemoteId(id);
+            var mappedObject = storage.GetObjectByLocalPath(localFile);
             storage.RemoveObject(mappedObject);
         }
     }

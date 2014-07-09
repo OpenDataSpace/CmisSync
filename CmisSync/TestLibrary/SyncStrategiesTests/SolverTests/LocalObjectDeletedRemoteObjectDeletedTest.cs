@@ -56,11 +56,9 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
             string remoteDocumentId = "DocumentId";
 
-            var docId = new Mock<IObjectId>();
-            docId.Setup(d => d.Id).Returns(remoteDocumentId);
             storage.AddLocalFile(tempFile, remoteDocumentId);
 
-            new LocalObjectDeletedRemoteObjectDeleted().Solve(session.Object, storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
+            new LocalObjectDeletedRemoteObjectDeleted().Solve(session.Object, storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), null);
 
             storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId)), Times.Once());
         }
