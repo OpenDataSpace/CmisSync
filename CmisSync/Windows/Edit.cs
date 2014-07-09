@@ -78,6 +78,7 @@ namespace CmisSync
             this.Ignores = new List<string>(ignores);
             this.localPath = localPath;
             this.type = type;
+            this.backgroundWorker.WorkerSupportsCancellation = true;
             this.backgroundWorker.DoWork += CheckPassword;
             this.backgroundWorker.RunWorkerCompleted += PasswordChecked;
 
@@ -132,6 +133,8 @@ namespace CmisSync
 
         protected override void Close(object sender, CancelEventArgs args)
         {
+            backgroundWorker.CancelAsync();
+            backgroundWorker.Dispose();
             Controller.CloseWindow();
         }
 
@@ -181,7 +184,9 @@ namespace CmisSync
 
         private void PasswordChecked(object sender, RunWorkerCompletedEventArgs args)
         {
-            if (args.Error != null) {
+            if (args.Cancelled) {
+                return;
+            } else if (args.Error != null) {
                 passwordHelp.Text = string.Format(Properties_Resources.LoginFailed, args.Error.Message);
             } else {
                 passwordHelp.Text = Properties_Resources.LoginSuccess;
