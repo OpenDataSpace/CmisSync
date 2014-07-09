@@ -219,13 +219,14 @@
     <Compile Include="Events\EventFilter\IFilterAggregator.cs" />
     <Compile Include="Events\EventTypes\IFilterableLocalPathEvent.cs" />
     <Compile Include="Sync\Strategy\RetryException.cs" />
+    <Compile Include="Sync\Solver\LocalObjectDeletedRemoteObjectDeleted.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
