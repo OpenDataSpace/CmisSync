@@ -56,8 +56,6 @@ namespace CmisSync.Lib.Sync.Strategy
         }
 
         public void Handle(object source, RenamedEventArgs e) {
-            string oldname = e.OldFullPath;
-            string newname = e.FullPath;
             bool? isDirectory = this.fsFactory.IsDirectory(e.FullPath);
 
             if (isDirectory == null) {
@@ -65,13 +63,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 return;
             }
 
-            if (oldname.StartsWith(this.path) && newname.StartsWith(this.path)) {
-                this.queue.AddEvent(new FSMovedEvent(oldname, newname, (bool)isDirectory));
-            } else if (oldname.StartsWith(this.path)) {
-                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname, (bool)isDirectory));
-            } else if (newname.StartsWith(this.path)) {
-                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname, (bool)isDirectory));
-            }
+            this.queue.AddEvent(new FSMovedEvent(e.OldFullPath, e.FullPath, (bool)isDirectory));
         }
     }
 }

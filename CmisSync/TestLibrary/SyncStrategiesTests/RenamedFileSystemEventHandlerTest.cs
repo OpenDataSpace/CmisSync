@@ -79,7 +79,7 @@ namespace TestLibrary.SyncStrategiesTests
             string oldPath = Path.Combine(rootPath, oldName);
             this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)true);
 
-            handler.Handle(null, new RenamedEventArgs(WatcherChangeTypes.Renamed, rootPath, newName, oldPath));
+            handler.Handle(null, this.CreateEvent(oldName, newName));
 
             this.queue.Verify(
                 q =>
@@ -94,7 +94,7 @@ namespace TestLibrary.SyncStrategiesTests
             string oldPath = Path.Combine(rootPath, oldName);
             this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)false);
 
-            handler.Handle(null, new RenamedEventArgs(WatcherChangeTypes.Renamed, rootPath, newName, oldPath));
+            handler.Handle(null, this.CreateEvent(oldName, newName));
 
             this.queue.Verify(
                 q =>
@@ -106,40 +106,29 @@ namespace TestLibrary.SyncStrategiesTests
         public void HandleRenameEventOfNonExistingPath() {
             var handler = new RenamedFileSystemEventHandler(this.queue.Object, rootPath, this.fsFactory.Object);
             string newPath = Path.Combine(rootPath, newName);
-            string oldPath = Path.Combine(rootPath, oldName);
             this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)null);
 
-            handler.Handle(null, new RenamedEventArgs(WatcherChangeTypes.Renamed, rootPath, newName, oldPath));
+            handler.Handle(null, this.CreateEvent(oldName, newName));
 
             this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once);
         }
 
         [Test, Category("Fast")]
-        public void HandleFolderMoveFromOutsideOfRootFolderIntoRootFolder() {
-            var handler = new RenamedFileSystemEventHandler(this.queue.Object, rootPath, this.fsFactory.Object);
-            string newPath = Path.Combine(rootPath, newName);
-            string oldPath = Path.GetFullPath(Path.Combine(rootPath, "..", Path.GetRandomFileName(), oldName));
-            this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)true);
-
-            handler.Handle(null, new RenamedEventArgs(WatcherChangeTypes.Renamed, rootPath, newName, oldPath));
-
-            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.LocalPath == newPath && e.IsDirectory == true && e.Type == WatcherChangeTypes.Created)), Times.Once);
-            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+        public void RenamedEventArgsConstructor()
+        {
+            var args = this.CreateEvent(oldName, newName);
+            Assert.That(args.FullPath, Is.EqualTo(Path.Combine(rootPath, newName)));
+            Assert.That(args.OldFullPath, Is.EqualTo(Path.Combine(rootPath, oldName)));
         }
 
-        [Test, Category("Fast")]
-        public void HandleFolderMoveFromInsideTheRootFolderToOutsideTheRootFolder() {
-            var handler = new RenamedFileSystemEventHandler(this.queue.Object, rootPath, this.fsFactory.Object);
-            string newTargetPath = Path.GetFullPath(Path.Combine(rootPath, "..", Path.GetRandomFileName()));
-            string newPath = Path.Combine(newTargetPath, newName);
-            string oldPath = Path.Combine(rootPath, oldName);
-            this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)true);
-
-            handler.Handle(null, new RenamedEventArgs(WatcherChangeTypes.Renamed, newTargetPath, newName, oldPath));
-
-            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.LocalPath == oldPath && e.IsDirectory == true && e.Type == WatcherChangeTypes.Deleted)), Times.Once);
-            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+        private RenamedEventArgs CreateEvent(string oldName, string newName)
+        {
+#if __MonoCS__
+            return new RenamedEventArgs(WatcherChangeTypes.Renamed, rootPath, newName, Path.Combine(rootPath, oldName));
+#else
+            return new RenamedEventArgs(WatcherChangeTypes.Renamed, rootPath, newName, oldName);
+#endif
         }
     }
 }
