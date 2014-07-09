@@ -150,9 +150,10 @@ namespace CmisSync.Lib.Sync.Strategy
                     isDirectory = false;
                 }
             } else {
-                try {
-                    isDirectory = (File.GetAttributes(e.FullPath) & FileAttributes.Directory) == FileAttributes.Directory;
-                } catch (FileNotFoundException) {
+                bool? check = fsFactory.IsDirectory(e.FullPath);
+                if (check != null) {
+                    isDirectory = (bool)check;
+                } else {
                     return;
                 }
             }
@@ -173,14 +174,19 @@ namespace CmisSync.Lib.Sync.Strategy
         {
             string oldname = e.OldFullPath;
             string newname = e.FullPath;
-            bool isDirectory = (File.GetAttributes(e.FullPath) & FileAttributes.Directory) == FileAttributes.Directory;
-            if (oldname.StartsWith(this.fileSystemWatcher.Path) && newname.StartsWith(this.fileSystemWatcher.Path))
-            {
-                this.queue.AddEvent(new FSMovedEvent(oldname, newname, isDirectory));
+            bool? isDirectory = fsFactory.IsDirectory(e.FullPath);
+
+            if (isDirectory == null) {
+                this.queue.AddEvent(new StartNextSyncEvent(true));
+                return;
+            }
+
+            if (oldname.StartsWith(this.fileSystemWatcher.Path) && newname.StartsWith(this.fileSystemWatcher.Path)) {
+                this.queue.AddEvent(new FSMovedEvent(oldname, newname, (bool)isDirectory));
             } else if (oldname.StartsWith(this.fileSystemWatcher.Path)) {
-                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname, isDirectory));
+                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname, (bool)isDirectory));
             } else if (newname.StartsWith(this.fileSystemWatcher.Path)) {
-                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname, isDirectory));
+                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname, (bool)isDirectory));
             }
         }
     }

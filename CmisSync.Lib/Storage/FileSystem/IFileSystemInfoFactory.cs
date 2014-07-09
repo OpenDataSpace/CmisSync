@@ -46,5 +46,12 @@ namespace CmisSync.Lib.Storage
         /// <returns>The conflict file info.</returns>
         /// <param name="file">File for which a new conflict file should be created.</param>
         IFileInfo CreateConflictFileInfo(IFileInfo file);
+
+        /// <summary>
+        /// Determines whether the path is an existing directory or an existing file or does not exist.
+        /// </summary>
+        /// <returns><c>true</c> if this path points to a directory;<c>false</c> if this path points to a file; otherwise if nothing exists on the path <c>null</c>.</returns>
+        /// <param name="path">Full path.</param>
+        bool? IsDirectory(string path);
     }
 }

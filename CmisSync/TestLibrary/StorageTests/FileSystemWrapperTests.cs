@@ -290,6 +290,31 @@ namespace TestLibrary.StorageTests
             Assert.That(conflictFile.Name, Is.Not.EqualTo(fileInfo.Name));
         }
 
+        [Test, Category("Medium")]
+        public void IsDirectoryTrue() {
+            string fullPath = Path.GetTempPath();
+            Assert.That(Factory.IsDirectory(fullPath), Is.True);
+        }
+
+        [Test, Category("Medium")]
+        public void IsDirectoryFalse() {
+            string fullPath = Path.GetTempFileName();
+            Assert.That(Factory.IsDirectory(fullPath), Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void IsDirectoryNull() {
+            string fullPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Assert.That(Factory.IsDirectory(fullPath), Is.Null);
+        }
+
+        [Test, Category("Medium")]
+        public void IsDirectoryRequirements() {
+            string path = Path.GetTempPath();
+            Assert.That(Factory.CreateFileInfo(path).Exists, Is.False);
+            Assert.That(Factory.CreateDirectoryInfo(path).Exists, Is.True);
+        }
+
         // Not implemented yet
         [Ignore]
         [Test, Category("Fast")]

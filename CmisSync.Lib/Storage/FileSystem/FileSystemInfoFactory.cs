@@ -75,5 +75,22 @@ namespace CmisSync.Lib.Storage
             while (conflictFile.Exists);
             return conflictFile;
         }
+
+        /// <summary>
+        /// Determines whether the path is an existing directory or an existing file or does not exist.
+        /// </summary>
+        /// <returns><c>true</c> if this path points to a directory;<c>false</c> if this path points to a file; otherwise if nothing exists on the path <c>null</c>.</returns>
+        /// <param name="path">Full path.</param>
+        public bool? IsDirectory(string path) {
+            if (this.CreateFileInfo(path).Exists) {
+                return false;
+            }
+
+            if (this.CreateDirectoryInfo(path).Exists) {
+                return true;
+            }
+
+            return null;
+        }
     }
 }
