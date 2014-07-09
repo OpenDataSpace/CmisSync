@@ -55,6 +55,8 @@ namespace CmisSync
         /// </summary>
         public CmisRepoCredentials Credentials;
 
+        private BackgroundWorker backgroundWorker = new BackgroundWorker();
+
         private string remotePath;
         private string localPath;
 
@@ -76,6 +78,8 @@ namespace CmisSync
             this.Ignores = new List<string>(ignores);
             this.localPath = localPath;
             this.type = type;
+            this.backgroundWorker.DoWork += CheckPassword;
+            this.backgroundWorker.RunWorkerCompleted += PasswordChecked;
 
             CreateTreeView();
             LoadEdit();
@@ -152,47 +156,40 @@ namespace CmisSync
         private Button cancelButton;
 
 
-        private void CheckPassword()
+        private void CheckPassword(object sender, DoWorkEventArgs args)
         {
-            if (!passwordChanged)
-            {
+            if (!passwordChanged) {
                 return;
             }
 
-            passwordHelp.Text = Properties_Resources.LoginCheck;
-            passwordBox.IsEnabled = false;
+            Dispatcher.BeginInvoke((Action)delegate
+            {
+                passwordHelp.Text = Properties_Resources.LoginCheck;
+                passwordBox.IsEnabled = false;
+                passwordProgress.Visibility = Visibility.Visible;
+            });
+
             ServerCredentials cred = new ServerCredentials()
             {
                 Address = Credentials.Address,
                 UserName = Credentials.UserName,
                 Password = passwordBox.Password
             };
-            using (new TaskFactory().StartNew(() =>
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    passwordProgress.Visibility = Visibility.Visible;
-                });
-                string output;
-                try
-                {
-                    CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
-                    output = Properties_Resources.LoginSuccess;
-                }
-                catch (Exception e)
-                {
-                    output = string.Format(Properties_Resources.LoginFailed, e.Message);
-                }
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    passwordChanged = false;
-                    passwordHelp.Text = output;
-                    passwordBox.IsEnabled = true;
-                    passwordProgress.Visibility = Visibility.Hidden;
-                });
-            }))
-            {
+
+            CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
+        }
+
+        private void PasswordChecked(object sender, RunWorkerCompletedEventArgs args)
+        {
+            if (args.Error != null) {
+                passwordHelp.Text = string.Format(Properties_Resources.LoginFailed, args.Error.Message);
+            } else {
+                passwordHelp.Text = Properties_Resources.LoginSuccess;
             }
+
+            passwordProgress.Visibility = Visibility.Hidden;
+            passwordChanged = false;
+            passwordBox.IsEnabled = true;
         }
 
         private void CreateTreeView()
@@ -211,7 +208,7 @@ namespace CmisSync
             repos.Add(repo);
             repo.Selected = true;
 
-            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
             IgnoredFolderLoader.AddIgnoredFolderToRootNode(repo, Ignores);
             LocalFolderLoader.AddLocalFolderToRootNode(repo, localPath);
             asyncLoader.Load(repo);
@@ -248,19 +245,18 @@ namespace CmisSync
             passwordHelp = editWPF.FindName("passwordHelp") as TextBlock;
             finishButton = editWPF.FindName("finishButton") as Button;
             cancelButton = editWPF.FindName("cancelButton") as Button;
-
             tabItemSelection.Content = treeView;
 
             addressBox.Text = Credentials.Address.ToString();
             userBox.Text = Credentials.UserName;
             passwordBox.Password = Credentials.Password.ToString();
+            passwordHelp.Text = string.Empty;
 
             ContentCanvas.Children.Add(editWPF);
 
-            passwordBox.LostFocus += delegate { CheckPassword(); };
+            passwordBox.LostFocus += delegate { backgroundWorker.RunWorkerAsync(); };
             passwordBox.PasswordChanged += delegate { passwordChanged = true; };
-            passwordChanged = true;
-            CheckPassword();
+            passwordChanged = false;
         }
     }
 }
