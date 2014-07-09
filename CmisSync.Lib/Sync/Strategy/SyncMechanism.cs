@@ -174,7 +174,7 @@ namespace CmisSync.Lib.Sync.Strategy
             solver[(int)SituationType.CHANGED, (int)SituationType.REMOVED] = null;
             solver[(int)SituationType.MOVED, (int)SituationType.REMOVED] = null;
             solver[(int)SituationType.RENAMED, (int)SituationType.REMOVED] = null;
-            solver[(int)SituationType.REMOVED, (int)SituationType.REMOVED] = null;
+            solver[(int)SituationType.REMOVED, (int)SituationType.REMOVED] = new LocalObjectDeletedRemoteObjectDeleted();
 
             return solver;
         }

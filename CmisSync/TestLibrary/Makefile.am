@@ -87,6 +87,7 @@ SOURCES =  \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectChangedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectDeletedTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectMovedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectRenamedTest.cs \
 	SyncStrategiesTests/SolverTests/RemoteObjectAddedTest.cs \

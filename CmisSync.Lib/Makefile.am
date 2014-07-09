@@ -141,6 +141,7 @@ SOURCES =  \
 	Sync/Solver/LocalObjectAdded.cs \
 	Sync/Solver/LocalObjectChanged.cs \
 	Sync/Solver/LocalObjectDeleted.cs \
+	Sync/Solver/LocalObjectDeletedRemoteObjectDeleted.cs \
 	Sync/Solver/LocalObjectMoved.cs \
 	Sync/Solver/LocalObjectRenamed.cs \
 	Sync/Solver/NothingToDoSolver.cs \
