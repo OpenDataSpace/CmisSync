@@ -36,6 +36,7 @@ namespace CmisSync.Lib.Events
         /// <param name='newPath'>
         /// New path.
         /// </param>
+        /// <param name="isDirectory"><c>true</c> if the moved object is a directory, otherwise <c>false</c></param>
         public FSMovedEvent(string oldPath, string newPath, bool isDirectory) : base(WatcherChangeTypes.Renamed, newPath, isDirectory)
         {
             this.OldPath = oldPath;
@@ -48,5 +49,14 @@ namespace CmisSync.Lib.Events
         /// The old path.
         /// </value>
         public string OldPath { get; private set; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FSMovedEvent"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FSMovedEvent"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format("FSMovedEvent {0} from \"{1}\" to \"{2}\"", this.IsDirectory ? "directory" : "file", this.OldPath, this.LocalPath);
+        }
     }
 }
