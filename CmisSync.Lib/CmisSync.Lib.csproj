@@ -219,6 +219,8 @@
     <Compile Include="Events\EventFilter\IFilterAggregator.cs" />
     <Compile Include="Events\EventTypes\IFilterableLocalPathEvent.cs" />
     <Compile Include="Sync\Strategy\RetryException.cs" />
+    <Compile Include="Sync\Strategy\Watcher\CreatedChangedDeletedFileSystemEventHandler.cs" />
+    <Compile Include="Sync\Strategy\Watcher\RenamedFileSystemEventHandler.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

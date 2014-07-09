@@ -70,7 +70,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
             Logger.Debug("Handling FSEvent: " + e);
 
-            if (fsevent.IsDirectory()) {
+            if (fsevent.IsDirectory) {
                 this.HandleFolderEvents(fsevent);
             } else {
                 this.HandleFileEvents(fsevent);

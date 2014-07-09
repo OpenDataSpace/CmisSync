@@ -177,6 +177,9 @@
     <Compile Include="EventsTests\EventsFilterTests\FilterAggregatorTest.cs" />
     <Compile Include="TestUtils\IsTestWithConfiguredLog4Net.cs" />
     <Compile Include="EventsTests\ActivityListenerAggregatorTest.cs" />
+    <Compile Include="SyncStrategiesTests\RenamedFileSystemEventHandlerTest.cs" />
+    <Compile Include="TestUtils\MockOfISyncEventQueue.cs" />
+    <Compile Include="SyncStrategiesTests\CreatedChangedDeletedFileSystemEventHandlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

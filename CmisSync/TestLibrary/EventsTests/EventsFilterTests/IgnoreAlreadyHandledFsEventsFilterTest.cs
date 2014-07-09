@@ -81,7 +81,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             var fsFactory = new Mock<IFileSystemInfoFactory>();
             var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
             var fsEvent = new Mock<IFSEvent>();
-            fsEvent.Setup(e => e.IsDirectory()).Returns(true);
+            fsEvent.Setup(e => e.IsDirectory).Returns(true);
             fsEvent.Setup(e => e.LocalPath).Returns(path);
             fsEvent.Setup(e => e.Type).Returns(WatcherChangeTypes.Created);
             fsFactory.AddDirectory(path);
@@ -98,7 +98,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             Guid guid = Guid.NewGuid();
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
-            var moveEvent = Mock.Of<IFSMovedEvent>(e => e.LocalPath == path && e.OldPath == oldPath && e.Type == WatcherChangeTypes.Renamed && e.IsDirectory() == true);
+            var moveEvent = Mock.Of<IFSMovedEvent>(e => e.LocalPath == path && e.OldPath == oldPath && e.Type == WatcherChangeTypes.Renamed && e.IsDirectory == true);
             var dirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == path && d.Exists == true && d.GetExtendedAttribute(It.IsAny<string>()) == guid.ToString());
             fsFactory.AddIDirectoryInfo(dirInfo);
             storage.AddMappedFolder(new MappedObject("path", "remoteId", MappedObjectType.Folder, null, null) { Guid = guid }, path);
@@ -116,7 +116,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
 
             var fsEvent = new Mock<IFSEvent>();
-            fsEvent.Setup(e => e.IsDirectory()).Returns(false);
+            fsEvent.Setup(e => e.IsDirectory).Returns(false);
             fsEvent.Setup(e => e.LocalPath).Returns(path);
             fsEvent.Setup(e => e.Type).Returns(WatcherChangeTypes.Created);
 
@@ -134,7 +134,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             var fsEvent = new Mock<IFSEvent>();
             fsEvent.Setup(e => e.LocalPath).Returns(path);
             fsEvent.Setup(e => e.Type).Returns(WatcherChangeTypes.Deleted);
-            fsEvent.Setup(e => e.IsDirectory()).Returns(false);
+            fsEvent.Setup(e => e.IsDirectory).Returns(false);
 
             Assert.That(filter.Handle(fsEvent.Object), Is.True);
         }

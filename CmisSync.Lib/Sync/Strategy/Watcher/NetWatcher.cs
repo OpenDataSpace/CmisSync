@@ -46,6 +46,10 @@ namespace CmisSync.Lib.Sync.Strategy
 
         private IFileSystemInfoFactory fsFactory;
 
+        private CreatedChangedDeletedFileSystemEventHandler createChangeDeleteHandler;
+
+        private RenamedFileSystemEventHandler renamedHandler;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.NetWatcher"/> class.
         /// Takes the given file system watcher and listens for events and passes them to the given queue
@@ -82,10 +86,14 @@ namespace CmisSync.Lib.Sync.Strategy
             this.fileSystemWatcher.Filter = "*";
             this.fileSystemWatcher.InternalBufferSize = 4 * 1024 * 16;
             this.fileSystemWatcher.NotifyFilter = NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.Security;
-            this.fileSystemWatcher.Created += new FileSystemEventHandler(this.OnCreatedChangedDeleted);
-            this.fileSystemWatcher.Deleted += new FileSystemEventHandler(this.OnCreatedChangedDeleted);
-            this.fileSystemWatcher.Changed += new FileSystemEventHandler(this.OnCreatedChangedDeleted);
-            this.fileSystemWatcher.Renamed += new RenamedEventHandler(this.OnRenamed);
+
+            this.createChangeDeleteHandler = new CreatedChangedDeletedFileSystemEventHandler(this.queue, this.storage, this.fsFactory);
+            this.renamedHandler = new RenamedFileSystemEventHandler(this.queue, watcher.Path, this.fsFactory);
+
+            this.fileSystemWatcher.Created += new FileSystemEventHandler(this.createChangeDeleteHandler.Handle);
+            this.fileSystemWatcher.Deleted += new FileSystemEventHandler(this.createChangeDeleteHandler.Handle);
+            this.fileSystemWatcher.Changed += new FileSystemEventHandler(this.createChangeDeleteHandler.Handle);
+            this.fileSystemWatcher.Renamed += new RenamedEventHandler(this.renamedHandler.Handle);
         }
 
         /// <summary>
@@ -126,67 +134,6 @@ namespace CmisSync.Lib.Sync.Strategy
                 }
 
                 this.disposed = true;
-            }
-        }
-
-        /// <summary>
-        /// Raises the created/changed/deleted event as FSEvent.
-        /// </summary>
-        /// <param name='source'>
-        /// Source file system watcher.
-        /// </param>
-        /// <param name='e'>
-        /// Reported changes.
-        /// </param>
-        private void OnCreatedChangedDeleted(object source, FileSystemEventArgs e)
-        {
-            bool isDirectory;
-            if(e.ChangeType == WatcherChangeTypes.Deleted) {
-                var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
-                if (obj != null) {
-                    isDirectory = obj.Type == CmisSync.Lib.Data.MappedObjectType.Folder;
-                } else {
-                    // we can not know it but is not relevant
-                    isDirectory = false;
-                }
-            } else {
-                bool? check = fsFactory.IsDirectory(e.FullPath);
-                if (check != null) {
-                    isDirectory = (bool)check;
-                } else {
-                    return;
-                }
-            }
-
-            this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath, isDirectory));
-        }
-
-        /// <summary>
-        /// Raises the renamed event as FSMovedEvent.
-        /// </summary>
-        /// <param name='source'>
-        /// Source file system watcher.
-        /// </param>
-        /// <param name='e'>
-        /// Reported renaming.
-        /// </param>
-        private void OnRenamed(object source, RenamedEventArgs e)
-        {
-            string oldname = e.OldFullPath;
-            string newname = e.FullPath;
-            bool? isDirectory = fsFactory.IsDirectory(e.FullPath);
-
-            if (isDirectory == null) {
-                this.queue.AddEvent(new StartNextSyncEvent(true));
-                return;
-            }
-
-            if (oldname.StartsWith(this.fileSystemWatcher.Path) && newname.StartsWith(this.fileSystemWatcher.Path)) {
-                this.queue.AddEvent(new FSMovedEvent(oldname, newname, (bool)isDirectory));
-            } else if (oldname.StartsWith(this.fileSystemWatcher.Path)) {
-                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, oldname, (bool)isDirectory));
-            } else if (newname.StartsWith(this.fileSystemWatcher.Path)) {
-                this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, newname, (bool)isDirectory));
             }
         }
     }

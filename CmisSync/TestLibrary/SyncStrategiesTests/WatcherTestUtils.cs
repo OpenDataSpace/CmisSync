@@ -70,7 +70,7 @@ namespace TestLibrary.SyncStrategiesTests
             t.Wait();
             if (this.returnedFSEvent != null)
             {
-                Assert.IsFalse(this.returnedFSEvent.IsDirectory());
+                Assert.IsFalse(this.returnedFSEvent.IsDirectory);
                 Assert.AreEqual(this.localFile.FullName, this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(WatcherChangeTypes.Created, this.returnedFSEvent.Type);
             }
@@ -104,7 +104,7 @@ namespace TestLibrary.SyncStrategiesTests
             if (this.returnedFSEvent != null)
             {
                 if (this.returnedFSEvent.Type == WatcherChangeTypes.Changed) {
-                    Assert.IsFalse(this.returnedFSEvent.IsDirectory());
+                    Assert.IsFalse(this.returnedFSEvent.IsDirectory);
                     Assert.AreEqual(this.localFile.FullName, this.returnedFSEvent.LocalPath);
                 }
                 else
@@ -137,10 +137,48 @@ namespace TestLibrary.SyncStrategiesTests
             if (this.returnedFSEvent != null) {
                 if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed)
                 {
-                    Assert.IsFalse(this.returnedFSEvent.IsDirectory());
+                    Assert.IsFalse(this.returnedFSEvent.IsDirectory);
                     Assert.AreEqual(newpath, (this.returnedFSEvent as FSMovedEvent).LocalPath);
                     Assert.AreEqual(oldpath, (this.returnedFSEvent as FSMovedEvent).OldPath);
                     Assert.AreEqual(WatcherChangeTypes.Renamed, (this.returnedFSEvent as FSMovedEvent).Type);
+                }
+                else
+                {
+                    Assert.Inconclusive(string.Format("File System Event: \"{0}\"", this.returnedFSEvent.ToString()));
+                }
+            }
+            else
+            {
+                Assert.Inconclusive("Missed file rename event");
+            }
+
+            this.localFile = new FileInfo(newpath);
+        }
+
+        public void ReportFSFileMovedEvent() {
+            var anotherSubFolder = new DirectoryInfo(Path.Combine(this.localFolder.FullName, Path.GetRandomFileName()));
+            anotherSubFolder.Create();
+            string oldpath = Path.Combine(this.localFile.FullName, Path.GetRandomFileName());
+            string newpath = Path.Combine(anotherSubFolder.FullName, Path.GetRandomFileName());
+            this.queue.Setup(q => q.AddEvent(It.Is<FSMovedEvent>(e => e.LocalPath == newpath)))
+                .Callback((ISyncEvent file) => this.returnedFSEvent = file as FSMovedEvent);
+            var watcherData = this.GetWatcherData(this.localFolder.FullName, this.queue.Object);
+            watcherData.Watcher.EnableEvents = true;
+            var t = Task.Factory.StartNew(() => {
+                int count = 0;
+                while (this.returnedFSEvent == null && count < RETRIES) {
+                    WaitWatcherData(watcherData, newpath, WatcherChangeTypes.Renamed, MILISECONDSWAIT);
+                    count++;
+                }
+            });
+            this.localFile.MoveTo(newpath);
+            t.Wait();
+            if (this.returnedFSEvent != null) {
+                if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed)
+                {
+                    Assert.That(this.returnedFSEvent.IsDirectory, Is.False);
+                    Assert.That((this.returnedFSEvent as FSMovedEvent).LocalPath, Is.EqualTo(newpath));
+                    Assert.That((this.returnedFSEvent as FSMovedEvent).OldPath, Is.EqualTo(oldpath));
                 }
                 else
                 {
@@ -196,7 +234,7 @@ namespace TestLibrary.SyncStrategiesTests
             t.Wait();
             if (this.returnedFSEvent != null)
             {
-                Assert.IsTrue(this.returnedFSEvent.IsDirectory());
+                Assert.IsTrue(this.returnedFSEvent.IsDirectory);
                 Assert.AreEqual(this.localSubFolder.FullName, this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(WatcherChangeTypes.Created, this.returnedFSEvent.Type);
             }
@@ -222,7 +260,7 @@ namespace TestLibrary.SyncStrategiesTests
             t.Wait();
             if (this.returnedFSEvent != null)
             {
-                Assert.IsTrue(this.returnedFSEvent.IsDirectory());
+                Assert.IsTrue(this.returnedFSEvent.IsDirectory);
                 Assert.AreEqual(this.localSubFolder.FullName, this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(WatcherChangeTypes.Changed, this.returnedFSEvent.Type);
             }
@@ -250,7 +288,7 @@ namespace TestLibrary.SyncStrategiesTests
             {
                 Assert.AreEqual(this.localSubFolder.FullName, this.returnedFSEvent.LocalPath);
                 Assert.AreEqual(WatcherChangeTypes.Deleted, this.returnedFSEvent.Type);
-                Assert.That(this.returnedFSEvent.IsDirectory(), Is.True);
+                Assert.That(this.returnedFSEvent.IsDirectory, Is.True);
             }
             else
             {
@@ -276,7 +314,7 @@ namespace TestLibrary.SyncStrategiesTests
             t.Wait();
             if (this.returnedFSEvent != null)
             {
-                Assert.IsTrue(this.returnedFSEvent.IsDirectory());
+                Assert.IsTrue(this.returnedFSEvent.IsDirectory);
                 if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed) {
                     Assert.AreEqual(oldpath, (this.returnedFSEvent as FSMovedEvent).OldPath);
                     Assert.AreEqual(newpath, (this.returnedFSEvent as FSMovedEvent).LocalPath);
@@ -299,40 +337,27 @@ namespace TestLibrary.SyncStrategiesTests
             anotherSubFolder.Create();
             string oldpath = this.localSubFolder.FullName;
             string newpath = Path.Combine(anotherSubFolder.FullName, Path.GetRandomFileName());
-            List<FSEvent> returnedFSEvents = new List<FSEvent>();
-            this.queue.Setup(q => q.AddEvent(It.IsAny<FSEvent>()))
-                .Callback((ISyncEvent f) => returnedFSEvents.Add(f as FSEvent));
+            this.queue.Setup(q => q.AddEvent(It.IsAny<FSMovedEvent>()))
+                .Callback((ISyncEvent f) => this.returnedFSEvent = f as FSMovedEvent);
             var watcherData = this.GetWatcherData(this.localFolder.FullName, this.queue.Object);
             watcherData.Watcher.EnableEvents = true;
             var t = Task.Factory.StartNew(() => {
                 int count = 0;
-                while (returnedFSEvents.Count < 2 && count < RETRIES) {
+                while (this.returnedFSEvent == null && count < RETRIES) {
                     WaitWatcherData(watcherData, newpath, WatcherChangeTypes.Renamed, MILISECONDSWAIT);
                     count++;
                 }
             });
             this.localSubFolder.MoveTo(newpath);
             t.Wait();
-            if (returnedFSEvents.Count > 0)
+            if (this.returnedFSEvent != null)
             {
-                bool oldpathfound = false;
-                bool newpathfound = false;
-                foreach (FSEvent fsEvent in returnedFSEvents) {
-                    if (fsEvent.LocalPath.Equals(oldpath)) {
-                        oldpathfound = true;
-                    }
+                FSMovedEvent movedEvent = this.returnedFSEvent as FSMovedEvent;
 
-                    if (fsEvent is FSMovedEvent && (fsEvent as FSMovedEvent).OldPath.Equals(oldpath)) {
-                        oldpathfound = true;
-                    }
-
-                    if (fsEvent.LocalPath.Equals(newpath)) {
-                        newpathfound = true;
-                    }
-                }
-
-                Assert.IsTrue(oldpathfound);
-                Assert.IsTrue(newpathfound);
+                Assert.That(movedEvent.OldPath, Is.EqualTo(oldpath));
+                Assert.That(movedEvent.LocalPath, Is.EqualTo(newpath));
+                Assert.That(movedEvent.Type, Is.EqualTo(WatcherChangeTypes.Renamed));
+                Assert.That(movedEvent.IsDirectory, Is.True);
             }
             else
             {

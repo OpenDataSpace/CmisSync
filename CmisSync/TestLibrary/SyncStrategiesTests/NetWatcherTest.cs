@@ -104,14 +104,20 @@ namespace TestLibrary.SyncStrategiesTests
             this.ReportFSFileChangedEvent();
         }
 
+        // This test fails on current build slave, retest when these are FC20 or higher
         [Test, Category("Medium"), Category("BrokenOnFC18"), Category("Erratic")]
-        //This test fails on current build slave, retest when these are FC20 or higher
         public void ReportFSFileRenamedEventTest() {
             this.ReportFSFileRenamedEvent();
         }
 
         [Test, Category("Medium")]
+        public void ReportFSFileMovedEventTest() {
+            this.ReportFSFileMovedEvent();
+        }
+
+        [Test, Category("Medium")]
         public void ReportFSFileRemovedEventTest() {
+            this.storage.AddLocalFile(this.localFile.FullName, "id");
             this.ReportFSFileRemovedEvent();
         }
 
@@ -131,8 +137,8 @@ namespace TestLibrary.SyncStrategiesTests
             this.ReportFSFolderRemovedEvent();
         }
 
+        // This test fails on current build slave, retest when these are FC20 or higher
         [Test, Category("Medium"), Category("BrokenOnFC18"), Category("Erratic")]
-        //This test fails on current build slave, retest when these are FC20 or higher
         public void ReportFSFolderRenamedEventTest() {
             this.ReportFSFolderRenamedEvent();
         }

@@ -54,7 +54,7 @@ namespace TestLibrary.EventsTests
             Directory.CreateDirectory(path);
             var e = new FSEvent(WatcherChangeTypes.Created, path, true);
 
-            Assert.That(e.IsDirectory(), Is.True, "It is a Directory");
+            Assert.That(e.IsDirectory, Is.True, "It is a Directory");
         }
 
         [Test, Category("Medium")]

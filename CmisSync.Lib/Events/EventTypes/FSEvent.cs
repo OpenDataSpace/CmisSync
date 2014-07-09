@@ -30,7 +30,11 @@ namespace CmisSync.Lib.Events
     /// </exception>
     public class FSEvent : IFSEvent
     {
-        private bool isDirectory;
+        /// <summary>
+        /// Gets a value indicating whether this instance is pointing to a directory.
+        /// </summary>
+        /// <value><c>true</c> if this is directory; otherwise, <c>false</c>.</value>
+        public bool IsDirectory { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FSEvent"/> class.
@@ -56,7 +60,7 @@ namespace CmisSync.Lib.Events
             this.Type = type;
             FileSystemInfo fileSystemInfo = isDirectory ? (FileSystemInfo)new DirectoryInfo(path) : (FileSystemInfo)new FileInfo(path);
             this.LocalPath = fileSystemInfo.FullName;
-            this.isDirectory = isDirectory;
+            this.IsDirectory = isDirectory;
             this.Name = fileSystemInfo.Name;
         }
 
@@ -91,17 +95,6 @@ namespace CmisSync.Lib.Events
         public override string ToString()
         {
             return string.Format("FSEvent with type \"{0}\" on path \"{1}\" and the name \"{2}\"", this.Type, this.LocalPath, this.Name);
-        }
-
-        /// <summary>
-        /// Determines whether this instance is directory.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if this instance is directory; otherwise, <c>false</c>.
-        /// </returns>
-        public bool IsDirectory()
-        {
-            return this.isDirectory;
         }
     }
 }

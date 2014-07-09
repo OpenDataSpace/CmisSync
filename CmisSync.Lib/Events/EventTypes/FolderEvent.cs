@@ -116,8 +116,10 @@ namespace CmisSync.Lib.Events
         /// Determines whether this event contains a directory.
         /// </summary>
         /// <returns><c>true</c></returns>
-        public bool IsDirectory() {
-            return true;
+        public bool IsDirectory {
+            get {
+                return true;
+            }
         }
     }
 }

@@ -93,7 +93,7 @@ namespace CmisSync.Lib.Events.Filter
             try {
                 var nameEvent = e as IFilterableNameEvent;
                 if (nameEvent != null && nameEvent.Name != null) {
-                    if (nameEvent.IsDirectory()) {
+                    if (nameEvent.IsDirectory) {
                         if (this.ignoredFolderNameFilter.CheckFolderName(nameEvent.Name, out reason)) {
                             this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
                             return true;

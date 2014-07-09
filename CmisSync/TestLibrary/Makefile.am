@@ -74,12 +74,14 @@ SOURCES =  \
 	SyncStrategiesTests/ContentChangeEventAccumulatorTest.cs \
 	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
 	SyncStrategiesTests/ContentChangesTest.cs \
+	SyncStrategiesTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
 	SyncStrategiesTests/DescendantsCrawlerTest.cs \
 	SyncStrategiesTests/LocalObjectFetcherTest.cs \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/RemoteObjectFetcherTest.cs \
 	SyncStrategiesTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
+	SyncStrategiesTests/RenamedFileSystemEventHandlerTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
@@ -102,6 +104,7 @@ SOURCES =  \
 	TestUtils/MockOfIDocumentUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
 	TestUtils/MockOfIFolderUtil.cs \
+	TestUtils/MockOfISyncEventQueue.cs \
 	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \

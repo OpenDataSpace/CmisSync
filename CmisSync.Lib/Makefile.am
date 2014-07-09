@@ -162,9 +162,11 @@ SOURCES =  \
 	Sync/Strategy/RemoteSituationDetection.cs \
 	Sync/Strategy/RetryException.cs \
 	Sync/Strategy/SyncMechanism.cs \
+	Sync/Strategy/Watcher/CreatedChangedDeletedFileSystemEventHandler.cs \
 	Sync/Strategy/Watcher/IWatcherProducer.cs \
 	Sync/Strategy/Watcher/MacWatcher.cs \
 	Sync/Strategy/Watcher/NetWatcher.cs \
+	Sync/Strategy/Watcher/RenamedFileSystemEventHandler.cs \
 	Sync/Strategy/Watcher/WatcherConsumer.cs \
 	Utils.cs
 

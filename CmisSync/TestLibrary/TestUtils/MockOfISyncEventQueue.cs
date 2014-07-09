@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IFilterableEvent.cs" company="GRAU DATA AG">
+// <copyright file="MockOfISyncEventQueue.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,19 +17,19 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace TestLibrary.TestUtils
 {
     using System;
+    using System.Linq.Expressions;
 
-    /// <summary>
-    /// Filterable event.
-    /// </summary>
-    public interface IFilterableEvent : ISyncEvent
+    using CmisSync.Lib.Events;
+
+    using Moq;
+
+    public static class MockOfISyncEventQueue
     {
-        /// <summary>
-        /// Determines whether this event contains a directory.
-        /// </summary>
-        /// <returns><c>true</c> if this event contains a directory; otherwise, <c>false</c>.</returns>
-        bool IsDirectory { get; }
+        public static void VerifyThatNoOtherEventIsAddedThan<T>(this Mock<ISyncEventQueue> queue) {
+            queue.Verify(q => q.AddEvent(It.Is<ISyncEvent>(e => !(e is T))), Times.Never());
+        }
     }
 }
