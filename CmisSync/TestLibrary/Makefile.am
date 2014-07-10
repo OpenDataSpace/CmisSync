@@ -53,6 +53,7 @@ SOURCES =  \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DBreezeTests.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
