@@ -20,7 +20,9 @@
 namespace CmisSync.Lib.Sync.Strategy
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Timers;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
@@ -33,6 +35,10 @@ namespace CmisSync.Lib.Sync.Strategy
         private ISyncEventQueue queue;
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
+        private long threshold;
+        private Timer timer;
+        private object listLock = new object();
+        private List<Tuple<FileSystemEventArgs, Guid, DateTime, bool>> deletions;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -41,7 +47,8 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="queue">Sync event queue.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="fsFactory">File system info factory.</param>
-        public CreatedChangedDeletedFileSystemEventHandler(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
+        /// <param name="threshold">Delay after which a deleted event is passed to the queue.</param>
+        public CreatedChangedDeletedFileSystemEventHandler(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null, long threshold = 100)
         {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
@@ -53,7 +60,12 @@ namespace CmisSync.Lib.Sync.Strategy
 
             this.queue = queue;
             this.storage = storage;
+            this.threshold = threshold;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
+            this.deletions = new List<Tuple<FileSystemEventArgs, Guid, DateTime, bool>>();
+            this.timer = new Timer();
+            this.timer.AutoReset = false;
+            this.timer.Elapsed += (sender, e) => this.PopEventsFromList();
         }
 
         /// <summary>
@@ -65,12 +77,16 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name='e'>
         /// Reported changes.
         /// </param>
-        public void Handle(object source, FileSystemEventArgs e) {
+        public virtual void Handle(object source, FileSystemEventArgs e) {
             bool isDirectory;
             if (e.ChangeType == WatcherChangeTypes.Deleted) {
                 var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
                 if (obj != null) {
                     isDirectory = obj.Type == CmisSync.Lib.Data.MappedObjectType.Folder;
+                    if (obj.Guid != Guid.Empty) {
+                        this.AddEventToList(e, obj.Guid, isDirectory);
+                        return;
+                    }
                 } else {
                     // we can not know if it was a directory or not but is not relevant => skip this event
                     return;
@@ -85,6 +101,35 @@ namespace CmisSync.Lib.Sync.Strategy
             }
 
             this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath, isDirectory));
+        }
+
+        private void AddEventToList(FileSystemEventArgs args, Guid guid, bool isDirectory) {
+            lock (this.listLock) {
+                this.timer.Stop();
+                this.deletions.Add(new Tuple<FileSystemEventArgs, Guid, DateTime, bool>(args, guid, DateTime.UtcNow, isDirectory));
+                this.timer.Interval = this.threshold - (DateTime.UtcNow - this.deletions[0].Item3).Milliseconds;
+                this.timer.Start();
+            }
+        }
+
+        private void PopEventsFromList() {
+            lock (this.listLock) {
+                this.timer.Stop();
+                if (this.deletions.Count == 0) {
+                    return;
+                }
+
+                while ((DateTime.UtcNow - this.deletions[0].Item3).Milliseconds > this.threshold) {
+                    var entry = this.deletions[0];
+                    this.queue.AddEvent(new FSEvent(entry.Item1.ChangeType, entry.Item1.FullPath, entry.Item4));
+                    this.deletions.RemoveAt(0);
+                }
+
+                if (this.deletions.Count != 0) {
+                    this.timer.Interval = this.threshold - (DateTime.UtcNow - this.deletions[0].Item3).Milliseconds;
+                    this.timer.Start();
+                }
+            }
         }
     }
 }

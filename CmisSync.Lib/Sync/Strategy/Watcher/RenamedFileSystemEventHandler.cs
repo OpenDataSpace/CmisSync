@@ -55,7 +55,7 @@ namespace CmisSync.Lib.Sync.Strategy
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 
-        public void Handle(object source, RenamedEventArgs e) {
+        public virtual void Handle(object source, RenamedEventArgs e) {
             bool? isDirectory = this.fsFactory.IsDirectory(e.FullPath);
 
             if (isDirectory == null) {

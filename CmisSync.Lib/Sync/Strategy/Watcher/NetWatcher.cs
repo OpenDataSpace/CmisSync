@@ -58,7 +58,11 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="queue">Queue for the occured events.</param>
         /// <param name="storage">Meta Data Storage to verify, if a deleted object is a file or folder.</param>
         /// <param name="fsFactory">File system info factory. If factory is null, the normal file system is used, otherwise the given factory.</param>
-        public NetWatcher(FileSystemWatcher watcher, ISyncEventQueue queue, IMetaDataStorage storage, FileSystemInfoFactory fsFactory = null)
+        public NetWatcher(
+            FileSystemWatcher watcher,
+            ISyncEventQueue queue,
+            IMetaDataStorage storage,
+            FileSystemInfoFactory fsFactory = null)
         {
             if (watcher == null) {
                 throw new ArgumentNullException("The given fs watcher must not be null");
