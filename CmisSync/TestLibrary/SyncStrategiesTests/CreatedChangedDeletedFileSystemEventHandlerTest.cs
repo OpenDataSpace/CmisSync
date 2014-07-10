@@ -136,8 +136,29 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
+        [Ignore]
+        [Test, Category("Fast")]
+        public void AggregatesFolderDeletedAndCreatedEventToFSMovedEvent() {
+            var handler = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object);
+            string newName = "new";
+            string oldName = "old";
+            Guid guid = Guid.NewGuid();
+            string newPath = Path.Combine(this.path, newName);
+            string oldPath = Path.Combine(Directory, oldName);
+            this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)true);
+            this.fsFactory.AddDirectory(newPath, guid, true);
+            this.storage.AddLocalFolder(oldPath, "id", guid);
+
+            handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, oldName));
+            handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.path, newName));
+
+            this.queue.Verify(q => q.AddEvent(It.Is<FSMovedEvent>(e => e.IsDirectory == true && e.Name == newName && e.OldPath == oldPath && e.LocalPath == newPath)), Times.Once());
+            this.WaitForThreshold();
+            this.queue.VerifyThatNoOtherEventIsAddedThan<FSMovedEvent>();
+        }
+
         private void WaitForThreshold() {
-            System.Threading.Thread.Sleep((int)Threshold * 2);
+            System.Threading.Thread.Sleep((int)Threshold * 10);
         }
     }
 }
