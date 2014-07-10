@@ -325,7 +325,7 @@ namespace TestLibrary.StorageTests
             folder.Create();
             folder.MoveTo(newPath);
             Assert.That(folder.Exists, Is.True);
-            Assert.That(folder.FullName, Is.EqualTo(newPath));
+            Assert.That(folder.FullName.TrimEnd(Path.DirectorySeparatorChar), Is.EqualTo(newPath));
             Assert.That(Factory.CreateDirectoryInfo(oldPath).Exists, Is.False);
         }
 
@@ -373,7 +373,7 @@ namespace TestLibrary.StorageTests
             Assert.That(Factory.CreateFileInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));
         }
 
-        // Not implemented yet
+        // Test is not implemented yet
         [Ignore]
         [Test, Category("Fast")]
         public void CreateNextConflictFile()

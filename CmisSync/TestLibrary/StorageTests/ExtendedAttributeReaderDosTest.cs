@@ -140,6 +140,16 @@ namespace TestLibrary.StorageTests
 
         [Test, Category("Medium")]
         [Category("ExtendedAttribute")]
+        public void GetNullAttributeFromNewFolderIfTrailingSlashesAreAvailable()
+        {
+            Directory.CreateDirectory(path);
+            string key = "test";
+            var reader = new ExtendedAttributeReaderDos();
+            Assert.That(reader.GetExtendedAttribute(path.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, key) == null);
+        }
+
+        [Test, Category("Medium")]
+        [Category("ExtendedAttribute")]
         public void SetAttributeToFolder()
         {
             Directory.CreateDirectory(path);
