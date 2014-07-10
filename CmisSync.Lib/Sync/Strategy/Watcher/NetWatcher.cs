@@ -135,6 +135,7 @@ namespace CmisSync.Lib.Sync.Strategy
                 {
                     this.EnableEvents = false;
                     this.fileSystemWatcher.Dispose();
+                    this.createChangeDeleteHandler.Dispose();
                 }
 
                 this.disposed = true;
