@@ -138,5 +138,24 @@ namespace TestLibrary.EventsTests.EventsFilterTests
 
             Assert.That(filter.Handle(fsEvent.Object), Is.True);
         }
+
+        [Test, Category("Fast")]
+        public void FilterDeletesFsEventsIfLocalFileSystemContainsTheElementOfTheStorage()
+        {
+            string path = "path";
+            Guid guid = Guid.NewGuid();
+            var storage = new Mock<IMetaDataStorage>();
+            var fsFactory = new Mock<IFileSystemInfoFactory>();
+            fsFactory.AddFile(path, guid, true);
+            storage.AddLocalFile(path, "id", guid);
+            var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
+            var fsEvent = Mock.Of<IFSEvent>(
+                e =>
+                e.LocalPath == path &&
+                e.Type == WatcherChangeTypes.Deleted &&
+                e.IsDirectory== false);
+
+            Assert.That(filter.Handle(fsEvent), Is.True);
+        }
     }
 }

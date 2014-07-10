@@ -91,7 +91,20 @@ namespace CmisSync.Lib.Events.Filter
                     }
 
                 case WatcherChangeTypes.Deleted:
-                    return this.storage.GetObjectByLocalPath(path) == null;
+                    IMappedObject o = this.storage.GetObjectByLocalPath(path);
+                    if (o == null) {
+                        return true;
+                    } else if(path.Exists) {
+                        try {
+                            Guid uuid;
+                            string ea = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                            if (ea != null && Guid.TryParse(ea, out uuid)) {
+                                return uuid == o.Guid;
+                            }
+                        } catch (IOException) {
+                        }
+                    }
+                    return false;
                 default:
                     return false;
                 }

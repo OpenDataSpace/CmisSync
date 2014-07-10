@@ -53,59 +53,66 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Fast")]
         public void ConstructorTakesQueueAndStorageAndFileSystemInfoFactory() {
-            new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object);
+            using (new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+            }
         }
 
         [Test, Category("Fast")]
         public void ConstructorTakesQueueAndStorage() {
-            new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object);
+            using (new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object)) {
+            }
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            new CreatedChangedDeletedFileSystemEventHandler(null, this.storage.Object);
+            using (new CreatedChangedDeletedFileSystemEventHandler(null, this.storage.Object)) {
+            }
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull() {
-            new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, null);
+            using (new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, null)) {
+            }
         }
 
         [Test, Category("Fast")]
         public void HandlesFileCreatedEvent() {
-            var handler = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object);
-            this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
+            using (var handler = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
 
-            handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
+                handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
 
-            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Created)), Times.Once());
-            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Created)), Times.Once());
+                this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+            }
         }
 
         [Test, Category("Fast")]
         public void HandlesFileChangedEvent() {
-            var handler = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object);
-            this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
+            using (var handler = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
 
-            handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+                handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
 
-            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Changed)), Times.Once());
-            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Changed)), Times.Once());
+                this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+            }
         }
 
         [Test, Category("Fast")]
         public void HandlesFileDeletedEvent() {
-            var handler = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object, Threshold);
-            this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)null);
-            var file = this.fsFactory.AddFile(this.path, false);
-            this.storage.AddLocalFile(file.Object.FullName, "id", Guid.NewGuid());
+            using (var handler = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object, Threshold)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)null);
+                var file = this.fsFactory.AddFile(this.path, false);
+                this.storage.AddLocalFile(file.Object.FullName, "id", Guid.NewGuid());
 
-            handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
-            this.WaitForThreshold();
-            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.LocalPath == this.path && e.Name == Name && e.Type == WatcherChangeTypes.Deleted)));
-            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+                handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
+                this.WaitForThreshold();
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.LocalPath == this.path && e.Name == Name && e.Type == WatcherChangeTypes.Deleted)));
+                this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+            }
         }
 
         [Test, Category("Fast")]
@@ -136,6 +143,7 @@ namespace TestLibrary.SyncStrategiesTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
+        // TODO
         [Ignore]
         [Test, Category("Fast")]
         public void AggregatesFolderDeletedAndCreatedEventToFSMovedEvent() {

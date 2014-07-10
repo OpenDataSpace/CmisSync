@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Sync.Strategy
     /// <summary>
     /// Created/Changed/Deleted file system events handler to report the events to the given queue.
     /// </summary>
-    public class CreatedChangedDeletedFileSystemEventHandler
+    public class CreatedChangedDeletedFileSystemEventHandler : IDisposable
     {
         private ISyncEventQueue queue;
         private IMetaDataStorage storage;
@@ -39,6 +39,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private Timer timer;
         private object listLock = new object();
         private List<Tuple<FileSystemEventArgs, Guid, DateTime, bool>> deletions;
+        private bool disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -48,7 +49,11 @@ namespace CmisSync.Lib.Sync.Strategy
         /// <param name="storage">Meta data storage.</param>
         /// <param name="fsFactory">File system info factory.</param>
         /// <param name="threshold">Delay after which a deleted event is passed to the queue.</param>
-        public CreatedChangedDeletedFileSystemEventHandler(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null, long threshold = 100)
+        public CreatedChangedDeletedFileSystemEventHandler(
+            ISyncEventQueue queue,
+            IMetaDataStorage storage,
+            IFileSystemInfoFactory fsFactory = null,
+            long threshold = 100)
         {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
@@ -101,6 +106,24 @@ namespace CmisSync.Lib.Sync.Strategy
             }
 
             this.queue.AddEvent(new FSEvent(e.ChangeType, e.FullPath, isDirectory));
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            // Check to see if Dispose has already been called.
+            if(!this.disposed) {
+                if(disposing) {
+                    this.timer.Dispose();
+                }
+
+                disposed = true;
+            }
         }
 
         private void AddEventToList(FileSystemEventArgs args, Guid guid, bool isDirectory) {
