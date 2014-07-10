@@ -77,7 +77,7 @@ namespace TestLibrary.IntegrationTests
                     Thread.Sleep(100);
                 }
 
-                Assert.That(this.list.Count, Is.EqualTo(2));
+                Assert.That(this.list.Count, Is.GreaterThanOrEqualTo(2));
                 Assert.That(this.list[0].ChangeType, Is.EqualTo(WatcherChangeTypes.Deleted));
                 Assert.That(this.list[0].FullPath, Is.EqualTo(Path.Combine(dirA.FullName, oldName)));
                 Assert.That(this.list[1].ChangeType, Is.EqualTo(WatcherChangeTypes.Created));
