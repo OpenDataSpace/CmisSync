@@ -242,6 +242,7 @@ namespace CmisSync.Lib.Storage
                 throw new ArgumentException("Empty or null key is not allowed");
             }
             path = Path.GetFullPath(path);
+            path = path.TrimEnd(Path.DirectorySeparatorChar);
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
             }
@@ -280,6 +281,7 @@ namespace CmisSync.Lib.Storage
             }
 
             path = Path.GetFullPath(path);
+            path = path.TrimEnd(Path.DirectorySeparatorChar);
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
             }
