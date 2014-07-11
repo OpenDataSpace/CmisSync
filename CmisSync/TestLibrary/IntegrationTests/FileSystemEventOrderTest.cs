@@ -52,7 +52,7 @@ namespace TestLibrary.IntegrationTests
             Directory.Delete(this.path, true);
         }
 
-        [Test, Category("Medium"), Timeout(20000), Repeat(10)]
+        [Test, Category("Medium"), Timeout(20000), Repeat(10), Category("Erratic")]
         public void MoveFileInsideTheWatchedFolder() {
             string oldName = Path.GetRandomFileName();
             string newName = Path.GetRandomFileName();
