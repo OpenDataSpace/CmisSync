@@ -16,6 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using CmisSync.Lib.Data;
+using TestLibrary.IntegrationTests;
 
 namespace TestLibrary.SyncStrategiesTests
 {
@@ -25,6 +27,7 @@ namespace TestLibrary.SyncStrategiesTests
     using System.Threading.Tasks;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
 
     using Moq;
@@ -45,6 +48,7 @@ namespace TestLibrary.SyncStrategiesTests
         protected DirectoryInfo localSubFolder;
         protected Mock<ISyncEventQueue> queue;
         protected FSEvent returnedFSEvent;
+        protected Guid uuid;
 
         private static readonly int RETRIES = 10;
         private static readonly int MILISECONDSWAIT = 1000;
@@ -156,9 +160,10 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         public void ReportFSFileMovedEvent() {
+
             var anotherSubFolder = new DirectoryInfo(Path.Combine(this.localFolder.FullName, Path.GetRandomFileName()));
             anotherSubFolder.Create();
-            string oldpath = Path.Combine(this.localFile.FullName, Path.GetRandomFileName());
+            string oldpath = Path.Combine(this.localFile.FullName);
             string newpath = Path.Combine(anotherSubFolder.FullName, Path.GetRandomFileName());
             this.queue.Setup(q => q.AddEvent(It.Is<FSMovedEvent>(e => e.LocalPath == newpath)))
                 .Callback((ISyncEvent file) => this.returnedFSEvent = file as FSMovedEvent);
@@ -171,7 +176,7 @@ namespace TestLibrary.SyncStrategiesTests
                     count++;
                 }
             });
-            this.localFile.MoveTo(newpath);
+            new FileInfoWrapper(this.localFile).MoveTo(newpath);
             t.Wait();
             if (this.returnedFSEvent != null) {
                 if (this.returnedFSEvent.Type == WatcherChangeTypes.Renamed)
@@ -348,7 +353,7 @@ namespace TestLibrary.SyncStrategiesTests
                     count++;
                 }
             });
-            this.localSubFolder.MoveTo(newpath);
+            new DirectoryInfoWrapper(this.localSubFolder).MoveTo(newpath);
             t.Wait();
             if (this.returnedFSEvent != null)
             {
@@ -368,7 +373,9 @@ namespace TestLibrary.SyncStrategiesTests
         }
 
         protected void SetUp() {
-            string localPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var config = ITUtils.GetConfig();
+            this.uuid = Guid.NewGuid();
+            string localPath = Path.Combine(config[1].ToString(), Path.GetRandomFileName());
             this.localFolder = new DirectoryInfo(localPath);
             this.localFolder.Create();
             this.localSubFolder = new DirectoryInfo(Path.Combine(this.localFolder.FullName, Path.GetRandomFileName()));
@@ -376,6 +383,14 @@ namespace TestLibrary.SyncStrategiesTests
             this.localFile = new FileInfo(Path.Combine(this.localFolder.FullName, Path.GetRandomFileName()));
             using (this.localFile.Create())
             {
+            }
+
+            if (AreExtendedAttributesAvailable(this.localFile.FullName)) {
+                new FileInfoWrapper(this.localFile).SetExtendedAttribute(MappedObject.ExtendedAttributeKey, this.uuid.ToString());
+            }
+
+            if (AreExtendedAttributesAvailable(this.localSubFolder.FullName)) {
+                new DirectoryInfoWrapper(this.localSubFolder).SetExtendedAttribute(MappedObject.ExtendedAttributeKey, this.uuid.ToString());
             }
 
             this.queue = new Mock<ISyncEventQueue>();
@@ -406,6 +421,24 @@ namespace TestLibrary.SyncStrategiesTests
 
         protected virtual void WaitWatcherData(WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
             Assert.Fail("to be implemented in sub class");
+        }
+
+        protected void IgnoreIfExtendedAttributesAreNotAvailable() {
+            IgnoreIfExtendedAttributesAreNotAvailable(this.localFolder.FullName);
+        }
+
+        public static void IgnoreIfExtendedAttributesAreNotAvailable(string fullName) {
+            if (!AreExtendedAttributesAvailable(fullName)) {
+                Assert.Ignore("Extended Attribute not available on path: " + fullName);
+            }
+        }
+
+        public static bool AreExtendedAttributesAvailable(string fullName) {
+            #if __MonoCS__ || __COCOA__
+            return new ExtendedAttributeReaderUnix().IsFeatureAvailable(fullName);
+            #else
+            return new ExtendedAttributeReaderDos().IsFeatureAvailable(fullName);
+            #endif
         }
     }
 }

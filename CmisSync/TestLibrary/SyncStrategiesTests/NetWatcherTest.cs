@@ -112,6 +112,9 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Medium")]
         public void ReportFSFileMovedEventTest() {
+            this.IgnoreIfExtendedAttributesAreNotAvailable();
+            string oldPath = this.localFile.FullName;
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileInfo>(f => f.FullName == oldPath))).Returns(Mock.Of<IMappedObject>(o => o.Guid == this.uuid && o.Type == MappedObjectType.File));
             this.ReportFSFileMovedEvent();
         }
 
@@ -145,6 +148,9 @@ namespace TestLibrary.SyncStrategiesTests
 
         [Test, Category("Medium")]
         public void ReportFSFolderMovedEventTest() {
+            this.IgnoreIfExtendedAttributesAreNotAvailable();
+            string oldPath = this.localSubFolder.FullName;
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IFileSystemInfo>(d => d.FullName == oldPath))).Returns(Mock.Of<IMappedObject>(o => o.Guid == this.uuid && o.Type == MappedObjectType.Folder));
             this.ReportFSFolderMovedEvent();
         }
 

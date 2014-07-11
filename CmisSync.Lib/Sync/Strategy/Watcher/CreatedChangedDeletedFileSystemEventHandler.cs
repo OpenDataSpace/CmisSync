@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Sync.Strategy
     using System.IO;
     using System.Timers;
 
+    using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -100,6 +101,11 @@ namespace CmisSync.Lib.Sync.Strategy
                 bool? check = this.fsFactory.IsDirectory(e.FullPath);
                 if (check != null) {
                     isDirectory = (bool)check;
+                    if (e.ChangeType == WatcherChangeTypes.Created) {
+                        if (this.MergingAddedAndDeletedEvent(e, isDirectory)) {
+                            return;
+                        }
+                    }
                 } else {
                     return;
                 }
@@ -142,15 +148,37 @@ namespace CmisSync.Lib.Sync.Strategy
                     return;
                 }
 
-                while ((DateTime.UtcNow - this.deletions[0].Item3).Milliseconds > this.threshold) {
+                while ((DateTime.UtcNow - this.deletions[0].Item3).Milliseconds >= this.threshold) {
                     var entry = this.deletions[0];
                     this.queue.AddEvent(new FSEvent(entry.Item1.ChangeType, entry.Item1.FullPath, entry.Item4));
                     this.deletions.RemoveAt(0);
                 }
 
-                if (this.deletions.Count != 0) {
+                if (this.deletions.Count > 0) {
                     this.timer.Interval = this.threshold - (DateTime.UtcNow - this.deletions[0].Item3).Milliseconds;
                     this.timer.Start();
+                }
+            }
+        }
+
+        private bool MergingAddedAndDeletedEvent(FileSystemEventArgs args, bool isDirectory) {
+            lock (this.listLock) {
+                Guid fsGuid;
+                IFileSystemInfo fsInfo = isDirectory ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(args.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(args.FullPath);
+                try {
+                    string fsUuid = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                    if (Guid.TryParse(fsUuid, out fsGuid)) {
+                        var correspondingDeletion = this.deletions.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == fsGuid);
+                        if (correspondingDeletion != null) {
+                            this.queue.AddEvent(new FSMovedEvent(correspondingDeletion.Item1.FullPath, args.FullPath, isDirectory));
+                            this.deletions.Remove(correspondingDeletion);
+                            return true;
+                        }
+                    }
+
+                    return false;
+                } catch(ExtendedAttributeException) {
+                    return false;
                 }
             }
         }
