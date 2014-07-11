@@ -353,25 +353,25 @@ namespace CmisSync.Lib.Sync.Strategy
         }
 
         private bool IsSymmetricNoneTuple(AbstractFolderEvent local, AbstractFolderEvent remote){
-            if(local.Local != MetaDataChangeType.NONE) {
+            if (local.Local != MetaDataChangeType.NONE) {
                 return false;
             }
 
-            if(local.Remote != MetaDataChangeType.NONE) {
+            if (remote.Remote != MetaDataChangeType.NONE) {
                 return false;
             }
 
             FileEvent localFileEvent = local as FileEvent;
-            if(localFileEvent != null) {
-                if(localFileEvent.LocalContent != ContentChangeType.NONE) {
+            if (localFileEvent != null) {
+                if (localFileEvent.LocalContent != ContentChangeType.NONE) {
                     return false;
                 }
 
             }
 
             FileEvent remoteFileEvent = remote as FileEvent;
-            if(remoteFileEvent != null) {
-                if(remoteFileEvent.RemoteContent != ContentChangeType.NONE) {
+            if (remoteFileEvent != null) {
+                if (remoteFileEvent.RemoteContent != ContentChangeType.NONE) {
                     return false;
                 }
 
