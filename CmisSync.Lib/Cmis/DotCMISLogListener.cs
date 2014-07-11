@@ -76,7 +76,7 @@ namespace CmisSync.Lib.Cmis
         {
             if (this.log.IsDebugEnabled)
             {
-                DotCMIS.Util.DotCMISDebug.DotCMISTraceLevel = System.Diagnostics.TraceLevel.Verbose;
+                DotCMIS.Util.DotCMISDebug.DotCMISTraceLevel = System.Diagnostics.TraceLevel.Info;
             }
             else
             {
