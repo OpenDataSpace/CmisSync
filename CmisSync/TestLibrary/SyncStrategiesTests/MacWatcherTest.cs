@@ -49,8 +49,8 @@ namespace TestLibrary.SyncStrategiesTests
 
         [SetUp]
         public new void SetUp() {
-//            base.SetUp ();
-            string localPath = Path.Combine (System.Environment.CurrentDirectory, Path.GetRandomFileName ());
+//            base.SetUp();
+            string localPath = Path.Combine(System.Environment.CurrentDirectory, Path.GetRandomFileName());
             localFolder = new DirectoryInfo(localPath);
             localFolder.Create();
             localSubFolder = new DirectoryInfo(Path.Combine(localFolder.FullName, Path.GetRandomFileName()));
@@ -63,7 +63,7 @@ namespace TestLibrary.SyncStrategiesTests
 
         [TearDown]
         public new void TearDown() {
-            base.TearDown ();
+            base.TearDown();
         }
 
         [Test, Category("Fast")]
@@ -108,10 +108,10 @@ namespace TestLibrary.SyncStrategiesTests
                 lock (Events) {
                     FSEvent fsEvent = newEvent as FSEvent;
                     if (fsEvent != null) {
-                        Events.Add (fsEvent);
+                        Events.Add(fsEvent);
                     }
 
-                    Queue.AddEvent (newEvent);
+                    Queue.AddEvent(newEvent);
                 }
             }
 
@@ -126,73 +126,78 @@ namespace TestLibrary.SyncStrategiesTests
             }
         }
 
-        protected override WatcherData GetWatcherData (string pathname, ISyncEventQueue queue) {
-            WatcherData watcherData = new WatcherData ();
+        protected override WatcherData GetWatcherData(string pathname, ISyncEventQueue queue) {
+            WatcherData watcherData = new WatcherData();
             watcherData.Data = new EventQueue(queue);
-            watcherData.Watcher = new MacWatcher (pathname, watcherData.Data as ISyncEventQueue, TimeSpan.FromMilliseconds(100));
+            watcherData.Watcher = new MacWatcher(pathname, watcherData.Data as ISyncEventQueue, TimeSpan.FromMilliseconds(100));
             return watcherData;
         }
 
-        protected override void WaitWatcherData (WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
+        protected override void WaitWatcherData(WatcherData watcherData, string pathname, WatcherChangeTypes types, int milliseconds) {
             EventQueue queue = watcherData.Data as EventQueue;
             while (milliseconds >= 0) {
                 FSEvent[] events;
                 lock (queue.Events) {
-                    events = queue.Events.ToArray ();
+                    events = queue.Events.ToArray();
                 }
                 foreach (FSEvent fsEvent in events) {
                     if (fsEvent.LocalPath == pathname && fsEvent.Type == types) {
                         return;
                     }
                 }
-                Thread.Sleep (10);
+                Thread.Sleep(10);
                 milliseconds -= 10;
             }
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFileAddedEventTest () {
-            ReportFSFileAddedEvent ();
+        public void ReportFSFileAddedEventTest() {
+            ReportFSFileAddedEvent();
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFileChangedEventTest () {
-            ReportFSFileChangedEvent ();
+        public void ReportFSFileChangedEventTest() {
+            ReportFSFileChangedEvent();
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFileRenamedEventTest () {
-            ReportFSFileRenamedEvent ();
+        public void ReportFSFileRenamedEventTest() {
+            ReportFSFileRenamedEvent();
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFileRemovedEventTest () {
-            ReportFSFileRemovedEvent ();
+        public void ReportFSFileMovedEventTest() {
+            this.ReportFSFileMovedEvent();
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFolderAddedEventTest () {
-            ReportFSFolderAddedEvent ();
+        public void ReportFSFileRemovedEventTest() {
+            ReportFSFileRemovedEvent();
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFolderChangedEventTest () {
-            ReportFSFolderChangedEvent ();
+        public void ReportFSFolderAddedEventTest() {
+            ReportFSFolderAddedEvent();
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFolderRemovedEventTest () {
-            ReportFSFolderRemovedEvent ();
+        public void ReportFSFolderChangedEventTest() {
+            ReportFSFolderChangedEvent();
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFolderRenamedEventTest () {
-            ReportFSFolderRenamedEvent ();
+        public void ReportFSFolderRemovedEventTest() {
+            ReportFSFolderRemovedEvent();
         }
 
         [Test, Category("Medium")]
-        public void ReportFSFolderMovedEventTest () {
-            ReportFSFolderMovedEvent ();
+        public void ReportFSFolderRenamedEventTest() {
+            ReportFSFolderRenamedEvent();
+        }
+
+        [Test, Category("Medium")]
+        public void ReportFSFolderMovedEventTest() {
+            ReportFSFolderMovedEvent();
         }
     }
 }
