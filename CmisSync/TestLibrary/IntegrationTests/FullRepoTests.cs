@@ -266,7 +266,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Erratic")]
-        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolder()
+        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByCrawler()
         {
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
             var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
@@ -279,6 +279,29 @@ namespace TestLibrary.IntegrationTests
             Thread.Sleep(5000);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("target"));
+            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("Cat"));
+        }
+
+        [Test, Category("Slow"), Category("Erratic")]
+        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByContentChange()
+        {
+            var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
+            var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
+            Thread.Sleep(15000);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
 
             this.repo.Run();
 
