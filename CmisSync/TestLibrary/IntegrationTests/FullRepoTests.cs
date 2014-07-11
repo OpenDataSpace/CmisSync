@@ -232,7 +232,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create));
-            this.remoteRootDir.GetChildren().First().Delete(true);
+            (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(false, null, true);
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
