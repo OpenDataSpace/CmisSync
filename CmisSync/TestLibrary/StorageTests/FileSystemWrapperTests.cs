@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests 
+namespace TestLibrary.StorageTests
 {
     using System;
     using System.IO;
@@ -27,6 +27,8 @@ namespace TestLibrary.StorageTests
     using Moq;
 
     using NUnit.Framework;
+
+    using TestLibrary.SyncStrategiesTests;
 
     [TestFixture]
     public class FileSystemWrapperTests {
@@ -313,6 +315,62 @@ namespace TestLibrary.StorageTests
             string path = Path.GetTempPath();
             Assert.That(Factory.CreateFileInfo(path).Exists, Is.False);
             Assert.That(Factory.CreateDirectoryInfo(path).Exists, Is.True);
+        }
+
+        [Test, Category("Medium")]
+        public void DirectoryMoveTo() {
+            string oldPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string newPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var folder = Factory.CreateDirectoryInfo(oldPath);
+            folder.Create();
+            folder.MoveTo(newPath);
+            Assert.That(folder.Exists, Is.True);
+            Assert.That(folder.FullName, Is.EqualTo(newPath));
+            Assert.That(Factory.CreateDirectoryInfo(oldPath).Exists, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void DirectoryMoveToAlsoMovesExtendedAttributes() {
+            string oldPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string newPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var folder = Factory.CreateDirectoryInfo(oldPath);
+            folder.Create();
+            BaseWatcherTest.IgnoreIfExtendedAttributesAreNotAvailable(oldPath);
+            Assert.That(folder.GetExtendedAttribute("test"), Is.Null);
+            folder.SetExtendedAttribute("test", "test");
+            folder.MoveTo(newPath);
+            Assert.That(folder.GetExtendedAttribute("test"), Is.EqualTo("test"));
+            Assert.That(Factory.CreateDirectoryInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));
+        }
+
+        [Test, Category("Medium")]
+        public void FileMoveTo() {
+            string oldPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string newPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var file = Factory.CreateFileInfo(oldPath);
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            file.MoveTo(newPath);
+            Assert.That(file.Exists, Is.True);
+            Assert.That(file.FullName, Is.EqualTo(newPath));
+            Assert.That(Factory.CreateFileInfo(oldPath).Exists, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void FileMoveToAlsoMovesExtendedAttributes() {
+            string oldPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string newPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var file = Factory.CreateFileInfo(oldPath);
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            BaseWatcherTest.IgnoreIfExtendedAttributesAreNotAvailable(oldPath);
+            Assert.That(file.GetExtendedAttribute("test"), Is.Null);
+            file.SetExtendedAttribute("test", "test");
+            file.MoveTo(newPath);
+            Assert.That(file.GetExtendedAttribute("test"), Is.EqualTo("test"));
+            Assert.That(Factory.CreateFileInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));
         }
 
         // Not implemented yet
