@@ -62,6 +62,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.CreateLocalPath(remotePath)).Returns(localPath);
+            matcher.Setup(m => m.CanCreateLocalPath(remotePath)).Returns(true);
 
             var remoteFolder = new Mock<IFolder>();
             remoteFolder.Setup(f => f.Path).Returns(remotePath);
@@ -96,6 +97,7 @@ namespace TestLibrary.SyncStrategiesTests
 
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.CreateLocalPath(remotePath)).Returns(localPath);
+            matcher.Setup(m => m.CanCreateLocalPath(remotePath)).Returns(true);
 
             var remoteFile = new Mock<IDocument>();
             remoteFile.Setup(f => f.Paths).Returns(new string[] { remotePath });
@@ -121,6 +123,40 @@ namespace TestLibrary.SyncStrategiesTests
 
             Assert.That(fetcher.Handle(fileEvent), Is.False);
             Assert.That(fileEvent.LocalFile, Is.EqualTo(file.Object));
+        }
+
+        [Test, Category("Fast")]
+        public void DropFileEventIfPathMatcherCannotCreateLocalPath() {
+            var remotePath = Path.Combine(Path.GetTempPath(), "a");
+
+            var matcher = new Mock<IPathMatcher>();
+            matcher.Setup(m => m.CanCreateLocalPath(remotePath)).Returns(false);
+
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.Setup(f => f.Paths).Returns(new string[] { remotePath });
+
+            var fileEvent = new FileEvent(remoteFile: remoteFile.Object);
+            var fetcher = new LocalObjectFetcher(matcher.Object);
+
+            Assert.That(fetcher.Handle(fileEvent), Is.True);
+            Assert.That(fileEvent.LocalFile, Is.Null);
+        }
+
+        [Test, Category("Fast")]
+        public void DropFolderEventIfPathMatcherCannotCreateLocalPath() {
+            var remotePath = Path.Combine(Path.GetTempPath(), "a");
+
+            var matcher = new Mock<IPathMatcher>();
+            matcher.Setup(m => m.CanCreateLocalPath(remotePath)).Returns(false);
+
+            var remoteFolder = new Mock<IFolder>();
+            remoteFolder.Setup(f => f.Path).Returns(remotePath);
+
+            var folderEvent = new FolderEvent(remoteFolder: remoteFolder.Object);
+            var fetcher = new LocalObjectFetcher(matcher.Object);
+
+            Assert.That(fetcher.Handle(folderEvent), Is.True);
+            Assert.That(folderEvent.LocalFolder, Is.Null);
         }
     }
 }

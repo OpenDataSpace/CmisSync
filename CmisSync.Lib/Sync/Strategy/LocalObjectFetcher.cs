@@ -53,7 +53,7 @@ namespace CmisSync.Lib.Sync.Strategy
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
         public LocalObjectFetcher(IPathMatcher matcher, IFileSystemInfoFactory fsFactory = null) {
-            if(matcher == null) {
+            if (matcher == null) {
                 throw new ArgumentNullException("matcher can not be null");
             }
 
@@ -73,10 +73,15 @@ namespace CmisSync.Lib.Sync.Strategy
         /// </param>
         /// <returns>always false</returns>
         public override bool Handle(ISyncEvent e) {
-            if(e is FolderEvent) {
+            if (e is FolderEvent) {
                 var folderEvent = e as FolderEvent;
                 if(folderEvent.LocalFolder != null) {
                     return false;
+                }
+
+                if (!this.matcher.CanCreateLocalPath(folderEvent.RemoteFolder.Path)) {
+                    Logger.Debug("Dropping FolderEvent for not accessable path: " + folderEvent.RemoteFolder.Path);
+                    return true;
                 }
 
                 Logger.Debug("Fetching local object for " + folderEvent);
@@ -84,10 +89,15 @@ namespace CmisSync.Lib.Sync.Strategy
                 folderEvent.LocalFolder = this.fsFactory.CreateDirectoryInfo(localPath);
             }
 
-            if(e is FileEvent) {
+            if (e is FileEvent) {
                 var fileEvent = e as FileEvent;
-                if(fileEvent.LocalFile != null) {
+                if (fileEvent.LocalFile != null) {
                     return false;
+                }
+
+                if (!this.matcher.CanCreateLocalPath(fileEvent.RemoteFile.Paths[0])) {
+                    Logger.Debug("Dropping FileEvent for not accessable path: " + fileEvent.RemoteFile.Paths[0]);
+                    return true;
                 }
 
                 Logger.Debug("Fetching local object for " + fileEvent);
