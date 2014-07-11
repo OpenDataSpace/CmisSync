@@ -16,8 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Threading;
-
 
 #if !__COCOA__
 namespace TestLibrary.IntegrationTests
@@ -25,6 +23,7 @@ namespace TestLibrary.IntegrationTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
@@ -42,7 +41,7 @@ namespace TestLibrary.IntegrationTests
 
         [SetUp]
         public void SetUp() {
-            this.path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            this.path = Path.Combine(ITUtils.GetConfig()[1].ToString(), Path.GetRandomFileName());
             Directory.CreateDirectory(this.path);
             this.list = new List<FileSystemEventArgs>();
         }
@@ -52,8 +51,8 @@ namespace TestLibrary.IntegrationTests
             Directory.Delete(this.path, true);
         }
 
-        [Test, Category("Medium"), Timeout(20000), Repeat(10), Category("Erratic")]
-        public void MoveFileInsideTheWatchedFolder() {
+        [Test, Category("Medium"), Timeout(20000), Repeat(5), Category("Erratic")]
+        public void MoveFolderInsideTheWatchedFolder() {
             string oldName = Path.GetRandomFileName();
             string newName = Path.GetRandomFileName();
             using (FileSystemWatcher fsWatcher = new FileSystemWatcher(this.path)) {
@@ -73,6 +72,41 @@ namespace TestLibrary.IntegrationTests
                 movingDir.Create();
                 fsWatcher.EnableRaisingEvents = true;
                 movingDir.MoveTo(Path.Combine(dirB.FullName, newName));
+                while (this.list.Count < 2) {
+                    Thread.Sleep(100);
+                }
+
+                Assert.That(this.list.Count, Is.GreaterThanOrEqualTo(2));
+                Assert.That(this.list[0].ChangeType, Is.EqualTo(WatcherChangeTypes.Deleted));
+                Assert.That(this.list[0].FullPath, Is.EqualTo(Path.Combine(dirA.FullName, oldName)));
+                Assert.That(this.list[1].ChangeType, Is.EqualTo(WatcherChangeTypes.Created));
+                Assert.That(this.list[1].FullPath, Is.EqualTo(Path.Combine(dirB.FullName, newName)));
+            }
+        }
+
+        [Test, Category("Medium"), Timeout(20000), Repeat(5), Category("Erratic")]
+        public void MoveFileInsideTheWatchedFolder() {
+            string oldName = Path.GetRandomFileName();
+            string newName = Path.GetRandomFileName();
+            using (FileSystemWatcher fsWatcher = new FileSystemWatcher(this.path)) {
+                fsWatcher.IncludeSubdirectories = true;
+                fsWatcher.Filter = "*";
+                fsWatcher.InternalBufferSize = 4 * 1024 * 16;
+                fsWatcher.NotifyFilter = NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.Security;
+                fsWatcher.Created += (object sender, FileSystemEventArgs e) => this.list.Add(e);
+                fsWatcher.Changed += (object sender, FileSystemEventArgs e) => this.list.Add(e);
+                fsWatcher.Deleted += (object sender, FileSystemEventArgs e) => this.list.Add(e);
+                fsWatcher.Renamed += (object sender, RenamedEventArgs e) => this.list.Add(e);
+                DirectoryInfo dirA = new DirectoryInfo(Path.Combine(this.path, Path.GetRandomFileName()));
+                dirA.Create();
+                DirectoryInfo dirB = new DirectoryInfo(Path.Combine(this.path, Path.GetRandomFileName()));
+                dirB.Create();
+                FileInfo movingFile = new FileInfo(Path.Combine(dirA.FullName, oldName));
+                using (movingFile.Create()){
+                }
+
+                fsWatcher.EnableRaisingEvents = true;
+                movingFile.MoveTo(Path.Combine(dirB.FullName, newName));
                 while (this.list.Count < 2) {
                     Thread.Sleep(100);
                 }
