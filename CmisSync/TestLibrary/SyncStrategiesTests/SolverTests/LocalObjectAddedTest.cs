@@ -392,5 +392,9 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
             return dirInfo;
         }
+
+        private void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(Mock<IFileSystemInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
     }
 }
