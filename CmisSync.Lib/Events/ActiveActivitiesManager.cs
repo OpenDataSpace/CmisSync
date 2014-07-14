@@ -71,7 +71,7 @@ namespace CmisSync.Lib.Events
         /// </summary>
         /// <param name="transmission">transmission which should be added</param>
         /// <returns>true if added</returns>
-        public bool AddTransmission(FileTransmissionEvent transmission)
+        public virtual bool AddTransmission(FileTransmissionEvent transmission)
         {
             if(transmission == null)
             {

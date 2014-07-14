@@ -100,12 +100,13 @@ namespace CmisSync.Lib.Sync.Solver
                     OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                     IFileUploader uploader = ContentTasks.ContentTaskUtils.CreateUploader();
                     var doc = remoteId as IDocument;
-                    FileTransmissionEvent statusEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                    this.queue.AddEvent(statusEvent);
-                    statusEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
+                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    this.queue.AddEvent(transmissionEvent);
+                    this.transmissionManager.AddTransmission(transmissionEvent);
+                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
                     using (var hashAlg = new SHA1Managed())
                     using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                        uploader.UploadFile(doc, file, statusEvent, hashAlg);
+                        uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
                         mappedObject.LastChecksum = hashAlg.Hash;
                     }
 
@@ -125,7 +126,7 @@ namespace CmisSync.Lib.Sync.Solver
 
                     OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
 
-                    statusEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
             }
 
