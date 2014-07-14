@@ -144,6 +144,7 @@ SOURCES =  \
 	Sync/Solver/LocalObjectDeletedRemoteObjectDeleted.cs \
 	Sync/Solver/LocalObjectMoved.cs \
 	Sync/Solver/LocalObjectRenamed.cs \
+	Sync/Solver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Sync/Solver/NothingToDoSolver.cs \
 	Sync/Solver/RemoteObjectAdded.cs \
 	Sync/Solver/RemoteObjectChanged.cs \
