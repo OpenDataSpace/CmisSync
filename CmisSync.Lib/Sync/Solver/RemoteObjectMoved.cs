@@ -53,9 +53,13 @@ namespace CmisSync.Lib.Sync.Solver
             if (remoteId is IFolder) {
                 IDirectoryInfo dirInfo = localFile as IDirectoryInfo;
                 string oldPath = dirInfo.FullName;
-                dirInfo.MoveTo(newPath);
-                dirInfo.LastWriteTimeUtc = (remoteId as IFolder).LastModificationDate != null ? (DateTime)(remoteId as IFolder).LastModificationDate : dirInfo.LastWriteTimeUtc;
-                OperationsLogger.Info(string.Format("Moved local folder {0} to {1}", oldPath, newPath));
+                if (!dirInfo.FullName.Equals(newPath)) {
+                    dirInfo.MoveTo(newPath);
+                    dirInfo.LastWriteTimeUtc = (remoteId as IFolder).LastModificationDate != null ? (DateTime)(remoteId as IFolder).LastModificationDate : dirInfo.LastWriteTimeUtc;
+                    OperationsLogger.Info(string.Format("Moved local folder {0} to {1}", oldPath, newPath));
+                } else {
+                    return;
+                }
             } else if (remoteId is IDocument) {
                 IFileInfo fileInfo = localFile as IFileInfo;
                 string oldPath = fileInfo.FullName;
