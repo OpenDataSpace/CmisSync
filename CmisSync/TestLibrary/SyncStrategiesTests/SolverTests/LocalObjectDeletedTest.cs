@@ -39,7 +39,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectDeletedTest
+    public class LocalObjectDeletedTest : IsTestWithConfiguredLog4Net
     {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -121,6 +121,19 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
 
             new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileDeletedWithoutPermissionToDeleteOnServer()
+        {
+            string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            string remoteDocumentId = "DocumentId";
+            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId));
+            this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisPermissionDeniedException());
+            var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
+
+            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+            this.storage.Verify(s => s.RemoveObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 
         private void SetupSessionExceptionOnDeletion(string remoteId, Exception ex) {
