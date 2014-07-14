@@ -76,7 +76,7 @@ namespace CmisSync.Lib.Events.Filter
                     goto case ChangeType.Updated;
                 case ChangeType.Updated:
                     var mappedObject = this.storage.GetObjectByRemoteId(change.ObjectId);
-                    if(mappedObject == null || mappedObject.LastChangeToken == null) {
+                    if (mappedObject == null || mappedObject.LastChangeToken == null) {
                         return false;
                     } else {
                         if (change.CmisObject == null) {
@@ -87,7 +87,9 @@ namespace CmisSync.Lib.Events.Filter
                             }
                         }
 
-                        if (mappedObject.LastChangeToken == change.CmisObject.ChangeToken) {
+                        var cmisObject = change.CmisObject;
+                        string cmisParentId = cmisObject is IFolder ? (cmisObject as IFolder).ParentId : cmisObject is IDocument ? (cmisObject as IDocument).Parents[0].Id : null;
+                        if (mappedObject.LastChangeToken == cmisObject.ChangeToken && mappedObject.ParentId == cmisParentId) {
                             Logger.Debug(string.Format("Ignoring remote change because the ChangeToken \"{0}\" is equal to the stored one", mappedObject.LastChangeToken));
                             return true;
                         } else {

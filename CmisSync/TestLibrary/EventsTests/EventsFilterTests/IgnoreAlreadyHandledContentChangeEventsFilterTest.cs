@@ -103,12 +103,14 @@ namespace TestLibrary.EventsTests.EventsFilterTests
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
             var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage.Object, session.Object);
-            var mappedObject = Mock.Of<IMappedObject>(o =>
-                                                      o.LastChangeToken == oldToken &&
-                                                      o.RemoteObjectId == remoteId);
+            var mappedObject = Mock.Of<IMappedObject>(
+                o =>
+                o.LastChangeToken == oldToken &&
+                o.RemoteObjectId == remoteId);
             storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == remoteId))).Returns(mappedObject);
-            var remoteObject = Mock.Of<ICmisObject>(o =>
-                                                    o.ChangeToken == newToken);
+            var remoteObject = Mock.Of<ICmisObject>(
+                o =>
+                o.ChangeToken == newToken);
             session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId), It.IsAny<IOperationContext>())).Returns(remoteObject);
             var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Updated, remoteId);
 
@@ -137,23 +139,77 @@ namespace TestLibrary.EventsTests.EventsFilterTests
         }
 
         [Test, Category("Fast")]
-        public void FilterHandlesChangeEventsIfChangeLogTokenIsEqualToLocalObject()
+        public void FiltersChangeEventsIfChangeLogTokenIsEqualToLocalObject()
+        {
+            string remoteId = "remoteId";
+            string changeToken = "Token";
+            string parentId = "parentId";
+            var session = new Mock<ISession>();
+            var storage = new Mock<IMetaDataStorage>();
+            var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage.Object, session.Object);
+            var mappedObject = Mock.Of<IMappedObject>(
+                o =>
+                o.LastChangeToken == changeToken &&
+                o.RemoteObjectId == remoteId &&
+                o.ParentId == parentId);
+            storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == remoteId))).Returns(mappedObject);
+            var remoteObject = Mock.Of<IFolder>(
+                o =>
+                o.ChangeToken == changeToken &&
+                o.ParentId == parentId);
+            session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId), It.IsAny<IOperationContext>())).Returns(remoteObject);
+            var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Updated, remoteId);
+
+            Assert.That(filter.Handle(contentChangeEvent), Is.True);
+        }
+
+        [Test, Category("Fast")]
+        public void FilterIgnoresFolderChangedEventsIfChangeLogTokenIsEqualButParentIdIsDifferent()
         {
             string remoteId = "remoteId";
             string changeToken = "Token";
             var session = new Mock<ISession>();
             var storage = new Mock<IMetaDataStorage>();
             var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage.Object, session.Object);
-            var mappedObject = Mock.Of<IMappedObject>(o =>
-                                                      o.LastChangeToken == changeToken &&
-                                                      o.RemoteObjectId == remoteId);
+            var mappedObject = Mock.Of<IMappedObject>(
+                o =>
+                o.LastChangeToken == changeToken &&
+                o.RemoteObjectId == remoteId &&
+                o.Type == MappedObjectType.Folder &&
+                o.ParentId == "oldParent");
             storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == remoteId))).Returns(mappedObject);
-            var remoteObject = Mock.Of<ICmisObject>(o =>
-                                                    o.ChangeToken == changeToken);
-            session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId), It.IsAny<IOperationContext>())).Returns(remoteObject);
+            var remoteFolder = Mock.Of<IFolder>(
+                o =>
+                o.ChangeToken == changeToken &&
+                o.ParentId == "newParent");
+            session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId), It.IsAny<IOperationContext>())).Returns(remoteFolder);
             var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Updated, remoteId);
 
-            Assert.That(filter.Handle(contentChangeEvent), Is.True);
+            Assert.That(filter.Handle(contentChangeEvent), Is.False);
+        }
+
+        [Test, Category("Fast")]
+        public void FilterIgnoresFileChangedEventsIfChangeLogTokenIsEqualButParentIdIsDifferent()
+        {
+            string remoteId = "remoteId";
+            string changeToken = "Token";
+            var session = new Mock<ISession>();
+            var storage = new Mock<IMetaDataStorage>();
+            var filter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage.Object, session.Object);
+            var mappedObject = Mock.Of<IMappedObject>(
+                o =>
+                o.LastChangeToken == changeToken &&
+                o.RemoteObjectId == remoteId &&
+                o.ParentId == "oldParent");
+            storage.Setup(s => s.GetObjectByRemoteId(It.Is<string>(id => id == remoteId))).Returns(mappedObject);
+            var remoteDocument = Mock.Of<IDocument>(
+                o =>
+                o.ChangeToken == changeToken);
+            Mock.Get(remoteDocument).SetupParent(Mock.Of<IFolder>(f => f.Id == "newParent"));
+            session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteId), It.IsAny<IOperationContext>())).Returns(remoteDocument);
+            var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Updated, remoteId);
+
+            Assert.That(filter.Handle(contentChangeEvent), Is.False);
         }
     }
 }
