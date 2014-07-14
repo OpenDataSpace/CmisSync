@@ -62,21 +62,9 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
         {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
 
-            bool remoteObjectDeleted = false;
-
             string remoteDocumentId = "DocumentId";
 
-            this.session.When(
-                () => remoteObjectDeleted).Setup(
-                s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId))).Throws(new InvalidOperationException());
-            this.session.When(
-                () => remoteObjectDeleted).Setup(
-                s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId), It.IsAny<bool>())).Throws(new InvalidOperationException());
-            this.session.When(() => !remoteObjectDeleted).Setup(
-                s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId))).Callback(() => remoteObjectDeleted = true);
-            this.session.When(
-                () => !remoteObjectDeleted).Setup(
-                s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId), It.IsAny<bool>())).Callback(() => remoteObjectDeleted = true);
+            this.session.Setup(s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId), true));
 
             var docId = new Mock<IObjectId>(MockBehavior.Strict);
             docId.Setup(d => d.Id).Returns(remoteDocumentId);
@@ -86,7 +74,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
 
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId)), Times.Once());
-            Assert.IsTrue(remoteObjectDeleted);
+            this.session.Verify(s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId), true), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
