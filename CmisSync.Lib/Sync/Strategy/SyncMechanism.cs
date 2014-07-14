@@ -196,7 +196,7 @@ namespace CmisSync.Lib.Sync.Strategy
         private void Solve(ISolver s, AbstractFolderEvent e)
         {
             using(var activity = new ActivityListenerResource(this.activityListener)) {
-            if(e is FolderEvent) {
+            if (e is FolderEvent) {
                 s.Solve(this.session, this.storage, (e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder);
                 // this.storage.ValidateObjectStructure();
             } else if (e is FileEvent) {
