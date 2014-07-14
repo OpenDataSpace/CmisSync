@@ -28,6 +28,7 @@ namespace CmisSync.Lib.Sync.Solver
 
     using DotCMIS.Client;
     using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -47,16 +48,30 @@ namespace CmisSync.Lib.Sync.Solver
         /// <param name="remoteId">Remote identifier.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
-            string id = remoteId.Id;
-            var mappedObject = storage.GetObjectByRemoteId(id);
-            if (mappedObject.Type == MappedObjectType.Folder) {
-                (remoteId as IFolder).DeleteTree(false, UnfileObject.DeleteSinglefiled, true);
+            var mappedObject = storage.GetObjectByRemoteId(remoteId.Id);
+
+            bool hasBeenDeleted = TryDeleteObjectOnServer(session, remoteId, mappedObject.Type);
+            if(hasBeenDeleted) {
+                storage.RemoveObject(mappedObject);
+                OperationsLogger.Info(string.Format("Deleted the corresponding remote object {0} of locally deleted object {1}", remoteId.Id, mappedObject.Name));
             } else {
-                session.Delete(remoteId, true);
+                OperationsLogger.Warn(string.Format("Permission denied while trying to Delete the locally deleted object {0} on the server.", mappedObject.Name));
             }
 
-            storage.RemoveObject(mappedObject);
-            OperationsLogger.Info(string.Format("Deleted the corresponding remote object {0} of locally deleted object {1}", remoteId.Id, mappedObject.Name));
+        }
+
+        private bool TryDeleteObjectOnServer(ISession session, IObjectId remoteId, MappedObjectType type)
+        {
+            try{
+                if (type == MappedObjectType.Folder) {
+                    (remoteId as IFolder).DeleteTree(false, UnfileObject.DeleteSinglefiled, true);
+                } else {
+                    session.Delete(remoteId, true);
+                }
+            } catch (CmisPermissionDeniedException){
+                return false;
+            }
+            return true;
         }
     }
 }
