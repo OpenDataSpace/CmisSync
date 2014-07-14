@@ -148,7 +148,7 @@ namespace CmisSync.Lib.Sync.Strategy
                     return;
                 }
 
-                while ((DateTime.UtcNow - this.deletions[0].Item3).Milliseconds >= this.threshold) {
+                while (this.deletions.Count > 0 && (DateTime.UtcNow - this.deletions[0].Item3).Milliseconds >= this.threshold) {
                     var entry = this.deletions[0];
                     this.queue.AddEvent(new FSEvent(entry.Item1.ChangeType, entry.Item1.FullPath, entry.Item4));
                     this.deletions.RemoveAt(0);
