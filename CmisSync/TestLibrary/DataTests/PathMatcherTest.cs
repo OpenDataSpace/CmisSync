@@ -22,7 +22,7 @@ namespace TestLibrary.DataTests
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.PathMatcher;
 
     using DotCMIS.Client;
 

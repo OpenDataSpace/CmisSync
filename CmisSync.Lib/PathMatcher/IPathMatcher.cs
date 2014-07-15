@@ -16,7 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Data
+namespace CmisSync.Lib.PathMatcher
 {
     using System;
     using System.Collections.Generic;

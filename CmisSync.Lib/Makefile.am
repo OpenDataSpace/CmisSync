@@ -51,8 +51,6 @@ SOURCES =  \
 	Consumer/SituationSolver/RemoteObjectMoved.cs \
 	Consumer/SituationSolver/RemoteObjectRenamed.cs \
 	Consumer/SyncMechanism.cs \
-	Data/IPathMatcher.cs \
-	Data/PathMatcher.cs \
 	Defines.cs \
 	Events/AbstractFolderEvent.cs \
 	Events/BubbledEvent.cs \
@@ -110,6 +108,8 @@ SOURCES =  \
 	Filter/ReportingFilter.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
+	PathMatcher/IPathMatcher.cs \
+	PathMatcher/PathMatcher.cs \
 	Producer/ContentChange/ContentChangeEventAccumulator.cs \
 	Producer/ContentChange/ContentChangeEventTransformer.cs \
 	Producer/ContentChange/ContentChanges.cs \

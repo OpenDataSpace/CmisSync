@@ -24,6 +24,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System.IO;
 
     using CmisSync.Lib.Data;
+    using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Consumer.SituationSolver;
 

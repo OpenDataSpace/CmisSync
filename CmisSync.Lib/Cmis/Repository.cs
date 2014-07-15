@@ -30,6 +30,7 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
 

@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Storage
     using System.IO;
     using System.Text;
 
+    using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Data;
 
     using DBreeze;

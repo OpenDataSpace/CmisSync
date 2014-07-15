@@ -24,6 +24,7 @@ namespace TestLibrary.StorageTests
     using System.Linq;
 
     using CmisSync.Lib.Data;
+    using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage;
 
     using DBreeze;

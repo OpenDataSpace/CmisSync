@@ -64,7 +64,6 @@
     <Compile Include="Utils.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />
     <Compile Include="Cmis\DotCMISLogListener.cs" />
-    <Compile Include="Data\PathMatcher.cs" />
     <Compile Include="HttpProxyUtils.cs" />
     <Compile Include="IActivityListener.cs" />
     <Compile Include="Streams\BandwidthLimitedStream.cs" />
@@ -73,7 +72,6 @@
     <Compile Include="Streams\OffsetStream.cs" />
     <Compile Include="Streams\ProgressStream.cs" />
     <Compile Include="Streams\StreamWrapper.cs" />
-    <Compile Include="Data\IPathMatcher.cs" />
     <Compile Include="Config\Config.cs" />
     <Compile Include="Config\ConfigManager.cs" />
     <Compile Include="Config\ConfigMigration.cs" />
@@ -217,6 +215,8 @@
     <Compile Include="Consumer\SituationSolver\RemoteObjectRenamed.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectDeletedRemoteObjectDeleted.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectRenamedRemoteObjectRenamed.cs" />
+    <Compile Include="PathMatcher\PathMatcher.cs" />
+    <Compile Include="PathMatcher\IPathMatcher.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
