@@ -623,6 +623,41 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
         }
 
+        [Test, Category("Slow")]
+        public void OneLocalFileIsChangedAndRenamed() {
+            string fileName = "file.txt";
+            string newFileName = "file_1.txt";
+            string content = "cat";
+            this.remoteRootDir.CreateDocument(fileName, content);
+            Thread.Sleep(100);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            using (var stream = file.AppendText()) {
+                stream.Write(content);
+            }
+            Thread.Sleep(100);
+            long length = Encoding.UTF8.GetBytes(content).Length * 2;
+
+            file.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
+            file.Refresh();
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.Run();
+
+            var document = this.remoteRootDir.GetChildren().First() as IDocument;
+            file = this.localRootDir.GetFiles().First();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(document.Name, Is.EqualTo(newFileName));
+            Assert.That(file.Name, Is.EqualTo(newFileName));
+            Assert.That(file.Length, Is.EqualTo(length));
+            Assert.That(document.ContentStreamLength, Is.EqualTo(length));
+        }
+
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
             int waited = 0;
             while (queue.Queue.IsEmpty)
