@@ -42,7 +42,6 @@ using System.Threading;
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
 using log4net;
-using CmisSync.Lib.Credentials;
 using CmisSync.Lib.Config;
 
 namespace CmisSync
@@ -159,7 +158,7 @@ namespace CmisSync
             catch(Exception e) {
                 return new Tuple<CmisServer,Exception>(null,e);
             }
-            
+
         }
 
 
@@ -354,7 +353,7 @@ namespace CmisSync
         public string CheckAddPage(string address)
         {
             address = address.Trim();
- 
+
 
             // Check address validity.
             bool fields_valid = ((!string.IsNullOrEmpty(address)) && (this.UrlRegex.IsMatch(address)));
@@ -600,7 +599,7 @@ namespace CmisSync
             /*                        else if (e.Message == "NameResolutionFailure")
                 warning = Properties_Resources.NameResolutionFailure;*/
             else
-                warning = String.Format("{0}{1}{2}", message, Environment.NewLine, 
+                warning = String.Format("{0}{1}{2}", message, Environment.NewLine,
                     String.Format(Properties_Resources.Sorry, Properties_Resources.ApplicationName));
             return warning;
         }

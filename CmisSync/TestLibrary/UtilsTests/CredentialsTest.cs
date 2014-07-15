@@ -24,7 +24,7 @@ namespace TestLibrary.UtilsTests.CredentialsTests
     using System.Xml.Serialization;
 
     using CmisSync.Lib;
-    using CmisSync.Lib.Credentials;
+    using CmisSync.Lib.Config;
 
     using Moq;
 

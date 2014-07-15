@@ -96,7 +96,7 @@ namespace TestLibrary.UtilsTests
             this.settings.Server = new Uri("http://example.com:8080/");
             this.settings.LoginRequired = true;
             this.settings.Username = "testuser";
-            this.settings.ObfuscatedPassword = new CmisSync.Lib.Credentials.Password("password").ObfuscatedPassword;
+            this.settings.ObfuscatedPassword = new Password("password").ObfuscatedPassword;
             HttpProxyUtils.SetDefaultProxy(this.settings);
             Assert.IsNotNull(WebRequest.DefaultWebProxy);
             Assert.IsNotNull(WebRequest.DefaultWebProxy.Credentials);

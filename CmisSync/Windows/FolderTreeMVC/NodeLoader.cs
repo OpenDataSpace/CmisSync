@@ -16,8 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib.Credentials;
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Config;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

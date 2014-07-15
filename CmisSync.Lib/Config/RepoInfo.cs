@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Config
     using System.Xml.Serialization;
 
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
 
     /// <summary>
     /// All the info for a particular CmisSync synchronized folder.
@@ -34,7 +35,7 @@ namespace CmisSync.Lib.Config
     [Serializable]
     public class RepoInfo
     {
-        private Credentials.CmisRepoCredentials credentials = new Credentials.CmisRepoCredentials();
+        private CmisRepoCredentials credentials = new CmisRepoCredentials();
         private double pollInterval = Config.DefaultPollInterval;
         private long chunkSize = Config.DefaultChunkSize;
         private int uploadRetries = 2;
@@ -123,7 +124,7 @@ namespace CmisSync.Lib.Config
 
             set
             {
-                this.credentials.Password = new CmisSync.Lib.Credentials.Password { ObfuscatedPassword = value };
+                this.credentials.Password = new Password { ObfuscatedPassword = value };
             }
         }
 
@@ -322,18 +323,18 @@ namespace CmisSync.Lib.Config
         /// Gets the password.
         /// </summary>
         /// <returns>The password.</returns>
-        public virtual Credentials.Password GetPassword()
+        public virtual Password GetPassword()
         {
-            return new Credentials.Password { ObfuscatedPassword = this.credentials.Password.ObfuscatedPassword };
+            return new Password { ObfuscatedPassword = this.credentials.Password.ObfuscatedPassword };
         }
 
         /// <summary>
         /// Sets the password.
         /// </summary>
         /// <param name="password">Password instance.</param>
-        public virtual void SetPassword(Credentials.Password password)
+        public virtual void SetPassword(Password password)
         {
-            this.credentials.Password = new Credentials.Password { ObfuscatedPassword = password.ObfuscatedPassword };
+            this.credentials.Password = new Password { ObfuscatedPassword = password.ObfuscatedPassword };
         }
 
         /// <summary>

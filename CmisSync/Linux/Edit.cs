@@ -24,7 +24,7 @@ namespace CmisSync
     using System.ComponentModel;
 
     using CmisSync.CmisTree;
-    using CmisSync.Lib.Credentials;
+    using CmisSync.Lib.Config;
 
     using Gtk;
 

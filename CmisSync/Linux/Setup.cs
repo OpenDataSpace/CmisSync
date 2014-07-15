@@ -45,11 +45,11 @@ using Mono.Unix;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Credentials;
+using CmisSync.Lib.Config;
 using CmisSync.CmisTree;
 
 namespace CmisSync {
- 
+
     [CLSCompliant(false)]
     public class Setup : SetupWindow {
 
@@ -123,7 +123,7 @@ namespace CmisSync {
             {
                 UseMarkup = true,
                           Xalign = 0,
-                          Markup = "<b>" + 
+                          Markup = "<b>" +
                               Properties_Resources.EnterWebAddress +
                               "</b>"
             };

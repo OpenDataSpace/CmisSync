@@ -56,7 +56,6 @@ namespace TestLibrary.IntegrationTests
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.Credentials;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Sync;
 
@@ -730,7 +729,7 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        private class CmisRepoMock : CmisRepo
+        private class CmisRepoMock : CmisSync.Lib.Sync.Repository
         {
             public SingleStepEventQueue SingleStepQueue;
 
