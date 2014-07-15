@@ -258,7 +258,7 @@ namespace TestLibrary.IntegrationTests
             string password,
             string repositoryId)
         {
-            CmisSync.Lib.Credentials.ServerCredentials credentials = new CmisSync.Lib.Credentials.ServerCredentials()
+            ServerCredentials credentials = new ServerCredentials()
             {
                 Address = new Uri(url),
                 UserName = user,
@@ -343,7 +343,7 @@ namespace TestLibrary.IntegrationTests
         [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(60000)]
         public void GetRepositoriesFuzzy(string url, string user, string password)
         {
-            CmisSync.Lib.Credentials.ServerCredentials credentials = new CmisSync.Lib.Credentials.ServerCredentials()
+            ServerCredentials credentials = new ServerCredentials()
             {
                 Address = new Uri(url),
                 UserName = user,

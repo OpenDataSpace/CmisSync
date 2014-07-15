@@ -56,7 +56,6 @@ namespace TestLibrary.IntegrationTests
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.Credentials;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Sync;
 

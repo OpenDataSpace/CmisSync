@@ -365,11 +365,11 @@ namespace CmisSync
                     return;
                 }
 
-                CmisSync.Lib.Credentials.CmisRepoCredentials credentials = new CmisSync.Lib.Credentials.CmisRepoCredentials()
+                CmisRepoCredentials credentials = new CmisRepoCredentials()
                 {
                     Address = folder.Address,
                     UserName = folder.User,
-                    Password = new Lib.Credentials.Password() {
+                    Password = new Password() {
                         ObfuscatedPassword = folder.ObfuscatedPassword
                     },
                     RepoId = folder.RepositoryId

@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Credentials
+namespace CmisSync.Lib.Config
 {
     using System;
     using System.Collections.Generic;

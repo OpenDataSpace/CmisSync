@@ -31,7 +31,6 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.Credentials;
     using CmisSync.Lib.Streams;
     using CmisSync.Lib.Sync;
 

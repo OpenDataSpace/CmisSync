@@ -25,7 +25,6 @@ namespace TestLibrary.LegacyCodeTests
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.Credentials;
 
     using Moq;
 
