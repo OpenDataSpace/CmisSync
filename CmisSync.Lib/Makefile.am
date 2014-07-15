@@ -107,7 +107,6 @@ SOURCES =  \
 	Events/SyncStrategyInitializer.cs \
 	HttpProxyUtils.cs \
 	IActivityListener.cs \
-	Storage/DataBaseTableNames.cs \
 	Storage/DBreezeInitializerSingleton.cs \
 	Storage/EntryNotFoundException.cs \
 	Storage/EventStorage.cs \

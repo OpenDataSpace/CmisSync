@@ -133,7 +133,6 @@
     <Compile Include="Events\EventFilter\IgnoredFolderNameFilter.cs" />
     <Compile Include="Data\IMappedObject.cs" />
     <Compile Include="Events\EventFilter\GenericHandleDublicatedEventsFilter.cs" />
-    <Compile Include="Storage\DataBaseTableNames.cs" />
     <Compile Include="Storage\MetaDataStorage.cs" />
     <Compile Include="Sync\Strategy\RemoteObjectFetcher.cs" />
     <Compile Include="Sync\Strategy\LocalObjectFetcher.cs" />
@@ -228,8 +227,8 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
