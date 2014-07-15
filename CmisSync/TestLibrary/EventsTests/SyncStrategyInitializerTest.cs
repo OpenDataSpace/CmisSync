@@ -25,6 +25,7 @@ namespace TestLibrary.EventsTests
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Events.Filter;

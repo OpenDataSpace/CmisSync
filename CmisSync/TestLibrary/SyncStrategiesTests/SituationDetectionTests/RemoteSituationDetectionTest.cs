@@ -23,6 +23,7 @@ namespace TestLibrary.SyncStrategiesTests.SituationDetectionTests
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;

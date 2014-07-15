@@ -25,6 +25,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     using System.IO;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;

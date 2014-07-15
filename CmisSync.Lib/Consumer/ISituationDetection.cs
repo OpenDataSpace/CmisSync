@@ -16,7 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Sync.Strategy
+namespace CmisSync.Lib.Consumer
 {
     using System;
 

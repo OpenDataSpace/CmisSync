@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Sync.Solver
     using System.IO;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.ContentTasks;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
