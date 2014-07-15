@@ -658,6 +658,63 @@ namespace TestLibrary.IntegrationTests
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
+        [Test, Category("Slow")]
+        public void OneRemoteDocumentIsChangedAndRenamedDetectedByCrawler() {
+            string fileName = "file.txt";
+            string newFileName = "file_1.txt";
+            string content = "cat";
+            var document = this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            document.SetContent(content + content, true, true);
+            long length = (long)document.ContentStreamLength;
+            document.Rename(newFileName);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            document = this.remoteRootDir.GetChildren().First() as IDocument;
+            var file = this.localRootDir.GetFiles().First();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(document.Name, Is.EqualTo(newFileName));
+            Assert.That(file.Name, Is.EqualTo(newFileName));
+            Assert.That(file.Length, Is.EqualTo(length));
+            Assert.That(document.ContentStreamLength, Is.EqualTo(length));
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteDocumentIsChangedAndRenamedDetectedByContentChanges() {
+            string fileName = "file.txt";
+            string newFileName = "file_1.txt";
+            string content = "cat";
+            var document = this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            document.SetContent(content + content, true, true);
+            long length = (long)document.ContentStreamLength;
+            document.Rename(newFileName);
+
+            Thread.Sleep(15000);
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            document = this.remoteRootDir.GetChildren().First() as IDocument;
+            var file = this.localRootDir.GetFiles().First();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(document.Name, Is.EqualTo(newFileName));
+            Assert.That(file.Name, Is.EqualTo(newFileName));
+            Assert.That(file.Length, Is.EqualTo(length));
+            Assert.That(document.ContentStreamLength, Is.EqualTo(length));
+        }
+
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
             int waited = 0;
             while (queue.Queue.IsEmpty)
