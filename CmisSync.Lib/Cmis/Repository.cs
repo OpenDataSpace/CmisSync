@@ -66,7 +66,7 @@ namespace CmisSync.Lib.Sync
     /// <summary>
     /// Synchronized CMIS repository.
     /// </summary>
-    public class CmisRepo : IDisposable
+    public class Repository : IDisposable
     {
         /// <summary>
         /// Name of the synchronized folder, as found in the CmisSync XML configuration file.
@@ -83,7 +83,7 @@ namespace CmisSync.Lib.Sync
         /// </summary>
         public readonly string LocalPath;
 
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisRepo));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(Repository));
 
         /// <summary>
         /// The ignored folders filter.
@@ -148,28 +148,28 @@ namespace CmisSync.Lib.Sync
 
         private IFileSystemInfoFactory fileSystemFactory;
 
-        static CmisRepo()
+        static Repository()
         {
             DBreezeInitializerSingleton.Init();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
-        public CmisRepo(RepoInfo repoInfo, ActivityListenerAggregator activityListener) : this(repoInfo, activityListener, false, CreateQueue())
+        public Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener) : this(repoInfo, activityListener, false, CreateQueue())
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="queue">Event Queue.</param>
-        protected CmisRepo(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, IDisposableSyncEventQueue queue)
+        protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, IDisposableSyncEventQueue queue)
         {
             if (repoInfo == null)
             {
@@ -255,10 +255,10 @@ namespace CmisSync.Lib.Sync
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="CmisSync.Lib.Sync.CmisRepo"/> class and releases unmanaged
+        /// Finalizes an instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class and releases unmanaged
         /// resources and performs other cleanup operations before the is reclaimed by garbage collection.
         /// </summary>
-        ~CmisRepo()
+        ~Repository()
         {
             this.Dispose(false);
         }

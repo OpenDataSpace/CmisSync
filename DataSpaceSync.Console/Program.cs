@@ -94,7 +94,7 @@ namespace DataSpaceSync.Console
 
             Logger.Info("Starting.");
 
-            List<CmisRepo> repositories = new List<CmisRepo>();
+            List<Repository> repositories = new List<Repository>();
             var transmissionManager = new ActiveActivitiesManager();
             foreach (RepoInfo repoInfo in ConfigManager.CurrentConfig.Folders) {
                 string path = repoInfo.LocalPath;
@@ -102,7 +102,7 @@ namespace DataSpaceSync.Console
                     Directory.CreateDirectory(path);
                 }
 
-                CmisRepo repo = new CmisRepo(repoInfo, new ActivityListenerAggregator(new ActivityListener(), transmissionManager));
+                Repository repo = new Repository(repoInfo, new ActivityListenerAggregator(new ActivityListener(), transmissionManager));
                 repositories.Add(repo);
                 repo.Initialize();
             }

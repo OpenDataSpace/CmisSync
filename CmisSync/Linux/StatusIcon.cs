@@ -141,7 +141,7 @@ namespace CmisSync {
                     {
                         if(menuItem is CmisSyncMenuItem && reponame.Equals(((CmisSyncMenuItem)menuItem).RepoName))
                         {
-                            foreach (CmisRepo aRepo in Program.Controller.Repositories)
+                            foreach (Repository aRepo in Program.Controller.Repositories)
                             {
                                 if (aRepo.Name.Equals(reponame))
                                 {
@@ -237,7 +237,7 @@ namespace CmisSync {
                             CmisSync.Properties_Resources.PauseSync) {
                         RepoName = folder_name
                     };
-                    foreach (CmisRepo aRepo in Program.Controller.Repositories)
+                    foreach (Repository aRepo in Program.Controller.Repositories)
                     {
                         if (aRepo.Name.Equals(folder_name))
                         {
