@@ -113,6 +113,7 @@ namespace CmisSync.Lib.ContentTasks
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = hashstream;
+                contentStream.Length = localFileStream.Length;
                 try
                 {
                     return remoteDocument.AppendContentStream(contentStream, true);
