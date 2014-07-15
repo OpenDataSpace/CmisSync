@@ -23,7 +23,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Storage;
-    using CmisSync.Lib.Sync.Solver;
+    using CmisSync.Lib.Consumer.SituationSolver;
 
     using DotCMIS.Client;
 

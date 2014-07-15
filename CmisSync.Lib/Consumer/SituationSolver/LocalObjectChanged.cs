@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Sync.Solver
+namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
     using System.IO;
@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Sync.Solver
         private ActiveActivitiesManager transmissionManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.LocalObjectChanged"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
         /// </summary>
         /// <param name="queue">Event queue for publishing upload transmission.</param>
         public LocalObjectChanged(ISyncEventQueue queue, ActiveActivitiesManager transmissionManager) {

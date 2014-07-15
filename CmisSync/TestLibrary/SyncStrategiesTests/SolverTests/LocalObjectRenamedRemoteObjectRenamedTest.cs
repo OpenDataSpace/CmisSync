@@ -21,7 +21,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 {
     using System;
 
-    using CmisSync.Lib.Sync.Solver;
+    using CmisSync.Lib.Consumer.SituationSolver;
 
     using NUnit.Framework;
 

@@ -16,7 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Sync.Solver
+namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using CmisSync.Lib.Storage;
     using DotCMIS.Client;

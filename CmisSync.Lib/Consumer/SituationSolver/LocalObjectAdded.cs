@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Sync.Solver
+namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
     using System.Collections.Generic;
@@ -49,7 +49,7 @@ namespace CmisSync.Lib.Sync.Solver
         private ActiveActivitiesManager transmissionManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.LocalObjectAdded"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
         /// </summary>
         /// <param name="queue">Queue to report transmission events to.</param>
         public LocalObjectAdded(ISyncEventQueue queue, ActiveActivitiesManager manager) {

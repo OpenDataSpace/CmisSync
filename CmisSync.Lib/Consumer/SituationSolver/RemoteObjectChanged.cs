@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Sync.Solver
+namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
     using System.IO;
@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Sync.Solver
         private ActiveActivitiesManager transmissonManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Solver.RemoteObjectChanged"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectChanged"/> class.
         /// </summary>
         /// <param name="queue">Event Queue to report transmission events to.</param>
         /// <param name="fsFactory">File System Factory.</param>
