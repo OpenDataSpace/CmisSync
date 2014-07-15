@@ -182,6 +182,7 @@
     <Compile Include="SyncStrategiesTests\CreatedChangedDeletedFileSystemEventHandlerTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectDeletedRemoteObjectDeletedTest.cs" />
     <Compile Include="IntegrationTests\FileSystemEventOrderTest.cs" />
+    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectRenamedRemoteObjectRenamedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

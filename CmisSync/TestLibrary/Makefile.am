@@ -90,6 +90,7 @@ SOURCES =  \
 	SyncStrategiesTests/SolverTests/LocalObjectDeletedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectMovedTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectRenamedTest.cs \
 	SyncStrategiesTests/SolverTests/RemoteObjectAddedTest.cs \
 	SyncStrategiesTests/SolverTests/RemoteObjectChangedTest.cs \
