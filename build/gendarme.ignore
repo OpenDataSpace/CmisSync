@@ -61,6 +61,7 @@ T: CmisSync.ControllerBase
 T: CmisSync.StatusIconController
 T: CmisSync.UI
 T: CmisSync.CmisTree.AsyncNodeLoader
+T: CmisSync.Edit
 #Disposed in CmisRepo:
 T: CmisSync.Lib.Storage.PersistentCookieStorage
 T: CmisSync.Lib.Storage.MetaDataStorage
