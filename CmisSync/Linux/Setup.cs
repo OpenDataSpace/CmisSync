@@ -45,6 +45,7 @@ using Mono.Unix;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Cmis.UiUtils;
 using CmisSync.Lib.Config;
 using CmisSync.CmisTree;
 

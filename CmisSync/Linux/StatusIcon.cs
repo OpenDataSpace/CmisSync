@@ -48,6 +48,7 @@ using System.Collections.Generic;
 using log4net;
 
 using CmisSync.Lib;
+using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Sync;
 
 namespace CmisSync {
@@ -137,7 +138,7 @@ namespace CmisSync {
             Controller.UpdateSuspendSyncFolderEvent += delegate (string reponame) {
                 if(!IsHandleCreated) return;
                 Application.Invoke(delegate {
-                    foreach (var menuItem in this.menu.Children) 
+                    foreach (var menuItem in this.menu.Children)
                     {
                         if(menuItem is CmisSyncMenuItem && reponame.Equals(((CmisSyncMenuItem)menuItem).RepoName))
                         {
@@ -393,7 +394,7 @@ namespace CmisSync {
             SetProperty ("always-show-image", new GLib.Value (true));
         }
     }
- 
+
     [CLSCompliant(false)]
     public class TransmissionMenuItem : ImageMenuItem {
 

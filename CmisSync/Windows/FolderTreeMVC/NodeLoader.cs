@@ -17,6 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Cmis.UiUtils;
 using CmisSync.Lib.Config;
 using System;
 using System.Collections.Generic;

@@ -26,6 +26,7 @@ namespace DataSpaceSync.Console
 
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Sync;
 

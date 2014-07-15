@@ -41,6 +41,7 @@ using System.Threading;
 
 using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Cmis.UiUtils;
 using log4net;
 using CmisSync.Lib.Config;
 

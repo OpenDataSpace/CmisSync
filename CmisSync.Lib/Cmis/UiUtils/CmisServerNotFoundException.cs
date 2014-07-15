@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
+namespace CmisSync.Lib.Cmis.UiUtils
 {
     using System;
     using System.Runtime.Serialization;

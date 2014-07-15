@@ -19,7 +19,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Sync
+namespace CmisSync.Lib.Cmis
 {
     using System;
     using System.Collections.Generic;

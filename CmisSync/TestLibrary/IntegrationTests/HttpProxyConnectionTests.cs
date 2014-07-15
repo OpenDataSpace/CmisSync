@@ -24,6 +24,7 @@ namespace TestLibrary.IntegrationTests
 
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.UiUtils;
     using CmisSync.Lib.Config;
 
     using DotCMIS;
