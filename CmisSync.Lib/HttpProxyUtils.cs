@@ -22,6 +22,7 @@ namespace CmisSync.Lib
     using System.Net;
     
     using log4net;
+    using CmisSync.Lib.Config;
 
     /// <summary>
     /// Http proxy utils.
