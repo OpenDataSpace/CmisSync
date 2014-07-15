@@ -222,13 +222,14 @@
     <Compile Include="Sync\Strategy\Watcher\CreatedChangedDeletedFileSystemEventHandler.cs" />
     <Compile Include="Sync\Strategy\Watcher\RenamedFileSystemEventHandler.cs" />
     <Compile Include="Sync\Solver\LocalObjectDeletedRemoteObjectDeleted.cs" />
+    <Compile Include="Sync\Solver\LocalObjectRenamedRemoteObjectRenamed.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="true" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="True" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />

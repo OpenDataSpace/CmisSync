@@ -198,22 +198,22 @@ namespace CmisSync.Lib.Sync.Strategy
             this.InformAboutLocalObjectsDeleted(removedLocalObjects.Values);
         }
 
-        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo cmisObject, IMappedObject storedParent, IMappedObject storedMappedChild)
+        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild)
         {
             AbstractFolderEvent createdEvent = null;
             if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                 // Renamed, Updated or Equal
-                if (cmisObject.Name == storedMappedChild.Name && cmisObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                if (fsObject.Name == storedMappedChild.Name && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
                     // Equal
-                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, cmisObject, localChange: MetaDataChangeType.NONE, src: this);
+                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, fsObject, localChange: MetaDataChangeType.NONE, src: this);
                 } else {
                     // Updated or Renamed
-                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, cmisObject, localChange: MetaDataChangeType.CHANGED, src: this);
+                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, fsObject, localChange: MetaDataChangeType.CHANGED, src: this);
                 }
             } else {
                 // Moved
-                IFileSystemInfo oldLocalPath = cmisObject is IFileInfo ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedMappedChild)) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedMappedChild));
-                createdEvent = FileOrFolderEventFactory.CreateEvent(null, cmisObject, localChange: MetaDataChangeType.MOVED, oldLocalObject: oldLocalPath, src: this);
+                IFileSystemInfo oldLocalPath = fsObject is IFileInfo ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(storedMappedChild)) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(storedMappedChild));
+                createdEvent = FileOrFolderEventFactory.CreateEvent(null, fsObject, localChange: MetaDataChangeType.MOVED, oldLocalObject: oldLocalPath, src: this);
             }
 
             return createdEvent;

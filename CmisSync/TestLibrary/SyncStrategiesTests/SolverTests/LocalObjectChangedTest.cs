@@ -40,23 +40,25 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
     [TestFixture]
     public class LocalObjectChangedTest
     {
-        private ActiveActivitiesManager manager;
+        private Mock<ActiveActivitiesManager> manager;
 
         [SetUp]
         public void SetUp() {
-            this.manager = new ActiveActivitiesManager();
+            this.manager = new Mock<ActiveActivitiesManager>() {
+                CallBase = true
+            };
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectChanged(Mock.Of<ISyncEventQueue>(), this.manager);
+            new LocalObjectChanged(Mock.Of<ISyncEventQueue>(), this.manager.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            new LocalObjectChanged(null, this.manager);
+            new LocalObjectChanged(null, this.manager.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -87,7 +89,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
             };
             storage.AddMappedFolder(mappedObject);
 
-            new LocalObjectChanged(queue.Object, this.manager).Solve(Mock.Of<ISession>(), storage.Object, localDirectory, Mock.Of<IFolder>());
+            new LocalObjectChanged(queue.Object, this.manager.Object).Solve(Mock.Of<ISession>(), storage.Object, localDirectory, Mock.Of<IFolder>());
 
             storage.VerifySavedMappedObject(
                 MappedObjectType.Folder,
@@ -98,6 +100,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 true,
                 localDirectory.LastWriteTimeUtc);
             queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -144,8 +147,9 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     remoteFile.Setup(f => f.ChangeToken).Returns(newChangeToken);
                 });
 
-                new LocalObjectChanged(queue.Object, this.manager).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
+                new LocalObjectChanged(queue.Object, this.manager.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
             }
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -184,7 +188,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
 
                 storage.AddMappedFile(mappedObject, path);
 
-                new LocalObjectChanged(Mock.Of<ISyncEventQueue>(), this.manager).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, Mock.Of<IDocument>());
+                new LocalObjectChanged(Mock.Of<ISyncEventQueue>(), this.manager.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, Mock.Of<IDocument>());
 
                 storage.VerifySavedMappedObject(
                     MappedObjectType.File,
@@ -197,6 +201,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     expectedHash,
                     fileLength);
                 queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+                this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
             }
         }
 
@@ -244,7 +249,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                     remoteFile.Setup(f => f.ChangeToken).Returns(newChangeToken);
                 });
 
-                new LocalObjectChanged(queue.Object, this.manager).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
+                new LocalObjectChanged(queue.Object, this.manager.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteFile.Object);
 
                 storage.VerifySavedMappedObject(
                     MappedObjectType.File,
@@ -260,6 +265,7 @@ namespace TestLibrary.SyncStrategiesTests.SolverTests
                 queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Path == localFile.Object.FullName && e.Type == FileTransmissionType.UPLOAD_MODIFIED_FILE)), Times.Once());
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(newModificationDate));
+                this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
             }
         }
     }
