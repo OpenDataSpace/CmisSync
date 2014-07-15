@@ -22,6 +22,7 @@ namespace TestLibrary.EventsTests
     using System.IO;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Data;

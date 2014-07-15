@@ -20,6 +20,7 @@ namespace CmisSync.Lib
 {
     using System;
 
+    using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;

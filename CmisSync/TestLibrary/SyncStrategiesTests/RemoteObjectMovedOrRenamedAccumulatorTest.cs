@@ -22,10 +22,10 @@ namespace TestLibrary.SyncStrategiesTests
     using System;
     using System.Collections.Generic;
 
+    using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
-    using CmisSync.Lib.Sync.Strategy;
 
     using DotCMIS.Client;
 

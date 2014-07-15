@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Events
     using System;
     using System.Collections.Generic;
 
+    using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Events.Filter;
     using CmisSync.Lib.Sync.Strategy;

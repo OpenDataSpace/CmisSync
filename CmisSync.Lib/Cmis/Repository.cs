@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Cmis
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Data;

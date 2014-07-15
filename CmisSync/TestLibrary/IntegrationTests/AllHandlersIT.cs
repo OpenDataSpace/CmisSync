@@ -24,6 +24,7 @@ namespace TestLibrary.IntegrationTests
     using System.IO;
 
     using CmisSync.Lib;
+    using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;

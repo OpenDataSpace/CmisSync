@@ -22,6 +22,7 @@ namespace TestLibrary.SyncStrategiesTests
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;

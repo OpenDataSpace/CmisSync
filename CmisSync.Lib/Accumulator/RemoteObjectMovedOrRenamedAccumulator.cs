@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Sync.Strategy
+namespace CmisSync.Lib.Accumulator
 {
     using System;
 
