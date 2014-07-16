@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.SyncStrategiesTests.SolverTests
+namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
     using System;
     using System.Collections.Generic;

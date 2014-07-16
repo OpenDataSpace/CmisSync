@@ -87,18 +87,18 @@ SOURCES =  \
 	SyncStrategiesTests/RenamedFileSystemEventHandlerTest.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectChangedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectDeletedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectMovedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectRenamedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectAddedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectChangedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectDeletedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectMovedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectRenamedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectAddedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectDeletedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectDeletedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/WatcherTestUtils.cs \

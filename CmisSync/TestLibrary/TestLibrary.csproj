@@ -114,16 +114,6 @@
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
     <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectChangedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectDeletedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectMovedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectRenamedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectAddedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectChangedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectDeletedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectMovedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectRenamedTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
@@ -164,9 +154,7 @@
     <Compile Include="SyncStrategiesTests\RenamedFileSystemEventHandlerTest.cs" />
     <Compile Include="TestUtils\MockOfISyncEventQueue.cs" />
     <Compile Include="SyncStrategiesTests\CreatedChangedDeletedFileSystemEventHandlerTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectDeletedRemoteObjectDeletedTest.cs" />
     <Compile Include="IntegrationTests\FileSystemEventOrderTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectRenamedRemoteObjectRenamedTest.cs" />
     <Compile Include="CmisTests\AuthenticationTests\AuthProviderFactoryTest.cs" />
     <Compile Include="CmisTests\AuthenticationTests\KerberosAuthenticationProviderTest.cs" />
     <Compile Include="CmisTests\AuthenticationTests\PersistentStandardAuthenticationProviderTest.cs" />
@@ -182,6 +170,18 @@
     <Compile Include="ConsumerTests\SyncMechanismTest.cs" />
     <Compile Include="ConsumerTests\LocalSituationDetectionTest.cs" />
     <Compile Include="ConsumerTests\RemoteSituationDetectionTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectAddedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectDeletedRemoteObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectRenamedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectAddedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectChangedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectMovedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectRenamedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
