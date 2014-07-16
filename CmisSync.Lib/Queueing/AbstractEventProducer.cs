@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
 
@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Events
     public abstract class AbstractEventProducer
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.AbstractEventProducer"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.AbstractEventProducer"/> class.
         /// </summary>
         /// <param name='queue'>
         /// The queue which could be used to pass events to.

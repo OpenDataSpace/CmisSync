@@ -25,9 +25,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Security.Cryptography;
 
     using CmisSync.Lib.FileTransmission;
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
 
     using DotCMIS.Client;

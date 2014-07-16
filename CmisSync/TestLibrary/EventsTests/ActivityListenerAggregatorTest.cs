@@ -23,6 +23,7 @@ namespace TestLibrary
 
     using CmisSync.Lib;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     using NUnit.Framework;
 

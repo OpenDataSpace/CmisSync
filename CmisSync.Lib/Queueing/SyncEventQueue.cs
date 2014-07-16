@@ -17,12 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
+
+    using CmisSync.Lib.Events;
 
     using log4net;
 
@@ -38,7 +40,7 @@ namespace CmisSync.Lib.Events
         private bool suspend = false;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.SyncEventQueue"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/> class.
         /// </summary>
         /// <param name="manager">Manager holding the handler.</param>
         public SyncEventQueue(ISyncEventManager manager) {

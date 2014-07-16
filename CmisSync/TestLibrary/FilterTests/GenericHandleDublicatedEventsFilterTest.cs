@@ -24,6 +24,7 @@ namespace TestLibrary.FilterTests
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
 
     using DotCMIS.Client;

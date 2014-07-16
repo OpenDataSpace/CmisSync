@@ -22,6 +22,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
     using System;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Watcher;
 

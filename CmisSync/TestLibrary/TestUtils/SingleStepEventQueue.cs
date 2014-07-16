@@ -23,6 +23,7 @@ namespace TestLibrary
     using System.Collections.Concurrent;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     /// <summary>
     /// This is a synchronous test-replacement for SyncEventQueue

@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Producer.ContentChange
     using System;
  
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     
     using DotCMIS.Client;
     using DotCMIS.Exceptions;

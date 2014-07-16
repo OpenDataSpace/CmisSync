@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage
+namespace CmisSync.Lib.Storage.FileSystem
 {
     using System;
 

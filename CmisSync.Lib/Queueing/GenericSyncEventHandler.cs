@@ -17,11 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
     using System.Collections.Generic;
     using System.Text;
+    
+    using CmisSync.Lib.Events;
 
     /// <summary>
     /// Generic sync event delegate.
@@ -45,7 +47,7 @@ namespace CmisSync.Lib.Events
         private string name;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.GenericSyncEventHandler"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/> class.
         /// </summary>
         /// <param name='handler'>
         /// Handler which will be called on incomming event.
@@ -59,7 +61,7 @@ namespace CmisSync.Lib.Events
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.GenericSyncEventHandler"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/> class.
         /// </summary>
         /// <param name='priority'>
         /// The priority for the queue.
@@ -106,9 +108,9 @@ namespace CmisSync.Lib.Events
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.GenericSyncEventHandler"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.GenericSyncEventHandler"/>.</returns>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Queueing.GenericSyncEventHandler"/>.</returns>
         public override string ToString()
         {
             return string.Format("[GenericSyncEventHandler {0}: Priority={1} AcceptedType={2}]", this.name != null ? this.name : string.Empty, this.Priority, typeof(TSyncEventType).ToString());

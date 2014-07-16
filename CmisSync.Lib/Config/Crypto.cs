@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Config
     using System.Security.Cryptography;
     using System.Text;
 
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
 
     /// <summary>
     /// Obfuscation for sensitive data, making password harvesting a little less straightforward.

@@ -22,7 +22,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
 
     using DBreeze;
     using DBreeze.DataTypes;

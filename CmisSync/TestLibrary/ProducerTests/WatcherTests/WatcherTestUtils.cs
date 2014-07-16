@@ -16,7 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib.Data;
+using CmisSync.Lib.Storage.Database.Entities;
 using TestLibrary.IntegrationTests;
 
 namespace TestLibrary.ProducerTests.WatcherTests
@@ -27,7 +27,8 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using System.Threading.Tasks;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
 
     using Moq;

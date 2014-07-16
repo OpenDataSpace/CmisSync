@@ -19,7 +19,7 @@
 #if __MonoCS__
 using System;
 using System.IO;
-using CmisSync.Lib.Storage;
+using CmisSync.Lib.Storage.FileSystem;
 
 using NUnit.Framework;
 

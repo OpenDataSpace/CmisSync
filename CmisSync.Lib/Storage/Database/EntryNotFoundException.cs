@@ -29,13 +29,13 @@ namespace CmisSync.Lib.Storage.Database
     public class EntryNotFoundException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.EntryNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.EntryNotFoundException"/> class.
         /// </summary>
         public EntryNotFoundException() : base() {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.EntryNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.EntryNotFoundException"/> class.
         /// </summary>
         /// <param name='message'>
         /// Message of the exception.
@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Storage.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.EntryNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.EntryNotFoundException"/> class.
         /// </summary>
         /// <param name='message'>
         /// Message of the exception.
@@ -58,7 +58,7 @@ namespace CmisSync.Lib.Storage.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.EntryNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.EntryNotFoundException"/> class.
         /// </summary>
         /// <param name='info'>
         /// Serialization Info.

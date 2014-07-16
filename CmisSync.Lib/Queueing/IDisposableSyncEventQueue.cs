@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
     using System.Collections.Concurrent;

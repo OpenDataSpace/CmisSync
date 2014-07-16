@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Events
 {
     using System;
 
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 

@@ -23,7 +23,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.IO;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
 
     using DotCMIS.Client;

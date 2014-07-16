@@ -21,6 +21,8 @@ namespace CmisSync.Lib.Events
 {
     using System;
 
+    using CmisSync.Lib.Queueing;
+
     /// <summary>
     /// Request ignored event.
     /// </summary>

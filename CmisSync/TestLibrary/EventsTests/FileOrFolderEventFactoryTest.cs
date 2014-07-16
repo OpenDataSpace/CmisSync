@@ -22,7 +22,7 @@ namespace TestLibrary.EventsTests
     using System;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 

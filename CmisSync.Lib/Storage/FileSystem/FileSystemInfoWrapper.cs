@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage
+namespace CmisSync.Lib.Storage.FileSystem
 {
     using System;
     using System.IO;
@@ -47,7 +47,7 @@ namespace CmisSync.Lib.Storage
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystemInfoWrapper"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.FileSystemInfoWrapper"/> class.
         /// </summary>
         /// <param name="original">original internal instance.</param>
         protected FileSystemInfoWrapper(FileSystemInfo original)
@@ -88,7 +88,7 @@ namespace CmisSync.Lib.Storage
         }
 
         /// <summary>
-        /// Gets a value indicating whether this <see cref="CmisSync.Lib.Storage.FileSystemInfoWrapper"/> is exists.
+        /// Gets a value indicating whether this <see cref="CmisSync.Lib.Storage.FileSystem.FileSystemInfoWrapper"/> is exists.
         /// </summary>
         /// <value><c>true</c> if exists; otherwise, <c>false</c>.</value>
         public bool Exists {

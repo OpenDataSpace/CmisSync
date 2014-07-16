@@ -21,7 +21,7 @@ using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
 
-using CmisSync.Lib.Storage;
+using CmisSync.Lib.Storage.FileSystem;
 
 using DotCMIS.Client;
 

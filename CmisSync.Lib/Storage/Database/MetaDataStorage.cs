@@ -25,7 +25,8 @@ namespace CmisSync.Lib.Storage.Database
     using System.Text;
 
     using CmisSync.Lib.PathMatcher;
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DBreeze;
     using DBreeze.DataTypes;
@@ -56,7 +57,7 @@ namespace CmisSync.Lib.Storage.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.MetaDataStorage"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/> class.
         /// </summary>
         /// <param name='engine'>
         /// DBreeze Engine. Must not be null.
@@ -393,9 +394,9 @@ namespace CmisSync.Lib.Storage.Database
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.MetaDataStorage"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.MetaDataStorage"/>.</returns>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/>.</returns>
         public override string ToString()
         {
             string list = string.Empty;

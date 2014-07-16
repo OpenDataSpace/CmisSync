@@ -24,9 +24,10 @@ namespace CmisSync.Lib.Producer.Watcher
     using System.IO;
     using System.Timers;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
 
     /// <summary>
@@ -89,7 +90,7 @@ namespace CmisSync.Lib.Producer.Watcher
             if (e.ChangeType == WatcherChangeTypes.Deleted) {
                 var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
                 if (obj != null) {
-                    isDirectory = obj.Type == CmisSync.Lib.Data.MappedObjectType.Folder;
+                    isDirectory = obj.Type == MappedObjectType.Folder;
                     if (obj.Guid != Guid.Empty) {
                         this.AddEventToList(e, obj.Guid, isDirectory);
                         return;

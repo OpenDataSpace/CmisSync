@@ -28,6 +28,7 @@ namespace DataSpaceSync.Console
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     using log4net;
     using log4net.Config;

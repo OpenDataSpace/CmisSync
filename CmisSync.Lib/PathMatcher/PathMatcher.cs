@@ -23,7 +23,7 @@ namespace CmisSync.Lib.PathMatcher
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 

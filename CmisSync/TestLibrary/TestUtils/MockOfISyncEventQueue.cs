@@ -23,6 +23,7 @@ namespace TestLibrary.TestUtils
     using System.Linq.Expressions;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     using Moq;
 

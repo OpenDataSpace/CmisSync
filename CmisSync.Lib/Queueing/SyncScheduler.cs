@@ -17,10 +17,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
     using System.Timers;
+
+    using CmisSync.Lib.Events;
 
     /// <summary>
     /// Sync scheduler. Inserts every pollInterval a new StartNextSyncEvent into the Queue
@@ -35,7 +37,7 @@ namespace CmisSync.Lib.Events
         private Timer timer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.SyncScheduler"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.SyncScheduler"/> class.
         /// Starts adding events automatically after successful creation.
         /// </summary>
         /// <param name="queue">Sync event queue.</param>
@@ -103,13 +105,13 @@ namespace CmisSync.Lib.Events
         }
 
         /// <summary>
-        /// Releases all resource used by the <see cref="CmisSync.Lib.Events.SyncScheduler"/> object.
+        /// Releases all resource used by the <see cref="CmisSync.Lib.Queueing.SyncScheduler"/> object.
         /// </summary>
-        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Events.SyncScheduler"/>.
-        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Events.SyncScheduler"/> in an unusable
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.Lib.Queueing.SyncScheduler"/>.
+        /// The <see cref="Dispose"/> method leaves the <see cref="CmisSync.Lib.Queueing.SyncScheduler"/> in an unusable
         /// state. After calling <see cref="Dispose"/>, you must release all references to the
-        /// <see cref="CmisSync.Lib.Events.SyncScheduler"/> so the garbage collector can reclaim the memory that the
-        /// <see cref="CmisSync.Lib.Events.SyncScheduler"/> was occupying.</remarks>
+        /// <see cref="CmisSync.Lib.Queueing.SyncScheduler"/> so the garbage collector can reclaim the memory that the
+        /// <see cref="CmisSync.Lib.Queueing.SyncScheduler"/> was occupying.</remarks>
         public void Dispose() {
             this.timer.Stop();
             this.timer.Dispose();

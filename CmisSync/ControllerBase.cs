@@ -47,6 +47,7 @@ namespace CmisSync
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
 
     using log4net;

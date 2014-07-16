@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage
+namespace CmisSync.Lib.Storage.FileSystem
 {
     using System;
     using System.IO;
@@ -40,7 +40,7 @@ namespace CmisSync.Lib.Storage
         string Name { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this <see cref="CmisSync.Lib.Storage.IFileSystemInfo"/> is exists.
+        /// Gets a value indicating whether this <see cref="CmisSync.Lib.Storage.FileSystem.IFileSystemInfo"/> is exists.
         /// </summary>
         /// <value><c>true</c> if exists; otherwise, <c>false</c>.</value>
         bool Exists { get; }

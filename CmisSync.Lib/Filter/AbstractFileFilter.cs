@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Filter
 {
     using System;
     
-    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     /// <summary>
     /// Abstract file filter. It takes an event queue make it possible to report any filtered event by requeueing an ignore Event to the queue

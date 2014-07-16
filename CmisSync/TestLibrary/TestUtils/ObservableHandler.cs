@@ -22,6 +22,7 @@ namespace TestLibrary.TestUtils
     using System.Collections.Generic;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     using NUnit.Framework;
 

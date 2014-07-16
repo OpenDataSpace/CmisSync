@@ -26,7 +26,8 @@ namespace CmisSync.Lib.Producer.Watcher
     using System.Text;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
     using DotCMIS.Client;
