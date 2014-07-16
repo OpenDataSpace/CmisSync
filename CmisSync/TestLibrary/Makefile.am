@@ -11,20 +11,27 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 	$(MOQ_LIBS)
 
 SOURCES =  \
+	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
+	AccumulatorTests/LocalObjectFetcherTest.cs \
+	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	ActiveActivitiesManagerTest.cs \
-	AuthenticationProviderTests/AuthProviderFactoryTest.cs \
-	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
-	AuthenticationProviderTests/PersistentStandardAuthenticationProviderTest.cs \
-	ConfigurationTest.cs \
-	ContentTasksTests/ChunkedDownloaderTest.cs \
-	ContentTasksTests/ChunkedFileUploaderTest.cs \
-	ContentTasksTests/ContentTaskUtilsTest.cs \
-	ContentTasksTests/SimpleFileDownloaderTest.cs \
-	ContentTasksTests/SimpleFileUploaderTest.cs \
-	DataTests/MappedObjectsTest.cs \
-	DataTests/ObjectTreeTest.cs \
-	DataTests/PathMatcherTest.cs \
-	EncodingTest.cs \
+	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
+	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
+	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
+	CmisTests/OperationContextFactoryTest.cs \
+	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
+	ConfigTests/ConfigurationTest.cs \
+	ConfigTests/CredentialsTest.cs \
+	ConfigTests/RepoInfoTests.cs \
+	FileTransmissionTests/ChunkedDownloaderTest.cs \
+	FileTransmissionTests/ChunkedFileUploaderTest.cs \
+	FileTransmissionTests/ContentTaskUtilsTest.cs \
+	FileTransmissionTests/SimpleFileDownloaderTest.cs \
+	FileTransmissionTests/SimpleFileUploaderTest.cs \
+	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
+	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
+	PathMatcherTests/PathMatcherTest.cs \
+	UtilsTests/EncodingTest.cs \
 	EventsTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
@@ -32,9 +39,9 @@ SOURCES =  \
 	EventsTests/EventsFilterTests/GenericHandleDublicatedEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreAlreadyHandledFsEventsFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
-	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
@@ -57,55 +64,49 @@ SOURCES =  \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
-	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
-	RepoInfoTests.cs \
 	StorageTests/ExtendedAttributeReaderDosTest.cs \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
-	StorageTests/MetaDataStorageTest.cs \
+	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
+	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/Utf8FileNameNormalizationTest.cs \
-	StorageTests/PersistentCookieStorageTest.cs \
-	StorageTests/PersistentStorageTest.cs \
-	StreamTests/BandwidthLimitedStreamTest.cs \
-	StreamTests/ChunkedStreamTest.cs \
-	StreamTests/NonClosingHashStreamTest.cs \
-	StreamTests/OffsetStreamTest.cs \
-	StreamTests/ProgressStreamTest.cs \
-	SyncStrategiesTests/ContentChangeEventAccumulatorTest.cs \
-	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
-	SyncStrategiesTests/ContentChangesTest.cs \
-	SyncStrategiesTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
-	SyncStrategiesTests/DescendantsCrawlerTest.cs \
-	SyncStrategiesTests/LocalObjectFetcherTest.cs \
-	SyncStrategiesTests/MacWatcherTest.cs \
-	SyncStrategiesTests/NetWatcherTest.cs \
-	SyncStrategiesTests/RemoteObjectFetcherTest.cs \
-	SyncStrategiesTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
-	SyncStrategiesTests/RenamedFileSystemEventHandlerTest.cs \
-	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
-	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectChangedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectDeletedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectMovedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectRenamedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectAddedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectChangedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectDeletedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectMovedTest.cs \
-	SyncStrategiesTests/SolverTests/RemoteObjectRenamedTest.cs \
-	SyncStrategiesTests/SyncMechanismTest.cs \
-	SyncStrategiesTests/WatcherTest.cs \
-	SyncStrategiesTests/WatcherTestUtils.cs \
+	StreamsTests/BandwidthLimitedStreamTest.cs \
+	StreamsTests/ChunkedStreamTest.cs \
+	StreamsTests/NonClosingHashStreamTest.cs \
+	StreamsTests/OffsetStreamTest.cs \
+	StreamsTests/ProgressStreamTest.cs \
+	ProducerTests/ContentChangeTests/ContentChangeEventTransformerTest.cs \
+	ProducerTests/ContentChangeTests/ContentChangesTest.cs \
+	ProducerTests/WatcherTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
+	ProducerTests/CrawlerTests/DescendantsCrawlerTest.cs \
+	ProducerTests/WatcherTests/MacWatcherTest.cs \
+	ProducerTests/WatcherTests/NetWatcherTest.cs \
+	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
+	ProducerTests/WatcherTests/RenamedFileSystemEventHandlerTest.cs \
+	ConsumerTests/LocalSituationDetectionTest.cs \
+	ConsumerTests/RemoteSituationDetectionTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectAddedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectDeletedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectDeletedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
+	ConsumerTests/SyncMechanismTest.cs \
+	ProducerTests/WatcherTests/WatcherTest.cs \
+	ProducerTests/WatcherTests/WatcherTestUtils.cs \
 	TestUtils/CmisConvenienceExtenders.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
-	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIDocumentUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
+	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockOfIFolderUtil.cs \
 	TestUtils/MockOfISyncEventQueue.cs \
 	TestUtils/MockSessionUtil.cs \
@@ -113,11 +114,7 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
-	UtilsTests/CmisSyncLibUtilsTest.cs \
-	UtilsTests/CredentialsTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs \
-	UtilsTests/OperationContextFactoryTest.cs 
-	
+	UtilsTests/HttpProxyUtilsTest.cs
 
 EXTRA_DIST = TestLibrary.csproj \
 	$(MOQ_PATH)
