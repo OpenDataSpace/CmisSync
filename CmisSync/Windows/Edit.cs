@@ -21,7 +21,8 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
-using CmisSync.Lib.Credentials;
+using CmisSync.Lib.Config;
+using CmisSync.Lib.Cmis.UiUtils;
 using CmisSync.CmisTree;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -179,7 +180,7 @@ namespace CmisSync
                 Password = passwordBox.Password
             };
 
-            CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
+            CmisUtils.GetRepositories(cred);
         }
 
         private void PasswordChecked(object sender, RunWorkerCompletedEventArgs args)
