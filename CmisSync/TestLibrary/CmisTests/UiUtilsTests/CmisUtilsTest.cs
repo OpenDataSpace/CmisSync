@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.UtilsTests
+namespace TestLibrary.CmisTests.UiUtilsTests
 {
     using System;
     using System.Collections.Generic;
