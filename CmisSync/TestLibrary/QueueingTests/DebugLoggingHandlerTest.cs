@@ -39,14 +39,15 @@ namespace TestLibrary.QueueingTests
         public void ToStringTest()
         {
             var handler = new DebugLoggingHandler();
-            Assert.AreEqual("CmisSync.Lib.Events.DebugLoggingHandler with Priority 100000", handler.ToString());
+            Assert.That(handler.ToString().Contains(handler.Priority.ToString()));
+            Assert.That(handler.ToString().Contains(handler.GetType().Name));
         }
         
         [Test, Category("Fast")]
         public void PriorityTest()
         {
             var handler = new DebugLoggingHandler();
-            Assert.AreEqual(100000, handler.Priority);
+            Assert.That(handler.Priority, Is.EqualTo(100000));
         }
     }
 }
