@@ -33,6 +33,7 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Producer.ContentChange;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;

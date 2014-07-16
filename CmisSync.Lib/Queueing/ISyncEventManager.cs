@@ -16,8 +16,10 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
+    using CmisSync.Lib.Events;
+
     /// <summary>
     /// Sync event manager which has a list of all Handlers and forwards events to them.
     /// </summary>

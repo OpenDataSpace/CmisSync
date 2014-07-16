@@ -23,6 +23,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Producer.Watcher;
 

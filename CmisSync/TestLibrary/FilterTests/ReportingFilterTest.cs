@@ -22,6 +22,7 @@ namespace TestLibrary.FilterTests
     using System;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
 
     using Moq;

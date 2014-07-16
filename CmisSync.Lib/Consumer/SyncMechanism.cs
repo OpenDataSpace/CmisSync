@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Consumer
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Queueing;
 
     using DotCMIS.Client;
 

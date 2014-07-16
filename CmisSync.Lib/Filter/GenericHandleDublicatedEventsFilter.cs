@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Filter
     using System;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     /// <summary>
     /// Generic handle dublicated events filter.

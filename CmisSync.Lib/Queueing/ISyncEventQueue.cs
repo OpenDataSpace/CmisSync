@@ -16,11 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
+
+    using CmisSync.Lib.Events;
 
     using log4net;
 

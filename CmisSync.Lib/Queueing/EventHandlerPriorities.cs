@@ -17,14 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
     using System.Collections.Generic;
 
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
@@ -66,7 +66,7 @@ namespace CmisSync.Lib.Events
         private static IDictionary<Type, int> map = new Dictionary<Type, int>();
 
         /// <summary>
-        /// Initializes static members of the <see cref="CmisSync.Lib.Events.EventHandlerPriorities"/> class.
+        /// Initializes static members of the <see cref="CmisSync.Lib.Queueing.EventHandlerPriorities"/> class.
         /// </summary>
         static EventHandlerPriorities()
         {

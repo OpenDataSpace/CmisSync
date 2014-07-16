@@ -25,6 +25,7 @@ namespace CmisSync.Lib
     using System.Text;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     /// <summary>
     /// Aggregates the activity status of multiple processes

@@ -23,6 +23,7 @@ namespace TestLibrary
     using System.Text;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     using Moq;
 

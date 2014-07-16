@@ -24,6 +24,7 @@ namespace TestLibrary.EventsTests
 
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
 
     using DotCMIS.Client;
 

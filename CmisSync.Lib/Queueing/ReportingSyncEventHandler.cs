@@ -16,7 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
 
@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Events
         protected readonly ISyncEventQueue Queue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.ReportingSyncEventHandler"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.ReportingSyncEventHandler"/> class.
         /// </summary>
         /// <param name='queue'>
         /// A reference to the queue.

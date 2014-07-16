@@ -16,9 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
+
+    using CmisSync.Lib.Events;
 
     using log4net;
 
@@ -75,10 +77,10 @@ namespace CmisSync.Lib.Events
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.SyncEventHandler"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Queueing.SyncEventHandler"/>.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.SyncEventHandler"/>.
+        /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Queueing.SyncEventHandler"/>.
         /// </returns>
         public override string ToString() {
             return this.GetType() + " with Priority " + this.Priority.ToString();

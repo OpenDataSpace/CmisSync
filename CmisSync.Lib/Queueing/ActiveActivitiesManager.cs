@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
     using System.Collections.Generic;
@@ -26,6 +26,8 @@ namespace CmisSync.Lib.Events
     using System.Text;
 
     using log4net;
+    
+    using CmisSync.Lib.Events;
 
     /// <summary>
     /// Active activities manager.

@@ -17,9 +17,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
+namespace CmisSync.Lib.Queueing
 {
     using System;
+
+    using CmisSync.Lib.Events;
 
     using log4net;
 
