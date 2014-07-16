@@ -79,7 +79,6 @@ namespace CmisSync.Lib.Producer.ContentChange
                 if(syncEvent.FullSyncRequested)
                 {
                     // Get last change log token on server side.
-                    this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);    // refresh
                     string lastRemoteChangeLogTokenBeforeFullCrawlSync = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
                     if (this.storage.ChangeLogToken == null) {
                         syncEvent.LastTokenOnServer = lastRemoteChangeLogTokenBeforeFullCrawlSync;
