@@ -23,14 +23,14 @@ SOURCES =  \
 	ConfigTests/ConfigurationTest.cs \
 	ConfigTests/CredentialsTest.cs \
 	ConfigTests/RepoInfoTests.cs \
-	ContentTasksTests/ChunkedDownloaderTest.cs \
-	ContentTasksTests/ChunkedFileUploaderTest.cs \
-	ContentTasksTests/ContentTaskUtilsTest.cs \
-	ContentTasksTests/SimpleFileDownloaderTest.cs \
-	ContentTasksTests/SimpleFileUploaderTest.cs \
-	DataTests/MappedObjectsTest.cs \
-	DataTests/ObjectTreeTest.cs \
-	DataTests/PathMatcherTest.cs \
+	FileTransmissionTests/ChunkedDownloaderTest.cs \
+	FileTransmissionTests/ChunkedFileUploaderTest.cs \
+	FileTransmissionTests/ContentTaskUtilsTest.cs \
+	FileTransmissionTests/SimpleFileDownloaderTest.cs \
+	FileTransmissionTests/SimpleFileUploaderTest.cs \
+	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
+	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
+	PathMatcherTests/PathMatcherTest.cs \
 	UtilsTests/EncodingTest.cs \
 	EventsTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
@@ -68,9 +68,8 @@ SOURCES =  \
 	StorageTests/ExtendedAttributeReaderDosTest.cs \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
-	StorageTests/MetaDataStorageTest.cs \
-	StorageTests/PersistentCookieStorageTest.cs \
-	StorageTests/PersistentStorageTest.cs \
+	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
+	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/Utf8FileNameNormalizationTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \

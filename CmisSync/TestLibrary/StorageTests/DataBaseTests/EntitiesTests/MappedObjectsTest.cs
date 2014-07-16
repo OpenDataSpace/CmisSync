@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.DataTests
+namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
 {
     using System;
     using System.Collections.Generic;

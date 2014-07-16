@@ -15,8 +15,9 @@
 //   along with this program. If not, see http://www.gnu.org/licenses/.
 //
 // </copyright>
-//-----------------------------------------------------------------------
-namespace TestLibrary.StorageTests
+                                                                         
+
+namespace TestLibrary.StorageTests.DataBaseTests
 {
     using System;
     using System.Net;

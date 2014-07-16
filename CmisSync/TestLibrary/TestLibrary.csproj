@@ -76,13 +76,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
-    <Compile Include="ContentTasksTests\ChunkedDownloaderTest.cs" />
-    <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
-    <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
-    <Compile Include="ContentTasksTests\SimpleFileDownloaderTest.cs" />
-    <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
-    <Compile Include="DataTests\MappedObjectsTest.cs" />
-    <Compile Include="DataTests\PathMatcherTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
@@ -104,7 +97,6 @@
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
     <Compile Include="StorageTests\FileSystemWrapperTests.cs" />
-    <Compile Include="StorageTests\PersistentStorageTest.cs" />
     <Compile Include="StreamTests\BandwidthLimitedStreamTest.cs" />
     <Compile Include="StreamTests\ChunkedStreamTest.cs" />
     <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
@@ -127,8 +119,6 @@
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\DBreezeTests.cs" />
-    <Compile Include="StorageTests\MetaDataStorageTest.cs" />
-    <Compile Include="StorageTests\PersistentCookieStorageTest.cs" />
     <Compile Include="TestUtils\SingleStepEventQueue.cs" />
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
@@ -142,7 +132,6 @@
     <Compile Include="SyncStrategiesTests\DescendantsCrawlerTest.cs" />
     <Compile Include="TestUtils\MockOfIFolderUtil.cs" />
     <Compile Include="TestUtils\MockOfIDocumentUtil.cs" />
-    <Compile Include="DataTests\ObjectTreeTest.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
     <Compile Include="StorageTests\ExtendedAttributeReaderDosTest.cs" />
     <Compile Include="StorageTests\Utf8FileNameNormalizationTest.cs" />
@@ -182,6 +171,16 @@
     <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectDeletedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectMovedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectRenamedTest.cs" />
+    <Compile Include="FileTransmissionTests\ChunkedDownloaderTest.cs" />
+    <Compile Include="FileTransmissionTests\ChunkedFileUploaderTest.cs" />
+    <Compile Include="FileTransmissionTests\ContentTaskUtilsTest.cs" />
+    <Compile Include="FileTransmissionTests\SimpleFileDownloaderTest.cs" />
+    <Compile Include="FileTransmissionTests\SimpleFileUploaderTest.cs" />
+    <Compile Include="PathMatcherTests\PathMatcherTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\MetaDataStorageTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\PersistentCookieStorageTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\EntitiesTests\MappedObjectsTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\ObjectTreeTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -219,5 +218,11 @@
     <Folder Include="AccumulatorTests\" />
     <Folder Include="ConfigTests\" />
     <Folder Include="ConsumerTests\" />
+    <Folder Include="StorageTests\DataBaseTests\" />
+    <Folder Include="StorageTests\FileSystemTests\" />
+    <Folder Include="StorageTests\DataBaseTests\EntitiesTests\" />
+    <Folder Include="PathMatcherTests\" />
+    <Folder Include="ProducerTests\" />
+    <Folder Include="ProducerTests\CrawlerTests\" />
   </ItemGroup>
 </Project>
