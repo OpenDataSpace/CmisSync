@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Filter
 {
     using System;
 
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Events;
 
     using DotCMIS.Client;

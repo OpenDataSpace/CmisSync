@@ -34,6 +34,7 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Sync.Strategy;
 
     using DBreeze;

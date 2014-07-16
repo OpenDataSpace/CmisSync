@@ -114,8 +114,6 @@ SOURCES =  \
 	Producer/ContentChange/ContentChangeEventTransformer.cs \
 	Producer/ContentChange/ContentChanges.cs \
 	Producer/Crawler/DescendantsCrawler.cs \
-	Producer/Crawler/IObjectTree.cs \
-	Producer/Crawler/ObjectTree.cs \
 	Producer/Watcher/CreatedChangedDeletedFileSystemEventHandler.cs \
 	Producer/Watcher/IWatcherProducer.cs \
 	Producer/Watcher/MacWatcher.cs \
@@ -142,7 +140,9 @@ SOURCES =  \
 	Storage/Database/EntryNotFoundException.cs \
 	Storage/Database/ICookieStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
+	Storage/Database/IObjectTree.cs \
 	Storage/Database/MetaDataStorage.cs \
+	Storage/Database/ObjectTree.cs \
 	Storage/Database/PersistentCookieStorage.cs \
 	Storage/FileSystem/DirectoryInfoWrapper.cs \
 	Storage/FileSystem/ExtendedAttributeException.cs \

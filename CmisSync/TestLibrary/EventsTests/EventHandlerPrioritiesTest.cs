@@ -24,6 +24,7 @@ namespace TestLibrary.EventsTests
     using CmisSync.Lib;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Producer.ContentChange;
+    using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Sync.Strategy;
 
     using log4net;

@@ -22,7 +22,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
     using System;
     using System.Collections.Generic;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database;
 
     using NUnit.Framework;
 

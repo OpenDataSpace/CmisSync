@@ -21,7 +21,7 @@ namespace CmisSync.Lib.Consumer
     using System;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
 
     /// <summary>
     /// Situation type.

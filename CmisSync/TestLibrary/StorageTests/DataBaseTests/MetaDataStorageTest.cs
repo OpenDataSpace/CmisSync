@@ -26,6 +26,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
     using CmisSync.Lib.Data;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
 
     using DBreeze;
 

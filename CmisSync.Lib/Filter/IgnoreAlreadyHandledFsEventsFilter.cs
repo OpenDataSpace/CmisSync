@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Filter
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
 
     /// <summary>
     /// Already added objects fs event filter.

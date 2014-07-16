@@ -27,6 +27,7 @@ namespace CmisSync.Lib.Events
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
+    using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Sync.Strategy;
 
     /// <summary>
