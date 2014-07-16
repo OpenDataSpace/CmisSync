@@ -26,6 +26,7 @@ namespace CmisSync.Lib
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
 

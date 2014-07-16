@@ -26,6 +26,7 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Sync.Strategy;
 
     using DotCMIS.Binding.Services;
