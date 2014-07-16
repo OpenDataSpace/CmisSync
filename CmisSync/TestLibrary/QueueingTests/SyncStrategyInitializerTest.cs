@@ -16,7 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace TestLibrary.EventsTests
+
+namespace TestLibrary.QueueingTests
 {
     using System;
     using System.IO;

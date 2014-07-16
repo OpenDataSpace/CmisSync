@@ -32,17 +32,17 @@ SOURCES =  \
 	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	UtilsTests/EncodingTest.cs \
-	EventsTests/DebugLoggingHandlerTest.cs \
+	QueueingTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
-	EventsTests/EventsFilterTests/FilterAggregatorTest.cs \
-	EventsTests/EventsFilterTests/GenericHandleDublicatedEventsFilterTest.cs \
-	EventsTests/EventsFilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
-	EventsTests/EventsFilterTests/IgnoreAlreadyHandledFsEventsFilterTest.cs \
-	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
-	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
-	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
-	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
+	FilterTests/FilterAggregatorTest.cs \
+	FilterTests/GenericHandleDublicatedEventsFilterTest.cs \
+	FilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
+	FilterTests/IgnoreAlreadyHandledFsEventsFilterTest.cs \
+	FilterTests/IgnoreFileNamesFilterTest.cs \
+	FilterTests/IgnoredFolderNamesFilterTest.cs \
+	FilterTests/IgnoredFoldersFilterTest.cs \
+	FilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileOrFolderEventFactoryTest.cs \
@@ -52,9 +52,9 @@ SOURCES =  \
 	EventsTests/GenericSyncEventHandlerTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
-	EventsTests/SyncEventManagerTest.cs \
-	EventsTests/SyncEventQueueTest.cs \
-	EventsTests/SyncStrategyInitializerTest.cs \
+	QueueingTests/SyncEventManagerTest.cs \
+	QueueingTests/SyncEventQueueTest.cs \
+	QueueingTests/SyncStrategyInitializerTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
