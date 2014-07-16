@@ -425,7 +425,7 @@ namespace CmisSync {
 
         public void OpenCmisSyncFolder (string reponame)
         {
-            foreach(CmisRepo repo in Program.Controller.Repositories)
+            foreach (var repo in Program.Controller.Repositories)
             {
                 if(repo.Name.Equals(reponame))
                 {

@@ -50,6 +50,7 @@ using MonoMac.ObjCRuntime;
 using CmisSync.Lib;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Sync;
+using CmisSync.Lib.Cmis;
 
 namespace CmisSync {
 
@@ -215,7 +216,7 @@ namespace CmisSync {
         }
 
         private SyncStatus getSyncStatus(string reponame) {
-            foreach (CmisRepo repo in Program.Controller.Repositories)
+            foreach (var repo in Program.Controller.Repositories)
             {
                 if(repo.Name.Equals(reponame)){
                     return repo.Status;
