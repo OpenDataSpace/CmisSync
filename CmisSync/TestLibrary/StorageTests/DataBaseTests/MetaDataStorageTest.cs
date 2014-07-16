@@ -23,7 +23,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
     using System.IO;
     using System.Linq;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Storage.Database;

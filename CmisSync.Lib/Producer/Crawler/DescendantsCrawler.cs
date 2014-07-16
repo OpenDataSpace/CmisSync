@@ -24,7 +24,7 @@ namespace CmisSync.Lib.Producer.Crawler
     using System.Linq;
     using System.Threading.Tasks;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;

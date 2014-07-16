@@ -23,7 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Storage.Database;

@@ -24,7 +24,7 @@ namespace CmisSync.Lib.Storage.Database
     using System.IO;
 
     using CmisSync.Lib.PathMatcher;
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
 
     using DotCMIS.Client;
 

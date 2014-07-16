@@ -16,7 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib.Data;
+using CmisSync.Lib.Storage.Database.Entities;
 using TestLibrary.IntegrationTests;
 
 namespace TestLibrary.ProducerTests.WatcherTests

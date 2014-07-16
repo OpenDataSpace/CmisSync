@@ -21,7 +21,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Consumer.SituationSolver;

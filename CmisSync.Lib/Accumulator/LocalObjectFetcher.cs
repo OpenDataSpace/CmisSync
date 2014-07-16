@@ -20,7 +20,7 @@ namespace CmisSync.Lib.Accumulator
 {
     using System;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Queueing;

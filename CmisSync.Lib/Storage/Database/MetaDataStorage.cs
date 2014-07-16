@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Storage.Database
     using System.Text;
 
     using CmisSync.Lib.PathMatcher;
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
 
     using DBreeze;
     using DBreeze.DataTypes;

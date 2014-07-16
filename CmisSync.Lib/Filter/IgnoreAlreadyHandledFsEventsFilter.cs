@@ -22,7 +22,7 @@ namespace CmisSync.Lib.Filter
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage;

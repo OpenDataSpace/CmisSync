@@ -24,7 +24,7 @@ namespace TestLibrary.ConsumerTests
     using System.IO;
 
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;

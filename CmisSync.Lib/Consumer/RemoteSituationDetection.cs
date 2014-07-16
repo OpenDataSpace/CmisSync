@@ -22,7 +22,7 @@ namespace CmisSync.Lib.Consumer
     using System;
     using System.Collections.Generic;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
 

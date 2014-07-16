@@ -23,7 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.IO;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib.Data;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage;
