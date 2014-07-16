@@ -20,7 +20,9 @@ SOURCES =  \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
 	CmisTests/OperationContextFactoryTest.cs \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
-	ConfigurationTest.cs \
+	ConfigTests/ConfigurationTest.cs \
+	ConfigTests/CredentialsTest.cs \
+	ConfigTests/RepoInfoTests.cs \
 	ContentTasksTests/ChunkedDownloaderTest.cs \
 	ContentTasksTests/ChunkedFileUploaderTest.cs \
 	ContentTasksTests/ContentTaskUtilsTest.cs \
@@ -29,7 +31,7 @@ SOURCES =  \
 	DataTests/MappedObjectsTest.cs \
 	DataTests/ObjectTreeTest.cs \
 	DataTests/PathMatcherTest.cs \
-	EncodingTest.cs \
+	UtilsTests/EncodingTest.cs \
 	EventsTests/DebugLoggingHandlerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
@@ -62,9 +64,7 @@ SOURCES =  \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
-	LocalFilesystemActivityGenerator.cs \
 	MoqExtensions/MoqExtensions.cs \
-	RepoInfoTests.cs \
 	StorageTests/ExtendedAttributeReaderDosTest.cs \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
@@ -115,8 +115,7 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
-	UtilsTests/CredentialsTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs 
+	UtilsTests/HttpProxyUtilsTest.cs
 
 EXTRA_DIST = TestLibrary.csproj \
 	$(MOQ_PATH)

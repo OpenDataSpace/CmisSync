@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.LegacyCodeTests
+namespace TestLibrary.ConfigTests
 {
     using System;
     using System.Collections.Generic;

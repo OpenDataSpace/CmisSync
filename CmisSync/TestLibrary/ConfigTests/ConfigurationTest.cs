@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary
+namespace TestLibrary.ConfigTests
 {
     using System;
     using System.Collections.Generic;

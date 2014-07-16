@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.UtilsTests.CredentialsTests
+namespace TestLibrary.ConfigTests
 {
     using System;
     using System.IO;

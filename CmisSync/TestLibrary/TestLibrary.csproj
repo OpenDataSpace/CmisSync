@@ -76,7 +76,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
-    <Compile Include="ConfigurationTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedDownloaderTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
     <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
@@ -84,7 +83,6 @@
     <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
     <Compile Include="DataTests\MappedObjectsTest.cs" />
     <Compile Include="DataTests\PathMatcherTest.cs" />
-    <Compile Include="EncodingTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
@@ -104,7 +102,6 @@
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
-    <Compile Include="LocalFilesystemActivityGenerator.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
     <Compile Include="StorageTests\FileSystemWrapperTests.cs" />
     <Compile Include="StorageTests\PersistentStorageTest.cs" />
@@ -140,7 +137,6 @@
     <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
     <Compile Include="TestUtils\ObservableHandler.cs" />
     <Compile Include="TestUtils\ObservableHandlerTest.cs" />
-    <Compile Include="UtilsTests\CredentialsTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\DBreezeTests.cs" />
@@ -149,7 +145,6 @@
     <Compile Include="TestUtils\SingleStepEventQueue.cs" />
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
-    <Compile Include="RepoInfoTests.cs" />
     <Compile Include="EventsTests\SyncStrategyInitializerTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledContentChangeEventsFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
@@ -183,6 +178,10 @@
     <Compile Include="AccumulatorTests\LocalObjectFetcherTest.cs" />
     <Compile Include="AccumulatorTests\RemoteObjectFetcherTest.cs" />
     <Compile Include="CmisTests\UiUtilsTests\CmisUtilsTest.cs" />
+    <Compile Include="ConfigTests\ConfigurationTest.cs" />
+    <Compile Include="ConfigTests\CredentialsTest.cs" />
+    <Compile Include="UtilsTests\EncodingTest.cs" />
+    <Compile Include="ConfigTests\RepoInfoTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -218,5 +217,6 @@
     <Folder Include="CmisTests\" />
     <Folder Include="CmisTests\UiUtilsTests\" />
     <Folder Include="AccumulatorTests\" />
+    <Folder Include="ConfigTests\" />
   </ItemGroup>
 </Project>
