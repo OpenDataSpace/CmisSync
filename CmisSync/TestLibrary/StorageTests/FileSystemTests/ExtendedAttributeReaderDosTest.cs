@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 #if !__MonoCS__
-namespace TestLibrary.StorageTests
+namespace TestLibrary.StorageTests.FileSystemTests
 {
     using System;
     using System.IO;

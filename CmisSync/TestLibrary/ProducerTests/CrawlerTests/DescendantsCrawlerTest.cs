@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.SyncStrategiesTests
+namespace TestLibrary.ProducerTests.CrawlerTests
 {
     using System;
     using System.Collections.Generic;

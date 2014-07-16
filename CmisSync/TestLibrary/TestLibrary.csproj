@@ -96,10 +96,8 @@
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
-    <Compile Include="StorageTests\FileSystemWrapperTests.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
-    <Compile Include="StorageTests\ExtendedAttributeReaderUnixTest.cs" />
     <Compile Include="TestUtils\MockMetaDataStorageUtil.cs" />
     <Compile Include="TestUtils\MockSessionUtil.cs" />
     <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
@@ -107,7 +105,6 @@
     <Compile Include="TestUtils\ObservableHandlerTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
-    <Compile Include="IntegrationTests\DBreezeTests.cs" />
     <Compile Include="TestUtils\SingleStepEventQueue.cs" />
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
@@ -120,8 +117,6 @@
     <Compile Include="TestUtils\MockOfIFolderUtil.cs" />
     <Compile Include="TestUtils\MockOfIDocumentUtil.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
-    <Compile Include="StorageTests\ExtendedAttributeReaderDosTest.cs" />
-    <Compile Include="StorageTests\Utf8FileNameNormalizationTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\ReportingFilterTest.cs" />
     <Compile Include="TestUtils\MockOfIFilterAggregatorUtil.cs" />
     <Compile Include="EventsTests\EventsFilterTests\FilterAggregatorTest.cs" />
@@ -181,6 +176,11 @@
     <Compile Include="ProducerTests\WatcherTests\WatcherTestUtils.cs" />
     <Compile Include="ProducerTests\WatcherTests\RenamedFileSystemEventHandlerTest.cs" />
     <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeReaderDosTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeReaderUnixTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\FileSystemWrapperTests.cs" />
+    <Compile Include="StorageTests\DataBaseTests\DBreezeTests.cs" />
+    <Compile Include="StorageTests\FileSystemTests\Utf8FileNameNormalizationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

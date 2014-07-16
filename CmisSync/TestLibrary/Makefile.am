@@ -58,19 +58,19 @@ SOURCES =  \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
-	IntegrationTests/DBreezeTests.cs \
+	StorageTests/DataBaseTests/DBreezeTests.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	MoqExtensions/MoqExtensions.cs \
-	StorageTests/ExtendedAttributeReaderDosTest.cs \
-	StorageTests/ExtendedAttributeReaderUnixTest.cs \
-	StorageTests/FileSystemWrapperTests.cs \
+	StorageTests/FileSystemTests/ExtendedAttributeReaderDosTest.cs \
+	StorageTests/FileSystemTests/ExtendedAttributeReaderUnixTest.cs \
+	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
-	StorageTests/Utf8FileNameNormalizationTest.cs \
+	StorageTests/FileSystemTests/Utf8FileNameNormalizationTest.cs \
 	StreamsTests/BandwidthLimitedStreamTest.cs \
 	StreamsTests/ChunkedStreamTest.cs \
 	StreamsTests/NonClosingHashStreamTest.cs \
