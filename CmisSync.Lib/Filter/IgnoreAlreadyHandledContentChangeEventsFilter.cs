@@ -17,11 +17,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events.Filter
+namespace CmisSync.Lib.Filter
 {
     using System;
 
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Events;
 
     using DotCMIS.Client;
     using DotCMIS.Enums;
@@ -40,7 +41,7 @@ namespace CmisSync.Lib.Events.Filter
 
         /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="CmisSync.Lib.Events.Filter.IgnoreAlreadyHandledContentChangeEventsFilter"/> class.
+        /// <see cref="CmisSync.Lib.Filter.IgnoreAlreadyHandledContentChangeEventsFilter"/> class.
         /// </summary>
         /// <param name="storage">Storage instance.</param>
         /// <param name="session">Session instance.</param>

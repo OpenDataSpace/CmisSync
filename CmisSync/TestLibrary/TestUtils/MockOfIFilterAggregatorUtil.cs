@@ -21,7 +21,7 @@ namespace TestLibrary.TestUtils
 {
     using System;
 
-    using CmisSync.Lib.Events.Filter;
+    using CmisSync.Lib.Filter;
 
     using Moq;
 

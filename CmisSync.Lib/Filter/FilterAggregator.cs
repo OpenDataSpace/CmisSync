@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events.Filter
+namespace CmisSync.Lib.Filter
 {
     using System;
 
@@ -27,7 +27,7 @@ namespace CmisSync.Lib.Events.Filter
     public class FilterAggregator : IFilterAggregator
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.FilterAggregator"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.FilterAggregator"/> class.
         /// </summary>
         /// <param name="fileNamesFilter">File names filter.</param>
         /// <param name="folderNamesFilter">Folder names filter.</param>

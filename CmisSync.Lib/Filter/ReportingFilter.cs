@@ -17,9 +17,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events.Filter
+namespace CmisSync.Lib.Filter
 {
     using System;
+    
+    using CmisSync.Lib.Events;
 
     /// <summary>
     /// Reporting filter.
@@ -47,7 +49,7 @@ namespace CmisSync.Lib.Events.Filter
         private InvalidFolderNameFilter invalidFolderNameFilter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.ReportingFilter"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.ReportingFilter"/> class.
         /// </summary>
         /// <param name="queue">Sync Event Queue to put work on.</param>
         /// <param name="ignoredFoldersFilter">Ignored folders filter.</param>

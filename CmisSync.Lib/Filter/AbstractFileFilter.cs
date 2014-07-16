@@ -17,9 +17,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events.Filter
+namespace CmisSync.Lib.Filter
 {
     using System;
+    
+    using CmisSync.Lib.Events;
 
     /// <summary>
     /// Abstract file filter. It takes an event queue make it possible to report any filtered event by requeueing an ignore Event to the queue
@@ -32,7 +34,7 @@ namespace CmisSync.Lib.Events.Filter
         protected readonly ISyncEventQueue Queue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.AbstractFileFilter"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.AbstractFileFilter"/> class.
         /// </summary>
         /// <param name='queue'>
         /// Queue where all filtered events should be reported to.
