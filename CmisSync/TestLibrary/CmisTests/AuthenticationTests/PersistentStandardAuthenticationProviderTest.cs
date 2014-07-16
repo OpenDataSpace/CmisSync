@@ -23,7 +23,7 @@ namespace TestLibrary.CmisTests.AuthenticationTests
     using System.Net;
 
     using CmisSync.Lib.Cmis;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
 
     using Moq;
 

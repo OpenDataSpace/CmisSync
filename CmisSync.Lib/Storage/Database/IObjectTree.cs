@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Data
+namespace CmisSync.Lib.Storage.Database
 {
     using System;
     using System.Collections.Generic;

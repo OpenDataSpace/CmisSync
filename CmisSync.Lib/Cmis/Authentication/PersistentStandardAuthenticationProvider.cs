@@ -24,7 +24,7 @@ namespace CmisSync.Lib.Cmis
     using System.Collections.Generic;
     using System.Net;
 
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
 
     using DotCMIS.Binding;
 

@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Sync.Strategy
+namespace CmisSync.Lib.Producer.Crawler
 {
     using System;
     using System.Collections.Generic;
@@ -28,6 +28,7 @@ namespace CmisSync.Lib.Sync.Strategy
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
     using DotCMIS.Client;
 
     using log4net;

@@ -26,6 +26,7 @@ namespace TestLibrary.ConsumerTests
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Sync.Strategy;
 
     using DotCMIS.Client;

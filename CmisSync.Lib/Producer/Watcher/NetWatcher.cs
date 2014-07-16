@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Sync.Strategy
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.Database;
 
     /// <summary>
     /// .Net file system watcher.
