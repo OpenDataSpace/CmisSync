@@ -23,7 +23,6 @@ namespace TestLibrary.EventsTests
     using System.Threading;
     using System.Threading.Tasks;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
 

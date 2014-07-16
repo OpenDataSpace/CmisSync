@@ -37,7 +37,6 @@ namespace CmisSync {
     using System.Diagnostics;
     using System.IO;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Notifications;
     using CmisSync.Lib.Config;

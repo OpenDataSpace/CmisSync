@@ -27,7 +27,7 @@ namespace TestLibrary.AccumulatorTests
     using CmisSync.Lib.Events;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;

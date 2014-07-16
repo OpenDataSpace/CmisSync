@@ -34,7 +34,6 @@
 
 
 using System;
-using CmisSync.Lib;
 using System.Windows.Forms;
 
 namespace CmisSync

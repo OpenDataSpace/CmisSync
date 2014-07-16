@@ -33,7 +33,7 @@ namespace TestLibrary.EventsTests
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using DotCMIS.Client;
     using DotCMIS.Enums;

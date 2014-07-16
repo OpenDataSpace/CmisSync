@@ -58,7 +58,6 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Sync;
 
     using DotCMIS;
     using DotCMIS.Client;

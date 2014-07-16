@@ -18,7 +18,6 @@
 //-----------------------------------------------------------------------
 using System;
 
-using CmisSync.Lib;
 
 namespace CmisSync {
 

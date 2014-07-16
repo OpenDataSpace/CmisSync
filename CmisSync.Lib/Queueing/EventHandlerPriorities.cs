@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Events
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     /// <summary>
     /// Default event handler priorities.

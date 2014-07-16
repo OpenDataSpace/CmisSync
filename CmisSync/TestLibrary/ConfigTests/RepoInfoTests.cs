@@ -23,7 +23,6 @@ namespace TestLibrary.ConfigTests
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Config;
 
     using Moq;

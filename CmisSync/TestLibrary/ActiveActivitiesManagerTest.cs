@@ -22,7 +22,6 @@ namespace TestLibrary
     using System.Collections.Generic;
     using System.Text;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Events;
 
     using Moq;

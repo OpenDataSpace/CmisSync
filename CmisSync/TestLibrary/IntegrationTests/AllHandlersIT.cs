@@ -35,7 +35,7 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using DBreeze;
 
@@ -53,7 +53,7 @@ namespace TestLibrary.IntegrationTests
 
     using TestLibrary.TestUtils;
 
-    using Strategy = CmisSync.Lib.Sync.Strategy;
+    using Strategy = CmisSync.Lib.Producer.Watcher;
 
     [TestFixture]
     public class AllHandlersIT : IsTestWithConfiguredLog4Net

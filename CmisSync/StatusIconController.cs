@@ -39,8 +39,6 @@ using System.Timers;
 
 using Threading = System.Threading;
 
-using CmisSync.Lib;
-using CmisSync.Lib.Sync;
 using System.Globalization;
 
 using System.Diagnostics;

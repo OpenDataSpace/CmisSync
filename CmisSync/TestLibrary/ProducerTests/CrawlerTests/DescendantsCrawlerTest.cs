@@ -31,7 +31,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using DBreeze;
 

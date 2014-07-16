@@ -23,9 +23,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Windows;
 using System.Globalization;
-using CmisSync.Lib;
 using CmisSync.Lib.Events;
-using CmisSync.Lib.Sync;
 using CmisSync.Lib.Cmis;
 
 namespace CmisSync

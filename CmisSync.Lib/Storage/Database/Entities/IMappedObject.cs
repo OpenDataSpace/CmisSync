@@ -25,7 +25,6 @@ namespace CmisSync.Lib.Data
     using System.IO;
     using System.Text;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Storage;
 
     using DotCMIS.Client;

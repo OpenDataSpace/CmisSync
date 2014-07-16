@@ -23,7 +23,6 @@ namespace CmisSync.Lib.FileTransmission
     using System.IO;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Streams;
 

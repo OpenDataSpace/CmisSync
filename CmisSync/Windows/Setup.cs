@@ -56,7 +56,6 @@ using WPF = System.Windows.Controls;
 
 using CmisSync.CmisTree;
 
-using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Cmis.UiUtils;
 using CmisSync.Lib.Config;

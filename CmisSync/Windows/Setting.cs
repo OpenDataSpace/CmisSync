@@ -27,7 +27,6 @@ using System.Windows.Media;
 using System.Windows.Controls;
 using System.Windows.Forms.Integration;
 
-using CmisSync.Lib;
 using CmisSync.Lib.Config;
 
 

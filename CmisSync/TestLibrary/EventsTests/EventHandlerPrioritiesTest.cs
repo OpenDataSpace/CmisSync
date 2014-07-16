@@ -21,11 +21,10 @@ namespace TestLibrary.EventsTests
     using System;
     using System.IO;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using log4net;
     using log4net.Config;

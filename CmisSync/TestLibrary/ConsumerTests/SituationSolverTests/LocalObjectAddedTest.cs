@@ -31,7 +31,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Consumer.SituationSolver;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using DotCMIS.Client;
     using DotCMIS.Data;

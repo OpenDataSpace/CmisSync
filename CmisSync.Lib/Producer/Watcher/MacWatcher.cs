@@ -31,7 +31,7 @@ using log4net;
 using CmisSync.Lib.Events;
 
 
-namespace CmisSync.Lib.Sync.Strategy
+namespace CmisSync.Lib.Producer.Watcher
 {
     /// <summary>
     /// Implementation of a Mac OS specific file system watcher.

@@ -36,7 +36,6 @@ namespace CmisSync
 {
     using System;
 
-    using CmisSync.Lib;
 
     using Gtk;
 

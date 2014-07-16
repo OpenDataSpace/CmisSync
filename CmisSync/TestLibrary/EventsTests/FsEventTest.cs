@@ -22,7 +22,6 @@ namespace TestLibrary.EventsTests
     using System;
     using System.IO;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Events;
 
     using NUnit.Framework;

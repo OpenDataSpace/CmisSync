@@ -25,7 +25,6 @@ namespace TestLibrary.FileTransmissionTests
     using System.Threading;
     using System.Threading.Tasks;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;

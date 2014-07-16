@@ -47,9 +47,7 @@ using CmisSync.Lib.Events;
 using System.Collections.Generic;
 using log4net;
 
-using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Sync;
 
 namespace CmisSync {
 

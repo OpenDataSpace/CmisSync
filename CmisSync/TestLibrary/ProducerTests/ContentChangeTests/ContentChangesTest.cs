@@ -22,12 +22,11 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
     using System;
     using System.Collections.Generic;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.ContentChange;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;

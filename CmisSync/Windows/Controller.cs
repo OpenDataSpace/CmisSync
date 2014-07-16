@@ -39,7 +39,6 @@ using System.IO;
 using System.Reflection;
 using Forms = System.Windows.Forms;
 
-using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Config;
 

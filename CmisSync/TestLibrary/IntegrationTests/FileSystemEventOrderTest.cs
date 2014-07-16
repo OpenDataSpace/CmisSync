@@ -27,7 +27,7 @@ namespace TestLibrary.IntegrationTests
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using Moq;
 

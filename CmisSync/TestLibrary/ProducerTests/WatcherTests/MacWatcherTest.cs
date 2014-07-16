@@ -26,7 +26,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using System.Threading;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using MonoMac.Foundation;
     using MonoMac.AppKit;

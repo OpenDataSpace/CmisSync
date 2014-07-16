@@ -21,7 +21,6 @@ namespace TestLibrary.CmisTests.AuthenticationTests
 {
     using System;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
 

@@ -21,13 +21,12 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
 {
     using System;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.ContentChange;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using DotCMIS.Client;
 

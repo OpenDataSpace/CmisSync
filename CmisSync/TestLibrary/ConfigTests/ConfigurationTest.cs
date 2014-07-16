@@ -25,7 +25,6 @@ namespace TestLibrary.ConfigTests
     using System.Linq;
     using System.Text;
 
-    using CmisSync.Lib;
     using CmisSync.Lib.Config;
 
     using NUnit.Framework;

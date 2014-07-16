@@ -35,7 +35,7 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Sync.Strategy;
+    using CmisSync.Lib.Producer.Watcher;
 
     using DBreeze;
 
@@ -236,7 +236,7 @@ namespace CmisSync.Lib.Cmis
 
             // Add File System Watcher
             #if __COCOA__
-            this.WatcherProducer = new CmisSync.Lib.Sync.Strategy.MacWatcher(LocalPath, Queue);
+            this.WatcherProducer = new CmisSync.Lib.Producer.Watcher.MacWatcher(LocalPath, Queue);
             #else
             this.WatcherProducer = new NetWatcher(new FileSystemWatcher(this.LocalPath), this.Queue, this.storage);
             #endif

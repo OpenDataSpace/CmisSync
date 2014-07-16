@@ -47,9 +47,7 @@ using MonoMac.Foundation;
 using MonoMac.AppKit;
 using MonoMac.ObjCRuntime;
 
-using CmisSync.Lib;
 using CmisSync.Lib.Events;
-using CmisSync.Lib.Sync;
 using CmisSync.Lib.Cmis;
 
 namespace CmisSync {
