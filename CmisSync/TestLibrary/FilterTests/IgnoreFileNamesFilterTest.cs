@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IgnoredFoldersFilterTest.cs" company="GRAU DATA AG">
+// <copyright file="IgnoreFileNamesFilterTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests.EventsFilterTests
+namespace TestLibrary.FilterTests
 {
     using System;
     using System.Collections.Generic;
@@ -33,33 +33,34 @@ namespace TestLibrary.EventsTests.EventsFilterTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class IgnoredFoldersFilterTest
+    public class IgnoreFileNamesFilterTest
     {
         [Test, Category("Fast"), Category("EventFilter")]
-        public void NormalConstructor()
+        public void DefaultConstrutorAddsRequiredFilter()
         {
-            new IgnoredFoldersFilter();
+            var filter = new IgnoredFileNamesFilter();
+            string reason;
+            Assert.That(filter.CheckFile("bla.sync", out reason), Is.True);
+            Assert.That(reason, Is.Not.Null);
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void AllowCorrectPaths()
+        public void AllowCorrectEventsTest()
         {
-            var filter = new IgnoredFoldersFilter();
-
+            var filter = new IgnoredFileNamesFilter();
             string reason;
-            Assert.That(filter.CheckPath(Path.GetTempPath(), out reason), Is.False);
+            Assert.That(filter.CheckFile("testfile", out reason), Is.False);
             Assert.That(string.IsNullOrEmpty(reason), Is.True);
         }
 
         [Test, Category("Fast"), Category("EventFilter")]
-        public void ForbidIgnoredFolderNames()
+        public void HandleIgnoredFileNamesTest()
         {
-            var ignoredFolder = new List<string>();
-            ignoredFolder.Add(Path.GetTempPath());
-            var filter = new IgnoredFoldersFilter { IgnoredPaths = ignoredFolder };
-
+            List<string> wildcards = new List<string>();
+            wildcards.Add("*~");
+            var filter = new IgnoredFileNamesFilter { Wildcards = wildcards };
             string reason;
-            Assert.That(filter.CheckPath(Path.GetTempPath(), out reason), Is.True);
+            Assert.That(filter.CheckFile("file~", out reason), Is.True);
             Assert.That(string.IsNullOrEmpty(reason), Is.False);
         }
     }

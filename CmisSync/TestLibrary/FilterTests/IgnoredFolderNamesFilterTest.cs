@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests.EventsFilterTests
+namespace TestLibrary.FilterTests
 {
     using System;
     using System.Collections.Generic;

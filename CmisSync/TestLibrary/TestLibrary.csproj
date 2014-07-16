@@ -78,17 +78,12 @@
     <Compile Include="ActiveActivitiesManagerTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\InvalidFolderNameFilterTest.cs" />
     <Compile Include="EventsTests\ExceptionEventTest.cs" />
     <Compile Include="EventsTests\FileEventTest.cs" />
     <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
     <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
-    <Compile Include="EventsTests\SyncEventManagerTest.cs" />
-    <Compile Include="EventsTests\SyncEventQueueTest.cs" />
     <Compile Include="IntegrationTests\AllHandlersIT.cs" />
     <Compile Include="IntegrationTests\CmisSyncTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
@@ -96,7 +91,6 @@
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
     <Compile Include="TestUtils\MockMetaDataStorageUtil.cs" />
     <Compile Include="TestUtils\MockSessionUtil.cs" />
@@ -104,22 +98,15 @@
     <Compile Include="TestUtils\ObservableHandler.cs" />
     <Compile Include="TestUtils\ObservableHandlerTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
     <Compile Include="TestUtils\SingleStepEventQueue.cs" />
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
-    <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
-    <Compile Include="EventsTests\SyncStrategyInitializerTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledContentChangeEventsFilterTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
     <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
     <Compile Include="EventsTests\FsEventTest.cs" />
     <Compile Include="TestUtils\MockOfIFolderUtil.cs" />
     <Compile Include="TestUtils\MockOfIDocumentUtil.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\ReportingFilterTest.cs" />
     <Compile Include="TestUtils\MockOfIFilterAggregatorUtil.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\FilterAggregatorTest.cs" />
     <Compile Include="TestUtils\IsTestWithConfiguredLog4Net.cs" />
     <Compile Include="EventsTests\ActivityListenerAggregatorTest.cs" />
     <Compile Include="TestUtils\MockOfISyncEventQueue.cs" />
@@ -181,6 +168,19 @@
     <Compile Include="StorageTests\FileSystemTests\FileSystemWrapperTests.cs" />
     <Compile Include="StorageTests\DataBaseTests\DBreezeTests.cs" />
     <Compile Include="StorageTests\FileSystemTests\Utf8FileNameNormalizationTest.cs" />
+    <Compile Include="QueueingTests\DebugLoggingHandlerTest.cs" />
+    <Compile Include="QueueingTests\SyncEventManagerTest.cs" />
+    <Compile Include="QueueingTests\SyncEventQueueTest.cs" />
+    <Compile Include="FilterTests\FilterAggregatorTest.cs" />
+    <Compile Include="FilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoreAlreadyHandledContentChangeEventsFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoredFolderNamesFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoredFoldersFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoreFileNamesFilterTest.cs" />
+    <Compile Include="FilterTests\InvalidFolderNameFilterTest.cs" />
+    <Compile Include="FilterTests\ReportingFilterTest.cs" />
+    <Compile Include="QueueingTests\SyncStrategyInitializerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -226,5 +226,7 @@
     <Folder Include="ProducerTests\CrawlerTests\" />
     <Folder Include="ProducerTests\WatcherTests\" />
     <Folder Include="ProducerTests\ContentChangeTests\" />
+    <Folder Include="QueueingTests\" />
+    <Folder Include="FilterTests\" />
   </ItemGroup>
 </Project>

@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary
+namespace TestLibrary.QueueingTests
 {
     using System;
     using System.IO;
