@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.ContentTasks
+namespace CmisSync.Lib.FileTransmission
 {
     using System;
     using System.IO;
@@ -126,14 +126,14 @@ namespace CmisSync.Lib.ContentTasks
         }
 
         /// <summary>
-        /// Releases all resource used by the <see cref="CmisSync.Lib.ContentTasks.SimpleFileUploader"/> object.
+        /// Releases all resource used by the <see cref="CmisSync.Lib.FileTransmission.SimpleFileUploader"/> object.
         /// </summary>
         /// <remarks>Call <see cref="Dispose"/> when you are finished using the
-        /// <see cref="CmisSync.Lib.ContentTasks.SimpleFileUploader"/>. The <see cref="Dispose"/> method leaves the
-        /// <see cref="CmisSync.Lib.ContentTasks.SimpleFileUploader"/> in an unusable state. After calling
+        /// <see cref="CmisSync.Lib.FileTransmission.SimpleFileUploader"/>. The <see cref="Dispose"/> method leaves the
+        /// <see cref="CmisSync.Lib.FileTransmission.SimpleFileUploader"/> in an unusable state. After calling
         /// <see cref="Dispose"/>, you must release all references to the
-        /// <see cref="CmisSync.Lib.ContentTasks.SimpleFileUploader"/> so the garbage collector can reclaim the memory
-        /// that the <see cref="CmisSync.Lib.ContentTasks.SimpleFileUploader"/> was occupying.</remarks>
+        /// <see cref="CmisSync.Lib.FileTransmission.SimpleFileUploader"/> so the garbage collector can reclaim the memory
+        /// that the <see cref="CmisSync.Lib.FileTransmission.SimpleFileUploader"/> was occupying.</remarks>
         public void Dispose()
         {
             this.Dispose(true);

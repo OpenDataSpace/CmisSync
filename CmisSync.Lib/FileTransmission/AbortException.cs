@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.ContentTasks
+namespace CmisSync.Lib.FileTransmission
 {
     using System;
     using System.Collections.Generic;
@@ -31,14 +31,14 @@ namespace CmisSync.Lib.ContentTasks
     public class AbortException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.AbortException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.AbortException"/> class.
         /// </summary>
         public AbortException() : base("Abort exception")
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.AbortException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.AbortException"/> class.
         /// </summary>
         /// <param name="msg">Abortion message.</param>
         public AbortException(string msg) : base(msg)
@@ -46,7 +46,7 @@ namespace CmisSync.Lib.ContentTasks
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.AbortException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.AbortException"/> class.
         /// </summary>
         /// <param name="message">Abortion Message.</param>
         /// <param name="inner">Inner exception.</param>
@@ -55,7 +55,7 @@ namespace CmisSync.Lib.ContentTasks
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.AbortException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.AbortException"/> class.
         /// </summary>
         /// <param name="info">Serializaction info.</param>
         /// <param name="context">Streaming context.</param>

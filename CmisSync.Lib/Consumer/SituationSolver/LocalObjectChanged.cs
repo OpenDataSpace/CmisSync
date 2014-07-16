@@ -24,7 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib.ContentTasks;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
@@ -98,7 +98,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 if (isChanged) {
                     Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
                     OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
-                    IFileUploader uploader = ContentTasks.ContentTaskUtils.CreateUploader();
+                    IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
                     var doc = remoteId as IDocument;
                     FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                     this.queue.AddEvent(transmissionEvent);

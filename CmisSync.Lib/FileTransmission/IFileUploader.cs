@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.ContentTasks
+namespace CmisSync.Lib.FileTransmission
 {
     using System;
     using System.IO;

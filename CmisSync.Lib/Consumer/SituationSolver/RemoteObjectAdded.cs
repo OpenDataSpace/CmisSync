@@ -120,7 +120,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 byte[] hash = null;
                 using (var hashAlg = new SHA1Managed())
                 using (var fileStream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
-                using (var downloader = ContentTasks.ContentTaskUtils.CreateDownloader())
+                using (var downloader = FileTransmission.ContentTaskUtils.CreateDownloader())
                 {
                     try {
                         downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
