@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.SyncStrategiesTests
+namespace TestLibrary.AccumulatorTests
 {
     using System;
     using System.Collections.Generic;

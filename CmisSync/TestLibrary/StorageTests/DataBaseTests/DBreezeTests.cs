@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
+namespace TestLibrary.StorageTests.DataBaseTests
 {
     using System;
     using System.IO;

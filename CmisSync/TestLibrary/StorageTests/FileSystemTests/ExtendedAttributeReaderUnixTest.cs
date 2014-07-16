@@ -27,7 +27,7 @@ using Moq;
 
 using TestLibrary.IntegrationTests;
 
-namespace TestLibrary.StorageTests
+namespace TestLibrary.StorageTests.FileSystemTests
 {
     [TestFixture]
     public class ExtendedAttributeReaderUnixTest
