@@ -32,6 +32,7 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
+    using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Storage;
     using CmisSync.Lib.Sync.Strategy;
 

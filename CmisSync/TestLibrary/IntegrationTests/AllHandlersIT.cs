@@ -32,6 +32,7 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Sync.Strategy;
 
     using DBreeze;

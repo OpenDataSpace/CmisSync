@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Sync.Strategy
+namespace CmisSync.Lib.Producer.ContentChange
 {
     using System;
     using System.IO;
