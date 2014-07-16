@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.AuthenticationProviderTests
+namespace TestLibrary.CmisTests.AuthenticationTests
 {
     using System;
     using System.Net;

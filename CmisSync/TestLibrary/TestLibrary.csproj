@@ -76,7 +76,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
-    <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
     <Compile Include="ConfigurationTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedDownloaderTest.cs" />
     <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
@@ -114,7 +113,6 @@
     <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
     <Compile Include="StreamTests\OffsetStreamTest.cs" />
     <Compile Include="StreamTests\ProgressStreamTest.cs" />
-    <Compile Include="SyncStrategiesTests\ContentChangeEventAccumulatorTest.cs" />
     <Compile Include="SyncStrategiesTests\ContentChangeEventTransformerTest.cs" />
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
     <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
@@ -142,26 +140,20 @@
     <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
     <Compile Include="TestUtils\ObservableHandler.cs" />
     <Compile Include="TestUtils\ObservableHandlerTest.cs" />
-    <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
     <Compile Include="UtilsTests\CredentialsTest.cs" />
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\DBreezeTests.cs" />
     <Compile Include="StorageTests\MetaDataStorageTest.cs" />
-    <Compile Include="SyncStrategiesTests\RemoteObjectFetcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\LocalObjectFetcherTest.cs" />
     <Compile Include="StorageTests\PersistentCookieStorageTest.cs" />
-    <Compile Include="AuthenticationProviderTests\AuthProviderFactoryTest.cs" />
     <Compile Include="TestUtils\SingleStepEventQueue.cs" />
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="EventsTests\DebugLoggingHandlerTest.cs" />
     <Compile Include="RepoInfoTests.cs" />
-    <Compile Include="AuthenticationProviderTests\PersistentStandardAuthenticationProviderTest.cs" />
     <Compile Include="EventsTests\SyncStrategyInitializerTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledContentChangeEventsFilterTest.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
-    <Compile Include="UtilsTests\OperationContextFactoryTest.cs" />
     <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
     <Compile Include="SyncStrategiesTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
     <Compile Include="EventsTests\FsEventTest.cs" />
@@ -183,6 +175,14 @@
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectDeletedRemoteObjectDeletedTest.cs" />
     <Compile Include="IntegrationTests\FileSystemEventOrderTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectRenamedRemoteObjectRenamedTest.cs" />
+    <Compile Include="CmisTests\AuthenticationTests\AuthProviderFactoryTest.cs" />
+    <Compile Include="CmisTests\AuthenticationTests\KerberosAuthenticationProviderTest.cs" />
+    <Compile Include="CmisTests\AuthenticationTests\PersistentStandardAuthenticationProviderTest.cs" />
+    <Compile Include="CmisTests\OperationContextFactoryTest.cs" />
+    <Compile Include="AccumulatorTests\ContentChangeEventAccumulatorTest.cs" />
+    <Compile Include="AccumulatorTests\LocalObjectFetcherTest.cs" />
+    <Compile Include="AccumulatorTests\RemoteObjectFetcherTest.cs" />
+    <Compile Include="CmisTests\UiUtilsTests\CmisUtilsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -214,4 +214,9 @@
   </Target>
   -->
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="CmisTests\" />
+    <Folder Include="CmisTests\UiUtilsTests\" />
+    <Folder Include="AccumulatorTests\" />
+  </ItemGroup>
 </Project>

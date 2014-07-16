@@ -11,10 +11,15 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 	$(MOQ_LIBS)
 
 SOURCES =  \
+	AccumulatorTests/ContentChangeEventAccumulatorTest.cs \
+	AccumulatorTests/LocalObjectFetcherTest.cs \
+	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	ActiveActivitiesManagerTest.cs \
-	AuthenticationProviderTests/AuthProviderFactoryTest.cs \
-	AuthenticationProviderTests/KerberosAuthenticationProviderTest.cs \
-	AuthenticationProviderTests/PersistentStandardAuthenticationProviderTest.cs \
+	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
+	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
+	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
+	CmisTests/OperationContextFactoryTest.cs \
+	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
 	ConfigurationTest.cs \
 	ContentTasksTests/ChunkedDownloaderTest.cs \
 	ContentTasksTests/ChunkedFileUploaderTest.cs \
@@ -32,9 +37,9 @@ SOURCES =  \
 	EventsTests/EventsFilterTests/GenericHandleDublicatedEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoreAlreadyHandledFsEventsFilterTest.cs \
+	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFolderNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/IgnoredFoldersFilterTest.cs \
-	EventsTests/EventsFilterTests/IgnoreFileNamesFilterTest.cs \
 	EventsTests/EventsFilterTests/InvalidFolderNameFilterTest.cs \
 	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
@@ -64,31 +69,28 @@ SOURCES =  \
 	StorageTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemWrapperTests.cs \
 	StorageTests/MetaDataStorageTest.cs \
-	StorageTests/Utf8FileNameNormalizationTest.cs \
 	StorageTests/PersistentCookieStorageTest.cs \
 	StorageTests/PersistentStorageTest.cs \
+	StorageTests/Utf8FileNameNormalizationTest.cs \
 	StreamTests/BandwidthLimitedStreamTest.cs \
 	StreamTests/ChunkedStreamTest.cs \
 	StreamTests/NonClosingHashStreamTest.cs \
 	StreamTests/OffsetStreamTest.cs \
 	StreamTests/ProgressStreamTest.cs \
-	SyncStrategiesTests/ContentChangeEventAccumulatorTest.cs \
 	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
 	SyncStrategiesTests/ContentChangesTest.cs \
 	SyncStrategiesTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
 	SyncStrategiesTests/DescendantsCrawlerTest.cs \
-	SyncStrategiesTests/LocalObjectFetcherTest.cs \
 	SyncStrategiesTests/MacWatcherTest.cs \
 	SyncStrategiesTests/NetWatcherTest.cs \
-	SyncStrategiesTests/RemoteObjectFetcherTest.cs \
 	SyncStrategiesTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	SyncStrategiesTests/RenamedFileSystemEventHandlerTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
 	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectChangedTest.cs \
-	SyncStrategiesTests/SolverTests/LocalObjectDeletedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
+	SyncStrategiesTests/SolverTests/LocalObjectDeletedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectMovedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectRenamedTest.cs \
@@ -102,10 +104,10 @@ SOURCES =  \
 	SyncStrategiesTests/WatcherTestUtils.cs \
 	TestUtils/CmisConvenienceExtenders.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
-	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIDocumentUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
+	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockOfIFolderUtil.cs \
 	TestUtils/MockOfISyncEventQueue.cs \
 	TestUtils/MockSessionUtil.cs \
@@ -113,11 +115,8 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
-	UtilsTests/CmisSyncLibUtilsTest.cs \
 	UtilsTests/CredentialsTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs \
-	UtilsTests/OperationContextFactoryTest.cs 
-	
+	UtilsTests/HttpProxyUtilsTest.cs 
 
 EXTRA_DIST = TestLibrary.csproj \
 	$(MOQ_PATH)
