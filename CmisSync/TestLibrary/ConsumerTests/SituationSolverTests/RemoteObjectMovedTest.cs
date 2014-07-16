@@ -25,7 +25,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.PathMatcher;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Consumer.SituationSolver;
 

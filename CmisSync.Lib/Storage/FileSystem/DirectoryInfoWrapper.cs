@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage 
+namespace CmisSync.Lib.Storage.FileSystem 
 {
     using System.IO;
 
@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Storage
         private DirectoryInfo original; 
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.DirectoryInfoWrapper"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.DirectoryInfoWrapper"/> class.
         /// Uses the given real instance and passes every future call to this instance.
         /// </summary>
         /// <param name="directoryInfo">Directory info.</param>
@@ -110,9 +110,9 @@ namespace CmisSync.Lib.Storage
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.DirectoryInfoWrapper"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.DirectoryInfoWrapper"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.DirectoryInfoWrapper"/>.</returns>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Storage.FileSystem.DirectoryInfoWrapper"/>.</returns>
         public override string ToString()
         {
             return string.Format("[{0}]", this.original.FullName);

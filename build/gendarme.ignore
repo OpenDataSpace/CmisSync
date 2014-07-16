@@ -63,8 +63,8 @@ T: CmisSync.UI
 T: CmisSync.CmisTree.AsyncNodeLoader
 T: CmisSync.Edit
 #Disposed in CmisRepo:
-T: CmisSync.Lib.Storage.PersistentCookieStorage
-T: CmisSync.Lib.Storage.MetaDataStorage
+T: CmisSync.Lib.Storage.FileSystem.PersistentCookieStorage
+T: CmisSync.Lib.Storage.FileSystem.MetaDataStorage
 
 #Windows Gendarme bug? XmlNodeList is not an IDisposal object at all
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule

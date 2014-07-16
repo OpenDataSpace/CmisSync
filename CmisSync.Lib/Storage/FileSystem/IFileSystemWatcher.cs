@@ -19,7 +19,7 @@
 using System;
 using System.IO;
 
-namespace CmisSync.Lib.Storage
+namespace CmisSync.Lib.Storage.FileSystem
 {
     ///
     ///<summary>Interface to enable mocking of FileSystemWatcher<summary>

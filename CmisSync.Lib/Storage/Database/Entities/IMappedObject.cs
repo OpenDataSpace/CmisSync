@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     using System.IO;
     using System.Text;
 
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 

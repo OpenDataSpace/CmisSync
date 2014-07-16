@@ -26,7 +26,7 @@ namespace TestLibrary.AccumulatorTests
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.PathMatcher;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
 
     using DotCMIS.Client;

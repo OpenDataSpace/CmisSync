@@ -25,7 +25,7 @@ namespace TestLibrary.TestUtils
 
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
 
     using DotCMIS.Binding.Services;

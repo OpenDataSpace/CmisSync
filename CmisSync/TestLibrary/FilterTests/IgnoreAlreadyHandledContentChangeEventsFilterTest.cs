@@ -27,7 +27,7 @@ namespace TestLibrary.FilterTests
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
 
     using DotCMIS.Client;

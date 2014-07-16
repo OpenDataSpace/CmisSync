@@ -24,7 +24,7 @@ namespace TestLibrary.TestUtils
     using System.IO;
 
     using CmisSync.Lib.Storage.Database.Entities;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
 

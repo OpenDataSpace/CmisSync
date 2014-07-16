@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage
+namespace CmisSync.Lib.Storage.FileSystem
 {
     using System;
     using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace CmisSync.Lib.Storage
         private FileInfo original;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileInfoWrapper"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.FileInfoWrapper"/> class.
         /// </summary>
         /// <param name="fileInfo">File info.</param>
         public FileInfoWrapper(FileInfo fileInfo) : base(fileInfo)

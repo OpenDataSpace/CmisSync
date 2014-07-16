@@ -24,7 +24,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
 
     using Moq;

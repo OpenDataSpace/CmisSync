@@ -24,7 +24,7 @@ namespace CmisSync.Lib.Accumulator
     using CmisSync.Lib.Events;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using log4net;
 

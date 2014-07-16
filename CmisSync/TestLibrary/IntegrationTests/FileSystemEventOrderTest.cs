@@ -26,7 +26,7 @@ namespace TestLibrary.IntegrationTests
     using System.Threading;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
 
     using Moq;
