@@ -126,7 +126,6 @@
     <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectDeletedTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectMovedTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectRenamedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
@@ -182,6 +181,7 @@
     <Compile Include="ConfigTests\CredentialsTest.cs" />
     <Compile Include="UtilsTests\EncodingTest.cs" />
     <Compile Include="ConfigTests\RepoInfoTests.cs" />
+    <Compile Include="ConsumerTests\SyncMechanismTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -218,5 +218,6 @@
     <Folder Include="CmisTests\UiUtilsTests\" />
     <Folder Include="AccumulatorTests\" />
     <Folder Include="ConfigTests\" />
+    <Folder Include="ConsumerTests\" />
   </ItemGroup>
 </Project>

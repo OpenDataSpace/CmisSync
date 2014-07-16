@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.SyncStrategiesTests
+namespace TestLibrary.ConsumerTests
 {
     using System;
     using System.IO;

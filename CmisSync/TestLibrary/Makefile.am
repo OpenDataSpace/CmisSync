@@ -99,7 +99,7 @@ SOURCES =  \
 	SyncStrategiesTests/SolverTests/RemoteObjectDeletedTest.cs \
 	SyncStrategiesTests/SolverTests/RemoteObjectMovedTest.cs \
 	SyncStrategiesTests/SolverTests/RemoteObjectRenamedTest.cs \
-	SyncStrategiesTests/SyncMechanismTest.cs \
+	ConsumerTests/SyncMechanismTest.cs \
 	SyncStrategiesTests/WatcherTest.cs \
 	SyncStrategiesTests/WatcherTestUtils.cs \
 	TestUtils/CmisConvenienceExtenders.cs \
