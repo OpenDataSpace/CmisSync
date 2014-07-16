@@ -292,7 +292,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(0);
-            fileInfo.SetupSet(f => f.LastWriteTimeUtc).Throws(new IOException());
+            fileInfo.SetupSet(f => f.LastWriteTimeUtc = It.IsAny<DateTime>()).Throws(new IOException());
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document, true);
