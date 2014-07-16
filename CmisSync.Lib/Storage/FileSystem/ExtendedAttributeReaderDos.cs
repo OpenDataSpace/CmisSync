@@ -323,7 +323,7 @@ namespace CmisSync.Lib.Storage.FileSystem
             if (!File.Exists(path) && !Directory.Exists(path)) {
                 throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
             }
-
+            DateTime oldDate = File.Exists(path) ? File.GetLastWriteTimeUtc(path) : Directory.GetLastWriteTimeUtc(path);
             if (value == null)
             {
                 RemoveExtendedAttribute(path, key);
@@ -336,6 +336,12 @@ namespace CmisSync.Lib.Storage.FileSystem
                     writer.Write(value);
                     writer.Close();
                 }
+            }
+
+            if (File.Exists(path)) {
+                File.SetLastWriteTimeUtc(path, oldDate);
+            } else {
+                Directory.SetLastWriteTimeUtc(path, oldDate);
             }
             #else
             throw new WrongPlatformException();
