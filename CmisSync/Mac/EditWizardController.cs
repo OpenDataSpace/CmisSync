@@ -25,9 +25,10 @@ using MonoMac.Foundation;
 using MonoMac.AppKit;
 
 using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Credentials;
+using CmisSync.Lib.Config;
 using CmisSync.CmisTree;
 using System.Threading.Tasks;
+using CmisSync.Lib.Cmis.UiUtils;
 
 namespace CmisSync
 {
