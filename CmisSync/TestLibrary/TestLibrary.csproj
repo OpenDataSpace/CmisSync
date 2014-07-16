@@ -114,8 +114,6 @@
     <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
     <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
     <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />
-    <Compile Include="SyncStrategiesTests\SituationDetectionTests\RemoteSituationDetectionTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectChangedTest.cs" />
     <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectDeletedTest.cs" />
@@ -182,6 +180,8 @@
     <Compile Include="UtilsTests\EncodingTest.cs" />
     <Compile Include="ConfigTests\RepoInfoTests.cs" />
     <Compile Include="ConsumerTests\SyncMechanismTest.cs" />
+    <Compile Include="ConsumerTests\LocalSituationDetectionTest.cs" />
+    <Compile Include="ConsumerTests\RemoteSituationDetectionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

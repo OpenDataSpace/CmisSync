@@ -85,8 +85,8 @@ SOURCES =  \
 	SyncStrategiesTests/NetWatcherTest.cs \
 	SyncStrategiesTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	SyncStrategiesTests/RenamedFileSystemEventHandlerTest.cs \
-	SyncStrategiesTests/SituationDetectionTests/LocalSituationDetectionTest.cs \
-	SyncStrategiesTests/SituationDetectionTests/RemoteSituationDetectionTest.cs \
+	ConsumerTests/LocalSituationDetectionTest.cs \
+	ConsumerTests/RemoteSituationDetectionTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectAddedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectChangedTest.cs \
 	SyncStrategiesTests/SolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
