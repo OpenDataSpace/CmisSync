@@ -17,13 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ContentTasksTests
+namespace TestLibrary.FileTransmissionTests
 {
     using System;
     using System.IO;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib.ContentTasks;
+    using CmisSync.Lib.FileTransmission;
 
     using Moq;
 

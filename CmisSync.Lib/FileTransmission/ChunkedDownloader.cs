@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.ContentTasks
+namespace CmisSync.Lib.FileTransmission
 {
     using System;
     using System.IO;
@@ -41,7 +41,7 @@ namespace CmisSync.Lib.ContentTasks
         private long chunkSize;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> class.
         /// </summary>
         /// <param name="chunkSize">Chunk size.</param>
         public ChunkedDownloader(long chunkSize = 1024 * 1024)
@@ -114,14 +114,14 @@ namespace CmisSync.Lib.ContentTasks
         }
 
         /// <summary>
-        /// Releases all resource used by the <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> object.
+        /// Releases all resource used by the <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> object.
         /// </summary>
         /// <remarks>Call <see cref="Dispose"/> when you are finished using the
-        /// <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/>. The <see cref="Dispose"/> method leaves the
-        /// <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> in an unusable state. After calling
+        /// <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/>. The <see cref="Dispose"/> method leaves the
+        /// <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> in an unusable state. After calling
         /// <see cref="Dispose"/>, you must release all references to the
-        /// <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> so the garbage collector can reclaim the memory
-        /// that the <see cref="CmisSync.Lib.ContentTasks.ChunkedDownloader"/> was occupying.</remarks>
+        /// <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> so the garbage collector can reclaim the memory
+        /// that the <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> was occupying.</remarks>
         public void Dispose()
         {
             this.Dispose(true);

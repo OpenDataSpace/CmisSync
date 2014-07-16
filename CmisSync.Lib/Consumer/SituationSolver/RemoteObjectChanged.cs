@@ -24,7 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib.ContentTasks;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Data;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;

@@ -177,7 +177,7 @@ namespace CmisSync.Lib.Streams
             if (this.transmissionEvent.Status.Aborting.GetValueOrDefault())
             {
                 this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = false, Aborted = true });
-                throw new ContentTasks.AbortException(this.transmissionEvent.Path);
+                throw new FileTransmission.AbortException(this.transmissionEvent.Path);
             }
 
             int result = this.Stream.Read(buffer, offset, count);
@@ -217,7 +217,7 @@ namespace CmisSync.Lib.Streams
             if (this.transmissionEvent.Status.Aborting.GetValueOrDefault())
             {
                 this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = false, Aborted = true });
-                throw new ContentTasks.AbortException(this.transmissionEvent.Path);
+                throw new FileTransmission.AbortException(this.transmissionEvent.Path);
             }
 
             this.Stream.Write(buffer, offset, count);

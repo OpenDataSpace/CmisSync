@@ -23,7 +23,7 @@ namespace TestLibrary.StreamTests
     using System.IO;
 
     using CmisSync.Lib;
-    using CmisSync.Lib.ContentTasks;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Streams;
 

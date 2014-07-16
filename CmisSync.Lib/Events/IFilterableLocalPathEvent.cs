@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib
+namespace CmisSync.Lib.Events
 {
     using System;
 

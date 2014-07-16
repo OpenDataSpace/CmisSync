@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ContentTasksTests
+namespace TestLibrary.FileTransmissionTests
 {
     using System;
     using System.IO;
@@ -27,7 +27,7 @@ namespace TestLibrary.ContentTasksTests
 
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
-    using CmisSync.Lib.ContentTasks;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
 
     using DotCMIS.Client;

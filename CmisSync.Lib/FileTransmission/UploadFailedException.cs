@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.ContentTasks
+namespace CmisSync.Lib.FileTransmission
 {
     using System;
     using System.Runtime.Serialization;
@@ -47,14 +47,14 @@ namespace CmisSync.Lib.ContentTasks
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/> class.
         /// </summary>
         public UploadFailedException() : this("Upload Failed")
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/> class.
         /// </summary>
         /// <param name="message">Upload failing reason message.</param>
         public UploadFailedException(string message) : base(message)
@@ -63,7 +63,7 @@ namespace CmisSync.Lib.ContentTasks
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/> class.
         /// </summary>
         /// <param name="message">Upload failing reason message.</param>
         /// <param name="innerException">Inner exception.</param>
@@ -73,7 +73,7 @@ namespace CmisSync.Lib.ContentTasks
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/> class.
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
@@ -109,9 +109,9 @@ namespace CmisSync.Lib.ContentTasks
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/>.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.ContentTasks.UploadFailedException"/>.</returns>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.FileTransmission.UploadFailedException"/>.</returns>
         public override string ToString()
         {
             return string.Format("{0}: {1}", base.ToString(), this.InnerException.ToString());
