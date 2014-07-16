@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events.Filter
+namespace CmisSync.Lib.Filter
 {
     using System;
     using System.Collections.Generic;
@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Events.Filter
         private object wildCardLock = new object();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoredFileNamesFilter"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.IgnoredFileNamesFilter"/> class.
         /// </summary>
         public IgnoredFileNamesFilter() {
             foreach (var required in this.requiredWildcards) {

@@ -17,12 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events.Filter
+namespace CmisSync.Lib.Filter
 {
     using System;
     using System.IO;
 
     using CmisSync.Lib.Data;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage;
 
     /// <summary>
@@ -34,7 +35,7 @@ namespace CmisSync.Lib.Events.Filter
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.Filter.IgnoreAlreadyHandledFsEventsFilter"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.IgnoreAlreadyHandledFsEventsFilter"/> class.
         /// </summary>
         /// <param name="storage">Storage instance.</param>
         /// <param name="fsFactory">Fs factory.</param>

@@ -24,7 +24,7 @@ namespace TestLibrary.EventsTests.EventsFilterTests
     using System.IO;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Events.Filter;
+    using CmisSync.Lib.Filter;
 
     using Moq;
 
