@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.AccumulatorTests
+namespace TestLibrary.ProducerTests.ContentChangeTests
 {
     using System;
 

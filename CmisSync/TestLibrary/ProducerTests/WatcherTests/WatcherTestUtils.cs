@@ -19,7 +19,7 @@
 using CmisSync.Lib.Data;
 using TestLibrary.IntegrationTests;
 
-namespace TestLibrary.SyncStrategiesTests
+namespace TestLibrary.ProducerTests.WatcherTests
 {
     using System;
     using System.Collections.Generic;

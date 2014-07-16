@@ -11,7 +11,7 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 	$(MOQ_LIBS)
 
 SOURCES =  \
-	AccumulatorTests/ContentChangeEventAccumulatorTest.cs \
+	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	ActiveActivitiesManagerTest.cs \
@@ -71,19 +71,19 @@ SOURCES =  \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/Utf8FileNameNormalizationTest.cs \
-	StreamTests/BandwidthLimitedStreamTest.cs \
-	StreamTests/ChunkedStreamTest.cs \
-	StreamTests/NonClosingHashStreamTest.cs \
-	StreamTests/OffsetStreamTest.cs \
-	StreamTests/ProgressStreamTest.cs \
-	SyncStrategiesTests/ContentChangeEventTransformerTest.cs \
-	SyncStrategiesTests/ContentChangesTest.cs \
-	SyncStrategiesTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
-	SyncStrategiesTests/DescendantsCrawlerTest.cs \
-	SyncStrategiesTests/MacWatcherTest.cs \
-	SyncStrategiesTests/NetWatcherTest.cs \
-	SyncStrategiesTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
-	SyncStrategiesTests/RenamedFileSystemEventHandlerTest.cs \
+	StreamsTests/BandwidthLimitedStreamTest.cs \
+	StreamsTests/ChunkedStreamTest.cs \
+	StreamsTests/NonClosingHashStreamTest.cs \
+	StreamsTests/OffsetStreamTest.cs \
+	StreamsTests/ProgressStreamTest.cs \
+	ProducerTests/ContentChangeTests/ContentChangeEventTransformerTest.cs \
+	ProducerTests/ContentChangeTests/ContentChangesTest.cs \
+	ProducerTests/WatcherTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
+	ProducerTests/CrawlerTests/DescendantsCrawlerTest.cs \
+	ProducerTests/WatcherTests/MacWatcherTest.cs \
+	ProducerTests/WatcherTests/NetWatcherTest.cs \
+	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
+	ProducerTests/WatcherTests/RenamedFileSystemEventHandlerTest.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectAddedTest.cs \
@@ -99,8 +99,8 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/RemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
-	SyncStrategiesTests/WatcherTest.cs \
-	SyncStrategiesTests/WatcherTestUtils.cs \
+	ProducerTests/WatcherTests/WatcherTest.cs \
+	ProducerTests/WatcherTests/WatcherTestUtils.cs \
 	TestUtils/CmisConvenienceExtenders.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \

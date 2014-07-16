@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 #if ! __COCOA__
-namespace TestLibrary.SyncStrategiesTests
+namespace TestLibrary.ProducerTests.WatcherTests
 {
     using System;
     using System.IO;

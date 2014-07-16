@@ -28,7 +28,7 @@ namespace TestLibrary.StorageTests
 
     using NUnit.Framework;
 
-    using TestLibrary.SyncStrategiesTests;
+    using TestLibrary.ProducerTests.WatcherTests;
 
     [TestFixture]
     public class FileSystemWrapperTests {

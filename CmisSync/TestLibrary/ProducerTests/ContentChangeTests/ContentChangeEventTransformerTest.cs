@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.SyncStrategiesTests
+namespace TestLibrary.ProducerTests.ContentChangeTests
 {
     using System;
 

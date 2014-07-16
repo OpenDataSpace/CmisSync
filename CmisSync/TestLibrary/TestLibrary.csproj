@@ -97,17 +97,6 @@
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
     <Compile Include="StorageTests\FileSystemWrapperTests.cs" />
-    <Compile Include="StreamTests\BandwidthLimitedStreamTest.cs" />
-    <Compile Include="StreamTests\ChunkedStreamTest.cs" />
-    <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
-    <Compile Include="StreamTests\OffsetStreamTest.cs" />
-    <Compile Include="StreamTests\ProgressStreamTest.cs" />
-    <Compile Include="SyncStrategiesTests\ContentChangeEventTransformerTest.cs" />
-    <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
-    <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
     <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
     <Compile Include="StorageTests\ExtendedAttributeReaderUnixTest.cs" />
@@ -127,9 +116,7 @@
     <Compile Include="EventsTests\EventsFilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
     <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
-    <Compile Include="SyncStrategiesTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
     <Compile Include="EventsTests\FsEventTest.cs" />
-    <Compile Include="SyncStrategiesTests\DescendantsCrawlerTest.cs" />
     <Compile Include="TestUtils\MockOfIFolderUtil.cs" />
     <Compile Include="TestUtils\MockOfIDocumentUtil.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
@@ -140,15 +127,12 @@
     <Compile Include="EventsTests\EventsFilterTests\FilterAggregatorTest.cs" />
     <Compile Include="TestUtils\IsTestWithConfiguredLog4Net.cs" />
     <Compile Include="EventsTests\ActivityListenerAggregatorTest.cs" />
-    <Compile Include="SyncStrategiesTests\RenamedFileSystemEventHandlerTest.cs" />
     <Compile Include="TestUtils\MockOfISyncEventQueue.cs" />
-    <Compile Include="SyncStrategiesTests\CreatedChangedDeletedFileSystemEventHandlerTest.cs" />
     <Compile Include="IntegrationTests\FileSystemEventOrderTest.cs" />
     <Compile Include="CmisTests\AuthenticationTests\AuthProviderFactoryTest.cs" />
     <Compile Include="CmisTests\AuthenticationTests\KerberosAuthenticationProviderTest.cs" />
     <Compile Include="CmisTests\AuthenticationTests\PersistentStandardAuthenticationProviderTest.cs" />
     <Compile Include="CmisTests\OperationContextFactoryTest.cs" />
-    <Compile Include="AccumulatorTests\ContentChangeEventAccumulatorTest.cs" />
     <Compile Include="AccumulatorTests\LocalObjectFetcherTest.cs" />
     <Compile Include="AccumulatorTests\RemoteObjectFetcherTest.cs" />
     <Compile Include="CmisTests\UiUtilsTests\CmisUtilsTest.cs" />
@@ -181,6 +165,22 @@
     <Compile Include="StorageTests\DataBaseTests\PersistentCookieStorageTest.cs" />
     <Compile Include="StorageTests\DataBaseTests\EntitiesTests\MappedObjectsTest.cs" />
     <Compile Include="ProducerTests\CrawlerTests\ObjectTreeTest.cs" />
+    <Compile Include="ProducerTests\ContentChangeTests\ContentChangeEventTransformerTest.cs" />
+    <Compile Include="ProducerTests\ContentChangeTests\ContentChangesTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\MacWatcherTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\NetWatcherTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\CreatedChangedDeletedFileSystemEventHandlerTest.cs" />
+    <Compile Include="AccumulatorTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
+    <Compile Include="ProducerTests\ContentChangeTests\ContentChangeEventAccumulatorTest.cs" />
+    <Compile Include="StreamsTests\BandwidthLimitedStreamTest.cs" />
+    <Compile Include="StreamsTests\ChunkedStreamTest.cs" />
+    <Compile Include="StreamsTests\NonClosingHashStreamTest.cs" />
+    <Compile Include="StreamsTests\OffsetStreamTest.cs" />
+    <Compile Include="StreamsTests\ProgressStreamTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\WatcherTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\WatcherTestUtils.cs" />
+    <Compile Include="ProducerTests\WatcherTests\RenamedFileSystemEventHandlerTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -224,5 +224,7 @@
     <Folder Include="PathMatcherTests\" />
     <Folder Include="ProducerTests\" />
     <Folder Include="ProducerTests\CrawlerTests\" />
+    <Folder Include="ProducerTests\WatcherTests\" />
+    <Folder Include="ProducerTests\ContentChangeTests\" />
   </ItemGroup>
 </Project>

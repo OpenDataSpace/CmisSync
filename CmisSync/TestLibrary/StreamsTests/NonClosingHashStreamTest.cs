@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StreamTests
+namespace TestLibrary.StreamsTests
 {
     using System;
     using System.IO;
