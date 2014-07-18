@@ -100,5 +100,45 @@ namespace TestLibrary.ConfigTests
         {
             Assert.That(this.info.AuthenticationType, Is.EqualTo(AuthenticationType.BASIC));
         }
+
+        [Test, Category("Fast")]
+        public void DefaultConnectionTimeoutIsSet() {
+            Assert.That(this.info.ConnectionTimeout, Is.EqualTo(Config.DefaultConnectionTimeout));
+        }
+
+        [Test, Category("Fast")]
+        public void DefaultReadTimeoutIsSet() {
+            Assert.That(this.info.ReadTimeout, Is.EqualTo(Config.DefaultReadTimeout));
+        }
+
+        [Test, Category("Fast")]
+        public void ConnectionTimeoutTakesPositiveNumber() {
+            int positiveNumber = 100;
+            this.info.ConnectionTimeout = positiveNumber;
+            Assert.That(this.info.ConnectionTimeout, Is.EqualTo(positiveNumber));
+        }
+
+        [Test, Category("Fast")]
+        public void ConnectionTimeoutTakesZeroOrNegativeNumberAndStoresMinusOne() {
+            this.info.ConnectionTimeout = 0;
+            Assert.That(this.info.ConnectionTimeout, Is.EqualTo(-1));
+            this.info.ConnectionTimeout = -2134;
+            Assert.That(this.info.ConnectionTimeout, Is.EqualTo(-1));
+        }
+
+        [Test, Category("Fast")]
+        public void ReadTimeoutTakesPositiveNumber() {
+            int positiveNumber = 100;
+            this.info.ReadTimeout = positiveNumber;
+            Assert.That(this.info.ReadTimeout, Is.EqualTo(positiveNumber));
+        }
+
+        [Test, Category("Fast")]
+        public void ReadTimeoutTakesZeroOrNegativeNumberAndStoresMinusOne() {
+            this.info.ReadTimeout = 0;
+            Assert.That(this.info.ReadTimeout, Is.EqualTo(-1));
+            this.info.ReadTimeout = -2134;
+            Assert.That(this.info.ReadTimeout, Is.EqualTo(-1));
+        }
     }
 }

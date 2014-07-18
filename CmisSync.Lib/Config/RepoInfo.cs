@@ -38,6 +38,8 @@ namespace CmisSync.Lib.Config
         private CmisRepoCredentials credentials = new CmisRepoCredentials();
         private double pollInterval = Config.DefaultPollInterval;
         private long chunkSize = Config.DefaultChunkSize;
+        private int connectionTimeout = Config.DefaultConnectionTimeout;
+        private int readTimeout = Config.DefaultReadTimeout;
         private int uploadRetries = 2;
         private int downloadRetries = 2;
         private int deletionRetries = 2;
@@ -157,7 +159,39 @@ namespace CmisSync.Lib.Config
 
             set
             {
-                this.pollInterval = (value <= 0) ? Config.DefaultPollInterval : value;
+                this.pollInterval = value > 0 ? value : Config.DefaultPollInterval;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the connection timeout.
+        /// If zero or negative number is passed, it will be converted to -1
+        /// </summary>
+        /// <value>The connection timeout.</value>
+        [XmlElement("connectionTimeout"), System.ComponentModel.DefaultValue(Config.DefaultConnectionTimeout)]
+        public int ConnectionTimeout {
+            get {
+                return this.connectionTimeout;
+            }
+
+            set {
+                this.connectionTimeout = value > 0 ? value : -1;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the read timeout.
+        /// If zero or negative number is passed, it will be converted to -1
+        /// </summary>
+        /// <value>The read timeout.</value>
+        [XmlElement("readTimeout"), System.ComponentModel.DefaultValue(Config.DefaultReadTimeout)]
+        public int ReadTimeout {
+            get {
+                return this.readTimeout;
+            }
+
+            set {
+                this.readTimeout = value > 0 ? value : -1;
             }
         }
 

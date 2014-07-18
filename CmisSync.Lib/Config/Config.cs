@@ -109,6 +109,16 @@ namespace CmisSync.Lib.Config
         /// </summary>
         public const int DefaultPollInterval = 5000;
 
+        /// <summary>
+        /// The default connection timeout is one minute.
+        /// </summary>
+        public const int DefaultConnectionTimeout = 60000;
+
+        /// <summary>
+        /// The default read timeout is one minute.
+        /// </summary>
+        public const int DefaultReadTimeout = 60000;
+
         private string fullpath;
         private string configPath;
         private Guid deviceId;

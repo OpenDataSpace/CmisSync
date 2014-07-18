@@ -495,12 +495,8 @@ namespace CmisSync.Lib.Cmis
             cmisParameters[SessionParameter.User] = repoInfo.User;
             cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
-
-            // Sets the Connect Timeout to infinite
-            cmisParameters[SessionParameter.ConnectTimeout] = "-1";
-
-            // Sets the Read Timeout to infinite
-            cmisParameters[SessionParameter.ReadTimeout] = "-1";
+            cmisParameters[SessionParameter.ConnectTimeout] = repoInfo.ConnectionTimeout.ToString();
+            cmisParameters[SessionParameter.ReadTimeout] = repoInfo.ReadTimeout.ToString();
             cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
             cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             cmisParameters[SessionParameter.Compression] = bool.TrueString;
