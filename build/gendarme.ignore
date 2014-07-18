@@ -16,7 +16,7 @@ T: CmisSync.Lib.Sync.CmisRepo/SynchronizedFolder
 
 #  http://blogs.msdn.com/b/pfxteam/archive/2012/03/25/10287435.aspx
 R: Gendarme.Rules.Correctness.DisposableFieldsShouldBeDisposedRule
-T: CmisSync.Lib.Events.SyncEventQueue
+T: CmisSync.Lib.Queueing.SyncEventQueue
 
 #Ignore dispose pattern for UI widget (Linux)
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
@@ -63,8 +63,8 @@ T: CmisSync.UI
 T: CmisSync.CmisTree.AsyncNodeLoader
 T: CmisSync.Edit
 #Disposed in CmisRepo:
-T: CmisSync.Lib.Storage.FileSystem.PersistentCookieStorage
-T: CmisSync.Lib.Storage.FileSystem.MetaDataStorage
+T: CmisSync.Lib.Storage.DataBase.PersistentCookieStorage
+T: CmisSync.Lib.Storage.DataBase.MetaDataStorage
 
 #Windows Gendarme bug? XmlNodeList is not an IDisposal object at all
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
@@ -77,7 +77,7 @@ M: System.Void CmisSync.Lib.Cmis.CmisUtils/FolderTree::.ctor(System.Collections.
 
 #We want to sort only
 R: Gendarme.Rules.Design.ImplementIComparableCorrectlyRule
-T: CmisSync.Lib.Events.SyncEventHandler
+T: CmisSync.Lib.Queueing.SyncEventHandler
 
 #Ignore Dispose pattern for checked classes
 R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
