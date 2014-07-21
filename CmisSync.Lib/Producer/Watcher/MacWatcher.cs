@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 #if __COCOA__
 
 using System;
@@ -29,6 +30,7 @@ using MonoMac.AppKit;
 using log4net;
 
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Queueing;
 
 
 namespace CmisSync.Lib.Producer.Watcher
