@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Solver to handle the situation of a locally added file/folderobject.
     /// </summary>
-    public class LocalObjectAdded : ISolver
+    public class LocalObjectAdded : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
@@ -56,7 +56,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="queue">Queue to report transmission events to.</param>
         /// <param name="manager">Activitiy manager for transmission propagations</param>
-        public LocalObjectAdded(ISyncEventQueue queue, ActiveActivitiesManager manager) {
+        public LocalObjectAdded(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, ActiveActivitiesManager manager) : base(session, storage) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -72,16 +72,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Solve the situation of a local object added and should be uploaded by using the session, storage, localFile and remoteId.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFileSystemInfo">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
-            string parentId = this.GetParentId(localFileSystemInfo, storage);
+            string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
             Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFileSystemInfo);
 
-            ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, session);
+            ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
 
             if(addedObject.LastModificationDate != null) {
@@ -109,7 +107,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 LastChangeToken = addedObject.ChangeToken,
                 LastContentSize = localFileSystemInfo is IDirectoryInfo ? -1 : 0
             };
-            storage.SaveMappedObject(mapped);
+            this.Storage.SaveMappedObject(mapped);
 
             var localFile = localFileSystemInfo as IFileInfo;
 
@@ -133,7 +131,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
 
-                    storage.SaveMappedObject(mapped);
+                    this.Storage.SaveMappedObject(mapped);
                     OperationsLogger.Info(string.Format("Uploaded file content of {0}", localFile.FullName));
                 }
 

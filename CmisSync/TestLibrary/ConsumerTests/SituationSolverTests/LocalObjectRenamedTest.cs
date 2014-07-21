@@ -21,10 +21,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
     using System;
 
+    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Consumer.SituationSolver;
 
     using DotCMIS.Client;
 
@@ -37,85 +37,90 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     [TestFixture]
     public class LocalObjectRenamedTest
     {
+        private readonly string oldName = "oldName";
+        private readonly string newName = "newName";
+        private readonly string id = "id";
+        private readonly string newChangeToken = "newChange";
+        private readonly DateTime modificationDate = DateTime.UtcNow;
+
+        private Mock<IMetaDataStorage> storage;
+        private Mock<ISession> session;
+        private LocalObjectRenamed underTest;
+
+        [SetUp]
+        public void SetUp() {
+            this.storage = new Mock<IMetaDataStorage>();
+            this.session = new Mock<ISession>();
+            this.underTest = new LocalObjectRenamed(this.session.Object, this.storage.Object);
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectRenamed();
+            new LocalObjectRenamed(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFolderRenamed()
         {
-            string oldName = "oldName";
-            string newName = "newName";
-            string id = "id";
-            string newChangeToken = "newChange";
-            var modificationDate = DateTime.UtcNow;
             var newFolder = Mock.Of<IFolder>(
                 f =>
-                f.LastModificationDate == modificationDate &&
-                f.Name == newName &&
-                f.ChangeToken == newChangeToken);
+                f.LastModificationDate == this.modificationDate &&
+                f.Name == this.newName &&
+                f.ChangeToken == this.newChangeToken);
             var remoteFolder = new Mock<IFolder>();
-            remoteFolder.Setup(f => f.Name).Returns(oldName);
-            remoteFolder.Setup(f => f.Id).Returns(id);
-            remoteFolder.Setup(f => f.Rename(newName, true)).Returns(newFolder);
+            remoteFolder.Setup(f => f.Name).Returns(this.oldName);
+            remoteFolder.Setup(f => f.Id).Returns(this.id);
+            remoteFolder.Setup(f => f.Rename(this.newName, true)).Returns(newFolder);
             var localFolder = new Mock<IDirectoryInfo>();
-            localFolder.SetupProperty(f => f.LastWriteTimeUtc, modificationDate);
-            localFolder.Setup(f => f.Name).Returns(newName);
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+            localFolder.Setup(f => f.Name).Returns(this.newName);
             var mappedFolder = new Mock<IMappedObject>();
             mappedFolder.SetupAllProperties();
             mappedFolder.SetupProperty(f => f.Guid, Guid.NewGuid());
-            mappedFolder.SetupProperty(f => f.Name, oldName);
-            mappedFolder.SetupProperty(f => f.RemoteObjectId, id);
+            mappedFolder.SetupProperty(f => f.Name, this.oldName);
+            mappedFolder.SetupProperty(f => f.RemoteObjectId, this.id);
             mappedFolder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
 
-            var storage = new Mock<IMetaDataStorage>();
-            storage.AddMappedFolder(mappedFolder.Object);
+            this.storage.AddMappedFolder(mappedFolder.Object);
 
-            new LocalObjectRenamed().Solve(Mock.Of<ISession>(), storage.Object, localFolder.Object, remoteFolder.Object);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
-            remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == newName), It.Is<bool>(b => b == true)), Times.Once());
+            remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
-            storage.VerifySavedMappedObject(MappedObjectType.Folder, id, newName, null, newChangeToken, true, modificationDate);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileRenamed()
         {
-            string oldName = "oldName";
-            string newName = "newName";
-            string id = "id";
-            string newChangeToken = "newChange";
-            var modificationDate = DateTime.UtcNow;
             var newFile = Mock.Of<IDocument>(
                 f =>
-                f.LastModificationDate == modificationDate &&
-                f.Name == newName &&
-                f.ChangeToken == newChangeToken);
+                f.LastModificationDate == this.modificationDate &&
+                f.Name == this.newName &&
+                f.ChangeToken == this.newChangeToken);
             var remoteFile = new Mock<IDocument>();
-            remoteFile.Setup(f => f.Name).Returns(oldName);
-            remoteFile.Setup(f => f.Id).Returns(id);
-            remoteFile.Setup(f => f.Rename(newName, true)).Returns(newFile);
+            remoteFile.Setup(f => f.Name).Returns(this.oldName);
+            remoteFile.Setup(f => f.Id).Returns(this.id);
+            remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
             var localFolder = new Mock<IFileInfo>();
-            localFolder.SetupProperty(f => f.LastWriteTimeUtc, modificationDate);
-            localFolder.Setup(f => f.Name).Returns(newName);
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+            localFolder.Setup(f => f.Name).Returns(this.newName);
             var mappedFile = new Mock<IMappedObject>();
             mappedFile.SetupAllProperties();
             mappedFile.SetupProperty(f => f.Guid, Guid.NewGuid());
-            mappedFile.SetupProperty(f => f.Name, oldName);
-            mappedFile.SetupProperty(f => f.RemoteObjectId, id);
+            mappedFile.SetupProperty(f => f.Name, this.oldName);
+            mappedFile.SetupProperty(f => f.RemoteObjectId, this.id);
             mappedFile.Setup(f => f.Type).Returns(MappedObjectType.File);
             mappedFile.Setup(f => f.LastContentSize).Returns(0);
 
-            var storage = new Mock<IMetaDataStorage>();
-            storage.AddMappedFile(mappedFile.Object);
+            this.storage.AddMappedFile(mappedFile.Object);
 
-            new LocalObjectRenamed().Solve(Mock.Of<ISession>(), storage.Object, localFolder.Object, remoteFile.Object);
+            this.underTest.Solve(localFolder.Object, remoteFile.Object);
 
-            remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == newName), It.Is<bool>(b => b == true)), Times.Once());
+            remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
-            storage.VerifySavedMappedObject(MappedObjectType.File, id, newName, null, newChangeToken, true, modificationDate, contentSize: 0);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, contentSize: 0);
         }
     }
 }

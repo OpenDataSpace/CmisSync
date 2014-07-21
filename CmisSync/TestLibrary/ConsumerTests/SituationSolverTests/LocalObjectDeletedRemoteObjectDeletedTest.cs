@@ -23,10 +23,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Consumer.SituationSolver;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -42,26 +42,35 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     [TestFixture]
     public class LocalObjectDeletedRemoteObjectDeletedTest
     {
+        private Mock<IMetaDataStorage> storage;
+        private Mock<ISession> session;
+        private LocalObjectDeletedRemoteObjectDeleted underTest;
+
+        [SetUp]
+        public void SetUp() {
+            this.storage = new Mock<IMetaDataStorage>();
+            this.session = new Mock<ISession>();
+            this.underTest = new LocalObjectDeletedRemoteObjectDeleted(this.session.Object, this.storage.Object);
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectDeletedRemoteObjectDeleted();
+            new LocalObjectDeletedRemoteObjectDeleted(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileDeleted()
         {
-            var session = new Mock<ISession>();
-            var storage = new Mock<IMetaDataStorage>();
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
 
             string remoteDocumentId = "DocumentId";
 
-            storage.AddLocalFile(tempFile, remoteDocumentId);
+            this.storage.AddLocalFile(tempFile, remoteDocumentId);
 
-            new LocalObjectDeletedRemoteObjectDeleted().Solve(session.Object, storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), null);
+            this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), null);
 
-            storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId)), Times.Once());
+            this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId)), Times.Once());
         }
     }
 }

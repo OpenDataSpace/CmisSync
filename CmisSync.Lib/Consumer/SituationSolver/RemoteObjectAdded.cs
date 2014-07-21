@@ -36,7 +36,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Solver to handle a new object which has been found on the server
     /// </summary>
-    public class RemoteObjectAdded : ISolver
+    public class RemoteObjectAdded : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
@@ -49,7 +49,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="queue">Queue to report new transmissions to.</param>
         /// <param name="fsFactory">File system factory.</param>
-        public RemoteObjectAdded(ISyncEventQueue queue, ActiveActivitiesManager transmissonManager, IFileSystemInfoFactory fsFactory = null) {
+        public RemoteObjectAdded(
+            ISession session,
+            IMetaDataStorage storage,
+            ISyncEventQueue queue,
+            ActiveActivitiesManager transmissonManager,
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -66,12 +71,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Adds the Object to Disk and Database
         /// </summary>
-        /// <param name='session'>
-        /// Cmis Session.
-        /// </param>
-        /// <param name='storage'>
-        /// Metadata Storage.
-        /// </param>
         /// <param name='localFile'>
         /// Local file.
         /// </param>
@@ -81,7 +80,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <exception cref='ArgumentException'>
         /// Is thrown when remoteId is not prefetched.
         /// </exception>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId) {
+        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId) {
             if(localFile is IDirectoryInfo) {
                 if(!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
@@ -105,7 +104,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject.Guid = uuid;
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
-                storage.SaveMappedObject(mappedObject);
+                this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
                 var file = localFile as IFileInfo;
@@ -169,7 +168,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     LastChecksum = hash,
                     ChecksumAlgorithmName = "SHA1"
                 };
-                storage.SaveMappedObject(mappedObject);
+                this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }

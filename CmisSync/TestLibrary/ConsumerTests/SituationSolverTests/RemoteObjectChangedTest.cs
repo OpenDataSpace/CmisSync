@@ -24,12 +24,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.Security.Cryptography;
     using System.Text;
 
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -44,30 +44,40 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     public class RemoteObjectChangedTest
     {
         private ActiveActivitiesManager manager;
+        private Mock<ISession> session;
+        private Mock<IMetaDataStorage> storage;
+        private Mock<ISyncEventQueue> queue;
+        private Mock<IFileSystemInfoFactory> fsFactory;
+        private RemoteObjectChanged underTest;
 
         [SetUp]
         public void SetUp() {
             this.manager = new ActiveActivitiesManager();
+            this.session = new Mock<ISession>();
+            this.storage = new Mock<IMetaDataStorage>();
+            this.queue = new Mock<ISyncEventQueue>();
+            this.fsFactory = new Mock<IFileSystemInfoFactory>();
+            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.queue.Object, this.manager, this.fsFactory.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new RemoteObjectChanged(null, this.manager);
+            new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
         {
-            new RemoteObjectChanged(Mock.Of<ISyncEventQueue>(), null);
+            new RemoteObjectChanged(this.session.Object, this.storage.Object, this.queue.Object, null);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesQueueAndTransmissionManager()
         {
-            new RemoteObjectChanged(Mock.Of<ISyncEventQueue>(), this.manager);
+            new RemoteObjectChanged(this.session.Object, this.storage.Object, this.queue.Object, this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -81,8 +91,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string lastChangeToken = "token";
             string newChangeToken = "newToken";
 
-            var storage = new Mock<IMetaDataStorage>();
-            var queue = new Mock<ISyncEventQueue>();
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);
             dirInfo.Setup(d => d.Name).Returns(folderName);
@@ -98,16 +106,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 Guid = Guid.NewGuid()
             };
 
-            storage.AddMappedFolder(mappedObject);
+            this.storage.AddMappedFolder(mappedObject);
 
             Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
-            new RemoteObjectChanged(queue.Object, this.manager).Solve(Mock.Of<ISession>(), storage.Object, dirInfo.Object, remoteObject.Object);
+            this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
-            storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
-            queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -126,8 +134,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             long newContentSize = newContent.Length;
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(newContent);
             byte[] oldHash = SHA1Managed.Create().ComputeHash(oldContent);
-            var queue = new Mock<ISyncEventQueue>();
-            var storage = new Mock<IMetaDataStorage>();
             var mappedObject = new MappedObject(
                 fileName,
                 id,
@@ -142,14 +148,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 LastChecksum = oldHash
             };
 
-            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
-            var cacheFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
+            var cacheFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
             using (var oldContentStream = new MemoryStream(oldContent))
             using (var stream = new MemoryStream()) {
                 cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
-                var backupFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
+                var backupFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
 
-                storage.AddMappedFile(mappedObject, path);
+                this.storage.AddMappedFile(mappedObject, path);
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, fileName, parentId, newContentSize, newContent, newChangeToken);
                 remoteObject.Setup(r => r.LastModificationDate).Returns(creationDate);
@@ -166,11 +171,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     b =>
                     b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(oldContentStream));
 
-                new RemoteObjectChanged(queue.Object, this.manager, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteObject.Object);
+                this.underTest.Solve(localFile.Object, remoteObject.Object);
 
-                storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
-                queue.Verify(
+                this.queue.Verify(
                     q =>
                     q.AddEvent(It.Is<FileTransmissionEvent>(
                     e =>
@@ -200,8 +205,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             long newContentSize = newContent.Length;
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(newContent);
             byte[] oldHash = SHA1Managed.Create().ComputeHash(oldContent);
-            var queue = new Mock<ISyncEventQueue>();
-            var storage = new Mock<IMetaDataStorage>();
             var mappedObject = new MappedObject(
                 fileName,
                 id,
@@ -216,15 +219,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 LastChecksum = oldHash
             };
 
-            Mock<IFileSystemInfoFactory> fsFactory = new Mock<IFileSystemInfoFactory>();
-            fsFactory.Setup(f => f.CreateConflictFileInfo(It.IsAny<IFileInfo>())).Returns(Mock.Of<IFileInfo>(i => i.FullName == confictFilePath));
-            var cacheFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
+            this.fsFactory.Setup(f => f.CreateConflictFileInfo(It.IsAny<IFileInfo>())).Returns(Mock.Of<IFileInfo>(i => i.FullName == confictFilePath));
+            var cacheFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
             using (var changedContentStream = new MemoryStream(changedContent))
             using (var stream = new MemoryStream()) {
                 cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
-                var backupFile = fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
+                var backupFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
 
-                storage.AddMappedFile(mappedObject, path);
+                this.storage.AddMappedFile(mappedObject, path);
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, fileName, parentId, newContentSize, newContent, newChangeToken);
                 remoteObject.Setup(r => r.LastModificationDate).Returns(creationDate);
@@ -247,11 +249,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     b =>
                     b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(changedContentStream));
 
-                new RemoteObjectChanged(queue.Object, this.manager, fsFactory.Object).Solve(Mock.Of<ISession>(), storage.Object, localFile.Object, remoteObject.Object);
+                this.underTest.Solve(localFile.Object, remoteObject.Object);
 
-                storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
-                queue.Verify(
+                this.queue.Verify(
                     q =>
                     q.AddEvent(It.Is<FileTransmissionEvent>(
                     e =>

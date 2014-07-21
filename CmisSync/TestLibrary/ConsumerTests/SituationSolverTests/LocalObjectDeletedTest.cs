@@ -44,18 +44,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private LocalObjectDeleted underTest;
 
         [SetUp]
         public void SetUp()
         {
             this.session = new Mock<ISession>(MockBehavior.Strict);
             this.storage = new Mock<IMetaDataStorage>(MockBehavior.Strict);
+            this.underTest = new LocalObjectDeleted(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectDeleted();
+            new LocalObjectDeleted(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -72,7 +74,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.AddLocalFile(tempFile, remoteDocumentId);
             this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
 
-            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
+            this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
 
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId)), Times.Once());
             this.session.Verify(s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId), true), Times.Once());
@@ -92,7 +94,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.AddLocalFolder(tempFolder, remoteFolderId);
             this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
 
-            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), folder.Object);
+            this.underTest.Solve(new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), folder.Object);
 
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o.RemoteObjectId == remoteFolderId)), Times.Once());
             folder.Verify(f => f.DeleteTree(false, UnfileObject.DeleteSinglefiled, true), Times.Once());
@@ -108,7 +110,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId));
             var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
 
-            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+            this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -121,7 +123,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisRuntimeException());
             var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
 
-            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+            this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -133,7 +135,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisPermissionDeniedException());
             var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
 
-            new LocalObjectDeleted().Solve(this.session.Object, this.storage.Object, new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+            this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+
             this.storage.Verify(s => s.RemoveObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 

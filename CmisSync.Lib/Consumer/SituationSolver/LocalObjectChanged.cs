@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// A local object has been changed and should be uploaded (if necessary) to server or updated on the server.
     /// </summary>
-    public class LocalObjectChanged : ISolver
+    public class LocalObjectChanged : AbstractEnhancedSolver
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
@@ -49,7 +49,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
         /// </summary>
         /// <param name="queue">Event queue for publishing upload transmission.</param>
-        public LocalObjectChanged(ISyncEventQueue queue, ActiveActivitiesManager transmissionManager) {
+        public LocalObjectChanged(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, ActiveActivitiesManager transmissionManager) : base(session, storage){
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -67,14 +67,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// Uploads the file content if content has been changed. Otherwise simply saves the
         /// last modification date.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFileSystemInfo">Local file system info.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
             // Match local changes to remote changes and updated them remotely
-            var mappedObject = storage.GetObjectByLocalPath(localFileSystemInfo);
+            var mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null) {
                 bool isChanged = false;
@@ -133,7 +131,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
-            storage.SaveMappedObject(mappedObject);
+            this.Storage.SaveMappedObject(mappedObject);
         }
     }
 }

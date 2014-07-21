@@ -33,20 +33,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object has been renamed. => Rename the corresponding object on the server.
     /// </summary>
-    public class LocalObjectRenamed : ISolver
+    public class LocalObjectRenamed : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectRenamed"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        public LocalObjectRenamed(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        }
+
+        /// <summary>
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
         {
-            var obj = storage.GetObjectByRemoteId(remoteId.Id);
+            var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             ICmisObject remoteObject;
 
             // Rename remote object
@@ -67,7 +73,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             obj.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
             obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
             obj.LastChangeToken = remoteObject.ChangeToken;
-            storage.SaveMappedObject(obj);
+            this.Storage.SaveMappedObject(obj);
         }
     }
 }

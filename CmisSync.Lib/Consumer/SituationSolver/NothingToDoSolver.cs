@@ -31,19 +31,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Does nothing
         /// </summary>
-        /// <param name='session'>
-        /// Cmis Session.
-        /// </param>
-        /// <param name='storage'>
-        /// The Storage.
-        /// </param>
         /// <param name='localFile'>
         /// Local file.
         /// </param>
         /// <param name='remoteId'>
         /// Remote identifier.
         /// </param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public virtual void Solve(IFileSystemInfo localFile, IObjectId remoteId)
         {
             // No Operation Needed
         }

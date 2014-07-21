@@ -25,12 +25,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object deleted remote object deleted.
     /// </summary>
-    public class LocalObjectDeletedRemoteObjectDeleted : ISolver
+    public class LocalObjectDeletedRemoteObjectDeleted : AbstractEnhancedSolver
     {
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectDeletedRemoteObjectDeleted"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        public LocalObjectDeletedRemoteObjectDeleted(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        }
+
+        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
         {
-            var mappedObject = storage.GetObjectByLocalPath(localFile);
-            storage.RemoveObject(mappedObject);
+            var mappedObject = this.Storage.GetObjectByLocalPath(localFile);
+            this.Storage.RemoveObject(mappedObject);
         }
     }
 }

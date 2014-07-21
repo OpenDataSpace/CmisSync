@@ -26,13 +26,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Storage.Database.Entities;
-    using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -63,21 +63,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorWithGivenQueueAndActivityManager()
         {
-            new LocalObjectAdded(Mock.Of<ISyncEventQueue>(), new ActiveActivitiesManager());
+            new LocalObjectAdded(this.session.Object, this.storage.Object, Mock.Of<ISyncEventQueue>(), new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new LocalObjectAdded(null, new ActiveActivitiesManager());
+            new LocalObjectAdded(this.session.Object, this.storage.Object, null, new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
         {
-            new LocalObjectAdded(Mock.Of<ISyncEventQueue>(), null);
+            new LocalObjectAdded(this.session.Object, this.storage.Object, Mock.Of<ISyncEventQueue>(), null);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -158,7 +158,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(0);
-
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
@@ -298,7 +297,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document, true);
-
         }
 
         private IDirectoryInfo SetupParentFolder(string parentId)
@@ -354,14 +352,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 .Callback<IContentStream, bool, bool>(
                     (s, o, r) =>
                     {
-                    using(var temp = new MemoryStream())
+                    using (var temp = new MemoryStream())
                     {
                         s.Stream.CopyTo(temp);
                     }
                 });
-            if(returnLastModificationDate) {
+            if (returnLastModificationDate) {
                 Mock.Get(futureRemoteDoc).Setup(doc => doc.LastModificationDate).Returns(new DateTime());
             }
+
             fileInfo.Setup(d => d.FullName).Returns(path);
             fileInfo.Setup(d => d.Name).Returns(fileName);
             fileInfo.Setup(d => d.Exists).Returns(true);
@@ -369,9 +368,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
             var transmissionManager = new ActiveActivitiesManager();
-            var solver = new LocalObjectAdded(this.queue.Object, transmissionManager);
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.queue.Object, transmissionManager);
 
-            solver.Solve(this.session.Object, this.storage.Object, fileInfo.Object, null);
+            solver.Solve(fileInfo.Object, null);
             documentMock = Mock.Get(futureRemoteDoc);
             Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
         }
@@ -408,9 +407,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
             var transmissionManager = new ActiveActivitiesManager();
-            var solver = new LocalObjectAdded(this.queue.Object, transmissionManager);
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.queue.Object, transmissionManager);
 
-            solver.Solve(this.session.Object, this.storage.Object, dirInfo.Object, null);
+            solver.Solve(dirInfo.Object, null);
             return dirInfo;
         }
 

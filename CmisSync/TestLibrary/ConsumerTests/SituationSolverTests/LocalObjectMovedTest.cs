@@ -22,10 +22,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Consumer.SituationSolver;
 
     using DotCMIS.Client;
 
@@ -44,6 +44,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private Mock<IFolder> remoteRootFolder;
         private Mock<IDirectoryInfo> localRootFolder;
         private MappedObject mappedRootFolder;
+        private LocalObjectMoved underTest;
 
         [SetUp]
         public void SetUp() {
@@ -54,12 +55,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
             this.mappedRootFolder = new MappedObject("/", this.rootId, MappedObjectType.Folder, null, "changeToken") { Guid = Guid.NewGuid() };
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(this.localRootFolder.Object)))).Returns(this.mappedRootFolder);
+            this.underTest = new LocalObjectMoved(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectMoved();
+            new LocalObjectMoved(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -77,7 +79,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
             remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object)).Callback(() => { remoteFolder.Setup(r => r.ChangeToken).Returns("changeToken"); }).Returns(remoteFolder.Object);
 
-            new LocalObjectMoved().Solve(this.session.Object, this.storage.Object, localFolder.Object, remoteFolder.Object);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "targetId", "changeToken", true);
@@ -100,7 +102,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 remoteFolder.Setup(r => r.ChangeToken).Returns("changeToken");
             }).Returns(remoteFolder.Object);
 
-            new LocalObjectMoved().Solve(this.session.Object, this.storage.Object, localFolder.Object, remoteFolder.Object);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(subFolder.Object, this.remoteRootFolder.Object), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "rootId", "changeToken");
@@ -126,7 +128,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 remoteFolder.Setup(f => f.ChangeToken).Returns("changeToken");
             }).Returns(remoteFolder.Object);
 
-            new LocalObjectMoved().Solve(this.session.Object, this.storage.Object, localFolder.Object, remoteFolder.Object);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object), Times.Once());
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
