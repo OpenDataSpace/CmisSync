@@ -715,6 +715,26 @@ namespace TestLibrary.IntegrationTests
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
+        [Test, Category("Slow")]
+        public void OneLocalAndTheCorrespondingRemoteFolderAreBothRenamedToTheSameName() {
+            string oldFolderName = "oldName";
+            string newFolderName = "newName";
+
+            var folder = this.remoteRootDir.CreateFolder(oldFolderName);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            folder.Rename(newFolderName);
+            this.localRootDir.GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newFolderName));
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
+            Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).Name, Is.EqualTo(newFolderName));
+        }
+
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
             int waited = 0;
             while (queue.Queue.IsEmpty)

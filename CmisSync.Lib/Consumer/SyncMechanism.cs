@@ -167,7 +167,7 @@ namespace CmisSync.Lib.Consumer
             solver[(int)SituationType.ADDED, (int)SituationType.RENAMED] = null;
             solver[(int)SituationType.CHANGED, (int)SituationType.RENAMED] = null;
             solver[(int)SituationType.MOVED, (int)SituationType.RENAMED] = null;
-            solver[(int)SituationType.RENAMED, (int)SituationType.RENAMED] = null;
+            solver[(int)SituationType.RENAMED, (int)SituationType.RENAMED] = new LocalObjectRenamedRemoteObjectRenamed();
             solver[(int)SituationType.REMOVED, (int)SituationType.RENAMED] = null;
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.REMOVED] = new RemoteObjectDeleted();
