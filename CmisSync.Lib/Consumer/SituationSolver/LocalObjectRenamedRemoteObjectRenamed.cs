@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using System.IO;
 
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
@@ -30,7 +31,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     {
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
+            if (localFile is IDirectoryInfo) {
+                var localFolder = localFile as IDirectoryInfo;
+                var remoteFolder = remoteId as IFolder;
+                var mappedObject = storage.GetObjectByRemoteId(remoteFolder.Id);
+                if (localFolder.Name.Equals(remoteFolder.Name)) {
+                    mappedObject.Name = localFolder.Name;
+                } else if (localFolder.LastWriteTimeUtc.CompareTo((DateTime)remoteFolder.LastModificationDate) > 0 ) {
+                    remoteFolder.Rename(localFolder.Name, true);
+                    mappedObject.Name = remoteFolder.Name;
+                } else {
+                    localFolder.MoveTo(Path.Combine(localFolder.Parent.FullName, remoteFolder.Name));
+                    mappedObject.Name = remoteFolder.Name;
+                }
 
+                mappedObject.LastChangeToken = remoteFolder.ChangeToken;
+                storage.SaveMappedObject(mappedObject);
+            } else {
+                throw new NotImplementedException("File scenario is not implemented yet");
+            }
         }
     }
 }
