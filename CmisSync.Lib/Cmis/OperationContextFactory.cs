@@ -30,6 +30,8 @@ namespace CmisSync.Lib.Cmis
     /// </summary>
     public static class OperationContextFactory
     {
+        private static readonly int MaximumItemsPerPage = 1000;
+
         public static IOperationContext CreateContentChangeEventContext(ISession session) {
             HashSet<string> filters = new HashSet<string>();
             filters.Add("cmis:objectId");
@@ -75,18 +77,39 @@ namespace CmisSync.Lib.Cmis
         }
 
         public static IOperationContext CreateNonCachingPathIncludingContext(ISession session) {
-            HashSet<string> filters = new HashSet<string>();
-            filters.Add("cmis:objectId");
-            filters.Add("cmis:name");
-            filters.Add("cmis:contentStreamFileName");
-            filters.Add("cmis:contentStreamLength");
-            filters.Add("cmis:lastModificationDate");
-            filters.Add("cmis:path");
-            filters.Add("cmis:changeToken");
-            filters.Add("cmis:parentId");
+            return CreateContext(
+                session,
+                false,
+                true,
+                "cmis:objectId",
+                "cmis:name",
+                "cmis:contentStreamFileName",
+                "cmis:contentStreamLength",
+                "cmis:lastModificationDate",
+                "cmis:path",
+                "cmis:changeToken",
+                "cmis:parentId");
+        }
+
+        public static IOperationContext CreateContext(ISession session, bool cacheEnabled, bool includePathSegments, params string[] elements) {
+            HashSet<string> filter = new HashSet<string>();
+            foreach (var entry in elements) {
+                filter.Add(entry);
+            }
+
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
-            return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, false, 100);
+            return session.CreateOperationContext(
+                filter: filter,
+                includeAcls: false,
+                includeAllowableActions: true,
+                includePolicies: false,
+                includeRelationships: IncludeRelationshipsFlag.None,
+                renditionFilter: renditions,
+                includePathSegments: includePathSegments,
+                orderBy: null,
+                cacheEnabled: cacheEnabled,
+                maxItemsPerPage: MaximumItemsPerPage);
         }
     }
 }
