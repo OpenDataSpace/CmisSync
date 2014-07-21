@@ -176,6 +176,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 parent = localFileInfo.Directory;
             }
 
+            try {
+                Guid uuid;
+                if (Guid.TryParse(parent.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out uuid)){
+                    return storage.GetObjectByGuid(uuid).RemoteObjectId;
+                }
+            } catch (IOException) {
+            }
+
             IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
             return mappedParent.RemoteObjectId;
         }
