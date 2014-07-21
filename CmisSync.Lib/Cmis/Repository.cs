@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Cmis
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
@@ -261,7 +262,7 @@ namespace CmisSync.Lib.Cmis
                 this.Status = status;
             };
 
-            this.Queue.EventManager.AddEventHandler(new SyncStrategyInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
+            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
         }
 
         /// <summary>

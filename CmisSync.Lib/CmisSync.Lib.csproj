@@ -134,7 +134,6 @@
     <Compile Include="Queueing\SyncEventManager.cs" />
     <Compile Include="Queueing\SyncScheduler.cs" />
     <Compile Include="Queueing\IDisposableSyncEventQueue.cs" />
-    <Compile Include="Queueing\SyncStrategyInitializer.cs" />
     <Compile Include="Queueing\ISyncEventManager.cs" />
     <Compile Include="Events\IRemoveFromLoggingEvent.cs" />
     <Compile Include="Events\AbstractFolderEvent.cs" />
@@ -217,6 +216,7 @@
     <Compile Include="PathMatcher\IPathMatcher.cs" />
     <Compile Include="Storage\Database\IObjectTree.cs" />
     <Compile Include="Storage\Database\ObjectTree.cs" />
+    <Compile Include="EventManagerInitializer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

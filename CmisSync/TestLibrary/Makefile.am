@@ -86,7 +86,7 @@ SOURCES =  \
 	QueueingTests/DebugLoggingHandlerTest.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
-	QueueingTests/SyncStrategyInitializerTest.cs \
+	EventManagerInitializerTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \

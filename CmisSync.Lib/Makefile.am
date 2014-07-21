@@ -52,6 +52,7 @@ SOURCES =  \
 	Consumer/SituationSolver/RemoteObjectRenamed.cs \
 	Consumer/SyncMechanism.cs \
 	Defines.cs \
+	EventManagerInitializer.cs \
 	Events/AbstractFolderEvent.cs \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
@@ -133,7 +134,6 @@ SOURCES =  \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
-	Queueing/SyncStrategyInitializer.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/Entities/IMappedObject.cs \
 	Storage/Database/Entities/MappedObject.cs \

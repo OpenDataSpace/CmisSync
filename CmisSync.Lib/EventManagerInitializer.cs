@@ -42,9 +42,9 @@ namespace CmisSync.Lib
     /// Successful login handler. It handles the SuccessfulLoginEvent and registers
     /// the necessary handlers and registers the root folder to the MetaDataStorage.
     /// </summary>
-    public class SyncStrategyInitializer : ReportingSyncEventHandler
+    public class EventManagerInitializer : ReportingSyncEventHandler
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncStrategyInitializer));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(EventManagerInitializer));
 
         private ContentChangeEventAccumulator ccaccumulator;
         private RepoInfo repoInfo;
@@ -60,7 +60,7 @@ namespace CmisSync.Lib
         private ActivityListenerAggregator activityListener;
   
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.SyncStrategyInitializer"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.EventManagerInitializer"/> class.
         /// </summary>
         /// <param name='queue'>
         /// The SyncEventQueue.
@@ -80,7 +80,7 @@ namespace CmisSync.Lib
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
-        public SyncStrategyInitializer(
+        public EventManagerInitializer(
             ISyncEventQueue queue,
             IMetaDataStorage storage,
             RepoInfo repoInfo,

@@ -180,7 +180,7 @@
     <Compile Include="FilterTests\IgnoreFileNamesFilterTest.cs" />
     <Compile Include="FilterTests\InvalidFolderNameFilterTest.cs" />
     <Compile Include="FilterTests\ReportingFilterTest.cs" />
-    <Compile Include="QueueingTests\SyncStrategyInitializerTest.cs" />
+    <Compile Include="EventManagerInitializerTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeChangesModificationDateTest.cs" />
   </ItemGroup>
   <ItemGroup>
