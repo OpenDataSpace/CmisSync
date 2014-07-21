@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Queueing
     using System;
     using System.Collections.Generic;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Queueing;
@@ -97,7 +98,7 @@ namespace CmisSync.Lib.Queueing
             map[typeof(DescendantsCrawler)] = NORMAL;
             map[typeof(SyncMechanism)] = NORMAL;
             map[typeof(GenericSyncEventHandler<>)] = NORMAL;
-            map[typeof(SyncStrategyInitializer)] = NORMAL;
+            map[typeof(EventManagerInitializer)] = NORMAL;
         }
 
         /// <summary>

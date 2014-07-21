@@ -48,7 +48,7 @@ namespace TestLibrary.QueueingTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class SyncStrategyInitializerTest
+    public class EventManagerInitializerTest
     {
         private ActivityListenerAggregator listener;
 
@@ -61,28 +61,28 @@ namespace TestLibrary.QueueingTests
         [Test, Category("Fast")]
         public void ConstructorTakesQueueAndManagerAndStorage()
         {
-            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new SyncStrategyInitializer(null, Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(null, Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull()
         {
-            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), null, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), null, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfRepoInfoIsNull()
         {
-            new SyncStrategyInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
@@ -90,7 +90,7 @@ namespace TestLibrary.QueueingTests
         {
             var queue = new Mock<ISyncEventQueue>();
             var storage = new Mock<IMetaDataStorage>();
-            var handler = new SyncStrategyInitializer(queue.Object, storage.Object, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            var handler = new EventManagerInitializer(queue.Object, storage.Object, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
 
             var e = new Mock<ISyncEvent>();
             Assert.False(handler.Handle(e.Object));
@@ -219,12 +219,12 @@ namespace TestLibrary.QueueingTests
             return new SuccessfulLoginEvent(new Uri("http://example.com"), session.Object);
         }
 
-        private static SyncStrategyInitializer CreateStrategyInitializer(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener)
+        private static EventManagerInitializer CreateStrategyInitializer(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener)
         {
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(s => s.EventManager).Returns(manager);
 
-            return new SyncStrategyInitializer(queue.Object, storage, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, listener);
+            return new EventManagerInitializer(queue.Object, storage, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, listener);
         }
 
         private static void VerifyNonContenChangeHandlersAdded(Mock<ISyncEventManager> manager, Times times)
