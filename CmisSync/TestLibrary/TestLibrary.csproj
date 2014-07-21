@@ -181,6 +181,7 @@
     <Compile Include="FilterTests\InvalidFolderNameFilterTest.cs" />
     <Compile Include="FilterTests\ReportingFilterTest.cs" />
     <Compile Include="QueueingTests\SyncStrategyInitializerTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeChangesModificationDateTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
