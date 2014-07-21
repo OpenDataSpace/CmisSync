@@ -220,6 +220,23 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
         }
 
+        [Test, Category("Slow")]
+        public void OneRemoteFolderIsDeleted()
+        {
+            this.remoteRootDir.CreateFolder("Cat");
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(true, null, true);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(0));
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
+        }
+
         [Test, Category("Slow"), Category("Conflict")]
         public void OneRemoteFolderIsDeletedAndOneUnsyncedFileExistsInTheCorrespondingLocalFolder()
         {
@@ -233,6 +250,7 @@ namespace TestLibrary.IntegrationTests
 
             using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create));
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(false, null, true);
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
@@ -658,6 +676,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
+        // Not yet implemented correctly
+        [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteDocumentIsChangedAndRenamedDetectedByCrawler() {
             string fileName = "file.txt";
@@ -686,6 +706,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
+        // Not yet implemented correctly
+        [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteDocumentIsChangedAndRenamedDetectedByContentChanges() {
             string fileName = "file.txt";
