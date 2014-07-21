@@ -63,6 +63,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     OperationsLogger.Info(string.Format("Renamed local folder {0} to {1}", Path.Combine(localFolder.Parent.FullName, oldName), remoteFolder.Name));
                 }
 
+                mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
+                mappedObject.LastRemoteWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 mappedObject.LastChangeToken = remoteFolder.ChangeToken;
                 storage.SaveMappedObject(mappedObject);
             } else {
