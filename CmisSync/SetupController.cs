@@ -394,8 +394,7 @@ namespace CmisSync
                 if (!regexRepoName.IsMatch(reponame)||CmisSync.Lib.Utils.IsInvalidFolderName(reponame.Replace(Path.DirectorySeparatorChar, ' '), new List<string>()))
                     throw new ArgumentException(String.Format(Properties_Resources.InvalidRepoName, reponame));
                 // Validate localpath
-                if(localpath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                    localpath = localpath.Substring(0,localpath.Length-1);
+                localpath = localpath.TrimEnd(Path.DirectorySeparatorChar);
                 if (CmisSync.Lib.Utils.IsInvalidFolderName(Path.GetFileName(localpath), new List<string>()))
                     throw new ArgumentException(String.Format(Properties_Resources.InvalidFolderName, Path.GetFileName(localpath)));
                 // If no warning handler is registered, handle warning as error
@@ -410,7 +409,6 @@ namespace CmisSync
                 return e.Message;
             }
         }
-
 
         public void CheckRepoPathExists(string localpath)
         {
