@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Security.Cryptography;
 
@@ -76,6 +77,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="remoteId">Remote identifier.</param>
         public override void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
+            Stopwatch completewatch = new Stopwatch();
+            completewatch.Start();
+            Logger.Debug("Starting LocalObjectAdded");
             string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
             Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFileSystemInfo);
 
@@ -116,7 +120,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 this.queue.AddEvent(transmissionEvent);
                 this.transmissionManager.AddTransmission(transmissionEvent);
                 if (localFile.Length > 0) {
+                    Stopwatch watch = new Stopwatch();
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
+                    watch.Start();
                     IFileUploader uploader = ContentTaskUtils.CreateUploader();
                     using (SHA1 hashAlg = new SHA1Managed())
                     using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
@@ -125,6 +131,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         mapped.LastChecksum = hashAlg.Hash;
                     }
 
+                    watch.Stop();
                     mapped.LastContentSize = localFile.Length;
                     localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
                     mapped.LastChangeToken = addedObject.ChangeToken;
@@ -132,11 +139,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
 
                     this.Storage.SaveMappedObject(mapped);
-                    OperationsLogger.Info(string.Format("Uploaded file content of {0}", localFile.FullName));
+                    OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
                 }
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
+
+            completewatch.Stop();
+            Logger.Debug(string.Format("Finished LocalObjectAdded after [{0} msec]", completewatch.ElapsedMilliseconds));
         }
 
         private static Guid WriteUuidToExtendedAttributeIfSupported(IFileSystemInfo localFile)
@@ -175,17 +185,34 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             string name = localFile.Name;
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
+            Stopwatch watch = new Stopwatch();
+            ICmisObject result;
             if (localFile is IDirectoryInfo) {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+                watch.Start();
                 var objId = session.CreateFolder(properties, new ObjectId(parentId));
+                watch.Stop();
+                Logger.Debug(string.Format("CreatedFolder in [{0} msec]", watch.ElapsedMilliseconds));
+                watch.Restart();
                 var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken");
-                return session.GetObject(objId, operationContext);
+                result = session.GetObject(objId, operationContext);
+                watch.Stop();
+                Logger.Debug(string.Format("GetFolder in [{0} msec]", watch.ElapsedMilliseconds));
             } else {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                watch.Start();
                 var objId = session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null);
+                watch.Stop();
+                Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
+                watch.Restart();
                 var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken", "cmis:contentStreamLength");
-                return session.GetObject(objId, operationContext);
+                result = session.GetObject(objId, operationContext);
+                watch.Stop();
+                Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
             }
+
+            watch.Stop();
+            return result;
         }
     }
 }
