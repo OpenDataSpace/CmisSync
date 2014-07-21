@@ -57,6 +57,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.storage = new Mock<IMetaDataStorage>();
             this.queue = new Mock<ISyncEventQueue>();
+            this.session.SetupCreateOperationContext();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -336,7 +337,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 null,
                 null,
                 null)).Returns(futureRemoteDocId);
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteDocId))).Returns(futureRemoteDoc);
+            IOperationContext operationContext = It.Is<IOperationContext>(
+                o =>
+                o.Filter.Contains("cmis:name") &&
+                o.Filter.Contains("cmis:objectId") &&
+                o.Filter.Contains("cmis:parentId") &&
+                o.Filter.Contains("cmis:lastModificationDate") &&
+                o.Filter.Contains("cmis:changeToken") &&
+                o.Filter.Contains("cmis:contentStreamLength") &&
+                o.Filter.Contains("cmis:contentStreamFileName") &&
+                o.CacheEnabled == true);
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteDocId), It.IsAny<IOperationContext>())).Returns(futureRemoteDoc);
             Mock.Get(futureRemoteDoc).Setup(
                 doc =>
                 doc.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()))
@@ -379,7 +390,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 o.Id == id);
 
             this.session.Setup(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == folderName), It.Is<IObjectId>(o => o.Id == parentId))).Returns(futureRemoteFolderId);
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteFolderId))).Returns(futureRemoteFolder);
+            IOperationContext operationContext = It.Is<IOperationContext>(
+                o =>
+                o.Filter.Contains("cmis:name") &&
+                o.Filter.Contains("cmis:objectId") &&
+                o.Filter.Contains("cmis:parentId") &&
+                o.Filter.Contains("cmis:changeToken") &&
+                o.CacheEnabled == true);
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == futureRemoteFolderId), It.IsAny<IOperationContext>())).Returns(futureRemoteFolder);
 
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(path);

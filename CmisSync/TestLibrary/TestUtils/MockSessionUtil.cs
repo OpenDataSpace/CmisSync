@@ -46,6 +46,41 @@ namespace TestLibrary.TestUtils
             session.Setup(s => s.Binding.GetRepositoryService().GetRepositoryInfo(It.IsAny<string>(), null).LatestChangeLogToken).Returns(changeLogToken);
         }
 
+        public static void SetupCreateOperationContext(this Mock<ISession> session) {
+            session.Setup(s => s.CreateOperationContext(
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(),
+                It.IsAny<IncludeRelationshipsFlag>(),
+                It.IsAny<HashSet<string>>(),
+                It.IsAny<bool>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<int>())).Returns(
+                (HashSet<string> filter,
+             bool includeAcls,
+             bool includeAllowableActions,
+             bool includePolicies,
+             IncludeRelationshipsFlag relationshipFlags,
+             HashSet<string> renditions,
+             bool includePathSegments,
+             string orderBy,
+             bool cacheEnabled,
+             int maxItemsPerPage) => Mock.Of<IOperationContext>(
+                o =>
+                o.Filter == new HashSet<string>(filter) &&
+                o.IncludeAcls == includeAcls &&
+                o.IncludeAllowableActions == includeAllowableActions &&
+                o.IncludePolicies == includePolicies &&
+                o.IncludeRelationships == (IncludeRelationshipsFlag?)relationshipFlags &&
+                o.RenditionFilter == new HashSet<string>(renditions) &&
+                o.IncludePathSegments == includePathSegments &&
+                o.OrderBy == orderBy &&
+                o.CacheEnabled == cacheEnabled &&
+                o.MaxItemsPerPage == maxItemsPerPage));
+        }
+
         public static Mock<IChangeEvent> GenerateChangeEvent(DotCMIS.Enums.ChangeType type, string objectId) {
             var changeEvent = new Mock<IChangeEvent>();
             changeEvent.Setup(ce => ce.ObjectId).Returns(objectId);

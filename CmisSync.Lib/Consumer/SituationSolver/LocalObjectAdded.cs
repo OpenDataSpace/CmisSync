@@ -24,14 +24,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.IO;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.FileTransmission;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -54,6 +55,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
         /// </summary>
         /// <param name="queue">Queue to report transmission events to.</param>
+        /// <param name="manager">Activitiy manager for transmission propagations</param>
         public LocalObjectAdded(ISyncEventQueue queue, ActiveActivitiesManager manager) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
@@ -83,7 +85,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
 
             if(addedObject.LastModificationDate != null) {
-                try{
+                try {
                     localFileSystemInfo.LastWriteTimeUtc = (DateTime)addedObject.LastModificationDate;
                 } catch (IOException e) {
                     Logger.Info("Could not write LastWriteTimeUtc due to: " + e.Message);
@@ -177,10 +179,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             properties.Add(PropertyIds.Name, name);
             if (localFile is IDirectoryInfo) {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
-                return session.GetObject(session.CreateFolder(properties, new ObjectId(parentId)));
+                var objId = session.CreateFolder(properties, new ObjectId(parentId));
+                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:objectId", "cmis:lastModificationDate", "cmis:parentId", "cmis:changeToken");
+                return session.GetObject(objId, operationContext);
             } else {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
-                return session.GetObject(session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null));
+                var objId = session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null);
+                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:objectId", "cmis:lastModificationDate", "cmis:parentId", "cmis:changeToken", "cmis:contentStreamLength", "cmis:contentStreamFileName");
+                return session.GetObject(objId, operationContext);
             }
         }
     }
