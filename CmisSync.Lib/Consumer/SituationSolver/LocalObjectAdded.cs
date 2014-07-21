@@ -180,12 +180,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             if (localFile is IDirectoryInfo) {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
                 var objId = session.CreateFolder(properties, new ObjectId(parentId));
-                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:parentId", "cmis:changeToken");
+                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken");
                 return session.GetObject(objId, operationContext);
             } else {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
                 var objId = session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null);
-                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:parentId", "cmis:changeToken", "cmis:contentStreamLength");
+                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken", "cmis:contentStreamLength");
                 return session.GetObject(objId, operationContext);
             }
         }
