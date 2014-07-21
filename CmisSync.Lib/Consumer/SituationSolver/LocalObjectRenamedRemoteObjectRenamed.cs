@@ -16,19 +16,33 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.IO;
 
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
+    using System.IO;
 
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
+    using log4net;
+
+    /// <summary>
+    /// Local object renamed and also the remote object has been renamed.
+    /// </summary>
     public class LocalObjectRenamedRemoteObjectRenamed : ISolver
     {
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
+        /// <summary>
+        /// Solve the specified situation by taking renaming the local or remote object to the name of the last changed object.
+        /// </summary>
+        /// <param name="session">Cmis session instance.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="remoteId">Remote object.</param>
         public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
         {
             if (localFile is IDirectoryInfo) {
@@ -37,12 +51,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 var mappedObject = storage.GetObjectByRemoteId(remoteFolder.Id);
                 if (localFolder.Name.Equals(remoteFolder.Name)) {
                     mappedObject.Name = localFolder.Name;
-                } else if (localFolder.LastWriteTimeUtc.CompareTo((DateTime)remoteFolder.LastModificationDate) > 0 ) {
+                } else if (localFolder.LastWriteTimeUtc.CompareTo((DateTime)remoteFolder.LastModificationDate) > 0) {
+                    string oldName = remoteFolder.Name;
                     remoteFolder.Rename(localFolder.Name, true);
                     mappedObject.Name = remoteFolder.Name;
+                    OperationsLogger.Info(string.Format("Renamed remote folder {0} with id {2} to {1}", oldName, remoteFolder.Id, remoteFolder.Name));
                 } else {
+                    string oldName = localFolder.Name;
                     localFolder.MoveTo(Path.Combine(localFolder.Parent.FullName, remoteFolder.Name));
                     mappedObject.Name = remoteFolder.Name;
+                    OperationsLogger.Info(string.Format("Renamed local folder {0} to {1}", Path.Combine(localFolder.Parent.FullName, oldName), remoteFolder.Name));
                 }
 
                 mappedObject.LastChangeToken = remoteFolder.ChangeToken;
