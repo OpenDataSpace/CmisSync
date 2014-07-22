@@ -48,8 +48,7 @@ T: CmisSync.ControllerBase
 # Disposed in TearDown
 R: Gendarme.Rules.Design.TypesWithDisposableFieldsShouldBeDisposableRule
 T: TestLibrary.IntegrationTests.FullRepoTests
-T: TestLibrary.SyncStrategiesTests.WatcherData
-T: TestLibrary.SyncStrategiesTests.DescendantsCrawlerTest
+T: TestLibrary.ProducerTests.WatcherTests.WatcherData
 T: TestLibrary.StorageTests.PersistentCookieStorageTest
 T: TestLibrary.StorageTests.MetaDataStorageTest
 T: TestLibrary.IntegrationTests.DBreezeTests
