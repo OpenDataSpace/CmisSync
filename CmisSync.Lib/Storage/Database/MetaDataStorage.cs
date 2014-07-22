@@ -39,6 +39,7 @@ namespace CmisSync.Lib.Storage.Database
     {
         private static readonly string PropertyTable = "properties";
         private static readonly string MappedObjectsTable = "objects";
+        private static readonly string MappedObjectsGuidsTable = "guids";
         private static readonly string ChangeLogTokenKey = "ChangeLogToken";
 
         /// <summary>
@@ -133,17 +134,15 @@ namespace CmisSync.Lib.Storage.Database
         /// </param>
         public IMappedObject GetObjectByLocalPath(IFileSystemInfo path)
         {
-            if(path == null)
-            {
+            if (path == null) {
                 throw new ArgumentNullException("Given path is null");
             }
 
-            if(!this.matcher.CanCreateRemotePath(path.FullName))
-            {
+            if(!this.matcher.CanCreateRemotePath(path.FullName)) {
                 throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", path.FullName));
             }
 
-            using(var tran = this.engine.GetTransaction())
+            using (var tran = this.engine.GetTransaction())
             {
                 string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
                 List<string> pathSegments = new List<string>(relativePath.Split(Path.DirectorySeparatorChar));
@@ -151,7 +150,7 @@ namespace CmisSync.Lib.Storage.Database
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
                 {
                     var value = row.Value;
-                    if(value == null)
+                    if (value == null)
                     {
                         continue;
                     }
@@ -166,19 +165,14 @@ namespace CmisSync.Lib.Storage.Database
                 }
 
                 MappedObject root = objects.Find(o => o.ParentId == null);
-                if(root == null)
-                {
+                if (root == null) {
                     return null;
                 }
 
-                if(root.Name != "/")
-                {
-                    if(root.Name == pathSegments[0])
-                    {
+                if (root.Name != "/") {
+                    if(root.Name == pathSegments[0]) {
                         pathSegments.RemoveAt(0);
-                    }
-                    else
-                    {
+                    } else {
                         return null;
                     }
                 }
@@ -186,17 +180,14 @@ namespace CmisSync.Lib.Storage.Database
                 MappedObject parent = root;
                 foreach(var name in pathSegments)
                 {
-                    if(name.Equals(".")) {
+                    if (name.Equals(".")) {
                         continue;
                     }
 
                     MappedObject child = objects.Find(o => o.ParentId == parent.RemoteObjectId && o.Name == name);
-                    if(child != null)
-                    {
+                    if (child != null) {
                         parent = child;
-                    }
-                    else
-                    {
+                    } else {
                         return null;
                     }
                 }
@@ -219,12 +210,10 @@ namespace CmisSync.Lib.Storage.Database
             using(var tran = this.engine.GetTransaction())
             {
                 DbCustomSerializer<MappedObject> value = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value;
-                if(value != null)
-                {
+                if (value != null) {
                     MappedObject data = value.Get;
 
-                    if (data == null)
-                    {
+                    if (data == null) {
                         return null;
                     }
 
@@ -247,6 +236,7 @@ namespace CmisSync.Lib.Storage.Database
             using(var tran = this.engine.GetTransaction())
             {
                 tran.Insert<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id, obj as MappedObject);
+                tran.Insert<byte[], string>(MappedObjectsGuidsTable, obj.Guid.ToByteArray(), id);
                 tran.Commit();
             }
         }
@@ -267,19 +257,16 @@ namespace CmisSync.Lib.Storage.Database
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
                 {
                     var value = row.Value;
-                    if(value == null)
-                    {
+                    if (value == null) {
                         continue;
                     }
 
                     var data = value.Get;
-                    if(data == null)
-                    {
+                    if (data == null) {
                         continue;
                     }
 
-                    if(row.Key.Equals(id))
-                    {
+                    if (row.Key.Equals(id)) {
                         root = data;
                     } else {
                         objects.Add(data);
@@ -293,6 +280,7 @@ namespace CmisSync.Lib.Storage.Database
                 this.RemoveChildren(tran, root, ref objects);
 
                 tran.RemoveKey<string>(MappedObjectsTable, id);
+                tran.RemoveKey<byte[]>(MappedObjectsGuidsTable, root.Guid.ToByteArray());
                 tran.Commit();
             }
         }
@@ -313,8 +301,7 @@ namespace CmisSync.Lib.Storage.Database
             {
                 string[] segments = this.GetRelativePathSegments(tran, id);
                 string path = this.matcher.RemoteTargetRootPath;
-                foreach(var name in segments)
-                {
+                foreach(var name in segments) {
                     path += name.StartsWith("/") ? name : "/" + name;
                 }
 
@@ -369,24 +356,19 @@ namespace CmisSync.Lib.Storage.Database
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
                 {
                     var data = row.Value.Get;
-                    if(data == null)
-                    {
+                    if (data == null) {
                         continue;
                     }
 
-                    if(parentId == data.ParentId)
-                    {
+                    if (parentId == data.ParentId) {
                         results.Add(new MappedObject(data));
-                    }
-                    else if(data.RemoteObjectId == parentId)
-                    {
+                    } else if(data.RemoteObjectId == parentId) {
                         parentExists = true;
                     }
                 }
             }
 
-            if(!parentExists)
-            {
+            if(!parentExists) {
                 throw new EntryNotFoundException();
             }
 
@@ -402,8 +384,7 @@ namespace CmisSync.Lib.Storage.Database
             string list = string.Empty;
             using (var tran = this.engine.GetTransaction())
             {
-                foreach (var row in tran.SelectForward<string, string>(MappedObjectsTable))
-                {
+                foreach (var row in tran.SelectForward<string, string>(MappedObjectsTable)) {
                     list += string.Format("[ Key={0}, Value={1}]{2}", row.Key, row.Value, Environment.NewLine);
                 }
             }
@@ -424,19 +405,16 @@ namespace CmisSync.Lib.Storage.Database
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
                 {
                     var value = row.Value;
-                    if(value == null)
-                    {
+                    if (value == null) {
                         continue;
                     }
 
                     var data = value.Get;
-                    if(data == null)
-                    {
+                    if (data == null) {
                         continue;
                     }
 
-                    if(data.ParentId == null)
-                    {
+                    if (data.ParentId == null) {
                         root = data;
                     } else {
                         objects.Add(data);
@@ -469,19 +447,16 @@ namespace CmisSync.Lib.Storage.Database
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
                 {
                     var value = row.Value;
-                    if(value == null)
-                    {
+                    if (value == null) {
                         continue;
                     }
 
                     var data = value.Get;
-                    if(data == null)
-                    {
+                    if (data == null) {
                         continue;
                     }
 
-                    if(data.ParentId == null)
-                    {
+                    if (data.ParentId == null) {
                         root = data;
                     } else {
                         objects.Add(data);
@@ -525,24 +500,22 @@ namespace CmisSync.Lib.Storage.Database
         /// <param name="guid">GUID of the requested object.</param>
         public IMappedObject GetObjectByGuid(Guid guid)
         {
-            using(var tran = this.engine.GetTransaction())
+            using (var tran = this.engine.GetTransaction())
             {
-                foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable))
-                {
-                    var value = row.Value;
-                    if (value == null) {
-                        continue;
-                    }
+                var row = tran.Select<byte[], string>(MappedObjectsGuidsTable, guid.ToByteArray());
+                if (row.Exists) {
+                    DbCustomSerializer<MappedObject> value = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, row.Value).Value;
+                    if (value != null) {
+                        MappedObject data = value.Get;
 
-                    var data = value.Get;
-                    if (data == null) {
-                        continue;
-                    }
+                        if (data == null) {
+                            return null;
+                        }
 
-                    if (data.Guid == guid) {
-                        return data;
+                        return new MappedObject(data);
                     }
                 }
+
             }
 
             return null;
@@ -559,16 +532,16 @@ namespace CmisSync.Lib.Storage.Database
             {
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable)) {
                     var value = row.Value;
-                    if(value == null) {
+                    if (value == null) {
                         continue;
                     }
 
                     var data = value.Get;
-                    if(data == null) {
+                    if (data == null) {
                         continue;
                     }
 
-                    if(data.ParentId == null) {
+                    if (data.ParentId == null) {
                         root = data;
                     } else {
                         objects.Add(data);
@@ -615,7 +588,7 @@ namespace CmisSync.Lib.Storage.Database
             path = path.StartsWith("/") ? "." + path : path;
             sb.Append(path).Append(Environment.NewLine);
             List<MappedObject> children = objects.FindAll(o => o.ParentId == parent.RemoteObjectId);
-            foreach(var child in children) {
+            foreach (var child in children) {
                 objects.Remove(child);
                 sb.Append(this.PrintFindLines(objects, child, path));
             }
@@ -634,14 +607,12 @@ namespace CmisSync.Lib.Storage.Database
         /// </param>
         private string GetId(IMappedObject obj)
         {
-            if(obj == null)
-            {
+            if (obj == null) {
                 throw new ArgumentNullException("The given obj is null");
             }
 
             string id = obj.RemoteObjectId;
-            if(id == null)
-            {
+            if (id == null) {
                 throw new ArgumentException("The given object has no remote object id");
             }
 
@@ -667,9 +638,10 @@ namespace CmisSync.Lib.Storage.Database
         {
             List<MappedObject> children = objects.FindAll(o => o.ParentId == root.RemoteObjectId);
             objects.RemoveAll(o => o.ParentId == root.RemoteObjectId);
-            foreach(var child in children) {
+            foreach (var child in children) {
                 this.RemoveChildren(tran, child, ref objects);
                 tran.RemoveKey<string>(MappedObjectsTable, child.RemoteObjectId);
+                tran.RemoveKey<byte[]>(MappedObjectsGuidsTable, child.Guid.ToByteArray());
             }
         }
     }
