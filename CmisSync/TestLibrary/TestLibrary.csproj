@@ -183,6 +183,7 @@
     <Compile Include="EventManagerInitializerTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeChangesModificationDateTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\AbstractEnhancedSolverTest.cs" />
+    <Compile Include="IntegrationTests\DBreezeBenchmarkTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

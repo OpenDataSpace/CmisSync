@@ -66,6 +66,7 @@ SOURCES =  \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
+	IntegrationTests/DBreezeBenchmarkTest.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullRepoTests.cs \

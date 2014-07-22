@@ -92,6 +92,33 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
+        public static IEnumerable<object[]> DBreeze
+        {
+            get
+            {
+                string path = "../../dbreeze.json";
+                bool exists = File.Exists(path);
+
+                if (!exists)
+                {
+                    path = "../CmisSync/TestLibrary/dbreeze.json";
+                    exists = File.Exists(path);
+                }
+
+                string json;
+
+                if (exists) {
+                    json = File.ReadAllText(path);
+                } else {
+                    json = string.Format(
+                        "[ [\"inMemory\", \"true\", \"\", \"10000\"] , [\"inTempPath\", \"false\", \"{0}\", \"10000\"] ]",
+                        Path.Combine(Path.GetTempPath(), "DB_Test"));
+                }
+
+                return JsonConvert.DeserializeObject<List<object[]>>(json);
+            }
+        }
+
         private static dynamic config = null;
 
         public static dynamic GetConfig()
