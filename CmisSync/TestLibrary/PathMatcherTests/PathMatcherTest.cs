@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.DataTests
+namespace TestLibrary.PathMatcherTests
 {
     using System;
     using System.IO;
