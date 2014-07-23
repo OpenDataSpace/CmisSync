@@ -433,7 +433,11 @@ namespace CmisSync
             }
 
             // Remove DBreeze DB folder
-            Directory.Delete(folder.GetDatabasePath(), true);
+            try {
+                Directory.Delete(folder.GetDatabasePath(), true);
+            } catch (DirectoryNotFoundException) {
+            }
+
 
             // Remove Legacy Cmis Database File
             string dbfilename = folder.DisplayName;
