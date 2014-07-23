@@ -93,7 +93,7 @@ namespace TestLibrary.IntegrationTests
                 watch.Start();
                 var obj = underTest.GetObjectByGuid(this.requestedGuid);
                 watch.Stop();
-                Logger.Debug(string.Format("Requesting one object by remote id took: {0} ms", watch.ElapsedMilliseconds));
+                Logger.Debug(string.Format("Requesting one object by remote GUID took: {0} ms", watch.ElapsedMilliseconds));
                 Assert.That(obj, Is.Not.Null);
             }
         }
@@ -122,10 +122,10 @@ namespace TestLibrary.IntegrationTests
                 MetaDataStorage underTest = new MetaDataStorage(engine, matcher.Object);
                 this.fillDatabaseWithEntries(i, underTest);
                 Stopwatch watch = new Stopwatch();
-                watch.Start();
                 var localPath = Mock.Of<IFileSystemInfo>(
                     p =>
                     p.FullName == Path.GetTempPath());
+                watch.Start();
                 underTest.GetObjectByLocalPath(localPath);
                 watch.Stop();
                 Logger.Debug(string.Format("Requesting one object by remote id took: {0} ms", watch.ElapsedMilliseconds));
@@ -135,26 +135,33 @@ namespace TestLibrary.IntegrationTests
         private void fillDatabaseWithEntries(int count, IMetaDataStorage storage) {
             Logger.Debug(string.Format("Adding {0} entries to storage", count));
             Stopwatch watch = new Stopwatch();
+            Stopwatch tempwatch = new Stopwatch();
             var parentFolder = new MappedObject("/", "rootId", MappedObjectType.Folder, null, "token") { Guid = Guid.NewGuid() };
             storage.SaveMappedObject(parentFolder);
+            long min = long.MaxValue;
+            long max = long.MinValue;
 
             for (int i = 0; i < count; i++) {
                 var file = new MappedObject(
                     "name_" + i.ToString(),
-                    i == 0 ? this.requestedId : "id_" + i.ToString(),
+                    i == count-1 ? this.requestedId : "id_" + i.ToString(),
                     MappedObjectType.File,
                     parentFolder.RemoteObjectId,
                     "token",
                     0)
                 {
-                    Guid = ((i == 0) ? this.requestedGuid : Guid.NewGuid())
+                    Guid = ((i == count - 1) ? this.requestedGuid : Guid.NewGuid())
                 };
                 watch.Start();
+                tempwatch.Restart();
                 storage.SaveMappedObject(file);
                 watch.Stop();
+                tempwatch.Stop();
+                min = Math.Min(min, tempwatch.ElapsedMilliseconds);
+                max = Math.Max(max, tempwatch.ElapsedMilliseconds);
             }
 
-            Logger.Debug(string.Format("Added {0} objects to storage in {1} ms", count, watch.ElapsedMilliseconds));
+            Logger.Debug(string.Format("Added {0} objects to storage in {1} (min: {2} max: {3}) ms", count, watch.ElapsedMilliseconds, min, max));
         }
     }
 }

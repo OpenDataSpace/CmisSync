@@ -111,8 +111,7 @@ namespace TestLibrary.IntegrationTests
                     json = File.ReadAllText(path);
                 } else {
                     json = string.Format(
-                        "[ [\"inMemory\", \"true\", \"\", \"10000\"] , [\"inTempPath\", \"false\", \"{0}\", \"10000\"] ]",
-                        Path.Combine(Path.GetTempPath(), "DB_Test"));
+                        "[ [\"a\", \"true\", \"\", \"100\"] , [\"b\", \"true\", \"\", \"1000\"] , [\"c\", \"true\", \"\", \"10000\"] , [\"d\", \"true\", \"\", \"100000\"] , [\"e\", \"true\", \"\", \"1000000\"]]");
                 }
 
                 return JsonConvert.DeserializeObject<List<object[]>>(json);
