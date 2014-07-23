@@ -46,6 +46,10 @@ namespace TestLibrary.TestUtils
             properties.Add(PropertyIds.Name, name);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
 
+            if (string.IsNullOrEmpty(content)) {
+                return folder.CreateDocument(properties, null, null);
+            }
+
             ContentStream contentStream = new ContentStream();
             contentStream.FileName = name;
             contentStream.MimeType = MimeType.GetMIMEType(name);
