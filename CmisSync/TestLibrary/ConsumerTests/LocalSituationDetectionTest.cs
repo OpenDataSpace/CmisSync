@@ -100,7 +100,7 @@ namespace TestLibrary.ConsumerTests
                 d.Name == "newName" &&
                 d.FullName == Path.Combine(Path.GetTempPath(), "newName") &&
                 d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey) == guid.ToString());
-            storage.Setup(s => s.GetObjectByGuid(guid)).Returns(Mock.Of<IMappedObject>(m => m.Name == "oldName"));
+            storage.Setup(s => s.GetObjectByGuid(guid)).Returns(Mock.Of<IMappedObject>());
             var folderEvent = new FolderEvent(dirInfo) { Local = MetaDataChangeType.CHANGED };
 
             Assert.That(new LocalSituationDetection().Analyse(storage.Object, folderEvent), Is.EqualTo(SituationType.RENAMED));
