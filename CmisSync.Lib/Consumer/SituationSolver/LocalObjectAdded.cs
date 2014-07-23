@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Security.Cryptography;
 
@@ -44,7 +45,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Solver to handle the situation of a locally added file/folderobject.
     /// </summary>
-    public class LocalObjectAdded : ISolver
+    public class LocalObjectAdded : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
@@ -56,7 +57,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="queue">Queue to report transmission events to.</param>
         /// <param name="manager">Activitiy manager for transmission propagations</param>
-        public LocalObjectAdded(ISyncEventQueue queue, ActiveActivitiesManager manager) {
+        public LocalObjectAdded(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, ActiveActivitiesManager manager) : base(session, storage) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -72,16 +73,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Solve the situation of a local object added and should be uploaded by using the session, storage, localFile and remoteId.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFileSystemInfo">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
         {
-            string parentId = this.GetParentId(localFileSystemInfo, storage);
+            Stopwatch completewatch = new Stopwatch();
+            completewatch.Start();
+            Logger.Debug("Starting LocalObjectAdded");
+            string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
             Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFileSystemInfo);
 
-            ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, session);
+            ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
 
             if(addedObject.LastModificationDate != null) {
@@ -109,7 +111,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 LastChangeToken = addedObject.ChangeToken,
                 LastContentSize = localFileSystemInfo is IDirectoryInfo ? -1 : 0
             };
-            storage.SaveMappedObject(mapped);
+            this.Storage.SaveMappedObject(mapped);
 
             var localFile = localFileSystemInfo as IFileInfo;
 
@@ -118,7 +120,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 this.queue.AddEvent(transmissionEvent);
                 this.transmissionManager.AddTransmission(transmissionEvent);
                 if (localFile.Length > 0) {
+                    Stopwatch watch = new Stopwatch();
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
+                    watch.Start();
                     IFileUploader uploader = ContentTaskUtils.CreateUploader();
                     using (SHA1 hashAlg = new SHA1Managed())
                     using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
@@ -127,18 +131,22 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         mapped.LastChecksum = hashAlg.Hash;
                     }
 
+                    watch.Stop();
                     mapped.LastContentSize = localFile.Length;
                     localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
                     mapped.LastChangeToken = addedObject.ChangeToken;
                     mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
 
-                    storage.SaveMappedObject(mapped);
-                    OperationsLogger.Info(string.Format("Uploaded file content of {0}", localFile.FullName));
+                    this.Storage.SaveMappedObject(mapped);
+                    OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
                 }
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
+
+            completewatch.Stop();
+            Logger.Debug(string.Format("Finished LocalObjectAdded after [{0} msec]", completewatch.ElapsedMilliseconds));
         }
 
         private static Guid WriteUuidToExtendedAttributeIfSupported(IFileSystemInfo localFile)
@@ -168,6 +176,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 parent = localFileInfo.Directory;
             }
 
+            try {
+                Guid uuid;
+                if (Guid.TryParse(parent.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out uuid)){
+                    return storage.GetObjectByGuid(uuid).RemoteObjectId;
+                }
+            } catch (IOException) {
+            }
+
             IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
             return mappedParent.RemoteObjectId;
         }
@@ -177,17 +193,34 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             string name = localFile.Name;
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
+            Stopwatch watch = new Stopwatch();
+            ICmisObject result;
             if (localFile is IDirectoryInfo) {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+                watch.Start();
                 var objId = session.CreateFolder(properties, new ObjectId(parentId));
+                watch.Stop();
+                Logger.Debug(string.Format("CreatedFolder in [{0} msec]", watch.ElapsedMilliseconds));
+                watch.Restart();
                 var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken");
-                return session.GetObject(objId, operationContext);
+                result = session.GetObject(objId, operationContext);
+                watch.Stop();
+                Logger.Debug(string.Format("GetFolder in [{0} msec]", watch.ElapsedMilliseconds));
             } else {
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                watch.Start();
                 var objId = session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null);
+                watch.Stop();
+                Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
+                watch.Restart();
                 var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken", "cmis:contentStreamLength");
-                return session.GetObject(objId, operationContext);
+                result = session.GetObject(objId, operationContext);
+                watch.Stop();
+                Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
             }
+
+            watch.Stop();
+            return result;
         }
     }
 }

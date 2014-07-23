@@ -45,19 +45,23 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private string newLocalName;
         private string newRemoteName;
         private LocalObjectRenamedRemoteObjectRenamed underTest;
+        private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+
 
         [SetUp]
         public void SetUp() {
             this.newLocalName = string.Empty;
             this.newRemoteName = string.Empty;
+            this.session = new Mock<ISession>();
             this.storage = new Mock<IMetaDataStorage>();
             this.InitializeMappedFolderOnStorage();
+            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object);
         }
 
         [Test]
         public void DefaultConstructor() {
-            new LocalObjectRenamedRemoteObjectRenamed();
+            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -65,11 +69,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         {
             this.newRemoteName = "newName";
             this.newLocalName = this.newRemoteName;
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed();
             var remoteFolder = this.CreateRemoteFolder(this.newRemoteName);
             var localFolder = this.CreateLocalFolder(this.newLocalName);
 
-            this.underTest.Solve(Mock.Of<ISession>(), this.storage.Object, localFolder.Object, remoteFolder.Object);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newLocalName, null, this.newChangeToken, true, null);
         }
@@ -81,12 +84,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.newLocalName = "newLocalName";
             DateTime remoteModification = DateTime.UtcNow;
             DateTime localModification = remoteModification.AddMinutes(1);
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed();
             var remoteFolder = this.CreateRemoteFolder(this.newRemoteName, remoteModification);
             var localFolder = this.CreateLocalFolder(this.newLocalName, localModification);
             remoteFolder.Setup(f => f.Rename(this.newLocalName, true)).Callback(() => remoteFolder.Setup(f => f.Name).Returns(this.newLocalName)).Returns(remoteFolder.Object);
 
-            this.underTest.Solve(Mock.Of<ISession>(), this.storage.Object, localFolder.Object, remoteFolder.Object);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Rename(this.newLocalName, true), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newLocalName, null, this.newChangeToken, true, null);
@@ -98,12 +100,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.newRemoteName = "newRemoteName";
             this.newLocalName = "newLocalName";
             DateTime modification = DateTime.UtcNow;
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed();
             var remoteFolder = this.CreateRemoteFolder(this.newRemoteName, modification);
             var localFolder = this.CreateLocalFolder(this.newLocalName, modification);
             localFolder.Setup(f => f.MoveTo(Path.Combine(this.fullNamePrefix, this.newRemoteName)));
 
-            this.underTest.Solve(Mock.Of<ISession>(), this.storage.Object, localFolder.Object, remoteFolder.Object);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             localFolder.Verify(f => f.MoveTo(Path.Combine(this.fullNamePrefix, this.newRemoteName)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newRemoteName, null, this.newChangeToken, true, null);
@@ -117,12 +118,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.newLocalName = "newLocalName";
             DateTime localModification = DateTime.UtcNow;
             DateTime remoteModification = localModification.AddMinutes(1);
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed();
             var remoteFolder = this.CreateRemoteFolder(this.newRemoteName, remoteModification);
             var localFolder = this.CreateLocalFolder(this.newLocalName, localModification);
             localFolder.Setup(f => f.MoveTo(Path.Combine(this.fullNamePrefix, this.newRemoteName)));
 
-            this.underTest.Solve(Mock.Of<ISession>(), this.storage.Object, localFolder.Object, remoteFolder.Object);
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             localFolder.Verify(f => f.MoveTo(Path.Combine(this.fullNamePrefix, this.newRemoteName)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newRemoteName, null, this.newChangeToken, true, null);

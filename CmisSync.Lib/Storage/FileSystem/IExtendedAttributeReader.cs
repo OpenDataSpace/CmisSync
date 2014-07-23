@@ -41,6 +41,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Key.
         /// </param>
         string GetExtendedAttribute(string path, string key);
+
         /// <summary>
         /// Sets the extended attribute.
         /// </summary>
@@ -54,6 +55,15 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Value.
         /// </param>
         void SetExtendedAttribute(string path, string key, string value);
+
+        /// <summary>
+        /// Sets the extended attribute and restore last modification date.
+        /// </summary>
+        /// <param name="fullName">Full name.</param>
+        /// <param name="key">Key.</param>
+        /// <param name="value">Value.</param>
+        void SetExtendedAttributeAndRestoreLastModificationDate(string fullName, string key, string value);
+
         /// <summary>
         /// Removes the extended attribute.
         /// </summary>
@@ -64,6 +74,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Key.
         /// </param>
         void RemoveExtendedAttribute(string path, string key);
+
         /// <summary>
         /// Lists the attribute keys.
         /// </summary>

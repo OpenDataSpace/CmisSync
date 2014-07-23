@@ -23,11 +23,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
-    using CmisSync.Lib.PathMatcher;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.PathMatcher;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -39,10 +39,24 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     [TestFixture]
     public class RemoteObjectMovedTest
     {
+        private Mock<ISession> session;
+        private Mock<IMetaDataStorage> storage;
+        private Mock<IPathMatcher> matcher;
+        private RemoteObjectMoved underTest;
+
+        [SetUp]
+        public void SetUp() {
+            this.session = new Mock<ISession>();
+            this.storage = new Mock<IMetaDataStorage>();
+            this.matcher = new Mock<IPathMatcher>();
+            this.storage.Setup(s => s.Matcher).Returns(this.matcher.Object);
+            this.underTest = new RemoteObjectMoved(this.session.Object, this.storage.Object);
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new RemoteObjectMoved();
+            new RemoteObjectMoved(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -59,11 +73,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
-
-            var session = new Mock<ISession>();
-            var matcher = new Mock<IPathMatcher>();
-            var storage = new Mock<IMetaDataStorage>();
-            storage.Setup(s => s.Matcher).Returns(matcher.Object);
 
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(oldPath);
@@ -88,16 +97,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 f.LastChangeToken == "oldToken" &&
                 f.Type == MappedObjectType.Folder &&
                 f.ParentId == parentId);
-            storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
-            storage.AddMappedFolder(mappedSubFolder, Path.Combine(Path.GetTempPath(), subFolderName), "/" + subFolderName);
-            matcher.Setup(m => m.CreateLocalPath(It.Is<IFolder>(f => f == remoteObject.Object))).Returns(newPath);
-            var solver = new RemoteObjectMoved();
+            this.storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
+            this.storage.AddMappedFolder(mappedSubFolder, Path.Combine(Path.GetTempPath(), subFolderName), "/" + subFolderName);
+            this.matcher.Setup(m => m.CreateLocalPath(It.Is<IFolder>(f => f == remoteObject.Object))).Returns(newPath);
 
-            solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
+            this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
 
-            storage.Verify(
+            this.storage.Verify(
                 s => s.SaveMappedObject(
                 It.Is<IMappedObject>(f => this.VerifySavedFolder(f, MappedObjectType.Folder, id, newFolderName, subFolderId, lastChangeToken, modifiedDate))),
                 Times.Once());
@@ -117,11 +125,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
-
-            var session = new Mock<ISession>();
-            var matcher = new Mock<IPathMatcher>();
-            var storage = new Mock<IMetaDataStorage>();
-            storage.Setup(s => s.Matcher).Returns(matcher.Object);
 
             var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(d => d.FullName).Returns(oldPath);
@@ -149,16 +152,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 f.LastChangeToken == "oldToken" &&
                 f.Type == MappedObjectType.Folder &&
                 f.ParentId == parentId);
-            storage.AddMappedFolder(mappedFile, oldPath, oldRemotePath);
-            storage.AddMappedFolder(mappedSubFolder, Path.Combine(Path.GetTempPath(), subFolderName), "/" + subFolderName);
-            matcher.Setup(m => m.CreateLocalPath(It.Is<IDocument>(f => f == remoteObject.Object))).Returns(newPath);
-            var solver = new RemoteObjectMoved();
+            this.storage.AddMappedFolder(mappedFile, oldPath, oldRemotePath);
+            this.storage.AddMappedFolder(mappedSubFolder, Path.Combine(Path.GetTempPath(), subFolderName), "/" + subFolderName);
+            this.matcher.Setup(m => m.CreateLocalPath(It.Is<IDocument>(f => f == remoteObject.Object))).Returns(newPath);
 
-            solver.Solve(session.Object, storage.Object, fileInfo.Object, remoteObject.Object);
+            this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
             fileInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
 
-            storage.Verify(
+            this.storage.Verify(
                 s => s.SaveMappedObject(
                 It.Is<IMappedObject>(f => this.VerifySavedFolder(f, MappedObjectType.File, id, newFileName, subFolderId, lastChangeToken, modifiedDate))),
                 Times.Once());
@@ -177,11 +179,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
-
-            var session = new Mock<ISession>();
-            var matcher = new Mock<IPathMatcher>();
-            var storage = new Mock<IMetaDataStorage>();
-            storage.Setup(s => s.Matcher).Returns(matcher.Object);
 
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(oldPath);
@@ -206,16 +203,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 f.LastChangeToken == "oldToken" &&
                 f.Type == MappedObjectType.Folder &&
                 f.ParentId == parentId);
-            storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
-            storage.AddMappedFolder(mappedSubFolder, Path.Combine(Path.GetTempPath(), subFolderName), "/" + subFolderName);
-            matcher.Setup(m => m.CreateLocalPath(It.Is<IFolder>(f => f == remoteObject.Object))).Returns(oldPath);
-            var solver = new RemoteObjectMoved();
+            this.storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
+            this.storage.AddMappedFolder(mappedSubFolder, Path.Combine(Path.GetTempPath(), subFolderName), "/" + subFolderName);
+            this.matcher.Setup(m => m.CreateLocalPath(It.Is<IFolder>(f => f == remoteObject.Object))).Returns(oldPath);
 
-            solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
+            this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.MoveTo(It.IsAny<string>()), Times.Never());
 
-            storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 
         private bool VerifySavedFolder(IMappedObject folder, MappedObjectType type, string id, string name, string parentId, string changeToken, DateTime modifiedTime)

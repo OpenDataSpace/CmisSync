@@ -38,7 +38,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Remote object has been changed. => update the metadata locally.
     /// </summary>
-    public class RemoteObjectChanged : ISolver
+    public class RemoteObjectChanged : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
@@ -51,7 +51,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="queue">Event Queue to report transmission events to.</param>
         /// <param name="fsFactory">File System Factory.</param>
-        public RemoteObjectChanged(ISyncEventQueue queue, ActiveActivitiesManager transmissonManager, IFileSystemInfoFactory fsFactory = null)
+        public RemoteObjectChanged(
+            ISession session,
+            IMetaDataStorage storage,
+            ISyncEventQueue queue,
+            ActiveActivitiesManager transmissonManager,
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage)
         {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
@@ -71,13 +76,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// If a folder is affected, simply update the local change time of the corresponding local folder.
         /// If it is a file and the changeToken is not equal to the saved, the new content is downloaded.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
         {
-            IMappedObject obj = storage.GetObjectByRemoteId(remoteId.Id);
+            IMappedObject obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if (remoteId is IFolder) {
                 var remoteFolder = remoteId as IFolder;
                 DateTime? lastModified = remoteFolder.LastModificationDate;
@@ -148,7 +151,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             }
 
-            storage.SaveMappedObject(obj);
+            this.Storage.SaveMappedObject(obj);
         }
     }
 }

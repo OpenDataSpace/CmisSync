@@ -34,9 +34,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// A Local object has been moved. => Move the corresponding object on the server.
     /// </summary>
-    public class LocalObjectMoved : ISolver
+    public class LocalObjectMoved : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
+        public LocalObjectMoved(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        }
 
         /// <summary>
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
@@ -45,15 +48,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Actual local file.</param>
         /// <param name="remoteId">Corresponding remote identifier.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
         {
             // Move Remote Object
             var remoteObject = remoteId as IFileableCmisObject;
-            var mappedObject = storage.GetObjectByRemoteId(remoteId.Id);
+            var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             var targetPath = localFile is IDirectoryInfo ? (localFile as IDirectoryInfo).Parent : (localFile as IFileInfo).Directory;
-            var targetId = storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
-            var src = session.GetObject(mappedObject.ParentId);
-            var target = session.GetObject(targetId);
+            var targetId = this.Storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
+            var src = this.Session.GetObject(mappedObject.ParentId);
+            var target = this.Session.GetObject(targetId);
             OperationsLogger.Info(string.Format("Moving remote object {2} from folder {0} to folder {1}", src.Name, target.Name, remoteId.Id));
             remoteObject = remoteObject.Move(src, target);
             if(localFile.Name != remoteObject.Name) {
@@ -64,7 +67,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             mappedObject.LastChangeToken = remoteObject.ChangeToken;
             mappedObject.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
             mappedObject.Name = remoteObject.Name;
-            storage.SaveMappedObject(mappedObject);
+            this.Storage.SaveMappedObject(mappedObject);
         }
     }
 }

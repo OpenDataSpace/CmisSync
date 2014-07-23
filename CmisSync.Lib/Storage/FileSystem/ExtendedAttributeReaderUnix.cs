@@ -110,6 +110,11 @@ namespace CmisSync.Lib.Storage.FileSystem
 #endif
         }
 
+        public void SetExtendedAttributeAndRestoreLastModificationDate(string path, string key, string value)
+        {
+            this.SetExtendedAttribute(path, key, value);
+        }
+
         /// <summary>
         /// Removes the extended attribute.
         /// </summary>

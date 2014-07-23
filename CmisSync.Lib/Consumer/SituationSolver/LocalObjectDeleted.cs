@@ -36,24 +36,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// A Local object has been deleted. => Delete the corresponding object on the server, if possible
     /// </summary>
-    public class LocalObjectDeleted : ISolver
+    public class LocalObjectDeleted : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
+        public LocalObjectDeleted(ISession session, IMetaDataStorage storage) : base (session, storage) {
+        }
 
         /// <summary>
         /// Solves the situation by deleting the corresponding remote object.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
         {
-            var mappedObject = storage.GetObjectByRemoteId(remoteId.Id);
+            var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
 
-            bool hasBeenDeleted = TryDeleteObjectOnServer(session, remoteId, mappedObject.Type);
+            bool hasBeenDeleted = TryDeleteObjectOnServer(remoteId, mappedObject.Type);
             if(hasBeenDeleted) {
-                storage.RemoveObject(mappedObject);
+                this.Storage.RemoveObject(mappedObject);
                 OperationsLogger.Info(string.Format("Deleted the corresponding remote object {0} of locally deleted object {1}", remoteId.Id, mappedObject.Name));
             } else {
                 OperationsLogger.Warn(string.Format("Permission denied while trying to Delete the locally deleted object {0} on the server.", mappedObject.Name));
@@ -61,13 +62,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
         }
 
-        private bool TryDeleteObjectOnServer(ISession session, IObjectId remoteId, MappedObjectType type)
+        private bool TryDeleteObjectOnServer(IObjectId remoteId, MappedObjectType type)
         {
             try{
                 if (type == MappedObjectType.Folder) {
                     (remoteId as IFolder).DeleteTree(false, UnfileObject.DeleteSinglefiled, true);
                 } else {
-                    session.Delete(remoteId, true);
+                    this.Session.Delete(remoteId, true);
                 }
             } catch (CmisPermissionDeniedException){
                 return false;

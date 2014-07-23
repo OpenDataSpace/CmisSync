@@ -32,23 +32,24 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object renamed and also the remote object has been renamed.
     /// </summary>
-    public class LocalObjectRenamedRemoteObjectRenamed : ISolver
+    public class LocalObjectRenamedRemoteObjectRenamed : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
+        public LocalObjectRenamedRemoteObjectRenamed(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        }
 
         /// <summary>
         /// Solve the specified situation by taking renaming the local or remote object to the name of the last changed object.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteId">Remote object.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
         {
             if (localFile is IDirectoryInfo) {
                 var localFolder = localFile as IDirectoryInfo;
                 var remoteFolder = remoteId as IFolder;
-                var mappedObject = storage.GetObjectByRemoteId(remoteFolder.Id);
+                var mappedObject = this.Storage.GetObjectByRemoteId(remoteFolder.Id);
                 if (localFolder.Name.Equals(remoteFolder.Name)) {
                     mappedObject.Name = localFolder.Name;
                 } else if (localFolder.LastWriteTimeUtc.CompareTo((DateTime)remoteFolder.LastModificationDate) > 0) {
@@ -66,7 +67,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
                 mappedObject.LastRemoteWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 mappedObject.LastChangeToken = remoteFolder.ChangeToken;
-                storage.SaveMappedObject(mappedObject);
+                this.Storage.SaveMappedObject(mappedObject);
             } else {
                 throw new NotImplementedException("File scenario is not implemented yet");
             }

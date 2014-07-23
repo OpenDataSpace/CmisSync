@@ -35,12 +35,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     public interface ISolver
     {
         /// <summary>
-        /// Solve the specified situation by using the session, storage, localFile and remoteId.
+        /// Solve the specified situation by using localFile and remote object.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
-        /// <param name="localFile">Local file.</param>
-        /// <param name="remoteId">Remote identifier.</param>
-        void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId);
+        /// <param name="localFileSystemInfo">Local filesystem info instance.</param>
+        /// <param name="remoteId">Remote identifier or object.</param>
+        void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId);
     }
 }

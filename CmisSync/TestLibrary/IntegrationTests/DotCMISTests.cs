@@ -45,6 +45,8 @@ namespace TestLibrary.IntegrationTests
 
     using NUnit.Framework;
 
+    using TestUtils;
+
     /// <summary>
     /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
     /// </summary>
@@ -149,6 +151,28 @@ namespace TestLibrary.IntegrationTests
             }
 
             emptyDoc.DeleteAllVersions();
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void RemovingRemoteFolderAndAddingADocumentToItShouldThrowException(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+
+            IFolder subFolder = folder.CreateFolder("subFolder");
+
+            IFolder subFolderInstanceCopy = (IFolder)session.GetObject(subFolder.Id);
+            subFolder.DeleteTree(true, null, true);
+
+            Assert.Throws<CmisBaseException>(() => subFolderInstanceCopy.CreateDocument("testFile.bin", "testContent"));
         }
 
         /// <summary>

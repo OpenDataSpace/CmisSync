@@ -22,10 +22,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Consumer.SituationSolver;
 
     using DotCMIS.Client;
 
@@ -38,10 +38,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     [TestFixture]
     public class RemoteObjectRenamedTest
     {
+        private Mock<ISession> session;
+        private Mock<IMetaDataStorage> storage;
+        private RemoteObjectRenamed underTest;
+
+        [SetUp]
+        public void SetUp() {
+            this.session = new Mock<ISession>();
+            this.storage = new Mock<IMetaDataStorage>();
+            this.underTest = new RemoteObjectRenamed(this.session.Object, this.storage.Object);
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new RemoteObjectRenamed();
+            new RemoteObjectRenamed(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -56,10 +67,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string id = "id";
             string parentId = "papa";
             string lastChangeToken = "token";
-
-            var session = new Mock<ISession>();
-
-            var storage = new Mock<IMetaDataStorage>();
 
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.FullName).Returns(oldPath);
@@ -78,16 +85,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
                 f.Type == MappedObjectType.Folder &&
                 f.ParentId == parentId);
-            storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
+            this.storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
 
-            var solver = new RemoteObjectRenamed();
-
-            solver.Solve(session.Object, storage.Object, dirInfo.Object, remoteObject.Object);
+            this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
 
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modifiedDate)), Times.Once());
-            storage.Verify(
+            this.storage.Verify(
                 s => s.SaveMappedObject(
                 It.Is<IMappedObject>(f => this.VerifySavedObject(f, MappedObjectType.Folder, id, newFolderName, parentId, lastChangeToken, modifiedDate))),
                 Times.Once());
@@ -105,7 +110,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string id = "id";
             string parentId = "root";
             string lastChangeToken = "token";
-            var storage = new Mock<IMetaDataStorage>();
             var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.FullName).Returns(oldPath);
             fileInfo.Setup(f => f.Name).Returns(oldFileName);
@@ -123,16 +127,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
                 f.Type == MappedObjectType.File &&
                 f.ParentId == parentId);
-            storage.AddMappedFolder(mappedFile, oldPath, oldRemotePath);
+            this.storage.AddMappedFolder(mappedFile, oldPath, oldRemotePath);
 
-            var solver = new RemoteObjectRenamed();
-
-            solver.Solve(null, storage.Object, fileInfo.Object, remoteObject.Object);
+            this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
             fileInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
 
             fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modifiedDate)), Times.Once());
-            storage.Verify(
+            this.storage.Verify(
                 s => s.SaveMappedObject(
                 It.Is<IMappedObject>(f => this.VerifySavedObject(f, MappedObjectType.File, id, newFileName, parentId, lastChangeToken, modifiedDate))),
                 Times.Once());

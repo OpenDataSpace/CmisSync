@@ -22,10 +22,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -34,20 +34,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Remote object has been renamed. => Rename the corresponding local object.
     /// </summary>
-    public class RemoteObjectRenamed : ISolver
+    public class RemoteObjectRenamed : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectRenamed"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        public RemoteObjectRenamed(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        }
+
+        /// <summary>
         /// Renames the specified localFile to the name of the given remoteId object by using the storage, localFile and remoteId.
         /// </summary>
-        /// <param name="session">Cmis session instance. Is not needed to solve this specific situation.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Local file or folder. It is the source file/folder reference, which should be renamed.</param>
         /// <param name="remoteId">Remote identifier. Should be an instance of IFolder or IDocument.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFile, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
         {
-            IMappedObject obj = storage.GetObjectByRemoteId(remoteId.Id);
+            IMappedObject obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if(remoteId is IFolder)
             {
                 // Rename local folder
@@ -63,7 +69,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 obj.LastChangeToken = remoteFolder.ChangeToken;
                 obj.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 obj.LastLocalWriteTimeUtc = dirInfo.LastWriteTimeUtc;
-                storage.SaveMappedObject(obj);
+                this.Storage.SaveMappedObject(obj);
                 OperationsLogger.Info(string.Format("Renamed local folder {0} to {1}", oldPath, remoteFolder.Name));
             }
             else if(remoteId is IDocument)
@@ -81,7 +87,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 obj.LastChangeToken = remoteDocument.ChangeToken;
                 obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
                 obj.LastLocalWriteTimeUtc = fileInfo.LastWriteTimeUtc;
-                storage.SaveMappedObject(obj);
+                this.Storage.SaveMappedObject(obj);
                 OperationsLogger.Info(string.Format("Renamed local file {0} to {1}", oldPath, remoteDocument.Name));
             } else {
                 throw new ArgumentException("Given remote Id is not an IFolder nor an IDocument instance");

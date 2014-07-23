@@ -112,8 +112,6 @@ namespace TestLibrary.ConsumerTests
             ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
             var noChangeSolver = new Mock<ISolver>();
             noChangeSolver.Setup(s => s.Solve(
-                It.IsAny<ISession>(),
-                It.IsAny<IMetaDataStorage>(),
                 It.IsAny<IFileSystemInfo>(),
                 It.Is<IObjectId>(id => id == remoteId)));
             localDetection.Setup(d => d.Analyse(
@@ -137,8 +135,6 @@ namespace TestLibrary.ConsumerTests
             Assert.True(mechanism.Handle(noChangeEvent));
             noChangeSolver.Verify(
                 s => s.Solve(
-                It.Is<ISession>(se => se == this.session.Object),
-                It.IsAny<IMetaDataStorage>(),
                 It.IsAny<IFileSystemInfo>(),
                 It.Is<IObjectId>(id => id.Id == remoteId.Id)),
                 Times.Once());
@@ -179,8 +175,6 @@ namespace TestLibrary.ConsumerTests
 
             remoteFolderAddedSolver.Verify(
                 s => s.Solve(
-                It.Is<ISession>(session => session == this.session.Object),
-                It.Is<IMetaDataStorage>(storage => storage == this.storage.Object),
                 It.IsAny<IFileSystemInfo>(),
                 It.IsAny<IObjectId>()),
                 Times.Once());
@@ -203,8 +197,6 @@ namespace TestLibrary.ConsumerTests
 
             localFolderAddedSolver.Verify(
                 s => s.Solve(
-                It.Is<ISession>(session => session == this.session.Object),
-                It.Is<IMetaDataStorage>(storage => storage == this.storage.Object),
                 It.IsAny<IFileSystemInfo>(),
                 It.IsAny<IObjectId>()),
                 Times.Once());
@@ -238,7 +230,7 @@ namespace TestLibrary.ConsumerTests
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
             var retryProducer = new Mock<ISolver>();
-            retryProducer.Setup(r => r.Solve(this.session.Object, this.storage.Object, It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>())).Throws(new RetryException("reason"));
+            retryProducer.Setup(r => r.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>())).Throws(new RetryException("reason"));
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = retryProducer.Object;
             var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener, solver);
             localDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);

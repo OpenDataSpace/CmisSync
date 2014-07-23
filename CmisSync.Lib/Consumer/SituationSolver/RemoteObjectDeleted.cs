@@ -34,29 +34,35 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Remote object has been deleted. => Delete the corresponding local object as well.
     /// </summary>
-    public class RemoteObjectDeleted : ISolver
+    public class RemoteObjectDeleted : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectDeleted"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        public RemoteObjectDeleted(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        }
+
+        /// <summary>
         /// Deletes the given localFileInfo on file system and removes the stored object from storage.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFileInfo">Local file info.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public virtual void Solve(ISession session, IMetaDataStorage storage, IFileSystemInfo localFileInfo, IObjectId remoteId)
+        public override void Solve(IFileSystemInfo localFileInfo, IObjectId remoteId)
         {
             if (localFileInfo is IDirectoryInfo) {
-                if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(storage, localFileInfo)) {
-                    storage.RemoveObject(storage.GetObjectByLocalPath(localFileInfo));
+                if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(this.Storage, localFileInfo)) {
+                    this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
                     throw new IOException(string.Format("Not all local objects under {0} have been synced yet", localFileInfo.FullName));
                 } else {
-                    storage.RemoveObject(storage.GetObjectByLocalPath(localFileInfo));
+                    this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
                 }
             } else if (localFileInfo is IFileInfo) {
                 var file = localFileInfo as IFileInfo;
-                var mappedFile = storage.GetObjectByLocalPath(file);
+                var mappedFile = this.Storage.GetObjectByLocalPath(file);
                 if (mappedFile != null && file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
                     file.Delete();
                     OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", file.FullName, mappedFile.RemoteObjectId));
@@ -69,7 +75,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     OperationsLogger.Info(string.Format("Deletion of local file {0} skipped because of not yet uploaded changes", file.FullName));
                 }
 
-                storage.RemoveObject(storage.GetObjectByLocalPath(localFileInfo));
+                this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
             }
         }
 

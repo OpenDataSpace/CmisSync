@@ -305,6 +305,50 @@ namespace CmisSync.Lib.Storage.FileSystem
         }
 
         /// <summary>
+        /// Sets the extended attribute and restore last modification date.
+        /// </summary>
+        /// <param name="path">Sets attribute of this path.</param>
+        /// <param name="key">Key of the attribute, which should be set.</param>
+        /// <param name="value">The value to set.</param>
+        public void SetExtendedAttributeAndRestoreLastModificationDate(string path, string key, string value)
+        {
+            #if ! __MonoCS__
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException("Empty or null key is not allowed");
+            }
+
+            path = Path.GetFullPath(path);
+            path = path.TrimEnd(Path.DirectorySeparatorChar);
+            if (!File.Exists(path) && !Directory.Exists(path)) {
+                throw new FileNotFoundException(string.Format("{0}: on path \"{1}\"", "No such file or directory", path), path);
+            }
+            DateTime oldDate = File.Exists(path) ? File.GetLastWriteTimeUtc(path) : Directory.GetLastWriteTimeUtc(path);
+            if (value == null)
+            {
+                RemoveExtendedAttribute(path, key);
+            }
+            else
+            {
+                using (FileStream stream = CreateFileStream(string.Format("{0}:{1}", path, key), FileAccess.Write, FileMode.Create, FileShare.Write))
+                {
+                    TextWriter writer = new StreamWriter(stream);
+                    writer.Write(value);
+                    writer.Close();
+                }
+            }
+
+            if (File.Exists(path)) {
+                File.SetLastWriteTimeUtc(path, oldDate);
+            } else {
+                Directory.SetLastWriteTimeUtc(path, oldDate);
+            }
+            #else
+            throw new WrongPlatformException();
+            #endif
+        }
+
+        /// <summary>
         /// Removes the extended attribute.
         /// </summary>
         /// <param name="path">Removes attribute from this path.</param>
