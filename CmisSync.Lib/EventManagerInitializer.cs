@@ -200,7 +200,7 @@ namespace CmisSync.Lib
                 if (!Guid.TryParse(localRootFolder.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out rootFolderGuid)) {
                     try {
                         rootFolderGuid = Guid.NewGuid();
-                        localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString(), true);
+                        localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString(), false);
                     } catch (ExtendedAttributeException ex)
                     {
                         Logger.Warn("Problem on setting Guid of the root path", ex);
