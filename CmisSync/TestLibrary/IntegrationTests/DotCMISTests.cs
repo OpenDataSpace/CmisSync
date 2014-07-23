@@ -651,11 +651,11 @@ namespace TestLibrary.IntegrationTests
             Stopwatch watch = Stopwatch.StartNew();
             this.CreateFolderHierarchie(testFolder);
             watch.Stop();
-            Logger.Debug("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Info("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
             watch.Restart();
             session.GetContentChanges(serverChangeLogToken, false, 10000);
             watch.Stop();
-            Logger.Debug("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Info("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
 
             testFolder.DeleteTree(true, null, true);
         }
@@ -690,18 +690,18 @@ namespace TestLibrary.IntegrationTests
             Stopwatch watch = Stopwatch.StartNew();
             this.CreateFolderHierarchie(testFolder);
             watch.Stop();
-            Logger.Debug("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Info("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
             IChangeEvents changes;
             watch.Restart();
             do {
                 var singleCallWatch = Stopwatch.StartNew();
                 changes = session.GetContentChanges(serverChangeLogToken, false, 100);
                 singleCallWatch.Stop();
-                Logger.Debug(string.Format("GetContentChanges({0}, false, 100) returned {2} events and took {1} ms", serverChangeLogToken, singleCallWatch.ElapsedMilliseconds, changes.ChangeEventList.Count));
+                Logger.Info(string.Format("GetContentChanges({0}, false, 100) returned {2} events and took {1} ms", serverChangeLogToken, singleCallWatch.ElapsedMilliseconds, changes.ChangeEventList.Count));
                 serverChangeLogToken = changes.LatestChangeLogToken;
             } while (changes.HasMoreItems == true && (changes.TotalNumItems != null && changes.TotalNumItems > changes.ChangeEventList.Count));
             watch.Stop();
-            Logger.Debug("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Info("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
 
             testFolder.DeleteTree(true, null, true);
         }
@@ -734,11 +734,11 @@ namespace TestLibrary.IntegrationTests
             Stopwatch watch = Stopwatch.StartNew();
             this.CreateFolderHierarchie(testFolder);
             watch.Stop();
-            Logger.Debug("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Info("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
             watch.Restart();
             testFolder.GetDescendants(-1, OperationContextFactory.CreateCrawlContext(session));
             watch.Stop();
-            Logger.Debug("Requested Descendants in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Info("Requested Descendants in "+ watch.ElapsedMilliseconds + " ms");
 
             testFolder.DeleteTree(true, null, true);
         }
