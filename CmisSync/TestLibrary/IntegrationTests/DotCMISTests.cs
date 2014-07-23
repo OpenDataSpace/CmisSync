@@ -42,6 +42,8 @@ namespace TestLibrary.IntegrationTests
     using DotCMIS.Enums;
     using DotCMIS.Exceptions;
 
+    using log4net;
+
     using Newtonsoft.Json;
 
     using NUnit.Framework;
@@ -52,8 +54,10 @@ namespace TestLibrary.IntegrationTests
     /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
     /// </summary>
     [TestFixture, Timeout(900000)]
-    public class DotCMISTests
+    public class DotCMISTests : IsTestWithConfiguredLog4Net
     {
+        private static readonly ILog Logger = LogManager.GetLogger (typeof(DotCMISTests));
+
         /// <summary>
         /// Disable HTTPS Verification
         /// </summary>
@@ -647,11 +651,11 @@ namespace TestLibrary.IntegrationTests
             Stopwatch watch = Stopwatch.StartNew();
             this.CreateFolderHierarchie(testFolder);
             watch.Stop();
-            Console.WriteLine("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Debug("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
             watch.Restart();
             session.GetContentChanges(serverChangeLogToken, false, 10000);
             watch.Stop();
-            Console.WriteLine("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Debug("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
 
             testFolder.DeleteTree(true, null, true);
         }
@@ -686,18 +690,18 @@ namespace TestLibrary.IntegrationTests
             Stopwatch watch = Stopwatch.StartNew();
             this.CreateFolderHierarchie(testFolder);
             watch.Stop();
-            Console.WriteLine("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Debug("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
             IChangeEvents changes;
             watch.Restart();
             do {
                 var singleCallWatch = Stopwatch.StartNew();
                 changes = session.GetContentChanges(serverChangeLogToken, false, 100);
                 singleCallWatch.Stop();
-                Console.WriteLine(string.Format("GetContentChanges({0}, false, 100) returned {2} events and took {1} ms", serverChangeLogToken, singleCallWatch.ElapsedMilliseconds, changes.ChangeEventList.Count));
+                Logger.Debug(string.Format("GetContentChanges({0}, false, 100) returned {2} events and took {1} ms", serverChangeLogToken, singleCallWatch.ElapsedMilliseconds, changes.ChangeEventList.Count));
                 serverChangeLogToken = changes.LatestChangeLogToken;
             } while (changes.HasMoreItems == true && (changes.TotalNumItems != null && changes.TotalNumItems > changes.ChangeEventList.Count));
             watch.Stop();
-            Console.WriteLine("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Debug("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
 
             testFolder.DeleteTree(true, null, true);
         }
@@ -730,11 +734,11 @@ namespace TestLibrary.IntegrationTests
             Stopwatch watch = Stopwatch.StartNew();
             this.CreateFolderHierarchie(testFolder);
             watch.Stop();
-            Console.WriteLine("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Debug("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
             watch.Restart();
             testFolder.GetDescendants(-1, OperationContextFactory.CreateCrawlContext(session));
             watch.Stop();
-            Console.WriteLine("Requested Descendants in "+ watch.ElapsedMilliseconds + " ms");
+            Logger.Debug("Requested Descendants in "+ watch.ElapsedMilliseconds + " ms");
 
             testFolder.DeleteTree(true, null, true);
         }
