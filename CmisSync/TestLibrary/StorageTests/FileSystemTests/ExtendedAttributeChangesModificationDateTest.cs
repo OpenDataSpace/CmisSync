@@ -61,15 +61,33 @@ namespace TestLibrary.StorageTests.FileSystemTests
             var file = this.fsFactory.CreateFileInfo(this.path);
             using (file.Open(FileMode.CreateNew)) {
             }
+
             DateTime oldTime = DateTime.UtcNow.AddDays(1);
             file.LastWriteTimeUtc = oldTime;
             file.Refresh();
             oldTime = file.LastWriteTimeUtc;
 
-            file.SetExtendedAttribute("Test", "test");
+            file.SetExtendedAttributeAndRestoreLastModificationDate("Test", "test");
 
             file.Refresh();
             Assert.That(file.LastWriteTimeUtc, Is.EqualTo(oldTime));
+        }
+
+        [Test, Category("Medium")]
+        public void SetExtendedAttributeToFolderDoesNotChangesModificationDate()
+        {
+            var folder = this.fsFactory.CreateDirectoryInfo(this.path);
+            folder.Create();
+
+            DateTime oldTime = DateTime.UtcNow.AddDays(1);
+            folder.LastWriteTimeUtc = oldTime;
+            folder.Refresh();
+            oldTime = folder.LastWriteTimeUtc;
+
+            folder.SetExtendedAttributeAndRestoreLastModificationDate("Test", "test");
+
+            folder.Refresh();
+            Assert.That(folder.LastWriteTimeUtc, Is.EqualTo(oldTime));
         }
     }
 }

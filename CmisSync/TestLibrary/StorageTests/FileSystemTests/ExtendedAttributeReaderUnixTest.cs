@@ -207,19 +207,25 @@ namespace TestLibrary.StorageTests.FileSystemTests
             Assert.That(reader.GetExtendedAttribute(path, key), Is.Null);
         }
 
-        //WARNING: do not use Expected Exceptions for these tests
-        //as there is a bug where ExtendedAttributeException matches FileNotFoundException
         [Test, Category("Medium"), Category("ExtendedAttribute")]
         public void SetExtendedAttributeOnNonExistingFileThrowsFileNotFoundException()
         {
             string key = "test";
             var reader = new ExtendedAttributeReaderUnix();
-            try{
-                reader.SetExtendedAttribute(path, key, null);
-            } catch (FileNotFoundException) {
-                return;
-            }
-            Assert.Fail("FileNotFoundException not thrown");
+            Assert.Throws<FileNotFoundException>(() => reader.SetExtendedAttribute(path, key, null));
+        }
+
+        [Test, Category("Medium"), Category("ExtendedAttribute")]
+        public void SetExtendedAttributeDoesNotChangesModificationDate()
+        {
+            using (File.Create(path));
+            File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddDays(1));
+            DateTime futureDate = File.GetLastWriteTimeUtc(path);
+            string key = "test";
+            string value = "value";
+            var reader = new ExtendedAttributeReaderUnix();
+            reader.SetExtendedAttributeAndRestoreLastModificationDate(path, key, value);
+            Assert.That(File.GetLastWriteTimeUtc(path), Is.EqualTo(futureDate));
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
