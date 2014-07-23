@@ -21,6 +21,7 @@ namespace TestLibrary.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Net;
     using System.Security.Cryptography;
@@ -614,6 +615,140 @@ namespace TestLibrary.IntegrationTests
             Assert.That(newFolder.ChangeToken, Is.Not.EqualTo(changeToken));
 
             newFolder.Delete(true);
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Benchmark")]
+        public void GetContentChangeBenchmark(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string foldername = "contentChanges";
+            IFolder testFolder;
+            try {
+                testFolder = session.GetObjectByPath(remoteFolderPath + "/" + foldername) as IFolder;
+
+                if (testFolder != null) {
+                    testFolder.DeleteTree(true, null, true);
+                }
+            }catch(CmisObjectNotFoundException) {
+            }
+
+            testFolder = folder.CreateFolder(foldername);
+
+            string serverChangeLogToken = session.Binding.GetRepositoryService().GetRepositoryInfo(repositoryId, null).LatestChangeLogToken;
+
+            Stopwatch watch = Stopwatch.StartNew();
+            this.CreateFolderHierarchie(testFolder);
+            watch.Stop();
+            Console.WriteLine("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            watch.Restart();
+            session.GetContentChanges(serverChangeLogToken, false, 10000);
+            watch.Stop();
+            Console.WriteLine("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
+
+            testFolder.DeleteTree(true, null, true);
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Benchmark")]
+        public void GetContentChangePagingBenchmark(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string foldername = "contentChanges";
+            IFolder testFolder;
+            try {
+                testFolder = session.GetObjectByPath(remoteFolderPath + "/" + foldername) as IFolder;
+
+                if (testFolder != null) {
+                    testFolder.DeleteTree(true, null, true);
+                }
+            }catch(CmisObjectNotFoundException) {
+            }
+
+            testFolder = folder.CreateFolder(foldername);
+
+            string serverChangeLogToken = session.Binding.GetRepositoryService().GetRepositoryInfo(repositoryId, null).LatestChangeLogToken;
+
+            Stopwatch watch = Stopwatch.StartNew();
+            this.CreateFolderHierarchie(testFolder);
+            watch.Stop();
+            Console.WriteLine("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            IChangeEvents changes;
+            watch.Restart();
+            do {
+                var singleCallWatch = Stopwatch.StartNew();
+                changes = session.GetContentChanges(serverChangeLogToken, false, 100);
+                singleCallWatch.Stop();
+                Console.WriteLine(string.Format("GetContentChanges({0}, false, 100) returned {2} events and took {1} ms", serverChangeLogToken, singleCallWatch.ElapsedMilliseconds, changes.ChangeEventList.Count));
+                serverChangeLogToken = changes.LatestChangeLogToken;
+            } while (changes.HasMoreItems == true && (changes.TotalNumItems != null && changes.TotalNumItems > changes.ChangeEventList.Count));
+            watch.Stop();
+            Console.WriteLine("Requested ContentChanges in "+ watch.ElapsedMilliseconds + " ms");
+
+            testFolder.DeleteTree(true, null, true);
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Benchmark")]
+        public void GetDescendantsBenchmark(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string foldername = "descendants";
+            IFolder testFolder;
+
+            try {
+                testFolder = session.GetObjectByPath(remoteFolderPath + "/" + foldername) as IFolder;
+                if (testFolder != null) {
+                    testFolder.DeleteTree(true, null, true);
+                }
+            } catch(CmisObjectNotFoundException) {
+            }
+
+            testFolder = folder.CreateFolder(foldername);
+
+            Stopwatch watch = Stopwatch.StartNew();
+            this.CreateFolderHierarchie(testFolder);
+            watch.Stop();
+            Console.WriteLine("Created Folder Hierarchie in "+ watch.ElapsedMilliseconds + " ms");
+            watch.Restart();
+            testFolder.GetDescendants(-1, OperationContextFactory.CreateCrawlContext(session));
+            watch.Stop();
+            Console.WriteLine("Requested Descendants in "+ watch.ElapsedMilliseconds + " ms");
+
+            testFolder.DeleteTree(true, null, true);
+        }
+
+        private void CreateFolderHierarchie(IFolder baseFolder) {
+            for (int i = 0; i < 10; i++) {
+                IFolder folder = baseFolder.CreateFolder("folder_" + i.ToString());
+                for (int j = 0; j < 10; j++) {
+                    folder = folder.CreateFolder("sub_"+ j.ToString());
+                    for (int k = 0; k < 5; k++) {
+                        folder.CreateDocument("doc_"+ k.ToString(), null);
+                    }
+                }
+            }
         }
 
         private class AssertingStream : StreamWrapper {
