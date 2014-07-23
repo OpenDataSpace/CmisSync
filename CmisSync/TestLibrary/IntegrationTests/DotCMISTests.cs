@@ -172,7 +172,7 @@ namespace TestLibrary.IntegrationTests
             IFolder subFolderInstanceCopy = (IFolder)session.GetObject(subFolder.Id);
             subFolder.DeleteTree(true, null, true);
 
-            Assert.Throws<CmisBaseException>(() => subFolderInstanceCopy.CreateDocument("testFile.bin", "testContent"));
+            Assert.Throws<CmisObjectNotFoundException>(() => subFolderInstanceCopy.CreateDocument("testFile.bin", "testContent"));
         }
 
         /// <summary>

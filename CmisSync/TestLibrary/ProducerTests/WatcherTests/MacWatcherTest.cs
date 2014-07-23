@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 #if __COCOA__
 
 namespace TestLibrary.ProducerTests.WatcherTests
@@ -27,6 +28,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
 
     using MonoMac.Foundation;
     using MonoMac.AppKit;
