@@ -78,7 +78,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             IMappedObject obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if (remoteId is IFolder) {

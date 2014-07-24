@@ -75,7 +75,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFileSystemInfo">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public override void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
+        public override void Solve(
+            IFileSystemInfo localFileSystemInfo,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             Stopwatch completewatch = new Stopwatch();
             completewatch.Start();

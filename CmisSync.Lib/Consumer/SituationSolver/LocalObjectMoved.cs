@@ -48,7 +48,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Actual local file.</param>
         /// <param name="remoteId">Corresponding remote identifier.</param>
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             // Move Remote Object
             var remoteObject = remoteId as IFileableCmisObject;

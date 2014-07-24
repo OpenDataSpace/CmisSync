@@ -198,10 +198,10 @@ namespace CmisSync.Lib.Consumer
         {
             using(var activity = new ActivityListenerResource(this.activityListener)) {
             if (e is FolderEvent) {
-                s.Solve((e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder);
+                s.Solve((e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);
                 // this.storage.ValidateObjectStructure();
             } else if (e is FileEvent) {
-                s.Solve((e as FileEvent).LocalFile, (e as FileEvent).RemoteFile);
+                s.Solve((e as FileEvent).LocalFile, (e as FileEvent).RemoteFile, (e as FileEvent).LocalContent, (e as FileEvent).RemoteContent);
                 // this.storage.ValidateObjectStructure();
             }
             }

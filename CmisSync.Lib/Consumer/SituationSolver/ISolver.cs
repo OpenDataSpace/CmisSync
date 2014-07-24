@@ -39,6 +39,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFileSystemInfo">Local filesystem info instance.</param>
         /// <param name="remoteId">Remote identifier or object.</param>
-        void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId);
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
+        void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId, ContentChangeType localContent, ContentChangeType remoteContent);
     }
 }

@@ -51,7 +51,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFileInfo">Local file info.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public override void Solve(IFileSystemInfo localFileInfo, IObjectId remoteId)
+        public override void Solve(
+            IFileSystemInfo localFileInfo,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             if (localFileInfo is IDirectoryInfo) {
                 if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(this.Storage, localFileInfo)) {

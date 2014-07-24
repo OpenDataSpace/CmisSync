@@ -69,7 +69,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFileSystemInfo">Local file system info.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public override void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId)
+        public override void Solve(
+            IFileSystemInfo localFileSystemInfo,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             // Match local changes to remote changes and updated them remotely
             var mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);

@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
 
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -68,6 +69,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFileSystemInfo">Local filesystem info instance.</param>
         /// <param name="remoteId">Remote identifier or object.</param>
-        public abstract void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId);
+        public abstract void Solve(
+            IFileSystemInfo localFileSystemInfo,
+            IObjectId remoteId,
+            ContentChangeType localContent,
+            ContentChangeType remoteContent);
     }
 }

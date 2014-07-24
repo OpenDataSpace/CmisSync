@@ -22,6 +22,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System;
 
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -65,7 +66,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 return this.Storage;
             }
 
-            public override void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId) {
+            public override void Solve(
+                IFileSystemInfo localFileSystemInfo,
+                IObjectId remoteId,
+                ContentChangeType localContent,
+                ContentChangeType remoteContent)
+            {
                 throw new NotImplementedException();
             }
         }

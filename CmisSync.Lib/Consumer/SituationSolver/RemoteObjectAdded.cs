@@ -80,7 +80,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <exception cref='ArgumentException'>
         /// Is thrown when remoteId is not prefetched.
         /// </exception>
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId) {
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
+        {
             if(localFile is IDirectoryInfo) {
                 if(!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
