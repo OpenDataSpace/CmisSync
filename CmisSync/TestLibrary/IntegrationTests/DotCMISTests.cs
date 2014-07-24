@@ -446,6 +446,50 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void SetOneGigabyteAsContentStream(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+
+            string filename = "1G_testfile.dat";
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            try {
+                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc != null) {
+                    doc.Delete(true);
+                }
+            } catch (CmisObjectNotFoundException)
+            {
+            }
+
+            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+
+            long length = 1024 * 1024 * 1024;
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = filename;
+            contentStream.MimeType = MimeType.GetMIMEType(filename);
+            contentStream.Length = length;
+            byte[] gig = new byte[length];
+            using (var memstream = new MemoryStream(gig)) {
+                contentStream.Stream = memstream;
+                emptyDoc.SetContentStream(contentStream, true, true);
+            }
+
+            Assert.AreEqual(length, emptyDoc.ContentStreamLength);
+
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void EnsureFileNameStaysEqualWhileUploading(
             string canonical_name,
             string localPath,
