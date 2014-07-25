@@ -182,13 +182,6 @@ namespace CmisSync.Lib.Streams
 
             int result = this.Stream.Read(buffer, offset, count);
 
-            if (this.Stream.Length > this.transmissionEvent.Status.Length) {
-                var transmissionArgs = new TransmissionProgressEventArgs {
-                    Length = this.Stream.Length
-                };
-                this.transmissionEvent.ReportProgress(transmissionArgs);
-            }
-
             this.CalculateBandwidth(result);
             return result;
         }
