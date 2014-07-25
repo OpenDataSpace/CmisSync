@@ -350,12 +350,18 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         [Test, Category("Fast")]
         public void OneRemoteFolderRenamed()
         {
+            DateTime modification = DateTime.UtcNow;
             string oldFolderName = "folderName";
             string newFolderName = "newfolderName";
             string folderId = "folderId";
             var localGuid = Guid.NewGuid();
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, oldFolderName));
-            var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localGuid };
+            oldLocalFolder.Setup(f => f.LastWriteTimeUtc).Returns(modification);
+            oldLocalFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(localGuid.ToString());
+            var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") {
+                Guid = localGuid,
+                LastLocalWriteTimeUtc = modification
+            };
             this.localFolder.SetupDirectories(oldLocalFolder.Object);
             this.storage.SaveMappedObject(storedFolder);
             var renamedRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, newFolderName, this.remoteRootPath + newFolderName, this.remoteRootId, "newChangeToken");
@@ -381,8 +387,14 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             string newFileName = "newfileName";
             string fileId = "fileId";
             var localGuid = Guid.NewGuid();
+            DateTime modificationDate = DateTime.UtcNow;
             var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, oldFileName));
-            var storedFile = new MappedObject(oldFileName, fileId, MappedObjectType.File, this.remoteRootId, "changeToken") { Guid = localGuid };
+            oldLocalFile.SetupGuid(localGuid);
+            oldLocalFile.SetupLastWriteTimeUtc(modificationDate);
+            var storedFile = new MappedObject(oldFileName, fileId, MappedObjectType.File, this.remoteRootId, "changeToken") {
+                Guid = localGuid,
+                LastLocalWriteTimeUtc = modificationDate
+            };
             this.localFolder.SetupFiles(oldLocalFile.Object);
             this.storage.SaveMappedObject(storedFile);
             var renamedRemoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, newFileName, this.remoteRootId, changeToken: "newChangeToken");
@@ -413,6 +425,8 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             DateTime lastModification = DateTime.UtcNow;
             var localGuid = Guid.NewGuid();
             var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, oldFileName));
+            oldLocalFile.SetupLastWriteTimeUtc(lastModification);
+            oldLocalFile.SetupGuid(localGuid);
             var storedFile = new MappedObject(oldFileName, fileId, MappedObjectType.File, this.remoteRootId, "changeToken") {
                 Guid = localGuid,
                 ChecksumAlgorithmName = type,
@@ -420,7 +434,6 @@ namespace TestLibrary.ProducerTests.CrawlerTests
                 LastLocalWriteTimeUtc = lastModification
             };
             this.localFolder.SetupFiles(oldLocalFile.Object);
-            oldLocalFile.Setup(f => f.LastWriteTimeUtc).Returns(lastModification);
             this.storage.SaveMappedObject(storedFile);
             var renamedRemoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, newFileName, this.remoteRootId, changeToken: "newChangeToken");
             renamedRemoteFile.SetupContentStreamHash(checksum, type);
@@ -446,11 +459,22 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             string oldFolderName = "folderName";
             string folderId = "folderId";
             var localGuid = Guid.NewGuid();
+            DateTime modification = DateTime.UtcNow;
             var localTargetGuid = Guid.NewGuid();
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, oldFolderName));
+            oldLocalFolder.SetupLastWriteTimeUtc(modification);
+            oldLocalFolder.SetupGuid(localGuid);
             var localTargetFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "target"));
-            var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localGuid };
-            var storedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localTargetGuid };
+            localTargetFolder.SetupLastWriteTimeUtc(modification);
+            localTargetFolder.SetupGuid(localTargetGuid);
+            var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") {
+                Guid = localGuid,
+                LastLocalWriteTimeUtc = modification
+            };
+            var storedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.remoteRootId, "changeToken") {
+                Guid = localTargetGuid,
+                LastLocalWriteTimeUtc = modification
+            };
             this.localFolder.SetupDirectories(oldLocalFolder.Object, localTargetFolder.Object);
             this.storage.SaveMappedObject(storedFolder);
             this.storage.SaveMappedObject(storedTargetFolder);
@@ -475,14 +499,20 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         [Test, Category("Fast")]
         public void OneRemoteFolderRemoved()
         {
+            Guid uuid = Guid.NewGuid();
+            DateTime modification = DateTime.UtcNow;
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "folderName"));
-            var storedFolder = new MappedObject("folderName", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken");
+            oldLocalFolder.SetupGuid(uuid);
+            oldLocalFolder.SetupLastWriteTimeUtc(modification);
+            var storedFolder = new MappedObject("folderName", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken") {
+                Guid = uuid,
+                LastLocalWriteTimeUtc = modification
+            };
             this.storage.SaveMappedObject(storedFolder);
             this.localFolder.SetupDirectories(oldLocalFolder.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
             this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();

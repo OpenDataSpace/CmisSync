@@ -367,6 +367,11 @@ namespace CmisSync.Lib.Producer.Crawler
                         remoteEvent.Remote == MetaDataChangeType.MOVED ? (remoteEvent is FileMovedEvent ? (remoteEvent as FileMovedEvent).OldRemoteFilePath : (remoteEvent as FolderMovedEvent).OldRemoteFolderPath) : null,
                         localEvent.Local == MetaDataChangeType.MOVED ? (localEvent is FileMovedEvent ? (IFileSystemInfo)(localEvent as FileMovedEvent).OldLocalFile : (IFileSystemInfo)(localEvent as FolderMovedEvent).OldLocalFolder) : null,
                         this);
+                    if (newEvent is FileEvent) {
+                        (newEvent as FileEvent).LocalContent = (localEvent as FileEvent).LocalContent;
+                        (newEvent as FileEvent).RemoteContent = (remoteEvent as FileEvent).RemoteContent;
+                    }
+
                     this.Queue.AddEvent(newEvent);
                 }
             }
