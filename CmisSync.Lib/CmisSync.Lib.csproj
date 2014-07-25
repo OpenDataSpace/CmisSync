@@ -218,6 +218,7 @@
     <Compile Include="Storage\Database\ObjectTree.cs" />
     <Compile Include="EventManagerInitializer.cs" />
     <Compile Include="Consumer\SituationSolver\AbstractEnhancedSolver.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectChanged.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
