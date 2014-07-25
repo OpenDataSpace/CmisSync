@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using DotCMIS;
 
 namespace TestLibrary.TestUtils
 {
@@ -78,6 +79,20 @@ namespace TestLibrary.TestUtils
 
         public static void VerifySetContentStream(this Mock<IDocument> doc, Times times, bool overwrite = true, bool refresh = true, string mimeType = null) {
             doc.Verify(d => d.SetContentStream(It.Is<IContentStream>(s => VerifyContentStream(s, mimeType, doc.Object.Name)), overwrite, refresh), times);
+        }
+
+        public static void VerifyUpdateLastModificationDate(this Mock<IDocument> doc, DateTime modificationDate, bool refresh = true) {
+            doc.VerifyUpdateLastModificationDate(modificationDate, Times.Once(), refresh);
+        }
+
+        public static void VerifyUpdateLastModificationDate(this Mock<IDocument> doc, DateTime modificationDate, Times times, bool refresh = true) {
+            doc.Verify(d => d.UpdateProperties(It.Is<IDictionary<string, object>>(dic => VerifyDictContainsLastModification(dic, modificationDate)), refresh));
+        }
+
+        private static bool VerifyDictContainsLastModification(IDictionary<string, object> dic, DateTime modificationDate) {
+            Assert.That(dic.ContainsKey(PropertyIds.LastModificationDate));
+            Assert.That(dic[PropertyIds.LastModificationDate], Is.EqualTo(modificationDate));
+            return true;
         }
 
         private static bool VerifyContentStream(IContentStream s, string mimeType, string fileName) {

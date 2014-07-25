@@ -119,6 +119,45 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void RemoteDocumentsMetaDataChanged()
+        {
+            DateTime modificationDate = DateTime.UtcNow;
+            string fileName = "a";
+            string path = Path.Combine(Path.GetTempPath(), fileName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+            string newChangeToken = "newToken";
+
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(d => d.FullName).Returns(path);
+            fileInfo.Setup(d => d.Name).Returns(fileName);
+            fileInfo.Setup(d => d.Directory).Returns(Mock.Of<IDirectoryInfo>());
+
+            var mappedObject = new MappedObject(
+                fileName,
+                id,
+                MappedObjectType.File,
+                parentId,
+                lastChangeToken)
+            {
+                Guid = Guid.NewGuid(),
+                LastContentSize = 0
+            };
+
+            this.storage.AddMappedFile(mappedObject);
+
+            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, fileName, parentId, changeToken: newChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modificationDate);
+
+            this.underTest.Solve(fileInfo.Object, remoteObject.Object);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, contentSize: 0);
+            fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modificationDate)), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void RemoteDocumentChanged()
         {
             DateTime creationDate = DateTime.UtcNow;
@@ -171,9 +210,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     b =>
                     b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(oldContentStream));
 
-                this.underTest.Solve(localFile.Object, remoteObject.Object);
+                this.underTest.Solve(localFile.Object, remoteObject.Object, remoteContent:ContentChangeType.CHANGED);
 
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, creationDate, expectedHash, newContent.Length);
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
                 this.queue.Verify(
                     q =>
@@ -249,9 +288,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     b =>
                     b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(changedContentStream));
 
-                this.underTest.Solve(localFile.Object, remoteObject.Object);
+                this.underTest.Solve(localFile.Object, remoteObject.Object, remoteContent:ContentChangeType.CHANGED);
 
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, expectedHash, newContent.Length);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, creationDate, expectedHash, newContent.Length);
                 Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
                 this.queue.Verify(
                     q =>

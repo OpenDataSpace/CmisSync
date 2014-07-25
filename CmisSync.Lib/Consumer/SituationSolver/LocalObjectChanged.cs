@@ -44,12 +44,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
         private ISyncEventQueue queue;
         private ActiveActivitiesManager transmissionManager;
+        private bool serverCanModifyDateTimes = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
         /// </summary>
         /// <param name="queue">Event queue for publishing upload transmission.</param>
-        public LocalObjectChanged(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, ActiveActivitiesManager transmissionManager) : base(session, storage){
+        public LocalObjectChanged(
+            ISession session,
+            IMetaDataStorage storage,
+            ISyncEventQueue queue,
+            ActiveActivitiesManager transmissionManager,
+            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage){
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -60,6 +66,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.queue = queue;
             this.transmissionManager = transmissionManager;
+            this.serverCanModifyDateTimes = serverCanModifyCreationAndModificationDate;
         }
 
         /// <summary>
@@ -112,15 +119,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
                         uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
                         mappedObject.LastChecksum = hashAlg.Hash;
-                    }
-
-                    if (doc.LastModificationDate != null) {
-                        try {
-                            localFile.LastWriteTimeUtc = (DateTime)doc.LastModificationDate;
-                        } catch (IOException e) {
-                            Logger.Info("Could not write LastWriteTimeUtc due to: " + e.Message);
-                        }
-
                     }
 
                     mappedObject.LastChangeToken = doc.ChangeToken;

@@ -133,7 +133,8 @@ namespace TestLibrary.TestUtils
             string parentId,
             string changeToken,
             bool extendedAttributeAvailable = true,
-            DateTime? lastModification = null,
+            DateTime? lastLocalModification = null,
+            DateTime? lastRemoteModification = null,
             byte[] checksum = null,
             long contentSize = -1)
         {
@@ -146,7 +147,8 @@ namespace TestLibrary.TestUtils
                 changeToken,
                 Times.Once(),
                 extendedAttributeAvailable,
-                lastModification,
+                lastLocalModification,
+                lastRemoteModification,
                 checksum,
                 contentSize);
         }
@@ -160,13 +162,14 @@ namespace TestLibrary.TestUtils
             string changeToken,
             Times times,
             bool extendedAttributeAvailable = true,
-            DateTime? lastModification = null,
+            DateTime? lastLocalModification = null,
+            DateTime? lastRemoteModification = null,
             byte[] checksum = null,
             long contentSize = -1)
         {
             db.Verify(
                 s =>
-                s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, extendedAttributeAvailable, lastModification, checksum, contentSize))),
+                s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, extendedAttributeAvailable, lastLocalModification, lastRemoteModification, checksum, contentSize))),
                 times);
         }
 
@@ -178,7 +181,8 @@ namespace TestLibrary.TestUtils
             string parentId,
             string changeToken,
             bool extendedAttributeAvailable,
-            DateTime? lastModification,
+            DateTime? lastLocalModification,
+            DateTime? lastRemoteModification,
             byte[] checksum,
             long contentSize)
         {
@@ -195,9 +199,12 @@ namespace TestLibrary.TestUtils
                 Assert.That(o.Guid, Is.EqualTo(Guid.Empty), "Given Guid must be empty");
             }
 
-            if (lastModification != null) {
-                Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastModification));
-                Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastModification));
+            if (lastLocalModification != null) {
+                Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastLocalModification));
+            }
+
+            if (lastRemoteModification != null) {
+                Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastRemoteModification));
             }
 
             if (checksum != null) {

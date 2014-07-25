@@ -51,13 +51,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
         private ISyncEventQueue queue;
         private ActiveActivitiesManager transmissionManager;
+        private bool serverCanModifyDateTimes = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
         /// </summary>
         /// <param name="queue">Queue to report transmission events to.</param>
         /// <param name="manager">Activitiy manager for transmission propagations</param>
-        public LocalObjectAdded(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, ActiveActivitiesManager manager) : base(session, storage) {
+        public LocalObjectAdded(
+            ISession session,
+            IMetaDataStorage storage,
+            ISyncEventQueue queue,
+            ActiveActivitiesManager manager,
+            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -68,6 +74,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.queue = queue;
             this.transmissionManager = manager;
+            this.serverCanModifyDateTimes = serverCanModifyCreationAndModificationDate;
         }
 
         /// <summary>
@@ -89,14 +96,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
-
-            if(addedObject.LastModificationDate != null) {
-                try {
-                    localFileSystemInfo.LastWriteTimeUtc = (DateTime)addedObject.LastModificationDate;
-                } catch (IOException e) {
-                    Logger.Info("Could not write LastWriteTimeUtc due to: " + e.Message);
-                }
-            }
 
             MappedObject mapped = new MappedObject(
                 localFileSystemInfo.Name,
@@ -136,8 +135,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     }
 
                     watch.Stop();
+
+                    if (this.serverCanModifyDateTimes) {
+                        Dictionary<string, object> properties = new Dictionary<string, object>();
+                        properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
+                        (addedObject as IDocument).UpdateProperties(properties, true);
+                    }
+
                     mapped.LastContentSize = localFile.Length;
-                    localFileSystemInfo.LastWriteTimeUtc = addedObject.LastModificationDate != null ? (DateTime)addedObject.LastModificationDate : localFileSystemInfo.LastWriteTimeUtc;
                     mapped.LastChangeToken = addedObject.ChangeToken;
                     mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
@@ -197,6 +202,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             string name = localFile.Name;
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
+            if (this.serverCanModifyDateTimes) {
+                properties.Add(PropertyIds.CreationDate, localFile.CreationTimeUtc);
+                properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
+            }
+
             Stopwatch watch = new Stopwatch();
             ICmisObject result;
             if (localFile is IDirectoryInfo) {
@@ -223,7 +233,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
             }
 
-            watch.Stop();
             return result;
         }
     }

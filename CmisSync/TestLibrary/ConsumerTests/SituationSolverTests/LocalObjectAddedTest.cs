@@ -96,7 +96,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, hash, 1);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, null, hash, 1);
             this.session.Verify(
                 s => s.CreateDocument(
                     It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
@@ -108,7 +108,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(fileInfo);
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
+            document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
             this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
@@ -130,7 +132,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, hash, 1);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, null, hash, 1);
             this.session.Verify(
                 s => s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
@@ -142,7 +144,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
+            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(fileInfo);
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
+            document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
             this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
@@ -171,6 +175,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(fileInfo);
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
             this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
@@ -200,6 +205,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
+            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(fileInfo);
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
             this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
@@ -212,11 +218,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string parentId = "papa";
             string lastChangeToken = "token";
             bool extendedAttributes = false;
+            Mock<IFolder> futureFolder;
 
-            var dirInfo = this.RunSolveFolder(folderName, id, parentId, lastChangeToken, extendedAttributes);
+            var dirInfo = this.RunSolveFolder(folderName, id, parentId, lastChangeToken, extendedAttributes, out futureFolder);
 
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
+            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(dirInfo);
             dirInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
         }
 
@@ -229,10 +237,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string parentId = "papa";
             string lastChangeToken = "token";
             bool extendedAttributes = true;
-            var dirInfo = this.RunSolveFolder(folderName, id, parentId, lastChangeToken, extendedAttributes);
+            Mock<IFolder> futureFolder;
+
+            var dirInfo = this.RunSolveFolder(folderName, id, parentId, lastChangeToken, extendedAttributes, out futureFolder);
 
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
+            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(dirInfo);
             dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k == MappedObject.ExtendedAttributeKey), It.Is<string>(v => !v.Equals(Guid.Empty)), true), Times.Once());
         }
 
@@ -258,6 +269,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
                 this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
                 this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Never());
+                VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(fileInfo);
                 throw;
             }
         }
@@ -277,24 +289,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document, false);
 
-            fileInfo.VerifySet(f => f.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void DoNotDieIfNotAbleToWriteUtcTime()
-        {
-            string fileName = "fileName";
-            string fileId = "fileId";
-            string parentId = "parentId";
-            string lastChangeToken = "token";
-            bool extendedAttributes = true;
-
-            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
-            fileInfo.Setup(f => f.Length).Returns(0);
-            fileInfo.SetupSet(f => f.LastWriteTimeUtc = It.IsAny<DateTime>()).Throws(new IOException());
-
-            Mock<IDocument> document;
-            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document, true);
+            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(fileInfo);
         }
 
         private IDirectoryInfo SetupParentFolder(string parentId)
@@ -373,7 +368,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
         }
 
-        private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes)
+        private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes, out Mock<IFolder> folderMock)
         {
             string path = Path.Combine(Path.GetTempPath(), folderName);
             var futureRemoteFolder = Mock.Of<IFolder>(
@@ -408,10 +403,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.queue.Object, transmissionManager);
 
             solver.Solve(dirInfo.Object, null);
+
+            folderMock = Mock.Get(futureRemoteFolder);
             return dirInfo;
         }
 
-        private void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(Mock<IFileSystemInfo> fsInfo) {
+        private static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(Mock<IFileSystemInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
+
+        private static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(Mock<IFileInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
+
+        private static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(Mock<IDirectoryInfo> fsInfo) {
             fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
         }
     }

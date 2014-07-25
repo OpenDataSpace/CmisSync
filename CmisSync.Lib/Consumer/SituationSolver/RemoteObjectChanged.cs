@@ -24,12 +24,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib.FileTransmission;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -98,46 +98,51 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 var remoteDocument = remoteId as IDocument;
                 DateTime? lastModified = remoteDocument.LastModificationDate;
                 if ((lastModified != null && lastModified != obj.LastRemoteWriteTimeUtc) || obj.LastChangeToken != remoteDocument.ChangeToken) {
-                    if (obj.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
-                        throw new ArgumentException("The local file has been changed since last write => aborting update");
-                    }
-
-                    // Download changes
-                    var file = localFile as IFileInfo;
-                    var cacheFile = this.fsFactory.CreateFileInfo(file.FullName + ".sync");
-                    var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName, cacheFile.FullName);
-                    this.queue.AddEvent(transmissionEvent);
-                    this.transmissonManager.AddTransmission(transmissionEvent);
-                    using (SHA1 hashAlg = new SHA1Managed())
-                    using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
-                    using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
-                        try {
-                            download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
-                        } catch(Exception ex) {
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                            throw;
+                    if (remoteContent != ContentChangeType.NONE) {
+                        if (obj.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
+                            throw new ArgumentException("The local file has been changed since last write => aborting update");
                         }
 
-                        obj.ChecksumAlgorithmName = "SHA1";
-                        obj.LastChecksum = hashAlg.Hash;
-                    }
+                        // Download changes
+                        var file = localFile as IFileInfo;
+                        var cacheFile = this.fsFactory.CreateFileInfo(file.FullName + ".sync");
+                        var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName, cacheFile.FullName);
+                        this.queue.AddEvent(transmissionEvent);
+                        this.transmissonManager.AddTransmission(transmissionEvent);
+                        using (SHA1 hashAlg = new SHA1Managed())
+                            using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+                        using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
+                            try {
+                                download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                            } catch(Exception ex) {
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                                throw;
+                            }
 
-                    var backupFile = this.fsFactory.CreateFileInfo(file.FullName + ".bak.sync");
-                    string uuid = file.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                    cacheFile.Replace(file, backupFile, true);
-                    file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid, true);
-                    backupFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
-                    byte[] checksumOfOldFile = null;
-                    using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
-                        checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
-                    }
-                    if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
-                        var conflictFile = this.fsFactory.CreateConflictFileInfo(file);
-                        backupFile.MoveTo(conflictFile.FullName);
-                        OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", file.FullName, remoteId.Id, conflictFile.FullName));
-                    } else {
-                        backupFile.Delete();
-                        OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", file.FullName, remoteId.Id));
+                            obj.ChecksumAlgorithmName = "SHA1";
+                            obj.LastChecksum = hashAlg.Hash;
+                        }
+
+                        var backupFile = this.fsFactory.CreateFileInfo(file.FullName + ".bak.sync");
+                        string uuid = file.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                        cacheFile.Replace(file, backupFile, true);
+                        file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid, true);
+                        backupFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                        byte[] checksumOfOldFile = null;
+                        using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
+                            checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
+                        }
+
+                        if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
+                            var conflictFile = this.fsFactory.CreateConflictFileInfo(file);
+                            backupFile.MoveTo(conflictFile.FullName);
+                            OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", file.FullName, remoteId.Id, conflictFile.FullName));
+                        } else {
+                            backupFile.Delete();
+                            OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", file.FullName, remoteId.Id));
+                        }
+
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                     }
 
                     obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
@@ -147,12 +152,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                     obj.LastContentSize = (long)remoteDocument.ContentStreamLength;
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
 
                 obj.LastChangeToken = remoteDocument.ChangeToken;
                 obj.LastRemoteWriteTimeUtc = lastModified;
-
             }
 
             this.Storage.SaveMappedObject(obj);
