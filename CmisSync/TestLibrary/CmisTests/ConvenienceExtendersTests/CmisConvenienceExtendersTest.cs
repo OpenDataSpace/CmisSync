@@ -59,20 +59,25 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests
 
         [Test, Category("Fast")]
         public void ContentStreamHashReturnsByteArrayIfHashIsAvailableAndTypeIsGiven() {
+            var doc = new Mock<IDocument>();
+            byte[] hash = new byte[16];
+            doc.SetupContentStreamHash(hash, "MD5");
+            Assert.That(doc.Object.ContentStreamHash("MD5"), Is.EqualTo(hash));
+        }
+
+        [Test, Category("Fast")]
+        public void ContentStreamHashReturnsNullIfNoValueInPropertyIsAvailable() {
             var properties = new List<IProperty>();
-            IList<object> values = new List<object>();
-            values.Add("{md5}00");
             var property = Mock.Of<IProperty>(
                 p =>
                 p.IsMultiValued == true &&
-                p.Id == "cmis:contentStreamHash" &&
-                p.Values == values);
+                p.Id == "cmis:contentStreamHash");
 
             properties.Add(property);
             var doc = Mock.Of<IDocument>(
                 d =>
                 d.Properties == properties);
-            Assert.That(doc.ContentStreamHash("MD5"), Is.EqualTo(new byte[1]));
+            Assert.That(doc.ContentStreamHash(), Is.Null);
         }
     }
 }

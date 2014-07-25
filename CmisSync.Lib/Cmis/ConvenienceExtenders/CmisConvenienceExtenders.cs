@@ -90,9 +90,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             string prefix = string.Format("{{{0}}}", type.ToLower());
             foreach (var prop in doc.Properties) {
                 if (prop.Id == "cmis:contentStreamHash") {
-                    foreach (string entry in prop.Values) {
-                        if (entry.StartsWith(prefix)) {
-                            return StringToByteArray(entry.Substring(prefix.Length));
+                    if (prop.Values != null) {
+                        foreach (string entry in prop.Values) {
+                            if (entry.StartsWith(prefix)) {
+                                return StringToByteArray(entry.Substring(prefix.Length));
+                            }
                         }
                     }
                 }

@@ -22,6 +22,7 @@ namespace TestLibrary.IntegrationTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net;
     using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
@@ -324,21 +325,27 @@ namespace TestLibrary.IntegrationTests
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
-            using (var emptyStream = new MemoryStream(new byte[0])) {
+            using (var oneByteStream = new MemoryStream(new byte[1])) {
                 ContentStream contentStream = new ContentStream();
                 contentStream.MimeType = MimeType.GetMIMEType(filename);
-                contentStream.Length = 0;
-                contentStream.Stream = emptyStream;
+                contentStream.Length = 1;
+                contentStream.Stream = oneByteStream;
                 var emptyDoc = folder.CreateDocument(properties, contentStream, null);
                 var context = new OperationContext();
                 IDocument requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
                 foreach (var prop in requestedDoc.Properties) {
                     if (prop.Id == "cmis:contentStreamHash") {
                         Assert.That(prop.IsMultiValued, Is.True);
-                        foreach (string entry in prop.Values) {
-                            Assert.That(entryRegex.IsMatch(entry));
+                        if (prop.Values != null) {
+                            foreach (string entry in prop.Values) {
+                                Assert.That(entryRegex.IsMatch(entry));
+                            }
                         }
                     }
+                }
+                byte[] remoteHash = requestedDoc.ContentStreamHash();
+                if (remoteHash != null) {
+                    Assert.That(remoteHash, Is.EqualTo(SHA1.Create().ComputeHash(new byte[1])));
                 }
             }
         }
