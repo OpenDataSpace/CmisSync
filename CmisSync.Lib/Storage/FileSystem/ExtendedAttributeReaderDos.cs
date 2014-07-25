@@ -272,8 +272,12 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="path">Sets attribute of this path.</param>
         /// <param name="key">Key of the attribute, which should be set.</param>
         /// <param name="value">The value to set.</param>
-        public void SetExtendedAttribute(string path, string key, string value)
+        public void SetExtendedAttribute(string path, string key, string value, bool restoreLastModificationDate = false)
         {
+            if (restoreLastModificationDate) {
+                SetExtendedAttributeAndRestoreLastModificationDate(path, key, value);
+            } else {
+
 #if ! __MonoCS__
             if (string.IsNullOrEmpty(key))
             {
@@ -302,6 +306,7 @@ namespace CmisSync.Lib.Storage.FileSystem
 #else
             throw new WrongPlatformException();
 #endif
+            }
         }
 
         /// <summary>
@@ -310,7 +315,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="path">Sets attribute of this path.</param>
         /// <param name="key">Key of the attribute, which should be set.</param>
         /// <param name="value">The value to set.</param>
-        public void SetExtendedAttributeAndRestoreLastModificationDate(string path, string key, string value)
+        private void SetExtendedAttributeAndRestoreLastModificationDate(string path, string key, string value)
         {
             #if ! __MonoCS__
             if (string.IsNullOrEmpty(key))

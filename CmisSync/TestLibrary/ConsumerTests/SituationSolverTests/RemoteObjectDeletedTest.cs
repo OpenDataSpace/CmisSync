@@ -98,7 +98,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(fileInfo.Object, null);
 
             fileInfo.Verify(f => f.Delete(), Times.Never());
-            fileInfo.Verify(f => f.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null));
+            fileInfo.Verify(f => f.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true), Times.Once());
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
         }
 

@@ -224,7 +224,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
             string key = "test";
             string value = "value";
             var reader = new ExtendedAttributeReaderUnix();
-            reader.SetExtendedAttributeAndRestoreLastModificationDate(path, key, value);
+            reader.SetExtendedAttribute(path, key, value, true);
             Assert.That(File.GetLastWriteTimeUtc(path), Is.EqualTo(futureDate));
         }
 

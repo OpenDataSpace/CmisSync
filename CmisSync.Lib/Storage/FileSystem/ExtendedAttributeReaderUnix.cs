@@ -83,7 +83,7 @@ namespace CmisSync.Lib.Storage.FileSystem
 #endif
         }
 
-        public void SetExtendedAttribute(string path, string key, string value)
+        public void SetExtendedAttribute(string path, string key, string value, bool restoreLastModificationDate = false)
         {
 #if __MonoCS__
             path = Path.GetFullPath(path);
@@ -108,11 +108,6 @@ namespace CmisSync.Lib.Storage.FileSystem
 #else
             throw new WrongPlatformException();
 #endif
-        }
-
-        public void SetExtendedAttributeAndRestoreLastModificationDate(string path, string key, string value)
-        {
-            this.SetExtendedAttribute(path, key, value);
         }
 
         /// <summary>

@@ -160,7 +160,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             {
                 uuid = Guid.NewGuid();
                 try {
-                    localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
+                    localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
                 } catch (ExtendedAttributeException ex) {
                     throw new RetryException(ex.Message, ex);
                 }

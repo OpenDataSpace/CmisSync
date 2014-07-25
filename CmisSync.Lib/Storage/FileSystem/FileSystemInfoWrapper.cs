@@ -133,28 +133,17 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <param name="key">Attribute name.</param>
         /// <param name="value">Attribute value.</param>
-        public void SetExtendedAttribute(string key, string value)
+        public void SetExtendedAttribute(string key, string value, bool restoreModificationDate = false)
         {
             if(reader != null)
             {
-                reader.SetExtendedAttribute(this.original.FullName, key, value);
+                reader.SetExtendedAttribute(this.original.FullName, key, value, restoreModificationDate);
             }
             else
             {
                 throw new ExtendedAttributeException("Feature is not supported");
             }
         }
-
-        public void SetExtendedAttributeAndRestoreLastModificationDate(string key, string value)
-        {
-            if (reader != null) {
-                reader.SetExtendedAttributeAndRestoreLastModificationDate(this.original.FullName, key, value);
-            } else {
-                throw new ExtendedAttributeException("Feature is not supported");
-            }
-
-        }
-
 
         /// <summary>
         /// Determines whether instance is able to save extended attributes.

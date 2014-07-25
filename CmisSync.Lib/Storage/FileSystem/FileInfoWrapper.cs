@@ -138,11 +138,11 @@ namespace CmisSync.Lib.Storage.FileSystem
 
 #if __MonoCS__
             foreach (var entry in oldSourceEAs) {
-                result.SetExtendedAttribute(entry.Key, entry.Value);
+                result.SetExtendedAttribute(entry.Key, entry.Value, true);
             }
 
             foreach (var entry in oldTargetEAs) {
-                destinationBackupFileName.SetExtendedAttribute(entry.Key, entry.Value);
+                destinationBackupFileName.SetExtendedAttribute(entry.Key, entry.Value, true);
             }
 #endif
             return result;

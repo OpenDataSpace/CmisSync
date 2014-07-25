@@ -257,13 +257,13 @@ namespace TestLibrary.StorageTests.FileSystemTests
                 stream.Write(new byte[2], 0, 2);
             }
 
-            sourceInfo.SetExtendedAttribute("test", sourceFile);
+            sourceInfo.SetExtendedAttribute("test", sourceFile, false);
             sourceInfo.Refresh();
             using (var stream = targetInfo.Open(FileMode.CreateNew, FileAccess.Write)) {
                 stream.Write(new byte[5], 0, 5);
             }
 
-            targetInfo.SetExtendedAttribute("test", targetFile);
+            targetInfo.SetExtendedAttribute("test", targetFile, false);
             targetInfo.Refresh();
 
             var newFileInfo = sourceInfo.Replace(targetInfo, backupInfo, true);
@@ -337,7 +337,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
             folder.Create();
             BaseWatcherTest.IgnoreIfExtendedAttributesAreNotAvailable(oldPath);
             Assert.That(folder.GetExtendedAttribute("test"), Is.Null);
-            folder.SetExtendedAttribute("test", "test");
+            folder.SetExtendedAttribute("test", "test", false);
             folder.MoveTo(newPath);
             Assert.That(folder.GetExtendedAttribute("test"), Is.EqualTo("test"));
             Assert.That(Factory.CreateDirectoryInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));
@@ -367,7 +367,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
             BaseWatcherTest.IgnoreIfExtendedAttributesAreNotAvailable(oldPath);
             Assert.That(file.GetExtendedAttribute("test"), Is.Null);
-            file.SetExtendedAttribute("test", "test");
+            file.SetExtendedAttribute("test", "test", false);
             file.MoveTo(newPath);
             Assert.That(file.GetExtendedAttribute("test"), Is.EqualTo("test"));
             Assert.That(Factory.CreateFileInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));

@@ -67,14 +67,8 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <param name="key">Attribute name.</param>
         /// <param name="value">Attribute value.</param>
-        void SetExtendedAttribute(string key, string value);
-
-        /// <summary>
-        /// Sets the extended attribute. And restores the last modification date if it has been changed.
-        /// </summary>
-        /// <param name="key">Attribute name.</param>
-        /// <param name="value">Attribute value.</param>
-        void SetExtendedAttributeAndRestoreLastModificationDate(string key, string value);
+        /// <param name="restoreModificationDate">If set to <c>true</c>, the last modification date of the file will be restored after setting the attribute. If <c>false</c> it could have been changed by the file system.</param>
+        void SetExtendedAttribute(string key, string value, bool restoreModificationDate);
 
         /// <summary>
         /// Gets the extended attribute.
