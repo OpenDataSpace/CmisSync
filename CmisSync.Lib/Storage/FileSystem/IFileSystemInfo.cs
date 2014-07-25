@@ -52,6 +52,12 @@ namespace CmisSync.Lib.Storage.FileSystem
         DateTime LastWriteTimeUtc { get; set; }
 
         /// <summary>
+        /// Gets the creation time in UTC.
+        /// </summary>
+        /// <value>The creation time in UTC.</value>
+        DateTime CreationTimeUtc { get; }
+
+        /// <summary>
         /// Gets the file attributes.
         /// </summary>
         /// <value>The attributes.</value>

@@ -71,6 +71,12 @@ namespace CmisSync.Lib.Storage.FileSystem
             }
         }
 
+        public DateTime CreationTimeUtc {
+            get {
+                return this.original.CreationTimeUtc;
+            }
+        }
+
         /// <summary>
         /// Gets the full name/path.
         /// </summary>
