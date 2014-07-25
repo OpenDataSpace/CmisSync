@@ -57,6 +57,7 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 

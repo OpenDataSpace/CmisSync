@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
@@ -135,9 +136,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     watch.Stop();
 
                     if (this.ServerCanModifyDateTimes) {
-                        Dictionary<string, object> properties = new Dictionary<string, object>();
-                        properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
-                        (addedObject as IDocument).UpdateProperties(properties, true);
+                        (addedObject as IDocument).UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
                     }
 
                     mapped.LastContentSize = localFile.Length;

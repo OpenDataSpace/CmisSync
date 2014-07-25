@@ -101,7 +101,6 @@
     <Compile Include="TestUtils\SingleStepEventQueue.cs" />
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
-    <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
     <Compile Include="EventsTests\FsEventTest.cs" />
     <Compile Include="TestUtils\MockOfIFolderUtil.cs" />
     <Compile Include="TestUtils\MockOfIDocumentUtil.cs" />

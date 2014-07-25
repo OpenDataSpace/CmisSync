@@ -219,6 +219,7 @@
     <Compile Include="EventManagerInitializer.cs" />
     <Compile Include="Consumer\SituationSolver\AbstractEnhancedSolver.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectChanged.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\CmisConvenienceExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -280,5 +281,6 @@
     <Folder Include="Cmis\Authentication\" />
     <Folder Include="Cmis\UiUtils\" />
     <Folder Include="Producer\ContentChange\" />
+    <Folder Include="Cmis\ConvenienceExtenders\" />
   </ItemGroup>
 </Project>

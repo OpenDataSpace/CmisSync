@@ -82,6 +82,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
+            remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "targetId", "changeToken", true);
         }
 
@@ -105,6 +106,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(subFolder.Object, this.remoteRootFolder.Object), Times.Once());
+            remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "rootId", "changeToken");
         }
 
@@ -132,6 +134,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object), Times.Once());
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
+            remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", newFolderName, "targetId", "changeToken");
         }
     }

@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.FileSystem;
@@ -67,7 +68,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 remoteObject.Rename(localFile.Name, true);
             }
 
-            if (mappedObject.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc)
+            if (this.ServerCanModifyDateTimes) {
+                if (mappedObject.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
+                    remoteObject.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
+                }
+            }
+
             mappedObject.ParentId = targetId;
             mappedObject.LastChangeToken = remoteObject.ChangeToken;
             mappedObject.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
