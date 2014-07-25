@@ -51,7 +51,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
         private ISyncEventQueue queue;
         private ActiveActivitiesManager transmissionManager;
-        private bool serverCanModifyDateTimes = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
@@ -63,7 +62,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             IMetaDataStorage storage,
             ISyncEventQueue queue,
             ActiveActivitiesManager manager,
-            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage) {
+            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage, serverCanModifyCreationAndModificationDate) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -74,7 +73,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.queue = queue;
             this.transmissionManager = manager;
-            this.serverCanModifyDateTimes = serverCanModifyCreationAndModificationDate;
         }
 
         /// <summary>
@@ -136,7 +134,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                     watch.Stop();
 
-                    if (this.serverCanModifyDateTimes) {
+                    if (this.ServerCanModifyDateTimes) {
                         Dictionary<string, object> properties = new Dictionary<string, object>();
                         properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
                         (addedObject as IDocument).UpdateProperties(properties, true);
@@ -202,7 +200,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             string name = localFile.Name;
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
-            if (this.serverCanModifyDateTimes) {
+            if (this.ServerCanModifyDateTimes) {
                 properties.Add(PropertyIds.CreationDate, localFile.CreationTimeUtc);
                 properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
             }

@@ -72,7 +72,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
             }
 
-            localFile.LastWriteTimeUtc = remoteObject.LastModificationDate != null ? (DateTime)remoteObject.LastModificationDate : localFile.LastWriteTimeUtc;
             obj.Name = remoteObject.Name;
             obj.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
             obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;

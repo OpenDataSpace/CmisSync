@@ -340,6 +340,8 @@ namespace TestLibrary.IntegrationTests
                 sw.WriteLine(content);
             }
 
+            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
+
             this.repo.Initialize();
 
             this.repo.Run();
@@ -349,6 +351,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
+            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
         [Test, Category("Slow"), Category("Erratic")]
@@ -368,6 +371,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
+            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
@@ -380,6 +384,7 @@ namespace TestLibrary.IntegrationTests
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
             Assert.That(doc.Name, Is.EqualTo(newFileName));
+            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
         [Test, Category("Slow"), Category("Erratic")]
@@ -402,6 +407,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
             new DirectoryInfo(Path.Combine(this.localRootDir.FullName, folderName)).Create();
             fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, folderName, newFileName));
+            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
@@ -415,6 +421,7 @@ namespace TestLibrary.IntegrationTests
             var doc = (child as IFolder).GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(fileInfo.Length), "ContentStream not set");
             Assert.That(doc.Name, Is.EqualTo(newFileName));
+            Assert.That(this.localRootDir.GetDirectories().First().GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
         [Test, Category("Slow")]
@@ -467,10 +474,15 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            // HACK This should be removed if the server sends correct events
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+            // HACK end
+
             content += content;
             doc.SetContent(content);
 
-            Thread.Sleep(20000);
+            Thread.Sleep(5000);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
 

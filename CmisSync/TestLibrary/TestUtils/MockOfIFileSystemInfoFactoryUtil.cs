@@ -142,5 +142,17 @@ namespace TestLibrary.TestUtils
             localFolder.Setup(f => f.Name).Returns(Path.GetFileName(path));
             return localFolder;
         }
+
+        public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileSystemInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
+
+        public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
+
+        public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IDirectoryInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
     }
 }

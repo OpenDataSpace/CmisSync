@@ -67,6 +67,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 remoteObject.Rename(localFile.Name, true);
             }
 
+            if (mappedObject.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc)
             mappedObject.ParentId = targetId;
             mappedObject.LastChangeToken = remoteObject.ChangeToken;
             mappedObject.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;

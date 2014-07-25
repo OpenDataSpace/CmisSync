@@ -44,7 +44,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
         private ISyncEventQueue queue;
         private ActiveActivitiesManager transmissionManager;
-        private bool serverCanModifyDateTimes = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
@@ -55,7 +54,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             IMetaDataStorage storage,
             ISyncEventQueue queue,
             ActiveActivitiesManager transmissionManager,
-            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage){
+            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage, serverCanModifyCreationAndModificationDate){
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -66,7 +65,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.queue = queue;
             this.transmissionManager = transmissionManager;
-            this.serverCanModifyDateTimes = serverCanModifyCreationAndModificationDate;
         }
 
         /// <summary>

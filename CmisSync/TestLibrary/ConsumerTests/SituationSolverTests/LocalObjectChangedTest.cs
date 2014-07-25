@@ -107,7 +107,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 true,
                 localDirectory.Object.LastWriteTimeUtc);
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
-            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(localDirectory);
+            localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
         }
 
@@ -156,7 +156,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
             }
 
-            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(localFile);
+            localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
@@ -211,7 +211,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
             }
 
-            VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(localFile);
+            localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -272,17 +272,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 remoteFile.VerifySetContentStream();
                 this.queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Path == localFile.Object.FullName && e.Type == FileTransmissionType.UPLOAD_MODIFIED_FILE)), Times.Once());
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
-                VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(localFile);
+                localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
                 this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
             }
-        }
-
-        private static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(Mock<IFileInfo> fsInfo) {
-            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
-        }
-
-        private static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(Mock<IDirectoryInfo> fsInfo) {
-            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
         }
     }
 }
