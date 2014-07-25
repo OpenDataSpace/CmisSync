@@ -52,10 +52,9 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullParameter()
         {
-            new FileEvent();
+            Assert.Throws<ArgumentNullException>(() => new FileEvent());
         }
 
         [Test, Category("Fast")]

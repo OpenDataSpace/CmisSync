@@ -31,10 +31,9 @@ namespace TestLibrary.EventsTests.ExceptionEventsTests
     public class BaseExceptionEventTest
     {
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithNullException()
         {
-            new ExceptionEvent(null);
+            Assert.Throws<ArgumentNullException>(() => new ExceptionEvent(null));
         }
 
         [Test, Category("Fast")]

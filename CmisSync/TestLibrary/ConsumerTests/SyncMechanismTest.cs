@@ -72,19 +72,17 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithLocalDetectionNull()
         {
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            new SyncMechanism(null, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener);
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(null, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithRemoteDetectionNull()
         {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            new SyncMechanism(localDetection.Object, null, this.queue.Object, this.session.Object, this.storage.Object, this.listener);
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(localDetection.Object, null, this.queue.Object, this.session.Object, this.storage.Object, this.listener));
         }
 
         [Test, Category("Fast")]
@@ -212,10 +210,9 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(NotImplementedException))]
         public void ThrowNotImplementedOnMissingSolver()
         {
-            this.TriggerNonExistingSolver();
+            Assert.Throws<NotImplementedException>(() => this.TriggerNonExistingSolver());
         }
 
         [Test, Category("Fast")]

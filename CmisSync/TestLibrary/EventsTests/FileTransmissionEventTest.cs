@@ -110,12 +110,11 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
         public void CalculationOfBitsPerSecondFailsOnIllegalDifference()
         {
             DateTime start = DateTime.Now;
             DateTime end = start.AddSeconds(1);
-            TransmissionProgressEventArgs.CalcBitsPerSecond(end, start, 100);
+            Assert.Throws<ArgumentException>(() => TransmissionProgressEventArgs.CalcBitsPerSecond(end, start, 100));
         }
 
         [Test, Category("Fast")]

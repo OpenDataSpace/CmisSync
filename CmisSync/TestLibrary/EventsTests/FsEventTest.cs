@@ -40,10 +40,9 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionInNullPath()
         {
-            new FSEvent(WatcherChangeTypes.Created, null, false);
+            Assert.Throws<ArgumentNullException>(() => new FSEvent(WatcherChangeTypes.Created, null, false));
         }
 
         [Test, Category("Medium")]

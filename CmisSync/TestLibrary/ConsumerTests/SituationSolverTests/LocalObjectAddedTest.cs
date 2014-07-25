@@ -67,17 +67,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new LocalObjectAdded(this.session.Object, this.storage.Object, null, new ActiveActivitiesManager());
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectAdded(this.session.Object, this.storage.Object, null, new ActiveActivitiesManager()));
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
         {
-            new LocalObjectAdded(this.session.Object, this.storage.Object, Mock.Of<ISyncEventQueue>(), null);
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectAdded(this.session.Object, this.storage.Object, Mock.Of<ISyncEventQueue>(), null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
