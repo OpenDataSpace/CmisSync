@@ -70,12 +70,10 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = progressstream;
-                try
-                {
+                contentStream.Length = localFileStream.Length;
+                try {
                     remoteDocument.SetContentStream(contentStream, overwrite, true);
-                }
-                catch(Exception e)
-                {
+                } catch(Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }
@@ -112,13 +110,9 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = hashstream;
-                contentStream.Length = localFileStream.Length;
-                try
-                {
+                try {
                     return remoteDocument.AppendContentStream(contentStream, true);
-                }
-                catch(Exception e)
-                {
+                } catch(Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }
