@@ -16,7 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using DotCMIS;
 
 namespace TestLibrary.TestUtils
 {
@@ -24,6 +23,7 @@ namespace TestLibrary.TestUtils
     using System.Collections.Generic;
     using System.IO;
 
+    using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data;
 
@@ -51,7 +51,7 @@ namespace TestLibrary.TestUtils
         }
 
         public static void SetupContent(this Mock<IDocument> doc, byte[] content, string fileName, string mimeType = "application/octet-stream") {
-            if(content != null) {
+            if (content != null) {
                 var stream = Mock.Of<IContentStream>(
                     s =>
                     s.Length == content.Length &&
@@ -71,6 +71,25 @@ namespace TestLibrary.TestUtils
         public static void SetupPath(this Mock<IDocument> doc, params string[] path) {
             List<string> paths = new List<string>(path);
             doc.Setup(d => d.Paths).Returns(paths);
+        }
+
+        public static void SetupContentStreamHash(this Mock<IDocument> doc, byte[] hash, string type = "SHA-1") {
+            var hashString = string.Format("{{{0}}}{1}", type.ToLower(), BitConverter.ToString(hash).Replace("-", string.Empty));
+            doc.SetupContentStreamHash(hashString);
+        }
+
+        public static void SetupContentStreamHash(this Mock<IDocument> doc, string hashString) {
+            var properties = new List<IProperty>();
+            IList<object> values = new List<object>();
+            values.Add(hashString);
+            var property = Mock.Of<IProperty>(
+                p =>
+                p.IsMultiValued == true &&
+                p.Id == "cmis:contentStreamHash" &&
+                p.Values == values);
+
+            properties.Add(property);
+            doc.Setup(d => d.Properties).Returns(properties);
         }
 
         public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {

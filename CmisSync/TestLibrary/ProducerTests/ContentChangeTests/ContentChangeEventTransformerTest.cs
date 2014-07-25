@@ -172,16 +172,19 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
         {
             string fileName = "file.bin";
             var storage = new Mock<IMetaDataStorage>();
-            var file = Mock.Of<IMappedObject>(f =>
-                                              f.RemoteObjectId == Id &&
-                                              f.Name == fileName &&
-                                              f.Type == MappedObjectType.File);
+            var file = Mock.Of<IMappedObject>(
+                f =>
+                f.RemoteObjectId == Id &&
+                f.Name == fileName &&
+                f.Type == MappedObjectType.File);
             storage.AddMappedFile(file);
             storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns("path");
             FileEvent fileEvent = null;
             var queue = new Mock<ISyncEventQueue>();
-            queue.Setup(h => h.AddEvent(It.IsAny<FileEvent>()))
-                    .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
+            queue.Setup(
+                h =>
+                h.AddEvent(It.IsAny<FileEvent>()))
+                .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
 
             var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
             var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Updated, false);
@@ -190,6 +193,38 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
             queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
             Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
             Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.CHANGED));
+        }
+
+        [Test, Category("Fast"), Category("ContentChange")]
+        public void LocallyExistingRemoteDocumentUpdatedButContentStaysEqual()
+        {
+            byte[] hash = new byte[20];
+            string type = "SHA-1";
+            string fileName = "file.bin";
+            var storage = new Mock<IMetaDataStorage>();
+            var file = Mock.Of<IMappedObject>(
+                f =>
+                f.RemoteObjectId == Id &&
+                f.Name == fileName &&
+                f.Type == MappedObjectType.File &&
+                f.ChecksumAlgorithmName == type &&
+                f.LastChecksum == hash);
+            storage.AddMappedFile(file);
+            storage.Setup(s => s.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns("path");
+            FileEvent fileEvent = null;
+            var queue = new Mock<ISyncEventQueue>();
+            queue.Setup(
+                h =>
+                h.AddEvent(It.IsAny<FileEvent>()))
+                .Callback<ISyncEvent>(e => fileEvent = e as FileEvent);
+
+            var transformer = new ContentChangeEventTransformer(queue.Object, storage.Object);
+            var contentChangeEvent = this.PrepareEvent(DotCMIS.Enums.ChangeType.Updated, false, hash);
+
+            Assert.That(transformer.Handle(contentChangeEvent), Is.True);
+            queue.Verify(q => q.AddEvent(It.IsAny<FileEvent>()), Times.Once());
+            Assert.That(fileEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
+            Assert.That(fileEvent.RemoteContent, Is.EqualTo(ContentChangeType.NONE));
         }
 
         [Test, Category("Fast"), Category("ContentChange")]
@@ -309,9 +344,13 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
             Assert.That(folderEvent.Remote, Is.EqualTo(MetaDataChangeType.CHANGED));
         }
 
-        private ContentChangeEvent PrepareEvent(DotCMIS.Enums.ChangeType type, bool hasContentStream) {
+        private ContentChangeEvent PrepareEvent(DotCMIS.Enums.ChangeType type, bool hasContentStream, byte[] contentHash = null) {
             var e = new ContentChangeEvent(type, Id);
             var remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(hasContentStream ? "streamId" : null, Id, "name", (string)null);
+            if (contentHash != null) {
+                remoteObject.SetupContentStreamHash(contentHash);
+            }
+
             var session = new Mock<ISession>();
             session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(remoteObject.Object);
 
