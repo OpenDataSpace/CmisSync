@@ -24,13 +24,14 @@ namespace CmisSync.Lib.Producer.Crawler
     using System.Linq;
     using System.Threading.Tasks;
 
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
-    
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
+
     using DotCMIS.Client;
 
     using log4net;
@@ -163,14 +164,9 @@ namespace CmisSync.Lib.Producer.Crawler
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
 
-            /*
-            storedTree = this.storage.GetObjectTree();
-            localTree = GetLocalDirectoryTree(this.localFolder);
-            var desc = this.remoteFolder.GetDescendants(-1);
-            remoteTree = GetRemoteDirectoryTree(this.remoteFolder, desc);*/
-
             List<IMappedObject> storedObjectsForRemote = storedTree.ToList();
             List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>(storedObjectsForRemote);
+
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
             this.CreateRemoteEvents(storedObjectsForRemote, remoteTree, eventMap);
             this.CreateLocalEvents(storedObjectsForLocal, localTree, eventMap);
@@ -275,6 +271,7 @@ namespace CmisSync.Lib.Producer.Crawler
                     if (storedMappedChild.LastChangeToken != cmisObject.ChangeToken) {
                         // Update
                         newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.CHANGED, src: this);
+                        AddRemoteContentChangeTypeToFileEvent(newEvent as FileEvent, storedMappedChild, cmisObject as IDocument);
                     } else {
                         // Equal
                         newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.NONE, src: this);
@@ -282,10 +279,12 @@ namespace CmisSync.Lib.Producer.Crawler
                 } else {
                     // Renamed
                     newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.CHANGED, src: this);
+                    AddRemoteContentChangeTypeToFileEvent(newEvent as FileEvent, storedMappedChild, cmisObject as IDocument);
                 }
             } else {
                 // Moved
                 newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.MOVED, oldRemotePath: this.storage.GetRemotePath(storedMappedChild), src: this);
+                AddRemoteContentChangeTypeToFileEvent(newEvent as FileEvent, storedMappedChild, cmisObject as IDocument);
             }
 
             return newEvent;
@@ -324,6 +323,19 @@ namespace CmisSync.Lib.Producer.Crawler
             }
         }
 
+        private static void AddRemoteContentChangeTypeToFileEvent(FileEvent fileEvent, IMappedObject obj, IDocument remoteDoc) {
+            if (fileEvent == null || obj == null || remoteDoc == null) {
+                return;
+            }
+
+            byte[] remoteHash = remoteDoc.ContentStreamHash(obj.ChecksumAlgorithmName);
+            if (remoteHash != null && remoteHash.SequenceEqual(obj.LastChecksum)) {
+                fileEvent.RemoteContent = ContentChangeType.NONE;
+            } else {
+                fileEvent.RemoteContent = ContentChangeType.CHANGED;
+            }
+        }
+
         private void MergeAndSendEvents(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
         {
             foreach (var entry in eventMap) {
@@ -332,14 +344,18 @@ namespace CmisSync.Lib.Producer.Crawler
                 } else if (entry.Value.Item1 == null && entry.Value.Item2 == null) {
                     continue;
                 } else if (entry.Value.Item1 == null) {
-                    this.Queue.AddEvent(entry.Value.Item2);
+                    if (entry.Value.Item2.Remote != MetaDataChangeType.NONE) {
+                        this.Queue.AddEvent(entry.Value.Item2);
+                    }
                 } else if (entry.Value.Item2 == null) {
-                    this.Queue.AddEvent(entry.Value.Item1);
+                    if (entry.Value.Item1.Local != MetaDataChangeType.NONE) {
+                        this.Queue.AddEvent(entry.Value.Item1);
+                    }
                 } else {
                     var localEvent = entry.Value.Item1;
                     var remoteEvent = entry.Value.Item2;
 
-                    if(IsSymmetricNoneTuple(localEvent, remoteEvent)) {
+                    if (this.IsSymmetricNoneTuple(localEvent, remoteEvent)) {
                         continue;
                     }
 
@@ -356,7 +372,7 @@ namespace CmisSync.Lib.Producer.Crawler
             }
         }
 
-        private bool IsSymmetricNoneTuple(AbstractFolderEvent local, AbstractFolderEvent remote){
+        private bool IsSymmetricNoneTuple(AbstractFolderEvent local, AbstractFolderEvent remote) {
             if (local.Local != MetaDataChangeType.NONE) {
                 return false;
             }
@@ -370,7 +386,6 @@ namespace CmisSync.Lib.Producer.Crawler
                 if (localFileEvent.LocalContent != ContentChangeType.NONE) {
                     return false;
                 }
-
             }
 
             FileEvent remoteFileEvent = remote as FileEvent;
@@ -378,7 +393,6 @@ namespace CmisSync.Lib.Producer.Crawler
                 if (remoteFileEvent.RemoteContent != ContentChangeType.NONE) {
                     return false;
                 }
-
             }
 
             return true;
