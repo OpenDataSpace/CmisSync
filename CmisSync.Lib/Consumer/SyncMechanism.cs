@@ -151,7 +151,7 @@ namespace CmisSync.Lib.Consumer
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager);
             solver[(int)SituationType.ADDED, (int)SituationType.CHANGED] = null;
-            solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = null;
+            solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage);
             solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = null;
             solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = null;
             solver[(int)SituationType.REMOVED, (int)SituationType.CHANGED] = null;

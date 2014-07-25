@@ -47,7 +47,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            if (localFileSystemInfo is IDirectoryInfo) {
+                var obj = this.Storage.GetObjectByRemoteId((remoteId as IFolder).Id);
+                obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                obj.LastRemoteWriteTimeUtc = (remoteId as IFolder).LastModificationDate;
+                obj.LastChangeToken = (remoteId as IFolder).ChangeToken;
+                this.Storage.SaveMappedObject(obj);
+            } else {
+                throw new NotImplementedException();
+            }
         }
     }
 }
