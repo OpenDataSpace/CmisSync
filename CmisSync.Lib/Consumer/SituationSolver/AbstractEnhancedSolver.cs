@@ -37,7 +37,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta Data Storage.</param>
-        public AbstractEnhancedSolver(ISession session, IMetaDataStorage storage)
+        public AbstractEnhancedSolver(
+            ISession session,
+            IMetaDataStorage storage,
+            bool serverCanModifyCreationAndModificationDate = true)
         {
             this.Storage = storage;
             if (session == null) {
@@ -50,6 +53,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.Session = session;
             this.Storage = storage;
+            this.ServerCanModifyDateTimes = serverCanModifyCreationAndModificationDate;
         }
 
         /// <summary>
@@ -63,6 +67,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <value>The storage.</value>
         protected IMetaDataStorage Storage { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this cmis server can modify date times.
+        /// </summary>
+        /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
+        protected bool ServerCanModifyDateTimes { get; private set; }
 
         /// <summary>
         /// Solve the specified situation by using localFile and remote object.

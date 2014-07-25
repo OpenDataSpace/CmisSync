@@ -54,8 +54,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Assert.That(solver.GetStorage(), Is.EqualTo(storage));
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorSetsServerPropertyCorrectly() {
+            var solver = new SolverClass(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), true);
+            Assert.That(solver.GetModification(), Is.True);
+            solver = new SolverClass(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), false);
+            Assert.That(solver.GetModification(), Is.False);
+        }
+
         private class SolverClass : AbstractEnhancedSolver {
-            public SolverClass(ISession session, IMetaDataStorage storage) : base(session, storage) {
+            public SolverClass(
+                ISession session,
+                IMetaDataStorage storage,
+                bool modificationsAllowed = true) : base(session, storage, modificationsAllowed) {
             }
 
             public ISession GetSession() {
@@ -64,6 +75,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             public IMetaDataStorage GetStorage() {
                 return this.Storage;
+            }
+
+            public bool GetModification() {
+                return this.ServerCanModifyDateTimes;
             }
 
             public override void Solve(
