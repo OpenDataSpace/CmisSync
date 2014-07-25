@@ -495,6 +495,29 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
+        public void OneRemoteFileUpdatedAndDetectedByCrawlSync()
+        {
+            string fileName = "file.txt";
+            string content = "cat";
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            content += content;
+            doc.SetContent(content);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(file.Length, Is.EqualTo(content.Length));
+        }
+
+        [Test, Category("Slow")]
         public void RemoteCreatedFileIsDeletedLocally()
         {
             string fileName = "file.txt";
