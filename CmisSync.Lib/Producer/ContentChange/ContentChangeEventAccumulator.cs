@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Producer.ContentChange
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
         public ContentChangeEventAccumulator(ISession session, ISyncEventQueue queue) : base(queue) {
-            if(session == null) {
+            if (session == null) {
                 throw new ArgumentNullException("Session instance is needed for the ContentChangeEventAccumulator, but was null");
             }
 
@@ -69,12 +69,12 @@ namespace CmisSync.Lib.Producer.ContentChange
         /// true if the CS Event is not valid any longer
         /// </returns>
         public override bool Handle(ISyncEvent e) {
-            if(!(e is ContentChangeEvent)) {
+            if (!(e is ContentChangeEvent)) {
                 return false;
             }
 
             var contentChangeEvent = e as ContentChangeEvent;
-            if(contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted && contentChangeEvent.CmisObject == null) {
+            if (contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted && contentChangeEvent.CmisObject == null) {
                 try {
                     contentChangeEvent.UpdateObject(this.session);
                     Logger.Debug("Updated Object in contentChangeEvent" + contentChangeEvent.ToString());
