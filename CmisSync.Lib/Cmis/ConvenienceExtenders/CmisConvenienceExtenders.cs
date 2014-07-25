@@ -135,6 +135,41 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         }
 
         /// <summary>
+        /// Sets a flag to ignores all children of this folder.
+        /// </summary>
+        /// <param name="folder">Folder.</param>
+        public static void IgnoreAllChildren(this IFolder folder) {
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            IList<string> devices = new List<string>();
+            devices.Add("*");
+            properties.Add("gds:ignoreDeviceIds", devices);
+            IList<string> ids = new List<string>();
+            ids.Add("gds:sync");
+            properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
+            folder.UpdateProperties(properties, true);
+        }
+
+        /// <summary>
+        /// Indicates if all children are ignored.
+        /// </summary>
+        /// <returns><c>true</c>, if all children are ignored, <c>false</c> otherwise.</returns>
+        /// <param name="folder">Folder.</param>
+        public static bool AreAllChildrenIgnored(this IFolder folder) {
+            foreach (var ignoredProperty in folder.Properties) {
+                if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
+                    if ((ignoredProperty.FirstValue as string).Contains("*")) {
+                        return true;
+                    } else if ((ignoredProperty.FirstValue as string).ToLower().Contains(Config.ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
         /// Hex string to byte array.
         /// </summary>
         /// <returns>The byte array.</returns>
