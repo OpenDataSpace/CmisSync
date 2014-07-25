@@ -364,7 +364,7 @@ namespace TestLibrary.IntegrationTests
 
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
             var localFolder = new Mock<IDirectoryInfo>();
-            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, filterAggregator, Mock.Of<IActivityListener>(), fsFactory);
+            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, filterAggregator, Mock.Of<IActivityListener>(), fsFactory: fsFactory);
             manager.AddEventHandler(crawler);
 
             var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();

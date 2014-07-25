@@ -66,6 +66,7 @@ namespace CmisSync.Lib.Producer.Crawler
             IMetaDataStorage storage,
             IFilterAggregator filter,
             IActivityListener activityListener,
+            bool serverSupportsHashes = false,
             IFileSystemInfoFactory fsFactory = null)
             : base(queue)
         {

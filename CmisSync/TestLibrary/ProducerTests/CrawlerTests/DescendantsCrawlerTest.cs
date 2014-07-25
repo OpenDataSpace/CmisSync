@@ -462,7 +462,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
                 this.storage,
                 this.filter,
                 this.listener.Object,
-                this.fsFactory.Object);
+                fsFactory: this.fsFactory.Object);
         }
 
         private void VerifyThatListenerHasBeenUsed() {

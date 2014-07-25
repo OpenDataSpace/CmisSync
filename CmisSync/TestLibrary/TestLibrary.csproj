@@ -182,6 +182,7 @@
     <Compile Include="EventManagerInitializerTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeChangesModificationDateTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\AbstractEnhancedSolverTest.cs" />
+    <Compile Include="CmisTests\ConvenienceExtendersTests\CmisConvenienceExtendersTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -229,5 +230,6 @@
     <Folder Include="ProducerTests\ContentChangeTests\" />
     <Folder Include="QueueingTests\" />
     <Folder Include="FilterTests\" />
+    <Folder Include="CmisTests\ConvenienceExtendersTests\" />
   </ItemGroup>
 </Project>

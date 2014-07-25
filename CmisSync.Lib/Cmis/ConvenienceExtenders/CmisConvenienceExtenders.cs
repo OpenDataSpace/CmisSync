@@ -77,6 +77,31 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         }
 
         /// <summary>
+        /// Returns the hash of the content stream on the server.
+        /// </summary>
+        /// <returns>The hash.</returns>
+        /// <param name="doc">Document with the content stream.</param>
+        /// <param name="type">Type of the requested hash.</param>
+        public static byte[] ContentStreamHash(this IDocument doc, string type = "SHA-1") {
+            if (doc.Properties == null) {
+                return null;
+            }
+
+            string prefix = string.Format("{{{0}}}", type.ToLower());
+            foreach (var prop in doc.Properties) {
+                if (prop.Id == "cmis:contentStreamHash") {
+                    foreach (string entry in prop.Values) {
+                        if (entry.StartsWith(prefix)) {
+                            return StringToByteArray(entry.Substring(prefix.Length));
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Sets the content stream of the document.
         /// </summary>
         /// <returns>The content.</returns>
@@ -101,10 +126,39 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// <returns>The result of UpdateProperties.</returns>
         /// <param name="obj">Fileable cmis object.</param>
         /// <param name="modificationDate">Modification date.</param>
-        public static ICmisObject UpdateLastWriteTimeUtc(this IFileableCmisObject obj, DateTime modificationDate) {
+        public static IObjectId UpdateLastWriteTimeUtc(this IFileableCmisObject obj, DateTime modificationDate) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.LastModificationDate, modificationDate);
-            return obj.UpdateProperties(properties);
+            return obj.UpdateProperties(properties, true);
+        }
+
+        /// <summary>
+        /// Hex string to byte array.
+        /// </summary>
+        /// <returns>The byte array.</returns>
+        /// <param name="hex">Hex string without leading 0x.</param>
+         private static byte[] StringToByteArray(string hex) {
+            if (hex.Length % 2 == 1) {
+                throw new ArgumentException("The binary key cannot have an odd number of digits");
+            }
+
+            byte[] arr = new byte[hex.Length >> 1];
+
+            for (int i = 0; i < hex.Length >> 1; ++i) {
+                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1])));
+            }
+
+            return arr;
+        }
+
+        private static int GetHexVal(char hex) {
+            int val = (int)hex;
+            // For uppercase A-F letters:
+            // return val - (val < 58 ? 48 : 55);
+            // For lowercase a-f letters:
+            // return val - (val < 58 ? 48 : 87);
+            // Or the two combined, but a bit slower:
+            return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
     }
 }
