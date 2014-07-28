@@ -71,7 +71,10 @@ namespace CmisSync.Lib.Filter
                 ContentChangeEvent change = e as ContentChangeEvent;
                 switch (change.Type) {
                 case ChangeType.Created:
-                    return this.storage.GetObjectByRemoteId(change.ObjectId) != null;
+                    // HACK This should be taken if the server sends correct change events
+                    // return this.storage.GetObjectByRemoteId(change.ObjectId) != null;
+                    goto case ChangeType.Updated;
+                    // HACK end
                 case ChangeType.Deleted:
                     return this.storage.GetObjectByRemoteId(change.ObjectId) == null;
                 case ChangeType.Security:

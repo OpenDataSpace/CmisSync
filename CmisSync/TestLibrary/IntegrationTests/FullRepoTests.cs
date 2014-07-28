@@ -475,11 +475,6 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
-            // HACK This should be removed if the server sends correct events
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
-            this.repo.Run();
-            // HACK end
-
             content += content;
             doc.SetContent(content);
 
