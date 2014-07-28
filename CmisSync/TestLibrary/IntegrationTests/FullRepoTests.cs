@@ -638,6 +638,7 @@ namespace TestLibrary.IntegrationTests
             using (var filestream = this.localRootDir.GetFiles().First().Open(FileMode.Truncate, FileAccess.Write, FileShare.None)) {
                 filestream.Write(newContent, 0, newContent.Length);
             }
+            DateTime modificationDate = this.localRootDir.GetFiles().First().LastWriteTimeUtc;
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
@@ -647,7 +648,7 @@ namespace TestLibrary.IntegrationTests
             var localDoc = this.localRootDir.GetFiles().First();
             Assert.That(remoteDoc.ContentStreamLength, Is.EqualTo(newContent.Length));
             Assert.That(localDoc.Length, Is.EqualTo(newContent.Length));
-            Assert.That((localDoc.LastWriteTimeUtc - remoteDoc.LastModificationDate).Value.Seconds, Is.EqualTo(0));
+            Assert.That(localDoc.LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
         /// <summary>

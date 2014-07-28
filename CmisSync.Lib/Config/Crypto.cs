@@ -85,22 +85,22 @@ namespace CmisSync.Lib.Config
         public static HashAlgorithm CreateHashAlgorithm(string name)
         {
             name = name.ToLower();
-            if (name.Equals("sha1"))
+            if (name.Equals("sha1") || name.Equals("sha-1"))
             {
                 return SHA1.Create();
             }
 
-            if (name.Equals("sha256"))
+            if (name.Equals("sha256") || name.Equals("sha-256"))
             {
                 return SHA256.Create();
             }
 
-            if (name.Equals("sha384"))
+            if (name.Equals("sha384") || name.Equals("sha-384"))
             {
                 return SHA384.Create();
             }
 
-            if (name.Equals("sha512"))
+            if (name.Equals("sha512") || name.Equals("sha-512"))
             {
                 return SHA512.Create();
             }

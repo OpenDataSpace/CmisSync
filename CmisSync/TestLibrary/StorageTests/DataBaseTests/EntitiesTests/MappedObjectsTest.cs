@@ -159,8 +159,8 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             var file = new MappedObject("name", "remoteId", MappedObjectType.File, null, null) { ChecksumAlgorithmName = "MD5" };
             Assert.AreEqual("MD5", file.ChecksumAlgorithmName);
 
-            file.ChecksumAlgorithmName = "SHA1";
-            Assert.AreEqual("SHA1", file.ChecksumAlgorithmName);
+            file.ChecksumAlgorithmName = "SHA-1";
+            Assert.AreEqual("SHA-1", file.ChecksumAlgorithmName);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]

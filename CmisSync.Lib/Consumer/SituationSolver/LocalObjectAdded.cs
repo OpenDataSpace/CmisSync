@@ -129,7 +129,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     using (SHA1 hashAlg = new SHA1Managed())
                     using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
                         uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
-                        mapped.ChecksumAlgorithmName = "SHA1";
+                        mapped.ChecksumAlgorithmName = "SHA-1";
                         mapped.LastChecksum = hashAlg.Hash;
                     }
 

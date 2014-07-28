@@ -142,7 +142,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
                     LastLocalWriteTimeUtc = modificationDate,
                     LastChecksum = new byte[20],
-                    ChecksumAlgorithmName = "SHA1"
+                    ChecksumAlgorithmName = "SHA-1"
                 };
                 this.storage.AddMappedFile(mappedObject, "path");
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
@@ -189,7 +189,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
                     LastLocalWriteTimeUtc = modificationDate,
                     LastChecksum = expectedHash,
-                    ChecksumAlgorithmName = "SHA1"
+                    ChecksumAlgorithmName = "SHA-1"
                 };
 
                 this.storage.AddMappedFile(mappedObject, path);
@@ -245,7 +245,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
                     LastLocalWriteTimeUtc = modificationDate,
                     LastChecksum = new byte[20],
-                    ChecksumAlgorithmName = "SHA1"
+                    ChecksumAlgorithmName = "SHA-1"
                 };
                 this.storage.AddMappedFile(mappedObject, "path");
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);

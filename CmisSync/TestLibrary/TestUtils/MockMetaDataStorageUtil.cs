@@ -208,7 +208,7 @@ namespace TestLibrary.TestUtils
             }
 
             if (checksum != null) {
-                Assert.That(o.ChecksumAlgorithmName, Is.EqualTo("SHA1"));
+                Assert.That(o.ChecksumAlgorithmName, Is.EqualTo("SHA-1"));
                 Assert.That(o.LastChecksum, Is.EqualTo(checksum), "Given checksum is not equal to last saved checksum");
             }
 

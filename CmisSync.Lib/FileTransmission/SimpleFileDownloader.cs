@@ -38,7 +38,7 @@ namespace CmisSync.Lib.FileTransmission
         private object disposeLock = new object();
 
         /// <summary>
-        /// Downloads the file and returns the SHA1 hash of the content of the saved file
+        /// Downloads the file and returns the SHA-1 hash of the content of the saved file
         /// </summary>
         /// <param name="remoteDocument">Remote document.</param>
         /// <param name="localFileStream">Local taget file stream.</param>

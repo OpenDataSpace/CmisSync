@@ -171,7 +171,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     LastLocalWriteTimeUtc = file.LastWriteTimeUtc,
                     LastRemoteWriteTimeUtc = remoteDoc.LastModificationDate,
                     LastChecksum = hash,
-                    ChecksumAlgorithmName = "SHA1"
+                    ChecksumAlgorithmName = "SHA-1"
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));

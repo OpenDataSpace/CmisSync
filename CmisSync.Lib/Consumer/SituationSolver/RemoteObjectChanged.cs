@@ -119,7 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                                 throw;
                             }
 
-                            obj.ChecksumAlgorithmName = "SHA1";
+                            obj.ChecksumAlgorithmName = "SHA-1";
                             obj.LastChecksum = hashAlg.Hash;
                         }
 

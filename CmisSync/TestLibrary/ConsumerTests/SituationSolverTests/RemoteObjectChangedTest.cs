@@ -121,6 +121,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteDocumentsMetaDataChanged()
         {
+            byte[] hash = new byte[20];
             DateTime modificationDate = DateTime.UtcNow;
             string fileName = "a";
             string path = Path.Combine(Path.GetTempPath(), fileName);
@@ -142,7 +143,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 lastChangeToken)
             {
                 Guid = Guid.NewGuid(),
-                LastContentSize = 0
+                LastContentSize = 0,
+                LastChecksum = hash,
+                ChecksumAlgorithmName = "SHA-1"
             };
 
             this.storage.AddMappedFile(mappedObject);
@@ -150,9 +153,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, fileName, parentId, changeToken: newChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modificationDate);
 
-            this.underTest.Solve(fileInfo.Object, remoteObject.Object);
+            this.underTest.Solve(fileInfo.Object, remoteObject.Object,ContentChangeType.NONE, ContentChangeType.NONE);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, contentSize: 0);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, contentSize: 0, checksum: hash);
             fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modificationDate)), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
         }
