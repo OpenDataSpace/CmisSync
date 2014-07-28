@@ -88,11 +88,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 obj.Name = remoteDocument.Name;
-                obj.LastChangeToken = remoteDocument.ChangeToken;
-                obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
+                obj.LastChangeToken = remoteContent == ContentChangeType.NONE ? remoteDocument.ChangeToken : obj.LastChangeToken;
+                obj.LastRemoteWriteTimeUtc = remoteContent == ContentChangeType.NONE ? remoteDocument.LastModificationDate : obj.LastRemoteWriteTimeUtc;
                 obj.LastLocalWriteTimeUtc = fileInfo.LastWriteTimeUtc;
                 this.Storage.SaveMappedObject(obj);
                 OperationsLogger.Info(string.Format("Renamed local file {0} to {1}", oldPath, remoteDocument.Name));
+                if (remoteContent != ContentChangeType.NONE) {
+                    throw new ArgumentException("Remote documents content is also changed => force crawl sync.");
+                }
             } else {
                 throw new ArgumentException("Given remote Id is not an IFolder nor an IDocument instance");
             }

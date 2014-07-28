@@ -713,10 +713,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
-        // Not yet implemented correctly
-        [Ignore]
         [Test, Category("Slow")]
-        public void OneRemoteDocumentIsChangedAndRenamedDetectedByCrawler() {
+        public void OneRemoteFileIsChangedAndRenamedDetectedByCrawler() {
             string fileName = "file.txt";
             string newFileName = "file_1.txt";
             string content = "cat";
@@ -724,6 +722,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
 
             document.SetContent(content + content, true, true);
             long length = (long)document.ContentStreamLength;
@@ -743,10 +742,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
-        // Not yet implemented correctly
-        [Ignore]
         [Test, Category("Slow")]
-        public void OneRemoteDocumentIsChangedAndRenamedDetectedByContentChanges() {
+        public void OneRemoteFileIsChangedAndRenamedDetectedByContentChanges() {
             string fileName = "file.txt";
             string newFileName = "file_1.txt";
             string content = "cat";
@@ -754,12 +751,17 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
 
             document.SetContent(content + content, true, true);
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
 
-            Thread.Sleep(15000);
+            Thread.Sleep(5000);
             this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
             this.repo.Run();
 
