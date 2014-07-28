@@ -347,6 +347,8 @@ namespace TestLibrary.IntegrationTests
                 if (remoteHash != null) {
                     Assert.That(remoteHash, Is.EqualTo(SHA1.Create().ComputeHash(new byte[1])));
                 }
+
+                requestedDoc.Delete(true);
             }
         }
 
