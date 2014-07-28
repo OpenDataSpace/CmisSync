@@ -81,10 +81,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             savedObject.Name = (remoteId as ICmisObject).Name;
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
-            savedObject.LastChangeToken = remoteId is ICmisObject ? (remoteId as ICmisObject).ChangeToken : null;
+            savedObject.LastChangeToken = (remoteId is IDocument && remoteContent != ContentChangeType.NONE) ? savedObject.LastChangeToken : remoteId is ICmisObject ? (remoteId as ICmisObject).ChangeToken : null;
             savedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
-            savedObject.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
+            savedObject.LastRemoteWriteTimeUtc = (remoteId is IDocument && remoteContent != ContentChangeType.NONE) ? savedObject.LastRemoteWriteTimeUtc : (remoteId as ICmisObject).LastModificationDate;
             this.Storage.SaveMappedObject(savedObject);
+            if (remoteId is IDocument && remoteContent != ContentChangeType.NONE) {
+                throw new ArgumentException("Remote content has also been changed => force crawl sync.");
+            }
         }
     }
 }
