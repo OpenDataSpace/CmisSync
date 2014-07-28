@@ -70,7 +70,7 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = progressstream;
-                contentStream.Length = localFileStream.Length;
+//                contentStream.Length = localFileStream.Length;
                 try {
                     remoteDocument.SetContentStream(contentStream, overwrite, true);
                 } catch(Exception e) {
