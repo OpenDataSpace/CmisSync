@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Consumer
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
 
     using CmisSync.Lib.Events;
@@ -191,12 +192,15 @@ namespace CmisSync.Lib.Consumer
             }
 
             Logger.Debug("Using Solver: " + solver.GetType());
+            Stopwatch watch = Stopwatch.StartNew();
             this.Solve(solver, actualEvent);
+            watch.Stop();
+            Logger.Debug(string.Format("Solver {0} took {1} ms", solver.GetType(), watch.ElapsedMilliseconds));
         }
 
         private void Solve(ISolver s, AbstractFolderEvent e)
         {
-            using(var activity = new ActivityListenerResource(this.activityListener)) {
+            using (var activity = new ActivityListenerResource(this.activityListener)) {
             if (e is FolderEvent) {
                 s.Solve((e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);
                 // this.storage.ValidateObjectStructure();
