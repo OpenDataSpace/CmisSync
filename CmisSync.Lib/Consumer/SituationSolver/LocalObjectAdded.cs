@@ -128,7 +128,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     IFileUploader uploader = ContentTaskUtils.CreateUploader();
                     using (SHA1 hashAlg = new SHA1Managed())
                     using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
-                        uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
+                        try {
+                            uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
+                        } catch (Exception ex) {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                            throw;
+                        }
+
                         mapped.ChecksumAlgorithmName = "SHA-1";
                         mapped.LastChecksum = hashAlg.Hash;
                     }

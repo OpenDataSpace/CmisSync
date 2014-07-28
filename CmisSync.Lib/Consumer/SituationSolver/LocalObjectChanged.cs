@@ -115,7 +115,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
                     using (var hashAlg = new SHA1Managed())
                     using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                        uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                        try {
+                            uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                        } catch(Exception ex) {
+                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                            throw;
+                        }
+
                         mappedObject.LastChecksum = hashAlg.Hash;
                     }
 
