@@ -69,24 +69,22 @@ namespace CmisSync.Lib.Storage.FileSystem
         void Refresh();
 
         /// <summary>
-        /// Sets the extended attribute.
-        /// </summary>
-        /// <param name="key">Attribute name.</param>
-        /// <param name="value">Attribute value.</param>
-        /// <param name="restoreModificationDate">If set to <c>true</c>, the last modification date of the file will be restored after setting the attribute. If <c>false</c> it could have been changed by the file system.</param>
-        void SetExtendedAttribute(string key, string value, bool restoreModificationDate);
-
-        /// <summary>
-        /// Gets the extended attribute.
-        /// </summary>
-        /// <returns>The extended attribute value.</returns>
-        /// <param name="key">Attribute name.</param>
-        string GetExtendedAttribute(string key);
-
-        /// <summary>
         /// Determines whether instance is able to save extended attributes.
         /// </summary>
         /// <returns><c>true</c> if this instance is able to save extended attributes; otherwise, <c>false</c>.</returns>
         bool IsExtendedAttributeAvailable();
+
+        /// <summary>
+        /// Gets the UUID.
+        /// </summary>
+        /// <value>The UUID.</value>
+        Guid? Uuid { get; }
+
+        /// <summary>
+        /// Sets the UUID.
+        /// </summary>
+        /// <param name="guid">UUID.</param>
+        /// <param name="restoreModificationDate">If set to <c>true</c> restores modification date.</param>
+        void SetUuid(Guid? uuid, bool restoreModificationDate);
     }
 }

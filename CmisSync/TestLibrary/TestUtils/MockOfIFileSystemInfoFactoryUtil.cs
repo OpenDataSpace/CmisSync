@@ -52,7 +52,7 @@ namespace TestLibrary.TestUtils
         public static Mock<IDirectoryInfo> AddDirectory(this Mock<IFileSystemInfoFactory> fsFactory, string path, Guid guid, bool exists = true)
         {
             var dir = fsFactory.AddDirectory(path, exists);
-            dir.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+            dir.Setup(d => d.Uuid).Returns(guid);
             return dir;
         }
 
@@ -112,7 +112,7 @@ namespace TestLibrary.TestUtils
         public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, Guid guid, bool exists = true)
         {
             var file = fsFactory.AddFile(path, exists);
-            file.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+            file.Setup(f => f.Uuid).Returns(guid);
             return file;
         }
 
@@ -148,7 +148,7 @@ namespace TestLibrary.TestUtils
         }
 
         public static void SetupGuid(this Mock<IFileSystemInfo> fileSystemInfo, Guid uuid) {
-            fileSystemInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            fileSystemInfo.Setup(f => f.Uuid).Returns(uuid);
         }
 
         public static void SetupLastWriteTimeUtc(this Mock<IFileInfo> fileInfo, DateTime lastWriteTimeUtc) {
@@ -156,7 +156,7 @@ namespace TestLibrary.TestUtils
         }
 
         public static void SetupGuid(this Mock<IFileInfo> fileInfo, Guid uuid) {
-            fileInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            fileInfo.Setup(f => f.Uuid).Returns(uuid);
         }
 
         public static void SetupLastWriteTimeUtc(this Mock<IDirectoryInfo> dirInfo, DateTime lastWriteTimeUtc) {
@@ -164,7 +164,7 @@ namespace TestLibrary.TestUtils
         }
 
         public static void SetupGuid(this Mock<IDirectoryInfo> dirInfo, Guid uuid) {
-            dirInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            dirInfo.Setup(f => f.Uuid).Returns(uuid);
         }
 
         public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileSystemInfo> fsInfo) {

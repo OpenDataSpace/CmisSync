@@ -165,12 +165,11 @@ namespace CmisSync.Lib.Producer.Watcher
 
         private bool MergingAddedAndDeletedEvent(FileSystemEventArgs args, bool isDirectory) {
             lock (this.listLock) {
-                Guid fsGuid;
                 IFileSystemInfo fsInfo = isDirectory ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(args.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(args.FullPath);
                 try {
-                    string fsUuid = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                    if (Guid.TryParse(fsUuid, out fsGuid)) {
-                        var correspondingDeletion = this.deletions.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == fsGuid);
+                    var fsUuid = fsInfo.Uuid;
+                    if (fsUuid != null) {
+                        var correspondingDeletion = this.deletions.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == (Guid)fsUuid);
                         if (correspondingDeletion != null) {
                             this.queue.AddEvent(new FSMovedEvent(correspondingDeletion.Item1.FullPath, args.FullPath, isDirectory));
                             this.deletions.Remove(correspondingDeletion);
