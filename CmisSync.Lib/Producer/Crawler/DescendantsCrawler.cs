@@ -226,17 +226,16 @@ namespace CmisSync.Lib.Producer.Crawler
         {
             var parent = localTree.Item;
             IMappedObject storedParent = null;
-            Guid guid;
-
-            if (this.TryGetExtendedAttribute(parent, out guid)) {
-                storedParent = storedObjects.Find(o => o.Guid.Equals(guid));
+            var guid = parent.Uuid;
+            if (guid != null) {
+                storedParent = storedObjects.Find(o => o.Guid.Equals((Guid)guid));
             }
 
             foreach (var child in localTree.Children) {
-                Guid childGuid;
+                var childGuid = child.Item.Uuid;
                 IMappedObject storedMappedChild = null;
-                if (this.TryGetExtendedAttribute(child.Item, out childGuid)) {
-                    storedMappedChild = storedObjects.Find(o => o.Guid == childGuid);
+                if (childGuid != null) {
+                    storedMappedChild = storedObjects.Find(o => o.Guid == (Guid)childGuid);
                     if (storedMappedChild != null) {
                         // Moved, Renamed, Updated or Equal
                         AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
@@ -309,17 +308,6 @@ namespace CmisSync.Lib.Producer.Crawler
                 if (storedMappedChild != null) {
                     storedObjects.Remove(storedMappedChild);
                 }
-            }
-        }
-
-        private bool TryGetExtendedAttribute(IFileSystemInfo fsInfo, out Guid guid) {
-            var uuid = fsInfo.Uuid;
-            if (uuid == null) {
-                guid = Guid.Empty;
-                return false;
-            } else {
-                guid =(Guid)uuid;
-                return true;
             }
         }
 
