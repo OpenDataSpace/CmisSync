@@ -24,11 +24,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -54,7 +55,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             IMetaDataStorage storage,
             ISyncEventQueue queue,
             ActiveActivitiesManager transmissionManager,
-            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage, serverCanModifyCreationAndModificationDate){
+            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage, serverCanModifyCreationAndModificationDate) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -81,7 +82,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             // Match local changes to remote changes and updated them remotely
-            var mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
+            Guid uuid;
+            string ea = localFileSystemInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+            IMappedObject mappedObject;
+            if (ea != null && Guid.TryParse(ea, out uuid)) {
+                mappedObject = this.Storage.GetObjectByGuid(uuid);
+            } else {
+                mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
+            }
+
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null) {
                 bool isChanged = false;

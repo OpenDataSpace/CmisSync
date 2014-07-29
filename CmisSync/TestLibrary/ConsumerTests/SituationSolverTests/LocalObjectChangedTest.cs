@@ -217,6 +217,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileContentChanged()
         {
+            Guid uuid = Guid.NewGuid();
             var modificationDate = DateTime.UtcNow;
             var newModificationDate = modificationDate.AddHours(1);
             var newChangeToken = "newChangeToken";
@@ -228,6 +229,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns("path");
+            localFile.SetupGuid(uuid);
             using (var uploadedContent = new MemoryStream()) {
                 localFile.Setup(
                     f =>
@@ -241,7 +243,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     "changeToken",
                     fileLength)
                 {
-                    Guid = Guid.NewGuid(),
+                    Guid = uuid,
                     LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
                     LastLocalWriteTimeUtc = modificationDate,
                     LastChecksum = new byte[20],
