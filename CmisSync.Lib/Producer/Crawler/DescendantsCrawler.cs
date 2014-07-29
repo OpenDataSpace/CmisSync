@@ -205,7 +205,7 @@ namespace CmisSync.Lib.Producer.Crawler
                 // Renamed, Updated or Equal
                 if (fsObject.Name == storedMappedChild.Name && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
                     // Equal
-                    createdEvent = FileOrFolderEventFactory.CreateEvent(null, fsObject, localChange: MetaDataChangeType.NONE, src: this);
+                    createdEvent = null; 
                 } else {
                     // Updated or Renamed
                     createdEvent = FileOrFolderEventFactory.CreateEvent(null, fsObject, localChange: MetaDataChangeType.CHANGED, src: this);
@@ -274,7 +274,7 @@ namespace CmisSync.Lib.Producer.Crawler
                         AddRemoteContentChangeTypeToFileEvent(newEvent as FileEvent, storedMappedChild, cmisObject as IDocument);
                     } else {
                         // Equal
-                        newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.NONE, src: this);
+                        newEvent = null;
                     }
                 } else {
                     // Renamed
@@ -355,10 +355,6 @@ namespace CmisSync.Lib.Producer.Crawler
                     var localEvent = entry.Value.Item1;
                     var remoteEvent = entry.Value.Item2;
 
-                    if (this.IsSymmetricNoneTuple(localEvent, remoteEvent)) {
-                        continue;
-                    }
-
                     var newEvent = FileOrFolderEventFactory.CreateEvent(
                         remoteEvent is FileEvent ? (IFileableCmisObject)(remoteEvent as FileEvent).RemoteFile : (IFileableCmisObject)(remoteEvent as FolderEvent).RemoteFolder,
                         localEvent is FileEvent ? (IFileSystemInfo)(localEvent as FileEvent).LocalFile : (IFileSystemInfo)(localEvent as FolderEvent).LocalFolder,
@@ -375,32 +371,6 @@ namespace CmisSync.Lib.Producer.Crawler
                     this.Queue.AddEvent(newEvent);
                 }
             }
-        }
-
-        private bool IsSymmetricNoneTuple(AbstractFolderEvent local, AbstractFolderEvent remote) {
-            if (local.Local != MetaDataChangeType.NONE) {
-                return false;
-            }
-
-            if (remote.Remote != MetaDataChangeType.NONE) {
-                return false;
-            }
-
-            FileEvent localFileEvent = local as FileEvent;
-            if (localFileEvent != null) {
-                if (localFileEvent.LocalContent != ContentChangeType.NONE) {
-                    return false;
-                }
-            }
-
-            FileEvent remoteFileEvent = remote as FileEvent;
-            if (remoteFileEvent != null) {
-                if (remoteFileEvent.RemoteContent != ContentChangeType.NONE) {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private void InformAboutRemoteObjectsAdded(IList<IFileableCmisObject> objects) {

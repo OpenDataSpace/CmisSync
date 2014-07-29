@@ -308,7 +308,6 @@ namespace TestLibrary.ProducerTests.CrawlerTests
                 It.Is<FolderEvent>(
                 e =>
                 e.LocalFolder.Equals(newLocalFolder.Object) &&
-                e.RemoteFolder.Equals(remoteSubFolder.Object) &&
                 e.Local.Equals(MetaDataChangeType.CHANGED))),
                 Times.Once());
             this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
