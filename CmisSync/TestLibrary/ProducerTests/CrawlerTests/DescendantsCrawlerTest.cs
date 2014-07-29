@@ -191,7 +191,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteDocumentAdded()
+        public void OneRemoteFileAdded()
         {
             IDocument newRemoteDocument = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "id", "name", this.remoteRootId).Object;
             this.remoteFolder.SetupDescendants(newRemoteDocument);
@@ -199,6 +199,29 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.RemoteFile.Equals(newRemoteDocument))), Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
+        }
+
+        [Test, Category("Fast")]
+        public void OneRemoteFileRemoved()
+        {
+            Guid fileGuid = Guid.NewGuid();
+            DateTime modificationDate = DateTime.UtcNow;
+            MappedObject obj = new MappedObject("name", "id", MappedObjectType.File, this.remoteRootId, "changeToken", 0) {
+                Guid = fileGuid,
+                LastLocalWriteTimeUtc = modificationDate
+            };
+            var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "name"));
+            oldLocalFile.SetupGuid(fileGuid);
+            oldLocalFile.SetupLastWriteTimeUtc(modificationDate);
+            this.localFolder.SetupFiles(oldLocalFile.Object);
+            this.storage.SaveMappedObject(obj);
+
+            var underTest = this.CreateCrawler();
+
+            Assert.That(underTest.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.Remote == MetaDataChangeType.DELETED)), Times.Once());
             this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
         }
