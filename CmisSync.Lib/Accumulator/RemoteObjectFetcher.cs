@@ -138,13 +138,7 @@ namespace CmisSync.Lib.Accumulator {
             }
 
             if (path != null) {
-                IMappedObject savedObject = null;
-                var uuid = path.Uuid;
-                if (uuid != null) {
-                    savedObject = this.storage.GetObjectByGuid((Guid)uuid);
-                }
-
-                savedObject = savedObject ?? this.storage.GetObjectByLocalPath(path);
+                IMappedObject savedObject = this.storage.GetObjectByLocalPath(path);
 
                 if(savedObject != null) {
                     return savedObject.RemoteObjectId;
