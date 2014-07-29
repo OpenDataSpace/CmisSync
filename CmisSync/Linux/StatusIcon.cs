@@ -395,7 +395,7 @@ namespace CmisSync {
 
     [CLSCompliant(false)]
     public class TransmissionMenuItem : ImageMenuItem {
-
+        private DateTime updateTime;
         public FileTransmissionType Type { get; private set; }
         public string Path { get; private set; }
         private string TypeString;
@@ -433,6 +433,13 @@ namespace CmisSync {
             }
 
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
+                TimeSpan diff = DateTime.Now - updateTime;
+                if (diff.Seconds < 1) {
+                    return;
+                }
+
+                updateTime = DateTime.Now;
+
                 percent = (status.Percent != null)? (double) status.Percent: 0;
                 long? bitsPerSecond = status.BitsPerSecond;
                 if( status.Percent != null && bitsPerSecond != null && text != null) {
