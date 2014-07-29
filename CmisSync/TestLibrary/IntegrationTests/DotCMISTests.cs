@@ -387,16 +387,10 @@ namespace TestLibrary.IntegrationTests
             string password,
             string repositoryId)
         {
-            // var watch = Stopwatch.StartNew();
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
 
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Created Session in {0} msec",watch.ElapsedMilliseconds));
-            // watch.Restart();
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Requested folder in {0} msec", watch.ElapsedMilliseconds));
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
@@ -410,11 +404,8 @@ namespace TestLibrary.IntegrationTests
             {
             }
 
-            // watch.Restart();
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
 
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Created empty doc in {0} msec", watch.ElapsedMilliseconds));
             Assert.That(emptyDoc.ContentStreamLength == null || emptyDoc.ContentStreamLength == 0, "returned document shouldn't got any content");
             string content = string.Empty;
             content += "Test ";
@@ -453,6 +444,25 @@ namespace TestLibrary.IntegrationTests
 
             Assert.AreEqual(content.Length, emptyDoc.ContentStreamLength);
             emptyDoc.DeleteAllVersions();
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void CreateDocumentWithContentStream(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string content = "content";
+            IDocument doc = folder.CreateDocument("name", content);
+
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            doc.DeleteAllVersions();
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
