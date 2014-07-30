@@ -61,9 +61,10 @@ namespace CmisSync.Lib.Consumer
                 return SituationType.MOVED;
             case MetaDataChangeType.CHANGED:
                 IFileSystemInfo localPath = actualEvent is FolderEvent ? (IFileSystemInfo)(actualEvent as FolderEvent).LocalFolder : (IFileSystemInfo)(actualEvent is FileEvent ? (actualEvent as FileEvent).LocalFile : null);
-                if (storage.GetObjectByLocalPath(localPath) == null) {
-                    var guid = localPath.Uuid;
-                    if (guid != null && storage.GetObjectByGuid((Guid)guid) != null) {
+                Guid? guid = localPath.Uuid;
+                if (guid != null) {
+                    IMappedObject storedObject = storage.GetObjectByGuid((Guid)guid);
+                    if (storedObject != null && storedObject.Name != localPath.Name) {
                         return SituationType.RENAMED;
                     }
                 }
