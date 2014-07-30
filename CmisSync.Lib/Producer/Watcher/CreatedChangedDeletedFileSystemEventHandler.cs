@@ -137,20 +137,20 @@ namespace CmisSync.Lib.Producer.Watcher
             }
         }
 
-        private double CalculateInterval() {
+        private void ResetTimerInterval() {
             double interval = this.threshold - (DateTime.UtcNow - this.deletions[0].Item3).Milliseconds;
             if(interval < 1) {
                 interval = 1;
             }
             
-            return interval;
+            this.timer.Interval = interval;
         }
 
         private void AddEventToList(FileSystemEventArgs args, Guid guid, bool isDirectory) {
             lock (this.listLock) {
                 this.timer.Stop();
                 this.deletions.Add(new Tuple<FileSystemEventArgs, Guid, DateTime, bool>(args, guid, DateTime.UtcNow, isDirectory));
-                this.timer.Interval = this.CalculateInterval();
+                this.ResetTimerInterval();
                 this.timer.Start();
             }
         }
@@ -169,7 +169,7 @@ namespace CmisSync.Lib.Producer.Watcher
                 }
 
                 if (this.deletions.Count > 0) {
-                    this.timer.Interval = this.CalculateInterval();
+                    this.ResetTimerInterval();
                     this.timer.Start();
                 }
             }
