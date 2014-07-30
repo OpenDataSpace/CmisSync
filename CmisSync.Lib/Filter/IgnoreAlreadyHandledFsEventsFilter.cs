@@ -79,7 +79,15 @@ namespace CmisSync.Lib.Filter
                     var obj = this.storage.GetObjectByLocalPath(path);
                     if (obj != null) {
                         if (obj.Guid != Guid.Empty) {
-                            string guid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                            string guid = string.Empty;
+                            try {
+                                guid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                            } catch (FileNotFoundException) {
+                                return true;
+                            } catch (DirectoryNotFoundException) {
+                                return true;
+                            }
+
                             Guid fsGuid;
                             if (Guid.TryParse(guid, out fsGuid)) {
                                 return fsGuid == obj.Guid;
