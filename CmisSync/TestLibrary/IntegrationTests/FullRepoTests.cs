@@ -443,7 +443,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
-            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
         }
 
         [Test, Category("Slow")]
@@ -529,7 +529,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
-            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 

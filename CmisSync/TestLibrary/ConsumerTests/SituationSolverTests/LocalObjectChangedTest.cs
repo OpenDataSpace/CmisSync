@@ -83,6 +83,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var modificationDate = DateTime.UtcNow;
             var localDirectory = new Mock<IDirectoryInfo>();
             localDirectory.Setup(f => f.LastWriteTimeUtc).Returns(modificationDate.AddMinutes(1));
+            localDirectory.Setup(f => f.Exists).Returns(true);
 
             var mappedObject = new MappedObject(
                 "name",
@@ -125,6 +126,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             localFile.SetupSet(f => f.LastWriteTimeUtc = It.IsAny<DateTime>()).Throws(new IOException());
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns("path");
+            localFile.Setup(f => f.Exists).Returns(true);
             using (var uploadedContent = new MemoryStream()) {
                 localFile.Setup(
                     f =>
@@ -172,6 +174,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns(path);
+            localFile.Setup(f => f.Exists).Returns(true);
+
             using (var stream = new MemoryStream(content)) {
                 localFile.Setup(
                     f =>
@@ -230,6 +234,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns("path");
             localFile.SetupGuid(uuid);
+            localFile.Setup(f => f.Exists).Returns(true);
             using (var uploadedContent = new MemoryStream()) {
                 localFile.Setup(
                     f =>
@@ -277,6 +282,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
                 this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
             }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void IgnoreChangesOnNonExistingLocalObject() {
+            var localDirectory = new Mock<IDirectoryInfo>();
+            localDirectory.Setup(f => f.Exists).Returns(false);
+
+            Assert.Throws<ArgumentException>(() => this.underTest.Solve(localDirectory.Object, Mock.Of<IFolder>()));
+
+            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
         }
     }
 }

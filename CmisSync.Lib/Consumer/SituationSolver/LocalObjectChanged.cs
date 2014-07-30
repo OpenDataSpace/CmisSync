@@ -81,6 +81,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
+            if (!localFileSystemInfo.Exists) {
+                throw new ArgumentException("Given local path does not exists: " + localFileSystemInfo.FullName);
+            }
+
             // Match local changes to remote changes and updated them remotely
             IMappedObject mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
