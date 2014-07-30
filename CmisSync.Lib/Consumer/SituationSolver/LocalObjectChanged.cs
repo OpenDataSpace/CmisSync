@@ -83,7 +83,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         {
             // Match local changes to remote changes and updated them remotely
             Guid uuid;
-            string ea = localFileSystemInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+            string ea = null;
+            try {
+                ea = localFileSystemInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+            } catch (FileNotFoundException ex) {
+                Logger.Debug("Skipping processing", ex);
+                return;
+            } catch (DirectoryNotFoundException ex) {
+                Logger.Debug("Skipping processing", ex);
+                return;
+            }
+
             IMappedObject mappedObject;
             if (ea != null && Guid.TryParse(ea, out uuid)) {
                 mappedObject = this.Storage.GetObjectByGuid(uuid);
