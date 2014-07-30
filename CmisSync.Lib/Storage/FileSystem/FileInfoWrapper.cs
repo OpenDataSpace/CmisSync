@@ -130,7 +130,7 @@ namespace CmisSync.Lib.Storage.FileSystem
                 }
 
                 foreach (var key in reader.ListAttributeKeys(destinationFile.FullName)) {
-                    oldTargetEAs.Add(key, reader.GetExtendedAttribute(destinationFile.FullName, key));
+                    oldTargetEAs.Add(key, destinationFile.GetExtendedAttribute(key));
                 }
             }
 #endif
@@ -138,11 +138,11 @@ namespace CmisSync.Lib.Storage.FileSystem
 
 #if __MonoCS__
             foreach (var entry in oldSourceEAs) {
-                reader.SetExtendedAttribute(result.FullName, entry.Key, entry.Value, true);
+                result.SetExtendedAttribute(entry.Key, entry.Value, true);
             }
 
             foreach (var entry in oldTargetEAs) {
-                reader.SetExtendedAttribute(destinationBackupFileName.FullName, entry.Key, entry.Value, true);
+                destinationBackupFileName.SetExtendedAttribute(entry.Key, entry.Value, true);
             }
 #endif
             return result;

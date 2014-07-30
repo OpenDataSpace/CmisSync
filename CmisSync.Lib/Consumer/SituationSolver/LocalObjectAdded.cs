@@ -168,7 +168,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             {
                 uuid = Guid.NewGuid();
                 try {
-                    localFile.SetUuid(uuid, true);
+                    localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
                 } catch (ExtendedAttributeException ex) {
                     throw new RetryException(ex.Message, ex);
                 }
@@ -188,14 +188,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 parent = localFileInfo.Directory;
             }
 
-            var uuid = parent.Uuid;
-            IMappedObject obj = null;
-            if (uuid != null) {
-                obj = storage.GetObjectByGuid((Guid)uuid);
+            try {
+                Guid uuid;
+                if (Guid.TryParse(parent.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out uuid)){
+                    return storage.GetObjectByGuid(uuid).RemoteObjectId;
+                }
+            } catch (IOException) {
             }
 
-            obj = obj ?? storage.GetObjectByLocalPath(parent);
-            return obj.RemoteObjectId;
+            IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
+            return mappedParent.RemoteObjectId;
         }
 
         private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session)

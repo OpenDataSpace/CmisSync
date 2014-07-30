@@ -138,14 +138,7 @@ namespace CmisSync.Lib.Accumulator {
             }
 
             if (path != null) {
-                IMappedObject savedObject = null;
-                var uuid = path.Uuid;
-                if (uuid != null) {
-                    savedObject = this.storage.GetObjectByGuid((Guid)uuid);
-                }
-
-                savedObject = savedObject ?? this.storage.GetObjectByLocalPath(path);
-
+                IMappedObject savedObject = this.storage.GetObjectByLocalPath(path);
                 if(savedObject != null) {
                     return savedObject.RemoteObjectId;
                 }
@@ -168,10 +161,10 @@ namespace CmisSync.Lib.Accumulator {
             }
 
             if (path != null && path.Exists) {
-                var uuid = path.Uuid;
-
-                if (uuid != null) {
-                    var mappedObject = storage.GetObjectByGuid((Guid)uuid);
+                string uuid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                Guid guid;
+                if (uuid != null && Guid.TryParse(uuid, out guid)){
+                    var mappedObject = storage.GetObjectByGuid(guid);
                     if(mappedObject != null) {
                         return mappedObject.RemoteObjectId;
                     } else {

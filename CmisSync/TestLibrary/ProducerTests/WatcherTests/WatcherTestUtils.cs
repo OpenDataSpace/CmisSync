@@ -387,11 +387,11 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
 
             if (AreExtendedAttributesAvailable(this.localFile.FullName)) {
-                new FileInfoWrapper(this.localFile).SetUuid(this.uuid, false);
+                new FileInfoWrapper(this.localFile).SetExtendedAttribute(MappedObject.ExtendedAttributeKey, this.uuid.ToString());
             }
 
             if (AreExtendedAttributesAvailable(this.localSubFolder.FullName)) {
-                new DirectoryInfoWrapper(this.localSubFolder).SetUuid(this.uuid, false);
+                new DirectoryInfoWrapper(this.localSubFolder).SetExtendedAttribute(MappedObject.ExtendedAttributeKey, this.uuid.ToString());
             }
 
             this.queue = new Mock<ISyncEventQueue>();

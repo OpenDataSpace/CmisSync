@@ -227,7 +227,7 @@ namespace TestLibrary.IntegrationTests
                     var newDirInfo = new Mock<IDirectoryInfo>();
                     newDirInfo.Setup(d => d.Exists).Returns(true);
                     newDirInfo.Setup(d => d.FullName).Returns(newPath);
-                    newDirInfo.Setup(d => d.Uuid).Returns(guid);
+                    newDirInfo.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
                     newDirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(r => r.FullName == this.localRoot));
                     fsFactory.AddIDirectoryInfo(newDirInfo.Object);
                 });

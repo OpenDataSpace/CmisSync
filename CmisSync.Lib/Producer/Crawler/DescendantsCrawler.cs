@@ -313,13 +313,13 @@ namespace CmisSync.Lib.Producer.Crawler
         }
 
         private bool TryGetExtendedAttribute(IFileSystemInfo fsInfo, out Guid guid) {
-            var uuid = fsInfo.Uuid;
-            if (uuid == null) {
+            string ea = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+            if (!string.IsNullOrEmpty(ea) &&
+                Guid.TryParse(ea, out guid)) {
+                return true;
+            } else {
                 guid = Guid.Empty;
                 return false;
-            } else {
-                guid =(Guid)uuid;
-                return true;
             }
         }
 

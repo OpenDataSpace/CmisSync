@@ -82,13 +82,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             // Match local changes to remote changes and updated them remotely
-            var uuid = localFileSystemInfo.Uuid;
-            IMappedObject mappedObject = null;
-            if (uuid != null) {
-                mappedObject = this.Storage.GetObjectByGuid((Guid)uuid);
+            Guid uuid;
+            string ea = localFileSystemInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+            IMappedObject mappedObject;
+            if (ea != null && Guid.TryParse(ea, out uuid)) {
+                mappedObject = this.Storage.GetObjectByGuid(uuid);
+            } else {
+                mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
             }
-
-            mappedObject = mappedObject ?? this.Storage.GetObjectByLocalPath(localFileSystemInfo);
 
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null) {

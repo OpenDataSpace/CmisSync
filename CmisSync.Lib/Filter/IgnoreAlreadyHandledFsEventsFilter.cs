@@ -79,9 +79,10 @@ namespace CmisSync.Lib.Filter
                     var obj = this.storage.GetObjectByLocalPath(path);
                     if (obj != null) {
                         if (obj.Guid != Guid.Empty) {
-                            var fsGuid = path.Uuid;
-                            if (fsGuid != null) {
-                                return obj.Guid == (Guid)fsGuid;
+                            string guid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                            Guid fsGuid;
+                            if (Guid.TryParse(guid, out fsGuid)) {
+                                return fsGuid == obj.Guid;
                             } else {
                                 return false;
                             }
@@ -97,9 +98,13 @@ namespace CmisSync.Lib.Filter
                     if (o == null) {
                         return true;
                     } else if(path.Exists) {
-                        var fsGuid = path.Uuid;
-                        if (fsGuid != null) {
-                            return o.Guid == (Guid)fsGuid;
+                        try {
+                            Guid uuid;
+                            string ea = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                            if (ea != null && Guid.TryParse(ea, out uuid)) {
+                                return uuid == o.Guid;
+                            }
+                        } catch (IOException) {
                         }
                     }
                     return false;

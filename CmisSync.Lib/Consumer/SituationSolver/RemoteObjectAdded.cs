@@ -102,7 +102,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
-                    localFolder.SetUuid(uuid, true);
+                    localFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
                 }
 
                 var mappedObject = new MappedObject(remoteFolder);
@@ -139,7 +139,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 Guid guid = Guid.NewGuid();
-                cacheFile.SetUuid(guid, false);
+                cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), false);
                 try {
                     cacheFile.MoveTo(file.FullName);
                 } catch (IOException) {
@@ -147,8 +147,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     if (file.Exists) {
                         IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
                         IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
-                        targetFile.SetUuid(guid, true);
-                        conflictFile.SetUuid(null, true);
+                        targetFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), true);
+                        conflictFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
                     } else {
                         throw;
                     }

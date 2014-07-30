@@ -67,7 +67,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
             file.Refresh();
             oldTime = file.LastWriteTimeUtc;
 
-            file.SetUuid(Guid.NewGuid(), true);
+            file.SetExtendedAttribute("Test", "test", true);
 
             file.Refresh();
             Assert.That(file.LastWriteTimeUtc, Is.EqualTo(oldTime));
@@ -84,7 +84,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
             folder.Refresh();
             oldTime = folder.LastWriteTimeUtc;
 
-            folder.SetUuid(Guid.NewGuid(), true);
+            folder.SetExtendedAttribute("Test", "test", true);
 
             folder.Refresh();
             Assert.That(folder.LastWriteTimeUtc, Is.EqualTo(oldTime));

@@ -27,11 +27,6 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// </summary>
     public abstract class FileSystemInfoWrapper : IFileSystemInfo
     {
-        /// <summary>
-        /// The extended attribute key for UUIDs.
-        /// </summary>
-        private static readonly string UUID_KEY = "DSS-UUID";
-
         private static IExtendedAttributeReader reader = null;
 
         private FileSystemInfo original;
@@ -168,39 +163,6 @@ namespace CmisSync.Lib.Storage.FileSystem
             else
             {
                 return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets the UUID.
-        /// </summary>
-        /// <value>The UUID.</value>
-        public Guid? Uuid {
-            get {
-                try {
-                    Guid uuid;
-                    string ea = this.GetExtendedAttribute(UUID_KEY);
-                    if (ea != null && Guid.TryParse(ea, out uuid)) {
-                        return uuid;
-                    }
-                } catch (FileNotFoundException) {
-                } catch (DirectoryNotFoundException){
-                }
-
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Sets the UUID.
-        /// </summary>
-        /// <param name="guid">UUID.</param>
-        /// <param name="restoreModificationDate">If set to <c>true</c> restores modification date.</param>
-        public void SetUuid(Guid? uuid, bool restoreModificationDate) {
-            if (uuid != null) {
-                this.SetExtendedAttribute(UUID_KEY, uuid.ToString(), restoreModificationDate);
-            } else {
-                this.SetExtendedAttribute(UUID_KEY, null, restoreModificationDate);
             }
         }
     }

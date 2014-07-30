@@ -124,10 +124,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         }
 
                         var backupFile = this.fsFactory.CreateFileInfo(file.FullName + ".bak.sync");
-                        var uuid = file.Uuid;
+                        string uuid = file.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
                         cacheFile.Replace(file, backupFile, true);
-                        file.SetUuid(uuid, true);
-                        backupFile.SetUuid(null, true);
+                        file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid, true);
+                        backupFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
                         byte[] checksumOfOldFile = null;
                         using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
                             checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);

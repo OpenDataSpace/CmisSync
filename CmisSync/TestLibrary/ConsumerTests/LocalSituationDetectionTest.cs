@@ -99,7 +99,7 @@ namespace TestLibrary.ConsumerTests
                 d =>
                 d.Name == "newName" &&
                 d.FullName == Path.Combine(Path.GetTempPath(), "newName") &&
-                d.Uuid == guid);
+                d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey) == guid.ToString());
             storage.Setup(s => s.GetObjectByGuid(guid)).Returns(Mock.Of<IMappedObject>());
             var folderEvent = new FolderEvent(dirInfo) { Local = MetaDataChangeType.CHANGED };
 
@@ -115,7 +115,7 @@ namespace TestLibrary.ConsumerTests
                 d =>
                 d.Name == "Name" &&
                 d.FullName == Path.Combine(Path.GetTempPath(), "Name") &&
-                d.Uuid == guid);
+                d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey) == guid.ToString());
             storage.Setup(s => s.GetObjectByLocalPath(dirInfo)).Returns(Mock.Of<IMappedObject>());
             var folderEvent = new FolderEvent(dirInfo) { Local = MetaDataChangeType.CHANGED };
 
