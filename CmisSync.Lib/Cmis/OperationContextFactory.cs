@@ -42,6 +42,7 @@ namespace CmisSync.Lib.Cmis
             filters.Add("cmis:path");
             filters.Add("cmis:changeToken");
             filters.Add("cmis:parentId");
+            filters.Add("cmis:contentStreamHash");
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
@@ -56,6 +57,7 @@ namespace CmisSync.Lib.Cmis
             filters.Add("cmis:lastModificationDate");
             filters.Add("cmis:changeToken");
             filters.Add("cmis:parentId");
+            filters.Add("cmis:contentStreamHash");
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
@@ -71,6 +73,7 @@ namespace CmisSync.Lib.Cmis
             filters.Add("cmis:path");
             filters.Add("cmis:changeToken");
             filters.Add("cmis:parentId");
+            filters.Add("cmis:contentStreamHash");
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
@@ -88,7 +91,8 @@ namespace CmisSync.Lib.Cmis
                 "cmis:lastModificationDate",
                 "cmis:path",
                 "cmis:changeToken",
-                "cmis:parentId");
+                "cmis:parentId",
+                "cmis:contentStreamHash");
         }
 
         public static IOperationContext CreateContext(ISession session, bool cacheEnabled, bool includePathSegments, params string[] elements) {
