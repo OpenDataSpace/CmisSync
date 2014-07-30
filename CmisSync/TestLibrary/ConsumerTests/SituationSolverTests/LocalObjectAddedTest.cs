@@ -214,6 +214,39 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void LocalEmptyFileAddedWithExtAttrAndAlreadySetUUID() {
+            string fileName = "fileName";
+            string fileId = "fileId";
+            string parentId = "parentId";
+            string lastChangeToken = "token";
+            bool extendedAttributes = true;
+            Guid uuid = Guid.NewGuid();
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+            fileInfo.SetupGuid(uuid);
+
+            Mock<IDocument> document;
+            this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, contentSize: 0);
+            this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => o.Guid == uuid)));
+            this.session.Verify(
+                s => s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
+                It.Is<IObjectId>(o => o.Id == parentId),
+                It.Is<IContentStream>(st => st == null),
+                null,
+                null,
+                null,
+                null),
+                Times.Once());
+            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
+            fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void LocalFolderAddedWithoutExtAttr()
         {
             string folderName = "a";

@@ -91,7 +91,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             completewatch.Start();
             Logger.Debug("Starting LocalObjectAdded");
             string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
-            Guid uuid = WriteUuidToExtendedAttributeIfSupported(localFileSystemInfo);
+            Guid uuid = WriteOrUseUuidIfSupported(localFileSystemInfo);
 
             ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
@@ -161,14 +161,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             Logger.Debug(string.Format("Finished LocalObjectAdded after [{0} msec]", completewatch.ElapsedMilliseconds));
         }
 
-        private static Guid WriteUuidToExtendedAttributeIfSupported(IFileSystemInfo localFile)
+        private static Guid WriteOrUseUuidIfSupported(IFileSystemInfo localFile)
         {
             Guid uuid = Guid.Empty;
             if (localFile.IsExtendedAttributeAvailable())
             {
-                uuid = Guid.NewGuid();
                 try {
-                    localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
+                    string ea = localFile.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                    if (ea == null || !Guid.TryParse(ea, out uuid)) {
+                        uuid = Guid.NewGuid();
+                        localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
+                    }
                 } catch (ExtendedAttributeException ex) {
                     throw new RetryException(ex.Message, ex);
                 }
