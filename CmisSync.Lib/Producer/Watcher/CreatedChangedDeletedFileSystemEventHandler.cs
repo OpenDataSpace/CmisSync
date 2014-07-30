@@ -24,11 +24,11 @@ namespace CmisSync.Lib.Producer.Watcher
     using System.IO;
     using System.Timers;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     /// <summary>
     /// Created/Changed/Deleted file system events handler to report the events to the given queue.
@@ -39,7 +39,10 @@ namespace CmisSync.Lib.Producer.Watcher
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
         private long threshold;
-        private Timer timer;
+        /// <summary>
+        /// The timer. Exposed to allow testability 
+        /// </summary>
+        protected Timer timer;
         private object listLock = new object();
         private List<Tuple<FileSystemEventArgs, Guid, DateTime, bool>> deletions;
         private bool disposed = false;
@@ -130,15 +133,24 @@ namespace CmisSync.Lib.Producer.Watcher
                     this.timer.Dispose();
                 }
 
-                disposed = true;
+                this.disposed = true;
             }
+        }
+
+        private double CalculateInterval() {
+            double interval = this.threshold - (DateTime.UtcNow - this.deletions[0].Item3).Milliseconds;
+            if(interval < 1) {
+                interval = 1;
+            }
+            
+            return interval;
         }
 
         private void AddEventToList(FileSystemEventArgs args, Guid guid, bool isDirectory) {
             lock (this.listLock) {
                 this.timer.Stop();
                 this.deletions.Add(new Tuple<FileSystemEventArgs, Guid, DateTime, bool>(args, guid, DateTime.UtcNow, isDirectory));
-                this.timer.Interval = this.threshold - (DateTime.UtcNow - this.deletions[0].Item3).Milliseconds;
+                this.timer.Interval = this.CalculateInterval();
                 this.timer.Start();
             }
         }
@@ -157,7 +169,7 @@ namespace CmisSync.Lib.Producer.Watcher
                 }
 
                 if (this.deletions.Count > 0) {
-                    this.timer.Interval = this.threshold - (DateTime.UtcNow - this.deletions[0].Item3).Milliseconds;
+                    this.timer.Interval = this.CalculateInterval();
                     this.timer.Start();
                 }
             }

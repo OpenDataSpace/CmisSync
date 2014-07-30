@@ -20,7 +20,9 @@
 namespace TestLibrary.ProducerTests.WatcherTests
 {
     using System;
+    using System.Linq;
     using System.IO;
+    using System.Timers;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -166,8 +168,33 @@ namespace TestLibrary.ProducerTests.WatcherTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSMovedEvent>();
         }
 
+        [Test, Category("Fast")]
+        public void TestThatCalculateIntervalAlwaysReturnsPositiveNumbers() {
+            using (var handler = new HandlerMockWithoutTimerAction(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)null);
+                var file = this.fsFactory.AddFile(this.path, false);
+                this.storage.AddLocalFile(file.Object.FullName, "id", Guid.NewGuid());
+
+                handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
+                System.Threading.Thread.Sleep(20);
+                handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
+                //negativ numbers lead to ArgumentException so this would break here
+            }
+        }
+
         private void WaitForThreshold() {
             System.Threading.Thread.Sleep((int)Threshold * 5);
+        }
+
+        private class HandlerMockWithoutTimerAction : CreatedChangedDeletedFileSystemEventHandler {
+            public HandlerMockWithoutTimerAction(
+                ISyncEventQueue queue,
+                IMetaDataStorage storage,
+                IFileSystemInfoFactory fsFactory): base(queue, storage, fsFactory, 10){
+                this.timer.Dispose();
+                this.timer = new Timer();
+                this.timer.AutoReset = false;
+            }
         }
     }
 }
