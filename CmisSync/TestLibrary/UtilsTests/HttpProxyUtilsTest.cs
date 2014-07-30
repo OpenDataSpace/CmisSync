@@ -40,43 +40,6 @@ namespace TestLibrary.UtilsTests
             this.settings = new ProxySettings();
         }
 
-        [Ignore]
-        [Test, Category("Fast")]
-        public void TestDefaultProxyEquality()
-        {
-            Assert.AreEqual(WebRequest.GetSystemWebProxy(), WebRequest.GetSystemWebProxy());
-        }
-
-        [Ignore]
-        [Test, Category("Fast")]
-        public void SetDefaultProxyToAuto()
-        {
-            // Prepare with false settings
-            this.settings.Selection = ProxySelection.CUSTOM;
-            this.settings.LoginRequired = false;
-            this.settings.Server = new Uri("http://example-false.com:8080/");
-            HttpProxyUtils.SetDefaultProxy(this.settings);
-
-            // Set correct ones
-            this.settings.Selection = ProxySelection.SYSTEM;
-            HttpProxyUtils.SetDefaultProxy(this.settings);
-            Assert.AreEqual(WebRequest.DefaultWebProxy, WebRequest.GetSystemWebProxy());
-        }
-
-        [Ignore]
-        [Test, Category("Fast")]
-        public void SetDefaultProxyToAutoOnNullInput()
-        {
-            // Prepare with false settings
-            this.settings.Selection = ProxySelection.CUSTOM;
-            this.settings.LoginRequired = false;
-            this.settings.Server = new Uri("http://example-false.com:8080/");
-            HttpProxyUtils.SetDefaultProxy(this.settings);
-
-            HttpProxyUtils.SetDefaultProxy(new ProxySettings { Selection = ProxySelection.SYSTEM });
-            Assert.AreEqual(WebRequest.DefaultWebProxy, WebRequest.GetSystemWebProxy());
-        }
-
         [Test, Category("Fast")]
         public void SetDefaultProxyToHTTPWithoutCredentials()
         {
