@@ -20,6 +20,9 @@
 namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
     using System;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Text;
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Storage.Database;
@@ -94,33 +97,121 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileRenamed()
         {
-            var newFile = Mock.Of<IDocument>(
-                f =>
-                f.LastModificationDate == this.modificationDate &&
-                f.Name == this.newName &&
-                f.ChangeToken == this.newChangeToken);
-            var remoteFile = new Mock<IDocument>();
-            remoteFile.Setup(f => f.Name).Returns(this.oldName);
-            remoteFile.Setup(f => f.Id).Returns(this.id);
-            remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
-            var localFolder = new Mock<IFileInfo>();
-            localFolder.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
-            localFolder.Setup(f => f.Name).Returns(this.newName);
-            var mappedFile = new Mock<IMappedObject>();
-            mappedFile.SetupAllProperties();
-            mappedFile.SetupProperty(f => f.Guid, Guid.NewGuid());
-            mappedFile.SetupProperty(f => f.Name, this.oldName);
-            mappedFile.SetupProperty(f => f.RemoteObjectId, this.id);
-            mappedFile.Setup(f => f.Type).Returns(MappedObjectType.File);
-            mappedFile.Setup(f => f.LastContentSize).Returns(0);
+            byte[] content = Encoding.UTF8.GetBytes("content");
+            byte[] hash = SHA1.Create().ComputeHash(content);
+            using (var contentStream = new MemoryStream(content)) {
+                var newFile = Mock.Of<IDocument>(
+                    f =>
+                    f.LastModificationDate == this.modificationDate &&
+                    f.Name == this.newName &&
+                    f.ChangeToken == this.newChangeToken);
+                var remoteFile = new Mock<IDocument>();
+                remoteFile.Setup(f => f.Name).Returns(this.oldName);
+                remoteFile.Setup(f => f.Id).Returns(this.id);
+                remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
+                var localFile = new Mock<IFileInfo>();
+                localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+                localFile.Setup(f => f.Name).Returns(this.newName);
+                localFile.Setup(f => f.Length).Returns(content.Length);
+                localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(contentStream);
+                var mappedFile = new Mock<IMappedObject>();
+                mappedFile.SetupAllProperties();
+                mappedFile.SetupProperty(f => f.Guid, Guid.NewGuid());
+                mappedFile.SetupProperty(f => f.Name, this.oldName);
+                mappedFile.SetupProperty(f => f.RemoteObjectId, this.id);
+                mappedFile.Setup(f => f.Type).Returns(MappedObjectType.File);
+                mappedFile.Setup(f => f.LastContentSize).Returns(content.Length);
+                mappedFile.Setup(f => f.LastChecksum).Returns(hash);
 
-            this.storage.AddMappedFile(mappedFile.Object);
+                this.storage.AddMappedFile(mappedFile.Object);
 
-            this.underTest.Solve(localFolder.Object, remoteFile.Object);
+                this.underTest.Solve(localFile.Object, remoteFile.Object);
 
-            remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
+                remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, contentSize: 0);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, contentSize: content.Length);
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileRenamedAndContentLengthIsDifferentThrowsException()
+        {
+            byte[] content = Encoding.UTF8.GetBytes("content");
+            byte[] hash = SHA1.Create().ComputeHash(content);
+            DateTime oldModificationDate = DateTime.UtcNow.AddDays(1);
+            using (var contentStream = new MemoryStream(content)) {
+                var newFile = Mock.Of<IDocument>(
+                    f =>
+                    f.LastModificationDate == this.modificationDate &&
+                    f.Name == this.newName &&
+                    f.ChangeToken == this.newChangeToken);
+                var remoteFile = new Mock<IDocument>();
+                remoteFile.Setup(f => f.Name).Returns(this.oldName);
+                remoteFile.Setup(f => f.Id).Returns(this.id);
+                remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
+                var localFile = new Mock<IFileInfo>();
+                localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+                localFile.Setup(f => f.Name).Returns(this.newName);
+                localFile.Setup(f => f.Length).Returns(content.Length);
+                localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(contentStream);
+                var mappedFile = new Mock<IMappedObject>();
+                mappedFile.SetupAllProperties();
+                mappedFile.SetupProperty(f => f.Guid, Guid.NewGuid());
+                mappedFile.SetupProperty(f => f.Name, this.oldName);
+                mappedFile.SetupProperty(f => f.RemoteObjectId, this.id);
+                mappedFile.Setup(f => f.Type).Returns(MappedObjectType.File);
+                mappedFile.Setup(f => f.LastContentSize).Returns(0);
+                mappedFile.Setup(f => f.LastChecksum).Returns(hash);
+                mappedFile.Setup(f => f.LastLocalWriteTimeUtc).Returns(oldModificationDate);
+
+                this.storage.AddMappedFile(mappedFile.Object);
+
+                Assert.Throws<ArgumentException>(() => this.underTest.Solve(localFile.Object, remoteFile.Object));
+
+                remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
+
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, oldModificationDate, contentSize: 0);
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileRenamedAndContentIsDifferentThrowsException()
+        {
+            byte[] content = Encoding.UTF8.GetBytes("content");
+            DateTime oldModificationDate = DateTime.UtcNow.AddDays(1);
+            using (var contentStream = new MemoryStream(content)) {
+                var newFile = Mock.Of<IDocument>(
+                    f =>
+                    f.LastModificationDate == this.modificationDate &&
+                    f.Name == this.newName &&
+                    f.ChangeToken == this.newChangeToken);
+                var remoteFile = new Mock<IDocument>();
+                remoteFile.Setup(f => f.Name).Returns(this.oldName);
+                remoteFile.Setup(f => f.Id).Returns(this.id);
+                remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
+                var localFile = new Mock<IFileInfo>();
+                localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+                localFile.Setup(f => f.Name).Returns(this.newName);
+                localFile.Setup(f => f.Length).Returns(content.Length);
+                localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(contentStream);
+                var mappedFile = new Mock<IMappedObject>();
+                mappedFile.SetupAllProperties();
+                mappedFile.SetupProperty(f => f.Guid, Guid.NewGuid());
+                mappedFile.SetupProperty(f => f.Name, this.oldName);
+                mappedFile.SetupProperty(f => f.RemoteObjectId, this.id);
+                mappedFile.Setup(f => f.Type).Returns(MappedObjectType.File);
+                mappedFile.Setup(f => f.LastContentSize).Returns(content.Length);
+                mappedFile.Setup(f => f.LastChecksum).Returns(new byte[20]);
+                mappedFile.Setup(f => f.LastLocalWriteTimeUtc).Returns(oldModificationDate);
+
+                this.storage.AddMappedFile(mappedFile.Object);
+
+                Assert.Throws<ArgumentException>(() => this.underTest.Solve(localFile.Object, remoteFile.Object));
+
+                remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
+
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, oldModificationDate, contentSize: content.Length);
+            }
         }
     }
 }
