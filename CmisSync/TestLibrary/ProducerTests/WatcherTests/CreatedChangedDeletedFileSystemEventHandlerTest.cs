@@ -20,15 +20,15 @@
 namespace TestLibrary.ProducerTests.WatcherTests
 {
     using System;
-    using System.Linq;
     using System.IO;
+    using System.Linq;
     using System.Timers;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
 
@@ -235,7 +235,40 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
                 System.Threading.Thread.Sleep(20);
                 handler.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
-                //negativ numbers lead to ArgumentException so this would break here
+                // negativ numbers lead to ArgumentException so this would break here
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void HandleExceptionsOnProcessingByInvokingCrawlSync() {
+            using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(It.IsAny<string>())).Throws(new Exception("Generic exception"));
+
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.path, Name));
+
+                this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)));
+                this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
+                this.WaitForThreshold();
+                this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)));
+                this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void HandleExceptionsOnTransformingByInvokingCrawlSync() {
+            using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
+                this.fsFactory.AddFile(this.path, Guid.Empty, true);
+
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+
+                this.fsFactory.Setup(f => f.CreateDirectoryInfo(It.IsAny<string>())).Throws(new Exception("Generic exception"));
+                this.fsFactory.Setup(f => f.CreateFileInfo(It.IsAny<string>())).Throws(new Exception("Generic exception"));
+
+                this.WaitForThreshold();
+                this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
+                this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)));
             }
         }
 
@@ -247,7 +280,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             public HandlerMockWithoutTimerAction(
                 ISyncEventQueue queue,
                 IMetaDataStorage storage,
-                IFileSystemInfoFactory fsFactory): base(queue, storage, fsFactory, 10){
+                IFileSystemInfoFactory fsFactory) : base(queue, storage, fsFactory, 10) {
                 this.timer.Dispose();
                 this.timer = new Timer();
                 this.timer.AutoReset = false;

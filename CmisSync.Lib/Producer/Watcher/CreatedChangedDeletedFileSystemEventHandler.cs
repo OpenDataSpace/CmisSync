@@ -30,22 +30,27 @@ namespace CmisSync.Lib.Producer.Watcher
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using log4net;
+
     /// <summary>
     /// Created/Changed/Deleted file system events handler to report the events to the given queue.
     /// </summary>
     public class CreatedChangedDeletedFileSystemEventHandler : IDisposable
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(CreatedChangedDeletedFileSystemEventHandler));
+
         private ISyncEventQueue queue;
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
         private long threshold;
+        private object listLock = new object();
+        private List<Tuple<FileSystemEventArgs, Guid, DateTime, bool>> events;
+        private bool disposed = false;
+
         /// <summary>
         /// The timer. Exposed to allow testability
         /// </summary>
         protected Timer timer;
-        private object listLock = new object();
-        private List<Tuple<FileSystemEventArgs, Guid, DateTime, bool>> events;
-        private bool disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -90,43 +95,58 @@ namespace CmisSync.Lib.Producer.Watcher
         /// </param>
         public virtual void Handle(object source, FileSystemEventArgs e) {
             try {
-            bool isDirectory = false;
-            if (e.ChangeType == WatcherChangeTypes.Deleted) {
-                var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
-                Guid guid = Guid.Empty;
-                if (obj != null) {
-                    isDirectory = obj.Type == MappedObjectType.Folder;
-                    guid = obj.Guid;
-                }
-
-                this.AddEventToList(e, guid, isDirectory);
-            } else {
-                bool? check = this.fsFactory.IsDirectory(e.FullPath);
-                if (check != null) {
-                    isDirectory = (bool)check;
-                    Guid fsGuid = Guid.Empty;
-                    IFileSystemInfo fsInfo = isDirectory ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(e.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(e.FullPath);
-                    string ea = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                    if (ea != null) {
-                        Guid.TryParse(ea, out fsGuid);
+                bool isDirectory = false;
+                if (e.ChangeType == WatcherChangeTypes.Deleted) {
+                    var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
+                    Guid guid = Guid.Empty;
+                    if (obj != null) {
+                        isDirectory = obj.Type == MappedObjectType.Folder;
+                        guid = obj.Guid;
                     }
 
-                    this.AddEventToList(e, fsGuid, isDirectory);
-                }
-            }
+                    this.AddEventToList(e, guid, isDirectory);
+                } else {
+                    bool? check = this.fsFactory.IsDirectory(e.FullPath);
+                    if (check != null) {
+                        isDirectory = (bool)check;
+                        Guid fsGuid = Guid.Empty;
+                        IFileSystemInfo fsInfo = isDirectory ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(e.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(e.FullPath);
+                        string ea = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                        if (ea != null) {
+                            Guid.TryParse(ea, out fsGuid);
+                        }
 
-            }catch (Exception ex) {
+                        this.AddEventToList(e, fsGuid, isDirectory);
+                    }
+                }
+            } catch (Exception ex) {
+                Logger.Warn(string.Format("Processing file system event {0} produces exception => force crawl sync", e.ToString()), ex);
                 this.queue.AddEvent(new StartNextSyncEvent(true));
             }
-
         }
 
+        /// <summary>
+        /// Releases all resource used by the
+        /// <see cref="CmisSync.Lib.Producer.Watcher.CreatedChangedDeletedFileSystemEventHandler"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the
+        /// <see cref="CmisSync.Lib.Producer.Watcher.CreatedChangedDeletedFileSystemEventHandler"/>. The
+        /// <see cref="Dispose"/> method leaves the
+        /// <see cref="CmisSync.Lib.Producer.Watcher.CreatedChangedDeletedFileSystemEventHandler"/> in an unusable
+        /// state. After calling <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.Producer.Watcher.CreatedChangedDeletedFileSystemEventHandler"/> so the garbage
+        /// collector can reclaim the memory that the
+        /// <see cref="CmisSync.Lib.Producer.Watcher.CreatedChangedDeletedFileSystemEventHandler"/> was occupying.</remarks>
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Dispose the internal timer.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected virtual void Dispose(bool disposing)
         {
             // Check to see if Dispose has already been called.
@@ -159,52 +179,51 @@ namespace CmisSync.Lib.Producer.Watcher
 
         private void PopEventsFromList() {
             try {
-            lock (this.listLock) {
-                this.timer.Stop();
-                if (this.events.Count == 0) {
-                    return;
-                }
-
-
-                while (this.events.Count > 0 && (DateTime.UtcNow - this.events[0].Item3).Milliseconds >= this.threshold) {
-                    var entry = this.events[0];
-                    this.events.RemoveAt(0);
-                    if (entry.Item1.ChangeType == WatcherChangeTypes.Created) {
-                        Guid fsGuid;
-                        IFileSystemInfo fsInfo = entry.Item4 ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(entry.Item1.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(entry.Item1.FullPath);
-                        try {
-                            string fsUuid = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                            if (Guid.TryParse(fsUuid, out fsGuid) && fsGuid != Guid.Empty) {
-                                var correspondingDeletion = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == fsGuid);
-                                if (correspondingDeletion != null) {
-                                    this.queue.AddEvent(new FSMovedEvent(correspondingDeletion.Item1.FullPath, entry.Item1.FullPath, entry.Item4));
-                                    this.events.Remove(correspondingDeletion);
-                                    continue;
-                                }
-                            }
-                        } catch (ExtendedAttributeException) {
-                        }
-                    } else if (entry.Item1.ChangeType == WatcherChangeTypes.Deleted && entry.Item2 != Guid.Empty) {
-                        var correspondingCreation = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == entry.Item2 && obj.Item1.ChangeType == WatcherChangeTypes.Created);
-                        if (correspondingCreation != null) {
-                            this.queue.AddEvent(new FSMovedEvent(entry.Item1.FullPath, correspondingCreation.Item1.FullPath, entry.Item4));
-                            this.events.Remove(correspondingCreation);
-                            continue;
-                        }
+                lock (this.listLock) {
+                    this.timer.Stop();
+                    if (this.events.Count == 0) {
+                        return;
                     }
 
-                    this.queue.AddEvent(new FSEvent(entry.Item1.ChangeType, entry.Item1.FullPath, entry.Item4));
-                }
+                    while (this.events.Count > 0 && (DateTime.UtcNow - this.events[0].Item3).Milliseconds >= this.threshold) {
+                        var entry = this.events[0];
+                        this.events.RemoveAt(0);
+                        if (entry.Item1.ChangeType == WatcherChangeTypes.Created) {
+                            Guid fsGuid;
+                            IFileSystemInfo fsInfo = entry.Item4 ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(entry.Item1.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(entry.Item1.FullPath);
+                            try {
+                                string fsUuid = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                                if (Guid.TryParse(fsUuid, out fsGuid) && fsGuid != Guid.Empty) {
+                                    var correspondingDeletion = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == fsGuid);
+                                    if (correspondingDeletion != null) {
+                                        this.queue.AddEvent(new FSMovedEvent(correspondingDeletion.Item1.FullPath, entry.Item1.FullPath, entry.Item4));
+                                        this.events.Remove(correspondingDeletion);
+                                        continue;
+                                    }
+                                }
+                            } catch (ExtendedAttributeException) {
+                            }
+                        } else if (entry.Item1.ChangeType == WatcherChangeTypes.Deleted && entry.Item2 != Guid.Empty) {
+                            var correspondingCreation = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == entry.Item2 && obj.Item1.ChangeType == WatcherChangeTypes.Created);
+                            if (correspondingCreation != null) {
+                                this.queue.AddEvent(new FSMovedEvent(entry.Item1.FullPath, correspondingCreation.Item1.FullPath, entry.Item4));
+                                this.events.Remove(correspondingCreation);
+                                continue;
+                            }
+                        }
 
-                if (this.events.Count > 0) {
-                    this.ResetTimerInterval();
-                    this.timer.Start();
+                        this.queue.AddEvent(new FSEvent(entry.Item1.ChangeType, entry.Item1.FullPath, entry.Item4));
+                    }
+
+                    if (this.events.Count > 0) {
+                        this.ResetTimerInterval();
+                        this.timer.Start();
+                    }
                 }
-            }
-            }catch (Exception ex) {
+            } catch (Exception ex) {
+                Logger.Warn(string.Format("Pop file system event produces exception => force crawl sync"), ex);
                 this.queue.AddEvent(new StartNextSyncEvent(true));
             }
-
         }
 
         private bool MergingAddedAndDeletedEvent(FileSystemEventArgs args, bool isDirectory) {
@@ -223,7 +242,7 @@ namespace CmisSync.Lib.Producer.Watcher
                     }
 
                     return false;
-                } catch(ExtendedAttributeException) {
+                } catch (ExtendedAttributeException) {
                     return false;
                 }
             }
