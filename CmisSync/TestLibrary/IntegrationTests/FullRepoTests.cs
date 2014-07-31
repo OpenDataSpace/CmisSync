@@ -781,6 +781,11 @@ namespace TestLibrary.IntegrationTests
             this.repo.Initialize();
             this.repo.Run();
 
+            // Wait for all fs change events
+            Thread.Sleep(500);
+            // Stabilize sync process to process all delayed fs events
+            this.repo.Run();
+
             folder.Rename(newFolderName);
             this.localRootDir.GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newFolderName));
 
