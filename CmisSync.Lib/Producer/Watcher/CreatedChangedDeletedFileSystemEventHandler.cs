@@ -89,6 +89,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// Reported changes.
         /// </param>
         public virtual void Handle(object source, FileSystemEventArgs e) {
+            try {
             bool isDirectory = false;
             if (e.ChangeType == WatcherChangeTypes.Deleted) {
                 var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
@@ -113,6 +114,11 @@ namespace CmisSync.Lib.Producer.Watcher
                     this.AddEventToList(e, fsGuid, isDirectory);
                 }
             }
+
+            }catch (Exception ex) {
+                this.queue.AddEvent(new StartNextSyncEvent(true));
+            }
+
         }
 
         public void Dispose()
@@ -152,11 +158,13 @@ namespace CmisSync.Lib.Producer.Watcher
         }
 
         private void PopEventsFromList() {
+            try {
             lock (this.listLock) {
                 this.timer.Stop();
                 if (this.events.Count == 0) {
                     return;
                 }
+
 
                 while (this.events.Count > 0 && (DateTime.UtcNow - this.events[0].Item3).Milliseconds >= this.threshold) {
                     var entry = this.events[0];
@@ -193,6 +201,10 @@ namespace CmisSync.Lib.Producer.Watcher
                     this.timer.Start();
                 }
             }
+            }catch (Exception ex) {
+                this.queue.AddEvent(new StartNextSyncEvent(true));
+            }
+
         }
 
         private bool MergingAddedAndDeletedEvent(FileSystemEventArgs args, bool isDirectory) {
