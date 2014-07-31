@@ -202,6 +202,10 @@ namespace CmisSync.Lib.Producer.Watcher
                                     }
                                 }
                             } catch (ExtendedAttributeException) {
+                            } catch (FileNotFoundException) {
+                                continue;
+                            } catch (DirectoryNotFoundException) {
+                                continue;
                             }
                         } else if (entry.Item1.ChangeType == WatcherChangeTypes.Deleted && entry.Item2 != Guid.Empty) {
                             var correspondingCreation = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == entry.Item2 && obj.Item1.ChangeType == WatcherChangeTypes.Created);
