@@ -37,7 +37,6 @@ namespace CmisSync.Lib.Producer.Watcher
 
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
-        private string path;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RenamedFileSystemEventHandler"/> class.
@@ -45,18 +44,13 @@ namespace CmisSync.Lib.Producer.Watcher
         /// <param name="queue">Sync event queue to report the events to.</param>
         /// <param name="rootpath">Root path to the watched file system directory.</param>
         /// <param name="fsFactory">File system factory.</param>
-        public RenamedFileSystemEventHandler(ISyncEventQueue queue, string rootpath, IFileSystemInfoFactory fsFactory = null)
+        public RenamedFileSystemEventHandler(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null)
         {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
 
-            if (rootpath == null) {
-                throw new ArgumentNullException("Given root path is null");
-            }
-
             this.queue = queue;
-            this.path = rootpath;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 

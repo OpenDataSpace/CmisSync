@@ -94,7 +94,7 @@ namespace CmisSync.Lib.Producer.Watcher
             this.fileSystemWatcher.NotifyFilter = NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.Security;
 
             this.createChangeDeleteHandler = new CreatedChangedDeletedFileSystemEventHandler(this.queue, this.storage, this.fsFactory);
-            this.renamedHandler = new RenamedFileSystemEventHandler(this.queue, watcher.Path, this.fsFactory);
+            this.renamedHandler = new RenamedFileSystemEventHandler(this.queue, this.fsFactory);
 
             this.fileSystemWatcher.Created += new FileSystemEventHandler(this.createChangeDeleteHandler.Handle);
             this.fileSystemWatcher.Deleted += new FileSystemEventHandler(this.createChangeDeleteHandler.Handle);
