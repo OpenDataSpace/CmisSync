@@ -437,6 +437,11 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            // Stabilize test by waiting for all delayed fs events
+            Thread.Sleep(500);
+            // Process the delayed fs events
+            this.repo.Run();
+
             new FileInfo(filePath).Delete();
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
@@ -687,7 +692,7 @@ namespace TestLibrary.IntegrationTests
             using (var stream = file.AppendText()) {
                 stream.Write(content);
             }
-            Thread.Sleep(100);
+
             long length = Encoding.UTF8.GetBytes(content).Length * 2;
 
             file.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
