@@ -305,8 +305,22 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
+        [Test, Category("Fast")]
+        public void HandleChangeEventOnNoMoreExistingFileOrFolderByJustIgnoringTheEvent() {
+            using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)true);
+                var dirInfo = this.fsFactory.AddDirectory(this.path, Guid.Empty, true);
+
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+                dirInfo.Setup(d => d.Exists).Returns(false);
+
+                this.WaitForThreshold();
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
+            }
+        }
+
         private void WaitForThreshold() {
-            System.Threading.Thread.Sleep((int)Threshold * 5);
+            System.Threading.Thread.Sleep((int)Threshold * 3);
         }
 
         private class HandlerMockWithoutTimerAction : CreatedChangedDeletedFileSystemEventHandler {
