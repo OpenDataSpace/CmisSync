@@ -828,6 +828,8 @@ namespace TestLibrary.IntegrationTests
             public void Run()
             {
                 this.SingleStepQueue.Run();
+                Thread.Sleep(500);
+                this.SingleStepQueue.Run();
             }
 
             public override void Initialize() {
