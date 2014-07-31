@@ -214,11 +214,6 @@ namespace CmisSync.Lib.Producer.Watcher
                                 this.events.Remove(correspondingCreation);
                                 continue;
                             }
-                        } else {
-                            IFileSystemInfo fsInfo = entry.Item4 ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(entry.Item1.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(entry.Item1.FullPath);
-                            if (!fsInfo.Exists) {
-                                continue;
-                            }
                         }
 
                         this.queue.AddEvent(new FSEvent(entry.Item1.ChangeType, entry.Item1.FullPath, entry.Item4));

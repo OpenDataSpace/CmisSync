@@ -306,7 +306,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
         }
 
         [Test, Category("Fast")]
-        public void HandleChangeEventOnNoMoreExistingFileOrFolderByJustIgnoringTheEvent() {
+        public void HandleChangeEventOnNoMoreExistingFileOrFolderByJustPassingTheEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)true);
                 var dirInfo = this.fsFactory.AddDirectory(this.path, Guid.Empty, true);
@@ -315,7 +315,8 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 dirInfo.Setup(d => d.Exists).Returns(false);
 
                 this.WaitForThreshold();
-                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(f => f.IsDirectory == true && f.LocalPath == this.path && f.Name == Name && f.Type == WatcherChangeTypes.Changed)));
+                this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
             }
         }
 
