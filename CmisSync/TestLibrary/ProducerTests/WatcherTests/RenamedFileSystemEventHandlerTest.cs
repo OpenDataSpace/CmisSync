@@ -123,6 +123,18 @@ namespace TestLibrary.ProducerTests.WatcherTests
             Assert.That(args.OldFullPath, Is.EqualTo(Path.Combine(rootPath, oldName)));
         }
 
+        [Test, Category("Fast")]
+        public void HandleExceptionsByInvokingCrawlSync() {
+            var handler = new RenamedFileSystemEventHandler(this.queue.Object, rootPath, this.fsFactory.Object);
+            string newPath = Path.Combine(rootPath, newName);
+            this.fsFactory.Setup(f => f.IsDirectory(newPath)).Throws(new Exception("IOException"));
+
+            handler.Handle(null, this.CreateEvent(oldName, newName));
+
+            this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
+            this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once);
+        }
+
         private RenamedEventArgs CreateEvent(string oldName, string newName)
         {
 #if __MonoCS__

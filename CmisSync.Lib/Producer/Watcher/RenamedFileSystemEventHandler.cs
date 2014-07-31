@@ -26,11 +26,15 @@ namespace CmisSync.Lib.Producer.Watcher
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using log4net;
+
     /// <summary>
     /// Renamed file system event handler.
     /// </summary>
     public class RenamedFileSystemEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RenamedFileSystemEventHandler));
+
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
         private string path;
@@ -57,14 +61,19 @@ namespace CmisSync.Lib.Producer.Watcher
         }
 
         public virtual void Handle(object source, RenamedEventArgs e) {
-            bool? isDirectory = this.fsFactory.IsDirectory(e.FullPath);
+            try {
+                bool? isDirectory = this.fsFactory.IsDirectory(e.FullPath);
 
-            if (isDirectory == null) {
+                if (isDirectory == null) {
+                    this.queue.AddEvent(new StartNextSyncEvent(true));
+                    return;
+                }
+
+                this.queue.AddEvent(new FSMovedEvent(e.OldFullPath, e.FullPath, (bool)isDirectory));
+            } catch (Exception ex) {
+                Logger.Warn(string.Format("Processing RenamedEventArgs {0} produces Exception => force crawl sync", e.ToString()), ex);
                 this.queue.AddEvent(new StartNextSyncEvent(true));
-                return;
             }
-
-            this.queue.AddEvent(new FSMovedEvent(e.OldFullPath, e.FullPath, (bool)isDirectory));
         }
     }
 }
