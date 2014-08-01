@@ -55,7 +55,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
             this.mappedRootFolder = new MappedObject("/", this.rootId, MappedObjectType.Folder, null, "changeToken") { Guid = Guid.NewGuid() };
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(this.localRootFolder.Object)))).Returns(this.mappedRootFolder);
-            this.underTest = new LocalObjectMoved(this.session.Object, this.storage.Object);
+            this.underTest = new LocalObjectMoved(this.session.Object, this.storage.Object, true);
         }
 
         [Test, Category("Fast"), Category("Solver")]

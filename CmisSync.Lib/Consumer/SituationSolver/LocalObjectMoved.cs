@@ -39,7 +39,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
-        public LocalObjectMoved(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        public LocalObjectMoved(
+            ISession session,
+            IMetaDataStorage storage,
+            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
         }
 
         /// <summary>

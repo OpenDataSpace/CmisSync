@@ -56,7 +56,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
             this.queue = new Mock<ISyncEventQueue>();
-            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, this.queue.Object, this.manager.Object);
+            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, this.queue.Object, this.manager.Object, true);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -273,7 +273,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     newChangeToken,
                     true,
                     localFile.Object.LastWriteTimeUtc,
-                    remoteFile.Object.LastModificationDate,
+                    localFile.Object.LastWriteTimeUtc,
                     expectedHash,
                     fileLength);
                 remoteFile.VerifySetContentStream();

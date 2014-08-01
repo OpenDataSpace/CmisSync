@@ -168,6 +168,28 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             return false;
         }
 
+        public static bool IsServerAbleToUpdateModificationDate(this ISession session) {
+            bool result = false;
+            var docType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, "cmis:document", null);
+            foreach (var prop in docType.PropertyDefinitions) {
+                if (prop.Id == "cmis:lastModificationDate" && prop.Updatability == DotCMIS.Enums.Updatability.ReadWrite) {
+                    result = true;
+                    break;
+                }
+            }
+
+            if (result) {
+                var folderType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, "cmis:folder", null);
+                foreach (var prop in folderType.PropertyDefinitions) {
+                    if (prop.Id == "cmis:lastModificationDate" && prop.Updatability != DotCMIS.Enums.Updatability.ReadWrite) {
+                        result = false;
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Hex string to byte array.

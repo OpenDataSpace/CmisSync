@@ -40,7 +40,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public AbstractEnhancedSolver(
             ISession session,
             IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate = true)
+            bool serverCanModifyCreationAndModificationDate = false)
         {
             this.Storage = storage;
             if (session == null) {

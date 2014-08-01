@@ -56,7 +56,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             IMetaDataStorage storage,
             ISyncEventQueue queue,
             ActiveActivitiesManager transmissionManager,
-            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
@@ -122,11 +122,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             if (this.ServerCanModifyDateTimes) {
                 if (remoteId is IDocument) {
-                    (remoteId as IDocument).UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
-                    mappedObject.LastRemoteWriteTimeUtc = localFile.LastWriteTimeUtc;
+                    (remoteId as IDocument).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
+                    mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
                 } else if (remoteId is IFolder) {
-                    (remoteId as IFolder).UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
-                    mappedObject.LastRemoteWriteTimeUtc = localFile.LastWriteTimeUtc;
+                    (remoteId as IFolder).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
+                    mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
                 }
             }
 

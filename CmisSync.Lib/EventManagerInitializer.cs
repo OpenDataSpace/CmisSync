@@ -23,6 +23,7 @@ namespace CmisSync.Lib
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Config;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -130,6 +131,7 @@ namespace CmisSync.Lib
             if (e is SuccessfulLoginEvent) {
                 var successfulLoginEvent = e as SuccessfulLoginEvent;
                 var session = successfulLoginEvent.Session;
+
                 var remoteRoot = successfulLoginEvent.Session.GetObjectByPath(this.repoInfo.RemotePath) as IFolder;
 
                 // Remove former added instances from event Queue.EventManager
@@ -192,7 +194,7 @@ namespace CmisSync.Lib
                 var localDetection = new LocalSituationDetection();
                 var remoteDetection = new RemoteSituationDetection();
 
-                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.activityListener);
+                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.activityListener, isServerAbleToUpdateModificationDate: session.IsServerAbleToUpdateModificationDate());
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);

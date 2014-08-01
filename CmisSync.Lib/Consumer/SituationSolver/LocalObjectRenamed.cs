@@ -45,7 +45,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        public LocalObjectRenamed(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        public LocalObjectRenamed(
+            ISession session,
+            IMetaDataStorage storage,
+            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
         }
 
         /// <summary>

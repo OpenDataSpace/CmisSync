@@ -38,7 +38,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        public LocalObjectChangedRemoteObjectChanged(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        public LocalObjectChangedRemoteObjectChanged(
+            ISession session,
+            IMetaDataStorage storage,
+            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
         }
 
         public override void Solve(

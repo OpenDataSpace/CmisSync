@@ -108,6 +108,7 @@ namespace TestLibrary.IntegrationTests
             var storage = this.GetInitializedStorage();
             storage.SaveMappedObject(new MappedObject(rootFolderName, rootFolderId, MappedObjectType.Folder, null, "oldtoken"));
             var session = new Mock<ISession>();
+            session.SetupTypeSystem();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
             var observer = new ObservableHandler();
@@ -130,6 +131,7 @@ namespace TestLibrary.IntegrationTests
             storage.SaveMappedObject(mappedObject);
 
             var session = new Mock<ISession>();
+            session.SetupTypeSystem();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
             IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, name, (string)null).Object;
@@ -156,6 +158,7 @@ namespace TestLibrary.IntegrationTests
             storage.SaveMappedObject(mappedObject);
 
             var session = new Mock<ISession>();
+            session.SetupTypeSystem();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
             IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(id, name, (string)null).Object;
@@ -352,7 +355,7 @@ namespace TestLibrary.IntegrationTests
             var remoteDetection = new RemoteSituationDetection();
             var transmissionManager = new ActiveActivitiesManager();
             var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator);
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator, isServerAbleToUpdateModificationDate: true);
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();

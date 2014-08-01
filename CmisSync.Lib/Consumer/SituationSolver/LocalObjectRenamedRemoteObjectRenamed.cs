@@ -37,7 +37,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
-        public LocalObjectRenamedRemoteObjectRenamed(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        public LocalObjectRenamedRemoteObjectRenamed(
+            ISession session,
+            IMetaDataStorage storage,
+            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
         }
 
         /// <summary>
