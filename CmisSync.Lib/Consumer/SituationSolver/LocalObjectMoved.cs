@@ -60,11 +60,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             var targetPath = localFile is IDirectoryInfo ? (localFile as IDirectoryInfo).Parent : (localFile as IFileInfo).Directory;
             var targetId = this.Storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
-            var src = this.Session.GetObject(mappedObject.ParentId);
-            var target = this.Session.GetObject(targetId);
-            OperationsLogger.Info(string.Format("Moving remote object {2} from folder {0} to folder {1}", src.Name, target.Name, remoteId.Id));
-            remoteObject = remoteObject.Move(src, target);
-            if(localFile.Name != remoteObject.Name) {
+            if (mappedObject.ParentId != targetId) {
+                var src = this.Session.GetObject(mappedObject.ParentId);
+                var target = this.Session.GetObject(targetId);
+                OperationsLogger.Info(string.Format("Moving remote object {2} from folder {0} to folder {1}", src.Name, target.Name, remoteId.Id));
+                remoteObject = remoteObject.Move(src, target);
+            }
+
+            if (localFile.Name != remoteObject.Name) {
                 remoteObject.Rename(localFile.Name, true);
             }
 
@@ -74,11 +77,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
             }
 
+            bool isContentChanged = localFile is IFileInfo ? (localFile as IFileInfo).IsContentChangedTo(mappedObject) : false;
+
             mappedObject.ParentId = targetId;
             mappedObject.LastChangeToken = remoteObject.ChangeToken;
             mappedObject.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
             mappedObject.Name = remoteObject.Name;
             this.Storage.SaveMappedObject(mappedObject);
+            if (isContentChanged) {
+                throw new ArgumentException("Local file content is also changed => force crawl sync.");
+            }
         }
     }
 }

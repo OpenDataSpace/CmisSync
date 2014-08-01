@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
@@ -88,56 +89,44 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             // Match local changes to remote changes and updated them remotely
             IMappedObject mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
-            if (localFile != null) {
-                bool isChanged = false;
-                if (localFile.Length == mappedObject.LastContentSize && localFile.LastWriteTimeUtc != mappedObject.LastLocalWriteTimeUtc) {
-                    Logger.Debug("Scanning for differences");
-                    using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                        byte[] fileHash = SHA1Managed.Create().ComputeHash(file);
-                        isChanged = !fileHash.SequenceEqual(mappedObject.LastChecksum);
-                        if (isChanged) {
-                            Logger.Debug(string.Format("{0}: actual hash{1}{2}: stored hash", BitConverter.ToString(fileHash), Environment.NewLine, BitConverter.ToString(mappedObject.LastChecksum)));
-                        }
+            if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
+                Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
+                OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
+                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
+                var doc = remoteId as IDocument;
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                this.queue.AddEvent(transmissionEvent);
+                this.transmissionManager.AddTransmission(transmissionEvent);
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
+                using (var hashAlg = new SHA1Managed())
+                using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                    try {
+                        uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                    } catch(Exception ex) {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        throw;
                     }
-                } else if(localFile.Length != mappedObject.LastContentSize) {
-                    Logger.Debug(
-                        string.Format(
-                        "lastContentSize: {0}{1}actualContentSize: {2}",
-                        mappedObject.LastContentSize.ToString(),
-                        Environment.NewLine,
-                        localFile.Length.ToString()));
-                    isChanged = true;
+
+                    mappedObject.LastChecksum = hashAlg.Hash;
                 }
 
-                if (isChanged) {
-                    Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
-                    OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
-                    IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
-                    var doc = remoteId as IDocument;
-                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                    this.queue.AddEvent(transmissionEvent);
-                    this.transmissionManager.AddTransmission(transmissionEvent);
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
-                    using (var hashAlg = new SHA1Managed())
-                    using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                        try {
-                            uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
-                        } catch(Exception ex) {
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                            throw;
-                        }
+                mappedObject.LastChangeToken = doc.ChangeToken;
+                mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
+                mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
+                mappedObject.LastContentSize = localFile.Length;
 
-                        mappedObject.LastChecksum = hashAlg.Hash;
-                    }
+                OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
 
-                    mappedObject.LastChangeToken = doc.ChangeToken;
-                    mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
-                    mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
-                    mappedObject.LastContentSize = localFile.Length;
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+            }
 
-                    OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
-
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+            if (this.ServerCanModifyDateTimes) {
+                if (remoteId is IDocument) {
+                    (remoteId as IDocument).UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
+                    mappedObject.LastRemoteWriteTimeUtc = localFile.LastWriteTimeUtc;
+                } else if (remoteId is IFolder) {
+                    (remoteId as IFolder).UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
+                    mappedObject.LastRemoteWriteTimeUtc = localFile.LastWriteTimeUtc;
                 }
             }
 

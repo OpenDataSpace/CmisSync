@@ -111,6 +111,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
                 var localFile = new Mock<IFileInfo>();
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+                localFile.Setup(f => f.Exists).Returns(true);
                 localFile.Setup(f => f.Name).Returns(this.newName);
                 localFile.Setup(f => f.Length).Returns(content.Length);
                 localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(contentStream);
@@ -153,6 +154,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
                 localFile.Setup(f => f.Name).Returns(this.newName);
                 localFile.Setup(f => f.Length).Returns(content.Length);
+                localFile.Setup(f => f.Exists).Returns(true);
                 localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(contentStream);
                 var mappedFile = new Mock<IMappedObject>();
                 mappedFile.SetupAllProperties();
@@ -193,6 +195,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
                 localFile.Setup(f => f.Name).Returns(this.newName);
                 localFile.Setup(f => f.Length).Returns(content.Length);
+                localFile.Setup(f => f.Exists).Returns(true);
                 localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(contentStream);
                 var mappedFile = new Mock<IMappedObject>();
                 mappedFile.SetupAllProperties();

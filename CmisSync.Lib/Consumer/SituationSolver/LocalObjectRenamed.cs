@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
@@ -37,7 +38,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// </summary>
     public class LocalObjectRenamed : AbstractEnhancedSolver
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectRenamed));
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         /// <summary>
@@ -77,29 +77,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
             }
 
-            bool isChanged = false;
-            if (localFile is IFileInfo) {
-                var file = localFile as IFileInfo;
-                if (obj.LastContentSize != file.Length) {
-                    isChanged = true;
-                } else {
-                    Logger.Debug("Scanning for differences");
-                    using (var f = file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
-                        byte[] fileHash = SHA1Managed.Create().ComputeHash(f);
-                        isChanged = !fileHash.SequenceEqual(obj.LastChecksum);
-                        if (isChanged) {
-                            Logger.Debug(string.Format("{0}: actual hash{1}{2}: stored hash", BitConverter.ToString(fileHash), Environment.NewLine, BitConverter.ToString(obj.LastChecksum)));
-                        }
-                    }
-                }
-            }
+            bool isContentChanged = localFile is IFileInfo ? (localFile as IFileInfo).IsContentChangedTo(obj) : false;
 
             obj.Name = remoteObject.Name;
             obj.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
-            obj.LastLocalWriteTimeUtc = isChanged ? obj.LastLocalWriteTimeUtc : localFile.LastWriteTimeUtc;
+            obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFile.LastWriteTimeUtc;
             obj.LastChangeToken = remoteObject.ChangeToken;
             this.Storage.SaveMappedObject(obj);
-            if (isChanged) {
+            if (isContentChanged) {
                 throw new ArgumentException("Local file content is also changed => force crawl sync.");
             }
         }

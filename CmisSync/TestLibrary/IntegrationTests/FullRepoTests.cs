@@ -699,6 +699,7 @@ namespace TestLibrary.IntegrationTests
             file.Refresh();
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            Thread.Sleep(200);
             this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
 

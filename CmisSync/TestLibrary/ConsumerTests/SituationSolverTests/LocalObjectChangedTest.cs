@@ -130,7 +130,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             using (var uploadedContent = new MemoryStream()) {
                 localFile.Setup(
                     f =>
-                    f.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(() => { return new MemoryStream(content); });
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
 
                 var mappedObject = new MappedObject(
                     "name",
@@ -179,7 +179,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             using (var stream = new MemoryStream(content)) {
                 localFile.Setup(
                     f =>
-                    f.Open(System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)).Returns(stream);
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream);
 
                 var mappedObject = new MappedObject(
                     "name",
@@ -238,7 +238,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             using (var uploadedContent = new MemoryStream()) {
                 localFile.Setup(
                     f =>
-                    f.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(() => { return new MemoryStream(content); });
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
 
                 var mappedObject = new MappedObject(
                     "name",

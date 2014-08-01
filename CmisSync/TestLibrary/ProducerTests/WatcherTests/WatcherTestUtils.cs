@@ -16,8 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using CmisSync.Lib.Storage.Database.Entities;
-using TestLibrary.IntegrationTests;
 
 namespace TestLibrary.ProducerTests.WatcherTests
 {
@@ -27,13 +25,16 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using System.Threading.Tasks;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
 
     using NUnit.Framework;
+
+    using TestLibrary.IntegrationTests;
 
     public class WatcherData
     {
@@ -53,6 +54,20 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
         private static readonly int RETRIES = 10;
         private static readonly int MILISECONDSWAIT = 1000;
+
+        public static void IgnoreIfExtendedAttributesAreNotAvailable(string fullName) {
+            if (!AreExtendedAttributesAvailable(fullName)) {
+                Assert.Ignore("Extended Attribute not available on path: " + fullName);
+            }
+        }
+
+        public static bool AreExtendedAttributesAvailable(string fullName) {
+            #if __MonoCS__ || __COCOA__
+            return new ExtendedAttributeReaderUnix().IsFeatureAvailable(fullName);
+            #else
+            return new ExtendedAttributeReaderDos().IsFeatureAvailable(fullName);
+            #endif
+        }
 
         public void ReportFSFileAddedEvent() {
             this.localFile.Delete();
@@ -161,7 +176,6 @@ namespace TestLibrary.ProducerTests.WatcherTests
         }
 
         public void ReportFSFileMovedEvent() {
-
             var anotherSubFolder = new DirectoryInfo(Path.Combine(this.localFolder.FullName, Path.GetRandomFileName()));
             anotherSubFolder.Create();
             string oldpath = Path.Combine(this.localFile.FullName);
@@ -426,20 +440,6 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
         protected void IgnoreIfExtendedAttributesAreNotAvailable() {
             IgnoreIfExtendedAttributesAreNotAvailable(this.localFolder.FullName);
-        }
-
-        public static void IgnoreIfExtendedAttributesAreNotAvailable(string fullName) {
-            if (!AreExtendedAttributesAvailable(fullName)) {
-                Assert.Ignore("Extended Attribute not available on path: " + fullName);
-            }
-        }
-
-        public static bool AreExtendedAttributesAvailable(string fullName) {
-            #if __MonoCS__ || __COCOA__
-            return new ExtendedAttributeReaderUnix().IsFeatureAvailable(fullName);
-            #else
-            return new ExtendedAttributeReaderDos().IsFeatureAvailable(fullName);
-            #endif
         }
     }
 }
