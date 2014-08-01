@@ -221,6 +221,7 @@
     <Compile Include="Consumer\SituationSolver\AbstractEnhancedSolver.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectChanged.cs" />
     <Compile Include="Cmis\ConvenienceExtenders\CmisConvenienceExtenders.cs" />
+    <Compile Include="Storage\Database\Entities\IFileConvenienceExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

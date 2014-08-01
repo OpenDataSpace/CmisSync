@@ -92,6 +92,7 @@ SOURCES =  \
 	EventManagerInitializerTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
+	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderDosTest.cs \
