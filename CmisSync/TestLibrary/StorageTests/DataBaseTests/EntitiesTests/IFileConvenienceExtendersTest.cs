@@ -93,17 +93,17 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
 
         [Test, Category("Fast")]
         public void ContentCheckReturnTrueIfLastContentHashIsNull() {
-            var obj = Mock.Of<IMappedObject>(
-                o =>
-                o.LastContentSize == length && o.LastChecksum == (byte[])null);
-            Assert.That(fileInfo.Object.IsContentChangedTo(obj), Is.True);
+            var obj = new Mock<IMappedObject>();
+            obj.Setup(o => o.LastContentSize).Returns(this.length);
+            obj.Setup(o => o.LastChecksum).Returns((byte[])null);
+            Assert.That(fileInfo.Object.IsContentChangedTo(obj.Object), Is.True);
         }
 
         [Test, Category("Fast")]
         public void ContentCheckReturnsFalseIfLengthAndModificationDateAreEqualAndModificationDateIsHintForChange() {
             var obj = Mock.Of<IMappedObject>(
                 o =>
-                o.LastContentSize == length &&
+                o.LastContentSize == this.length &&
                 o.LastChecksum == this.expectedHash &&
                 o.LastLocalWriteTimeUtc == this.modificationDate);
             this.fileInfo.SetupLastWriteTimeUtc(this.modificationDate);
