@@ -21,11 +21,11 @@ namespace CmisSync.Lib.Accumulator
 {
     using System;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using log4net;
 
@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Accumulator
         private IMetaDataStorage storage;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RemoteObjectMovedOrRenamedAccumulator"/> class.
+        /// Initializes a new instance of the <see cref="RemoteObjectMovedOrRenamedAccumulator"/> class.
         /// </summary>
         /// <param name="queue">Sync event queue.</param>
         /// <param name="storage">Meta data storage.</param>
@@ -77,7 +77,7 @@ namespace CmisSync.Lib.Accumulator
             if(storedObject != null) {
                 if (storedObject.ParentId != this.GetParentId(e as AbstractFolderEvent)) {
                     this.AccumulateEvent(e as AbstractFolderEvent, storedObject);
-                } else if(storedObject.Name != GetRemoteObjectName(e as AbstractFolderEvent)) {
+                } else if(storedObject.Name != this.GetRemoteObjectName(e as AbstractFolderEvent)) {
                     this.AccumulateEvent(e as AbstractFolderEvent, storedObject);
                 }
             }

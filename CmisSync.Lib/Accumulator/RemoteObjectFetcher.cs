@@ -22,11 +22,11 @@ namespace CmisSync.Lib.Accumulator {
     using System.IO;
 
     using CmisSync.Lib.Cmis;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Accumulator {
         private IOperationContext operationContext;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RemoteObjectFetcher"/> class.
+        /// Initializes a new instance of the <see cref="RemoteObjectFetcher"/> class.
         /// Fetches remote CMIS Objects and adds them to the handled events.
         /// </summary>
         /// <param name="session">Session to be used.</param>
@@ -147,7 +147,6 @@ namespace CmisSync.Lib.Accumulator {
             return null;
         }
 
-
         private string FetchIdFromExtendedAttribute(ISyncEvent e) {
             IFileSystemInfo path = null;
             if(e is FileEvent) {
@@ -163,8 +162,8 @@ namespace CmisSync.Lib.Accumulator {
             if (path != null && path.Exists) {
                 string uuid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
                 Guid guid;
-                if (uuid != null && Guid.TryParse(uuid, out guid)){
-                    var mappedObject = storage.GetObjectByGuid(guid);
+                if (uuid != null && Guid.TryParse(uuid, out guid)) {
+                    var mappedObject = this.storage.GetObjectByGuid(guid);
                     if(mappedObject != null) {
                         return mappedObject.RemoteObjectId;
                     } else {
