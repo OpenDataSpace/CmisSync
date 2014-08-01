@@ -55,7 +55,9 @@ namespace CmisSync.Lib.Queueing
         /// <param name="name">
         /// Name of the instance
         /// </param>
-        public GenericSyncEventHandler(GenericSyncEventDelegate<TSyncEventType> handler, string name = null)
+        public GenericSyncEventHandler(
+            GenericSyncEventDelegate<TSyncEventType> handler,
+            string name = null)
             : this(EventHandlerPriorities.GetPriority(typeof(GenericSyncEventHandler<>)), handler, name)
         {
         }
@@ -72,7 +74,10 @@ namespace CmisSync.Lib.Queueing
         /// <param name="name">
         /// Name of the instance
         /// </param>
-        public GenericSyncEventHandler(int priority, GenericSyncEventDelegate<TSyncEventType> handler, string name = null)
+        public GenericSyncEventHandler(
+            int priority,
+            GenericSyncEventDelegate<TSyncEventType> handler,
+            string name = null)
         {
             this.priority = priority;
             this.handler = handler;

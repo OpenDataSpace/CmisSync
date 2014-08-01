@@ -51,14 +51,15 @@ namespace CmisSync.Lib.Producer.Crawler
         private bool dropNextSyncEvents = false;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.DescendantsCrawler"/> class.
+        /// Initializes a new instance of the <see cref="DescendantsCrawler"/> class.
         /// </summary>
         /// <param name="queue">Sync Event Queue.</param>
         /// <param name="remoteFolder">Remote folder.</param>
         /// <param name="localFolder">Local folder.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="filter">Aggregated filter.</param>
-        /// <param name ="activityListener">Activity listner.</param>
+        /// <param name="activityListener">Activity listner.</param>
+        /// <param name="serverSupportsHashes">Indicates whether this server supports content hashes.</param>
         /// <param name="fsFactory">File system info factory.</param>
         public DescendantsCrawler(
             ISyncEventQueue queue,
@@ -105,6 +106,82 @@ namespace CmisSync.Lib.Producer.Crawler
         }
 
         /// <summary>
+        /// Gets the local directory tree.
+        /// </summary>
+        /// <returns>The local directory tree.</returns>
+        /// <param name="parent">Parent directory.</param>
+        /// <param name="filter">Filter for files.</param>
+        public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
+            var children = new List<IObjectTree<IFileSystemInfo>>();
+            foreach (var child in parent.GetDirectories()) {
+                string reason;
+                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
+                    children.Add(GetLocalDirectoryTree(child, filter));
+                } else {
+                    Logger.Debug(reason);
+                }
+            }
+
+            foreach (var file in parent.GetFiles()) {
+                string reason;
+                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
+                    children.Add(new ObjectTree<IFileSystemInfo> {
+                        Item = file,
+                        Children = new List<IObjectTree<IFileSystemInfo>>()
+                    });
+                } else {
+                    Logger.Debug(reason);
+                }
+            }
+
+            IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {
+                Item = parent,
+                Children = children
+            };
+            return tree;
+        }
+
+        /// <summary>
+        /// Gets the remote directory tree.
+        /// </summary>
+        /// <returns>The remote directory tree.</returns>
+        /// <param name="parent">Parent folder.</param>
+        /// <param name="descendants">Descendants of remote object.</param>
+        /// <param name="filter">Filter of ignored or invalid files and folder</param>
+        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants, IFilterAggregator filter) {
+            IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
+            if (descendants != null) {
+                foreach (var child in descendants) {
+                    if (child.Item is IFolder) {
+                        string reason;
+                        if (!filter.FolderNamesFilter.CheckFolderName(child.Item.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(child.Item.Name, out reason)) {
+                            children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children, filter));
+                        } else {
+                            Logger.Debug(reason);
+                        }
+                    } else if (child.Item is IDocument) {
+                        string reason;
+                        if (!filter.FileNamesFilter.CheckFile(child.Item.Name, out reason)) {
+                            children.Add(new ObjectTree<IFileableCmisObject> {
+                                Item = child.Item,
+                                Children = new List<IObjectTree<IFileableCmisObject>>()
+                            });
+                        } else {
+                            Logger.Debug(reason);
+                        }
+                    }
+                }
+            }
+
+            var tree = new ObjectTree<IFileableCmisObject> {
+                Item = parent,
+                Children = children
+            };
+
+            return tree;
+        }
+
+        /// <summary>
         /// Handles StartNextSync events.
         /// </summary>
         /// <param name="e">The event to handle.</param>
@@ -147,6 +224,19 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             return correspondingRemoteEvent;
+        }
+
+        private static void AddRemoteContentChangeTypeToFileEvent(FileEvent fileEvent, IMappedObject obj, IDocument remoteDoc) {
+            if (fileEvent == null || obj == null || remoteDoc == null) {
+                return;
+            }
+
+            byte[] remoteHash = remoteDoc.ContentStreamHash(obj.ChecksumAlgorithmName);
+            if (remoteHash != null && remoteHash.SequenceEqual(obj.LastChecksum)) {
+                fileEvent.RemoteContent = ContentChangeType.NONE;
+            } else {
+                fileEvent.RemoteContent = ContentChangeType.CHANGED;
+            }
         }
 
         private void CrawlDescendants()
@@ -323,19 +413,6 @@ namespace CmisSync.Lib.Producer.Crawler
             }
         }
 
-        private static void AddRemoteContentChangeTypeToFileEvent(FileEvent fileEvent, IMappedObject obj, IDocument remoteDoc) {
-            if (fileEvent == null || obj == null || remoteDoc == null) {
-                return;
-            }
-
-            byte[] remoteHash = remoteDoc.ContentStreamHash(obj.ChecksumAlgorithmName);
-            if (remoteHash != null && remoteHash.SequenceEqual(obj.LastChecksum)) {
-                fileEvent.RemoteContent = ContentChangeType.NONE;
-            } else {
-                fileEvent.RemoteContent = ContentChangeType.CHANGED;
-            }
-        }
-
         private void MergeAndSendEvents(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
         {
             foreach (var entry in eventMap) {
@@ -423,82 +500,6 @@ namespace CmisSync.Lib.Producer.Crawler
                 removedLocalObjects.Remove(id);
                 removedRemoteObjects.Remove(id);
             }
-        }
-
-        /// <summary>
-        /// Gets the local directory tree.
-        /// </summary>
-        /// <returns>The local directory tree.</returns>
-        /// <param name="parent">Parent directory.</param>
-        /// <param name="filter">Filter for files.</param>
-        public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
-            var children = new List<IObjectTree<IFileSystemInfo>>();
-            foreach (var child in parent.GetDirectories()) {
-                string reason;
-                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
-                    children.Add(GetLocalDirectoryTree(child, filter));
-                } else {
-                    Logger.Debug(reason);
-                }
-            }
-
-            foreach (var file in parent.GetFiles()) {
-                string reason;
-                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
-                    children.Add(new ObjectTree<IFileSystemInfo> {
-                        Item = file,
-                        Children = new List<IObjectTree<IFileSystemInfo>>()
-                    });
-                } else {
-                    Logger.Debug(reason);
-                }
-            }
-
-            IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {
-                Item = parent,
-                Children = children
-            };
-            return tree;
-        }
-
-        /// <summary>
-        /// Gets the remote directory tree.
-        /// </summary>
-        /// <returns>The remote directory tree.</returns>
-        /// <param name="parent">Parent folder.</param>
-        /// <param name="descendants">Descendants of remote object.</param>
-        /// <param name="filter">Filter of ignored or invalid files and folder</param>
-        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants, IFilterAggregator filter) {
-            IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
-            if (descendants != null) {
-                foreach (var child in descendants) {
-                    if (child.Item is IFolder) {
-                        string reason;
-                        if (!filter.FolderNamesFilter.CheckFolderName(child.Item.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(child.Item.Name, out reason)) {
-                            children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children, filter));
-                        } else {
-                            Logger.Debug(reason);
-                        }
-                    } else if (child.Item is IDocument) {
-                        string reason;
-                        if (!filter.FileNamesFilter.CheckFile(child.Item.Name, out reason)) {
-                            children.Add(new ObjectTree<IFileableCmisObject> {
-                                Item = child.Item,
-                                Children = new List<IObjectTree<IFileableCmisObject>>()
-                            });
-                        } else {
-                            Logger.Debug(reason);
-                        }
-                    }
-                }
-            }
-
-            var tree = new ObjectTree<IFileableCmisObject> {
-                Item = parent,
-                Children = children
-            };
-
-            return tree;
         }
 
         private class ResetStartNextCrawlSyncFilterEvent : ISyncEvent, IRemoveFromLoggingEvent {

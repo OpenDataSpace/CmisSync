@@ -53,12 +53,22 @@ namespace CmisSync.Lib
         private bool disposed = false;
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.ActivityListenerResource"/> class.
         /// </summary>
+        /// <param name="listener">Activity listener.</param>
         public ActivityListenerResource(IActivityListener listener)
         {
             this.activityListener = listener;
             this.activityListener.ActivityStarted();
+        }
+
+        /// <summary>
+        /// Releases unmanaged resources and performs other cleanup operations before the
+        /// <see cref="CmisSync.Lib.ActivityListenerResource"/> is reclaimed by garbage collection.
+        /// </summary>
+        ~ActivityListenerResource()
+        {
+            this.Dispose(false);
         }
 
         /// <summary>
@@ -71,8 +81,9 @@ namespace CmisSync.Lib
         }
 
         /// <summary>
-        /// Dispose pattern
+        /// Dispose the specified disposing.
         /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected virtual void Dispose(bool disposing)
         {
             if(!this.disposed)
@@ -80,14 +91,6 @@ namespace CmisSync.Lib
                 this.activityListener.ActivityStopped();
                 this.disposed = true;
             }
-        }
-
-        /// <summary>
-        /// Destructor.
-        /// </summary>
-        ~ActivityListenerResource()
-        {
-            this.Dispose(false);
         }
     }
 }

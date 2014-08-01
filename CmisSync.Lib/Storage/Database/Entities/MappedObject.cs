@@ -84,7 +84,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         public static readonly string ExtendedAttributeKey = "DSS-UUID";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
+        /// Initializes a new instance of the <see cref="MappedObject"/> class.
         /// </summary>
         [Obsolete("Must not be used manually. This constructor should be used for serialization only.", true)]
         public MappedObject()
@@ -93,7 +93,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
+        /// Initializes a new instance of the <see cref="MappedObject"/> class.
         /// </summary>
         /// <param name="name">Name of the Directory/Folder.</param>
         /// <param name="remoteId">Remote identifier.</param>
@@ -132,7 +132,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
+        /// Initializes a new instance of the <see cref="MappedObject"/> class.
         /// </summary>
         /// <param name='data'>
         /// Data to copy.
@@ -164,7 +164,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.MappedObject"/> class.
+        /// Initializes a new instance of the <see cref="MappedObject"/> class.
         /// </summary>
         /// <param name='remoteFolder'>
         /// A IFolder fetched via cmis.

@@ -51,6 +51,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFile">Local file or folder. It is the source file/folder reference, which should be renamed.</param>
         /// <param name="remoteId">Remote identifier. Should be an instance of IFolder or IDocument.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
             IFileSystemInfo localFile,
             IObjectId remoteId,

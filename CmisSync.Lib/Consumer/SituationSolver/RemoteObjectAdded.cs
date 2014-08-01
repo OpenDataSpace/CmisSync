@@ -23,12 +23,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.IO;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
-    
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
+
     using DotCMIS.Client;
   
     using log4net;
@@ -47,7 +47,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectAdded"/> class.
         /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
         /// <param name="queue">Queue to report new transmissions to.</param>
+        /// <param name="transmissonManager">Transmisson manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
             ISession session,
@@ -77,6 +80,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name='remoteId'>
         /// Remote Object (already fetched).
         /// </param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         /// <exception cref='ArgumentException'>
         /// Is thrown when remoteId is not prefetched.
         /// </exception>

@@ -46,12 +46,12 @@ namespace CmisSync.Lib.Storage.Database
         /// <returns>The list.</returns>
         public List<T> ToList() {
             var list = new List<T>();
-            if (Item != null) {
-                list.Add(Item);
+            if (this.Item != null) {
+                list.Add(this.Item);
             }
 
-            if (Children != null) {
-                foreach (var child in Children) {
+            if (this.Children != null) {
+                foreach (var child in this.Children) {
                     list.AddRange(child.ToList());
                 }
             }

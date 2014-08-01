@@ -21,9 +21,15 @@ namespace CmisSync.Lib.Events
 {
     using System;
 
+    /// <summary>
+    /// Interface for all events which are able to be filtered by local path.
+    /// </summary>
     public interface IFilterableLocalPathEvent
     {
+        /// <summary>
+        /// Gets the local path.
+        /// </summary>
+        /// <value>The local path.</value>
         string LocalPath { get; }
     }
 }
-

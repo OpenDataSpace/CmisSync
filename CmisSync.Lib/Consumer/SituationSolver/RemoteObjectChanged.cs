@@ -49,7 +49,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectChanged"/> class.
         /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
         /// <param name="queue">Event Queue to report transmission events to.</param>
+        /// <param name="transmissonManager">Transmisson manager.</param>
         /// <param name="fsFactory">File System Factory.</param>
         public RemoteObjectChanged(
             ISession session,
@@ -78,6 +81,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteId">Remote identifier.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
             IFileSystemInfo localFile,
             IObjectId remoteId,

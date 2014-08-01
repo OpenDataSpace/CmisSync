@@ -39,10 +39,9 @@ namespace CmisSync.Lib.Producer.Watcher
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RenamedFileSystemEventHandler"/> class.
+        /// Initializes a new instance of the <see cref="RenamedFileSystemEventHandler"/> class.
         /// </summary>
         /// <param name="queue">Sync event queue to report the events to.</param>
-        /// <param name="rootpath">Root path to the watched file system directory.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RenamedFileSystemEventHandler(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null)
         {
@@ -54,6 +53,11 @@ namespace CmisSync.Lib.Producer.Watcher
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 
+        /// <summary>
+        /// Takes rename file system events and transforms them to rename events on queue.
+        /// </summary>
+        /// <param name="source">source object</param>
+        /// <param name="e">Rename event from file system watcher</param>
         public virtual void Handle(object source, RenamedEventArgs e) {
             try {
                 bool? isDirectory = this.fsFactory.IsDirectory(e.FullPath);

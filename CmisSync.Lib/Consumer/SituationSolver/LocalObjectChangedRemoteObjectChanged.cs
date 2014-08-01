@@ -38,12 +38,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
+        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectChangedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
             bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
         }
 
+        /// <summary>
+        /// Solve the specified situation by using localFile and remote object.
+        /// </summary>
+        /// <param name="localFileSystemInfo">Local filesystem info instance.</param>
+        /// <param name="remoteId">Remote identifier or object.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
             IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,

@@ -63,7 +63,7 @@ namespace CmisSync.Lib.Storage.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/> class.
+        /// Initializes a new instance of the <see cref="MetaDataStorage"/> class.
         /// </summary>
         /// <param name='engine'>
         /// DBreeze Engine. Must not be null.

@@ -71,6 +71,10 @@ namespace CmisSync.Lib.Storage.FileSystem
             }
         }
 
+        /// <summary>
+        /// Gets the creation time in UTC.
+        /// </summary>
+        /// <value>The creation time in UTC.</value>
         public DateTime CreationTimeUtc {
             get {
                 return this.original.CreationTimeUtc;
@@ -139,6 +143,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <param name="key">Attribute name.</param>
         /// <param name="value">Attribute value.</param>
+        /// <param name="restoreModificationDate">Restore the modification date of the file after setting ea.</param>
         public void SetExtendedAttribute(string key, string value, bool restoreModificationDate = false)
         {
             if(reader != null)

@@ -50,7 +50,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
         /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
         /// <param name="queue">Event queue for publishing upload transmission.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
+        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectChanged(
             ISession session,
             IMetaDataStorage storage,
@@ -74,8 +78,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// Uploads the file content if content has been changed. Otherwise simply saves the
         /// last modification date.
         /// </summary>
-        /// <param name="localFileSystemInfo">Local file system info.</param>
-        /// <param name="remoteId">Remote identifier.</param>
+        /// <param name="localFileSystemInfo">Local filesystem info instance.</param>
+        /// <param name="remoteId">Remote identifier or object.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
             IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,

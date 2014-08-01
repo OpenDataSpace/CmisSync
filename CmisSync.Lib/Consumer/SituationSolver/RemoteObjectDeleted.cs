@@ -22,10 +22,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -51,6 +51,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFileInfo">Local file info.</param>
         /// <param name="remoteId">Remote identifier.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
             IFileSystemInfo localFileInfo,
             IObjectId remoteId,

@@ -35,10 +35,10 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// The extended attribute.
         /// </returns>
         /// <param name='path'>
-        /// Path.
+        /// Full path.
         /// </param>
         /// <param name='key'>
-        /// Key.
+        /// Extended attribute key.
         /// </param>
         string GetExtendedAttribute(string path, string key);
 
@@ -46,13 +46,13 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Sets the extended attribute.
         /// </summary>
         /// <param name='path'>
-        /// Path.
+        /// Full path.
         /// </param>
         /// <param name='key'>
-        /// Key.
+        /// Extended attribute Key.
         /// </param>
         /// <param name='value'>
-        /// Value.
+        /// Extended attribute Value.
         /// </param>
         /// <param name="restoreModificationDate">if <c>true</c>, the last modification date will be restored after setting the attributes, otherwise the modification date could be changed by this operation.</param>
         void SetExtendedAttribute(string path, string key, string value, bool restoreModificationDate = false);
@@ -61,10 +61,10 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Removes the extended attribute.
         /// </summary>
         /// <param name='path'>
-        /// Path.
+        /// Full path.
         /// </param>
         /// <param name='key'>
-        /// Key.
+        /// Extended attribute key.
         /// </param>
         void RemoveExtendedAttribute(string path, string key);
 
@@ -75,7 +75,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// The attribute keys.
         /// </returns>
         /// <param name='path'>
-        /// Path.
+        /// Full path.
         /// </param>
         List<string> ListAttributeKeys(string path);
 
@@ -95,9 +95,33 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// </summary>
     [Serializable]
     public class WrongPlatformException : Exception {
-        public WrongPlatformException() { }
-        public WrongPlatformException(string message) : base(message) { }
-        public WrongPlatformException(string message, Exception inner) : base(message, inner) { }
-        protected WrongPlatformException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.WrongPlatformException"/> class.
+        /// </summary>
+        public WrongPlatformException() {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.WrongPlatformException"/> class.
+        /// </summary>
+        /// <param name="message">Exception message.</param>
+        public WrongPlatformException(string message) : base(message) {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.WrongPlatformException"/> class.
+        /// </summary>
+        /// <param name="message">Exception message.</param>
+        /// <param name="inner">Inner exception.</param>
+        public WrongPlatformException(string message, Exception inner) : base(message, inner) {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.WrongPlatformException"/> class.
+        /// </summary>
+        /// <param name="info">Serialization info.</param>
+        /// <param name="context">Streaming context.</param>
+        protected WrongPlatformException(SerializationInfo info, StreamingContext context) : base(info, context) {
+        }
     }
 }

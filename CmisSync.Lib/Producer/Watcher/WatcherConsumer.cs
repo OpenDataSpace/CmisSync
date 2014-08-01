@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Producer.Watcher
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> class.
+        /// Initializes a new instance of the <see cref="WatcherConsumer"/> class.
         /// </summary>
         /// <param name='queue'>
         /// Queue where the FSEvents and also the FileEvents and FolderEvents are reported.

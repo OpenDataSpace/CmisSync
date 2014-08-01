@@ -56,7 +56,6 @@ namespace CmisSync.Lib.Storage.Database.Entities
             }
 
             if (file.Length == obj.LastContentSize) {
-
                 if (scanOnlyIfModificationDateDiffers && obj.LastLocalWriteTimeUtc == file.LastWriteTimeUtc) {
                     return false;
                 } else {

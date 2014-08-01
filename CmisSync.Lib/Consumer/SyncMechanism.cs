@@ -23,10 +23,10 @@ namespace CmisSync.Lib.Consumer
     using System.Diagnostics;
     using System.IO;
 
-    using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
 
     using DotCMIS.Client;
 
@@ -50,7 +50,7 @@ namespace CmisSync.Lib.Consumer
         private bool isServerAbleToUpdateModificationDate;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.SyncMechanism"/> class.
+        /// Initializes a new instance of the <see cref="SyncMechanism"/> class.
         /// </summary>
         /// <param name="localSituation">Local situation.</param>
         /// <param name="remoteSituation">Remote situation.</param>
@@ -59,6 +59,7 @@ namespace CmisSync.Lib.Consumer
         /// <param name="storage">Meta data storage.</param>
         /// <param name="activityListener">Active sync progress listener.</param>
         /// <param name="solver">Solver for custom solver matrix.</param>
+        /// <param name="isServerAbleToUpdateModificationDate">Enables the modification date sync feature.</param>
         public SyncMechanism(
             ISituationDetection<AbstractFolderEvent> localSituation,
             ISituationDetection<AbstractFolderEvent> remoteSituation,
@@ -141,7 +142,7 @@ namespace CmisSync.Lib.Consumer
             ISolver[,] solver = new ISolver[dim, dim];
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = new NothingToDoSolver();
             solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager,this.isServerAbleToUpdateModificationDate);
+            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
             solver[(int)SituationType.MOVED, (int)SituationType.NOCHANGE] = new LocalObjectMoved(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
             solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
             solver[(int)SituationType.REMOVED, (int)SituationType.NOCHANGE] = new LocalObjectDeleted(this.session, this.storage);
@@ -204,13 +205,11 @@ namespace CmisSync.Lib.Consumer
         private void Solve(ISolver s, AbstractFolderEvent e)
         {
             using (var activity = new ActivityListenerResource(this.activityListener)) {
-            if (e is FolderEvent) {
-                s.Solve((e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);
-                // this.storage.ValidateObjectStructure();
-            } else if (e is FileEvent) {
-                s.Solve((e as FileEvent).LocalFile, (e as FileEvent).RemoteFile, (e as FileEvent).LocalContent, (e as FileEvent).RemoteContent);
-                // this.storage.ValidateObjectStructure();
-            }
+                if (e is FolderEvent) {
+                    s.Solve((e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);
+                } else if (e is FileEvent) {
+                    s.Solve((e as FileEvent).LocalFile, (e as FileEvent).RemoteFile, (e as FileEvent).LocalContent, (e as FileEvent).RemoteContent);
+                }
             }
         }
     }

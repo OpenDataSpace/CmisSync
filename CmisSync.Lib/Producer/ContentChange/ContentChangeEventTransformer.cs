@@ -187,6 +187,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                     if (file != null) {
                         byte[] hash = doc.ContentStreamHash(file.ChecksumAlgorithmName);
                         if (hash == null || !hash.SequenceEqual(file.LastChecksum)) {
+                            Logger.Debug(string.Format("SavedChecksum: {0} RemoteChecksum: {1}", Utils.ToHexString(file.LastChecksum), Utils.ToHexString(hash)));
                             fileEvent.RemoteContent = ContentChangeType.CHANGED;
                         } else {
                             fileEvent.RemoteContent = ContentChangeType.NONE;

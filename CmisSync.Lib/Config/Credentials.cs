@@ -77,7 +77,7 @@ namespace CmisSync.Lib.Config
         private string password = null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Credentials.Password"/> class with the given password.
+        /// Initializes a new instance of the <see cref="Password"/> class with the given password.
         /// </summary>
         /// <param name="password">as plain text</param>
         public Password(string password)
@@ -86,7 +86,7 @@ namespace CmisSync.Lib.Config
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Credentials.Password"/> class without setting a password.
+        /// Initializes a new instance of the <see cref="Password"/> class without setting a password.
         /// </summary>
         public Password()
         {

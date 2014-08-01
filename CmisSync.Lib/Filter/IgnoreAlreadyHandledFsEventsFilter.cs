@@ -22,11 +22,11 @@ namespace CmisSync.Lib.Filter
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     /// <summary>
     /// Already added objects fs event filter.
@@ -105,7 +105,7 @@ namespace CmisSync.Lib.Filter
                     IMappedObject o = this.storage.GetObjectByLocalPath(path);
                     if (o == null) {
                         return true;
-                    } else if(path.Exists) {
+                    } else if (path.Exists) {
                         try {
                             Guid uuid;
                             string ea = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
@@ -115,6 +115,7 @@ namespace CmisSync.Lib.Filter
                         } catch (IOException) {
                         }
                     }
+
                     return false;
                 default:
                     return false;

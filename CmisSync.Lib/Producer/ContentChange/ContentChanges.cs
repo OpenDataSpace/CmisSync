@@ -34,6 +34,9 @@ namespace CmisSync.Lib.Producer.ContentChange
 
     using log4net;
 
+    /// <summary>
+    /// Content changes are collected and published to the queue.
+    /// </summary>
     public class ContentChanges : ReportingSyncEventHandler
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChanges));
@@ -45,23 +48,28 @@ namespace CmisSync.Lib.Producer.ContentChange
         private bool dropNextSyncEvents = false;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.ContentChanges"/> class.
+        /// Initializes a new instance of the <see cref="ContentChanges"/> class.
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta Data Storage.</param>
         /// <param name="queue">Event Queue.</param>
         /// <param name="maxNumberOfContentChanges">Max number of content changes.</param>
         /// <param name="isPropertyChangesSupported">If set to <c>true</c> is property changes supported.</param>
-        public ContentChanges(ISession session, IMetaDataStorage storage, ISyncEventQueue queue, int maxNumberOfContentChanges = 100, bool isPropertyChangesSupported = false) : base(queue) {
-            if(session == null) {
+        public ContentChanges(
+            ISession session,
+            IMetaDataStorage storage,
+            ISyncEventQueue queue,
+            int maxNumberOfContentChanges = 100,
+            bool isPropertyChangesSupported = false) : base(queue) {
+            if (session == null) {
                 throw new ArgumentNullException("Session instance is needed for the ChangeLogStrategy, but was null");
             }
 
-            if(storage == null) {
+            if (storage == null) {
                 throw new ArgumentNullException("MetaDataStorage instance is needed for the ChangeLogStrategy, but was null");
             }
 
-            if(maxNumberOfContentChanges <= 1) {
+            if (maxNumberOfContentChanges <= 1) {
                 throw new ArgumentException("MaxNumberOfContentChanges must be greater then one");
             }
 
@@ -71,6 +79,11 @@ namespace CmisSync.Lib.Producer.ContentChange
             this.isPropertyChangesSupported = isPropertyChangesSupported;
         }
 
+        /// <summary>
+        /// Handle the specified e.
+        /// </summary>
+        /// <param name="e">The event to handle.</param>
+        /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e)
         {
             StartNextSyncEvent syncEvent = e as StartNextSyncEvent;

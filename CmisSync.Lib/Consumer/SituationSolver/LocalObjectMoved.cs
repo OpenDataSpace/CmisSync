@@ -23,10 +23,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.IO;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -39,6 +39,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectMoved"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectMoved(
             ISession session,
             IMetaDataStorage storage,
@@ -48,10 +54,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Actual local file.</param>
         /// <param name="remoteId">Corresponding remote identifier.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
             IFileSystemInfo localFile,
             IObjectId remoteId,

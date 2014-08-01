@@ -25,11 +25,11 @@ namespace CmisSync.Lib.Queueing
     using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
 
     /// <summary>
     /// Default event handler priorities.

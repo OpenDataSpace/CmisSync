@@ -37,6 +37,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta Data Storage.</param>
+        /// <param name="serverCanModifyCreationAndModificationDate">Enables the last modification date sync.</param>
         public AbstractEnhancedSolver(
             ISession session,
             IMetaDataStorage storage,
@@ -79,6 +80,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFileSystemInfo">Local filesystem info instance.</param>
         /// <param name="remoteId">Remote identifier or object.</param>
+        /// <param name="localContent">Signalizes how the local content has been modified.</param>
+        /// <param name="remoteContent">Signalizes how the remote content has been modified.</param>
         public abstract void Solve(
             IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,

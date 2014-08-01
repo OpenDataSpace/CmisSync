@@ -29,9 +29,33 @@ namespace CmisSync.Lib.Storage.FileSystem
     [Serializable]
     public class ExtendedAttributeException : IOException
     {
-        public ExtendedAttributeException() : base("ExtendedAttribute manipulation exception") { }
-        public ExtendedAttributeException(string msg) : base(msg) { }
-        public ExtendedAttributeException(string message, Exception inner) : base(message, inner) { }
-        protected ExtendedAttributeException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
+        /// </summary>
+        public ExtendedAttributeException() : base("ExtendedAttribute manipulation exception") {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
+        /// </summary>
+        /// <param name="msg">Eception message.</param>
+        public ExtendedAttributeException(string msg) : base(msg) {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
+        /// </summary>
+        /// <param name="message">Exception message.</param>
+        /// <param name="inner">Inner exception.</param>
+        public ExtendedAttributeException(string message, Exception inner) : base(message, inner) {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
+        /// </summary>
+        /// <param name="info">Serialization info.</param>
+        /// <param name="context">Streaming context.</param>
+        protected ExtendedAttributeException(SerializationInfo info, StreamingContext context) : base(info, context) {
+        }
     }
 }

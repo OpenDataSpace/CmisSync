@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CmisRepo.cs" company="GRAU DATA AG">
+// <copyright file="Repository.cs" company="GRAU DATA AG">
 //
 //   Copyright (C) 2012  Nicolas Raoul &lt;nicolas.raoul@aegif.jp&gt;
 //   Copyright (C) 2014 GRAU DATA &lt;info@graudata.com&gt;
@@ -19,6 +19,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Cmis
 {
     using System;
@@ -29,15 +30,15 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Producer.ContentChange;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DBreeze;
 
@@ -161,7 +162,7 @@ namespace CmisSync.Lib.Cmis
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class.
+        /// Initializes a new instance of the <see cref="Repository"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
@@ -170,7 +171,7 @@ namespace CmisSync.Lib.Cmis
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class.
+        /// Initializes a new instance of the <see cref="Repository"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
@@ -266,7 +267,7 @@ namespace CmisSync.Lib.Cmis
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class and releases unmanaged
+        /// Finalizes an instance of the <see cref="Repository"/> class and releases unmanaged
         /// resources and performs other cleanup operations before the is reclaimed by garbage collection.
         /// </summary>
         ~Repository()

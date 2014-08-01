@@ -37,6 +37,11 @@ namespace CmisSync.Lib.Producer.Watcher
     /// </summary>
     public class CreatedChangedDeletedFileSystemEventHandler : IDisposable
     {
+        /// <summary>
+        /// The timer. Exposed to allow testability
+        /// </summary>
+        protected Timer timer;
+
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CreatedChangedDeletedFileSystemEventHandler));
 
         private ISyncEventQueue queue;
@@ -48,13 +53,8 @@ namespace CmisSync.Lib.Producer.Watcher
         private bool disposed = false;
 
         /// <summary>
-        /// The timer. Exposed to allow testability
-        /// </summary>
-        protected Timer timer;
-
-        /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="CmisSync.Lib.Sync.Strategy.CreatedChangedDeletedFileSystemEventHandler"/> class.
+        /// <see cref="CreatedChangedDeletedFileSystemEventHandler"/> class.
         /// </summary>
         /// <param name="queue">Sync event queue.</param>
         /// <param name="storage">Meta data storage.</param>

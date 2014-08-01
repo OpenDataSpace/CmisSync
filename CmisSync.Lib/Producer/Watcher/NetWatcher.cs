@@ -24,8 +24,8 @@ namespace CmisSync.Lib.Producer.Watcher
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.FileSystem;
 
     /// <summary>
     /// .Net file system watcher.
@@ -53,7 +53,7 @@ namespace CmisSync.Lib.Producer.Watcher
         private RenamedFileSystemEventHandler renamedHandler;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.NetWatcher"/> class.
+        /// Initializes a new instance of the <see cref="NetWatcher"/> class.
         /// Takes the given file system watcher and listens for events and passes them to the given queue
         /// </summary>
         /// <param name="watcher">File System Watcher.</param>

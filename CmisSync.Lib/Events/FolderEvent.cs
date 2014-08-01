@@ -98,6 +98,16 @@ namespace CmisSync.Lib.Events
         }
 
         /// <summary>
+        /// Gets a value indicating whether this event contains a directory.
+        /// </summary>
+        /// <returns><c>true</c> if this instance is directory; otherwise, <c>false</c>.</returns>
+        public bool IsDirectory {
+            get {
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderEvent"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FolderEvent"/>.</returns>
@@ -110,16 +120,6 @@ namespace CmisSync.Lib.Events
                 this.LocalFolder != null ? this.LocalFolder.Name : string.Empty,
                 this.RemoteFolder != null ? this.RemoteFolder.Name : string.Empty,
                 this.Source != null ? this.Source : "null");
-        }
-
-        /// <summary>
-        /// Determines whether this event contains a directory.
-        /// </summary>
-        /// <returns><c>true</c></returns>
-        public bool IsDirectory {
-            get {
-                return true;
-            }
         }
     }
 }

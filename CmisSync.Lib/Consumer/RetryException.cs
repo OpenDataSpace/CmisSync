@@ -31,14 +31,14 @@ namespace CmisSync.Lib.Consumer
     public class RetryException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RetryException"/> class.
+        /// Initializes a new instance of the <see cref="RetryException"/> class.
         /// </summary>
         public RetryException() : base("Retry exception")
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RetryException"/> class.
+        /// Initializes a new instance of the <see cref="RetryException"/> class.
         /// </summary>
         /// <param name="msg">Retry message.</param>
         public RetryException(string msg) : base(msg)
@@ -46,7 +46,7 @@ namespace CmisSync.Lib.Consumer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RetryException"/> class.
+        /// Initializes a new instance of the <see cref="RetryException"/> class.
         /// </summary>
         /// <param name="message">Retry message.</param>
         /// <param name="inner">Inner exception.</param>
@@ -55,7 +55,7 @@ namespace CmisSync.Lib.Consumer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RetryException"/> class.
+        /// Initializes a new instance of the <see cref="RetryException"/> class.
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
@@ -64,4 +64,3 @@ namespace CmisSync.Lib.Consumer
         }
     }
 }
-

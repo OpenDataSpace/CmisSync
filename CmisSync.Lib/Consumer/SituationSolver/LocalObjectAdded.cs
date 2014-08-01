@@ -56,8 +56,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
         /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
         /// <param name="queue">Queue to report transmission events to.</param>
         /// <param name="manager">Activitiy manager for transmission propagations</param>
+        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectAdded(
             ISession session,
             IMetaDataStorage storage,
@@ -77,10 +80,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         }
 
         /// <summary>
-        /// Solve the situation of a local object added and should be uploaded by using the session, storage, localFile and remoteId.
+        /// Solve the specified situation by using localFile and remote object.
         /// </summary>
-        /// <param name="localFileSystemInfo">Local file.</param>
-        /// <param name="remoteId">Remote identifier.</param>
+        /// <param name="localFileSystemInfo">Local filesystem info instance.</param>
+        /// <param name="remoteId">Remote identifier or object.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
             IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
@@ -193,7 +198,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             try {
                 Guid uuid;
-                if (Guid.TryParse(parent.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out uuid)){
+                if (Guid.TryParse(parent.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out uuid)) {
                     return storage.GetObjectByGuid(uuid).RemoteObjectId;
                 }
             } catch (IOException) {

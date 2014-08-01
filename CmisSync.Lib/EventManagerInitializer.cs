@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SyncStrategyInitializer.cs" company="GRAU DATA AG">
+// <copyright file="EventManagerInitializer.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -21,18 +21,18 @@ namespace CmisSync.Lib
     using System;
 
     using CmisSync.Lib.Accumulator;
-    using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Enums;
@@ -61,23 +61,14 @@ namespace CmisSync.Lib
         private ActivityListenerAggregator activityListener;
   
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.EventManagerInitializer"/> class.
+        /// Initializes a new instance of the <see cref="EventManagerInitializer"/> class.
         /// </summary>
-        /// <param name='queue'>
-        /// The SyncEventQueue.
-        /// </param>
-        /// <param name='storage'>
-        /// Storage for Metadata.
-        /// </param>
-        /// <param name='repoInfo'>
-        /// Repo info.
-        /// </param>
-        /// <param name='activityListner'>
-        /// Listener for Sync activities.
-        /// </param>
-        /// <param name='fsFactory'>
-        /// Fs factory.
-        /// </param>
+        /// <param name='queue'>The SyncEventQueue.</param>
+        /// <param name='storage'>Storage for Metadata.</param>
+        /// <param name='repoInfo'>Repo info.</param>
+        /// <param name="filter">Filter aggregation.</param>
+        /// <param name='activityListner'>Listener for Sync activities.</param>
+        /// <param name='fsFactory'>File system factory.</param>
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>

@@ -137,7 +137,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// <summary>
         /// Sets a flag to ignores all children of this folder.
         /// </summary>
-        /// <param name="folder">Folder.</param>
+        /// <param name="folder">Folder which children should be ignored.</param>
         public static void IgnoreAllChildren(this IFolder folder) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             IList<string> devices = new List<string>();
@@ -153,7 +153,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// Indicates if all children are ignored.
         /// </summary>
         /// <returns><c>true</c>, if all children are ignored, <c>false</c> otherwise.</returns>
-        /// <param name="folder">Folder.</param>
+        /// <param name="folder">Remote cmis folder.</param>
         public static bool AreAllChildrenIgnored(this IFolder folder) {
             foreach (var ignoredProperty in folder.Properties) {
                 if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
@@ -168,6 +168,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             return false;
         }
 
+        /// <summary>
+        /// Determines if is server able to update modification date.
+        /// </summary>
+        /// <returns><c>true</c> if is server able to update modification date; otherwise, <c>false</c>.</returns>
+        /// <param name="session">Cmis session.</param>
         public static bool IsServerAbleToUpdateModificationDate(this ISession session) {
             bool result = false;
             var docType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, "cmis:document", null);
@@ -203,8 +208,8 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
 
             byte[] arr = new byte[hex.Length >> 1];
 
-            for (int i = 0; i < hex.Length >> 1; ++i) {
-                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1])));
+            for (int i = 0; i < (hex.Length >> 1); ++i) {
+                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + GetHexVal(hex[(i << 1) + 1]));
             }
 
             return arr;
@@ -212,11 +217,6 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
 
         private static int GetHexVal(char hex) {
             int val = (int)hex;
-            // For uppercase A-F letters:
-            // return val - (val < 58 ? 48 : 55);
-            // For lowercase a-f letters:
-            // return val - (val < 58 ? 48 : 87);
-            // Or the two combined, but a bit slower:
             return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
     }

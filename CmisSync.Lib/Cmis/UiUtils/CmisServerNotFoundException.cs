@@ -29,14 +29,14 @@ namespace CmisSync.Lib.Cmis.UiUtils
     public class CmisServerNotFoundException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisServerNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="CmisServerNotFoundException"/> class.
         /// </summary>
         public CmisServerNotFoundException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisServerNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="CmisServerNotFoundException"/> class.
         /// </summary>
         /// <param name="message">Exception message.</param>
         public CmisServerNotFoundException(string message) : base(message)
@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisServerNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="CmisServerNotFoundException"/> class.
         /// </summary>
         /// <param name="message">Exception message.</param>
         /// <param name="inner">Inner exception.</param>
@@ -53,7 +53,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisServerNotFoundException"/> class.
+        /// Initializes a new instance of the <see cref="CmisServerNotFoundException"/> class.
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
