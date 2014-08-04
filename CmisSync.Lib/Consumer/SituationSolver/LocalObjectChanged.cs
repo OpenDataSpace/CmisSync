@@ -33,6 +33,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -110,6 +111,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
                     } catch(Exception ex) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        if(ex.InnerException is CmisPermissionDeniedException){
+                            OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has been not been uploaded: PermissionDenied", localFile.FullName));
+                            return;
+                        }
                         throw;
                     }
 

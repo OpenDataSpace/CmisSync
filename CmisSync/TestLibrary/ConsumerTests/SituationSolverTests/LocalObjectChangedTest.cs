@@ -32,6 +32,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using DotCMIS.Client;
     using DotCMIS.Data;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -281,6 +282,54 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
                 localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
                 this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void PermissionDeniedTriggersNoOperation()
+        {
+            Guid uuid = Guid.NewGuid();
+            var modificationDate = DateTime.UtcNow;
+            var newModificationDate = modificationDate.AddHours(1);
+            var newChangeToken = "newChangeToken";
+            int fileLength = 20;
+            byte[] content = new byte[fileLength];
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
+
+            var localFile = new Mock<IFileInfo>();
+            localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
+            localFile.Setup(f => f.Length).Returns(fileLength);
+            localFile.Setup(f => f.FullName).Returns("path");
+            localFile.SetupGuid(uuid);
+            localFile.Setup(f => f.Exists).Returns(true);
+            using (var uploadedContent = new MemoryStream()) {
+                localFile.Setup(
+                    f =>
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
+
+                var mappedObject = new MappedObject(
+                    "name",
+                    "remoteId",
+                    MappedObjectType.File,
+                    "parentId",
+                    "changeToken",
+                    fileLength)
+                {
+                    Guid = uuid,
+                    LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
+                    LastLocalWriteTimeUtc = modificationDate,
+                    LastChecksum = new byte[20],
+                    ChecksumAlgorithmName = "SHA-1"
+                };
+                this.storage.AddMappedFile(mappedObject, "path");
+                var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
+                
+                remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Throws(new CmisPermissionDeniedException());
+
+                this.underTest.Solve(localFile.Object, remoteFile.Object);
+
+                this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+                remoteFile.VerifySetContentStream();
             }
         }
 
