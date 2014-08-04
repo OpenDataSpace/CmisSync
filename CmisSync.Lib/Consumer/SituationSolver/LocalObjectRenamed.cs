@@ -75,7 +75,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 try {
                     remoteObject = (remoteId as ICmisObject).Rename(localFile.Name, true) as ICmisObject;
                 } catch (CmisPermissionDeniedException) {
-                    OperationsLogger.Info(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFile.Name));
+                    OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFile.Name));
                     return;
                 }
                 OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteObject.Id, oldName, localFile.Name));
