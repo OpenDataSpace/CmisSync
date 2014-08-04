@@ -30,6 +30,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -61,6 +62,35 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void DefaultConstructorTest()
         {
             new LocalObjectRenamed(this.session.Object, this.storage.Object);
+        }
+        
+        [Test, Category("Fast"), Category("Solver")]
+        public void PermissionDeniedLeadsToNoOperation()
+        {
+            var newFolder = Mock.Of<IFolder>(
+                f =>
+                f.LastModificationDate == this.modificationDate &&
+                f.Name == this.newName &&
+                f.ChangeToken == this.newChangeToken);
+            var remoteFolder = new Mock<IFolder>();
+            remoteFolder.Setup(f => f.Name).Returns(this.oldName);
+            remoteFolder.Setup(f => f.Id).Returns(this.id);
+            remoteFolder.Setup(f => f.Rename(this.newName, true)).Throws(new CmisPermissionDeniedException());
+            var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+            localFolder.Setup(f => f.Name).Returns(this.newName);
+            var mappedFolder = new Mock<IMappedObject>();
+            mappedFolder.SetupAllProperties();
+            mappedFolder.SetupProperty(f => f.Guid, Guid.NewGuid());
+            mappedFolder.SetupProperty(f => f.Name, this.oldName);
+            mappedFolder.SetupProperty(f => f.RemoteObjectId, this.id);
+            mappedFolder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
+
+            this.storage.AddMappedFolder(mappedFolder.Object);
+
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
+
+            this.storage.Verify(f => f.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]

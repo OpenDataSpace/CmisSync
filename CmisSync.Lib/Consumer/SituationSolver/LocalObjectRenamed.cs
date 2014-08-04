@@ -30,6 +30,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -71,7 +72,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             // Rename remote object
             if(remoteId is ICmisObject) {
                 string oldName = (remoteId as ICmisObject).Name;
-                remoteObject = (remoteId as ICmisObject).Rename(localFile.Name, true) as ICmisObject;
+                try {
+                    remoteObject = (remoteId as ICmisObject).Rename(localFile.Name, true) as ICmisObject;
+                } catch (CmisPermissionDeniedException) {
+                    OperationsLogger.Info(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFile.Name));
+                    return;
+                }
                 OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteObject.Id, oldName, localFile.Name));
             } else {
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
