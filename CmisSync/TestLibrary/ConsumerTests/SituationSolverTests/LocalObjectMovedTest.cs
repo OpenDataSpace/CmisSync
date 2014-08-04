@@ -28,6 +28,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -136,6 +137,27 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
             remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", newFolderName, "targetId", "changeToken");
+        }
+        
+        [Test, Category("Fast"), Category("Solver")]
+        public void PermissionDeniedLeadsToNoOperation()
+        {
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", this.rootId);
+            var remoteTargetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", this.rootId);
+            this.session.AddRemoteObjects(remoteFolder.Object, remoteTargetFolder.Object);
+            var localTargetFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target"));
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target", "folder"));
+            localFolder.Setup(f => f.Parent).Returns(localTargetFolder.Object);
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
+            this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+            remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object)).Throws(new CmisPermissionDeniedException());
+
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
+
+            remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
+            storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
     }
 }

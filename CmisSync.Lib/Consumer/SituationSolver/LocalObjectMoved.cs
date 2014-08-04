@@ -29,6 +29,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -48,7 +49,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectMoved(
             ISession session,
             IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate)
+        {
         }
 
         /// <summary>
@@ -69,19 +71,30 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             var targetPath = localFile is IDirectoryInfo ? (localFile as IDirectoryInfo).Parent : (localFile as IFileInfo).Directory;
             var targetId = this.Storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
-            if (mappedObject.ParentId != targetId) {
-                var src = this.Session.GetObject(mappedObject.ParentId);
-                var target = this.Session.GetObject(targetId);
-                OperationsLogger.Info(string.Format("Moving remote object {2} from folder {0} to folder {1}", src.Name, target.Name, remoteId.Id));
-                remoteObject = remoteObject.Move(src, target);
+            try
+            {
+                if (mappedObject.ParentId != targetId)
+                {
+                    var src = this.Session.GetObject(mappedObject.ParentId);
+                    var target = this.Session.GetObject(targetId);
+                    OperationsLogger.Info(string.Format("Moving remote object {2} from folder {0} to folder {1}", src.Name, target.Name, remoteId.Id));
+                    remoteObject = remoteObject.Move(src, target);
+                }
+
+                if (localFile.Name != remoteObject.Name)
+                {
+                    remoteObject.Rename(localFile.Name, true);
+                }
+            } catch (CmisPermissionDeniedException)
+            {
+                OperationsLogger.Info(string.Format("Moving remote object failed {0}: Permission Denied", localFile.FullName));
+                return;
             }
 
-            if (localFile.Name != remoteObject.Name) {
-                remoteObject.Rename(localFile.Name, true);
-            }
-
-            if (this.ServerCanModifyDateTimes) {
-                if (mappedObject.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc) {
+            if (this.ServerCanModifyDateTimes)
+            {
+                if (mappedObject.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc)
+                {
                     remoteObject.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
                 }
             }
@@ -93,7 +106,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             mappedObject.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
             mappedObject.Name = remoteObject.Name;
             this.Storage.SaveMappedObject(mappedObject);
-            if (isContentChanged) {
+            if (isContentChanged)
+            {
                 throw new ArgumentException("Local file content is also changed => force crawl sync.");
             }
         }
