@@ -40,6 +40,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
     using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -98,7 +99,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
             Guid uuid = WriteOrUseUuidIfSupported(localFileSystemInfo);
 
-            ICmisObject addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
+            ICmisObject addedObject;
+            try {
+                addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
+            } catch (CmisPermissionDeniedException) {
+                OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server.", localFileSystemInfo.FullName));
+                return;
+            }
+
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
 
             MappedObject mapped = new MappedObject(

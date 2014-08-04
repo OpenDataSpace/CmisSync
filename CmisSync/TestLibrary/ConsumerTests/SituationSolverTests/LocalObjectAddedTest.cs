@@ -37,6 +37,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using DotCMIS.Client;
     using DotCMIS.Data;
     using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -326,6 +327,44 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document, false);
 
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void PermissionDeniedLeadsToNoOperation()
+        {
+            string fileName = "fileName";
+            string fileId = "fileId";
+            string parentId = "parentId";
+            string lastChangeToken = "token";
+            bool extendedAttributes = true;
+
+            string path = Path.Combine(Path.GetTempPath(), fileName);
+            this.session.Setup(s => s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == fileName),
+                It.Is<IObjectId>(o => o.Id == parentId),
+                null,
+                null,
+                null,
+                null,
+                null)).Throws(new CmisPermissionDeniedException());
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+
+            var parentDirInfo = this.SetupParentFolder(parentId);
+
+            var parents = new List<IFolder>();
+            parents.Add(Mock.Of<IFolder>(f => f.Id == parentId));
+            fileInfo.Setup(d => d.FullName).Returns(path);
+            fileInfo.Setup(d => d.Name).Returns(fileName);
+            fileInfo.Setup(d => d.Exists).Returns(true);
+            fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
+
+            fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
+            var transmissionManager = new ActiveActivitiesManager();
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.queue.Object, transmissionManager);
+            solver.Solve(fileInfo.Object, null);
+            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 
         private IDirectoryInfo SetupParentFolder(string parentId)
