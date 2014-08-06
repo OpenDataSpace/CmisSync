@@ -114,6 +114,44 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void LocalFolderChangedFetchByGuidInExtendedAttribute()
+        {
+            Guid guid = Guid.NewGuid();
+            var modificationDate = DateTime.UtcNow;
+            var localDirectory = new Mock<IDirectoryInfo>();
+            localDirectory.Setup(f => f.LastWriteTimeUtc).Returns(modificationDate.AddMinutes(1));
+            localDirectory.Setup(f => f.Exists).Returns(true);
+            localDirectory.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+
+            var mappedObject = new MappedObject(
+                "name",
+                "remoteId",
+                MappedObjectType.Folder,
+                "parentId",
+                "changeToken")
+            {
+                Guid = guid,
+                LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1)
+            };
+            this.storage.AddMappedFolder(mappedObject);
+
+            this.underTest.Solve(localDirectory.Object, Mock.Of<IFolder>());
+
+            this.storage.VerifySavedMappedObject(
+                MappedObjectType.Folder,
+                "remoteId",
+                mappedObject.Name,
+                mappedObject.ParentId,
+                mappedObject.LastChangeToken,
+                true,
+                localDirectory.Object.LastWriteTimeUtc);
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
+            this.storage.Verify(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void LocalFileModificationDateNotWritableShallNotThrow()
         {
             var modificationDate = DateTime.UtcNow;
@@ -323,7 +361,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 };
                 this.storage.AddMappedFile(mappedObject, "path");
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
-                
+
                 remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Throws(new CmisPermissionDeniedException());
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
