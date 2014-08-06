@@ -94,7 +94,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             // Match local changes to remote changes and updated them remotely
-            IMappedObject mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
+
+            IMappedObject mappedObject = null;
+            try{
+                string ea = localFileSystemInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+                Guid guid;
+                if (Guid.TryParse(ea, out guid)) {
+                    mappedObject = this.Storage.GetObjectByGuid(guid);
+                }
+            }catch(Exception){
+                //fallback to GetObjectByLocalPath
+            }
+
+            if(mappedObject == null) {
+                mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
+            }
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
                 Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
