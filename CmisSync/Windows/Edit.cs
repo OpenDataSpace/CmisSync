@@ -88,8 +88,10 @@ namespace CmisSync
             switch (type)
             {
                 case EditType.EditFolder:
-                    tab.SelectedItem = tabItemSelection;
-                    break;
+                    //  GUI workaround to remove ignore folder {{
+                    //tab.SelectedItem = tabItemSelection;
+                    //break;
+                    //  GUI workaround to remove ignore folder }}
                 case EditType.EditCredentials:
                     tab.SelectedItem = tabItemCredentials;
                     break;
@@ -239,7 +241,9 @@ namespace CmisSync
             UserControl editWPF = Application.LoadComponent(resourceLocater) as UserControl;
 
             tab = editWPF.FindName("tab") as TabControl;
-            tabItemSelection = editWPF.FindName("tabItemSelection") as TabItem;
+            //  GUI workaround to remove ignore folder {{
+            //tabItemSelection = editWPF.FindName("tabItemSelection") as TabItem;
+            //  GUI workaround to remove ignore folder }}
             tabItemCredentials = editWPF.FindName("tabItemCredentials") as TabItem;
             addressLabel = editWPF.FindName("addressLabel") as TextBlock;
             addressBox = editWPF.FindName("addressBox") as TextBox;
@@ -251,7 +255,10 @@ namespace CmisSync
             passwordHelp = editWPF.FindName("passwordHelp") as TextBlock;
             finishButton = editWPF.FindName("finishButton") as Button;
             cancelButton = editWPF.FindName("cancelButton") as Button;
-            tabItemSelection.Content = treeView;
+
+            //  GUI workaround to remove ignore folder {{
+            //tabItemSelection.Content = treeView;
+            //  GUI workaround to remove ignore folder }}
 
             addressBox.Text = Credentials.Address.ToString();
             userBox.Text = Credentials.UserName;

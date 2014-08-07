@@ -254,7 +254,9 @@ namespace CmisSync {
 
                     submenu.Add(open_localfolder_item);
                     submenu.Add(suspend_folder_item);
-                    submenu.Add(edit_folder_item);
+                    //  GUI workaround to remove ignore folder {{
+                    //submenu.Add(edit_folder_item);
+                    //  GUI workaround to remove ignore folder }}
                     submenu.Add(new SeparatorMenuItem());
                     submenu.Add(remove_folder_from_sync_item);
 
