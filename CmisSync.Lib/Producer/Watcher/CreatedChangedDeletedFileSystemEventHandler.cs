@@ -194,7 +194,7 @@ namespace CmisSync.Lib.Producer.Watcher
                             try {
                                 string fsUuid = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
                                 if (Guid.TryParse(fsUuid, out fsGuid) && fsGuid != Guid.Empty) {
-                                    var correspondingDeletion = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == fsGuid);
+                                    var correspondingDeletion = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == fsGuid && obj.Item1.ChangeType == WatcherChangeTypes.Deleted);
                                     if (correspondingDeletion != null) {
                                         this.queue.AddEvent(new FSMovedEvent(correspondingDeletion.Item1.FullPath, entry.Item1.FullPath, entry.Item4));
                                         this.events.Remove(correspondingDeletion);
@@ -227,28 +227,6 @@ namespace CmisSync.Lib.Producer.Watcher
             } catch (Exception ex) {
                 Logger.Warn(string.Format("Pop file system event produces exception => force crawl sync"), ex);
                 this.queue.AddEvent(new StartNextSyncEvent(true));
-            }
-        }
-
-        private bool MergingAddedAndDeletedEvent(FileSystemEventArgs args, bool isDirectory) {
-            lock (this.listLock) {
-                Guid fsGuid;
-                IFileSystemInfo fsInfo = isDirectory ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(args.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(args.FullPath);
-                try {
-                    string fsUuid = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                    if (Guid.TryParse(fsUuid, out fsGuid)) {
-                        var correspondingDeletion = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == fsGuid);
-                        if (correspondingDeletion != null) {
-                            this.queue.AddEvent(new FSMovedEvent(correspondingDeletion.Item1.FullPath, args.FullPath, isDirectory));
-                            this.events.Remove(correspondingDeletion);
-                            return true;
-                        }
-                    }
-
-                    return false;
-                } catch (ExtendedAttributeException) {
-                    return false;
-                }
             }
         }
     }

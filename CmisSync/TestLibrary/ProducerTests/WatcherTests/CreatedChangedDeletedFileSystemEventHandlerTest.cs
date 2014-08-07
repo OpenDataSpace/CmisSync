@@ -37,7 +37,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
     using TestUtils;
 
     [TestFixture]
-    public class CreatedChangedDeletedFileSystemEventHandlerTest
+    public class CreatedChangedDeletedFileSystemEventHandlerTest : IsTestWithConfiguredLog4Net
     {
         private static readonly string Name = "Cat";
         private static readonly string Directory = Path.GetTempPath();
@@ -204,6 +204,23 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
                 this.WaitForThreshold();
                 this.queue.VerifyThatNoOtherEventIsAddedThan<FSMovedEvent>();
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void DoesNotAggregateFolderChangedEventsToFSMovedEvent() {
+            using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                Guid guid = Guid.NewGuid();
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)true);
+                
+                this.fsFactory.AddDirectory(this.path, guid, true);
+                this.storage.AddLocalFolder(this.path, "id", guid);
+
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+
+                this.WaitForThreshold();
+                this.queue.Verify(q => q.AddEvent(It.IsAny<FSMovedEvent>()), Times.Never());
             }
         }
 
