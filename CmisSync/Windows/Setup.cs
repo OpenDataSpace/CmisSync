@@ -538,8 +538,11 @@ namespace CmisSync
                     RepoId = repository.Key
                 };
                 AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
-                asyncLoader.Load(repo);
-                loader.Add(repo.Id, asyncLoader);
+                //  GUI workaround to remove ignore folder {{
+                //asyncLoader.Load(repo);
+                //loader.Add(repo.Id, asyncLoader);
+                repo.Status = LoadingStatus.DONE;
+                //  GUI workaround to remove ignore folder }}
             }
             treeView.DataContext = repos;
             treeView.AddHandler(TreeViewItem.ExpandedEvent, new RoutedEventHandler(delegate(object sender, RoutedEventArgs e)

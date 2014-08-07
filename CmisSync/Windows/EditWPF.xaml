@@ -7,9 +7,11 @@
              mc:Ignorable="d" Height="400" Width="620">
     <Grid HorizontalAlignment="Right" Width="440" Margin="0,30,15,50">
         <TabControl x:Name="tab" HorizontalAlignment="Left" Height="320" Margin="0,0,0,0" VerticalAlignment="Top" Width="440">
+            <!--  GUI workaround to remove ignore folder
             <TabItem x:Name="tabItemSelection" Header="AddingFolder">
                 <Grid/>
             </TabItem>
+            -->
             <TabItem x:Name="tabItemCredentials" Header="Credentials">
                 <Grid>
                     <TextBlock x:Name="addressLabel" HorizontalAlignment="Left" Margin="10,40,0,0" TextWrapping="NoWrap" Text="addressLabel" VerticalAlignment="Top"/>
