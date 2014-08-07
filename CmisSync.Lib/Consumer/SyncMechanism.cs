@@ -123,6 +123,7 @@ namespace CmisSync.Lib.Consumer
                     this.DoHandle(folderEvent);
                 } catch (RetryException retry) {
                     Logger.Debug(string.Format("RetryException[{0}] thrown for event {1} => enqueue event", retry.Message, folderEvent.ToString()));
+                    folderEvent.RetryCount++;
                     this.Queue.AddEvent(folderEvent);
                 } catch (Exception) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing");

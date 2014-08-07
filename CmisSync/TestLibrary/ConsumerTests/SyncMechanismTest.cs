@@ -228,7 +228,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        public void AddingEventBackToQueueOnRetryExceptionInSolver()
+        public void AddingEventBackToQueueOnRetryExceptionInSolverAndIncrementRetryCounter()
         {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
@@ -251,6 +251,7 @@ namespace TestLibrary.ConsumerTests
             Assert.That(mechanism.Handle(folderEvent), Is.True);
 
             this.queue.Verify(q => q.AddEvent(folderEvent), Times.Once());
+            Assert.That(folderEvent.RetryCount, Is.EqualTo(1));
         }
 
         private void TriggerNonExistingSolver() {

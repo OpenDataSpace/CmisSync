@@ -38,6 +38,7 @@ namespace CmisSync.Lib.Events
         {
             this.Local = MetaDataChangeType.NONE;
             this.Remote = MetaDataChangeType.NONE;
+            this.RetryCount = 0;
         }
 
         /// <summary>
@@ -59,5 +60,13 @@ namespace CmisSync.Lib.Events
         /// The path.
         /// </value>
         public abstract string RemotePath { get; }
+
+        /// <summary>
+        /// Gets or sets the retry count.
+        /// </summary>
+        /// <value>
+        /// The retry count.
+        /// </value>
+        public int RetryCount { get; set; }
     }
 }
