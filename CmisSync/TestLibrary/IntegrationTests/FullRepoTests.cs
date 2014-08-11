@@ -831,6 +831,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
             this.repo.Run();
 
+            document.Refresh();
             document.SetContent(content + content, true, true);
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
