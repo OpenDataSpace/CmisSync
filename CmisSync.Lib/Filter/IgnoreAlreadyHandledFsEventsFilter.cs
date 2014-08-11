@@ -100,10 +100,9 @@ namespace CmisSync.Lib.Filter
                         return true;
                     } else if (path.Exists) {
                         try {
-                            Guid uuid;
-                            string ea = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                            if (ea != null && Guid.TryParse(ea, out uuid)) {
-                                return uuid == o.Guid;
+                            Guid? uuid = path.Uuid;
+                            if (uuid != null) {
+                                return (Guid)uuid == o.Guid;
                             }
                         } catch (IOException) {
                         }

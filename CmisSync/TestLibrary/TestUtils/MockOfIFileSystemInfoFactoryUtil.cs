@@ -116,6 +116,7 @@ namespace TestLibrary.TestUtils
         {
             var file = fsFactory.AddFile(path, exists);
             file.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+            file.Setup(f => f.Uuid).Returns(guid);
             return file;
         }
 
