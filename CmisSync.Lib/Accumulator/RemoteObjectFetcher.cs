@@ -160,10 +160,9 @@ namespace CmisSync.Lib.Accumulator {
             }
 
             if (path != null && path.Exists) {
-                string uuid = path.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                Guid guid;
-                if (uuid != null && Guid.TryParse(uuid, out guid)) {
-                    var mappedObject = this.storage.GetObjectByGuid(guid);
+                Guid? uuid = path.Uuid;
+                if (uuid != null) {
+                    var mappedObject = this.storage.GetObjectByGuid((Guid)uuid);
                     if(mappedObject != null) {
                         return mappedObject.RemoteObjectId;
                     } else {
