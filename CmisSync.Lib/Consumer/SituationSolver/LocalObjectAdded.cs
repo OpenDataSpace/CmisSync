@@ -174,14 +174,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             Logger.Debug(string.Format("Finished LocalObjectAdded after [{0} msec]", completewatch.ElapsedMilliseconds));
         }
 
-        private static Guid WriteOrUseUuidIfSupported(IFileSystemInfo localFile)
+        private Guid WriteOrUseUuidIfSupported(IFileSystemInfo localFile)
         {
             Guid uuid = Guid.Empty;
             if (localFile.IsExtendedAttributeAvailable())
             {
                 try {
                     string ea = localFile.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                    if (ea == null || !Guid.TryParse(ea, out uuid)) {
+                    if (ea == null || !Guid.TryParse(ea, out uuid) || this.Storage.GetObjectByGuid(uuid) != null) {
                         uuid = Guid.NewGuid();
                         localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
                     }
