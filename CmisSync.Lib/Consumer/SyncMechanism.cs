@@ -95,8 +95,8 @@ namespace CmisSync.Lib.Consumer
             this.LocalSituation = localSituation;
             this.RemoteSituation = remoteSituation;
             this.activityListener = activityListener;
-            this.Solver = solver == null ? this.CreateSolver() : solver;
             this.isServerAbleToUpdateModificationDate = isServerAbleToUpdateModificationDate;
+            this.Solver = solver == null ? this.CreateSolver() : solver;
         }
 
         /// <summary>
