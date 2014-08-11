@@ -100,7 +100,7 @@ namespace TestLibrary.FilterTests
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
             var moveEvent = Mock.Of<IFSMovedEvent>(e => e.LocalPath == path && e.OldPath == oldPath && e.Type == WatcherChangeTypes.Renamed && e.IsDirectory == true);
-            var dirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == path && d.Exists == true && d.GetExtendedAttribute(It.IsAny<string>()) == guid.ToString());
+            var dirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == path && d.Exists == true && d.Uuid == guid);
             fsFactory.AddIDirectoryInfo(dirInfo);
             storage.AddMappedFolder(new MappedObject("path", "remoteId", MappedObjectType.Folder, null, null) { Guid = guid }, path);
             var filter = new IgnoreAlreadyHandledFsEventsFilter(storage.Object, fsFactory.Object);
