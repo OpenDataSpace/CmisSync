@@ -338,6 +338,37 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
+        public void OneLocalFileCopied()
+        {
+            var uuid = Guid.NewGuid();
+            var oldFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "old"), uuid);
+            oldFile.Setup(f => f.LastWriteTimeUtc).Returns(this.lastLocalWriteTime);
+            var newFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "new"), uuid);
+
+            var remoteSubFolder = MockOfIDocumentUtil.CreateRemoteDocumentMock("streamId", "oldId", oldFile.Object.Name, this.remoteFolder.Object, changeToken: "oldChange");
+            var storedFolder = new MappedObject(oldFile.Object.Name, "oldId", MappedObjectType.File, this.remoteRootId, "oldChange") {
+                Guid = uuid,
+                LastLocalWriteTimeUtc = this.lastLocalWriteTime
+            };
+            this.storage.SaveMappedObject(storedFolder);
+            this.remoteFolder.SetupDescendants(remoteSubFolder.Object);
+            this.localFolder.SetupFiles(newFile.Object, oldFile.Object);
+            
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(
+                q =>
+                q.AddEvent(
+                It.Is<FileEvent>(
+                e =>
+                e.LocalFile.Equals(newFile.Object) &&
+                e.Local.Equals(MetaDataChangeType.CREATED))),
+                Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
+        }
+
+        [Test, Category("Fast")]
         public void NoChangeOnExistingFileAndFolderCreatesNoEventsInQueue()
         {
             DateTime changeTime = DateTime.UtcNow;

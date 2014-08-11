@@ -94,9 +94,12 @@ namespace TestLibrary.TestUtils
             }
         }
 
-        public static void AddIFileInfo(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo fileInfo)
+        public static void AddIFileInfo(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo fileInfo, bool exists = true)
         {
             fsFactory.Setup(f => f.CreateFileInfo(fileInfo.FullName)).Returns(fileInfo);
+            if(exists){
+                fsFactory.Setup(f => f.IsDirectory(fileInfo.FullName)).Returns(false);
+            }
         }
 
         public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true)
@@ -105,7 +108,7 @@ namespace TestLibrary.TestUtils
             file.Setup(f => f.Name).Returns(Path.GetFileName(path));
             file.Setup(f => f.FullName).Returns(path);
             file.Setup(f => f.Exists).Returns(exists);
-            fsFactory.AddIFileInfo(file.Object);
+            fsFactory.AddIFileInfo(file.Object, exists);
             return file;
         }
 
