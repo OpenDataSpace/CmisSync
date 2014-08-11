@@ -55,9 +55,9 @@ namespace TestLibrary.IntegrationTests
     using System.Threading;
 
     using CmisSync.Lib;
-    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
@@ -249,7 +249,9 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
-            using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create));
+            using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create)) {
+            }
+
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(false, null, true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
 
@@ -355,6 +357,43 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
+        [Test, Category("Slow")]
+        public void OneLocalFileCreatedAndModificationDateIsSynced()
+        {
+            if (!this.session.IsServerAbleToUpdateModificationDate()) {
+                Assert.Ignore("Server does not support the synchronization of modification dates");
+            }
+
+            string fileName = "file";
+            string content = "content";
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(filePath);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(content);
+            }
+
+            DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
+            fileInfo.LastWriteTimeUtc = modificationDate;
+            modificationDate = fileInfo.LastWriteTimeUtc;
+
+            DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
+            fileInfo.CreationTimeUtc = creationDate;
+            creationDate = fileInfo.CreationTimeUtc;
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
+            var doc = child as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
+            Assert.That(doc.LastModificationDate, Is.EqualTo(modificationDate), "Modification date is not equal");
+            Assert.That(doc.CreationDate, Is.EqualTo(creationDate), "Creation Date is not equal");
+            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
+        }
+
         [Test, Category("Slow"), Category("Erratic")]
         public void OneLocalFileRenamed()
         {
@@ -439,6 +478,7 @@ namespace TestLibrary.IntegrationTests
 
             // Stabilize test by waiting for all delayed fs events
             Thread.Sleep(500);
+
             // Process the delayed fs events
             this.repo.Run();
 
@@ -670,6 +710,7 @@ namespace TestLibrary.IntegrationTests
             using (var filestream = this.localRootDir.GetFiles().First().Open(FileMode.Truncate, FileAccess.Write, FileShare.None)) {
                 filestream.Write(newContent, 0, newContent.Length);
             }
+
             DateTime modificationDate = this.localRootDir.GetFiles().First().LastWriteTimeUtc;
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
@@ -821,6 +862,7 @@ namespace TestLibrary.IntegrationTests
 
             // Wait for all fs change events
             Thread.Sleep(500);
+
             // Stabilize sync process to process all delayed fs events
             this.repo.Run();
 

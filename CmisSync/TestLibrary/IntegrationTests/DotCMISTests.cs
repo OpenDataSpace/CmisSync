@@ -466,6 +466,47 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void CreateDocumentWithCreationAndModificationDate(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            if (!session.IsServerAbleToUpdateModificationDate()) {
+                Assert.Ignore("Server is not able to sync modification dates");
+            }
+            string filename = "name";
+            IDocument doc;
+            try {
+                doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc != null) {
+                    doc.Delete(true);
+                }
+            } catch (CmisObjectNotFoundException)
+            {
+            }
+
+            DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
+            DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.CreationDate, creationDate);
+            properties.Add(PropertyIds.LastModificationDate, modificationDate);
+
+            doc = folder.CreateDocument(properties, null, null);
+
+            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.EqualTo(0), "Wrong modification date");
+            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.EqualTo(0), "Wrong creation date");
+            doc.DeleteAllVersions();
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void EnsureFileNameStaysEqualWhileUploading(
             string canonical_name,
             string localPath,
@@ -698,6 +739,7 @@ namespace TestLibrary.IntegrationTests
             filters.Add("cmis:contentStreamFileName");
             filters.Add("cmis:contentStreamLength");
             filters.Add("cmis:lastModificationDate");
+            filters.Add("cmis:creationDate");
             filters.Add("cmis:path");
             filters.Add("cmis:changeToken");
             filters.Add(PropertyIds.SecondaryObjectTypeIds);
