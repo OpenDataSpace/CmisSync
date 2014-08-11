@@ -285,6 +285,27 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void LocalFolderAddedWithAlreadyExistingGuid()
+        {
+            string folderName = "a";
+
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+            bool extendedAttributes = true;
+            Mock<IFolder> futureFolder;
+            Guid guid = Guid.NewGuid();
+            this.storage.AddLocalFile("unimportant", "unimportant", guid);
+
+            var dirInfo = this.RunSolveFolder(folderName, id, parentId, lastChangeToken, extendedAttributes, out futureFolder, guid);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
+            this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
+            dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k == MappedObject.ExtendedAttributeKey), It.Is<string>(v => !v.Equals(guid.ToString())), true), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(RetryException))]
         public void LocalFileIsUsedByAnotherProcess() {
             string fileName = "fileName";
@@ -449,7 +470,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
         }
 
-        private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes, out Mock<IFolder> folderMock)
+        private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes, out Mock<IFolder> folderMock, Guid? existingGuid = null)
         {
             string path = Path.Combine(Path.GetTempPath(), folderName);
             var futureRemoteFolder = Mock.Of<IFolder>(
@@ -477,6 +498,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             dirInfo.Setup(d => d.Name).Returns(folderName);
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
+            if(existingGuid != null) {
+                dirInfo.Setup(d => d.GetExtendedAttribute(It.IsAny<string>())).Returns(existingGuid.ToString());
+            }
 
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
