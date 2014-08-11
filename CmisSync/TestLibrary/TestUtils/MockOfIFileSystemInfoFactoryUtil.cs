@@ -153,6 +153,7 @@ namespace TestLibrary.TestUtils
 
         public static void SetupGuid(this Mock<IFileSystemInfo> fileSystemInfo, Guid uuid) {
             fileSystemInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            fileSystemInfo.Setup(f => f.Uuid).Returns(uuid);
         }
 
         public static void SetupLastWriteTimeUtc(this Mock<IFileInfo> fileInfo, DateTime lastWriteTimeUtc) {
@@ -161,6 +162,7 @@ namespace TestLibrary.TestUtils
 
         public static void SetupGuid(this Mock<IFileInfo> fileInfo, Guid uuid) {
             fileInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            fileInfo.Setup(f => f.Uuid).Returns(uuid);
         }
 
         public static void SetupLastWriteTimeUtc(this Mock<IDirectoryInfo> dirInfo, DateTime lastWriteTimeUtc) {
@@ -169,6 +171,7 @@ namespace TestLibrary.TestUtils
 
         public static void SetupGuid(this Mock<IDirectoryInfo> dirInfo, Guid uuid) {
             dirInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            dirInfo.Setup(f => f.Uuid).Returns(uuid);
         }
 
         public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileSystemInfo> fsInfo) {
