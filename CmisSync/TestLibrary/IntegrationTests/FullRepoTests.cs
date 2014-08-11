@@ -389,8 +389,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            Assert.That(doc.LastModificationDate, Is.EqualTo(modificationDate), "Modification date is not equal");
-            Assert.That(doc.CreationDate, Is.EqualTo(creationDate), "Creation Date is not equal");
+            Assert.That((DateTime)doc.LastModificationDate - modificationDate, Is.EqualTo(0), "Modification date is not equal");
+            Assert.That((DateTime)doc.CreationDate - creationDate, Is.EqualTo(0), "Creation Date is not equal");
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
