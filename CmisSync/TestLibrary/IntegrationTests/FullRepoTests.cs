@@ -579,6 +579,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             content += content;
+            doc.Refresh();
             doc.SetContent(content);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
@@ -869,6 +870,7 @@ namespace TestLibrary.IntegrationTests
             // Stabilize sync process to process all delayed fs events
             this.repo.Run();
 
+            folder.Refresh();
             folder.Rename(newFolderName);
             this.localRootDir.GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newFolderName));
 
