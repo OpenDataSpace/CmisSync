@@ -28,6 +28,7 @@ namespace CmisSync.Lib.Storage.FileSystem
     public abstract class FileSystemInfoWrapper : IFileSystemInfo
     {
         private static IExtendedAttributeReader reader = null;
+        private static readonly string ExtendedAttributeKey = "DSS-UUID";
 
         private FileSystemInfo original;
 
@@ -111,6 +112,22 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <value>The attributes.</value>
         public FileAttributes Attributes {
             get { return this.original.Attributes; }
+        }
+
+        public Guid? Uuid {
+            get {
+                Guid uuid;
+                string storedValue = this.GetExtendedAttribute(ExtendedAttributeKey);
+                if (storedValue != null && Guid.TryParse(storedValue, out uuid)) {
+                    return uuid;
+                } else {
+                    return null;
+                }
+            }
+
+            set {
+                this.SetExtendedAttribute(ExtendedAttributeKey, value == null ? null : value.ToString(), true);
+            }
         }
 
         /// <summary>
