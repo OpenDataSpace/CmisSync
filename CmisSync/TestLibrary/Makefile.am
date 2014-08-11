@@ -33,6 +33,7 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectMovedRemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \

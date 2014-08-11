@@ -185,6 +185,7 @@
     <Compile Include="CmisTests\ConvenienceExtendersTests\CmisConvenienceExtendersTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectChangedTest.cs" />
     <Compile Include="StorageTests\DataBaseTests\EntitiesTests\IFileConvenienceExtendersTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectMovedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
