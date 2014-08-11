@@ -553,6 +553,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             content += content;
+            doc.Refresh();
             doc.SetContent(content);
 
             Thread.Sleep(5000);
@@ -798,6 +799,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
+            document.Refresh();
             document.SetContent(content + content, true, true);
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
