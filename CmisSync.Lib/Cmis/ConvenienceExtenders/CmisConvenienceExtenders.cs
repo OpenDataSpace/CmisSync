@@ -116,10 +116,12 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             ContentStream contentStream = new ContentStream();
             contentStream.FileName = doc.Name;
             contentStream.MimeType = MimeType.GetMIMEType(doc.Name);
-            contentStream.Length = content.Length;
-            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
-
-            return doc.SetContentStream(contentStream, overwrite, refresh);
+            byte[] c = Encoding.UTF8.GetBytes(content);
+            contentStream.Length = c.LongLength;
+            using (var stream = new MemoryStream(c)) {
+                contentStream.Stream = stream;
+                return doc.SetContentStream(contentStream, overwrite, refresh);
+            }
         }
 
         /// <summary>
