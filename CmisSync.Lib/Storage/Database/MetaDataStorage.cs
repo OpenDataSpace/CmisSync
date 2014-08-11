@@ -244,13 +244,24 @@ namespace CmisSync.Lib.Storage.Database
         /// <param name='obj'>
         /// The MappedObject instance.
         /// </param>
+        /// <exception cref="DublicateGuidException">Is thrown when guid already in database</exception>
         public void SaveMappedObject(IMappedObject obj)
         {
             string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
+                var byteGuid = obj.Guid.ToByteArray();
+                var row = tran.Select<byte[], string>(MappedObjectsGuidsTable, byteGuid);
+                if(row.Exists && row.Value != id) {
+                    tran.Rollback();
+                    throw new DublicateGuidException(string.Format("An entry with Guid {0} already exists", obj.Guid));
+                }
+
                 tran.Insert<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id, obj as MappedObject);
-                tran.Insert<byte[], string>(MappedObjectsGuidsTable, obj.Guid.ToByteArray(), id);
+                if(!obj.Guid.Equals(Guid.Empty)) {
+                    tran.Insert<byte[], string>(MappedObjectsGuidsTable, obj.Guid.ToByteArray(), id);
+                }
+
                 tran.Commit();
             }
         }
@@ -358,10 +369,10 @@ namespace CmisSync.Lib.Storage.Database
         }
 
         /// <summary>
-        ///  Gets the children of the given parent object. 
+        ///  Gets the children of the given parent object.
         /// </summary>
         /// <returns>
-        ///  The saved children. 
+        ///  The saved children.
         /// </returns>
         /// <param name='parent'>
         ///  Parent of the children.
