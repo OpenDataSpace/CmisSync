@@ -23,6 +23,7 @@ namespace CmisSync.Lib.Queueing
     public class DelayRetryAndNextSyncEventHandler : ReportingSyncEventHandler
     {
         private bool triggerSyncWhenQueueEmpty = false;
+        private bool triggerFullSync = false;
 
         public DelayRetryAndNextSyncEventHandler(ISyncEventQueue queue) : base(queue)
         {
@@ -33,11 +34,12 @@ namespace CmisSync.Lib.Queueing
             var startNextSyncEvent = e as StartNextSyncEvent;
             if(startNextSyncEvent != null) {
                 triggerSyncWhenQueueEmpty = true;
+                triggerFullSync = startNextSyncEvent.FullSyncRequested;
                 hasBeenHandled = true;
             }
 
             if(Queue.IsEmpty && triggerSyncWhenQueueEmpty) {
-                Queue.AddEvent(new StartNextSyncEvent());
+                Queue.AddEvent(new StartNextSyncEvent(triggerFullSync));
                 triggerSyncWhenQueueEmpty = false;
             }
 

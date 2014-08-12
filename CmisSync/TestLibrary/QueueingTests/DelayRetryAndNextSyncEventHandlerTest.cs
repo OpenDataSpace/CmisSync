@@ -80,6 +80,18 @@ namespace TestLibrary.QueueingTests
             Assert.False(underTest.Handle(Mock.Of<ISyncEvent>()));
             queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == false)), Times.Once());
         }
+
+        [Test, Category("Fast")]
+        public void FullSyncFlagIsStored() {
+            var queue = new Mock<ISyncEventQueue>();
+            var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
+            queue.Setup(q => q.IsEmpty).Returns(true);
+
+            Assert.True(underTest.Handle(new StartNextSyncEvent(true)));
+
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
+
+        }
     }
 }
 
