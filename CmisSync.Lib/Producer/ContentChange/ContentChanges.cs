@@ -45,7 +45,6 @@ namespace CmisSync.Lib.Producer.ContentChange
         private int maxNumberOfContentChanges;
         private IChangeEvent lastChange;
         private bool isPropertyChangesSupported;
-        private bool dropNextSyncEvents = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ContentChanges"/> class.
@@ -102,14 +101,8 @@ namespace CmisSync.Lib.Producer.ContentChange
                 }
                 else
                 {
-                    if (this.dropNextSyncEvents) {
-                        return true;
-                    }
-
                     Logger.Debug("Starting ContentChange Sync");
                     bool result = this.StartSync();
-                    this.dropNextSyncEvents = true;
-                    Queue.AddEvent(new ResetStartNextSyncFilterEvent());
                     return result;
                 }
             }
@@ -122,11 +115,6 @@ namespace CmisSync.Lib.Producer.ContentChange
                 {
                     this.storage.ChangeLogToken = lastTokenOnServer;
                 }
-            }
-
-            if(e is ResetStartNextSyncFilterEvent) {
-                this.dropNextSyncEvents = false;
-                return true;
             }
 
             return false;
@@ -223,13 +211,6 @@ namespace CmisSync.Lib.Producer.ContentChange
                 lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
             }
             while (!lastTokenOnServer.Equals(lastTokenOnClient));
-        }
-
-        private class ResetStartNextSyncFilterEvent : ISyncEvent, IRemoveFromLoggingEvent {
-            public override string ToString()
-            {
-                return string.Format("[ResetStartNextSyncFilterEvent]");
-            }
         }
     }
 }

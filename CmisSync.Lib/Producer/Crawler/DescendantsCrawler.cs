@@ -48,7 +48,6 @@ namespace CmisSync.Lib.Producer.Crawler
         private IFileSystemInfoFactory fsFactory;
         private IFilterAggregator filter;
         private IActivityListener activityListener;
-        private bool dropNextSyncEvents = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescendantsCrawler"/> class.
@@ -189,26 +188,12 @@ namespace CmisSync.Lib.Producer.Crawler
         public override bool Handle(ISyncEvent e)
         {
             if(e is StartNextSyncEvent) {
-                if (this.dropNextSyncEvents) {
-                    return true;
-                }
-
                 Logger.Debug("Starting DecendantsCrawlSync upon " + e);
-                try {
-                    using (var activity = new ActivityListenerResource(this.activityListener)) {
-                        this.CrawlDescendants();
-                    }
-                } finally {
-                    this.dropNextSyncEvents = true;
-                    Queue.AddEvent(new ResetStartNextCrawlSyncFilterEvent());
+                using (var activity = new ActivityListenerResource(this.activityListener)) {
+                    this.CrawlDescendants();
                 }
 
                 this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
-                return true;
-            }
-
-            if(e is ResetStartNextCrawlSyncFilterEvent) {
-                this.dropNextSyncEvents = false;
                 return true;
             }
 
@@ -508,13 +493,6 @@ namespace CmisSync.Lib.Producer.Crawler
             foreach(var id in mutualIds) {
                 removedLocalObjects.Remove(id);
                 removedRemoteObjects.Remove(id);
-            }
-        }
-
-        private class ResetStartNextCrawlSyncFilterEvent : ISyncEvent, IRemoveFromLoggingEvent {
-            public override string ToString()
-            {
-                return string.Format("[ResetStartNextCrawlSyncFilterEvent]");
             }
         }
     }
