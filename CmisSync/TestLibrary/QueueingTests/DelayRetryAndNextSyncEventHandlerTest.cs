@@ -55,14 +55,12 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void TriggerNextSyncEventWhenQueueEmpty() {
+        public void DoNotDelayStartSyncWhenQueueEmpty() {
             var queue = new Mock<ISyncEventQueue>();
             queue.Setup(q => q.IsEmpty).Returns(true);
             var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
 
-            Assert.True(underTest.Handle(new StartNextSyncEvent()));
-
-            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == false)));
+            Assert.False(underTest.Handle(new StartNextSyncEvent()));
         }
 
         [Test, Category("Fast")]
@@ -85,9 +83,12 @@ namespace TestLibrary.QueueingTests
         public void FullSyncFlagIsStored() {
             var queue = new Mock<ISyncEventQueue>();
             var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
-            queue.Setup(q => q.IsEmpty).Returns(true);
+            queue.Setup(q => q.IsEmpty).Returns(false);
 
             Assert.True(underTest.Handle(new StartNextSyncEvent(true)));
+
+            queue.Setup(q => q.IsEmpty).Returns(true);
+            Assert.True(underTest.Handle(new StartNextSyncEvent(false)));
 
             queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
         }

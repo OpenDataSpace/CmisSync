@@ -56,8 +56,16 @@ namespace CmisSync.Lib.Queueing
 
             var startNextSyncEvent = e as StartNextSyncEvent;
             if(startNextSyncEvent != null) {
+                //Fallthrough case
+                if(this.Queue.IsEmpty && !triggerSyncWhenQueueEmpty && retryEvents.Count == 0){
+                    return false;
+                }
+
                 this.triggerSyncWhenQueueEmpty = true;
-                this.triggerFullSync = startNextSyncEvent.FullSyncRequested;
+                if(!this.triggerFullSync) {
+                    this.triggerFullSync = startNextSyncEvent.FullSyncRequested;
+                }
+
                 hasBeenHandled = true;
             }
 
