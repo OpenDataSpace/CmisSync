@@ -90,7 +90,41 @@ namespace TestLibrary.QueueingTests
             Assert.True(underTest.Handle(new StartNextSyncEvent(true)));
 
             queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
+        }
 
+        [Test, Category("Fast")]
+        public void RetryEventsAreSavedAndReinsertedAfterNonFullSyncRequested() {
+            var queue = new Mock<ISyncEventQueue>();
+            var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
+            queue.Setup(q => q.IsEmpty).Returns(true);
+
+            var syncEvent1 = new FileEvent(Mock.Of<IFileInfo>()) { RetryCount = 1 };
+            var syncEvent2 = new FileEvent(Mock.Of<IFileInfo>()) { RetryCount = 1 };
+
+            Assert.True(underTest.Handle(syncEvent1));
+            Assert.True(underTest.Handle(syncEvent2));
+            queue.Verify(q => q.AddEvent(syncEvent1), Times.Never());
+            queue.Verify(q => q.AddEvent(syncEvent2), Times.Never());
+
+            Assert.True(underTest.Handle(new StartNextSyncEvent(false)));
+
+            queue.Verify(q => q.AddEvent(syncEvent1), Times.Once());
+            queue.Verify(q => q.AddEvent(syncEvent2), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void RetryEventsAreDroppedWhenFullSyncRequested() {
+            var queue = new Mock<ISyncEventQueue>();
+            var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
+            queue.Setup(q => q.IsEmpty).Returns(true);
+
+            var syncEvent1 = new FileEvent(Mock.Of<IFileInfo>()) { RetryCount = 1 };
+
+            Assert.True(underTest.Handle(syncEvent1));
+
+            Assert.True(underTest.Handle(new StartNextSyncEvent(true)));
+
+            queue.Verify(q => q.AddEvent(syncEvent1), Times.Never());
         }
     }
 }

@@ -18,12 +18,15 @@
 //-----------------------------------------------------------------------
 namespace CmisSync.Lib.Queueing
 {
+    using System.Collections.Generic;
+
     using CmisSync.Lib.Events;
 
     public class DelayRetryAndNextSyncEventHandler : ReportingSyncEventHandler
     {
         private bool triggerSyncWhenQueueEmpty = false;
         private bool triggerFullSync = false;
+        private List<AbstractFolderEvent> retryEvents = new List<AbstractFolderEvent>();
 
         public DelayRetryAndNextSyncEventHandler(ISyncEventQueue queue) : base(queue)
         {
@@ -31,6 +34,7 @@ namespace CmisSync.Lib.Queueing
 
         public override bool Handle(ISyncEvent e) {
             bool hasBeenHandled = false;
+
             var startNextSyncEvent = e as StartNextSyncEvent;
             if(startNextSyncEvent != null) {
                 triggerSyncWhenQueueEmpty = true;
@@ -38,7 +42,21 @@ namespace CmisSync.Lib.Queueing
                 hasBeenHandled = true;
             }
 
+            var fileOrFolderEvent = e as AbstractFolderEvent;
+            if(fileOrFolderEvent != null && fileOrFolderEvent.RetryCount > 0) {
+                retryEvents.Add(fileOrFolderEvent);
+                hasBeenHandled = true;
+            }
+
             if(Queue.IsEmpty && triggerSyncWhenQueueEmpty) {
+                if(triggerFullSync) {
+                    this.retryEvents.Clear();
+                }
+
+                foreach(var storedRetryEvent in retryEvents) {
+                    Queue.AddEvent(storedRetryEvent);
+                }
+
                 Queue.AddEvent(new StartNextSyncEvent(triggerFullSync));
                 triggerSyncWhenQueueEmpty = false;
             }
