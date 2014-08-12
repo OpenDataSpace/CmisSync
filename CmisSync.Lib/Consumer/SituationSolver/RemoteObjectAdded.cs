@@ -39,6 +39,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     public class RemoteObjectAdded : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
@@ -147,7 +148,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), false);
                 try {
                     cacheFile.MoveTo(file.FullName);
-                } catch (IOException) {
+                } catch (IOException e) {
                     file.Refresh();
                     if (file.Exists) {
                         IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
@@ -155,13 +156,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         targetFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), true);
                         conflictFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
                     } else {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = e });
                         throw;
                     }
                 }
 
                 file.Refresh();
                 if (remoteDoc.LastModificationDate != null) {
-                    file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
+                    try {
+                        file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
+                    } catch(IOException e) {
+                        Logger.Debug("Cannot set last modification date", e);
+                    }
                 }
 
                 MappedObject mappedObject = new MappedObject(
