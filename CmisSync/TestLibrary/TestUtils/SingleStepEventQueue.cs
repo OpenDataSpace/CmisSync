@@ -49,6 +49,12 @@ namespace TestLibrary
             }
         }
 
+        public bool IsEmpty {
+            get {
+                return this.Queue.Count == 0;
+            }
+        }
+
         public bool SwallowExceptions { get; set;}
 
         public void AddEvent(ISyncEvent e) {

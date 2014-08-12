@@ -70,6 +70,16 @@ namespace CmisSync.Lib.Queueing
         }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is empty.
+        /// </summary>
+        /// <value><c>true</c> if this instance is empty; otherwise, <c>false</c>.</value>
+        public bool IsEmpty {
+            get {
+                return this.queue.Count == 0;
+            }
+        }
+
+        /// <summary>
         /// Adds the event to the queue.
         /// </summary>
         /// <param name="newEvent">New event.</param>
