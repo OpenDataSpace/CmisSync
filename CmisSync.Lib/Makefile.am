@@ -45,6 +45,7 @@ SOURCES =  \
 	Consumer/SituationSolver/LocalObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectMovedRemoteObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/NothingToDoSolver.cs \

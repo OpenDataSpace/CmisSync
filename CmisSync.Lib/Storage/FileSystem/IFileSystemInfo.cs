@@ -64,6 +64,12 @@ namespace CmisSync.Lib.Storage.FileSystem
         FileAttributes Attributes { get; }
 
         /// <summary>
+        /// Gets or sets the UUID.
+        /// </summary>
+        /// <value>The UUID.</value>
+        Guid? Uuid { get; set; }
+
+        /// <summary>
         /// Refresh the loaded information of this instance.
         /// </summary>
         void Refresh();

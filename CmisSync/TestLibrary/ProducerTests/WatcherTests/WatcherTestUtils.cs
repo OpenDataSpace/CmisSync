@@ -401,11 +401,11 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
 
             if (AreExtendedAttributesAvailable(this.localFile.FullName)) {
-                new FileInfoWrapper(this.localFile).SetExtendedAttribute(MappedObject.ExtendedAttributeKey, this.uuid.ToString());
+                new FileInfoWrapper(this.localFile).Uuid = this.uuid;
             }
 
             if (AreExtendedAttributesAvailable(this.localSubFolder.FullName)) {
-                new DirectoryInfoWrapper(this.localSubFolder).SetExtendedAttribute(MappedObject.ExtendedAttributeKey, this.uuid.ToString());
+                new DirectoryInfoWrapper(this.localSubFolder).Uuid = this.uuid;
             }
 
             this.queue = new Mock<ISyncEventQueue>();

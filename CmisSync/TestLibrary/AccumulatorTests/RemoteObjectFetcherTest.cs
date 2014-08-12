@@ -138,7 +138,7 @@ namespace TestLibrary.AccumulatorTests
             storage.AddLocalFile(Path, Id, Uuid);
 
             var fileInfoMock = new Mock<IFileInfo>();
-            fileInfoMock.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(Uuid.ToString());
+            fileInfoMock.Setup(f => f.Uuid).Returns(Uuid);
             fileInfoMock.Setup(f => f.Exists).Returns(true);
             var fileEvent = new FileEvent(fileInfoMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
@@ -205,7 +205,7 @@ namespace TestLibrary.AccumulatorTests
 
             var dirMock = new Mock<IDirectoryInfo>();
             dirMock.Setup(d => d.Exists).Returns(true);
-            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Uuid.ToString());
+            dirMock.Setup(d => d.Uuid).Returns(Uuid);
 
             var folderEvent = new FolderEvent(dirMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
@@ -245,7 +245,7 @@ namespace TestLibrary.AccumulatorTests
 
             var dirMock = new Mock<IDirectoryInfo>();
             dirMock.Setup(d => d.Exists).Returns(true);
-            dirMock.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(Uuid.ToString());
+            dirMock.Setup(d => d.Uuid).Returns(Uuid);
             var crawlEvent = new CrawlRequestEvent(localFolder: dirMock.Object, remoteFolder: null);
 
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);

@@ -208,7 +208,6 @@ namespace CmisSync.Lib.Queueing
                         Logger.Error("Exception in EventHandler");
                         Logger.Error("Event was: " + syncEvent);
                         Logger.Error(e);
-                        Logger.Error(e.StackTrace);
                     }
                 }
             }

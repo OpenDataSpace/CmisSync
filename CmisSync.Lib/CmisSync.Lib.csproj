@@ -224,13 +224,14 @@
     <Compile Include="Storage\Database\Entities\IFileConvenienceExtenders.cs" />
     <Compile Include="Storage\Database\DublicateGuidException.cs" />
     <Compile Include="Queueing\DelayRetryAndNextSyncEventHandler.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectMoved.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="true" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="True" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
