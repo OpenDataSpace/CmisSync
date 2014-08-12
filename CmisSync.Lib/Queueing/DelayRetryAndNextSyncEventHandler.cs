@@ -18,10 +18,30 @@
 //-----------------------------------------------------------------------
 namespace CmisSync.Lib.Queueing
 {
-    public class DelayRetryAndNextSyncEventHandler
+    using CmisSync.Lib.Events;
+
+    public class DelayRetryAndNextSyncEventHandler : ReportingSyncEventHandler
     {
-        public DelayRetryAndNextSyncEventHandler()
+        private bool triggerSyncWhenQueueEmpty = false;
+
+        public DelayRetryAndNextSyncEventHandler(ISyncEventQueue queue) : base(queue)
         {
+        }
+
+        public override bool Handle(ISyncEvent e) {
+            bool hasBeenHandled = false;
+            var startNextSyncEvent = e as StartNextSyncEvent;
+            if(startNextSyncEvent != null) {
+                triggerSyncWhenQueueEmpty = true;
+                hasBeenHandled = true;
+            }
+
+            if(Queue.IsEmpty && triggerSyncWhenQueueEmpty) {
+                Queue.AddEvent(new StartNextSyncEvent());
+                triggerSyncWhenQueueEmpty = false;
+            }
+
+            return hasBeenHandled;
         }
     }
 }

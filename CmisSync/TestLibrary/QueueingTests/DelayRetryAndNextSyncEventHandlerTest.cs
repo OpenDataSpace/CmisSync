@@ -18,7 +18,11 @@
 //-----------------------------------------------------------------------
 namespace TestLibrary.QueueingTests
 {
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.FileSystem;
+
+    using Moq;
 
     using NUnit.Framework;
 
@@ -27,7 +31,54 @@ namespace TestLibrary.QueueingTests
     {
         [Test, Category("Fast")]
         public void ConstructorTest() {
-            var underTest = new DelayRetryAndNextSyncEventHandler();
+            var underTest = new DelayRetryAndNextSyncEventHandler(Mock.Of<ISyncEventQueue>());
+        }
+
+        [Test, Category("Fast")]
+        public void DoesNotHandleNonRetryEvent() {
+            var underTest = new DelayRetryAndNextSyncEventHandler(Mock.Of<ISyncEventQueue>());
+            var fileEvent = new FileEvent(Mock.Of<IFileInfo>()){ RetryCount = 0 };
+            Assert.False(underTest.Handle(fileEvent));
+        }
+
+        [Test, Category("Fast")]
+        public void DelaysNextSyncEventUntilQueueEmpty() {
+            var queue = new Mock<ISyncEventQueue>();
+            var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
+            queue.Setup(q => q.IsEmpty).Returns(false);
+
+            Assert.True(underTest.Handle(new StartNextSyncEvent()));
+            queue.Setup(q => q.IsEmpty).Returns(true);
+
+            Assert.False(underTest.Handle(Mock.Of<ISyncEvent>()));
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == false)));
+        }
+
+        [Test, Category("Fast")]
+        public void TriggerNextSyncEventWhenQueueEmpty() {
+            var queue = new Mock<ISyncEventQueue>();
+            queue.Setup(q => q.IsEmpty).Returns(true);
+            var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
+
+            Assert.True(underTest.Handle(new StartNextSyncEvent()));
+
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == false)));
+        }
+
+        [Test, Category("Fast")]
+        public void ResetNextSyncFlagAfterRequest() {
+            var queue = new Mock<ISyncEventQueue>();
+            var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
+            queue.Setup(q => q.IsEmpty).Returns(false);
+
+            Assert.True(underTest.Handle(new StartNextSyncEvent()));
+            queue.Setup(q => q.IsEmpty).Returns(true);
+
+            Assert.False(underTest.Handle(Mock.Of<ISyncEvent>()));
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == false)), Times.Once());
+
+            Assert.False(underTest.Handle(Mock.Of<ISyncEvent>()));
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == false)), Times.Once());
         }
     }
 }
