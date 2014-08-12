@@ -40,6 +40,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// </summary>
     public class RemoteObjectChanged : AbstractEnhancedSolver
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectChanged));
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         private ISyncEventQueue queue;
@@ -95,7 +96,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 DateTime? lastModified = remoteFolder.LastModificationDate;
                 obj.LastChangeToken = remoteFolder.ChangeToken;
                 if (lastModified != null) {
-                    localFile.LastWriteTimeUtc = (DateTime)lastModified;
+                    try {
+                        localFile.LastWriteTimeUtc = (DateTime)lastModified;
+                    } catch(IOException e) {
+                        Logger.Debug("Couldn't set the server side modification date", e);
+                    }
+
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 }
             } else if (remoteId is IDocument) {
