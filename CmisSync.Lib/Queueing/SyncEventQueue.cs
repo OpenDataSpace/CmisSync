@@ -205,7 +205,7 @@ namespace CmisSync.Lib.Queueing
 
                         manager.Handle(syncEvent);
                     } catch(Exception e) {
-                        Logger.Error(string.Format("Exception in EventHandler on Event {1}: ", syncEvent), e);
+                        Logger.Error(string.Format("Exception in EventHandler on Event {1}: ", syncEvent.ToString()), e);
                     }
                 }
             }
