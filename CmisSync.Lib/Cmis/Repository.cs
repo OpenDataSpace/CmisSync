@@ -264,6 +264,8 @@ namespace CmisSync.Lib.Cmis
             };
 
             this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
+
+            this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
         }
 
         /// <summary>
