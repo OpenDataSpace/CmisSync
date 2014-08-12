@@ -87,6 +87,7 @@ SOURCES =  \
 	ProducerTests/WatcherTests/WatcherTest.cs \
 	ProducerTests/WatcherTests/WatcherTestUtils.cs \
 	QueueingTests/DebugLoggingHandlerTest.cs \
+	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
 	EventManagerInitializerTest.cs \
