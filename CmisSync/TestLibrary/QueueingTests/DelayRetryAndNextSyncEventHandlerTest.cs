@@ -37,7 +37,7 @@ namespace TestLibrary.QueueingTests
         [Test, Category("Fast")]
         public void DoesNotHandleNonRetryEvent() {
             var underTest = new DelayRetryAndNextSyncEventHandler(Mock.Of<ISyncEventQueue>());
-            var fileEvent = new FileEvent(Mock.Of<IFileInfo>()){ RetryCount = 0 };
+            var fileEvent = new FileEvent(Mock.Of<IFileInfo>()) { RetryCount = 0 };
             Assert.False(underTest.Handle(fileEvent));
         }
 
@@ -128,4 +128,3 @@ namespace TestLibrary.QueueingTests
         }
     }
 }
-

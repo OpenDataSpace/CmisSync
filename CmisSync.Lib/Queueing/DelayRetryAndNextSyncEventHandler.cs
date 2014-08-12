@@ -22,47 +22,65 @@ namespace CmisSync.Lib.Queueing
 
     using CmisSync.Lib.Events;
 
+    /// <summary>
+    /// Delay StartNextSyncEvents and AbstractFolderEvents with RetryCounter > 0.
+    /// Events are only retried if no full sync is requested as they are obsolete then.
+    /// </summary>
     public class DelayRetryAndNextSyncEventHandler : ReportingSyncEventHandler
     {
         private bool triggerSyncWhenQueueEmpty = false;
         private bool triggerFullSync = false;
         private List<AbstractFolderEvent> retryEvents = new List<AbstractFolderEvent>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.DelayRetryAndNextSyncEventHandler"/> class.
+        /// </summary>
+        /// <param name='queue'>
+        /// The SyncEventQueue.
+        /// </param>
         public DelayRetryAndNextSyncEventHandler(ISyncEventQueue queue) : base(queue)
         {
         }
 
+        /// <summary>
+        /// Handle the specified e if AbstractFolderEvent or StartNextSyncEvent.
+        /// </summary>
+        /// <param name='e'>
+        /// The ISyncEvent.
+        /// </param>
+        /// <returns>
+        /// True if handled
+        /// </returns>
         public override bool Handle(ISyncEvent e) {
             bool hasBeenHandled = false;
 
             var startNextSyncEvent = e as StartNextSyncEvent;
             if(startNextSyncEvent != null) {
-                triggerSyncWhenQueueEmpty = true;
-                triggerFullSync = startNextSyncEvent.FullSyncRequested;
+                this.triggerSyncWhenQueueEmpty = true;
+                this.triggerFullSync = startNextSyncEvent.FullSyncRequested;
                 hasBeenHandled = true;
             }
 
             var fileOrFolderEvent = e as AbstractFolderEvent;
             if(fileOrFolderEvent != null && fileOrFolderEvent.RetryCount > 0) {
-                retryEvents.Add(fileOrFolderEvent);
+                this.retryEvents.Add(fileOrFolderEvent);
                 hasBeenHandled = true;
             }
 
-            if(Queue.IsEmpty && triggerSyncWhenQueueEmpty) {
-                if(triggerFullSync) {
+            if(this.Queue.IsEmpty && this.triggerSyncWhenQueueEmpty) {
+                if(this.triggerFullSync) {
                     this.retryEvents.Clear();
                 }
 
-                foreach(var storedRetryEvent in retryEvents) {
+                foreach(var storedRetryEvent in this.retryEvents) {
                     Queue.AddEvent(storedRetryEvent);
                 }
 
-                Queue.AddEvent(new StartNextSyncEvent(triggerFullSync));
-                triggerSyncWhenQueueEmpty = false;
+                this.Queue.AddEvent(new StartNextSyncEvent(this.triggerFullSync));
+                this.triggerSyncWhenQueueEmpty = false;
             }
 
             return hasBeenHandled;
         }
     }
 }
-
