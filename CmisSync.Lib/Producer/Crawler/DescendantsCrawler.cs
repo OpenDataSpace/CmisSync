@@ -308,26 +308,21 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             foreach (var child in localTree.Children) {
-                Guid childGuid;
-                IMappedObject storedMappedChild = null;
-                if (this.TryGetExtendedAttribute(child.Item, out childGuid)) {
-                    storedMappedChild = storedObjects.Find(o => o.Guid == childGuid);
-                    if (storedMappedChild != null) {
-                        var localPath = this.storage.GetLocalPath(storedMappedChild);
-                        if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
-                            // Copied
-                            AddCreatedEventToQueue(child.Item);
-                        } else {
-                            // Moved, Renamed, Updated or Equal
-                            AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
-                            AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
-
-                            eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
-                            storedObjects.Remove(storedMappedChild);
-                        }
-                    } else {
-                        // Added
+                bool removeStoredMappedChild = false;
+                
+                IMappedObject storedMappedChild = FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
+                if (storedMappedChild != null) {
+                    var localPath = this.storage.GetLocalPath(storedMappedChild);
+                    if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
+                        // Copied
                         AddCreatedEventToQueue(child.Item);
+                    } else {
+                        // Moved, Renamed, Updated or Equal
+                        AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
+                        AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
+
+                        eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
+                        removeStoredMappedChild = true;
                     }
                 } else {
                     // Added
@@ -335,7 +330,19 @@ namespace CmisSync.Lib.Producer.Crawler
                 }
 
                 this.CreateLocalEvents(storedObjects, child, eventMap);
+
+                if(removeStoredMappedChild) {
+                    storedObjects.Remove(storedMappedChild);
+                }
             }
+        }
+
+        private IMappedObject FindStoredObjectByFileSystemInfo(List<IMappedObject> storedObjects, IFileSystemInfo fsInfo) {
+            Guid childGuid;
+            if (this.TryGetExtendedAttribute(fsInfo, out childGuid)) {
+               return storedObjects.Find(o => o.Guid == childGuid);
+            }
+            return null;
         }
 
         private void AddCreatedEventToQueue(IFileSystemInfo fsInfo) {
