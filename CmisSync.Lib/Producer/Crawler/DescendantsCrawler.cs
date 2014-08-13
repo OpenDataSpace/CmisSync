@@ -310,22 +310,21 @@ namespace CmisSync.Lib.Producer.Crawler
             foreach (var child in localTree.Children) {
                 Guid childGuid;
                 IMappedObject storedMappedChild = null;
-                bool copied = false;
                 if (this.TryGetExtendedAttribute(child.Item, out childGuid)) {
                     storedMappedChild = storedObjects.Find(o => o.Guid == childGuid);
                     if (storedMappedChild != null) {
-                        // Copied
-                        var localPath = storage.GetLocalPath(storedMappedChild);
-                        if((!localPath.Equals(child.Item.FullName)) && fsFactory.IsDirectory(localPath) != null){
+                        var localPath = this.storage.GetLocalPath(storedMappedChild);
+                        if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
+                            // Copied
                             AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CREATED, src: this);
                             Queue.AddEvent(addEvent);
-                            copied = true;
-                        }else{
+                        } else {
                             // Moved, Renamed, Updated or Equal
                             AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
                             AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
-    
+
                             eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
+                            storedObjects.Remove(storedMappedChild);
                         }
                     } else {
                         // Added
@@ -339,9 +338,6 @@ namespace CmisSync.Lib.Producer.Crawler
                 }
 
                 this.CreateLocalEvents(storedObjects, child, eventMap);
-                if (storedMappedChild != null && copied == false) {
-                    storedObjects.Remove(storedMappedChild);
-                }
             }
         }
 
