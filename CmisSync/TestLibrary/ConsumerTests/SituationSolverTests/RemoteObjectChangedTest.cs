@@ -81,6 +81,47 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFolderChangedAndModificationDateCouldNotBeSet()
+        {
+            DateTime creationDate = DateTime.UtcNow;
+            string folderName = "a";
+            string path = Path.Combine(Path.GetTempPath(), folderName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+            string newChangeToken = "newToken";
+            DateTime modification = DateTime.UtcNow;
+
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.FullName).Returns(path);
+            dirInfo.Setup(d => d.Name).Returns(folderName);
+            dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
+            dirInfo.SetupGet(d => d.LastWriteTimeUtc).Returns(modification);
+            dirInfo.SetupSet(d => d.LastWriteTimeUtc = It.IsAny<DateTime>()).Throws(new IOException("Another process is using this folder"));
+
+            var mappedObject = new MappedObject(
+                folderName,
+                id,
+                MappedObjectType.Folder,
+                parentId,
+                lastChangeToken)
+            {
+                Guid = Guid.NewGuid()
+            };
+
+            this.storage.AddMappedFolder(mappedObject);
+
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
+
+            this.underTest.Solve(dirInfo.Object, remoteObject.Object);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, lastLocalModification: modification);
+            dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void RemoteFolderChanged()
         {
             DateTime creationDate = DateTime.UtcNow;

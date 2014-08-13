@@ -163,6 +163,44 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileAddedAndExceptionOnModificationDateIsThrown()
+        {
+            var cacheFileInfo = new Mock<IFileInfo>();
+            var fileInfo = new Mock<IFileInfo>();
+            var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
+            fileInfo.SetupAllProperties();
+            fileInfo.Setup(f => f.FullName).Returns(this.path);
+            fileInfo.Setup(f => f.Name).Returns(this.objectName);
+            fileInfo.Setup(f => f.Directory).Returns(parentDir);
+            fileInfo.SetupSet(f => f.LastWriteTimeUtc = It.IsAny<DateTime>()).Throws<IOException>();
+            DateTime modification = DateTime.UtcNow;
+            fileInfo.SetupGet(f => f.LastWriteTimeUtc).Returns(modification);
+            byte[] content = Encoding.UTF8.GetBytes("content");
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
+            cacheFileInfo.SetupAllProperties();
+            cacheFileInfo.Setup(f => f.FullName).Returns(this.path + ".sync");
+            cacheFileInfo.Setup(f => f.Name).Returns(this.objectName + ".sync");
+            cacheFileInfo.Setup(f => f.Directory).Returns(parentDir);
+            cacheFileInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
+            using (var stream = new MemoryStream()) {
+                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(stream);
+                this.fsFactory.AddIFileInfo(cacheFileInfo.Object);
+
+                Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
+                remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+
+                this.underTest.Solve(fileInfo.Object, remoteObject.Object);
+
+                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
+                cacheFileInfo.Verify(f => f.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>(), It.IsAny<bool>()), Times.Once());
+                cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
+                fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
+                this.queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Type == FileTransmissionType.DOWNLOAD_NEW_FILE)), Times.Once());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, modification, this.creationDate, expectedHash, content.Length);
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedAndLocalFileIsCreatedWhileDownloadIsInProgress()
         {
             string uuid = Guid.NewGuid().ToString();
