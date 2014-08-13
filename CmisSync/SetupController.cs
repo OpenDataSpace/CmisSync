@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SetupController.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -168,7 +168,12 @@ namespace CmisSync
         static public string[] GetSubfolders(string repositoryId, string path,
             string address, string user, string password)
         {
-            return CmisUtils.GetSubfolders(repositoryId, path, address, user, password);
+            CmisRepoCredentials credentials = new CmisRepoCredentials();
+            credentials.Address = new Uri(address);
+            credentials.UserName = user;
+            credentials.Password = password;
+            credentials.RepoId = repositoryId;
+            return CmisUtils.GetSubfolders(credentials, path);
         }
 
 

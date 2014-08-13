@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Credentials.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -53,6 +53,23 @@ namespace CmisSync.Lib.Config
         /// Gets or sets the server Address and Path
         /// </summary>
         public Uri Address { get; set; }
+
+        private string binding = DotCMIS.BindingType.Browser;
+
+        /// <summary>
+        /// Gets or sets the CMIS binding
+        /// </summary>
+        public string Binding
+        {
+            get
+            {
+                return binding;
+            }
+            set
+            {
+                binding = value;
+            }
+        }
     }
 
     /// <summary>

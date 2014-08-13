@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="CmisUtils.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -109,7 +109,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
 
             // See https://github.com/nicolas-raoul/CmisSync/wiki/What-address for the list of ECM products prefixes
             // Please send us requests to support more CMIS servers: https://github.com/nicolas-raoul/CmisSync/issues
-            string[] suffixes = {
+            string[] atompubSuffixes = {
                 "/cmis/atom11",
                 "/alfresco/cmisatom",
                 "/alfresco/service/cmis",
@@ -123,6 +123,14 @@ namespace CmisSync.Lib.Cmis.UiUtils
                 "/nuxeo/atom/cmis",
                 "/cmis/atom"
             };
+            string[] browserSuffixes = {
+                "/cmis/browser"
+            };
+            string[] suffixes = atompubSuffixes;
+            if (credentials.Binding == BindingType.Browser)
+            {
+                suffixes = browserSuffixes;
+            }
             string bestUrl = null;
 
             // Try all suffixes
@@ -162,6 +170,30 @@ namespace CmisSync.Lib.Cmis.UiUtils
             return new Tuple<CmisServer, Exception>(new CmisServer(bestUrl == null ? credentials.Address : new Uri(bestUrl), null), firstException);
         }
 
+        static public Dictionary<string,string> GetCmisParameters(ServerCredentials credentials)
+        {
+            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
+            cmisParameters[SessionParameter.BindingType] = credentials.Binding;
+            if (credentials.Binding == BindingType.AtomPub)
+            {
+                cmisParameters[SessionParameter.AtomPubUrl] = credentials.Address.ToString();
+            }
+            else if (credentials.Binding == BindingType.Browser)
+            {
+                cmisParameters[SessionParameter.BrowserUrl] = credentials.Address.ToString();
+            }
+            cmisParameters[SessionParameter.User] = credentials.UserName;
+            cmisParameters[SessionParameter.Password] = credentials.Password.ToString();
+            return cmisParameters;
+        }
+
+        static public Dictionary<string, string> GetCmisParameters(CmisRepoCredentials credentials)
+        {
+            Dictionary<string, string> cmisParameters = GetCmisParameters((ServerCredentials)credentials);
+            cmisParameters[SessionParameter.RepositoryId] = credentials.RepoId;
+            return cmisParameters;
+        }
+
         /// <summary>
         /// Get the list of repositories of a CMIS server
         /// Each item contains id + 
@@ -180,11 +212,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
             // Create session factory.
             SessionFactory factory = SessionFactory.NewInstance();
 
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = credentials.Address.ToString();
-            cmisParameters[SessionParameter.User] = credentials.UserName;
-            cmisParameters[SessionParameter.Password] = credentials.Password.ToString();
+            Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
 
             IList<IRepository> repositories;
             try
@@ -233,22 +261,12 @@ namespace CmisSync.Lib.Cmis.UiUtils
         /// Get the sub-folders of a particular CMIS folder.
         /// </summary>
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
-        static public string[] GetSubfolders(
-            string repositoryId,
-            string path,
-            string address,
-            string user,
-            string password)
+        static public string[] GetSubfolders(CmisRepoCredentials credentials, string path)
         {
             List<string> result = new List<string>();
 
             // Connect to the CMIS repository.
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = address;
-            cmisParameters[SessionParameter.User] = user;
-            cmisParameters[SessionParameter.Password] = password;
-            cmisParameters[SessionParameter.RepositoryId] = repositoryId;
+            Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
             SessionFactory factory = SessionFactory.NewInstance();
             ISession session = factory.CreateSession(cmisParameters);
 
@@ -312,12 +330,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         static public NodeTree GetSubfolderTree(CmisRepoCredentials credentials, string path, int depth)
         {
             // Connect to the CMIS repository.
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = credentials.Address.ToString();
-            cmisParameters[SessionParameter.User] = credentials.UserName;
-            cmisParameters[SessionParameter.Password] = credentials.Password.ToString();
-            cmisParameters[SessionParameter.RepositoryId] = credentials.RepoId;
+            Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
             SessionFactory factory = SessionFactory.NewInstance();
             ISession session = factory.CreateSession(cmisParameters);
 

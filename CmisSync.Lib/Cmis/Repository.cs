@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Repository.cs" company="GRAU DATA AG">
 //
 //   Copyright (C) 2012  Nicolas Raoul &lt;nicolas.raoul@aegif.jp&gt;
@@ -495,12 +495,7 @@ namespace CmisSync.Lib.Cmis
         /// </param>
         private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo)
         {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
-            cmisParameters[SessionParameter.User] = repoInfo.User;
-            cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
-            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
+            Dictionary<string, string> cmisParameters = UiUtils.CmisUtils.GetCmisParameters(repoInfo.Credentials);
             cmisParameters[SessionParameter.ConnectTimeout] = repoInfo.ConnectionTimeout.ToString();
             cmisParameters[SessionParameter.ReadTimeout] = repoInfo.ReadTimeout.ToString();
             cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
