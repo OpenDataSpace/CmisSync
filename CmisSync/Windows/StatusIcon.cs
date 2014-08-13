@@ -96,7 +96,8 @@ namespace CmisSync
                     }
                 }
                 Controller.Warning = true;
-                this.trayicon.ShowBalloonTip(30000,
+                this.trayicon.ShowBalloonTip(
+                    30000,
                     String.Format(Properties_Resources.NotificationCredentialsError, reponame),
                     Properties_Resources.NotificationChangeCredentials,
                     ToolTipIcon.Warning);
@@ -122,12 +123,13 @@ namespace CmisSync
         {
             lock (repoCreditsErrorListLock)
             {
-                foreach (string reponame in repoCreditsErrorList)
-                {
+                foreach (string reponame in repoCreditsErrorList) {
                     Program.Controller.EditRepositoryCredentials(reponame);
                 }
+
                 repoCreditsErrorList.Clear();
             }
+
             Controller.Warning = false;
         }
 
@@ -159,21 +161,21 @@ namespace CmisSync
                 {
                     BeginInvoke((Action)delegate
                     {
-                        if (icon_frame < 0)
-                        {
+                        if (icon_frame < 0) {
                             this.trayicon.Icon = SystemIcons.Error;
                             return;
                         }
-                        if (icon_frame > 0)
-                        {
+
+                        if (icon_frame > 0) {
                             this.trayicon.Icon = animationFrames[icon_frame];
                             return;
                         }
-                        if (Controller.Warning)
-                        {
+
+                        if (Controller.Warning) {
                             this.trayicon.Icon = SystemIcons.Warning;
                             return;
                         }
+
                         this.trayicon.Icon = animationFrames[icon_frame];
                         return;
                     });
@@ -432,7 +434,6 @@ namespace CmisSync
             };
             this.traymenu.Items.Add(this.exitItem);
         }
-
 
         /// <summary>
         /// Create the animation frames from image files.
