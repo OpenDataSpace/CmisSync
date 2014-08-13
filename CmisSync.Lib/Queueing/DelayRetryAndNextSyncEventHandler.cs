@@ -28,8 +28,8 @@ namespace CmisSync.Lib.Queueing
     /// </summary>
     public class DelayRetryAndNextSyncEventHandler : ReportingSyncEventHandler
     {
-        private bool triggerSyncWhenQueueEmpty = false;
-        private bool triggerFullSync = false;
+        private bool syncHasBeenDelayed = false;
+        private bool lastDelayedSyncWasFullSync = false;
         private List<AbstractFolderEvent> retryEvents = new List<AbstractFolderEvent>();
 
         /// <summary>
@@ -52,31 +52,43 @@ namespace CmisSync.Lib.Queueing
         /// True if handled
         /// </returns>
         public override bool Handle(ISyncEvent e) {
-            bool hasBeenHandled = false;
+            bool isEventDelayed = false;
 
-            var startNextSyncEvent = e as StartNextSyncEvent;
-            if(startNextSyncEvent != null) {
-                //Fallthrough case
-                if(this.Queue.IsEmpty && !triggerSyncWhenQueueEmpty && retryEvents.Count == 0){
-                    return false;
-                }
-
-                this.triggerSyncWhenQueueEmpty = true;
-                if(!this.triggerFullSync) {
-                    this.triggerFullSync = startNextSyncEvent.FullSyncRequested;
-                }
-
-                hasBeenHandled = true;
+            if(e is AbstractFolderEvent) {
+                isEventDelayed = this.DelayEventIfRetryCountPositive(e as AbstractFolderEvent);
             }
 
-            var fileOrFolderEvent = e as AbstractFolderEvent;
-            if(fileOrFolderEvent != null && fileOrFolderEvent.RetryCount > 0) {
+            if(e is StartNextSyncEvent) {
+                if(this.SyncHasToBeDelayed()) {
+                    this.DelayNextSyncEvent(e as StartNextSyncEvent);
+                    isEventDelayed = true;
+                }
+            }
+
+            this.FireDelayedEventsIfQueueIsEmpty();
+
+            return isEventDelayed;
+        }
+
+        private bool DelayEventIfRetryCountPositive(AbstractFolderEvent fileOrFolderEvent) {
+            if(fileOrFolderEvent.RetryCount > 0) {
                 this.retryEvents.Add(fileOrFolderEvent);
-                hasBeenHandled = true;
+                return true;
             }
 
-            if(this.Queue.IsEmpty && this.triggerSyncWhenQueueEmpty) {
-                if(this.triggerFullSync) {
+            return false;
+        }
+
+        private void DelayNextSyncEvent(StartNextSyncEvent startNextSyncEvent) {
+            this.syncHasBeenDelayed = true;
+            if(!this.lastDelayedSyncWasFullSync && startNextSyncEvent.FullSyncRequested == true) {
+                this.lastDelayedSyncWasFullSync = true;
+            }
+        }
+
+        private void FireDelayedEventsIfQueueIsEmpty() {
+            if(this.Queue.IsEmpty && this.syncHasBeenDelayed) {
+                if(this.lastDelayedSyncWasFullSync) {
                     this.retryEvents.Clear();
                 }
 
@@ -84,11 +96,14 @@ namespace CmisSync.Lib.Queueing
                     Queue.AddEvent(storedRetryEvent);
                 }
 
-                this.Queue.AddEvent(new StartNextSyncEvent(this.triggerFullSync));
-                this.triggerSyncWhenQueueEmpty = false;
+                this.Queue.AddEvent(new StartNextSyncEvent(this.lastDelayedSyncWasFullSync));
+                this.syncHasBeenDelayed = false;
             }
+        }
 
-            return hasBeenHandled;
+        private bool SyncHasToBeDelayed() {
+            // delay if queue not empty or if already stored events have to be fired.
+            return !this.Queue.IsEmpty || this.syncHasBeenDelayed || this.retryEvents.Count > 0;
         }
     }
 }
