@@ -432,4 +432,10 @@ This could lead to a lot of conflict files!</value>
   <data name="TransmissionFailedOnRepo" xml:space="preserve">
     <value>[{0}] Transmission failed:</value>
   </data>
+  <data name="Features" xml:space="preserve">
+    <value>Features</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
 </root>

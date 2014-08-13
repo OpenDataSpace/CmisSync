@@ -136,6 +136,9 @@ namespace CmisSync
         private void ApplySetting()
         {
             ProxyTab.Header = Properties_Resources.SettingProxy;
+            FeatureTogglesTab.Header = Properties_Resources.Features;
+            FeatureTogglesTab.IsEnabled = false;
+            NotificationToggle.Content = Properties_Resources.Notifications;
             ProxyNone.GroupName = ProxySystem.GroupName = ProxyCustom.GroupName = "proxy";
             ProxyNone.Content = Properties_Resources.NetworkProxySelectNone;
             ProxySystem.Content = Properties_Resources.NetworkProxySelectSystem;
