@@ -316,8 +316,7 @@ namespace CmisSync.Lib.Producer.Crawler
                         var localPath = this.storage.GetLocalPath(storedMappedChild);
                         if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
                             // Copied
-                            AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CREATED, src: this);
-                            Queue.AddEvent(addEvent);
+                            AddCreatedEventToQueue(child.Item);
                         } else {
                             // Moved, Renamed, Updated or Equal
                             AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
@@ -328,17 +327,20 @@ namespace CmisSync.Lib.Producer.Crawler
                         }
                     } else {
                         // Added
-                        AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CREATED, src: this);
-                        Queue.AddEvent(addEvent);
+                        AddCreatedEventToQueue(child.Item);
                     }
                 } else {
                     // Added
-                    AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CREATED, src: this);
-                    Queue.AddEvent(addEvent);
+                    AddCreatedEventToQueue(child.Item);
                 }
 
                 this.CreateLocalEvents(storedObjects, child, eventMap);
             }
+        }
+
+        private void AddCreatedEventToQueue(IFileSystemInfo fsInfo) {
+            AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, fsInfo, localChange: MetaDataChangeType.CREATED, src: this);
+            this.Queue.AddEvent(addEvent);
         }
 
         private AbstractFolderEvent CreateRemoteEventBasedOnStorage(IFileableCmisObject cmisObject, IMappedObject storedParent, IMappedObject storedMappedChild)
