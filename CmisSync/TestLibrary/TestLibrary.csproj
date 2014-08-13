@@ -85,7 +85,6 @@
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
     <Compile Include="IntegrationTests\AllHandlersIT.cs" />
-    <Compile Include="IntegrationTests\CmisSyncTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
@@ -187,6 +186,7 @@
     <Compile Include="StorageTests\DataBaseTests\EntitiesTests\IFileConvenienceExtendersTest.cs" />
     <Compile Include="QueueingTests\DelayRetryAndNextSyncEventHandlerTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectMovedTest.cs" />
+    <Compile Include="IntegrationTests\RepositoryUtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

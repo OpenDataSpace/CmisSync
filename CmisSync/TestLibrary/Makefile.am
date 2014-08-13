@@ -67,13 +67,13 @@ SOURCES =  \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
-	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/RepositoryUtilsTests.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
