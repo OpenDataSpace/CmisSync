@@ -311,7 +311,7 @@ namespace CmisSync {
                 {
                     // Continue to folder selection
                     Controller.Add1PageCompleted(
-                            new Uri(address_entry.Text), user_entry.Text, password_entry.Text);
+                            new Uri(address_entry.Text), "atompub", user_entry.Text, password_entry.Text);
                 }
             };
 
