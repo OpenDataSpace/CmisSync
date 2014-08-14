@@ -28,6 +28,8 @@ namespace CmisSync.Lib.Config
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
 
+    using DotCMIS;
+
     /// <summary>
     /// All the info for a particular CmisSync synchronized folder.
     /// Contains local info, as well as remote info to connect to the CMIS folder.
@@ -77,13 +79,12 @@ namespace CmisSync.Lib.Config
                 this.credentials.Address = value;
             }
         }
+
         /// <summary>
-        /// Gets or set the bind type.
+        /// Gets or sets the binding type.
         /// </summary>
-        /// <value>
-        /// The bind type.
-        /// </value>
-        [XmlElement("binding")]
+        /// <value>The binding type.</value>
+        [XmlElement("binding"), System.ComponentModel.DefaultValue(BindingType.AtomPub)]
         public string Binding
         {
             get
@@ -167,6 +168,7 @@ namespace CmisSync.Lib.Config
             {
                 return this.credentials.RepoId;
             }
+
             set
             {
                 this.credentials.RepoId = value;
