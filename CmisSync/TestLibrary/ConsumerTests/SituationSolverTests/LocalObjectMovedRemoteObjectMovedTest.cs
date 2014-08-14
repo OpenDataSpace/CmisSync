@@ -39,7 +39,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     public class LocalObjectMovedRemoteObjectMovedTest : IsTestWithConfiguredLog4Net
     {
         private readonly string remoteObjectId = "remoteObjectId";
-        private readonly string oldRemoteParentId = "oldRemoteParentId";
         private readonly string newRemoteParentId = "newRemoteParentId";
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;

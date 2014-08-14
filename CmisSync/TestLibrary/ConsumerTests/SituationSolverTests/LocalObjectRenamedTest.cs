@@ -67,11 +67,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void PermissionDeniedLeadsToNoOperation()
         {
-            var newFolder = Mock.Of<IFolder>(
-                f =>
-                f.LastModificationDate == this.modificationDate &&
-                f.Name == this.newName &&
-                f.ChangeToken == this.newChangeToken);
             var remoteFolder = new Mock<IFolder>();
             remoteFolder.Setup(f => f.Name).Returns(this.oldName);
             remoteFolder.Setup(f => f.Id).Returns(this.id);

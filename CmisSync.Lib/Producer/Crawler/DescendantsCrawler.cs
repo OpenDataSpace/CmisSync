@@ -270,7 +270,7 @@ namespace CmisSync.Lib.Producer.Crawler
 
             // Send out Events to queue
             this.InformAboutRemoteObjectsDeleted(removedRemoteObjects.Values);
-            this.InformAboutLocalObjectsDeleted(removedLocalObjects.Values);
+            this.InformAboutLocalObjects(removedLocalObjects.Values, MetaDataChangeType.DELETED);
         }
 
         private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild)
@@ -310,12 +310,12 @@ namespace CmisSync.Lib.Producer.Crawler
             foreach (var child in localTree.Children) {
                 bool removeStoredMappedChild = false;
                 
-                IMappedObject storedMappedChild = FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
+                IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
                     var localPath = this.storage.GetLocalPath(storedMappedChild);
                     if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
                         // Copied
-                        AddCreatedEventToQueue(child.Item);
+                        this.AddCreatedEventToQueue(child.Item);
                     } else {
                         // Moved, Renamed, Updated or Equal
                         AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
@@ -326,7 +326,7 @@ namespace CmisSync.Lib.Producer.Crawler
                     }
                 } else {
                     // Added
-                    AddCreatedEventToQueue(child.Item);
+                    this.AddCreatedEventToQueue(child.Item);
                 }
 
                 this.CreateLocalEvents(storedObjects, child, eventMap);
@@ -342,6 +342,7 @@ namespace CmisSync.Lib.Producer.Crawler
             if (this.TryGetExtendedAttribute(fsInfo, out childGuid)) {
                return storedObjects.Find(o => o.Guid == childGuid);
             }
+
             return null;
         }
 
@@ -449,32 +450,12 @@ namespace CmisSync.Lib.Producer.Crawler
             }
         }
 
-        private void InformAboutRemoteObjectsAdded(IList<IFileableCmisObject> objects) {
-            foreach (var addedRemotely in objects) {
-                if (addedRemotely is IFolder) {
-                    this.Queue.AddEvent(new FolderEvent(null, addedRemotely as IFolder, this) { Remote = MetaDataChangeType.CREATED });
-                } else if (addedRemotely is IDocument) {
-                    this.Queue.AddEvent(new FileEvent(null, addedRemotely as IDocument) { Remote = MetaDataChangeType.CREATED });
-                }
-            }
-        }
-
-        private void InformAboutLocalObjectsAdded(IList<IFileSystemInfo> objects) {
-            foreach (var addedLocally in objects) {
-                if (addedLocally is IDirectoryInfo) {
-                    this.Queue.AddEvent(new FolderEvent(addedLocally as IDirectoryInfo, null, this) { Local = MetaDataChangeType.CREATED });
-                } else if (addedLocally is IFileInfo) {
-                    this.Queue.AddEvent(new FileEvent(addedLocally as IFileInfo, null) { Local = MetaDataChangeType.CREATED });
-                }
-            }
-        }
-
-        private void InformAboutLocalObjectsDeleted(IEnumerable<IFileSystemInfo> objects) {
+        private void InformAboutLocalObjects(IEnumerable<IFileSystemInfo> objects, MetaDataChangeType changeType) {
             foreach (var deleted in objects) {
                 if (deleted is IDirectoryInfo) {
-                    this.Queue.AddEvent(new FolderEvent(deleted as IDirectoryInfo, null, this) { Local = MetaDataChangeType.DELETED });
+                    this.Queue.AddEvent(new FolderEvent(deleted as IDirectoryInfo, null, this) { Local = changeType });
                 } else if (deleted is IFileInfo) {
-                    this.Queue.AddEvent(new FileEvent(deleted as IFileInfo) { Local = MetaDataChangeType.DELETED });
+                    this.Queue.AddEvent(new FileEvent(deleted as IFileInfo) { Local = changeType });
                 }
             }
         }
