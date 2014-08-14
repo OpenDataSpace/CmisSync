@@ -77,6 +77,25 @@ namespace CmisSync.Lib.Config
                 this.credentials.Address = value;
             }
         }
+        /// <summary>
+        /// Gets or set the bind type.
+        /// </summary>
+        /// <value>
+        /// The bind type.
+        /// </value>
+        [XmlElement("binding")]
+        public string Binding
+        {
+            get
+            {
+                return this.credentials.Binding;
+            }
+
+            set
+            {
+                this.credentials.Binding = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the remote path on the remote server, starting from the root of the CMIS repository.

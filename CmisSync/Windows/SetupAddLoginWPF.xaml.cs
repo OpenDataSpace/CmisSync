@@ -65,5 +65,17 @@ namespace CmisSync
             continue_button.Content = Properties_Resources.Continue;
             cancel_button.Content = Properties_Resources.Cancel;
         }
+
+        private void browser_radio_Checked(object sender, RoutedEventArgs e)
+        {
+            RadioButton browser_radio = (sender as RadioButton);
+            browser_radio.IsChecked = true;
+        }
+
+        private void atompub_radio_Checked(object sender, RoutedEventArgs e)
+        {
+            RadioButton atompub_radio = (sender as RadioButton);
+            atompub_radio.IsChecked = true;
+        }
     }
 }

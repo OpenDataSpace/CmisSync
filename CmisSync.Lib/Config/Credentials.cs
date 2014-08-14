@@ -54,7 +54,10 @@ namespace CmisSync.Lib.Config
         /// </summary>
         public Uri Address { get; set; }
 
-        private string binding = DotCMIS.BindingType.Browser;
+        public const string BindingAtomPub = DotCMIS.BindingType.AtomPub;
+        public const string BindingBrowser = DotCMIS.BindingType.Browser;
+
+        private string binding = BindingAtomPub;
 
         /// <summary>
         /// Gets or sets the CMIS binding

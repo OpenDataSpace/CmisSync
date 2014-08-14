@@ -128,6 +128,7 @@ namespace CmisSync
         public double ProgressBarPercentage { get; private set; }
 
         public Uri saved_address = null;
+        public string saved_binding = CmisRepoCredentials.BindingAtomPub;
         public string saved_remote_path = String.Empty;
         public string saved_user = String.Empty;
         public string saved_password = String.Empty;
@@ -159,21 +160,6 @@ namespace CmisSync
                 return new Tuple<CmisServer,Exception>(null,e);
             }
 
-        }
-
-
-        /// <summary>
-        /// Get the list of subfolders contained in a CMIS folder.
-        /// </summary>
-        static public string[] GetSubfolders(string repositoryId, string path,
-            string address, string user, string password)
-        {
-            CmisRepoCredentials credentials = new CmisRepoCredentials();
-            credentials.Address = new Uri(address);
-            credentials.UserName = user;
-            credentials.Password = password;
-            credentials.RepoId = repositoryId;
-            return CmisUtils.GetSubfolders(credentials, path);
         }
 
 
@@ -424,9 +410,10 @@ namespace CmisSync
         /// <summary>
         /// First step of remote folder addition wizard is complete, switch to second step
         /// </summary>
-        public void Add1PageCompleted(Uri address, string user, string password)
+        public void Add1PageCompleted(Uri address, string binding, string user, string password)
         {
             saved_address = address;
+            saved_binding = binding;
             saved_user = user;
             saved_password = password;
 
@@ -440,7 +427,6 @@ namespace CmisSync
         public void BackToPage1()
         {
             PreviousAddress = saved_address;
-            PreviousPath = saved_user;
             ChangePageEvent(PageType.Add1);
         }
 
@@ -500,6 +486,7 @@ namespace CmisSync
             {
                 DisplayName = repoName,
                 Address = saved_address,
+                Binding = saved_binding,
                 User = saved_user.TrimEnd(),
                 ObfuscatedPassword = new Password(saved_password.TrimEnd()).ObfuscatedPassword,
                 RepositoryId = PreviousRepository,

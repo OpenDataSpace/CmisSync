@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ControllerBase.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -368,8 +368,10 @@ namespace CmisSync
                 CmisRepoCredentials credentials = new CmisRepoCredentials()
                 {
                     Address = folder.Address,
+                    Binding = folder.Binding,
                     UserName = folder.User,
-                    Password = new Password() {
+                    Password = new Password()
+                    {
                         ObfuscatedPassword = folder.ObfuscatedPassword
                     },
                     RepoId = folder.RepositoryId

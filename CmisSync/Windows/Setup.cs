@@ -389,6 +389,8 @@ namespace CmisSync
         private CircularProgressBar password_progress;
         private TextBlock password_help_label;
         private TextBox address_error_label;
+        private RadioButton browser_radio;
+        private RadioButton atompub_radio;
 
         private void LoadAddLoginWPF()
         {
@@ -411,6 +413,8 @@ namespace CmisSync
             address_error_label = LoadAddLoginWPF.FindName("address_error_label") as TextBox;
             continue_button = LoadAddLoginWPF.FindName("continue_button") as Button;
             cancel_button = LoadAddLoginWPF.FindName("cancel_button") as Button;
+            browser_radio = LoadAddLoginWPF.FindName("browser_radio") as RadioButton;
+            atompub_radio = LoadAddLoginWPF.FindName("atompub_radio") as RadioButton;
 
             ContentCanvas.Children.Add(LoadAddLoginWPF);
 
@@ -456,6 +460,30 @@ namespace CmisSync
                 Controller.PageCancelled();
             };
 
+            string binding = Controller.saved_binding;
+            if (binding == null)
+            {
+                binding = CmisRepoCredentials.BindingBrowser;
+            }
+
+            atompub_radio.Click += delegate
+            {
+                binding = CmisRepoCredentials.BindingAtomPub;
+            };
+            if (binding == CmisRepoCredentials.BindingAtomPub)
+            {
+                atompub_radio.IsChecked = true;
+            }
+
+            browser_radio.Click += delegate
+            {
+                binding = CmisRepoCredentials.BindingBrowser;
+            };
+            if (binding == CmisRepoCredentials.BindingBrowser)
+            {
+                browser_radio.IsChecked = true;
+            }
+
             continue_button.Click += delegate
             {
                 // Show wait cursor
@@ -469,7 +497,8 @@ namespace CmisSync
                 {
                     UserName = user_box.Text,
                     Password = password_box.Password,
-                    Address = new Uri(address_box.Text)
+                    Address = new Uri(address_box.Text),
+                    Binding = binding,
                 };
                 IAsyncResult ar = dlgt.BeginInvoke(credentials, null, null);
                 while (!ar.AsyncWaitHandle.WaitOne(100))
@@ -499,7 +528,7 @@ namespace CmisSync
                     ControllerLoginRemoveAction();
                     // Continue to next step, which is choosing a particular folder.
                     Controller.Add1PageCompleted(
-                        new Uri(address_box.Text), user_box.Text, password_box.Password);
+                        new Uri(address_box.Text), binding, user_box.Text, password_box.Password);
                 }
             };
         }
@@ -548,6 +577,7 @@ namespace CmisSync
                     UserName = Controller.saved_user,
                     Password = Controller.saved_password,
                     Address = Controller.saved_address,
+                    Binding = Controller.saved_binding,
                     RepoId = repository.Key
                 };
                 AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
