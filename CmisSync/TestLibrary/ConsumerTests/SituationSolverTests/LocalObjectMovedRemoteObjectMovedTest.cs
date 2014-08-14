@@ -60,6 +60,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void BothFoldersAreMovedIntoTheSameFolder() {
             string newChangeToken = "newChangeToken";
             string folderName = "folder";
+            var mappedObject = new MappedObject(folderName, this.remoteObjectId, MappedObjectType.Folder, this.oldRemoteParentId, "changeToken");
+            this.storage.AddMappedFolder(mappedObject);
             var underTest = new LocalObjectMovedRemoteObjectMoved(this.session.Object, this.storage.Object, true);
             var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, folderName, "/" + folderName, this.newRemoteParentId, newChangeToken);
             underTest.Solve(Mock.Of<IDirectoryInfo>(), remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
