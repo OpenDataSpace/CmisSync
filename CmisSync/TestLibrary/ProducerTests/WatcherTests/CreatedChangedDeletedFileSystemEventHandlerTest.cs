@@ -264,15 +264,31 @@ namespace TestLibrary.ProducerTests.WatcherTests
         [Test, Category("Fast")]
         public void HandleExceptionsOnProcessingByInvokingCrawlSync() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
-                this.fsFactory.Setup(f => f.IsDirectory(It.IsAny<string>())).Throws(new Exception("Generic exception"));
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Throws(new Exception("Generic exception"));
 
-                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.path, Name));
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
 
                 this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)));
                 this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
                 this.WaitForThreshold();
                 this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)));
                 this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void HandleExceptionsOnUuidReadingByJustPassingEmptyUuid() {
+            using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
+                var filemock = this.fsFactory.AddFile(this.path, Guid.Empty, true);
+                filemock.Setup(f => f.Uuid).Throws<ExtendedAttributeException>();
+
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
+
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
+                this.WaitForThreshold();
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Created)), Times.Once());
+                this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
             }
         }
 
@@ -301,7 +317,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 var fileInfo = this.fsFactory.AddFile(this.path, Guid.Empty, true);
 
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
-                fileInfo.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Throws(new FileNotFoundException());
+                fileInfo.Setup(f => f.Uuid).Throws(new FileNotFoundException());
 
                 this.WaitForThreshold();
                 this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
@@ -315,7 +331,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 var dirInfo = this.fsFactory.AddDirectory(this.path, Guid.Empty, true);
 
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
-                dirInfo.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Throws(new DirectoryNotFoundException());
+                dirInfo.Setup(f => f.Uuid).Throws(new DirectoryNotFoundException());
 
                 this.WaitForThreshold();
                 this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);

@@ -109,14 +109,18 @@ namespace CmisSync.Lib.Producer.Watcher
                     bool? check = this.fsFactory.IsDirectory(e.FullPath);
                     if (check != null) {
                         isDirectory = (bool)check;
-                        Guid fsGuid = Guid.Empty;
                         IFileSystemInfo fsInfo = isDirectory ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(e.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(e.FullPath);
-                        string ea = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                        if (ea != null) {
-                            Guid.TryParse(ea, out fsGuid);
+                        Guid uuid = Guid.Empty;
+                        try {
+                            Guid? fsGuid = fsInfo.Uuid;
+                            if (fsGuid != null) {
+                                uuid = (Guid)fsGuid;
+                            }
+                        } catch(Exception) {
+                            uuid = Guid.Empty;
                         }
 
-                        this.AddEventToList(e, fsGuid, isDirectory);
+                        this.AddEventToList(e, uuid, isDirectory);
                     }
                 }
             } catch (Exception ex) {
@@ -189,12 +193,11 @@ namespace CmisSync.Lib.Producer.Watcher
                         var entry = this.events[0];
                         this.events.RemoveAt(0);
                         if (entry.Item1.ChangeType == WatcherChangeTypes.Created) {
-                            Guid fsGuid;
                             IFileSystemInfo fsInfo = entry.Item4 ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(entry.Item1.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(entry.Item1.FullPath);
                             try {
-                                string fsUuid = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                                if (Guid.TryParse(fsUuid, out fsGuid) && fsGuid != Guid.Empty) {
-                                    var correspondingDeletion = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == fsGuid && obj.Item1.ChangeType == WatcherChangeTypes.Deleted);
+                                Guid? fsUuid = fsInfo.Uuid;
+                                if (fsUuid != null && fsUuid != Guid.Empty) {
+                                    var correspondingDeletion = this.events.Find((Tuple<FileSystemEventArgs, Guid, DateTime, bool> obj) => obj.Item2 == (Guid)fsUuid && obj.Item1.ChangeType == WatcherChangeTypes.Deleted);
                                     if (correspondingDeletion != null) {
                                         this.queue.AddEvent(new FSMovedEvent(correspondingDeletion.Item1.FullPath, entry.Item1.FullPath, entry.Item4));
                                         this.events.Remove(correspondingDeletion);

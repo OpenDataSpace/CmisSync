@@ -53,6 +53,7 @@ namespace TestLibrary.TestUtils
         {
             var dir = fsFactory.AddDirectory(path, exists);
             dir.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+            dir.Setup(d =>d.Uuid).Returns(guid);
             return dir;
         }
 

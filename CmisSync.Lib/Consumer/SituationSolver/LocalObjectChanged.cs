@@ -106,7 +106,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 //fallback to GetObjectByLocalPath
             }
 
-            if(mappedObject == null) {
+            if (mappedObject == null) {
                 mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
             }
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
