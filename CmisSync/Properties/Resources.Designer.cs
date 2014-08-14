@@ -124,6 +124,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Binding Type.
+        /// </summary>
+        internal static string BindingType {
+            get {
+                return ResourceManager.GetString("BindingType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Browse remote folder.
         /// </summary>
         internal static string BrowseRemoteFolder {
