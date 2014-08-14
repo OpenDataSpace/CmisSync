@@ -69,6 +69,8 @@ namespace CmisSync
         {
             base.AwakeFromNib ();
 
+            this.BindingLabel.StringValue = Properties_Resources.BindingType;
+
             this.AddressLabel.StringValue = Properties_Resources.EnterWebAddress;
             this.UserLabel.StringValue = Properties_Resources.User;
             this.PasswordLabel.StringValue = Properties_Resources.Password;
@@ -79,6 +81,13 @@ namespace CmisSync
             this.ContinueButton.Title = Properties_Resources.Continue;
             this.CancelButton.Title = Properties_Resources.Cancel;
 
+            if (String.IsNullOrEmpty (Controller.saved_binding) || Controller.saved_binding == CmisRepoCredentials.BindingAtomPub) {
+                this.BindingAtomPub.State = NSCellStateValue.On;
+                this.BindingBrowser.State = NSCellStateValue.Off;
+            } else {
+                this.BindingBrowser.State = NSCellStateValue.On;
+                this.BindingAtomPub.State = NSCellStateValue.Off;
+            }
             this.AddressText.StringValue = (Controller.PreviousAddress == null || String.IsNullOrEmpty (Controller.PreviousAddress.ToString ())) ? "https://" : Controller.PreviousAddress.ToString ();
             this.UserText.StringValue = String.IsNullOrEmpty (Controller.saved_user) ? Environment.UserName : Controller.saved_user;
 //            this.PasswordText.StringValue = String.IsNullOrEmpty (Controller.saved_password) ? "" : Controller.saved_password;
@@ -136,12 +145,16 @@ namespace CmisSync
 
         partial void OnContinue (MonoMac.Foundation.NSObject sender)
         {
+            string binding = BindingAtomPub.State == NSCellStateValue.On ? ServerCredentials.BindingAtomPub : ServerCredentials.BindingBrowser;
             ServerCredentials credentials = new ServerCredentials() {
                 UserName = UserText.StringValue,
                 Password = PasswordText.StringValue,
-                Address = new Uri(AddressText.StringValue)
+                Address = new Uri(AddressText.StringValue),
+                Binding = binding
             };
             WarnText.StringValue = String.Empty;
+            BindingAtomPub.Enabled = false;
+            BindingBrowser.Enabled = false;
             AddressText.Enabled = false;
             UserText.Enabled = false;
             PasswordText.Enabled = false;
@@ -164,6 +177,8 @@ namespace CmisSync
                     if (Controller.repositories == null)
                     {
                         WarnText.StringValue = Controller.GetConnectionsProblemWarning(fuzzyResult.Item1, fuzzyResult.Item2);
+                        BindingAtomPub.Enabled = true;
+                        BindingBrowser.Enabled = true;
                         AddressText.Enabled = true;
                         UserText.Enabled = true;
                         PasswordText.Enabled = true;
@@ -173,7 +188,7 @@ namespace CmisSync
                     else
                     {
                         RemoveEvent();
-                        Controller.Add1PageCompleted(cmisServer.Url, credentials.UserName, credentials.Password.ToString());
+                        Controller.Add1PageCompleted(cmisServer.Url, binding, credentials.UserName, credentials.Password.ToString());
                     }
                     LoginProgress.StopAnimation(this);
                 });

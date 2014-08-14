@@ -144,6 +144,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
                     {
                         UserName = credentials.UserName,
                         Password = credentials.Password.ToString(),
+                        Binding = credentials.Binding,
                         Address = new Uri(fuzzyUrl)
                     };
                     repositories = GetRepositories(cred);

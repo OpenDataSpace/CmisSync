@@ -1,21 +1,3 @@
-//-----------------------------------------------------------------------
-// <copyright file="SetupSubLogin.designer.cs" company="GRAU DATA AG">
-//
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General private License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//   GNU General private License for more details.
-//
-//   You should have received a copy of the GNU General private License
-//   along with this program. If not, see http://www.gnu.org/licenses/.
-//
-// </copyright>
-//-----------------------------------------------------------------------
 // WARNING
 //
 // This file has been generated automatically by Xamarin Studio to store outlets and
@@ -38,6 +20,15 @@ namespace CmisSync
 
 		[Outlet]
 		MonoMac.AppKit.NSTextField AddressText { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButtonCell BindingAtomPub { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButtonCell BindingBrowser { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTextField BindingLabel { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSButton CancelButton { get; set; }
@@ -71,6 +62,21 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (BindingLabel != null) {
+				BindingLabel.Dispose ();
+				BindingLabel = null;
+			}
+
+			if (BindingAtomPub != null) {
+				BindingAtomPub.Dispose ();
+				BindingAtomPub = null;
+			}
+
+			if (BindingBrowser != null) {
+				BindingBrowser.Dispose ();
+				BindingBrowser = null;
+			}
+
 			if (AddressHelp != null) {
 				AddressHelp.Dispose ();
 				AddressHelp = null;
@@ -96,6 +102,11 @@ namespace CmisSync
 				ContinueButton = null;
 			}
 
+			if (LoginProgress != null) {
+				LoginProgress.Dispose ();
+				LoginProgress = null;
+			}
+
 			if (PasswordLabel != null) {
 				PasswordLabel.Dispose ();
 				PasswordLabel = null;
@@ -119,11 +130,6 @@ namespace CmisSync
 			if (WarnText != null) {
 				WarnText.Dispose ();
 				WarnText = null;
-			}
-
-			if (LoginProgress != null) {
-				LoginProgress.Dispose ();
-				LoginProgress = null;
 			}
 		}
 	}
