@@ -162,6 +162,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     mapped.LastChangeToken = addedObject.ChangeToken;
                     mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                    if (mapped.RemoteObjectId != addedObject.Id) {
+                        this.Storage.RemoveObject(mapped);
+                        mapped.RemoteObjectId = addedObject.Id;
+                    }
 
                     this.Storage.SaveMappedObject(mapped);
                     OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
