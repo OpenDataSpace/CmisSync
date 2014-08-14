@@ -109,14 +109,18 @@ namespace CmisSync.Lib.Producer.Watcher
                     bool? check = this.fsFactory.IsDirectory(e.FullPath);
                     if (check != null) {
                         isDirectory = (bool)check;
-                        Guid fsGuid = Guid.Empty;
                         IFileSystemInfo fsInfo = isDirectory ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(e.FullPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(e.FullPath);
-                        string ea = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                        if (ea != null) {
-                            Guid.TryParse(ea, out fsGuid);
+                        Guid uuid = Guid.Empty;
+                        try {
+                            Guid? fsGuid = fsInfo.Uuid;
+                            if (fsGuid != null) {
+                                uuid = (Guid)fsGuid;
+                            }
+                        } catch(Exception) {
+                            uuid = Guid.Empty;
                         }
 
-                        this.AddEventToList(e, fsGuid, isDirectory);
+                        this.AddEventToList(e, uuid, isDirectory);
                     }
                 }
             } catch (Exception ex) {
