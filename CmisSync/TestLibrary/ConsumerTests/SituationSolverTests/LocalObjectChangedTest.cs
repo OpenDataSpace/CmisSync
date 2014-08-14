@@ -328,11 +328,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         {
             Guid uuid = Guid.NewGuid();
             var modificationDate = DateTime.UtcNow;
-            var newModificationDate = modificationDate.AddHours(1);
-            var newChangeToken = "newChangeToken";
             int fileLength = 20;
             byte[] content = new byte[fileLength];
-            byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
 
             var localFile = new Mock<IFileInfo>();
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));

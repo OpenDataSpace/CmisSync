@@ -30,11 +30,6 @@ namespace TestLibrary.QueueingTests
     public class DelayRetryAndNextSyncEventHandlerTest
     {
         [Test, Category("Fast")]
-        public void ConstructorTest() {
-            var underTest = new DelayRetryAndNextSyncEventHandler(Mock.Of<ISyncEventQueue>());
-        }
-
-        [Test, Category("Fast")]
         public void DoesNotHandleNonRetryEvent() {
             var underTest = new DelayRetryAndNextSyncEventHandler(Mock.Of<ISyncEventQueue>());
             var fileEvent = new FileEvent(Mock.Of<IFileInfo>()) { RetryCount = 0 };
