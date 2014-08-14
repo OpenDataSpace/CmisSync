@@ -301,7 +301,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 var fileInfo = this.fsFactory.AddFile(this.path, Guid.Empty, true);
 
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
-                fileInfo.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Throws(new FileNotFoundException());
+                fileInfo.Setup(f => f.Uuid).Throws(new FileNotFoundException());
 
                 this.WaitForThreshold();
                 this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
@@ -315,7 +315,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 var dirInfo = this.fsFactory.AddDirectory(this.path, Guid.Empty, true);
 
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
-                dirInfo.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Throws(new DirectoryNotFoundException());
+                dirInfo.Setup(f => f.Uuid).Throws(new DirectoryNotFoundException());
 
                 this.WaitForThreshold();
                 this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
