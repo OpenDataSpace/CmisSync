@@ -310,12 +310,12 @@ namespace CmisSync.Lib.Producer.Crawler
             foreach (var child in localTree.Children) {
                 bool removeStoredMappedChild = false;
                 
-                IMappedObject storedMappedChild = FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
+                IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
                     var localPath = this.storage.GetLocalPath(storedMappedChild);
                     if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
                         // Copied
-                        AddCreatedEventToQueue(child.Item);
+                        this.AddCreatedEventToQueue(child.Item);
                     } else {
                         // Moved, Renamed, Updated or Equal
                         AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
@@ -326,7 +326,7 @@ namespace CmisSync.Lib.Producer.Crawler
                     }
                 } else {
                     // Added
-                    AddCreatedEventToQueue(child.Item);
+                    this.AddCreatedEventToQueue(child.Item);
                 }
 
                 this.CreateLocalEvents(storedObjects, child, eventMap);
@@ -342,6 +342,7 @@ namespace CmisSync.Lib.Producer.Crawler
             if (this.TryGetExtendedAttribute(fsInfo, out childGuid)) {
                return storedObjects.Find(o => o.Guid == childGuid);
             }
+
             return null;
         }
 
