@@ -223,6 +223,7 @@
     <Compile Include="Cmis\ConvenienceExtenders\CmisConvenienceExtenders.cs" />
     <Compile Include="Storage\Database\Entities\IFileConvenienceExtenders.cs" />
     <Compile Include="Storage\Database\DublicateGuidException.cs" />
+    <Compile Include="Queueing\DelayRetryAndNextSyncEventHandler.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectMoved.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

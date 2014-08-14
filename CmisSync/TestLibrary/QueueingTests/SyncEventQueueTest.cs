@@ -66,6 +66,7 @@ namespace TestLibrary.QueueingTests
                 queue.StopListener();
                 WaitFor(queue, (q) => { return q.IsStopped; });
                 Assert.True(queue.IsStopped);
+                Assert.True(queue.IsEmpty);
             }
 
             managerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Exactly(2));

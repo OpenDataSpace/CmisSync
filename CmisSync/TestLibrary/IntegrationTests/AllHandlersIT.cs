@@ -379,7 +379,8 @@ namespace TestLibrary.IntegrationTests
             var ignoreContentChangesFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage, session.Object);
             manager.AddEventHandler(ignoreContentChangesFilter);
 
-
+            var delayRetryAndNextSyncEventHandler = new DelayRetryAndNextSyncEventHandler(queue);
+            manager.AddEventHandler(delayRetryAndNextSyncEventHandler);
 
             /* This is not implemented yet
             var failedOperationsFilder = new FailedOperationsFilter(queue);

@@ -32,7 +32,7 @@ M: System.Void CmisSync.CmisSyncMenuItem::.ctor(System.String)
 #Configure setting
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 M: System.Void CmisSync.UI::.cctor()
-M: System.Void TestLibrary.DataTests.PathMatcherTest::SetUp()
+M: System.Void TestLibrary.PathMatcherTests.PathMatcherTest::SetUp()
 T: TestLibrary.EventsTests.EventsFilterTests.IgnoredFolderNamesFilterTest
 
 #Required to be type long for error code
@@ -117,4 +117,4 @@ R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
 M: System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>> CmisSync.Lib.Storage.Database.IObjectTree`1::get_Children()
 M: System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>> CmisSync.Lib.Storage.Database.ObjectTree`1::get_Children()
 M: System.Void CmisSync.Lib.Storage.Database.ObjectTree`1::set_Children(System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>>)
-M: CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject> CmisSync.Lib.Producer.Crawler.DescendantsCrawler::GetRemoteDirectoryTree(DotCMIS.Client.IFolder,System.Collections.Generic.IList`1<DotCMIS.Client.ITree`1<DotCMIS.Client.IFileableCmisObject>>,CmisSync.Lib.Events.Filter.IFilterAggregator) 
+M: CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject> CmisSync.Lib.Producer.Crawler.DescendantsCrawler::GetRemoteDirectoryTree(DotCMIS.Client.IFolder,System.Collections.Generic.IList`1<DotCMIS.Client.ITree`1<DotCMIS.Client.IFileableCmisObject>>,CmisSync.Lib.Filter.IFilterAggregator)

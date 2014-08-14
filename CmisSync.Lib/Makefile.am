@@ -128,6 +128,7 @@ SOURCES =  \
 	Queueing/AbstractEventProducer.cs \
 	Queueing/ActiveActivitiesManager.cs \
 	Queueing/DebugLoggingHandler.cs \
+	Queueing/DelayRetryAndNextSyncEventHandler.cs \
 	Queueing/EventHandlerPriorities.cs \
 	Queueing/GenericSyncEventHandler.cs \
 	Queueing/IDisposableSyncEventQueue.cs \

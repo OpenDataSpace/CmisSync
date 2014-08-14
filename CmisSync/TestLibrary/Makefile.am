@@ -67,13 +67,13 @@ SOURCES =  \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
-	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/RepositoryUtilsTests.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
@@ -88,6 +88,7 @@ SOURCES =  \
 	ProducerTests/WatcherTests/WatcherTest.cs \
 	ProducerTests/WatcherTests/WatcherTestUtils.cs \
 	QueueingTests/DebugLoggingHandlerTest.cs \
+	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
 	EventManagerInitializerTest.cs \

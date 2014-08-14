@@ -48,7 +48,6 @@ namespace CmisSync.Lib.Producer.Crawler
         private IFileSystemInfoFactory fsFactory;
         private IFilterAggregator filter;
         private IActivityListener activityListener;
-        private bool dropNextSyncEvents = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescendantsCrawler"/> class.
@@ -189,26 +188,12 @@ namespace CmisSync.Lib.Producer.Crawler
         public override bool Handle(ISyncEvent e)
         {
             if(e is StartNextSyncEvent) {
-                if (this.dropNextSyncEvents) {
-                    return true;
-                }
-
                 Logger.Debug("Starting DecendantsCrawlSync upon " + e);
-                try {
-                    using (var activity = new ActivityListenerResource(this.activityListener)) {
-                        this.CrawlDescendants();
-                    }
-                } finally {
-                    this.dropNextSyncEvents = true;
-                    Queue.AddEvent(new ResetStartNextCrawlSyncFilterEvent());
+                using (var activity = new ActivityListenerResource(this.activityListener)) {
+                    this.CrawlDescendants();
                 }
 
                 this.Queue.AddEvent(new FullSyncCompletedEvent(e as StartNextSyncEvent));
-                return true;
-            }
-
-            if(e is ResetStartNextCrawlSyncFilterEvent) {
-                this.dropNextSyncEvents = false;
                 return true;
             }
 
@@ -323,41 +308,46 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             foreach (var child in localTree.Children) {
-                Guid childGuid;
-                IMappedObject storedMappedChild = null;
-                bool copied = false;
-                if (this.TryGetExtendedAttribute(child.Item, out childGuid)) {
-                    storedMappedChild = storedObjects.Find(o => o.Guid == childGuid);
-                    if (storedMappedChild != null) {
+                bool removeStoredMappedChild = false;
+                
+                IMappedObject storedMappedChild = FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
+                if (storedMappedChild != null) {
+                    var localPath = this.storage.GetLocalPath(storedMappedChild);
+                    if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
                         // Copied
-                        var localPath = storage.GetLocalPath(storedMappedChild);
-                        if((!localPath.Equals(child.Item.FullName)) && fsFactory.IsDirectory(localPath) != null){
-                            AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CREATED, src: this);
-                            Queue.AddEvent(addEvent);
-                            copied = true;
-                        }else{
-                            // Moved, Renamed, Updated or Equal
-                            AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
-                            AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
-    
-                            eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
-                        }
+                        AddCreatedEventToQueue(child.Item);
                     } else {
-                        // Added
-                        AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CREATED, src: this);
-                        Queue.AddEvent(addEvent);
+                        // Moved, Renamed, Updated or Equal
+                        AbstractFolderEvent correspondingRemoteEvent = GetCorrespondingRemoteEvent(eventMap, storedMappedChild);
+                        AbstractFolderEvent createdEvent = this.CreateLocalEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
+
+                        eventMap[storedMappedChild.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(createdEvent, correspondingRemoteEvent);
+                        removeStoredMappedChild = true;
                     }
                 } else {
                     // Added
-                    AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, child.Item, localChange: MetaDataChangeType.CREATED, src: this);
-                    Queue.AddEvent(addEvent);
+                    AddCreatedEventToQueue(child.Item);
                 }
 
                 this.CreateLocalEvents(storedObjects, child, eventMap);
-                if (storedMappedChild != null && copied == false) {
+
+                if(removeStoredMappedChild) {
                     storedObjects.Remove(storedMappedChild);
                 }
             }
+        }
+
+        private IMappedObject FindStoredObjectByFileSystemInfo(List<IMappedObject> storedObjects, IFileSystemInfo fsInfo) {
+            Guid childGuid;
+            if (this.TryGetExtendedAttribute(fsInfo, out childGuid)) {
+               return storedObjects.Find(o => o.Guid == childGuid);
+            }
+            return null;
+        }
+
+        private void AddCreatedEventToQueue(IFileSystemInfo fsInfo) {
+            AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(null, fsInfo, localChange: MetaDataChangeType.CREATED, src: this);
+            this.Queue.AddEvent(addEvent);
         }
 
         private AbstractFolderEvent CreateRemoteEventBasedOnStorage(IFileableCmisObject cmisObject, IMappedObject storedParent, IMappedObject storedMappedChild)
@@ -508,13 +498,6 @@ namespace CmisSync.Lib.Producer.Crawler
             foreach(var id in mutualIds) {
                 removedLocalObjects.Remove(id);
                 removedRemoteObjects.Remove(id);
-            }
-        }
-
-        private class ResetStartNextCrawlSyncFilterEvent : ISyncEvent, IRemoveFromLoggingEvent {
-            public override string ToString()
-            {
-                return string.Format("[ResetStartNextCrawlSyncFilterEvent]");
             }
         }
     }

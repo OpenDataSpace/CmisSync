@@ -78,6 +78,7 @@ namespace CmisSync.Lib.Queueing
             map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
             map[typeof(IgnoreAlreadyHandledFsEventsFilter)] = FILTER;
             map[typeof(IgnoreAlreadyHandledContentChangeEventsFilter)] = FILTER;
+            map[typeof(DelayRetryAndNextSyncEventHandler)] = FILTER;
 
             // Below filter but higher than remote/local accumulators
             map[typeof(RemoteObjectMovedOrRenamedAccumulator)] = HIGHER;

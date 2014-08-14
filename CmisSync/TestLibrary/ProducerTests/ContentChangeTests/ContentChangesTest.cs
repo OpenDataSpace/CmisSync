@@ -286,37 +286,5 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
             Assert.IsTrue(changes.Handle(startSyncEvent));
             queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
         }
-
-        [Test, Category("Fast"), Category("ContentChange")]
-        public void DropAllStartNextSyncEventsInQueueWhichAreAvailableUntilRequestIsDone()
-        {
-            var queue = new Mock<ISyncEventQueue>();
-            ISyncEvent resetToken = null;
-            queue.Setup(q => q.AddEvent(It.Is<ISyncEvent>(e => !(e is ContentChangeEvent)))).Callback<ISyncEvent>(e => resetToken = e);
-            var storage = new Mock<IMetaDataStorage>();
-            storage.SetupProperty(s => s.ChangeLogToken, "lastToken");
-
-            Mock<ISession> session = MockSessionUtil.GetSessionMockReturning3Changesin2Batches();
-
-            var startSyncEvent = new StartNextSyncEvent(false);
-            var changes = new ContentChanges(session.Object, storage.Object, queue.Object, this.maxNumberOfContentChanges, this.isPropertyChangesSupported);
-
-            // Start the first regular sync
-            Assert.That(changes.Handle(startSyncEvent), Is.True);
-            Assert.That(resetToken, Is.Not.Null);
-            queue.Verify(foo => foo.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(4));
-
-            // Drop next incomming start sync events
-            Assert.That(changes.Handle(startSyncEvent), Is.True);
-            Assert.That(changes.Handle(startSyncEvent), Is.True);
-
-            // Handle reset event
-            Assert.That(changes.Handle(resetToken), Is.True);
-
-            // Executes next sync and passes a new reset token to queue
-            Assert.That(changes.Handle(startSyncEvent), Is.True);
-            queue.Verify(foo => foo.AddEvent(It.IsAny<ContentChangeEvent>()), Times.Exactly(3));
-            queue.Verify(foo => foo.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(5));
-        }
     }
 }

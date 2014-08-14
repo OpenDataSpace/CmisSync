@@ -102,8 +102,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ICmisObject addedObject;
             try {
                 addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
-            } catch (CmisPermissionDeniedException) {
-                OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server.", localFileSystemInfo.FullName));
+            } catch (CmisPermissionDeniedException e) {
+                OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
                 return;
             }
 

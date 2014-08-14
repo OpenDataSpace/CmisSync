@@ -25,6 +25,7 @@ using System.Windows;
 using System.Globalization;
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Config;
 
 namespace CmisSync
 {
@@ -96,7 +97,8 @@ namespace CmisSync
                     }
                 }
                 Controller.Warning = true;
-                this.trayicon.ShowBalloonTip(30000,
+                this.trayicon.ShowBalloonTip(
+                    30000,
                     String.Format(Properties_Resources.NotificationCredentialsError, reponame),
                     Properties_Resources.NotificationChangeCredentials,
                     ToolTipIcon.Warning);
@@ -122,12 +124,13 @@ namespace CmisSync
         {
             lock (repoCreditsErrorListLock)
             {
-                foreach (string reponame in repoCreditsErrorList)
-                {
+                foreach (string reponame in repoCreditsErrorList) {
                     Program.Controller.EditRepositoryCredentials(reponame);
                 }
+
                 repoCreditsErrorList.Clear();
             }
+
             Controller.Warning = false;
         }
 
@@ -159,21 +162,21 @@ namespace CmisSync
                 {
                     BeginInvoke((Action)delegate
                     {
-                        if (icon_frame < 0)
-                        {
+                        if (icon_frame < 0) {
                             this.trayicon.Icon = SystemIcons.Error;
                             return;
                         }
-                        if (icon_frame > 0)
-                        {
+
+                        if (icon_frame > 0) {
                             this.trayicon.Icon = animationFrames[icon_frame];
                             return;
                         }
-                        if (Controller.Warning)
-                        {
+
+                        if (Controller.Warning) {
                             this.trayicon.Icon = SystemIcons.Warning;
                             return;
                         }
+
                         this.trayicon.Icon = animationFrames[icon_frame];
                         return;
                     });
@@ -227,31 +230,34 @@ namespace CmisSync
                 }
             };
 
-            //Transmission Submenu.
-            Controller.UpdateTransmissionMenuEvent += delegate
+            if (ConfigManager.CurrentConfig.Notifications)
             {
-                if(IsHandleCreated)
+                //Transmission Submenu.
+                Controller.UpdateTransmissionMenuEvent += delegate
                 {
-                    BeginInvoke((Action)delegate
+                    if (IsHandleCreated)
                     {
-                        this.stateItem.DropDownItems.Clear();
-                        List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
-                        foreach (FileTransmissionEvent transmission in transmissions)
+                        BeginInvoke((Action)delegate
                         {
-                            ToolStripMenuItem transmission_sub_menu_item = new TransmissionMenuItem(transmission, this);
-                            this.stateItem.DropDownItems.Add(transmission_sub_menu_item);
-                        }
-                        if (transmissions.Count > 0)
-                        {
-                            this.stateItem.Enabled = true;
-                        }
-                        else 
-                        {
-                            this.stateItem.Enabled = false;
-                        }
-                    });
-                }
-            };
+                            this.stateItem.DropDownItems.Clear();
+                            List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
+                            foreach (FileTransmissionEvent transmission in transmissions)
+                            {
+                                ToolStripMenuItem transmission_sub_menu_item = new TransmissionMenuItem(transmission, this);
+                                this.stateItem.DropDownItems.Add(transmission_sub_menu_item);
+                            }
+                            if (transmissions.Count > 0)
+                            {
+                                this.stateItem.Enabled = true;
+                            }
+                            else
+                            {
+                                this.stateItem.Enabled = false;
+                            }
+                        });
+                    }
+                };
+            }
         }
 
 
@@ -433,7 +439,6 @@ namespace CmisSync
             this.traymenu.Items.Add(this.exitItem);
         }
 
-
         /// <summary>
         /// Create the animation frames from image files.
         /// </summary>
@@ -516,7 +521,7 @@ namespace CmisSync
     {
         private FileTransmissionType Type { get; set; }
         private string Path { get; set; }
-        private Control Parent;
+        private Control ParentControl;
         private FileTransmissionEvent transmissionEvent;
 
         private int updateInterval = 1;
@@ -553,7 +558,7 @@ namespace CmisSync
         {
             Path = e.Path;
             Type = e.Type;
-            Parent = parent;
+            ParentControl = parent;
             transmissionEvent = e;
             switch (Type)
             {
@@ -587,7 +592,7 @@ namespace CmisSync
                 }
                 updateTime = DateTime.Now;
 
-                Parent.BeginInvoke((Action)delegate()
+                ParentControl.BeginInvoke((Action)delegate()
                 {
                     lock (disposeLock)
                     {
