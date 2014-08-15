@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using System.Collections.Generic;
 
 namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
@@ -366,6 +367,40 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
                 remoteFile.VerifySetContentStream();
             }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void PermissionDeniedOnModificationDateSavesTheLocalDate()
+        {
+            Guid uuid = Guid.NewGuid();
+            var modificationDate = DateTime.UtcNow;
+
+            var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
+            localFolder.Setup(f => f.FullName).Returns("path");
+            localFolder.SetupGuid(uuid);
+            localFolder.Setup(f => f.Exists).Returns(true);
+
+            var mappedObject = new MappedObject(
+                "name",
+                "remoteId",
+                MappedObjectType.Folder,
+                "parentId",
+                "changeToken")
+            {
+                Guid = uuid,
+                LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
+                LastLocalWriteTimeUtc = modificationDate,
+            };
+            this.storage.AddMappedFolder(mappedObject, "path");
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "name", "path", "parentId");
+
+            remoteFolder.Setup(r => r.UpdateProperties(It.IsAny<IDictionary<string, object>>(), true)).Throws(new CmisPermissionDeniedException());
+
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "name", "parentId", "changeToken", true, localFolder.Object.LastWriteTimeUtc, remoteFolder.Object.LastModificationDate);
+            remoteFolder.Verify(r => r.UpdateProperties(It.IsAny<IDictionary<string, object>>(), true));
         }
 
         [Test, Category("Fast"), Category("Solver")]
