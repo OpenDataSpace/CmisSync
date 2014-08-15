@@ -225,6 +225,8 @@
     <Compile Include="Storage\Database\DublicateGuidException.cs" />
     <Compile Include="Queueing\DelayRetryAndNextSyncEventHandler.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectMoved.cs" />
+    <Compile Include="Queueing\ConnectionScheduler.cs" />
+    <Compile Include="Queueing\IConnectionScheduler.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

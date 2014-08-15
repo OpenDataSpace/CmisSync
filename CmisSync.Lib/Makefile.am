@@ -127,10 +127,12 @@ SOURCES =  \
 	Producer/Watcher/WatcherConsumer.cs \
 	Queueing/AbstractEventProducer.cs \
 	Queueing/ActiveActivitiesManager.cs \
+	Queueing/ConnectionScheduler.cs \
 	Queueing/DebugLoggingHandler.cs \
 	Queueing/DelayRetryAndNextSyncEventHandler.cs \
 	Queueing/EventHandlerPriorities.cs \
 	Queueing/GenericSyncEventHandler.cs \
+	Queueing/IConnectionScheduler.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \

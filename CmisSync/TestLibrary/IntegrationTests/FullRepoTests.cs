@@ -62,6 +62,7 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Queueing;
 
     using DotCMIS;
+    using DotCMIS.Binding;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
 
@@ -896,6 +897,18 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
+        private class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
+
+            public BlockingSingleConnectionScheduler(ConnectionScheduler original) : base(original) {
+            }
+
+            public override void Start() {
+                if (!base.Connect()) {
+                    Assert.Fail("Connection failed");
+                }
+            }
+        }
+
         private class CmisRepoMock : CmisSync.Lib.Cmis.Repository
         {
             public SingleStepEventQueue SingleStepQueue;
@@ -913,6 +926,9 @@ namespace TestLibrary.IntegrationTests
             }
 
             public override void Initialize() {
+                ConnectionScheduler original = this.connectionScheduler;
+                this.connectionScheduler = new BlockingSingleConnectionScheduler(original);
+                original.Dispose();
                 base.Initialize();
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
                 this.Scheduler.Stop();
