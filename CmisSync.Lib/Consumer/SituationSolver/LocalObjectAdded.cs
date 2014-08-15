@@ -97,7 +97,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             completewatch.Start();
             Logger.Debug("Starting LocalObjectAdded");
             string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
-            Guid uuid = WriteOrUseUuidIfSupported(localFileSystemInfo);
+            Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
 
             ICmisObject addedObject;
             try {
