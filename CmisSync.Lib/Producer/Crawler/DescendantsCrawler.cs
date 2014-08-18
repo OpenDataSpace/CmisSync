@@ -22,7 +22,6 @@ namespace CmisSync.Lib.Producer.Crawler
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
@@ -42,12 +41,10 @@ namespace CmisSync.Lib.Producer.Crawler
     public class DescendantsCrawler : ReportingSyncEventHandler
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(DescendantsCrawler));
-        private IFolder remoteFolder;
-        private IDirectoryInfo localFolder;
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
-        private IFilterAggregator filter;
         private IActivityListener activityListener;
+        private DescendantsTreeBuilder treebuilder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescendantsCrawler"/> class.
@@ -92,92 +89,14 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             this.storage = storage;
-            this.remoteFolder = remoteFolder;
-            this.localFolder = localFolder;
-            this.filter = filter;
             this.activityListener = activityListener;
+            this.treebuilder = new DescendantsTreeBuilder(storage, remoteFolder, localFolder, filter);
 
             if (fsFactory == null) {
                 this.fsFactory = new FileSystemInfoFactory();
             } else {
                 this.fsFactory = fsFactory;
             }
-        }
-
-        /// <summary>
-        /// Gets the local directory tree.
-        /// </summary>
-        /// <returns>The local directory tree.</returns>
-        /// <param name="parent">Parent directory.</param>
-        /// <param name="filter">Filter for files.</param>
-        public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
-            var children = new List<IObjectTree<IFileSystemInfo>>();
-            foreach (var child in parent.GetDirectories()) {
-                string reason;
-                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
-                    children.Add(GetLocalDirectoryTree(child, filter));
-                } else {
-                    Logger.Debug(reason);
-                }
-            }
-
-            foreach (var file in parent.GetFiles()) {
-                string reason;
-                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
-                    children.Add(new ObjectTree<IFileSystemInfo> {
-                        Item = file,
-                        Children = new List<IObjectTree<IFileSystemInfo>>()
-                    });
-                } else {
-                    Logger.Debug(reason);
-                }
-            }
-
-            IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {
-                Item = parent,
-                Children = children
-            };
-            return tree;
-        }
-
-        /// <summary>
-        /// Gets the remote directory tree.
-        /// </summary>
-        /// <returns>The remote directory tree.</returns>
-        /// <param name="parent">Parent folder.</param>
-        /// <param name="descendants">Descendants of remote object.</param>
-        /// <param name="filter">Filter of ignored or invalid files and folder</param>
-        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants, IFilterAggregator filter) {
-            IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
-            if (descendants != null) {
-                foreach (var child in descendants) {
-                    if (child.Item is IFolder) {
-                        string reason;
-                        if (!filter.FolderNamesFilter.CheckFolderName(child.Item.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(child.Item.Name, out reason)) {
-                            children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children, filter));
-                        } else {
-                            Logger.Debug(reason);
-                        }
-                    } else if (child.Item is IDocument) {
-                        string reason;
-                        if (!filter.FileNamesFilter.CheckFile(child.Item.Name, out reason)) {
-                            children.Add(new ObjectTree<IFileableCmisObject> {
-                                Item = child.Item,
-                                Children = new List<IObjectTree<IFileableCmisObject>>()
-                            });
-                        } else {
-                            Logger.Debug(reason);
-                        }
-                    }
-                }
-            }
-
-            var tree = new ObjectTree<IFileableCmisObject> {
-                Item = parent,
-                Children = children
-            };
-
-            return tree;
         }
 
         /// <summary>
@@ -226,18 +145,10 @@ namespace CmisSync.Lib.Producer.Crawler
 
         private void CrawlDescendants()
         {
-            IObjectTree<IMappedObject> storedTree = null;
-            IObjectTree<IFileSystemInfo> localTree = null;
-            IObjectTree<IFileableCmisObject> remoteTree = null;
-
-            // Request 3 trees in parallel
-            Task[] tasks = new Task[3];
-            tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
-            tasks[1] = Task.Factory.StartNew(() => localTree = GetLocalDirectoryTree(this.localFolder, this.filter));
-            tasks[2] = Task.Factory.StartNew(() => remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter));
-
-            // Wait until all tasks are finished
-            Task.WaitAll(tasks);
+            DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
+            IObjectTree<IMappedObject> storedTree = trees.StoredTree;
+            IObjectTree<IFileSystemInfo> localTree = trees.LocalTree;
+            IObjectTree<IFileableCmisObject> remoteTree = trees.RemoteTree;
 
             List<IMappedObject> storedObjectsForRemote = storedTree.ToList();
             List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>(storedObjectsForRemote);

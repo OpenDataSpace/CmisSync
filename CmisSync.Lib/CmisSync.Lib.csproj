@@ -228,6 +228,7 @@
     <Compile Include="Queueing\ConnectionScheduler.cs" />
     <Compile Include="Queueing\IConnectionScheduler.cs" />
     <Compile Include="Producer\Crawler\DescendantsTreeBuilder.cs" />
+    <Compile Include="Producer\Crawler\DescendantsTreeCollection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
