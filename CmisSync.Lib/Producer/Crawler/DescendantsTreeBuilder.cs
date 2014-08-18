@@ -38,7 +38,7 @@ namespace CmisSync.Lib.Producer.Crawler
     /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a null
     /// reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
     /// </exception>
-    public class DescendantsTreeBuilder
+    public class DescendantsTreeBuilder : IDescendantsTreeBuilder
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(DescendantsTreeBuilder));
         private IMetaDataStorage storage;
