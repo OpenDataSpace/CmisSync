@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Producer.Crawler
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
         private IActivityListener activityListener;
-        private DescendantsTreeBuilder treebuilder;
+        private IDescendantsTreeBuilder treebuilder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DescendantsCrawler"/> class.
@@ -160,6 +160,7 @@ namespace CmisSync.Lib.Producer.Crawler
             Dictionary<string, IFileSystemInfo> removedLocalObjects = new Dictionary<string, IFileSystemInfo>();
             Dictionary<string, IFileSystemInfo> removedRemoteObjects = new Dictionary<string, IFileSystemInfo>();
 
+            //remove the top level folders
             storedObjectsForLocal.Remove(storedTree.Item);
             storedObjectsForRemote.Remove(storedTree.Item);
 
