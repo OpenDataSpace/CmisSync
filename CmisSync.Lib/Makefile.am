@@ -119,6 +119,7 @@ SOURCES =  \
 	Producer/ContentChange/ContentChangeEventTransformer.cs \
 	Producer/ContentChange/ContentChanges.cs \
 	Producer/Crawler/DescendantsCrawler.cs \
+	Producer/Crawler/DescendantsTreeBuilder.cs \
 	Producer/Watcher/CreatedChangedDeletedFileSystemEventHandler.cs \
 	Producer/Watcher/IWatcherProducer.cs \
 	Producer/Watcher/MacWatcher.cs \
