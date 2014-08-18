@@ -39,6 +39,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Data;
+    using DotCMIS.Data.Impl;
     using DotCMIS.Enums;
     using DotCMIS.Exceptions;
 
@@ -244,19 +246,38 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 watch.Stop();
                 Logger.Debug(string.Format("GetFolder in [{0} msec]", watch.ElapsedMilliseconds));
             } else {
+                bool emptyFile = (localFile as IFileInfo).Length == 0;
                 properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
                 watch.Start();
-                var objId = session.CreateDocument(properties, new ObjectId(parentId), null, null, null, null, null);
-                watch.Stop();
-                Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
-                watch.Restart();
-                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken", "cmis:contentStreamLength");
-                result = session.GetObject(objId, operationContext);
-                watch.Stop();
-                Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
+                using (var emptyStream = new MemoryStream(new byte[0])) {
+                    var objId = session.CreateDocument(
+                        properties,
+                        new ObjectId(parentId),
+                        emptyFile ? this.CreateEmptyStream(name, emptyStream) : null,
+                        null,
+                        null,
+                        null,
+                        null);
+                    watch.Stop();
+                    Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
+                    watch.Restart();
+                    var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken", "cmis:contentStreamLength");
+                    result = session.GetObject(objId, operationContext);
+                    watch.Stop();
+                    Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
+                }
             }
 
             return result;
+        }
+
+        private IContentStream CreateEmptyStream(string filename, Stream emptyStream) {
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = filename;
+            contentStream.MimeType = Cmis.MimeType.GetMIMEType(filename);
+            contentStream.Length = 0;
+            contentStream.Stream = emptyStream;
+            return contentStream;
         }
     }
 }

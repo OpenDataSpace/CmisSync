@@ -172,7 +172,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
                 It.Is<IObjectId>(o => o.Id == parentId),
-                It.Is<IContentStream>(st => st == null),
+                It.Is<IContentStream>(st => st != null && st.Length == 0),
                 null,
                 null,
                 null,
@@ -200,13 +200,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, contentSize: 0);
             this.session.Verify(
                 s => s.CreateDocument(
-                    It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
-                    It.Is<IObjectId>(o => o.Id == parentId),
-                    It.Is<IContentStream>(st => st == null),
-                    null,
-                    null,
-                    null,
-                    null),
+                It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
+                It.Is<IObjectId>(o => o.Id == parentId),
+                It.Is<IContentStream>(st => VerifyEmptyStream(st)),
+                null,
+                null,
+                null,
+                null),
                 Times.Once());
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
@@ -235,7 +235,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 s => s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
                 It.Is<IObjectId>(o => o.Id == parentId),
-                It.Is<IContentStream>(st => st == null),
+                It.Is<IContentStream>(st => this.VerifyEmptyStream(st)),
                 null,
                 null,
                 null,
@@ -361,7 +361,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session.Setup(s => s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == fileName),
                 It.Is<IObjectId>(o => o.Id == parentId),
-                null,
+                It.IsAny<IContentStream>(),
                 null,
                 null,
                 null,
@@ -423,7 +423,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session.Setup(s => s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == fileName),
                 It.Is<IObjectId>(o => o.Id == parentId),
-                null,
+                It.Is<IContentStream>(stream => SetupFutureRemoteDocStream(Mock.Get(futureRemoteDoc), stream)),
                 null,
                 null,
                 null,
@@ -456,6 +456,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             solver.Solve(fileInfo.Object, null);
             documentMock = Mock.Get(futureRemoteDoc);
             Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
+        }
+
+        private bool SetupFutureRemoteDocStream(Mock<IDocument> doc, IContentStream stream) {
+            if (stream == null) {
+                return true;
+            } else {
+                doc.Setup(d => d.ContentStreamLength).Returns(stream.Length);
+                doc.Setup(d => d.ContentStreamFileName).Returns(stream.FileName);
+                doc.Setup(d => d.ContentStreamMimeType).Returns(stream.MimeType);
+                return true;
+            }
         }
 
         private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes, out Mock<IFolder> folderMock, Guid? existingGuid = null)
@@ -492,6 +503,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             folderMock = Mock.Get(futureRemoteFolder);
             return dirInfo;
+        }
+
+        private bool VerifyEmptyStream(IContentStream stream) {
+            Assert.That(stream, Is.Not.Null);
+            Assert.That(stream.Length, Is.EqualTo(0));
+            Assert.That(string.IsNullOrEmpty(stream.MimeType), Is.False);
+            return true;
         }
     }
 }
