@@ -277,6 +277,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            remoteFolder.Refresh();
             remoteFolder.Rename("Dog", true);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
