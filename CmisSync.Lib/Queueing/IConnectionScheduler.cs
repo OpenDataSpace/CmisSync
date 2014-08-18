@@ -20,6 +20,7 @@
 namespace CmisSync.Lib
 {
     using System;
+    using CmisSync.Lib.Queueing;
 
     /// <summary>
     /// Connection scheduler interface.

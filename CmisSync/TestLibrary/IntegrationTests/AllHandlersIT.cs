@@ -40,6 +40,7 @@ namespace TestLibrary.IntegrationTests
 
     using DBreeze;
 
+    using DotCMIS.Binding;
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -332,6 +333,9 @@ namespace TestLibrary.IntegrationTests
             SingleStepEventQueue queue = new SingleStepEventQueue(manager);
 
             manager.AddEventHandler(observer);
+
+            var connectionScheduler = new ConnectionScheduler(new RepoInfo(), queue, Mock.Of<ISessionFactory>(), Mock.Of<IAuthenticationProvider>());
+            manager.AddEventHandler(connectionScheduler);
 
             var changes = new ContentChanges(session.Object, storage, queue, this.maxNumberOfContentChanges, this.isPropertyChangesSupported);
             manager.AddEventHandler(changes);

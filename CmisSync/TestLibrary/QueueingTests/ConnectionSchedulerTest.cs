@@ -217,12 +217,12 @@ namespace TestLibrary.QueueingTests
             var waitHandle = new AutoResetEvent(false);
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
                 .Callback<IDictionary<string, string>, object, object, object>(
-                    (d, x, y, z) => this.VerifyConnectionProperties(d)).Throws(new CmisRuntimeException("Proxy Authentication Required"));
+                    (d, x, y, z) => this.VerifyConnectionProperties(d)).Throws(new CmisRuntimeException("Some generic exception"));
             this.queue.Setup(q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback(() => waitHandle.Set());
             using (var scheduler = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
                 scheduler.Start();
                 waitHandle.WaitOne();
-                this.queue.Verify(q => q.AddEvent(It.IsAny<ProxyAuthRequiredEvent>()), Times.Once());
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ExceptionEvent>()), Times.Once());
                 this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
                     .Callback<IDictionary<string, string>, object, object, object>(
                         (d, x, y, z) => this.VerifyConnectionProperties(d)).Returns(this.session.Object);
@@ -234,6 +234,95 @@ namespace TestLibrary.QueueingTests
             }
 
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void NoLoginRetryAfterPermissionDeniedExceptionOccured() {
+            var waitHandle = new AutoResetEvent(false);
+            this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                .Callback<IDictionary<string, string>, object, object, object>(
+                    (d, x, y, z) => this.VerifyConnectionProperties(d)).Throws<CmisPermissionDeniedException>();
+            this.queue.Setup(q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback(() => waitHandle.Set());
+            using (var scheduler = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
+                scheduler.Start();
+                waitHandle.WaitOne();
+                this.queue.Verify(q => q.AddEvent(It.IsAny<PermissionDeniedEvent>()), Times.Once());
+                this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                    .Callback<IDictionary<string, string>, object, object, object>(
+                        (d, x, y, z) => this.VerifyConnectionProperties(d)).Returns(this.session.Object);
+                Assert.That(waitHandle.WaitOne(3 * this.interval), Is.False);
+                this.queue.Verify(q => q.AddEvent(It.IsAny<PermissionDeniedEvent>()), Times.Once());
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
+            }
+
+            this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Never());
+        }
+
+        [Test, Category("Fast")]
+        public void LoginRetryAfterPermissionDeniedExceptionOccuredAndConfigHasBeenChanged() {
+            var waitHandle = new AutoResetEvent(false);
+            this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                .Callback<IDictionary<string, string>, object, object, object>(
+                    (d, x, y, z) => this.VerifyConnectionProperties(d)).Throws<CmisPermissionDeniedException>();
+            this.queue.Setup(q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback(() => waitHandle.Set());
+            using (var underTest = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
+                underTest.Start();
+                waitHandle.WaitOne();
+                this.queue.Verify(q => q.AddEvent(It.IsAny<PermissionDeniedEvent>()), Times.Once());
+                this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                    .Callback<IDictionary<string, string>, object, object, object>(
+                        (d, x, y, z) => this.VerifyConnectionProperties(d)).Returns(this.session.Object);
+                Assert.That(waitHandle.WaitOne(3 * this.interval), Is.False);
+                this.queue.Verify(q => q.AddEvent(It.IsAny<PermissionDeniedEvent>()), Times.Once());
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(1));
+                underTest.Handle(new RepoConfigChangedEvent(this.repoInfo));
+                Assert.That(waitHandle.WaitOne(3 * this.interval), Is.True);
+                this.queue.Verify(q => q.AddEvent(It.IsAny<PermissionDeniedEvent>()), Times.Once());
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
+                this.queue.Verify(q => q.AddEvent(It.IsAny<SuccessfulLoginEvent>()), Times.Once());
+                Assert.That(waitHandle.WaitOne(3 * this.interval), Is.False);
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
+            }
+
+            this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void LoginRetryAfterConfigHasBeenChanged() {
+            var waitHandle = new AutoResetEvent(false);
+            var newSession = new Mock<ISession>();
+            newSession.SetupCreateOperationContext();
+            this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                .Callback<IDictionary<string, string>, object, object, object>(
+                    (d, x, y, z) => this.VerifyConnectionProperties(d))
+                    .Returns(this.session.Object);
+            this.queue.Setup(q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback(() => waitHandle.Set());
+            using (var underTest = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
+                underTest.Start();
+                waitHandle.WaitOne();
+                this.queue.Verify(q => q.AddEvent(It.Is<SuccessfulLoginEvent>(l => l.Session == this.session.Object)), Times.Once());
+                Assert.That(waitHandle.WaitOne(3 * this.interval), Is.False);
+                this.queue.Verify(q => q.AddEvent(It.Is<SuccessfulLoginEvent>(l => l.Session == this.session.Object)), Times.Once());
+                underTest.Handle(new RepoConfigChangedEvent(this.repoInfo));
+                underTest.Handle(new RepoConfigChangedEvent(this.repoInfo));
+                underTest.Handle(new RepoConfigChangedEvent(this.repoInfo));
+                underTest.Handle(new RepoConfigChangedEvent(this.repoInfo));
+                this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                    .Returns(newSession.Object);
+                underTest.Handle(new RepoConfigChangedEvent(this.repoInfo));
+                Assert.That(waitHandle.WaitOne(3 * this.interval), Is.True);
+                waitHandle.WaitOne(this.interval);
+                waitHandle.WaitOne(this.interval);
+                waitHandle.WaitOne(this.interval);
+                waitHandle.WaitOne(this.interval);
+                waitHandle.WaitOne(this.interval);
+                this.queue.Verify(q => q.AddEvent(It.Is<SuccessfulLoginEvent>(l => l.Session == newSession.Object)), Times.Between(1, 5, Range.Inclusive));
+                Assert.That(waitHandle.WaitOne(3 * this.interval), Is.False);
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Between(2, 6, Range.Inclusive));
+            }
+
+            this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Between(1, 5, Range.Inclusive));
+            newSession.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Between(1, 5, Range.Inclusive));
         }
 
         private bool VerifyConnectionProperties(IDictionary<string, string> d)
