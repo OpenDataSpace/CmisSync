@@ -21,25 +21,25 @@ namespace CmisSync.Lib.Producer.Crawler
     using System;
     using System.Collections.Generic;
     using System.Linq;
- 
+
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.FileSystem;
-    
+
     using DotCMIS.Client;
 
     public class CrawlEventNotifier
     {
         private ISyncEventQueue Queue {get; set;}
-        
+
         public CrawlEventNotifier(ISyncEventQueue queue)
         {
             this.Queue = queue;
         }
-        
+
         public void MergeEventsAndAddToQueue(CrawlEventCollection events) {
             this.MergeAndSendEvents(events.mergableEvents);
-            
+
 
             this.FindReportAndRemoveMutualDeletedObjects(events.removedRemoteObjects, events.removedLocalObjects);
 
@@ -48,7 +48,7 @@ namespace CmisSync.Lib.Producer.Crawler
             this.InformAboutLocalObjectsDeleted(events.removedLocalObjects.Values);
             events.creationEvents.ForEach(e => this.Queue.AddEvent(e));
         }
-        
+
         private void MergeAndSendEvents(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
         {
             foreach (var entry in eventMap) {

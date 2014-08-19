@@ -20,7 +20,7 @@
 namespace CmisSync.Lib.Producer.Crawler
 {
     using System;
-    
+
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
@@ -153,7 +153,7 @@ namespace CmisSync.Lib.Producer.Crawler
             DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
 
             CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
-            
+
             this.notifier.MergeEventsAndAddToQueue(events);
         }
     }
