@@ -163,7 +163,7 @@ namespace CmisSync.Lib.Accumulator {
                 Guid? uuid = path.Uuid;
                 if (uuid != null) {
                     var mappedObject = this.storage.GetObjectByGuid((Guid)uuid);
-                    if(mappedObject != null) {
+                    if (mappedObject != null) {
                         return mappedObject.RemoteObjectId;
                     } else {
                         Logger.Debug("Uuid found in Extended Attribute but not in DataBase, do not fetch");
