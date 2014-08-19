@@ -232,6 +232,7 @@
     <Compile Include="Producer\Crawler\IDescendantsTreeBuilder.cs" />
     <Compile Include="Producer\Crawler\CrawlEventGenerator.cs" />
     <Compile Include="Producer\Crawler\CrawlEventCollection.cs" />
+    <Compile Include="Producer\Crawler\CrawlEventNotifier.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

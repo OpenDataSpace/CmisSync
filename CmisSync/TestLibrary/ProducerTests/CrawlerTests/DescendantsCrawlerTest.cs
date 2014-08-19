@@ -592,7 +592,8 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         {
             var generator = new CrawlEventGenerator(this.storage, this.fsFactory.Object);
             var treeBuilder = new DescendantsTreeBuilder(this.storage, this.remoteFolder.Object, this.localFolder.Object, this.filter);
-            return new DescendantsCrawler(this.queue.Object, treeBuilder, generator, this.listener.Object);
+            var notifier = new CrawlEventNotifier(this.queue.Object);
+            return new DescendantsCrawler(this.queue.Object, treeBuilder, generator, notifier, this.listener.Object);
         }
 
         private void VerifyThatListenerHasBeenUsed() {
