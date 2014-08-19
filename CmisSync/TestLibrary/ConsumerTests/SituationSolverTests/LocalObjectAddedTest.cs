@@ -51,6 +51,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<ISyncEventQueue> queue;
+        private byte[] emptyhash = SHA1.Create().ComputeHash(new byte[0]);
 
         [SetUp]
         public void SetUp()
@@ -166,7 +167,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, contentSize: 0);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, checksum: this.emptyhash, contentSize: 0);
             this.session.Verify(
                 s =>
                 s.CreateDocument(
@@ -197,7 +198,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, contentSize: 0);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, checksum: this.emptyhash, contentSize: 0);
             this.session.Verify(
                 s => s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")),
@@ -229,7 +230,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IDocument> document;
             this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, contentSize: 0);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, fileId, fileName, parentId, lastChangeToken, extendedAttributes, checksum: this.emptyhash, contentSize: 0);
             this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => o.Guid == uuid)));
             this.session.Verify(
                 s => s.CreateDocument(
