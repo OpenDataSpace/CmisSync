@@ -87,12 +87,32 @@ namespace CmisSync.Lib.Producer.Crawler
             this.eventGenerator = new CrawlEventGenerator(storage);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.DescendantsCrawler"/> class based on its internal classes.
+        /// This is mostly usefull for Unit Testing
+        /// </summary>
+        /// <param name='queue'>
+        /// The event queue.
+        /// </param>
+        /// <param name='builder'>
+        /// The DescendantsTreeBuilder.
+        /// </param>
+        /// <param name='generator'>
+        /// The CrawlEventGenerator.
+        /// </param>
+        /// <param name='activityListener'>
+        /// Activity listener.
+        /// </param>
+        /// <exception cref='ArgumentNullException'>
+        /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a
+        /// null reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
+        /// </exception>
         public DescendantsCrawler(
             ISyncEventQueue queue,
             IDescendantsTreeBuilder builder,
             CrawlEventGenerator generator,
             IActivityListener activityListener)
-            : base (queue)
+            : base(queue)
         {
             if (activityListener == null) {
                 throw new ArgumentNullException("Given activityListener is null");
