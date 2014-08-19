@@ -142,6 +142,16 @@ namespace CmisSync.Lib.Producer.Crawler
                 fileEvent.RemoteContent = ContentChangeType.CHANGED;
             }
         }
+        
+        private Dictionary<string, IFileSystemInfo> TransformToFileSystemInfoDict(List<IMappedObject> storedObjectList) {
+            Dictionary<string, IFileSystemInfo> ret = new Dictionary<string, IFileSystemInfo>();
+            foreach (var localDeleted in storedObjectList) {
+                string path = this.storage.GetLocalPath(localDeleted);
+                IFileSystemInfo info = localDeleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
+                ret.Add(localDeleted.RemoteObjectId, info);
+            }
+            return ret;
+        }
 
         private void CrawlDescendants()
         {
@@ -157,24 +167,13 @@ namespace CmisSync.Lib.Producer.Crawler
             this.CreateRemoteEvents(storedObjectsForRemote, remoteTree, eventMap);
             this.CreateLocalEvents(storedObjectsForLocal, localTree, eventMap);
 
-            Dictionary<string, IFileSystemInfo> removedLocalObjects = new Dictionary<string, IFileSystemInfo>();
-            Dictionary<string, IFileSystemInfo> removedRemoteObjects = new Dictionary<string, IFileSystemInfo>();
+            IMappedObject rootNode = storedTree.Item;
+            storedObjectsForLocal.Remove(rootNode);
+            storedObjectsForRemote.Remove(rootNode);
+            
+            Dictionary<string, IFileSystemInfo> removedLocalObjects = this.TransformToFileSystemInfoDict(storedObjectsForLocal); 
 
-            //remove the top level folders
-            storedObjectsForLocal.Remove(storedTree.Item);
-            storedObjectsForRemote.Remove(storedTree.Item);
-
-            foreach (var localDeleted in storedObjectsForLocal) {
-                string path = this.storage.GetLocalPath(localDeleted);
-                IFileSystemInfo info = localDeleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
-                removedLocalObjects.Add(localDeleted.RemoteObjectId, info);
-            }
-
-            foreach (var remoteDeleted in storedObjectsForRemote) {
-                string path = this.storage.GetLocalPath(remoteDeleted);
-                IFileSystemInfo info = remoteDeleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
-                removedRemoteObjects.Add(remoteDeleted.RemoteObjectId, info);
-            }
+            Dictionary<string, IFileSystemInfo> removedRemoteObjects = this.TransformToFileSystemInfoDict(storedObjectsForRemote);
 
             this.MergeAndSendEvents(eventMap);
 
