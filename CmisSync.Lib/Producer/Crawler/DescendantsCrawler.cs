@@ -53,17 +53,13 @@ namespace CmisSync.Lib.Producer.Crawler
         /// <param name="storage">Meta data storage.</param>
         /// <param name="filter">Aggregated filter.</param>
         /// <param name="activityListener">Activity listner.</param>
-        /// <param name="serverSupportsHashes">Indicates whether this server supports content hashes.</param>
-        /// <param name="fsFactory">File system info factory.</param>
         public DescendantsCrawler(
             ISyncEventQueue queue,
             IFolder remoteFolder,
             IDirectoryInfo localFolder,
             IMetaDataStorage storage,
             IFilterAggregator filter,
-            IActivityListener activityListener,
-            bool serverSupportsHashes = false,
-            IFileSystemInfoFactory fsFactory = null)
+            IActivityListener activityListener)
             : base(queue)
         {
             if (remoteFolder == null) {
@@ -88,7 +84,23 @@ namespace CmisSync.Lib.Producer.Crawler
 
             this.activityListener = activityListener;
             this.treebuilder = new DescendantsTreeBuilder(storage, remoteFolder, localFolder, filter);
-            this.eventGenerator = new CrawlEventGenerator(storage, fsFactory);
+            this.eventGenerator = new CrawlEventGenerator(storage);
+        }
+
+        public DescendantsCrawler(
+            ISyncEventQueue queue,
+            IDescendantsTreeBuilder builder,
+            CrawlEventGenerator generator,
+            IActivityListener activityListener)
+            : base (queue)
+        {
+            if (activityListener == null) {
+                throw new ArgumentNullException("Given activityListener is null");
+            }
+
+            this.activityListener = activityListener;
+            this.treebuilder = builder;
+            this.eventGenerator = generator;
         }
 
         /// <summary>
