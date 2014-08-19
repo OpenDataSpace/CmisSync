@@ -266,6 +266,8 @@ namespace CmisSync.Lib.Cmis
             this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
 
             this.connectionScheduler = new ConnectionScheduler(this.RepoInfo, this.Queue, this.sessionFactory, this.authProvider);
+
+            this.Queue.EventManager.AddEventHandler(this.connectionScheduler);
         }
 
         /// <summary>

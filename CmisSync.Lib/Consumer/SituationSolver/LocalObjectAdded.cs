@@ -120,13 +120,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             {
                 Guid = uuid,
                 LastRemoteWriteTimeUtc = addedObject.LastModificationDate,
-                /* TODO DIRTY DIRTY DIRTY HACK! THIS MUST BE REFACTORED
-                 * The LastLocalWriteTime is not set to a value to ensure that a not completely
-                 * uploaded file is recognized as changed on the next crawl sync
-                 */
                 LastLocalWriteTimeUtc = localFileSystemInfo is IFileInfo && (localFileSystemInfo as IFileInfo).Length > 0 ? (DateTime?)null : (DateTime?)localFileSystemInfo.LastWriteTimeUtc,
                 LastChangeToken = addedObject.ChangeToken,
-                LastContentSize = localFileSystemInfo is IDirectoryInfo ? -1 : 0
+                LastContentSize = localFileSystemInfo is IDirectoryInfo ? -1 : 0,
+                ChecksumAlgorithmName =  localFileSystemInfo is IDirectoryInfo ? null : "SHA-1",
+                LastChecksum =  localFileSystemInfo is IDirectoryInfo ? null : SHA1.Create().ComputeHash(new byte[0])
             };
             this.Storage.SaveMappedObject(mapped);
 

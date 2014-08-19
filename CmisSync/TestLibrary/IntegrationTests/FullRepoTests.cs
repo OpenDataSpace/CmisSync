@@ -883,6 +883,44 @@ namespace TestLibrary.IntegrationTests
             Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).Name, Is.EqualTo(newFolderName));
         }
 
+        [Test, Category("Slow")]
+        public void EmptyLocalFileIsCreatedAndChangedRemotely() {
+            string fileName = "file";
+            string content = "content";
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(filePath);
+            using (fileInfo.Open(FileMode.CreateNew)) {
+            }
+
+            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
+            var doc = child as IDocument;
+            doc.SetContent(content, true, true);
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "ContentStream not set correctly");
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            doc.Refresh();
+            Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.EqualTo(0));
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+        }
+
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
             int waited = 0;
             while (queue.Queue.IsEmpty)

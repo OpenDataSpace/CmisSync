@@ -39,11 +39,13 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Connection scheduler.
     /// </summary>
-    public class ConnectionScheduler : IConnectionScheduler
+    public class ConnectionScheduler : SyncEventHandler, IConnectionScheduler
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionScheduler));
         private Task task;
         private object connectionLock = new object();
+        private object repoInfoLock = new object();
+        private bool isForbidden = false;
 
         protected ISyncEventQueue Queue { get; set; }
 
@@ -143,12 +145,48 @@ namespace CmisSync.Lib.Queueing
         }
 
         /// <summary>
+        /// Handles repository configuration change events by extracting new login informations and returns false
+        /// </summary>
+        /// <param name="e">The event to handle.</param>
+        /// <returns>false</returns>
+        public override bool Handle(ISyncEvent e)
+        {
+            if (e is RepoConfigChangedEvent) {
+                var changedConfig = (e as RepoConfigChangedEvent).RepoInfo;
+                if (changedConfig != null) {
+                    lock(this.repoInfoLock) {
+                        this.RepoInfo = changedConfig;
+                        this.isForbidden = false;
+                        lock(this.connectionLock) {
+                            if (this.task != null) {
+                                try {
+                                    this.task.Dispose();
+                                    this.task = null;
+                                } catch(InvalidOperationException) {
+                                    // Disposing the login task before it is finished is not a problem.
+                                }
+                            }
+
+                            this.Start();
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Connect this instance.
         /// </summary>
         protected bool Connect()
         {
-            while (true) {
+            lock(this.repoInfoLock) {
                 try {
+                    if (this.isForbidden) {
+                        return false;
+                    }
+
                     // Create session.
                     var session = this.SessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.AuthProvider, null);
 
@@ -158,12 +196,15 @@ namespace CmisSync.Lib.Queueing
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {
                     Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
                     this.Queue.AddEvent(new PermissionDeniedEvent(e));
+                    this.isForbidden = true;
                 } catch (CmisRuntimeException e) {
                     if (e.Message == "Proxy Authentication Required") {
                         this.Queue.AddEvent(new ProxyAuthRequiredEvent(e));
                         Logger.Warn("Proxy Settings Problem", e);
+                        this.isForbidden = true;
                     } else {
                         Logger.Error("Connection to repository failed: ", e);
+                        this.Queue.AddEvent(new ExceptionEvent(e));
                     }
                 } catch (CmisObjectNotFoundException e) {
                     Logger.Error("Failed to find cmis object: ", e);
