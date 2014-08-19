@@ -118,6 +118,7 @@ SOURCES =  \
 	Producer/ContentChange/ContentChangeEventAccumulator.cs \
 	Producer/ContentChange/ContentChangeEventTransformer.cs \
 	Producer/ContentChange/ContentChanges.cs \
+	Producer/Crawler/CrawlEventCollection.cs \
 	Producer/Crawler/CrawlEventGenerator.cs \
 	Producer/Crawler/DescendantsCrawler.cs \
 	Producer/Crawler/DescendantsTreeBuilder.cs \
