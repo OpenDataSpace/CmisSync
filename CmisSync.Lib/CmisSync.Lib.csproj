@@ -230,6 +230,7 @@
     <Compile Include="Producer\Crawler\DescendantsTreeBuilder.cs" />
     <Compile Include="Producer\Crawler\DescendantsTreeCollection.cs" />
     <Compile Include="Producer\Crawler\IDescendantsTreeBuilder.cs" />
+    <Compile Include="Producer\Crawler\CrawlEventGenerator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
