@@ -125,6 +125,7 @@ SOURCES =  \
 	Producer/Crawler/DescendantsTreeBuilder.cs \
 	Producer/Crawler/DescendantsTreeCollection.cs \
 	Producer/Crawler/IDescendantsTreeBuilder.cs \
+	Producer/Crawler/LocalEventGenerator.cs \
 	Producer/Watcher/CreatedChangedDeletedFileSystemEventHandler.cs \
 	Producer/Watcher/IWatcherProducer.cs \
 	Producer/Watcher/MacWatcher.cs \
