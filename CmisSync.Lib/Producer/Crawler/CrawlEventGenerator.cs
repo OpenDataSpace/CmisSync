@@ -35,6 +35,7 @@ namespace CmisSync.Lib.Producer.Crawler
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
         private LocalEventGenerator localEventGenerator;
+        private RemoteEventGenerator remoteEventGenerator;
 
         public CrawlEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
         {
@@ -50,6 +51,7 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             this.localEventGenerator = new LocalEventGenerator(this.storage, this.fsFactory);
+            this.remoteEventGenerator = new RemoteEventGenerator(this.storage);
         }
 
         public CrawlEventCollection GenerateEvents(DescendantsTreeCollection trees) {
@@ -61,8 +63,8 @@ namespace CmisSync.Lib.Producer.Crawler
             List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>(storedObjectsForRemote);
 
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
-            createdEvents.creationEvents = this.CreateRemoteEvents(storedObjectsForRemote, remoteTree, eventMap);
-            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateLocalEvents(storedObjectsForLocal, localTree, eventMap));
+            createdEvents.creationEvents = this.remoteEventGenerator.CreateEvents(storedObjectsForRemote, remoteTree, eventMap);
+            createdEvents.creationEvents.AddRange(this.localEventGenerator.CreateEvents(storedObjectsForLocal, localTree, eventMap));
 
             createdEvents.mergableEvents = eventMap;
 
@@ -71,23 +73,9 @@ namespace CmisSync.Lib.Producer.Crawler
             storedObjectsForRemote.Remove(rootNode);
 
             createdEvents.removedLocalObjects = this.TransformToFileSystemInfoDict(storedObjectsForLocal);
-
             createdEvents.removedRemoteObjects = this.TransformToFileSystemInfoDict(storedObjectsForRemote);
 
             return createdEvents;
-        }
-
-        private static void AddRemoteContentChangeTypeToFileEvent(FileEvent fileEvent, IMappedObject obj, IDocument remoteDoc) {
-            if (fileEvent == null || obj == null || remoteDoc == null) {
-                return;
-            }
-
-            byte[] remoteHash = remoteDoc.ContentStreamHash(obj.ChecksumAlgorithmName);
-            if (remoteHash != null && remoteHash.SequenceEqual(obj.LastChecksum)) {
-                fileEvent.RemoteContent = ContentChangeType.NONE;
-            } else {
-                fileEvent.RemoteContent = ContentChangeType.CHANGED;
-            }
         }
 
         private Dictionary<string, IFileSystemInfo> TransformToFileSystemInfoDict(List<IMappedObject> storedObjectList) {
@@ -99,60 +87,6 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             return ret;
-        }
-
-        private AbstractFolderEvent CreateRemoteEventBasedOnStorage(IFileableCmisObject cmisObject, IMappedObject storedParent, IMappedObject storedMappedChild)
-        {
-            AbstractFolderEvent newEvent = null;
-            if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
-                // Renamed or Equal
-                if (storedMappedChild.Name == cmisObject.Name) {
-                    // Equal or property update
-                    if (storedMappedChild.LastChangeToken != cmisObject.ChangeToken) {
-                        // Update
-                        newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.CHANGED, src: this);
-                        AddRemoteContentChangeTypeToFileEvent(newEvent as FileEvent, storedMappedChild, cmisObject as IDocument);
-                    } else {
-                        // Equal
-                        newEvent = null;
-                    }
-                } else {
-                    // Renamed
-                    newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.CHANGED, src: this);
-                    AddRemoteContentChangeTypeToFileEvent(newEvent as FileEvent, storedMappedChild, cmisObject as IDocument);
-                }
-            } else {
-                // Moved
-                newEvent = FileOrFolderEventFactory.CreateEvent(cmisObject, null, MetaDataChangeType.MOVED, oldRemotePath: this.storage.GetRemotePath(storedMappedChild), src: this);
-                AddRemoteContentChangeTypeToFileEvent(newEvent as FileEvent, storedMappedChild, cmisObject as IDocument);
-            }
-
-            return newEvent;
-        }
-
-        private List<AbstractFolderEvent> CreateRemoteEvents(List<IMappedObject> storedObjects, IObjectTree<IFileableCmisObject> remoteTree, Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
-        {
-            List<AbstractFolderEvent> createdEvents = new List<AbstractFolderEvent>();
-            var storedParent = storedObjects.Find(o => o.RemoteObjectId == remoteTree.Item.Id);
-
-            foreach (var child in remoteTree.Children) {
-                var storedMappedChild = storedObjects.Find(o => o.RemoteObjectId == child.Item.Id);
-                if (storedMappedChild != null) {
-                    AbstractFolderEvent newEvent = this.CreateRemoteEventBasedOnStorage(child.Item, storedParent, storedMappedChild);
-                    eventMap[child.Item.Id] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(null, newEvent);
-                } else {
-                    // Added
-                    AbstractFolderEvent addEvent = FileOrFolderEventFactory.CreateEvent(child.Item, null, MetaDataChangeType.CREATED, src: this);
-                    createdEvents.Add(addEvent);
-                }
-
-                createdEvents.AddRange(this.CreateRemoteEvents(storedObjects, child, eventMap));
-                if (storedMappedChild != null) {
-                    storedObjects.Remove(storedMappedChild);
-                }
-            }
-
-            return createdEvents;
         }
     }
 }

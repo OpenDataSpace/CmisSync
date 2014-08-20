@@ -54,7 +54,22 @@ namespace CmisSync.Lib.Producer.Crawler
             }
         }
 
-        public List<AbstractFolderEvent> CreateLocalEvents(
+        /// <summary>
+        /// Creates the local events and returns the creationEvents, the other Events are stored in the eventMap, handled objects are removed from storedObjects
+        /// </summary>
+        /// <returns>
+        /// The local events.
+        /// </returns>
+        /// <param name='storedObjects'>
+        /// Stored objects.
+        /// </param>
+        /// <param name='localTree'>
+        /// Local tree.
+        /// </param>
+        /// <param name='eventMap'>
+        /// Event map.
+        /// </param>
+        public List<AbstractFolderEvent> CreateEvents(
             List<IMappedObject> storedObjects,
             IObjectTree<IFileSystemInfo> localTree,
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
@@ -90,7 +105,7 @@ namespace CmisSync.Lib.Producer.Crawler
                     creationEvents.Add(this.GenerateCreatedEvent(child.Item));
                 }
 
-                creationEvents.AddRange(this.CreateLocalEvents(storedObjects, child, eventMap));
+                creationEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap));
 
                 if(removeStoredMappedChild) {
                     storedObjects.Remove(storedMappedChild);
