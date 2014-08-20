@@ -16,10 +16,13 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
-    using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.FileSystem;
+
     using DotCMIS.Client;
 
     /// <summary>
@@ -36,7 +39,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectDeletedRemoteObjectDeleted(ISession session, IMetaDataStorage storage) : base(session, storage) {
         }
 
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
+        /// <summary>
+        /// Solve the specified situation by using localFile and remote object.
+        /// </summary>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="remoteId">Remote identifier or object.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             var mappedObject = this.Storage.GetObjectByLocalPath(localFile);
             this.Storage.RemoveObject(mappedObject);

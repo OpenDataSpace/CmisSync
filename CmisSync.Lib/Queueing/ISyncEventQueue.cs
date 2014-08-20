@@ -38,7 +38,7 @@ namespace CmisSync.Lib.Queueing
         /// <value>
         /// <c>true</c> if this instance is stopped; otherwise, <c>false</c>.
         /// </value>
-        bool IsStopped { get; } 
+        bool IsStopped { get; }
 
         /// <summary>
         /// Gets the event manager.
@@ -66,5 +66,13 @@ namespace CmisSync.Lib.Queueing
         /// Continue the queue consumer if it is suspended.
         /// </summary>
         void Continue();
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is empty.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is empty; otherwise, <c>false</c>.
+        /// </value>
+        bool IsEmpty { get; }
     }
 }

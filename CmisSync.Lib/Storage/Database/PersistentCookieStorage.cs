@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Storage.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.PersistentCookieStorage"/> class.
+        /// Initializes a new instance of the <see cref="PersistentCookieStorage"/> class.
         /// </summary>
         /// <param name='db'>
         /// DBreeze engine instance to be used for saving collection.

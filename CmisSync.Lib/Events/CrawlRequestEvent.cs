@@ -52,11 +52,9 @@ namespace CmisSync.Lib.Events
         }
 
         /// <summary>
-        /// Gets the remote folder.
+        /// Gets or sets the remote folder.
         /// </summary>
-        /// <value>
-        /// The remote folder.
-        /// </value>
+        /// <value>The remote folder.</value>
         public IFolder RemoteFolder { get; set; }
 
         /// <summary>

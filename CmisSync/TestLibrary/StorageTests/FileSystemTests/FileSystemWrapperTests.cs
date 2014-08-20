@@ -257,13 +257,13 @@ namespace TestLibrary.StorageTests.FileSystemTests
                 stream.Write(new byte[2], 0, 2);
             }
 
-            sourceInfo.SetExtendedAttribute("test", sourceFile);
+            sourceInfo.SetExtendedAttribute("test", sourceFile, false);
             sourceInfo.Refresh();
             using (var stream = targetInfo.Open(FileMode.CreateNew, FileAccess.Write)) {
                 stream.Write(new byte[5], 0, 5);
             }
 
-            targetInfo.SetExtendedAttribute("test", targetFile);
+            targetInfo.SetExtendedAttribute("test", targetFile, false);
             targetInfo.Refresh();
 
             var newFileInfo = sourceInfo.Replace(targetInfo, backupInfo, true);
@@ -271,6 +271,77 @@ namespace TestLibrary.StorageTests.FileSystemTests
             backupInfo.Refresh();
             Assert.That(backupInfo.Exists, Is.True);
             Assert.That(backupInfo.GetExtendedAttribute("test"), Is.EqualTo(targetFile));
+        }
+
+        [Test, Category("Medium")]
+        public void SetUuidOnFolderToNull() {
+            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
+                Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+
+            var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
+            underTest.Create();
+
+            underTest.Uuid = null;
+
+            Assert.That(underTest.Uuid, Is.Null);
+        }
+
+        [Test, Category("Medium")]
+        public void SetUuidOnFolder() {
+            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
+                Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+
+            var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
+            underTest.Create();
+
+            Guid uuid = Guid.NewGuid();
+            underTest.Uuid = uuid;
+
+            Assert.That(underTest.Uuid, Is.EqualTo(uuid));
+        }
+
+        [Test, Category("Medium")]
+        public void GetUuidFromFolder() {
+            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
+                Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+
+            var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
+            underTest.Create();
+
+            Guid uuid = Guid.NewGuid();
+
+            underTest.SetExtendedAttribute("DSS-UUID", uuid.ToString(), false);
+
+            Assert.That(underTest.Uuid, Is.EqualTo(uuid));
+        }
+
+        [Test, Category("Medium")]
+        public void UuidIsNullIfStoredStringIsNotAnUuid() {
+            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
+                Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+
+            var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
+            underTest.Create();
+
+            underTest.SetExtendedAttribute("DSS-UUID", "stuff", false);
+
+            Assert.That(underTest.Uuid, Is.Null);
+        }
+
+        [Test, Category("Medium")]
+        public void UuidIsNullIfNothingIsStored() {
+            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
+                Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+
+            var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
+            underTest.Create();
+
+            Assert.That(underTest.Uuid, Is.Null);
         }
 
         [Test, Category("Fast")]
@@ -337,7 +408,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
             folder.Create();
             BaseWatcherTest.IgnoreIfExtendedAttributesAreNotAvailable(oldPath);
             Assert.That(folder.GetExtendedAttribute("test"), Is.Null);
-            folder.SetExtendedAttribute("test", "test");
+            folder.SetExtendedAttribute("test", "test", false);
             folder.MoveTo(newPath);
             Assert.That(folder.GetExtendedAttribute("test"), Is.EqualTo("test"));
             Assert.That(Factory.CreateDirectoryInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));
@@ -367,7 +438,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
             BaseWatcherTest.IgnoreIfExtendedAttributesAreNotAvailable(oldPath);
             Assert.That(file.GetExtendedAttribute("test"), Is.Null);
-            file.SetExtendedAttribute("test", "test");
+            file.SetExtendedAttribute("test", "test", false);
             file.MoveTo(newPath);
             Assert.That(file.GetExtendedAttribute("test"), Is.EqualTo("test"));
             Assert.That(Factory.CreateFileInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));

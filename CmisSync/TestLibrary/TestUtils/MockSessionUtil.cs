@@ -28,6 +28,7 @@ namespace TestLibrary.TestUtils
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
 
+    using DotCMIS.Binding;
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -79,6 +80,24 @@ namespace TestLibrary.TestUtils
                 o.OrderBy == orderBy &&
                 o.CacheEnabled == cacheEnabled &&
                 o.MaxItemsPerPage == maxItemsPerPage));
+        }
+
+        public static void SetupTypeSystem(this Mock<ISession> session, bool serverCanModifyLastModificationDate = true) {
+            string repoId = "repoId";
+            var repositoryService = new Mock<IRepositoryService>();
+            IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
+            if (serverCanModifyLastModificationDate) {
+                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "cmis:lastModificationDate" && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
+            } else {
+                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "cmis:lastModificationDate" && p.Updatability == DotCMIS.Enums.Updatability.ReadOnly));
+            }
+
+            var docType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
+            var folderType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
+            repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:document", null)).Returns(docType);
+            repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:folder", null)).Returns(folderType);
+            session.Setup(s => s.Binding.GetRepositoryService()).Returns(repositoryService.Object);
+            session.Setup(s => s.RepositoryInfo.Id).Returns(repoId);
         }
 
         public static Mock<IChangeEvent> GenerateChangeEvent(DotCMIS.Enums.ChangeType type, string objectId) {

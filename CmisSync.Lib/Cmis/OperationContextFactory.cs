@@ -32,6 +32,11 @@ namespace CmisSync.Lib.Cmis
     {
         private static readonly int MaximumItemsPerPage = 1000;
 
+        /// <summary>
+        /// Creates the content change event context.
+        /// </summary>
+        /// <returns>The content change event context.</returns>
+        /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateContentChangeEventContext(ISession session) {
             HashSet<string> filters = new HashSet<string>();
             filters.Add("cmis:objectId");
@@ -42,11 +47,17 @@ namespace CmisSync.Lib.Cmis
             filters.Add("cmis:path");
             filters.Add("cmis:changeToken");
             filters.Add("cmis:parentId");
+            filters.Add("cmis:contentStreamHash");
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
         }
 
+        /// <summary>
+        /// Creates the crawl context.
+        /// </summary>
+        /// <returns>The crawl context.</returns>
+        /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateCrawlContext(ISession session) {
             HashSet<string> filters = new HashSet<string>();
             filters.Add("cmis:objectId");
@@ -56,11 +67,17 @@ namespace CmisSync.Lib.Cmis
             filters.Add("cmis:lastModificationDate");
             filters.Add("cmis:changeToken");
             filters.Add("cmis:parentId");
+            filters.Add("cmis:contentStreamHash");
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
         }
 
+        /// <summary>
+        /// Creates the default context.
+        /// </summary>
+        /// <returns>The default context.</returns>
+        /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateDefaultContext(ISession session) {
             HashSet<string> filters = new HashSet<string>();
             filters.Add("cmis:objectId");
@@ -71,11 +88,17 @@ namespace CmisSync.Lib.Cmis
             filters.Add("cmis:path");
             filters.Add("cmis:changeToken");
             filters.Add("cmis:parentId");
+            filters.Add("cmis:contentStreamHash");
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
         }
 
+        /// <summary>
+        /// Creates the non caching and path including context.
+        /// </summary>
+        /// <returns>The non caching and path including context.</returns>
+        /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateNonCachingPathIncludingContext(ISession session) {
             return CreateContext(
                 session,
@@ -88,9 +111,18 @@ namespace CmisSync.Lib.Cmis
                 "cmis:lastModificationDate",
                 "cmis:path",
                 "cmis:changeToken",
-                "cmis:parentId");
+                "cmis:parentId",
+                "cmis:contentStreamHash");
         }
 
+        /// <summary>
+        /// Creates an operation context.
+        /// </summary>
+        /// <returns>The context.</returns>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="cacheEnabled">If set to <c>true</c> cache enabled.</param>
+        /// <param name="includePathSegments">If set to <c>true</c> include path segments.</param>
+        /// <param name="elements">Requested cmis elements.</param>
         public static IOperationContext CreateContext(ISession session, bool cacheEnabled, bool includePathSegments, params string[] elements) {
             HashSet<string> filter = new HashSet<string>();
             foreach (var entry in elements) {

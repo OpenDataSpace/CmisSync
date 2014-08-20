@@ -50,12 +50,13 @@ namespace CmisSync.Lib.Filter
         private InvalidFolderNameFilter invalidFolderNameFilter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Filter.ReportingFilter"/> class.
+        /// Initializes a new instance of the <see cref="ReportingFilter"/> class.
         /// </summary>
         /// <param name="queue">Sync Event Queue to put work on.</param>
         /// <param name="ignoredFoldersFilter">Ignored folders filter.</param>
         /// <param name="ignoredFileNameFilter">Ignored file name filter.</param>
         /// <param name="ignoredFolderNameFilter">Ignored folder name filter.</param>
+        /// <param name="invalidFoderNameFilter">Invalid folder name filter</param> 
         public ReportingFilter(
             ISyncEventQueue queue,
             IgnoredFoldersFilter ignoredFoldersFilter,

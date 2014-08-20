@@ -181,6 +181,7 @@ namespace CmisSync.Lib.Streams
             }
 
             int result = this.Stream.Read(buffer, offset, count);
+
             this.CalculateBandwidth(result);
             return result;
         }

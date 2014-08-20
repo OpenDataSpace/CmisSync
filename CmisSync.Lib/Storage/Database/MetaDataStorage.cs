@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Storage.Database
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Text;
 
@@ -32,6 +33,8 @@ namespace CmisSync.Lib.Storage.Database
     using DBreeze.DataTypes;
     using DBreeze.Transactions;
 
+    using log4net;
+
     /// <summary>
     /// Meta data storage.
     /// </summary>
@@ -41,6 +44,8 @@ namespace CmisSync.Lib.Storage.Database
         private static readonly string MappedObjectsTable = "objects";
         private static readonly string MappedObjectsGuidsTable = "guids";
         private static readonly string ChangeLogTokenKey = "ChangeLogToken";
+
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(MetaDataStorage));
 
         /// <summary>
         /// The db engine.
@@ -58,7 +63,7 @@ namespace CmisSync.Lib.Storage.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.MetaDataStorage"/> class.
+        /// Initializes a new instance of the <see cref="MetaDataStorage"/> class.
         /// </summary>
         /// <param name='engine'>
         /// DBreeze Engine. Must not be null.
@@ -142,6 +147,7 @@ namespace CmisSync.Lib.Storage.Database
                 throw new ArgumentException(string.Format("Given path \"{0}\" is not able to be matched on remote path", path.FullName));
             }
 
+            Stopwatch watch = Stopwatch.StartNew();
             using (var tran = this.engine.GetTransaction())
             {
                 string relativePath = this.matcher.GetRelativeLocalPath(path.FullName);
@@ -166,6 +172,8 @@ namespace CmisSync.Lib.Storage.Database
 
                 MappedObject root = objects.Find(o => o.ParentId == null);
                 if (root == null) {
+                    watch.Stop();
+                    Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                     return null;
                 }
 
@@ -173,6 +181,8 @@ namespace CmisSync.Lib.Storage.Database
                     if(root.Name == pathSegments[0]) {
                         pathSegments.RemoveAt(0);
                     } else {
+                        watch.Stop();
+                        Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                         return null;
                     }
                 }
@@ -188,10 +198,14 @@ namespace CmisSync.Lib.Storage.Database
                     if (child != null) {
                         parent = child;
                     } else {
+                        watch.Stop();
+                        Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                         return null;
                     }
                 }
 
+                watch.Stop();
+                Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                 return new MappedObject(parent);
             }
         }
@@ -230,13 +244,24 @@ namespace CmisSync.Lib.Storage.Database
         /// <param name='obj'>
         /// The MappedObject instance.
         /// </param>
+        /// <exception cref="DublicateGuidException">Is thrown when guid already in database</exception>
         public void SaveMappedObject(IMappedObject obj)
         {
             string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
+                var byteGuid = obj.Guid.ToByteArray();
+                var row = tran.Select<byte[], string>(MappedObjectsGuidsTable, byteGuid);
+                if(row.Exists && row.Value != id) {
+                    tran.Rollback();
+                    throw new DublicateGuidException(string.Format("An entry with Guid {0} already exists", obj.Guid));
+                }
+
                 tran.Insert<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id, obj as MappedObject);
-                tran.Insert<byte[], string>(MappedObjectsGuidsTable, obj.Guid.ToByteArray(), id);
+                if(!obj.Guid.Equals(Guid.Empty)) {
+                    tran.Insert<byte[], string>(MappedObjectsGuidsTable, obj.Guid.ToByteArray(), id);
+                }
+
                 tran.Commit();
             }
         }
@@ -296,6 +321,7 @@ namespace CmisSync.Lib.Storage.Database
         /// </param>
         public string GetRemotePath(IMappedObject obj)
         {
+            Stopwatch watch = Stopwatch.StartNew();
             string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
@@ -305,6 +331,8 @@ namespace CmisSync.Lib.Storage.Database
                     path += name.StartsWith("/") ? name : "/" + name;
                 }
 
+                watch.Stop();
+                Logger.Debug(string.Format("Method GetRemotePath returned after {0} ms", watch.ElapsedMilliseconds));
                 return path.Replace("//", "/");
             }
         }
@@ -320,6 +348,7 @@ namespace CmisSync.Lib.Storage.Database
         /// </param>
         public string GetLocalPath(IMappedObject mappedObject)
         {
+            Stopwatch watch = Stopwatch.StartNew();
             string id = this.GetId(mappedObject);
             using(var tran = this.engine.GetTransaction())
             {
@@ -333,21 +362,24 @@ namespace CmisSync.Lib.Storage.Database
                     segments = temp;
                 }
 
+                watch.Stop();
+                Logger.Debug(string.Format("Method GetLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                 return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(segments));
             }
         }
 
         /// <summary>
-        ///  Gets the children of the given parent object. 
+        ///  Gets the children of the given parent object.
         /// </summary>
         /// <returns>
-        ///  The saved children. 
+        ///  The saved children.
         /// </returns>
         /// <param name='parent'>
         ///  Parent of the children.
         /// </param>
         public List<IMappedObject> GetChildren(IMappedObject parent)
         {
+            Stopwatch watch = Stopwatch.StartNew();
             string parentId = this.GetId(parent);
             List<IMappedObject> results = new List<IMappedObject>();
             bool parentExists = false;
@@ -372,6 +404,8 @@ namespace CmisSync.Lib.Storage.Database
                 throw new EntryNotFoundException();
             }
 
+            watch.Stop();
+            Logger.Debug(string.Format("Method GetChildren returned after {0} ms", watch.ElapsedMilliseconds));
             return results;
         }
 
@@ -500,6 +534,7 @@ namespace CmisSync.Lib.Storage.Database
         /// <param name="guid">GUID of the requested object.</param>
         public IMappedObject GetObjectByGuid(Guid guid)
         {
+            Stopwatch watch = Stopwatch.StartNew();
             using (var tran = this.engine.GetTransaction())
             {
                 var row = tran.Select<byte[], string>(MappedObjectsGuidsTable, guid.ToByteArray());
@@ -509,15 +544,20 @@ namespace CmisSync.Lib.Storage.Database
                         MappedObject data = value.Get;
 
                         if (data == null) {
+                            watch.Stop();
+                            Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
                             return null;
                         }
 
+                        watch.Stop();
+                        Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
                         return new MappedObject(data);
                     }
                 }
-
             }
 
+            watch.Stop();
+            Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
             return null;
         }
 
@@ -526,6 +566,7 @@ namespace CmisSync.Lib.Storage.Database
         /// </summary>
         /// <returns>The object tree.</returns>
         public IObjectTree<IMappedObject> GetObjectTree() {
+            Stopwatch watch = Stopwatch.StartNew();
             MappedObject root = null;
             List<MappedObject> objects = new List<MappedObject>();
             using(var tran = this.engine.GetTransaction())
@@ -553,6 +594,8 @@ namespace CmisSync.Lib.Storage.Database
                 return null;
             }
 
+            watch.Stop();
+            Logger.Debug(string.Format("Method GetObjectTree returned after {0} ms", watch.ElapsedMilliseconds));
             return this.GetSubTree(objects, root);
         }
 

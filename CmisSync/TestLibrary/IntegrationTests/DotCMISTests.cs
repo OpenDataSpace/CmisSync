@@ -22,6 +22,7 @@ namespace TestLibrary.IntegrationTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net;
     using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
@@ -30,6 +31,7 @@ namespace TestLibrary.IntegrationTests
 
     using CmisSync.Lib;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Streams;
 
@@ -323,22 +325,30 @@ namespace TestLibrary.IntegrationTests
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
-            using (var emptyStream = new MemoryStream(new byte[0])) {
+            using (var oneByteStream = new MemoryStream(new byte[1])) {
                 ContentStream contentStream = new ContentStream();
                 contentStream.MimeType = MimeType.GetMIMEType(filename);
-                contentStream.Length = 0;
-                contentStream.Stream = emptyStream;
+                contentStream.Length = 1;
+                contentStream.Stream = oneByteStream;
                 var emptyDoc = folder.CreateDocument(properties, contentStream, null);
                 var context = new OperationContext();
                 IDocument requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
                 foreach (var prop in requestedDoc.Properties) {
                     if (prop.Id == "cmis:contentStreamHash") {
                         Assert.That(prop.IsMultiValued, Is.True);
-                        foreach (string entry in prop.Values) {
-                            Assert.That(entryRegex.IsMatch(entry));
+                        if (prop.Values != null) {
+                            foreach (string entry in prop.Values) {
+                                Assert.That(entryRegex.IsMatch(entry));
+                            }
                         }
                     }
                 }
+                byte[] remoteHash = requestedDoc.ContentStreamHash();
+                if (remoteHash != null) {
+                    Assert.That(remoteHash, Is.EqualTo(SHA1.Create().ComputeHash(new byte[1])));
+                }
+
+                requestedDoc.Delete(true);
             }
         }
 
@@ -377,16 +387,10 @@ namespace TestLibrary.IntegrationTests
             string password,
             string repositoryId)
         {
-            // var watch = Stopwatch.StartNew();
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
 
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Created Session in {0} msec",watch.ElapsedMilliseconds));
-            // watch.Restart();
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Requested folder in {0} msec", watch.ElapsedMilliseconds));
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
@@ -400,11 +404,8 @@ namespace TestLibrary.IntegrationTests
             {
             }
 
-            // watch.Restart();
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
 
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Created empty doc in {0} msec", watch.ElapsedMilliseconds));
             Assert.That(emptyDoc.ContentStreamLength == null || emptyDoc.ContentStreamLength == 0, "returned document shouldn't got any content");
             string content = string.Empty;
             content += "Test ";
@@ -446,25 +447,41 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
-        public void SetOneGigabyteAsContentStream(
+        public void CreateDocumentWithContentStream(
             string canonical_name,
             string localPath,
             string remoteFolderPath,
             string url,
             string user,
             string password,
-            string repositoryId)
-        {
+            string repositoryId) {
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            string content = "content";
+            IDocument doc = folder.CreateDocument("name", content);
 
-            string filename = "1G_testfile.dat";
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.Name, filename);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            doc.DeleteAllVersions();
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void CreateDocumentWithCreationAndModificationDate(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            if (!session.IsServerAbleToUpdateModificationDate()) {
+                Assert.Ignore("Server is not able to sync modification dates");
+            }
+            string filename = "name";
+            IDocument doc;
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
@@ -472,21 +489,21 @@ namespace TestLibrary.IntegrationTests
             {
             }
 
-            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+            DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
+            DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
-            long length = 1024 * 1024 * 1024;
-            ContentStream contentStream = new ContentStream();
-            contentStream.FileName = filename;
-            contentStream.MimeType = MimeType.GetMIMEType(filename);
-            contentStream.Length = length;
-            byte[] gig = new byte[length];
-            using (var memstream = new MemoryStream(gig)) {
-                contentStream.Stream = memstream;
-                emptyDoc.SetContentStream(contentStream, true, true);
-            }
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.CreationDate, creationDate);
+            properties.Add(PropertyIds.LastModificationDate, modificationDate);
 
-            Assert.AreEqual(length, emptyDoc.ContentStreamLength);
+            doc = folder.CreateDocument(properties, null, null);
 
+            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.EqualTo(0), "Wrong modification date");
+            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.EqualTo(0), "Wrong creation date");
+            doc.DeleteAllVersions();
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
@@ -660,6 +677,49 @@ namespace TestLibrary.IntegrationTests
             newFolder.Delete(true);
         }
 
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void SetOneGigabyteAsContentStream(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+
+            string filename = "1G_testfile.dat";
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, filename);
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            try {
+                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                if (doc != null) {
+                    doc.Delete(true);
+                }
+            } catch (CmisObjectNotFoundException)
+            {
+            }
+
+            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
+
+            long length = 1024 * 1024 * 1024;
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = filename;
+            contentStream.MimeType = MimeType.GetMIMEType(filename);
+            contentStream.Length = length;
+            byte[] gig = new byte[length];
+            using (var memstream = new MemoryStream(gig)) {
+                contentStream.Stream = memstream;
+                emptyDoc.SetContentStream(contentStream, true, true);
+            }
+
+            Assert.AreEqual(length, emptyDoc.ContentStreamLength);
+        }
+
         private class AssertingStream : StreamWrapper {
             private Action verification;
 
@@ -722,6 +782,7 @@ namespace TestLibrary.IntegrationTests
             filters.Add("cmis:contentStreamFileName");
             filters.Add("cmis:contentStreamLength");
             filters.Add("cmis:lastModificationDate");
+            filters.Add("cmis:creationDate");
             filters.Add("cmis:path");
             filters.Add("cmis:changeToken");
             filters.Add(PropertyIds.SecondaryObjectTypeIds);

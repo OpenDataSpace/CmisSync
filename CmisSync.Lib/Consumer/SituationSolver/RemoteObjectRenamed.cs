@@ -51,7 +51,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFile">Local file or folder. It is the source file/folder reference, which should be renamed.</param>
         /// <param name="remoteId">Remote identifier. Should be an instance of IFolder or IDocument.</param>
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             IMappedObject obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if(remoteId is IFolder)
@@ -84,11 +90,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 obj.Name = remoteDocument.Name;
-                obj.LastChangeToken = remoteDocument.ChangeToken;
-                obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
+                obj.LastChangeToken = remoteContent == ContentChangeType.NONE ? remoteDocument.ChangeToken : obj.LastChangeToken;
+                obj.LastRemoteWriteTimeUtc = remoteContent == ContentChangeType.NONE ? remoteDocument.LastModificationDate : obj.LastRemoteWriteTimeUtc;
                 obj.LastLocalWriteTimeUtc = fileInfo.LastWriteTimeUtc;
                 this.Storage.SaveMappedObject(obj);
                 OperationsLogger.Info(string.Format("Renamed local file {0} to {1}", oldPath, remoteDocument.Name));
+                if (remoteContent != ContentChangeType.NONE) {
+                    throw new ArgumentException("Remote documents content is also changed => force crawl sync.");
+                }
             } else {
                 throw new ArgumentException("Given remote Id is not an IFolder nor an IDocument instance");
             }

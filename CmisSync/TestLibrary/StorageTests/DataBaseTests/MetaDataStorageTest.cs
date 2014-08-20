@@ -194,11 +194,10 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(EntryNotFoundException))]
         public void GetChildrenOfNonExistingParentMustThrowException()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.GetChildren(Mock.Of<IMappedObject>(o => o.RemoteObjectId == "DOESNOTEXIST"));
+            Assert.Throws<EntryNotFoundException>(() => storage.GetChildren(Mock.Of<IMappedObject>(o => o.RemoteObjectId == "DOESNOTEXIST")));
         }
 
         [Test, Category("Fast")]
@@ -620,6 +619,20 @@ namespace TestLibrary.StorageTests.DataBaseTests
             Assert.That(tree.Children[0].Item, Is.EqualTo(child1Folder));
             Assert.That(tree.Children[0].Children.Count, Is.EqualTo(1));
             Assert.That(tree.Children[0].Children[0].Item, Is.EqualTo(child2File));
+        }
+
+        [Test, Category("Fast")]
+        public void ThrowOnDublicateGuid()
+        {
+            var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
+            var rootFolder = new MappedObject("name", "rootId", MappedObjectType.Folder, null, "token");
+            var child1 = new MappedObject("sub1", "subId1", MappedObjectType.File, "rootId", "token");
+            child1.Guid = Guid.NewGuid();
+            var child2 = new MappedObject("sub2", "subId2", MappedObjectType.File, "rootId", "token");
+            child2.Guid = child1.Guid;
+            storage.SaveMappedObject(rootFolder);
+            storage.SaveMappedObject(child1);
+            Assert.Throws<DublicateGuidException>(() => storage.SaveMappedObject(child2));
         }
     }
 }

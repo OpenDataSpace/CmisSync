@@ -22,6 +22,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System;
 
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -53,8 +54,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Assert.That(solver.GetStorage(), Is.EqualTo(storage));
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorSetsServerPropertyCorrectly() {
+            var solver = new SolverClass(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), true);
+            Assert.That(solver.GetModification(), Is.True);
+            solver = new SolverClass(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), false);
+            Assert.That(solver.GetModification(), Is.False);
+        }
+
         private class SolverClass : AbstractEnhancedSolver {
-            public SolverClass(ISession session, IMetaDataStorage storage) : base(session, storage) {
+            public SolverClass(
+                ISession session,
+                IMetaDataStorage storage,
+                bool modificationsAllowed = true) : base(session, storage, modificationsAllowed) {
             }
 
             public ISession GetSession() {
@@ -65,7 +77,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 return this.Storage;
             }
 
-            public override void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId) {
+            public bool GetModification() {
+                return this.ServerCanModifyDateTimes;
+            }
+
+            public override void Solve(
+                IFileSystemInfo localFileSystemInfo,
+                IObjectId remoteId,
+                ContentChangeType localContent,
+                ContentChangeType remoteContent)
+            {
                 throw new NotImplementedException();
             }
         }

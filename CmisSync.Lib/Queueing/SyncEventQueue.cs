@@ -49,10 +49,14 @@ namespace CmisSync.Lib.Queueing
             }
 
             this.EventManager = manager;
-            this.consumer = new Task(() => Listen(this.queue, this.EventManager, this.suspendHandle));
+            this.consumer = new Task(() => this.Listen(this.queue, this.EventManager, this.suspendHandle));
             this.consumer.Start();
         }
 
+        /// <summary>
+        /// Gets the event manager.
+        /// </summary>
+        /// <value>The event manager.</value>
         public ISyncEventManager EventManager { get; private set; }
 
         /// <summary>
@@ -62,6 +66,16 @@ namespace CmisSync.Lib.Queueing
         public bool IsStopped {
             get {
                 return this.consumer.IsCompleted;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is empty.
+        /// </summary>
+        /// <value><c>true</c> if this instance is empty; otherwise, <c>false</c>.</value>
+        public bool IsEmpty {
+            get {
+                return this.queue.Count == 0;
             }
         }
 
@@ -127,6 +141,15 @@ namespace CmisSync.Lib.Queueing
             return this.consumer.Wait(milisecondsTimeout);
         }
 
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the
+        /// <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/>. The <see cref="Dispose"/> method leaves the
+        /// <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/> in an unusable state. After calling
+        /// <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/> so the garbage collector can reclaim the memory that the
+        /// <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/> was occupying.</remarks>
         public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
@@ -147,6 +170,10 @@ namespace CmisSync.Lib.Queueing
             this.suspendHandle.Set();
         }
 
+        /// <summary>
+        /// Dispose the this instance if isDisposing is true.
+        /// </summary>
+        /// <param name="isDisposing">If set to <c>true</c> is disposing.</param>
         protected virtual void Dispose(bool isDisposing) {
             if (this.alreadyDisposed) {
                 return;
@@ -188,10 +215,7 @@ namespace CmisSync.Lib.Queueing
 
                         manager.Handle(syncEvent);
                     } catch(Exception e) {
-                        Logger.Error("Exception in EventHandler");
-                        Logger.Error("Event was: " + syncEvent);
-                        Logger.Error(e);
-                        Logger.Error(e.StackTrace);
+                        Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
                     }
                 }
             }

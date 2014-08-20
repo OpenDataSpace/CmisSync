@@ -21,12 +21,14 @@ namespace CmisSync.Lib.Producer.ContentChange
 {
     using System;
     using System.IO;
+    using System.Linq;
 
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -142,48 +144,66 @@ namespace CmisSync.Lib.Producer.ContentChange
             IDocument doc = contentChangeEvent.CmisObject as IDocument;
             switch(contentChangeEvent.Type)
             {
-                case DotCMIS.Enums.ChangeType.Created:
-                    {
-                        var fileEvent = new FileEvent(null, doc) { Remote = MetaDataChangeType.CREATED };
-                        fileEvent.RemoteContent = doc.ContentStreamId == null ? ContentChangeType.NONE : ContentChangeType.CREATED;
-                        Queue.AddEvent(fileEvent);
-                        break;
-                    }
+            case DotCMIS.Enums.ChangeType.Created:
+            {
+                var fileEvent = new FileEvent(null, doc) { Remote = MetaDataChangeType.CREATED };
+                fileEvent.RemoteContent = doc.ContentStreamId == null ? ContentChangeType.NONE : ContentChangeType.CREATED;
+                Queue.AddEvent(fileEvent);
+                break;
+            }
 
-                case DotCMIS.Enums.ChangeType.Security:
-                    {
-                        IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
-                        var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
-                        var fileEvent = new FileEvent(fileInfo, doc);
-                        if(fileInfo != null)
-                        {
-                            fileEvent.Remote = MetaDataChangeType.CHANGED;
-                        } else {
-                            fileEvent.Remote = MetaDataChangeType.CREATED;
-                            fileEvent.RemoteContent = ContentChangeType.CREATED;
-                        }
-
-                        Queue.AddEvent(fileEvent);
-                        break;
-                    }
-
-                case DotCMIS.Enums.ChangeType.Updated:
-                    {
-                        IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
-                        var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
-                        var fileEvent = new FileEvent(fileInfo, doc);
-                        if(fileInfo != null)
-                        {
-                            fileEvent.Remote = MetaDataChangeType.CHANGED;
+            case DotCMIS.Enums.ChangeType.Security:
+            {
+                IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
+                var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
+                var fileEvent = new FileEvent(fileInfo, doc);
+                if(fileInfo != null) {
+                    fileEvent.Remote = MetaDataChangeType.CHANGED;
+                } else {
+                    fileEvent.Remote = MetaDataChangeType.CREATED;
+                    if (file != null) {
+                        byte[] hash = doc.ContentStreamHash(file.ChecksumAlgorithmName);
+                        if (hash == null || !hash.Equals(file.LastChecksum)) {
                             fileEvent.RemoteContent = ContentChangeType.CHANGED;
                         } else {
-                            fileEvent.Remote = MetaDataChangeType.CREATED;
-                            fileEvent.RemoteContent = ContentChangeType.CREATED;
+                            fileEvent.RemoteContent = ContentChangeType.NONE;
                         }
-
-                        Queue.AddEvent(fileEvent);
-                        break;
+                    } else {
+                        fileEvent.RemoteContent = ContentChangeType.CREATED;
                     }
+                }
+
+                Queue.AddEvent(fileEvent);
+                break;
+            }
+
+            case DotCMIS.Enums.ChangeType.Updated:
+            {
+                IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
+                var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
+                var fileEvent = new FileEvent(fileInfo, doc);
+                if(fileInfo != null) {
+                    fileEvent.Remote = MetaDataChangeType.CHANGED;
+                    if (file != null) {
+                        byte[] hash = doc.ContentStreamHash(file.ChecksumAlgorithmName);
+                        if (hash == null || !hash.SequenceEqual(file.LastChecksum)) {
+                            Logger.Debug(string.Format("SavedChecksum: {0} RemoteChecksum: {1}", Utils.ToHexString(file.LastChecksum), Utils.ToHexString(hash)));
+                            fileEvent.RemoteContent = ContentChangeType.CHANGED;
+                        } else {
+                            fileEvent.RemoteContent = ContentChangeType.NONE;
+                        }
+                    } else {
+                        fileEvent.Remote = MetaDataChangeType.CREATED;
+                        fileEvent.RemoteContent = ContentChangeType.CREATED;
+                    }
+                } else {
+                    fileEvent.Remote = MetaDataChangeType.CREATED;
+                    fileEvent.RemoteContent = ContentChangeType.CREATED;
+                }
+
+                Queue.AddEvent(fileEvent);
+                break;
+            }
             }
         }
 

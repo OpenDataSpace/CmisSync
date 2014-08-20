@@ -99,8 +99,12 @@ namespace CmisSync
                     Address = Controller.saved_address,
                     RepoId = repository.Key
                 };
-                AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
-                Loader.Add(repo.Id, asyncLoader);
+                //  GUI workaround to remove ignore folder {{
+                //AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+                //Loader.Add(repo.Id, asyncLoader);
+                repo.Status = LoadingStatus.DONE;
+                //  GUI workaround to remove ignore folder }}
+
             }
 
             DataSource = new CmisTree.CmisTreeDataSource(Repositories);
@@ -118,9 +122,11 @@ namespace CmisSync
             InsertEvent ();
 
             //  must be called after InsertEvent()
-            foreach (RootFolder repo in Repositories) {
-                Loader [repo.Id].Load (repo);
-            }
+            //  GUI workaround to remove ignore folder {{
+            //foreach (RootFolder repo in Repositories) {
+            //    Loader [repo.Id].Load (repo);
+            //}
+            //  GUI workaround to remove ignore folder }}
         }
 
         SetupController Controller;

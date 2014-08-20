@@ -56,6 +56,7 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Net" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Backend.cs" />
@@ -218,13 +219,27 @@
     <Compile Include="Storage\Database\ObjectTree.cs" />
     <Compile Include="EventManagerInitializer.cs" />
     <Compile Include="Consumer\SituationSolver\AbstractEnhancedSolver.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectChanged.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\CmisConvenienceExtenders.cs" />
+    <Compile Include="Storage\Database\Entities\IFileConvenienceExtenders.cs" />
+    <Compile Include="Storage\Database\DublicateGuidException.cs" />
+    <Compile Include="Queueing\DelayRetryAndNextSyncEventHandler.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectMoved.cs" />
+    <Compile Include="Queueing\ConnectionScheduler.cs" />
+    <Compile Include="Queueing\IConnectionScheduler.cs" />
+    <Compile Include="Producer\Crawler\DescendantsTreeBuilder.cs" />
+    <Compile Include="Producer\Crawler\DescendantsTreeCollection.cs" />
+    <Compile Include="Producer\Crawler\IDescendantsTreeBuilder.cs" />
+    <Compile Include="Producer\Crawler\CrawlEventGenerator.cs" />
+    <Compile Include="Producer\Crawler\CrawlEventCollection.cs" />
+    <Compile Include="Producer\Crawler\CrawlEventNotifier.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />
@@ -279,5 +294,6 @@
     <Folder Include="Cmis\Authentication\" />
     <Folder Include="Cmis\UiUtils\" />
     <Folder Include="Producer\ContentChange\" />
+    <Folder Include="Cmis\ConvenienceExtenders\" />
   </ItemGroup>
 </Project>

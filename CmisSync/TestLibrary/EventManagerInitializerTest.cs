@@ -209,7 +209,7 @@ namespace TestLibrary.QueueingTests
             var remoteObject = new Mock<IFolder>();
             remoteObject.Setup(r => r.Id).Returns(id);
             remoteObject.Setup(r => r.ChangeToken).Returns(token);
-
+            session.SetupTypeSystem();
             session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
             if (changeEventSupported)
             {

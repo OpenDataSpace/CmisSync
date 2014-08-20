@@ -40,6 +40,7 @@ namespace TestLibrary.IntegrationTests
 
     using DBreeze;
 
+    using DotCMIS.Binding;
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -108,6 +109,7 @@ namespace TestLibrary.IntegrationTests
             var storage = this.GetInitializedStorage();
             storage.SaveMappedObject(new MappedObject(rootFolderName, rootFolderId, MappedObjectType.Folder, null, "oldtoken"));
             var session = new Mock<ISession>();
+            session.SetupTypeSystem();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
             var observer = new ObservableHandler();
@@ -130,6 +132,7 @@ namespace TestLibrary.IntegrationTests
             storage.SaveMappedObject(mappedObject);
 
             var session = new Mock<ISession>();
+            session.SetupTypeSystem();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
             IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, name, (string)null).Object;
@@ -156,6 +159,7 @@ namespace TestLibrary.IntegrationTests
             storage.SaveMappedObject(mappedObject);
 
             var session = new Mock<ISession>();
+            session.SetupTypeSystem();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
             IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(id, name, (string)null).Object;
@@ -227,7 +231,7 @@ namespace TestLibrary.IntegrationTests
                     var newDirInfo = new Mock<IDirectoryInfo>();
                     newDirInfo.Setup(d => d.Exists).Returns(true);
                     newDirInfo.Setup(d => d.FullName).Returns(newPath);
-                    newDirInfo.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+                    newDirInfo.Setup(d => d.Uuid).Returns(guid);
                     newDirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(r => r.FullName == this.localRoot));
                     fsFactory.AddIDirectoryInfo(newDirInfo.Object);
                 });
@@ -330,6 +334,9 @@ namespace TestLibrary.IntegrationTests
 
             manager.AddEventHandler(observer);
 
+            var connectionScheduler = new ConnectionScheduler(new RepoInfo(), queue, Mock.Of<ISessionFactory>(), Mock.Of<IAuthenticationProvider>());
+            manager.AddEventHandler(connectionScheduler);
+
             var changes = new ContentChanges(session.Object, storage, queue, this.maxNumberOfContentChanges, this.isPropertyChangesSupported);
             manager.AddEventHandler(changes);
 
@@ -352,7 +359,7 @@ namespace TestLibrary.IntegrationTests
             var remoteDetection = new RemoteSituationDetection();
             var transmissionManager = new ActiveActivitiesManager();
             var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator);
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator, isServerAbleToUpdateModificationDate: true);
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
@@ -364,7 +371,10 @@ namespace TestLibrary.IntegrationTests
 
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
             var localFolder = new Mock<IDirectoryInfo>();
-            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, filterAggregator, Mock.Of<IActivityListener>(), fsFactory);
+            var generator = new CrawlEventGenerator(storage, fsFactory);
+            var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator);
+            var notifier = new CrawlEventNotifier(queue);
+            var crawler = new DescendantsCrawler(queue, treeBuilder, generator, notifier, Mock.Of<IActivityListener>());
             manager.AddEventHandler(crawler);
 
             var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();
@@ -376,7 +386,8 @@ namespace TestLibrary.IntegrationTests
             var ignoreContentChangesFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(storage, session.Object);
             manager.AddEventHandler(ignoreContentChangesFilter);
 
-
+            var delayRetryAndNextSyncEventHandler = new DelayRetryAndNextSyncEventHandler(queue);
+            manager.AddEventHandler(delayRetryAndNextSyncEventHandler);
 
             /* This is not implemented yet
             var failedOperationsFilder = new FailedOperationsFilter(queue);

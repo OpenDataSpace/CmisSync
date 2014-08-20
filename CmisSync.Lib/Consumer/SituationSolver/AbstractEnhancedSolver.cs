@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
 
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -36,7 +37,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta Data Storage.</param>
-        public AbstractEnhancedSolver(ISession session, IMetaDataStorage storage)
+        /// <param name="serverCanModifyCreationAndModificationDate">Enables the last modification date sync.</param>
+        public AbstractEnhancedSolver(
+            ISession session,
+            IMetaDataStorage storage,
+            bool serverCanModifyCreationAndModificationDate = false)
         {
             this.Storage = storage;
             if (session == null) {
@@ -49,6 +54,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.Session = session;
             this.Storage = storage;
+            this.ServerCanModifyDateTimes = serverCanModifyCreationAndModificationDate;
         }
 
         /// <summary>
@@ -64,10 +70,22 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         protected IMetaDataStorage Storage { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether this cmis server can modify date times.
+        /// </summary>
+        /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
+        protected bool ServerCanModifyDateTimes { get; private set; }
+
+        /// <summary>
         /// Solve the specified situation by using localFile and remote object.
         /// </summary>
         /// <param name="localFileSystemInfo">Local filesystem info instance.</param>
         /// <param name="remoteId">Remote identifier or object.</param>
-        public abstract void Solve(IFileSystemInfo localFileSystemInfo, IObjectId remoteId);
+        /// <param name="localContent">Signalizes how the local content has been modified.</param>
+        /// <param name="remoteContent">Signalizes how the remote content has been modified.</param>
+        public abstract void Solve(
+            IFileSystemInfo localFileSystemInfo,
+            IObjectId remoteId,
+            ContentChangeType localContent,
+            ContentChangeType remoteContent);
     }
 }

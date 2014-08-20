@@ -158,6 +158,9 @@ namespace CmisSync
                 TabView.SelectAt (0);
                 break;
             }
+            //  GUI workaround to remove ignore folder {{
+            this.TabView.Remove (this.FolderTab);
+            //  GUI workaround to remove ignore folder }}
 
             Controller.CloseWindowEvent += delegate
             {

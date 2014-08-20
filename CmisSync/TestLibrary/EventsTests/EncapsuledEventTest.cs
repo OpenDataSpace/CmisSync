@@ -39,10 +39,9 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfEncapsuledEventIsNull()
         {
-            new EncapsuledEvent(null);
+            Assert.Throws<ArgumentNullException>(() => new EncapsuledEvent(null));
         }
     }
 }

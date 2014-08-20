@@ -51,31 +51,24 @@ namespace TestLibrary.ProducerTests.WatcherTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTakesQueueAndPathAndFileSystemFactory()
+        public void ConstructorTakesQueueAndFileSystemFactory()
         {
-            new RenamedFileSystemEventHandler(Mock.Of<ISyncEventQueue>(), "path", this.fsFactory.Object);
+            new RenamedFileSystemEventHandler(Mock.Of<ISyncEventQueue>(), this.fsFactory.Object);
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTakesQueueAndPath() {
-            new RenamedFileSystemEventHandler(Mock.Of<ISyncEventQueue>(), "path");
+        public void ConstructorTakesQueue() {
+            new RenamedFileSystemEventHandler(Mock.Of<ISyncEventQueue>());
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull() {
-            new RenamedFileSystemEventHandler(null, "path");
-        }
-
-        [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfPathIsNull() {
-            new RenamedFileSystemEventHandler(Mock.Of<ISyncEventQueue>(), null);
+            Assert.Throws<ArgumentNullException>(() => new RenamedFileSystemEventHandler(null));
         }
 
         [Test, Category("Fast")]
         public void HandleRenameFolderEvent() {
-            var handler = new RenamedFileSystemEventHandler(this.queue.Object, rootPath, this.fsFactory.Object);
+            var handler = new RenamedFileSystemEventHandler(this.queue.Object, this.fsFactory.Object);
             string newPath = Path.Combine(rootPath, newName);
             string oldPath = Path.Combine(rootPath, oldName);
             this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)true);
@@ -90,7 +83,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
         [Test, Category("Fast")]
         public void HandleRenameFileEvent() {
-            var handler = new RenamedFileSystemEventHandler(this.queue.Object, rootPath, this.fsFactory.Object);
+            var handler = new RenamedFileSystemEventHandler(this.queue.Object, this.fsFactory.Object);
             string newPath = Path.Combine(rootPath, newName);
             string oldPath = Path.Combine(rootPath, oldName);
             this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)false);
@@ -105,7 +98,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
 
         [Test, Category("Fast")]
         public void HandleRenameEventOfNonExistingPath() {
-            var handler = new RenamedFileSystemEventHandler(this.queue.Object, rootPath, this.fsFactory.Object);
+            var handler = new RenamedFileSystemEventHandler(this.queue.Object, this.fsFactory.Object);
             string newPath = Path.Combine(rootPath, newName);
             this.fsFactory.Setup(f => f.IsDirectory(newPath)).Returns((bool?)null);
 
@@ -121,6 +114,18 @@ namespace TestLibrary.ProducerTests.WatcherTests
             var args = this.CreateEvent(oldName, newName);
             Assert.That(args.FullPath, Is.EqualTo(Path.Combine(rootPath, newName)));
             Assert.That(args.OldFullPath, Is.EqualTo(Path.Combine(rootPath, oldName)));
+        }
+
+        [Test, Category("Fast")]
+        public void HandleExceptionsByInvokingCrawlSync() {
+            var handler = new RenamedFileSystemEventHandler(this.queue.Object, this.fsFactory.Object);
+            string newPath = Path.Combine(rootPath, newName);
+            this.fsFactory.Setup(f => f.IsDirectory(newPath)).Throws(new Exception("IOException"));
+
+            handler.Handle(null, this.CreateEvent(oldName, newName));
+
+            this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();
+            this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once);
         }
 
         private RenamedEventArgs CreateEvent(string oldName, string newName)

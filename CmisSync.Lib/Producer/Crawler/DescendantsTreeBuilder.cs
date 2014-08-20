@@ -1,0 +1,190 @@
+//-----------------------------------------------------------------------
+// <copyright file="DescendantsTreeBuilder.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
+namespace CmisSync.Lib.Producer.Crawler
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+
+    using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
+
+    using DotCMIS.Client;
+
+    using log4net;
+
+    /// <summary>
+    /// Descendants tree builder.
+    /// </summary>
+    /// <exception cref='ArgumentNullException'>
+    /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a null
+    /// reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
+    /// </exception>
+    public class DescendantsTreeBuilder : IDescendantsTreeBuilder
+    {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(DescendantsTreeBuilder));
+        private IMetaDataStorage storage;
+        private IFolder remoteFolder;
+        private IDirectoryInfo localFolder;
+        private IFilterAggregator filter;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.DescendantsTreeBuilder"/> class.
+        /// </summary>
+        /// <param name='storage'>
+        /// The MetadataStorage.
+        /// </param>
+        /// <param name='remoteFolder'>
+        /// Remote folder.
+        /// </param>
+        /// <param name='localFolder'>
+        /// Local folder.
+        /// </param>
+        /// <param name='filter'>
+        /// Aggregated Filters.
+        /// </param>
+        /// <exception cref='ArgumentNullException'>
+        /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a
+        /// null reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
+        /// </exception>
+        public DescendantsTreeBuilder(IMetaDataStorage storage, IFolder remoteFolder, IDirectoryInfo localFolder, IFilterAggregator filter)
+        {
+            if (remoteFolder == null) {
+                throw new ArgumentNullException("Given remoteFolder is null");
+            }
+
+            if (localFolder == null) {
+                throw new ArgumentNullException("Given localFolder is null");
+            }
+
+            if (storage == null) {
+                throw new ArgumentNullException("Given storage is null");
+            }
+
+            if (filter == null) {
+                throw new ArgumentNullException("Given filter is null");
+            }
+
+            this.storage = storage;
+            this.remoteFolder = remoteFolder;
+            this.localFolder = localFolder;
+            this.filter = filter;
+        }
+
+        /// <summary>
+        /// Gets the local directory tree.
+        /// </summary>
+        /// <returns>The local directory tree.</returns>
+        /// <param name="parent">Parent directory.</param>
+        /// <param name="filter">Filter for files.</param>
+        public static IObjectTree<IFileSystemInfo> GetLocalDirectoryTree(IDirectoryInfo parent, IFilterAggregator filter) {
+            var children = new List<IObjectTree<IFileSystemInfo>>();
+            foreach (var child in parent.GetDirectories()) {
+                string reason;
+                if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
+                    children.Add(GetLocalDirectoryTree(child, filter));
+                } else {
+                    Logger.Debug(reason);
+                }
+            }
+
+            foreach (var file in parent.GetFiles()) {
+                string reason;
+                if (!filter.FileNamesFilter.CheckFile(file.Name, out reason)) {
+                    children.Add(new ObjectTree<IFileSystemInfo> {
+                        Item = file,
+                        Children = new List<IObjectTree<IFileSystemInfo>>()
+                    });
+                } else {
+                    Logger.Debug(reason);
+                }
+            }
+
+            IObjectTree<IFileSystemInfo> tree = new ObjectTree<IFileSystemInfo> {
+                Item = parent,
+                Children = children
+            };
+            return tree;
+        }
+
+        /// <summary>
+        /// Gets the remote directory tree.
+        /// </summary>
+        /// <returns>The remote directory tree.</returns>
+        /// <param name="parent">Parent folder.</param>
+        /// <param name="descendants">Descendants of remote object.</param>
+        /// <param name="filter">Filter of ignored or invalid files and folder</param>
+        public static IObjectTree<IFileableCmisObject> GetRemoteDirectoryTree(IFolder parent, IList<ITree<IFileableCmisObject>> descendants, IFilterAggregator filter) {
+            IList<IObjectTree<IFileableCmisObject>> children = new List<IObjectTree<IFileableCmisObject>>();
+            if (descendants != null) {
+                foreach (var child in descendants) {
+                    if (child.Item is IFolder) {
+                        string reason;
+                        if (!filter.FolderNamesFilter.CheckFolderName(child.Item.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(child.Item.Name, out reason)) {
+                            children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children, filter));
+                        } else {
+                            Logger.Debug(reason);
+                        }
+                    } else if (child.Item is IDocument) {
+                        string reason;
+                        if (!filter.FileNamesFilter.CheckFile(child.Item.Name, out reason)) {
+                            children.Add(new ObjectTree<IFileableCmisObject> {
+                                Item = child.Item,
+                                Children = new List<IObjectTree<IFileableCmisObject>>()
+                            });
+                        } else {
+                            Logger.Debug(reason);
+                        }
+                    }
+                }
+            }
+
+            var tree = new ObjectTree<IFileableCmisObject> {
+                Item = parent,
+                Children = children
+            };
+
+            return tree;
+        }
+
+        /// <summary>
+        /// Builds the trees asynchronously by crawling storage, FileSystem and Server.
+        /// </summary>
+        /// <returns>
+        /// The trees as a struct.
+        /// </returns>
+        public DescendantsTreeCollection BuildTrees() {
+            IObjectTree<IMappedObject> storedTree = null;
+            IObjectTree<IFileSystemInfo> localTree = null;
+            IObjectTree<IFileableCmisObject> remoteTree = null;
+
+            // Request 3 trees in parallel
+            Task[] tasks = new Task[3];
+            tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
+            tasks[1] = Task.Factory.StartNew(() => localTree = GetLocalDirectoryTree(this.localFolder, this.filter));
+            tasks[2] = Task.Factory.StartNew(() => remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter));
+
+            // Wait until all tasks are finished
+            Task.WaitAll(tasks);
+            return new DescendantsTreeCollection(storedTree, localTree, remoteTree);
+        }
+    }
+}

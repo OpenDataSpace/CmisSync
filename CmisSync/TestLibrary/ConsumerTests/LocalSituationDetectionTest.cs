@@ -23,11 +23,11 @@ namespace TestLibrary.ConsumerTests
     using System.IO;
 
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -60,9 +60,9 @@ namespace TestLibrary.ConsumerTests
         public void FileContentChangedDetection()
         {
             var fileInfo = Mock.Of<IFileInfo>(f => f.Exists == true);
-            var FileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.NONE, LocalContent = ContentChangeType.CHANGED };
+            var fileEvent = new FileEvent(fileInfo) { Local = MetaDataChangeType.NONE, LocalContent = ContentChangeType.CHANGED };
 
-            Assert.That(new LocalSituationDetection().Analyse(Mock.Of<IMetaDataStorage>(), FileEvent), Is.EqualTo(SituationType.CHANGED));
+            Assert.That(new LocalSituationDetection().Analyse(Mock.Of<IMetaDataStorage>(), fileEvent), Is.EqualTo(SituationType.CHANGED));
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
@@ -99,7 +99,7 @@ namespace TestLibrary.ConsumerTests
                 d =>
                 d.Name == "newName" &&
                 d.FullName == Path.Combine(Path.GetTempPath(), "newName") &&
-                d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey) == guid.ToString());
+                d.Uuid == guid);
             storage.Setup(s => s.GetObjectByGuid(guid)).Returns(Mock.Of<IMappedObject>());
             var folderEvent = new FolderEvent(dirInfo) { Local = MetaDataChangeType.CHANGED };
 
@@ -115,7 +115,7 @@ namespace TestLibrary.ConsumerTests
                 d =>
                 d.Name == "Name" &&
                 d.FullName == Path.Combine(Path.GetTempPath(), "Name") &&
-                d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey) == guid.ToString());
+                d.Uuid == guid);
             storage.Setup(s => s.GetObjectByLocalPath(dirInfo)).Returns(Mock.Of<IMappedObject>());
             var folderEvent = new FolderEvent(dirInfo) { Local = MetaDataChangeType.CHANGED };
 

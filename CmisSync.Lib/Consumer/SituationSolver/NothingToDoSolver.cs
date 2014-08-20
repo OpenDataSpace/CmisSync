@@ -16,13 +16,15 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
-    using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
-    
+    using CmisSync.Lib.Storage.FileSystem;
+
     using DotCMIS.Client;
-    
+
     /// <summary>
     /// Nothing to do solver, does nothing.
     /// </summary>
@@ -37,7 +39,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name='remoteId'>
         /// Remote identifier.
         /// </param>
-        public virtual void Solve(IFileSystemInfo localFile, IObjectId remoteId)
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
+        public virtual void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent,
+            ContentChangeType remoteContent)
         {
             // No Operation Needed
         }

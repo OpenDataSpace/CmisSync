@@ -191,7 +191,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteDocumentAdded()
+        public void OneRemoteFileAdded()
         {
             IDocument newRemoteDocument = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "id", "name", this.remoteRootId).Object;
             this.remoteFolder.SetupDescendants(newRemoteDocument);
@@ -199,6 +199,30 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.RemoteFile.Equals(newRemoteDocument))), Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
+        }
+
+        [Test, Category("Fast")]
+        public void OneRemoteFileRemoved()
+        {
+            Guid fileGuid = Guid.NewGuid();
+            DateTime modificationDate = DateTime.UtcNow;
+            MappedObject obj = new MappedObject("name", "id", MappedObjectType.File, this.remoteRootId, "changeToken", 0) {
+                Guid = fileGuid,
+                LastLocalWriteTimeUtc = modificationDate
+            };
+            var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "name"));
+            oldLocalFile.SetupGuid(fileGuid);
+            oldLocalFile.SetupLastWriteTimeUtc(modificationDate);
+            this.localFolder.SetupFiles(oldLocalFile.Object);
+            this.storage.SaveMappedObject(obj);
+
+            var underTest = this.CreateCrawler();
+
+            Assert.That(underTest.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.Remote == MetaDataChangeType.DELETED)), Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
         }
 
@@ -214,6 +238,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteFolder.Object))), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.RemoteFolder.Equals(newRemoteSubFolder.Object))), Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Exactly(2));
             this.VerifyThatListenerHasBeenUsed();
         }
 
@@ -238,6 +263,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile.Equals(newFileMock.Object))), Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
         }
 
@@ -257,6 +283,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => e.LocalFile != null && e.LocalFile.Equals(oldLocalFile.Object) && e.Local.Equals(MetaDataChangeType.DELETED))), Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
         }
 
@@ -275,6 +302,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.LocalFolder != null && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
         }
 
@@ -303,10 +331,41 @@ namespace TestLibrary.ProducerTests.CrawlerTests
                 It.Is<FolderEvent>(
                 e =>
                 e.LocalFolder.Equals(newLocalFolder.Object) &&
-                e.RemoteFolder.Equals(remoteSubFolder.Object) &&
                 e.Local.Equals(MetaDataChangeType.CHANGED))),
                 Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
+        }
+
+        [Test, Category("Fast")]
+        public void OneLocalFileCopied()
+        {
+            var uuid = Guid.NewGuid();
+            var oldFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "old"), uuid);
+            oldFile.Setup(f => f.LastWriteTimeUtc).Returns(this.lastLocalWriteTime);
+            var newFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "new"), uuid);
+
+            var remoteSubFolder = MockOfIDocumentUtil.CreateRemoteDocumentMock("streamId", "oldId", oldFile.Object.Name, this.remoteFolder.Object, changeToken: "oldChange");
+            var storedFolder = new MappedObject(oldFile.Object.Name, "oldId", MappedObjectType.File, this.remoteRootId, "oldChange") {
+                Guid = uuid,
+                LastLocalWriteTimeUtc = this.lastLocalWriteTime
+            };
+            this.storage.SaveMappedObject(storedFolder);
+            this.remoteFolder.SetupDescendants(remoteSubFolder.Object);
+            this.localFolder.SetupFiles(newFile.Object, oldFile.Object);
+
+            var crawler = this.CreateCrawler();
+
+            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(
+                q =>
+                q.AddEvent(
+                It.Is<FileEvent>(
+                e =>
+                e.LocalFile.Equals(newFile.Object) &&
+                e.Local.Equals(MetaDataChangeType.CREATED))),
+                Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
         }
 
         [Test, Category("Fast")]
@@ -337,18 +396,25 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
             this.queue.Verify(q => q.AddEvent(It.Is<AbstractFolderEvent>(e => e.Local == MetaDataChangeType.NONE && e.Remote == MetaDataChangeType.NONE)), Times.Never());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Never());
             this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
         public void OneRemoteFolderRenamed()
         {
+            DateTime modification = DateTime.UtcNow;
             string oldFolderName = "folderName";
             string newFolderName = "newfolderName";
             string folderId = "folderId";
             var localGuid = Guid.NewGuid();
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, oldFolderName));
-            var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localGuid };
+            oldLocalFolder.Setup(f => f.LastWriteTimeUtc).Returns(modification);
+            oldLocalFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(localGuid.ToString());
+            var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") {
+                Guid = localGuid,
+                LastLocalWriteTimeUtc = modification
+            };
             this.localFolder.SetupDirectories(oldLocalFolder.Object);
             this.storage.SaveMappedObject(storedFolder);
             var renamedRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(folderId, newFolderName, this.remoteRootPath + newFolderName, this.remoteRootId, "newChangeToken");
@@ -363,6 +429,80 @@ namespace TestLibrary.ProducerTests.CrawlerTests
                 e.Local == MetaDataChangeType.NONE &&
                 e.RemoteFolder.Equals(renamedRemoteFolder.Object))),
                 Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
+        }
+
+        [Test, Category("Fast")]
+        public void OneRemoteFileRenamedAndContentHashIsNotAvailable()
+        {
+            string oldFileName = "fileName";
+            string newFileName = "newfileName";
+            string fileId = "fileId";
+            var localGuid = Guid.NewGuid();
+            DateTime modificationDate = DateTime.UtcNow;
+            var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, oldFileName));
+            oldLocalFile.SetupGuid(localGuid);
+            oldLocalFile.SetupLastWriteTimeUtc(modificationDate);
+            var storedFile = new MappedObject(oldFileName, fileId, MappedObjectType.File, this.remoteRootId, "changeToken") {
+                Guid = localGuid,
+                LastLocalWriteTimeUtc = modificationDate
+            };
+            this.localFolder.SetupFiles(oldLocalFile.Object);
+            this.storage.SaveMappedObject(storedFile);
+            var renamedRemoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, newFileName, this.remoteRootId, changeToken: "newChangeToken");
+            this.remoteFolder.SetupDescendants(renamedRemoteFile.Object);
+            Assert.That(this.CreateCrawler().Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(
+                q =>
+                q.AddEvent(
+                It.Is<FileEvent>(
+                e =>
+                e.Remote == MetaDataChangeType.CHANGED &&
+                e.RemoteContent == ContentChangeType.CHANGED &&
+                e.Local == MetaDataChangeType.NONE &&
+                e.RemoteFile.Equals(renamedRemoteFile.Object))),
+                Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
+            this.VerifyThatListenerHasBeenUsed();
+        }
+
+        [Test, Category("Fast")]
+        public void OneRemoteFileRenamedAndContentHashIsAvailable()
+        {
+            byte[] checksum = new byte[20];
+            string type = "SHA-1";
+            string oldFileName = "fileName";
+            string newFileName = "newfileName";
+            string fileId = "fileId";
+            DateTime lastModification = DateTime.UtcNow;
+            var localGuid = Guid.NewGuid();
+            var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, oldFileName));
+            oldLocalFile.SetupLastWriteTimeUtc(lastModification);
+            oldLocalFile.SetupGuid(localGuid);
+            var storedFile = new MappedObject(oldFileName, fileId, MappedObjectType.File, this.remoteRootId, "changeToken") {
+                Guid = localGuid,
+                ChecksumAlgorithmName = type,
+                LastChecksum = checksum,
+                LastLocalWriteTimeUtc = lastModification
+            };
+            this.localFolder.SetupFiles(oldLocalFile.Object);
+            this.storage.SaveMappedObject(storedFile);
+            var renamedRemoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, fileId, newFileName, this.remoteRootId, changeToken: "newChangeToken");
+            renamedRemoteFile.SetupContentStreamHash(checksum, type);
+            this.remoteFolder.SetupDescendants(renamedRemoteFile.Object);
+            Assert.That(this.CreateCrawler().Handle(new StartNextSyncEvent()), Is.True);
+            this.queue.Verify(
+                q =>
+                q.AddEvent(
+                It.Is<FileEvent>(
+                e =>
+                e.Remote == MetaDataChangeType.CHANGED &&
+                e.RemoteContent == ContentChangeType.NONE &&
+                e.Local == MetaDataChangeType.NONE &&
+                e.RemoteFile.Equals(renamedRemoteFile.Object))),
+                Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
         }
 
@@ -372,11 +512,22 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             string oldFolderName = "folderName";
             string folderId = "folderId";
             var localGuid = Guid.NewGuid();
+            DateTime modification = DateTime.UtcNow;
             var localTargetGuid = Guid.NewGuid();
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, oldFolderName));
+            oldLocalFolder.SetupLastWriteTimeUtc(modification);
+            oldLocalFolder.SetupGuid(localGuid);
             var localTargetFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "target"));
-            var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localGuid };
-            var storedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.remoteRootId, "changeToken") { Guid = localTargetGuid };
+            localTargetFolder.SetupLastWriteTimeUtc(modification);
+            localTargetFolder.SetupGuid(localTargetGuid);
+            var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") {
+                Guid = localGuid,
+                LastLocalWriteTimeUtc = modification
+            };
+            var storedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.remoteRootId, "changeToken") {
+                Guid = localTargetGuid,
+                LastLocalWriteTimeUtc = modification
+            };
             this.localFolder.SetupDirectories(oldLocalFolder.Object, localTargetFolder.Object);
             this.storage.SaveMappedObject(storedFolder);
             this.storage.SaveMappedObject(storedTargetFolder);
@@ -394,21 +545,29 @@ namespace TestLibrary.ProducerTests.CrawlerTests
                 e.Local == MetaDataChangeType.NONE &&
                 e.RemoteFolder.Equals(renamedRemoteFolder.Object))),
                 Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
         }
 
         [Test, Category("Fast")]
         public void OneRemoteFolderRemoved()
         {
+            Guid uuid = Guid.NewGuid();
+            DateTime modification = DateTime.UtcNow;
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "folderName"));
-            var storedFolder = new MappedObject("folderName", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken");
+            oldLocalFolder.SetupGuid(uuid);
+            oldLocalFolder.SetupLastWriteTimeUtc(modification);
+            var storedFolder = new MappedObject("folderName", "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken") {
+                Guid = uuid,
+                LastLocalWriteTimeUtc = modification
+            };
             this.storage.SaveMappedObject(storedFolder);
             this.localFolder.SetupDirectories(oldLocalFolder.Object);
             var crawler = this.CreateCrawler();
 
             Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
         }
 
@@ -425,49 +584,25 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.NONE && e.Local == MetaDataChangeType.DELETED && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Never());
             this.queue.Verify(q => q.AddEvent(It.Is<FolderEvent>(e => e.Remote == MetaDataChangeType.DELETED && e.Local == MetaDataChangeType.NONE && e.LocalFolder.Equals(oldLocalFolder.Object))), Times.Never());
+            this.VerifyThatCountOfAddedEventsIsLimitedTo(Times.Once());
             this.VerifyThatListenerHasBeenUsed();
-        }
-
-        [Test, Category("Fast")]
-        public void DropAllStartNextSyncEventsInQueueWhichAreAvailableUntilRequestIsDone()
-        {
-            var crawler = this.CreateCrawler();
-
-            var startSyncEvent = new StartNextSyncEvent(true);
-
-            ISyncEvent resetToken = null;
-            queue.Setup(q => q.AddEvent(It.Is<ISyncEvent>(e => e.ToString() == "[ResetStartNextCrawlSyncFilterEvent]"))).Callback<ISyncEvent>(e => resetToken = e);
-
-            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            Assert.That(resetToken, Is.Not.Null);
-            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-            Assert.That(crawler.Handle(new StartNextSyncEvent()), Is.True);
-
-            this.remoteFolder.Verify(r => r.GetDescendants(-1), Times.Once);
-
-            // Handle reset event
-            Assert.That(crawler.Handle(resetToken), Is.True);
-
-            // Executes next sync and passes a new reset token to queue
-            Assert.That(crawler.Handle(startSyncEvent), Is.True);
-            this.remoteFolder.Verify(r => r.GetDescendants(-1), Times.Exactly(2));
         }
 
         private DescendantsCrawler CreateCrawler()
         {
-            return new DescendantsCrawler(
-                this.queue.Object,
-                this.remoteFolder.Object,
-                this.localFolder.Object,
-                this.storage,
-                this.filter,
-                this.listener.Object,
-                this.fsFactory.Object);
+            var generator = new CrawlEventGenerator(this.storage, this.fsFactory.Object);
+            var treeBuilder = new DescendantsTreeBuilder(this.storage, this.remoteFolder.Object, this.localFolder.Object, this.filter);
+            var notifier = new CrawlEventNotifier(this.queue.Object);
+            return new DescendantsCrawler(this.queue.Object, treeBuilder, generator, notifier, this.listener.Object);
         }
 
         private void VerifyThatListenerHasBeenUsed() {
             this.listener.Verify(l => l.ActivityStarted(), Times.AtLeastOnce());
             this.listener.Verify(l => l.ActivityStopped(), Times.AtLeastOnce());
+        }
+
+        private void VerifyThatCountOfAddedEventsIsLimitedTo(Times times) {
+            this.queue.Verify(q => q.AddEvent(It.IsAny<AbstractFolderEvent>()), times);
         }
     }
 }

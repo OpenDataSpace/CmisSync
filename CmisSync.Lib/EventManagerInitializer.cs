@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SyncStrategyInitializer.cs" company="GRAU DATA AG">
+// <copyright file="EventManagerInitializer.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -21,17 +21,18 @@ namespace CmisSync.Lib
     using System;
 
     using CmisSync.Lib.Accumulator;
-    using CmisSync.Lib.Consumer;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Enums;
@@ -60,23 +61,14 @@ namespace CmisSync.Lib
         private ActivityListenerAggregator activityListener;
   
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.EventManagerInitializer"/> class.
+        /// Initializes a new instance of the <see cref="EventManagerInitializer"/> class.
         /// </summary>
-        /// <param name='queue'>
-        /// The SyncEventQueue.
-        /// </param>
-        /// <param name='storage'>
-        /// Storage for Metadata.
-        /// </param>
-        /// <param name='repoInfo'>
-        /// Repo info.
-        /// </param>
-        /// <param name='activityListner'>
-        /// Listener for Sync activities.
-        /// </param>
-        /// <param name='fsFactory'>
-        /// Fs factory.
-        /// </param>
+        /// <param name='queue'>The SyncEventQueue.</param>
+        /// <param name='storage'>Storage for Metadata.</param>
+        /// <param name='repoInfo'>Repo info.</param>
+        /// <param name="filter">Filter aggregation.</param>
+        /// <param name='activityListner'>Listener for Sync activities.</param>
+        /// <param name='fsFactory'>File system factory.</param>
         /// <exception cref='ArgumentNullException'>
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
@@ -130,6 +122,7 @@ namespace CmisSync.Lib
             if (e is SuccessfulLoginEvent) {
                 var successfulLoginEvent = e as SuccessfulLoginEvent;
                 var session = successfulLoginEvent.Session;
+
                 var remoteRoot = successfulLoginEvent.Session.GetObjectByPath(this.repoInfo.RemotePath) as IFolder;
 
                 // Remove former added instances from event Queue.EventManager
@@ -173,7 +166,7 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.crawler);
                 }
 
-                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener, this.fileSystemFactory);
+                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener);
                 this.Queue.EventManager.AddEventHandler(this.crawler);
 
                 // Add remote object moved accumulator
@@ -192,7 +185,7 @@ namespace CmisSync.Lib
                 var localDetection = new LocalSituationDetection();
                 var remoteDetection = new RemoteSituationDetection();
 
-                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.activityListener);
+                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.activityListener, isServerAbleToUpdateModificationDate: session.IsServerAbleToUpdateModificationDate());
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);
@@ -200,7 +193,7 @@ namespace CmisSync.Lib
                 if (!Guid.TryParse(localRootFolder.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out rootFolderGuid)) {
                     try {
                         rootFolderGuid = Guid.NewGuid();
-                        localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString());
+                        localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString(), false);
                     } catch (ExtendedAttributeException ex)
                     {
                         Logger.Warn("Problem on setting Guid of the root path", ex);

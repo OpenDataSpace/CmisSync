@@ -20,10 +20,10 @@ namespace CmisSync.Lib.Accumulator
 {
     using System;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using log4net;
@@ -43,7 +43,7 @@ namespace CmisSync.Lib.Accumulator
         private IPathMatcher matcher;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.LocalObjectFetcher"/> class.
+        /// Initializes a new instance of the <see cref="LocalObjectFetcher"/> class.
         /// </summary>
         /// <param name='matcher'>
         /// Matcher from IMetaDataStorage

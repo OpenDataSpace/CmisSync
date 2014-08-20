@@ -22,10 +22,10 @@ namespace CmisSync.Lib.Consumer
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using log4net;
 
@@ -62,9 +62,8 @@ namespace CmisSync.Lib.Consumer
             case MetaDataChangeType.CHANGED:
                 IFileSystemInfo localPath = actualEvent is FolderEvent ? (IFileSystemInfo)(actualEvent as FolderEvent).LocalFolder : (IFileSystemInfo)(actualEvent is FileEvent ? (actualEvent as FileEvent).LocalFile : null);
                 if (storage.GetObjectByLocalPath(localPath) == null) {
-                    string ea = localPath.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                    Guid guid;
-                    if (Guid.TryParse(ea, out guid) && storage.GetObjectByGuid(guid) != null) {
+                    Guid? guid = localPath.Uuid;
+                    if (guid != null && storage.GetObjectByGuid((Guid)guid) != null) {
                         return SituationType.RENAMED;
                     }
                 }

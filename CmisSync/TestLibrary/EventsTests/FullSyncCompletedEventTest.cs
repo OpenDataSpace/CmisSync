@@ -39,10 +39,9 @@ namespace TestLibrary.EventsTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsOnNullParameterTest()
         {
-            new FullSyncCompletedEvent(null);
+            Assert.Throws<ArgumentNullException>(() => new FullSyncCompletedEvent(null));
         }
     }
 }

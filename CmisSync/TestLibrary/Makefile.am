@@ -18,6 +18,7 @@ SOURCES =  \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
+	CmisTests/ConvenienceExtendersTests/CmisConvenienceExtendersTest.cs \
 	CmisTests/OperationContextFactoryTest.cs \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
 	ConfigTests/ConfigurationTest.cs \
@@ -28,9 +29,11 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/AbstractEnhancedSolverTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectAddedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectChangedRemoteObjectChangedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectMovedRemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \
@@ -64,13 +67,13 @@ SOURCES =  \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
-	IntegrationTests/CmisSyncTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/RepositoryUtilsTests.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
@@ -85,11 +88,13 @@ SOURCES =  \
 	ProducerTests/WatcherTests/WatcherTest.cs \
 	ProducerTests/WatcherTests/WatcherTestUtils.cs \
 	QueueingTests/DebugLoggingHandlerTest.cs \
+	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
 	EventManagerInitializerTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
+	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderDosTest.cs \
@@ -101,7 +106,6 @@ SOURCES =  \
 	StreamsTests/NonClosingHashStreamTest.cs \
 	StreamsTests/OffsetStreamTest.cs \
 	StreamsTests/ProgressStreamTest.cs \
-	TestUtils/CmisConvenienceExtenders.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIDocumentUtil.cs \

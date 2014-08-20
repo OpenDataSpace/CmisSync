@@ -29,14 +29,14 @@ namespace CmisSync.Lib.Cmis.UiUtils
     public class CmisPermissionDeniedException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisPermissionDeniedException"/> class.
+        /// Initializes a new instance of the <see cref="CmisPermissionDeniedException"/> class.
         /// </summary>
         public CmisPermissionDeniedException()
         {
         }
         
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisPermissionDeniedException"/> class.
+        /// Initializes a new instance of the <see cref="CmisPermissionDeniedException"/> class.
         /// </summary>
         /// <param name="message">Message of the exception.</param>
         public CmisPermissionDeniedException(string message) : base(message)
@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         }
         
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisPermissionDeniedException"/> class.
+        /// Initializes a new instance of the <see cref="CmisPermissionDeniedException"/> class.
         /// </summary>
         /// <param name="message">Message of the exception.</param>
         /// <param name="inner">Inner exception.</param>
@@ -53,7 +53,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.CmisPermissionDeniedException"/> class.
+        /// Initializes a new instance of the <see cref="CmisPermissionDeniedException"/> class.
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>

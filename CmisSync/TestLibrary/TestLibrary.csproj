@@ -85,7 +85,6 @@
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
     <Compile Include="IntegrationTests\AllHandlersIT.cs" />
-    <Compile Include="IntegrationTests\CmisSyncTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
@@ -101,7 +100,6 @@
     <Compile Include="TestUtils\SingleStepEventQueue.cs" />
     <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
     <Compile Include="IntegrationTests\FullRepoTests.cs" />
-    <Compile Include="TestUtils\CmisConvenienceExtenders.cs" />
     <Compile Include="EventsTests\FsEventTest.cs" />
     <Compile Include="TestUtils\MockOfIFolderUtil.cs" />
     <Compile Include="TestUtils\MockOfIDocumentUtil.cs" />
@@ -183,6 +181,13 @@
     <Compile Include="EventManagerInitializerTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeChangesModificationDateTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\AbstractEnhancedSolverTest.cs" />
+    <Compile Include="CmisTests\ConvenienceExtendersTests\CmisConvenienceExtendersTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectChangedTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\EntitiesTests\IFileConvenienceExtendersTest.cs" />
+    <Compile Include="QueueingTests\DelayRetryAndNextSyncEventHandlerTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectMovedTest.cs" />
+    <Compile Include="IntegrationTests\RepositoryUtilsTests.cs" />
+    <Compile Include="QueueingTests\ConnectionSchedulerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -230,5 +235,6 @@
     <Folder Include="ProducerTests\ContentChangeTests\" />
     <Folder Include="QueueingTests\" />
     <Folder Include="FilterTests\" />
+    <Folder Include="CmisTests\ConvenienceExtendersTests\" />
   </ItemGroup>
 </Project>

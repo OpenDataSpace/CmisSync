@@ -52,7 +52,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="localFile">Old local file/folder.</param>
         /// <param name="remoteId">Remote identifier.</param>
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             // Move local object
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
@@ -77,10 +83,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             savedObject.Name = (remoteId as ICmisObject).Name;
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
-            savedObject.LastChangeToken = remoteId is ICmisObject ? (remoteId as ICmisObject).ChangeToken : null;
+            savedObject.LastChangeToken = (remoteId is IDocument && remoteContent != ContentChangeType.NONE) ? savedObject.LastChangeToken : remoteId is ICmisObject ? (remoteId as ICmisObject).ChangeToken : null;
             savedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
-            savedObject.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
+            savedObject.LastRemoteWriteTimeUtc = (remoteId is IDocument && remoteContent != ContentChangeType.NONE) ? savedObject.LastRemoteWriteTimeUtc : (remoteId as ICmisObject).LastModificationDate;
             this.Storage.SaveMappedObject(savedObject);
+            if (remoteId is IDocument && remoteContent != ContentChangeType.NONE) {
+                throw new ArgumentException("Remote content has also been changed => force crawl sync.");
+            }
         }
     }
 }

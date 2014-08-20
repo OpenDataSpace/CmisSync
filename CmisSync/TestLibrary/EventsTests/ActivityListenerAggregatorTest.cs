@@ -33,15 +33,13 @@ namespace TestLibrary
     public class ActivityListenerAggregatorTest
     {
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
-            new ActivityListenerAggregator(Mock.Of<IActivityListener>(), null);
+            Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(Mock.Of<IActivityListener>(), null));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfActivityListenerIsNull() {
-            new ActivityListenerAggregator(null, new ActiveActivitiesManager());
+            Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(null, new ActiveActivitiesManager()));
         }
 
         [Test, Category("Fast")]

@@ -66,6 +66,7 @@ namespace TestLibrary.QueueingTests
                 queue.StopListener();
                 WaitFor(queue, (q) => { return q.IsStopped; });
                 Assert.True(queue.IsStopped);
+                Assert.True(queue.IsEmpty);
             }
 
             managerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Exactly(2));
@@ -133,6 +134,21 @@ namespace TestLibrary.QueueingTests
             }
 
             t.Wait();
+        }
+
+        [Test, Category("Fast")]
+        public void ExceptionsInManagerAreHandled() {
+            var managerMock = new Mock<ISyncEventManager>();
+            managerMock.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Exception("Generic Exception Message"));
+            var eventMock = new Mock<ISyncEvent>();
+            eventMock.Setup(e => e.ToString()).Returns("Mocked Event");
+            using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object))
+            {
+                queue.AddEvent(eventMock.Object);
+                queue.StopListener();
+                WaitFor(queue, (q) => { return q.IsStopped; });
+                Assert.True(queue.IsStopped);
+            }
         }
 
         private static void WaitFor<T>(T obj, Func<T, bool> check)

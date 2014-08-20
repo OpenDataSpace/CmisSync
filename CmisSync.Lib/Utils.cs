@@ -467,5 +467,13 @@ namespace CmisSync.Lib
 
             return false;
         }
+
+        public static string ToHexString(byte[] data) {
+            if (data == null) {
+                return "(null)";
+            } else {
+                return BitConverter.ToString(data).Replace("-", string.Empty);
+            }
+        }
     }
 }

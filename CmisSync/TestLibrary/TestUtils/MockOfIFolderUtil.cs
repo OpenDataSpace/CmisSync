@@ -22,9 +22,12 @@ namespace TestLibrary.TestUtils
     using System;
     using System.Collections.Generic;
 
+    using DotCMIS;
     using DotCMIS.Client;
 
     using Moq;
+
+    using NUnit.Framework;
 
     public static class MockOfIFolderUtil
     {
@@ -56,6 +59,20 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
             newRemoteObject.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns((IObjectId old, IObjectId current) => CreateRemoteFolderMock(id, name, path, current.Id, changetoken).Object);
             return newRemoteObject;
+        }
+
+        public static void VerifyUpdateLastModificationDate(this Mock<IFolder> folder, DateTime modificationDate, bool refresh = true) {
+            folder.VerifyUpdateLastModificationDate(modificationDate, Times.Once(), refresh);
+        }
+
+        public static void VerifyUpdateLastModificationDate(this Mock<IFolder> folder, DateTime modificationDate, Times times, bool refresh = true) {
+            folder.Verify(d => d.UpdateProperties(It.Is<IDictionary<string, object>>(dic => VerifyDictContainsLastModification(dic, modificationDate)), refresh));
+        }
+
+        private static bool VerifyDictContainsLastModification(IDictionary<string, object> dic, DateTime modificationDate) {
+            Assert.That(dic.ContainsKey(PropertyIds.LastModificationDate));
+            Assert.That(dic[PropertyIds.LastModificationDate], Is.EqualTo(modificationDate));
+            return true;
         }
     }
 }

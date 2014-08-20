@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CmisRepo.cs" company="GRAU DATA AG">
+// <copyright file="Repository.cs" company="GRAU DATA AG">
 //
 //   Copyright (C) 2012  Nicolas Raoul &lt;nicolas.raoul@aegif.jp&gt;
 //   Copyright (C) 2014 GRAU DATA &lt;info@graudata.com&gt;
@@ -19,6 +19,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Cmis
 {
     using System;
@@ -29,15 +30,15 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Producer.ContentChange;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DBreeze;
 
@@ -135,11 +136,6 @@ namespace CmisSync.Lib.Cmis
         private IDisposableAuthProvider authProvider;
 
         /// <summary>
-        /// Session to the CMIS repository.
-        /// </summary>
-        protected ISession session;
-
-        /// <summary>
         /// The session factory.
         /// </summary>
         private ISessionFactory sessionFactory;
@@ -153,6 +149,11 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         protected MetaDataStorage storage;
 
+        /// <summary>
+        /// The connection scheduler.
+        /// </summary>
+        protected ConnectionScheduler connectionScheduler;
+
         private IFileSystemInfoFactory fileSystemFactory;
 
         static Repository()
@@ -161,7 +162,7 @@ namespace CmisSync.Lib.Cmis
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class.
+        /// Initializes a new instance of the <see cref="Repository"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
@@ -170,7 +171,7 @@ namespace CmisSync.Lib.Cmis
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class.
+        /// Initializes a new instance of the <see cref="Repository"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
@@ -178,13 +179,11 @@ namespace CmisSync.Lib.Cmis
         /// <param name="queue">Event Queue.</param>
         protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, IDisposableSyncEventQueue queue)
         {
-            if (repoInfo == null)
-            {
+            if (repoInfo == null) {
                 throw new ArgumentNullException("Given repoInfo is null");
             }
 
-            if (activityListener == null)
-            {
+            if (activityListener == null) {
                 throw new ArgumentNullException("Given activityListener is null");
             }
 
@@ -263,10 +262,16 @@ namespace CmisSync.Lib.Cmis
             };
 
             this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
+
+            this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
+
+            this.connectionScheduler = new ConnectionScheduler(this.RepoInfo, this.Queue, this.sessionFactory, this.authProvider);
+
+            this.Queue.EventManager.AddEventHandler(this.connectionScheduler);
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="CmisSync.Lib.Sync.Repository"/> class and releases unmanaged
+        /// Finalizes an instance of the <see cref="Repository"/> class and releases unmanaged
         /// resources and performs other cleanup operations before the is reclaimed by garbage collection.
         /// </summary>
         ~Repository()
@@ -355,7 +360,7 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         public virtual void Initialize()
         {
-            this.Connect();
+            this.connectionScheduler.Start();
 
             // Enable FS Watcher events
             this.WatcherProducer.EnableEvents = true;
@@ -379,6 +384,7 @@ namespace CmisSync.Lib.Cmis
             {
                 if (disposing)
                 {
+                    this.connectionScheduler.Dispose();
                     this.Scheduler.Dispose();
                     this.WatcherProducer.Dispose();
                     this.Queue.StopListener();
@@ -407,8 +413,7 @@ namespace CmisSync.Lib.Cmis
 
         private bool RepoInfoChanged(ISyncEvent e)
         {
-            if (e is RepoConfigChangedEvent)
-            {
+            if (e is RepoConfigChangedEvent) {
                 this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
                 this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.GetIgnoredPaths());
                 this.ignoredFileNameFilter.Wildcards = ConfigManager.CurrentConfig.IgnoreFileNames;
@@ -418,94 +423,6 @@ namespace CmisSync.Lib.Cmis
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Connect to the CMIS repository.
-        /// </summary>
-        /// <param name="reconnect">
-        /// Forces a reconnect if set to <c>true</c>
-        /// </param>
-        private void Connect(bool reconnect = false)
-        {
-            if (this.session != null && !reconnect)
-            {
-                return;
-            }
-
-            using(log4net.ThreadContext.Stacks["NDC"].Push("Connect"))
-            {
-                try
-                {
-                    // Create session.
-                    this.session = this.sessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.authProvider, null);
-
-                    this.session.DefaultContext = OperationContextFactory.CreateDefaultContext(this.session);
-                    this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, this.session));
-                }
-                catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
-                {
-                    Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
-                    this.Queue.AddEvent(new PermissionDeniedEvent(e));
-                }
-                catch (CmisRuntimeException e)
-                {
-                    if(e.Message == "Proxy Authentication Required")
-                    {
-                        this.Queue.AddEvent(new ProxyAuthRequiredEvent(e));
-                        Logger.Warn("Proxy Settings Problem", e);
-                    }
-                    else
-                    {
-                        Logger.Error("Connection to repository failed: ", e);
-                    }
-                }
-                catch (CmisObjectNotFoundException e)
-                {
-                    Logger.Error("Failed to find cmis object: ", e);
-                }
-                catch (CmisBaseException e)
-                {
-                    Logger.Error("Failed to create session to remote " + this.RepoInfo.Address.ToString() + ": ", e);
-                }
-            }
-        }
-
-        private bool IsGetDescendantsSupported()
-        {
-            try
-            {
-                return this.session.RepositoryInfo.Capabilities.IsGetDescendantsSupported != false && this.RepoInfo.SupportedFeatures.GetDescendantsSupport == true;
-            }
-            catch(NullReferenceException)
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Parameter to use for all CMIS requests.
-        /// </summary>
-        /// <returns>
-        /// The cmis parameter.
-        /// </returns>
-        /// <param name='repoInfo'>
-        /// The repository infos.
-        /// </param>
-        private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo)
-        {
-            Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
-            cmisParameters[SessionParameter.User] = repoInfo.User;
-            cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
-            cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;
-            cmisParameters[SessionParameter.ConnectTimeout] = repoInfo.ConnectionTimeout.ToString();
-            cmisParameters[SessionParameter.ReadTimeout] = repoInfo.ReadTimeout.ToString();
-            cmisParameters[SessionParameter.DeviceIdentifier] = ConfigManager.CurrentConfig.DeviceId.ToString();
-            cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
-            cmisParameters[SessionParameter.Compression] = bool.TrueString;
-            return cmisParameters;
         }
     }
 }

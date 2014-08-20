@@ -52,10 +52,22 @@ namespace CmisSync.Lib.Storage.FileSystem
         DateTime LastWriteTimeUtc { get; set; }
 
         /// <summary>
+        /// Gets the creation time in UTC.
+        /// </summary>
+        /// <value>The creation time in UTC.</value>
+        DateTime CreationTimeUtc { get; }
+
+        /// <summary>
         /// Gets the file attributes.
         /// </summary>
         /// <value>The attributes.</value>
         FileAttributes Attributes { get; }
+
+        /// <summary>
+        /// Gets or sets the UUID.
+        /// </summary>
+        /// <value>The UUID.</value>
+        Guid? Uuid { get; set; }
 
         /// <summary>
         /// Refresh the loaded information of this instance.
@@ -67,14 +79,8 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <param name="key">Attribute name.</param>
         /// <param name="value">Attribute value.</param>
-        void SetExtendedAttribute(string key, string value);
-
-        /// <summary>
-        /// Sets the extended attribute. And restores the last modification date if it has been changed.
-        /// </summary>
-        /// <param name="key">Attribute name.</param>
-        /// <param name="value">Attribute value.</param>
-        void SetExtendedAttributeAndRestoreLastModificationDate(string key, string value);
+        /// <param name="restoreModificationDate">If set to <c>true</c>, the last modification date of the file will be restored after setting the attribute. If <c>false</c> it could have been changed by the file system.</param>
+        void SetExtendedAttribute(string key, string value, bool restoreModificationDate);
 
         /// <summary>
         /// Gets the extended attribute.

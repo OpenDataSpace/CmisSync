@@ -72,19 +72,17 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithLocalDetectionNull()
         {
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            new SyncMechanism(null, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener);
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(null, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithRemoteDetectionNull()
         {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
-            new SyncMechanism(localDetection.Object, null, this.queue.Object, this.session.Object, this.storage.Object, this.listener);
+            Assert.Throws<ArgumentNullException>(() => new SyncMechanism(localDetection.Object, null, this.queue.Object, this.session.Object, this.storage.Object, this.listener));
         }
 
         [Test, Category("Fast")]
@@ -113,7 +111,9 @@ namespace TestLibrary.ConsumerTests
             var noChangeSolver = new Mock<ISolver>();
             noChangeSolver.Setup(s => s.Solve(
                 It.IsAny<IFileSystemInfo>(),
-                It.Is<IObjectId>(id => id == remoteId)));
+                It.Is<IObjectId>(id => id == remoteId),
+                It.IsAny<ContentChangeType>(),
+                It.IsAny<ContentChangeType>()));
             localDetection.Setup(d => d.Analyse(
                 It.Is<IMetaDataStorage>(db => db == this.storage.Object),
                 It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
@@ -136,7 +136,9 @@ namespace TestLibrary.ConsumerTests
             noChangeSolver.Verify(
                 s => s.Solve(
                 It.IsAny<IFileSystemInfo>(),
-                It.Is<IObjectId>(id => id.Id == remoteId.Id)),
+                It.Is<IObjectId>(id => id.Id == remoteId.Id),
+                It.IsAny<ContentChangeType>(),
+                It.IsAny<ContentChangeType>()),
                 Times.Once());
             this.VerifyThatListenerIsInformed();
         }
@@ -176,7 +178,9 @@ namespace TestLibrary.ConsumerTests
             remoteFolderAddedSolver.Verify(
                 s => s.Solve(
                 It.IsAny<IFileSystemInfo>(),
-                It.IsAny<IObjectId>()),
+                It.IsAny<IObjectId>(),
+                It.IsAny<ContentChangeType>(),
+                It.IsAny<ContentChangeType>()),
                 Times.Once());
             this.VerifyThatListenerIsInformed();
         }
@@ -198,16 +202,17 @@ namespace TestLibrary.ConsumerTests
             localFolderAddedSolver.Verify(
                 s => s.Solve(
                 It.IsAny<IFileSystemInfo>(),
-                It.IsAny<IObjectId>()),
+                It.IsAny<IObjectId>(),
+                It.IsAny<ContentChangeType>(),
+                It.IsAny<ContentChangeType>()),
                 Times.Once());
             this.VerifyThatListenerIsInformed();
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(NotImplementedException))]
         public void ThrowNotImplementedOnMissingSolver()
         {
-            this.TriggerNonExistingSolver();
+            Assert.Throws<NotImplementedException>(() => this.TriggerNonExistingSolver());
         }
 
         [Test, Category("Fast")]
@@ -223,14 +228,20 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast")]
-        public void AddingEventBackToQueueOnRetryExceptionInSolver()
+        public void AddingEventBackToQueueOnRetryExceptionInSolverAndIncrementRetryCounter()
         {
             var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
             var retryProducer = new Mock<ISolver>();
-            retryProducer.Setup(r => r.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>())).Throws(new RetryException("reason"));
+            retryProducer.Setup(
+                r =>
+                r.Solve(
+                It.IsAny<IFileSystemInfo>(),
+                It.IsAny<IObjectId>(),
+                It.IsAny<ContentChangeType>(),
+                It.IsAny<ContentChangeType>())).Throws(new RetryException("reason"));
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = retryProducer.Object;
             var mechanism = new SyncMechanism(localDetection.Object, remoteDetection.Object, this.queue.Object, this.session.Object, this.storage.Object, this.listener, solver);
             localDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
@@ -240,6 +251,7 @@ namespace TestLibrary.ConsumerTests
             Assert.That(mechanism.Handle(folderEvent), Is.True);
 
             this.queue.Verify(q => q.AddEvent(folderEvent), Times.Once());
+            Assert.That(folderEvent.RetryCount, Is.EqualTo(1));
         }
 
         private void TriggerNonExistingSolver() {

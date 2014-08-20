@@ -16,6 +16,7 @@ SOURCES =  \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/Authentication/PersistentStandardAuthenticationProvider.cs \
 	Cmis/Authentication/StandardAuthenticationProviderWrapper.cs \
+	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/MimeType.cs \
 	Cmis/OperationContextFactory.cs \
@@ -40,9 +41,11 @@ SOURCES =  \
 	Consumer/SituationSolver/ISolver.cs \
 	Consumer/SituationSolver/LocalObjectAdded.cs \
 	Consumer/SituationSolver/LocalObjectChanged.cs \
+	Consumer/SituationSolver/LocalObjectChangedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectMovedRemoteObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/NothingToDoSolver.cs \
@@ -115,7 +118,13 @@ SOURCES =  \
 	Producer/ContentChange/ContentChangeEventAccumulator.cs \
 	Producer/ContentChange/ContentChangeEventTransformer.cs \
 	Producer/ContentChange/ContentChanges.cs \
+	Producer/Crawler/CrawlEventCollection.cs \
+	Producer/Crawler/CrawlEventGenerator.cs \
+	Producer/Crawler/CrawlEventNotifier.cs \
 	Producer/Crawler/DescendantsCrawler.cs \
+	Producer/Crawler/DescendantsTreeBuilder.cs \
+	Producer/Crawler/DescendantsTreeCollection.cs \
+	Producer/Crawler/IDescendantsTreeBuilder.cs \
 	Producer/Watcher/CreatedChangedDeletedFileSystemEventHandler.cs \
 	Producer/Watcher/IWatcherProducer.cs \
 	Producer/Watcher/MacWatcher.cs \
@@ -124,9 +133,12 @@ SOURCES =  \
 	Producer/Watcher/WatcherConsumer.cs \
 	Queueing/AbstractEventProducer.cs \
 	Queueing/ActiveActivitiesManager.cs \
+	Queueing/ConnectionScheduler.cs \
 	Queueing/DebugLoggingHandler.cs \
+	Queueing/DelayRetryAndNextSyncEventHandler.cs \
 	Queueing/EventHandlerPriorities.cs \
 	Queueing/GenericSyncEventHandler.cs \
+	Queueing/IConnectionScheduler.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \
@@ -136,6 +148,8 @@ SOURCES =  \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
+	Storage/Database/DublicateGuidException.cs \
+	Storage/Database/Entities/IFileConvenienceExtenders.cs \
 	Storage/Database/Entities/IMappedObject.cs \
 	Storage/Database/Entities/MappedObject.cs \
 	Storage/Database/EntryNotFoundException.cs \

@@ -39,12 +39,11 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void AddingNullAsTransmissionReturnsFalse()
         {
             var manager = new ActiveActivitiesManager();
 
-            manager.AddTransmission(null);
+            Assert.Throws<ArgumentNullException>(() => manager.AddTransmission(null));
         }
 
         [Test, Category("Fast")]

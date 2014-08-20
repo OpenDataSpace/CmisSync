@@ -28,6 +28,7 @@ namespace CmisSync.Lib.Storage.FileSystem
     public abstract class FileSystemInfoWrapper : IFileSystemInfo
     {
         private static IExtendedAttributeReader reader = null;
+        private static readonly string ExtendedAttributeKey = "DSS-UUID";
 
         private FileSystemInfo original;
 
@@ -72,6 +73,16 @@ namespace CmisSync.Lib.Storage.FileSystem
         }
 
         /// <summary>
+        /// Gets the creation time in UTC.
+        /// </summary>
+        /// <value>The creation time in UTC.</value>
+        public DateTime CreationTimeUtc {
+            get {
+                return this.original.CreationTimeUtc;
+            }
+        }
+
+        /// <summary>
         /// Gets the full name/path.
         /// </summary>
         /// <value>The full name.</value>
@@ -101,6 +112,22 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <value>The attributes.</value>
         public FileAttributes Attributes {
             get { return this.original.Attributes; }
+        }
+
+        public Guid? Uuid {
+            get {
+                Guid uuid;
+                string storedValue = this.GetExtendedAttribute(ExtendedAttributeKey);
+                if (storedValue != null && Guid.TryParse(storedValue, out uuid)) {
+                    return uuid;
+                } else {
+                    return null;
+                }
+            }
+
+            set {
+                this.SetExtendedAttribute(ExtendedAttributeKey, value == null ? null : value.ToString(), true);
+            }
         }
 
         /// <summary>
@@ -133,28 +160,18 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <param name="key">Attribute name.</param>
         /// <param name="value">Attribute value.</param>
-        public void SetExtendedAttribute(string key, string value)
+        /// <param name="restoreModificationDate">Restore the modification date of the file after setting ea.</param>
+        public void SetExtendedAttribute(string key, string value, bool restoreModificationDate = false)
         {
             if(reader != null)
             {
-                reader.SetExtendedAttribute(this.original.FullName, key, value);
+                reader.SetExtendedAttribute(this.original.FullName, key, value, restoreModificationDate);
             }
             else
             {
                 throw new ExtendedAttributeException("Feature is not supported");
             }
         }
-
-        public void SetExtendedAttributeAndRestoreLastModificationDate(string key, string value)
-        {
-            if (reader != null) {
-                reader.SetExtendedAttributeAndRestoreLastModificationDate(this.original.FullName, key, value);
-            } else {
-                throw new ExtendedAttributeException("Feature is not supported");
-            }
-
-        }
-
 
         /// <summary>
         /// Determines whether instance is able to save extended attributes.

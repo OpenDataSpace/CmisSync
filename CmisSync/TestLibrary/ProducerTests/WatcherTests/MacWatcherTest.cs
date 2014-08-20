@@ -117,6 +117,10 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 }
             }
 
+            public bool IsEmpty {
+                get { return Queue.IsEmpty; }
+            }
+
             public bool IsStopped {
                 get { return Queue.IsStopped; }
             }

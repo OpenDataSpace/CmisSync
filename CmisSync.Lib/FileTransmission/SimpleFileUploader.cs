@@ -63,6 +63,22 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If upload fails</exception>
         public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true)
         {
+            if(remoteDocument == null) {
+                throw new ArgumentException("remoteDocument can not be null");
+            }
+
+            if(localFileStream == null) {
+                throw new ArgumentException("localFileStream can not be null");
+            }
+
+            if(status == null) {
+                throw new ArgumentException("status can not be null");
+            }
+
+            if(hashAlg == null) {
+                throw new ArgumentException("hashAlg can not be null");
+            }
+
             using(NonClosingHashStream hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
             using(ProgressStream progressstream = new ProgressStream(hashstream, status))
             {
@@ -70,12 +86,9 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = progressstream;
-                try
-                {
+                try {
                     remoteDocument.SetContentStream(contentStream, overwrite, true);
-                }
-                catch(Exception e)
-                {
+                } catch(Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }
@@ -112,13 +125,9 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream.FileName = remoteDocument.Name;
                 contentStream.MimeType = Cmis.MimeType.GetMIMEType(contentStream.FileName);
                 contentStream.Stream = hashstream;
-                contentStream.Length = localFileStream.Length;
-                try
-                {
+                try {
                     return remoteDocument.AppendContentStream(contentStream, true);
-                }
-                catch(Exception e)
-                {
+                } catch(Exception e) {
                     throw new UploadFailedException(e, remoteDocument);
                 }
             }

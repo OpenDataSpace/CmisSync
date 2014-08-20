@@ -22,10 +22,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Enums;
@@ -40,39 +40,50 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
-        public LocalObjectDeleted(ISession session, IMetaDataStorage storage) : base (session, storage) {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectDeleted"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        public LocalObjectDeleted(ISession session, IMetaDataStorage storage) : base(session, storage) {
         }
 
         /// <summary>
         /// Solves the situation by deleting the corresponding remote object.
         /// </summary>
         /// <param name="localFile">Local file.</param>
-        /// <param name="remoteId">Remote identifier.</param>
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
+        /// <param name="remoteId">Remote identifier or object.</param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
 
-            bool hasBeenDeleted = TryDeleteObjectOnServer(remoteId, mappedObject.Type);
+            bool hasBeenDeleted = this.TryDeleteObjectOnServer(remoteId, mappedObject.Type);
             if(hasBeenDeleted) {
                 this.Storage.RemoveObject(mappedObject);
                 OperationsLogger.Info(string.Format("Deleted the corresponding remote object {0} of locally deleted object {1}", remoteId.Id, mappedObject.Name));
             } else {
                 OperationsLogger.Warn(string.Format("Permission denied while trying to Delete the locally deleted object {0} on the server.", mappedObject.Name));
             }
-
         }
 
         private bool TryDeleteObjectOnServer(IObjectId remoteId, MappedObjectType type)
         {
-            try{
+            try {
                 if (type == MappedObjectType.Folder) {
                     (remoteId as IFolder).DeleteTree(false, UnfileObject.DeleteSinglefiled, true);
                 } else {
                     this.Session.Delete(remoteId, true);
                 }
-            } catch (CmisPermissionDeniedException){
+            } catch (CmisPermissionDeniedException) {
                 return false;
             }
+
             return true;
         }
     }

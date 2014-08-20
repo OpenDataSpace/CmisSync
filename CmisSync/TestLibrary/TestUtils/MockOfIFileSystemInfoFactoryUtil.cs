@@ -53,6 +53,7 @@ namespace TestLibrary.TestUtils
         {
             var dir = fsFactory.AddDirectory(path, exists);
             dir.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+            dir.Setup(d =>d.Uuid).Returns(guid);
             return dir;
         }
 
@@ -94,9 +95,12 @@ namespace TestLibrary.TestUtils
             }
         }
 
-        public static void AddIFileInfo(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo fileInfo)
+        public static void AddIFileInfo(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo fileInfo, bool exists = true)
         {
             fsFactory.Setup(f => f.CreateFileInfo(fileInfo.FullName)).Returns(fileInfo);
+            if(exists){
+                fsFactory.Setup(f => f.IsDirectory(fileInfo.FullName)).Returns(false);
+            }
         }
 
         public static Mock<IFileInfo> AddFile(this Mock<IFileSystemInfoFactory> fsFactory, string path, bool exists = true)
@@ -105,7 +109,7 @@ namespace TestLibrary.TestUtils
             file.Setup(f => f.Name).Returns(Path.GetFileName(path));
             file.Setup(f => f.FullName).Returns(path);
             file.Setup(f => f.Exists).Returns(exists);
-            fsFactory.AddIFileInfo(file.Object);
+            fsFactory.AddIFileInfo(file.Object, exists);
             return file;
         }
 
@@ -113,6 +117,7 @@ namespace TestLibrary.TestUtils
         {
             var file = fsFactory.AddFile(path, exists);
             file.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+            file.Setup(f => f.Uuid).Returns(guid);
             return file;
         }
 
@@ -141,6 +146,45 @@ namespace TestLibrary.TestUtils
             localFolder.Setup(f => f.GetDirectories()).Returns(folderList.ToArray());
             localFolder.Setup(f => f.Name).Returns(Path.GetFileName(path));
             return localFolder;
+        }
+
+        public static void SetupLastWriteTimeUtc(this Mock<IFileSystemInfo> fileSystemInfo, DateTime lastWriteTimeUtc) {
+            fileSystemInfo.Setup(f => f.LastWriteTimeUtc).Returns(lastWriteTimeUtc);
+        }
+
+        public static void SetupGuid(this Mock<IFileSystemInfo> fileSystemInfo, Guid uuid) {
+            fileSystemInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            fileSystemInfo.Setup(f => f.Uuid).Returns(uuid);
+        }
+
+        public static void SetupLastWriteTimeUtc(this Mock<IFileInfo> fileInfo, DateTime lastWriteTimeUtc) {
+            fileInfo.Setup(f => f.LastWriteTimeUtc).Returns(lastWriteTimeUtc);
+        }
+
+        public static void SetupGuid(this Mock<IFileInfo> fileInfo, Guid uuid) {
+            fileInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            fileInfo.Setup(f => f.Uuid).Returns(uuid);
+        }
+
+        public static void SetupLastWriteTimeUtc(this Mock<IDirectoryInfo> dirInfo, DateTime lastWriteTimeUtc) {
+            dirInfo.Setup(f => f.LastWriteTimeUtc).Returns(lastWriteTimeUtc);
+        }
+
+        public static void SetupGuid(this Mock<IDirectoryInfo> dirInfo, Guid uuid) {
+            dirInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid.ToString());
+            dirInfo.Setup(f => f.Uuid).Returns(uuid);
+        }
+
+        public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileSystemInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
+
+        public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
+        }
+
+        public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IDirectoryInfo> fsInfo) {
+            fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
         }
     }
 }

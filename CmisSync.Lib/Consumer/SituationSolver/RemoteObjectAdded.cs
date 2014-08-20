@@ -23,12 +23,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.IO;
     using System.Security.Cryptography;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
-    
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
+
     using DotCMIS.Client;
   
     using log4net;
@@ -39,6 +39,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     public class RemoteObjectAdded : AbstractEnhancedSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
@@ -47,7 +48,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectAdded"/> class.
         /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
         /// <param name="queue">Queue to report new transmissions to.</param>
+        /// <param name="transmissonManager">Transmisson manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
             ISession session,
@@ -77,10 +81,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name='remoteId'>
         /// Remote Object (already fetched).
         /// </param>
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
         /// <exception cref='ArgumentException'>
         /// Is thrown when remoteId is not prefetched.
         /// </exception>
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId) {
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
+        {
             if(localFile is IDirectoryInfo) {
                 if(!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
@@ -97,7 +108,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
-                    localFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString());
+                    localFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
                 }
 
                 var mappedObject = new MappedObject(remoteFolder);
@@ -134,24 +145,29 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 Guid guid = Guid.NewGuid();
-                cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString());
+                cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), false);
                 try {
                     cacheFile.MoveTo(file.FullName);
-                } catch (IOException) {
+                } catch (IOException e) {
                     file.Refresh();
                     if (file.Exists) {
                         IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
                         IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
-                        targetFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString());
-                        conflictFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null);
+                        targetFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), true);
+                        conflictFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
                     } else {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = e });
                         throw;
                     }
                 }
 
                 file.Refresh();
                 if (remoteDoc.LastModificationDate != null) {
-                    file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
+                    try {
+                        file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
+                    } catch(IOException e) {
+                        Logger.Debug("Cannot set last modification date", e);
+                    }
                 }
 
                 MappedObject mappedObject = new MappedObject(
@@ -166,7 +182,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     LastLocalWriteTimeUtc = file.LastWriteTimeUtc,
                     LastRemoteWriteTimeUtc = remoteDoc.LastModificationDate,
                     LastChecksum = hash,
-                    ChecksumAlgorithmName = "SHA1"
+                    ChecksumAlgorithmName = "SHA-1"
                 };
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));

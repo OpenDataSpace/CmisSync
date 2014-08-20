@@ -68,7 +68,7 @@ namespace CmisSync.Lib.Queueing
                 if (this.handler[i].Handle(e))
                 {
                     if(!(e is IRemoveFromLoggingEvent)) {
-                        Logger.Debug(String.Format("Event {0} was handled by {1}", e.ToString(), this.handler[i].GetType()));
+                        Logger.Debug(string.Format("Event {0} was handled by {1}", e.ToString(), this.handler[i].GetType()));
                     }
 
                     return;

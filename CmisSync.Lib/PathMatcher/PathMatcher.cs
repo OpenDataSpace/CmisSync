@@ -33,7 +33,7 @@ namespace CmisSync.Lib.PathMatcher
     public class PathMatcher : IPathMatcher
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Data.PathMatcher"/> class.
+        /// Initializes a new instance of the <see cref="PathMatcher"/> class.
         /// </summary>
         /// <param name="localTargetRootPath">Local target root path.</param>
         /// <param name="remoteTargetRootPath">Remote target root path.</param>

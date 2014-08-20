@@ -35,6 +35,9 @@ namespace CmisSync.Lib.Storage.FileSystem
     {
         private readonly string prefix = "user.";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeReaderUnix"/> class.
+        /// </summary>
         public ExtendedAttributeReaderUnix()
         {
 #if (__MonoCS__ != true)
@@ -42,6 +45,12 @@ namespace CmisSync.Lib.Storage.FileSystem
 #endif
         }
 
+        /// <summary>
+        /// Gets the extended attribute.
+        /// </summary>
+        /// <returns>The extended attribute.</returns>
+        /// <param name="path">Path to the file or folder.</param>
+        /// <param name="key">Key of the extended attribute.</param>
         public string GetExtendedAttribute(string path, string key)
         {
             path = Path.GetFullPath(path);
@@ -83,7 +92,14 @@ namespace CmisSync.Lib.Storage.FileSystem
 #endif
         }
 
-        public void SetExtendedAttribute(string path, string key, string value)
+        /// <summary>
+        /// Sets the extended attribute.
+        /// </summary>
+        /// <param name="path">Path to the file or folder.</param>
+        /// <param name="key">Key of the extended attribute.</param>
+        /// <param name="value">Value of the extended attribute.</param>
+        /// <param name="restoreLastModificationDate">If set to <c>true</c> restore last modification date.</param>
+        public void SetExtendedAttribute(string path, string key, string value, bool restoreLastModificationDate = false)
         {
 #if __MonoCS__
             path = Path.GetFullPath(path);
@@ -108,11 +124,6 @@ namespace CmisSync.Lib.Storage.FileSystem
 #else
             throw new WrongPlatformException();
 #endif
-        }
-
-        public void SetExtendedAttributeAndRestoreLastModificationDate(string path, string key, string value)
-        {
-            this.SetExtendedAttribute(path, key, value);
         }
 
         /// <summary>

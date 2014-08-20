@@ -65,6 +65,16 @@ namespace CmisSync.Lib.Events
         }
 
         /// <summary>
+        /// Gets a value indicating whether this event contains a directory.
+        /// </summary>
+        /// <returns><c>true</c> if this instance is directory; otherwise, <c>false</c>.</returns>
+        public bool IsDirectory {
+            get {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Gets the remote path.
         /// </summary>
         /// <value>The path.</value>
@@ -143,16 +153,6 @@ namespace CmisSync.Lib.Events
                 this.Name,
                 this.Remote,
                 this.RemoteContent);
-        }
-
-        /// <summary>
-        /// Determines whether this event contains a directory.
-        /// </summary>
-        /// <returns><c>false</c></returns>
-        public bool IsDirectory {
-            get {
-                return false;
-            }
         }
     }
 }

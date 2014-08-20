@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+using System.Collections.Generic;
 
 namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
@@ -32,6 +33,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using DotCMIS.Client;
     using DotCMIS.Data;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -56,7 +58,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
             this.queue = new Mock<ISyncEventQueue>();
-            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, this.queue.Object, this.manager.Object);
+            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, this.queue.Object, this.manager.Object, true);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -81,9 +83,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void LocalFolderChanged()
         {
             var modificationDate = DateTime.UtcNow;
-            var localDirectory = Mock.Of<IDirectoryInfo>(
-                f =>
-                f.LastWriteTimeUtc == modificationDate.AddMinutes(1));
+            var localDirectory = new Mock<IDirectoryInfo>();
+            localDirectory.Setup(f => f.LastWriteTimeUtc).Returns(modificationDate.AddMinutes(1));
+            localDirectory.Setup(f => f.Exists).Returns(true);
 
             var mappedObject = new MappedObject(
                 "name",
@@ -97,7 +99,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             };
             this.storage.AddMappedFolder(mappedObject);
 
-            this.underTest.Solve(localDirectory, Mock.Of<IFolder>());
+            this.underTest.Solve(localDirectory.Object, Mock.Of<IFolder>());
 
             this.storage.VerifySavedMappedObject(
                 MappedObjectType.Folder,
@@ -106,9 +108,48 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 mappedObject.ParentId,
                 mappedObject.LastChangeToken,
                 true,
-                localDirectory.LastWriteTimeUtc);
+                localDirectory.Object.LastWriteTimeUtc);
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFolderChangedFetchByGuidInExtendedAttribute()
+        {
+            Guid guid = Guid.NewGuid();
+            var modificationDate = DateTime.UtcNow;
+            var localDirectory = new Mock<IDirectoryInfo>();
+            localDirectory.Setup(f => f.LastWriteTimeUtc).Returns(modificationDate.AddMinutes(1));
+            localDirectory.Setup(f => f.Exists).Returns(true);
+            localDirectory.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
+
+            var mappedObject = new MappedObject(
+                "name",
+                "remoteId",
+                MappedObjectType.Folder,
+                "parentId",
+                "changeToken")
+            {
+                Guid = guid,
+                LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1)
+            };
+            this.storage.AddMappedFolder(mappedObject);
+
+            this.underTest.Solve(localDirectory.Object, Mock.Of<IFolder>());
+
+            this.storage.VerifySavedMappedObject(
+                MappedObjectType.Folder,
+                "remoteId",
+                mappedObject.Name,
+                mappedObject.ParentId,
+                mappedObject.LastChangeToken,
+                true,
+                localDirectory.Object.LastWriteTimeUtc);
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
+            this.storage.Verify(s => s.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -125,10 +166,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             localFile.SetupSet(f => f.LastWriteTimeUtc = It.IsAny<DateTime>()).Throws(new IOException());
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns("path");
+            localFile.Setup(f => f.Exists).Returns(true);
             using (var uploadedContent = new MemoryStream()) {
                 localFile.Setup(
                     f =>
-                    f.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(() => { return new MemoryStream(content); });
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
 
                 var mappedObject = new MappedObject(
                     "name",
@@ -142,7 +184,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
                     LastLocalWriteTimeUtc = modificationDate,
                     LastChecksum = new byte[20],
-                    ChecksumAlgorithmName = "SHA1"
+                    ChecksumAlgorithmName = "SHA-1"
                 };
                 this.storage.AddMappedFile(mappedObject, "path");
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
@@ -156,6 +198,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
             }
 
+            localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
@@ -171,10 +214,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns(path);
+            localFile.Setup(f => f.Exists).Returns(true);
+
             using (var stream = new MemoryStream(content)) {
                 localFile.Setup(
                     f =>
-                    f.Open(System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)).Returns(stream);
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream);
 
                 var mappedObject = new MappedObject(
                     "name",
@@ -188,7 +233,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
                     LastLocalWriteTimeUtc = modificationDate,
                     LastChecksum = expectedHash,
-                    ChecksumAlgorithmName = "SHA1"
+                    ChecksumAlgorithmName = "SHA-1"
                 };
 
                 this.storage.AddMappedFile(mappedObject, path);
@@ -203,16 +248,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     mappedObject.LastChangeToken,
                     true,
                     localFile.Object.LastWriteTimeUtc,
+                    mappedObject.LastRemoteWriteTimeUtc,
                     expectedHash,
                     fileLength);
                 this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
                 this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
             }
+
+            localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileContentChanged()
         {
+            Guid uuid = Guid.NewGuid();
             var modificationDate = DateTime.UtcNow;
             var newModificationDate = modificationDate.AddHours(1);
             var newChangeToken = "newChangeToken";
@@ -224,10 +273,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
             localFile.Setup(f => f.Length).Returns(fileLength);
             localFile.Setup(f => f.FullName).Returns("path");
+            localFile.SetupGuid(uuid);
+            localFile.Setup(f => f.Exists).Returns(true);
             using (var uploadedContent = new MemoryStream()) {
                 localFile.Setup(
                     f =>
-                    f.Open(FileMode.Open, FileAccess.Read, FileShare.Read)).Returns(() => { return new MemoryStream(content); });
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
 
                 var mappedObject = new MappedObject(
                     "name",
@@ -237,11 +288,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     "changeToken",
                     fileLength)
                 {
-                    Guid = Guid.NewGuid(),
+                    Guid = uuid,
                     LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
                     LastLocalWriteTimeUtc = modificationDate,
                     LastChecksum = new byte[20],
-                    ChecksumAlgorithmName = "SHA1"
+                    ChecksumAlgorithmName = "SHA-1"
                 };
                 this.storage.AddMappedFile(mappedObject, "path");
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
@@ -262,14 +313,107 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     newChangeToken,
                     true,
                     localFile.Object.LastWriteTimeUtc,
+                    localFile.Object.LastWriteTimeUtc,
                     expectedHash,
                     fileLength);
                 remoteFile.VerifySetContentStream();
                 this.queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Path == localFile.Object.FullName && e.Type == FileTransmissionType.UPLOAD_MODIFIED_FILE)), Times.Once());
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
-                Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(newModificationDate));
+                localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
                 this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
             }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void PermissionDeniedTriggersNoOperation()
+        {
+            Guid uuid = Guid.NewGuid();
+            var modificationDate = DateTime.UtcNow;
+            int fileLength = 20;
+            byte[] content = new byte[fileLength];
+
+            var localFile = new Mock<IFileInfo>();
+            localFile.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
+            localFile.Setup(f => f.Length).Returns(fileLength);
+            localFile.Setup(f => f.FullName).Returns("path");
+            localFile.SetupGuid(uuid);
+            localFile.Setup(f => f.Exists).Returns(true);
+            using (var uploadedContent = new MemoryStream()) {
+                localFile.Setup(
+                    f =>
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
+
+                var mappedObject = new MappedObject(
+                    "name",
+                    "remoteId",
+                    MappedObjectType.File,
+                    "parentId",
+                    "changeToken",
+                    fileLength)
+                {
+                    Guid = uuid,
+                    LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
+                    LastLocalWriteTimeUtc = modificationDate,
+                    LastChecksum = new byte[20],
+                    ChecksumAlgorithmName = "SHA-1"
+                };
+                this.storage.AddMappedFile(mappedObject, "path");
+                var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "remoteId", "name", "parentId", fileLength, new byte[20]);
+
+                remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Throws(new CmisPermissionDeniedException());
+
+                this.underTest.Solve(localFile.Object, remoteFile.Object);
+
+                this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+                remoteFile.VerifySetContentStream();
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void PermissionDeniedOnModificationDateSavesTheLocalDate()
+        {
+            Guid uuid = Guid.NewGuid();
+            var modificationDate = DateTime.UtcNow;
+
+            var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, modificationDate.AddMinutes(1));
+            localFolder.Setup(f => f.FullName).Returns("path");
+            localFolder.SetupGuid(uuid);
+            localFolder.Setup(f => f.Exists).Returns(true);
+
+            var mappedObject = new MappedObject(
+                "name",
+                "remoteId",
+                MappedObjectType.Folder,
+                "parentId",
+                "changeToken")
+            {
+                Guid = uuid,
+                LastRemoteWriteTimeUtc = modificationDate.AddMinutes(1),
+                LastLocalWriteTimeUtc = modificationDate,
+            };
+            this.storage.AddMappedFolder(mappedObject, "path");
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "name", "path", "parentId");
+
+            remoteFolder.Setup(r => r.UpdateProperties(It.IsAny<IDictionary<string, object>>(), true)).Throws(new CmisPermissionDeniedException());
+
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "name", "parentId", "changeToken", true, localFolder.Object.LastWriteTimeUtc, remoteFolder.Object.LastModificationDate);
+            remoteFolder.Verify(r => r.UpdateProperties(It.IsAny<IDictionary<string, object>>(), true));
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void IgnoreChangesOnNonExistingLocalObject() {
+            var localDirectory = new Mock<IDirectoryInfo>();
+            localDirectory.Setup(f => f.Exists).Returns(false);
+
+            Assert.Throws<ArgumentException>(() => this.underTest.Solve(localDirectory.Object, Mock.Of<IFolder>()));
+
+            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never());
+            localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
         }
     }
 }

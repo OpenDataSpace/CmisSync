@@ -25,8 +25,20 @@ namespace CmisSync.Lib.Queueing
 
     using log4net;
 
+    /// <summary>
+    /// Interface of a disposable sync event queue.
+    /// </summary>
     public interface IDisposableSyncEventQueue : ISyncEventQueue, IDisposable {
+        /// <summary>
+        /// Stops the listeners.
+        /// </summary>
         void StopListener();
+
+        /// <summary>
+        /// Waits for queue to be stopped.
+        /// </summary>
+        /// <returns><c>true</c>, if for stopped was waited, <c>false</c> otherwise.</returns>
+        /// <param name="timeout">Timeout of waiting.</param>
         bool WaitForStopped(int timeout);
     }
 }

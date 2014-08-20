@@ -55,8 +55,6 @@ namespace CmisSync.Lib
 
         private object countingLock = new object();
 
-        public ActiveActivitiesManager TransmissionManager { get; private set; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.ActivityListenerAggregator"/> class.
         /// </summary>
@@ -75,6 +73,12 @@ namespace CmisSync.Lib
             this.overall = overallListener;
             this.TransmissionManager = transmissionManager;
         }
+
+        /// <summary>
+        /// Gets the transmission manager.
+        /// </summary>
+        /// <value>The transmission manager.</value>
+        public ActiveActivitiesManager TransmissionManager { get; private set; }
 
         /// <summary>
         /// Call this method to indicate that activity has started.

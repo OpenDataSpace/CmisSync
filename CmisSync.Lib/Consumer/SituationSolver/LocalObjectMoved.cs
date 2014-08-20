@@ -22,12 +22,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -38,36 +40,76 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
-        public LocalObjectMoved(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectMoved"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
+        public LocalObjectMoved(
+            ISession session,
+            IMetaDataStorage storage,
+            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate)
+        {
         }
 
         /// <summary>
         /// Solve the specified situation by using the session, storage, localFile and remoteId.
         /// </summary>
-        /// <param name="session">Cmis session instance.</param>
-        /// <param name="storage">Meta data storage.</param>
         /// <param name="localFile">Actual local file.</param>
         /// <param name="remoteId">Corresponding remote identifier.</param>
-        public override void Solve(IFileSystemInfo localFile, IObjectId remoteId)
+        /// <param name="localContent">Hint if the local content has been changed.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed.</param>
+        public override void Solve(
+            IFileSystemInfo localFile,
+            IObjectId remoteId,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             // Move Remote Object
             var remoteObject = remoteId as IFileableCmisObject;
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             var targetPath = localFile is IDirectoryInfo ? (localFile as IDirectoryInfo).Parent : (localFile as IFileInfo).Directory;
             var targetId = this.Storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
-            var src = this.Session.GetObject(mappedObject.ParentId);
-            var target = this.Session.GetObject(targetId);
-            OperationsLogger.Info(string.Format("Moving remote object {2} from folder {0} to folder {1}", src.Name, target.Name, remoteId.Id));
-            remoteObject = remoteObject.Move(src, target);
-            if(localFile.Name != remoteObject.Name) {
-                remoteObject.Rename(localFile.Name, true);
+            try
+            {
+                if (mappedObject.ParentId != targetId)
+                {
+                    var src = this.Session.GetObject(mappedObject.ParentId);
+                    var target = this.Session.GetObject(targetId);
+                    OperationsLogger.Info(string.Format("Moving remote object {2} from folder {0} to folder {1}", src.Name, target.Name, remoteId.Id));
+                    remoteObject = remoteObject.Move(src, target);
+                }
+
+                if (localFile.Name != remoteObject.Name)
+                {
+                    remoteObject.Rename(localFile.Name, true);
+                }
+            } catch (CmisPermissionDeniedException)
+            {
+                OperationsLogger.Info(string.Format("Moving remote object failed {0}: Permission Denied", localFile.FullName));
+                return;
             }
+
+            if (this.ServerCanModifyDateTimes)
+            {
+                if (mappedObject.LastLocalWriteTimeUtc != localFile.LastWriteTimeUtc)
+                {
+                    remoteObject.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
+                }
+            }
+
+            bool isContentChanged = localFile is IFileInfo ? (localFile as IFileInfo).IsContentChangedTo(mappedObject) : false;
 
             mappedObject.ParentId = targetId;
             mappedObject.LastChangeToken = remoteObject.ChangeToken;
             mappedObject.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
             mappedObject.Name = remoteObject.Name;
             this.Storage.SaveMappedObject(mappedObject);
+            if (isContentChanged)
+            {
+                throw new ArgumentException("Local file content is also changed => force crawl sync.");
+            }
         }
     }
 }

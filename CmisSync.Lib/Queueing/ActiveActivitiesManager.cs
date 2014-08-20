@@ -25,9 +25,9 @@ namespace CmisSync.Lib.Queueing
     using System.Linq;
     using System.Text;
 
-    using log4net;
-    
     using CmisSync.Lib.Events;
+
+    using log4net;
 
     /// <summary>
     /// Active activities manager.

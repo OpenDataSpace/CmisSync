@@ -26,45 +26,52 @@ namespace CmisSync.Lib.Producer.Watcher
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using log4net;
+
     /// <summary>
     /// Renamed file system event handler.
     /// </summary>
     public class RenamedFileSystemEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(RenamedFileSystemEventHandler));
+
         private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
-        private string path;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Sync.Strategy.RenamedFileSystemEventHandler"/> class.
+        /// Initializes a new instance of the <see cref="RenamedFileSystemEventHandler"/> class.
         /// </summary>
         /// <param name="queue">Sync event queue to report the events to.</param>
-        /// <param name="rootpath">Root path to the watched file system directory.</param>
         /// <param name="fsFactory">File system factory.</param>
-        public RenamedFileSystemEventHandler(ISyncEventQueue queue, string rootpath, IFileSystemInfoFactory fsFactory = null)
+        public RenamedFileSystemEventHandler(ISyncEventQueue queue, IFileSystemInfoFactory fsFactory = null)
         {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is null");
             }
 
-            if (rootpath == null) {
-                throw new ArgumentNullException("Given root path is null");
-            }
-
             this.queue = queue;
-            this.path = rootpath;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 
+        /// <summary>
+        /// Takes rename file system events and transforms them to rename events on queue.
+        /// </summary>
+        /// <param name="source">source object</param>
+        /// <param name="e">Rename event from file system watcher</param>
         public virtual void Handle(object source, RenamedEventArgs e) {
-            bool? isDirectory = this.fsFactory.IsDirectory(e.FullPath);
+            try {
+                bool? isDirectory = this.fsFactory.IsDirectory(e.FullPath);
 
-            if (isDirectory == null) {
+                if (isDirectory == null) {
+                    this.queue.AddEvent(new StartNextSyncEvent(true));
+                    return;
+                }
+
+                this.queue.AddEvent(new FSMovedEvent(e.OldFullPath, e.FullPath, (bool)isDirectory));
+            } catch (Exception ex) {
+                Logger.Warn(string.Format("Processing RenamedEventArgs {0} produces Exception => force crawl sync", e.ToString()), ex);
                 this.queue.AddEvent(new StartNextSyncEvent(true));
-                return;
             }
-
-            this.queue.AddEvent(new FSMovedEvent(e.OldFullPath, e.FullPath, (bool)isDirectory));
         }
     }
 }

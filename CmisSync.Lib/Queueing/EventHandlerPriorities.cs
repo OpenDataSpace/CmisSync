@@ -25,11 +25,11 @@ namespace CmisSync.Lib.Queueing
     using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
 
     /// <summary>
     /// Default event handler priorities.
@@ -78,6 +78,7 @@ namespace CmisSync.Lib.Queueing
             map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
             map[typeof(IgnoreAlreadyHandledFsEventsFilter)] = FILTER;
             map[typeof(IgnoreAlreadyHandledContentChangeEventsFilter)] = FILTER;
+            map[typeof(DelayRetryAndNextSyncEventHandler)] = FILTER;
 
             // Below filter but higher than remote/local accumulators
             map[typeof(RemoteObjectMovedOrRenamedAccumulator)] = HIGHER;
@@ -99,6 +100,7 @@ namespace CmisSync.Lib.Queueing
             map[typeof(SyncMechanism)] = NORMAL;
             map[typeof(GenericSyncEventHandler<>)] = NORMAL;
             map[typeof(EventManagerInitializer)] = NORMAL;
+            map[typeof(ConnectionScheduler)] = NORMAL;
         }
 
         /// <summary>

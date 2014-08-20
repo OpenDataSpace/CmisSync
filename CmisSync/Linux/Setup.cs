@@ -369,8 +369,10 @@ namespace CmisSync {
                     cmisStore.UpdateCmisTree(root);
                 };
                 cmisStore.UpdateCmisTree (root);
-                asyncLoader.Load (root);
-                loader.Add (root.Id, asyncLoader);
+                //  GUI workaround to remove ignore folder {{
+                //asyncLoader.Load (root);
+                //loader.Add (root.Id, asyncLoader);
+                //  GUI workaround to remove ignore folder }}
             }
 
             Header = Properties_Resources.Which;
@@ -475,7 +477,9 @@ namespace CmisSync {
             column.Expand = true;
             treeView.AppendColumn (column);
 
-            treeView.AppendColumn ("Status", new StatusCellRenderer (), "text", (int)CmisTreeStore.Column.ColumnStatus);
+            //  GUI workaround to remove ignore folder {{
+            //treeView.AppendColumn ("Status", new StatusCellRenderer (), "text", (int)CmisTreeStore.Column.ColumnStatus);
+            //  GUI workaround to remove ignore folder }}
 
             treeView.RowExpanded += delegate (object o, RowExpandedArgs args) {
                 Node node = cmisStore.GetValue(args.Iter, (int)CmisTreeStore.Column.ColumnNode) as Node;

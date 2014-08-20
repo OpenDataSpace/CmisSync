@@ -23,6 +23,7 @@ namespace TestLibrary.TestUtils
     using System.Collections.Generic;
     using System.IO;
 
+    using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data;
 
@@ -50,7 +51,7 @@ namespace TestLibrary.TestUtils
         }
 
         public static void SetupContent(this Mock<IDocument> doc, byte[] content, string fileName, string mimeType = "application/octet-stream") {
-            if(content != null) {
+            if (content != null) {
                 var stream = Mock.Of<IContentStream>(
                     s =>
                     s.Length == content.Length &&
@@ -72,6 +73,25 @@ namespace TestLibrary.TestUtils
             doc.Setup(d => d.Paths).Returns(paths);
         }
 
+        public static void SetupContentStreamHash(this Mock<IDocument> doc, byte[] hash, string type = "SHA-1") {
+            var hashString = string.Format("{{{0}}}{1}", type.ToLower(), BitConverter.ToString(hash).Replace("-", string.Empty));
+            doc.SetupContentStreamHash(hashString);
+        }
+
+        public static void SetupContentStreamHash(this Mock<IDocument> doc, string hashString) {
+            var properties = new List<IProperty>();
+            IList<object> values = new List<object>();
+            values.Add(hashString);
+            var property = Mock.Of<IProperty>(
+                p =>
+                p.IsMultiValued == true &&
+                p.Id == "cmis:contentStreamHash" &&
+                p.Values == values);
+
+            properties.Add(property);
+            doc.Setup(d => d.Properties).Returns(properties);
+        }
+
         public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {
             doc.VerifySetContentStream(Times.Once(), overwrite, refresh, mimeType);
         }
@@ -80,11 +100,26 @@ namespace TestLibrary.TestUtils
             doc.Verify(d => d.SetContentStream(It.Is<IContentStream>(s => VerifyContentStream(s, mimeType, doc.Object.Name)), overwrite, refresh), times);
         }
 
+        public static void VerifyUpdateLastModificationDate(this Mock<IDocument> doc, DateTime modificationDate, bool refresh = true) {
+            doc.VerifyUpdateLastModificationDate(modificationDate, Times.Once(), refresh);
+        }
+
+        public static void VerifyUpdateLastModificationDate(this Mock<IDocument> doc, DateTime modificationDate, Times times, bool refresh = true) {
+            doc.Verify(d => d.UpdateProperties(It.Is<IDictionary<string, object>>(dic => VerifyDictContainsLastModification(dic, modificationDate)), refresh));
+        }
+
+        private static bool VerifyDictContainsLastModification(IDictionary<string, object> dic, DateTime modificationDate) {
+            Assert.That(dic.ContainsKey(PropertyIds.LastModificationDate));
+            Assert.That(dic[PropertyIds.LastModificationDate], Is.EqualTo(modificationDate));
+            return true;
+        }
+
         private static bool VerifyContentStream(IContentStream s, string mimeType, string fileName) {
             if (mimeType != null) {
                 Assert.That(s.MimeType, Is.EqualTo(mimeType));
             }
-            Assert.That(s.Length, Is.Null);
+
+            // Assert.That(s.Length, Is.Null);
             Assert.That(s.FileName, Is.EqualTo(fileName));
             return true;
         }

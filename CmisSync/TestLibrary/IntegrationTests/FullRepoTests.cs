@@ -55,12 +55,14 @@ namespace TestLibrary.IntegrationTests
     using System.Threading;
 
     using CmisSync.Lib;
-    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
+    using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
     using DotCMIS;
+    using DotCMIS.Binding;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
 
@@ -173,6 +175,7 @@ namespace TestLibrary.IntegrationTests
                 this.localRootDir.Delete(true);
             }
 
+            this.remoteRootDir.Refresh();
             this.remoteRootDir.DeleteTree(true, null, true);
             this.repo.Dispose();
         }
@@ -248,7 +251,9 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
-            using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create));
+            using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create)) {
+            }
+
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(false, null, true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
 
@@ -273,6 +278,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            remoteFolder.Refresh();
             remoteFolder.Rename("Dog", true);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
@@ -340,6 +346,8 @@ namespace TestLibrary.IntegrationTests
                 sw.WriteLine(content);
             }
 
+            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
+
             this.repo.Initialize();
 
             this.repo.Run();
@@ -349,6 +357,44 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
+            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalFileCreatedAndModificationDateIsSynced()
+        {
+            if (!this.session.IsServerAbleToUpdateModificationDate()) {
+                Assert.Ignore("Server does not support the synchronization of modification dates");
+            }
+
+            string fileName = "file";
+            string content = "content";
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(filePath);
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine(content);
+            }
+
+            DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromHours(1);
+            fileInfo.LastWriteTimeUtc = modificationDate;
+            modificationDate = fileInfo.LastWriteTimeUtc;
+
+            DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
+            fileInfo.CreationTimeUtc = creationDate;
+            creationDate = fileInfo.CreationTimeUtc;
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
+            var doc = child as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
+            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.EqualTo(0), "Modification date is not equal");
+            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.EqualTo(0), "Creation Date is not equal");
+            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
         [Test, Category("Slow"), Category("Erratic")]
@@ -368,6 +414,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
+            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
@@ -380,6 +427,7 @@ namespace TestLibrary.IntegrationTests
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
             Assert.That(doc.Name, Is.EqualTo(newFileName));
+            Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
         [Test, Category("Slow"), Category("Erratic")]
@@ -402,6 +450,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
             new DirectoryInfo(Path.Combine(this.localRootDir.FullName, folderName)).Create();
             fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, folderName, newFileName));
+            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
@@ -415,6 +464,7 @@ namespace TestLibrary.IntegrationTests
             var doc = (child as IFolder).GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(fileInfo.Length), "ContentStream not set");
             Assert.That(doc.Name, Is.EqualTo(newFileName));
+            Assert.That(this.localRootDir.GetDirectories().First().GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
         [Test, Category("Slow")]
@@ -429,13 +479,19 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            // Stabilize test by waiting for all delayed fs events
+            Thread.Sleep(500);
+
+            // Process the delayed fs events
+            this.repo.Run();
+
             new FileInfo(filePath).Delete();
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
             this.repo.Run();
 
-            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
         }
 
         [Test, Category("Slow")]
@@ -456,6 +512,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Length, Is.EqualTo(content.Length));
         }
 
+        // TODO Should also work, but the content change of the server aggregates created and update events atm.
+        [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFileUpdated()
         {
@@ -470,9 +528,64 @@ namespace TestLibrary.IntegrationTests
             content += content;
             doc.SetContent(content);
 
-            Thread.Sleep(20000);
+            Thread.Sleep(5000);
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(file.Length, Is.EqualTo(content.Length));
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFileUpdatedAndRecognizedByContentChanges()
+        {
+            string fileName = "file.txt";
+            string content = "cat";
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+            Thread.Sleep(5000);
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            content += content;
+            doc.Refresh();
+            doc.SetContent(content);
+
+            Thread.Sleep(5000);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(file.Length, Is.EqualTo(content.Length));
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFileUpdatedAndDetectedByCrawlSync()
+        {
+            string fileName = "file.txt";
+            string content = "cat";
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            content += content;
+            doc.Refresh();
+            doc.SetContent(content);
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
 
             this.repo.Run();
 
@@ -498,7 +611,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
-            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
 
@@ -603,6 +716,8 @@ namespace TestLibrary.IntegrationTests
                 filestream.Write(newContent, 0, newContent.Length);
             }
 
+            DateTime modificationDate = this.localRootDir.GetFiles().First().LastWriteTimeUtc;
+
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
             this.repo.Run();
@@ -611,7 +726,7 @@ namespace TestLibrary.IntegrationTests
             var localDoc = this.localRootDir.GetFiles().First();
             Assert.That(remoteDoc.ContentStreamLength, Is.EqualTo(newContent.Length));
             Assert.That(localDoc.Length, Is.EqualTo(newContent.Length));
-            Assert.That((localDoc.LastWriteTimeUtc - remoteDoc.LastModificationDate).Value.Seconds, Is.EqualTo(0));
+            Assert.That(localDoc.LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
         /// <summary>
@@ -655,13 +770,14 @@ namespace TestLibrary.IntegrationTests
             using (var stream = file.AppendText()) {
                 stream.Write(content);
             }
-            Thread.Sleep(100);
+
             long length = Encoding.UTF8.GetBytes(content).Length * 2;
 
             file.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
             file.Refresh();
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            Thread.Sleep(200);
             this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
 
@@ -676,10 +792,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
-        // Not yet implemented correctly
-        [Ignore]
         [Test, Category("Slow")]
-        public void OneRemoteDocumentIsChangedAndRenamedDetectedByCrawler() {
+        public void OneRemoteFileIsChangedAndRenamedDetectedByCrawler() {
             string fileName = "file.txt";
             string newFileName = "file_1.txt";
             string content = "cat";
@@ -687,7 +801,9 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
 
+            document.Refresh();
             document.SetContent(content + content, true, true);
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
@@ -706,10 +822,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(document.ContentStreamLength, Is.EqualTo(length));
         }
 
-        // Not yet implemented correctly
-        [Ignore]
         [Test, Category("Slow")]
-        public void OneRemoteDocumentIsChangedAndRenamedDetectedByContentChanges() {
+        public void OneRemoteFileIsChangedAndRenamedDetectedByContentChanges() {
             string fileName = "file.txt";
             string newFileName = "file_1.txt";
             string content = "cat";
@@ -717,12 +831,18 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
 
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            document.Refresh();
             document.SetContent(content + content, true, true);
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
 
-            Thread.Sleep(15000);
+            Thread.Sleep(5000);
             this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
             this.repo.Run();
 
@@ -747,6 +867,13 @@ namespace TestLibrary.IntegrationTests
             this.repo.Initialize();
             this.repo.Run();
 
+            // Wait for all fs change events
+            Thread.Sleep(500);
+
+            // Stabilize sync process to process all delayed fs events
+            this.repo.Run();
+
+            folder.Refresh();
             folder.Rename(newFolderName);
             this.localRootDir.GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newFolderName));
 
@@ -755,6 +882,44 @@ namespace TestLibrary.IntegrationTests
 
             Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
             Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).Name, Is.EqualTo(newFolderName));
+        }
+
+        [Test, Category("Slow")]
+        public void EmptyLocalFileIsCreatedAndChangedRemotely() {
+            string fileName = "file";
+            string content = "content";
+            var filePath = Path.Combine(this.localRootDir.FullName, fileName);
+            var fileInfo = new FileInfo(filePath);
+            using (fileInfo.Open(FileMode.CreateNew)) {
+            }
+
+            DateTime modificationDate = fileInfo.LastWriteTimeUtc;
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            var children = this.remoteRootDir.GetChildren();
+            Assert.That(children.TotalNumItems, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(IDocument)));
+            var doc = child as IDocument;
+            doc.SetContent(content, true, true);
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "ContentStream not set correctly");
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            doc.Refresh();
+            Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.EqualTo(0));
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
         }
 
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
@@ -772,6 +937,18 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
+        private class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
+
+            public BlockingSingleConnectionScheduler(ConnectionScheduler original) : base(original) {
+            }
+
+            public override void Start() {
+                if (!base.Connect()) {
+                    Assert.Fail("Connection failed");
+                }
+            }
+        }
+
         private class CmisRepoMock : CmisSync.Lib.Cmis.Repository
         {
             public SingleStepEventQueue SingleStepQueue;
@@ -784,9 +961,14 @@ namespace TestLibrary.IntegrationTests
             public void Run()
             {
                 this.SingleStepQueue.Run();
+                Thread.Sleep(500);
+                this.SingleStepQueue.Run();
             }
 
             public override void Initialize() {
+                ConnectionScheduler original = this.connectionScheduler;
+                this.connectionScheduler = new BlockingSingleConnectionScheduler(original);
+                original.Dispose();
                 base.Initialize();
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
                 this.Scheduler.Stop();

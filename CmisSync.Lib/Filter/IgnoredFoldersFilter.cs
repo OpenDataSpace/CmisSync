@@ -85,6 +85,7 @@ namespace CmisSync.Lib.Filter
         /// <param name='localPath'>
         /// The local path which should be checked, if it should be ignored.
         /// </param>
+        /// <param name="reason">Reason of the result value if returns <c>true</c></param>
         public virtual bool CheckPath(string localPath, out string reason)
         {
             lock (this.listLock)
