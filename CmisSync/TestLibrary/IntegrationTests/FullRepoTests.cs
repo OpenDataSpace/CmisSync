@@ -512,8 +512,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Length, Is.EqualTo(content.Length));
         }
 
-        // TODO Should also work, but the content change of the server aggregates created and update events atm.
-        [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFileUpdated()
         {
