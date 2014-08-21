@@ -590,14 +590,10 @@ namespace TestLibrary.ProducerTests.CrawlerTests
 
         private DescendantsCrawler CreateCrawler()
         {
-            return new DescendantsCrawler(
-                this.queue.Object,
-                this.remoteFolder.Object,
-                this.localFolder.Object,
-                this.storage,
-                this.filter,
-                this.listener.Object,
-                fsFactory: this.fsFactory.Object);
+            var generator = new CrawlEventGenerator(this.storage, this.fsFactory.Object);
+            var treeBuilder = new DescendantsTreeBuilder(this.storage, this.remoteFolder.Object, this.localFolder.Object, this.filter);
+            var notifier = new CrawlEventNotifier(this.queue.Object);
+            return new DescendantsCrawler(this.queue.Object, treeBuilder, generator, notifier, this.listener.Object);
         }
 
         private void VerifyThatListenerHasBeenUsed() {

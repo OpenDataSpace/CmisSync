@@ -94,21 +94,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             // Match local changes to remote changes and updated them remotely
-
             IMappedObject mappedObject = null;
-            try{
+            try {
                 string ea = localFileSystemInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
                 Guid guid;
                 if (Guid.TryParse(ea, out guid)) {
                     mappedObject = this.Storage.GetObjectByGuid(guid);
                 }
-            }catch(Exception){
-                //fallback to GetObjectByLocalPath
+            } catch(Exception) {
             }
 
             if (mappedObject == null) {
                 mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
             }
+
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
                 Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
@@ -125,10 +124,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
                     } catch(Exception ex) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        if(ex.InnerException is CmisPermissionDeniedException){
+                        if (ex.InnerException is CmisPermissionDeniedException) {
                             OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has been not been uploaded: PermissionDenied", localFile.FullName));
                             return;
                         }
+
                         throw;
                     }
 
@@ -146,12 +146,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             if (this.ServerCanModifyDateTimes) {
-                if (remoteId is IDocument) {
-                    (remoteId as IDocument).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
-                    mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
-                } else if (remoteId is IFolder) {
-                    (remoteId as IFolder).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
-                    mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                try {
+                    if (remoteId is IDocument) {
+                        (remoteId as IDocument).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
+                        mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                    } else if (remoteId is IFolder) {
+                        (remoteId as IFolder).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
+                        mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                    }
+                } catch(CmisPermissionDeniedException) {
+                    Logger.Debug(string.Format("Locally changed modification date \"{0}\"is not uploaded to the server: PermissionDenied", localFileSystemInfo.LastWriteTimeUtc));
                 }
             }
 

@@ -40,6 +40,7 @@ namespace TestLibrary.IntegrationTests
 
     using DBreeze;
 
+    using DotCMIS.Binding;
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -333,6 +334,9 @@ namespace TestLibrary.IntegrationTests
 
             manager.AddEventHandler(observer);
 
+            var connectionScheduler = new ConnectionScheduler(new RepoInfo(), queue, Mock.Of<ISessionFactory>(), Mock.Of<IAuthenticationProvider>());
+            manager.AddEventHandler(connectionScheduler);
+
             var changes = new ContentChanges(session.Object, storage, queue, this.maxNumberOfContentChanges, this.isPropertyChangesSupported);
             manager.AddEventHandler(changes);
 
@@ -367,7 +371,10 @@ namespace TestLibrary.IntegrationTests
 
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
             var localFolder = new Mock<IDirectoryInfo>();
-            var crawler = new DescendantsCrawler(queue, remoteFolder.Object, localFolder.Object, storage, filterAggregator, Mock.Of<IActivityListener>(), fsFactory: fsFactory);
+            var generator = new CrawlEventGenerator(storage, fsFactory);
+            var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator);
+            var notifier = new CrawlEventNotifier(queue);
+            var crawler = new DescendantsCrawler(queue, treeBuilder, generator, notifier, Mock.Of<IActivityListener>());
             manager.AddEventHandler(crawler);
 
             var permissionDenied = new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, ConfigChangedEvent>();

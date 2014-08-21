@@ -225,13 +225,23 @@
     <Compile Include="Storage\Database\DublicateGuidException.cs" />
     <Compile Include="Queueing\DelayRetryAndNextSyncEventHandler.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectMoved.cs" />
+    <Compile Include="Queueing\ConnectionScheduler.cs" />
+    <Compile Include="Queueing\IConnectionScheduler.cs" />
+    <Compile Include="Producer\Crawler\DescendantsTreeBuilder.cs" />
+    <Compile Include="Producer\Crawler\DescendantsTreeCollection.cs" />
+    <Compile Include="Producer\Crawler\IDescendantsTreeBuilder.cs" />
+    <Compile Include="Producer\Crawler\CrawlEventGenerator.cs" />
+    <Compile Include="Producer\Crawler\CrawlEventCollection.cs" />
+    <Compile Include="Producer\Crawler\CrawlEventNotifier.cs" />
+    <Compile Include="Producer\Crawler\LocalEventGenerator.cs" />
+    <Compile Include="Producer\Crawler\RemoteEventGenerator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
+        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="">
+          <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />
           <OthersVar />

@@ -166,7 +166,7 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.crawler);
                 }
 
-                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener, fsFactory: this.fileSystemFactory);
+                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener);
                 this.Queue.EventManager.AddEventHandler(this.crawler);
 
                 // Add remote object moved accumulator
@@ -208,6 +208,11 @@ namespace CmisSync.Lib
 
                 Logger.Debug("Saving Root Folder to DataBase");
                 this.storage.SaveMappedObject(rootFolder);
+
+                // Sync up everything that changed
+                // since we've been offline
+                // start full crawl sync on beginning
+                this.Queue.AddEvent(new StartNextSyncEvent(true));
                 return true;
             }
 

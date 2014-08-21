@@ -118,7 +118,15 @@ SOURCES =  \
 	Producer/ContentChange/ContentChangeEventAccumulator.cs \
 	Producer/ContentChange/ContentChangeEventTransformer.cs \
 	Producer/ContentChange/ContentChanges.cs \
+	Producer/Crawler/CrawlEventCollection.cs \
+	Producer/Crawler/CrawlEventGenerator.cs \
+	Producer/Crawler/CrawlEventNotifier.cs \
 	Producer/Crawler/DescendantsCrawler.cs \
+	Producer/Crawler/DescendantsTreeBuilder.cs \
+	Producer/Crawler/DescendantsTreeCollection.cs \
+	Producer/Crawler/IDescendantsTreeBuilder.cs \
+	Producer/Crawler/LocalEventGenerator.cs \
+	Producer/Crawler/RemoteEventGenerator.cs \
 	Producer/Watcher/CreatedChangedDeletedFileSystemEventHandler.cs \
 	Producer/Watcher/IWatcherProducer.cs \
 	Producer/Watcher/MacWatcher.cs \
@@ -127,10 +135,12 @@ SOURCES =  \
 	Producer/Watcher/WatcherConsumer.cs \
 	Queueing/AbstractEventProducer.cs \
 	Queueing/ActiveActivitiesManager.cs \
+	Queueing/ConnectionScheduler.cs \
 	Queueing/DebugLoggingHandler.cs \
 	Queueing/DelayRetryAndNextSyncEventHandler.cs \
 	Queueing/EventHandlerPriorities.cs \
 	Queueing/GenericSyncEventHandler.cs \
+	Queueing/IConnectionScheduler.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \

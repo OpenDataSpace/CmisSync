@@ -100,6 +100,7 @@ namespace CmisSync.Lib.Queueing
             map[typeof(SyncMechanism)] = NORMAL;
             map[typeof(GenericSyncEventHandler<>)] = NORMAL;
             map[typeof(EventManagerInitializer)] = NORMAL;
+            map[typeof(ConnectionScheduler)] = NORMAL;
         }
 
         /// <summary>

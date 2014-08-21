@@ -43,13 +43,15 @@ namespace CmisSync.Lib.Cmis.UiUtils
     public class CmisServer
     {
         /// <summary>
-        /// URL of the CMIS server.
+        /// Gets the URL of the CMIS server.
         /// </summary>
+        /// <value>The URL.</value>
         public Uri Url { get; private set; }
 
         /// <summary>
-        /// Repositories contained in the CMIS server.
+        /// Gets the Repositories contained in the CMIS server.
         /// </summary>
+        /// <value>The repositories.</value>
         public Dictionary<string, string> Repositories { get; private set; }
 
         /// <summary>
@@ -127,10 +129,10 @@ namespace CmisSync.Lib.Cmis.UiUtils
                 "/cmis/browser"
             };
             string[] suffixes = atompubSuffixes;
-            if (credentials.Binding == BindingType.Browser)
-            {
+            if (credentials.Binding == BindingType.Browser) {
                 suffixes = browserSuffixes;
             }
+
             string bestUrl = null;
 
             // Try all suffixes
@@ -171,18 +173,16 @@ namespace CmisSync.Lib.Cmis.UiUtils
             return new Tuple<CmisServer, Exception>(new CmisServer(bestUrl == null ? credentials.Address : new Uri(bestUrl), null), firstException);
         }
 
-        static public Dictionary<string,string> GetCmisParameters(ServerCredentials credentials)
+        static public Dictionary<string, string> GetCmisParameters(ServerCredentials credentials)
         {
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
             cmisParameters[SessionParameter.BindingType] = credentials.Binding;
-            if (credentials.Binding == BindingType.AtomPub)
-            {
+            if (credentials.Binding == BindingType.AtomPub) {
                 cmisParameters[SessionParameter.AtomPubUrl] = credentials.Address.ToString();
-            }
-            else if (credentials.Binding == BindingType.Browser)
-            {
+            } else if (credentials.Binding == BindingType.Browser) {
                 cmisParameters[SessionParameter.BrowserUrl] = credentials.Address.ToString();
             }
+
             cmisParameters[SessionParameter.User] = credentials.UserName;
             cmisParameters[SessionParameter.Password] = credentials.Password.ToString();
             return cmisParameters;
@@ -216,45 +216,32 @@ namespace CmisSync.Lib.Cmis.UiUtils
             Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
 
             IList<IRepository> repositories;
-            try
-            {
+            try {
                 repositories = factory.GetRepositories(cmisParameters);
-            }
-            catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
-            {
+            } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {
                 Logger.Debug("CMIS server found, but permission denied. Please check username/password. " + Utils.ToLogString(e));
                 throw;
-            }
-            catch (CmisRuntimeException e)
-            {
+            } catch (CmisRuntimeException e) {
                 Logger.Debug("No CMIS server at this address, or no connection. " + Utils.ToLogString(e));
                 throw;
-            }
-            catch (CmisObjectNotFoundException e)
-            {
+            } catch (CmisObjectNotFoundException e) {
                 Logger.Debug("No CMIS server at this address, or no connection. " + Utils.ToLogString(e));
                 throw;
-            }
-            catch (CmisConnectionException e)
-            {
+            } catch (CmisConnectionException e) {
                 Logger.Debug("No CMIS server at this address, or no connection. " + Utils.ToLogString(e));
                 throw;
-            }
-            catch (CmisInvalidArgumentException e)
-            {
+            } catch (CmisInvalidArgumentException e) {
                 Logger.Debug("Invalid URL, maybe Alfresco Cloud? " + Utils.ToLogString(e));
                 throw;
             }
 
             // Populate the result list with identifier and name of each repository.
-            foreach (IRepository repo in repositories)
-            {
-                if(!Utils.IsRepoNameHidden(repo.Name, ConfigManager.CurrentConfig.HiddenRepoNames))
-                {
+            foreach (IRepository repo in repositories) {
+                if (!Utils.IsRepoNameHidden(repo.Name, ConfigManager.CurrentConfig.HiddenRepoNames)) {
                     result.Add(repo.Id, repo.Name);
                 }
             }
-            
+
             return result;
         }
 
@@ -273,12 +260,9 @@ namespace CmisSync.Lib.Cmis.UiUtils
 
             // Get the folder.
             IFolder folder;
-            try
-            {
+            try {
                 folder = (IFolder)session.GetObjectByPath(path);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Logger.Warn(string.Format("CmisUtils | exception when session GetObjectByPath for {0}: {1}", path, Utils.ToLogString(ex)));
                 return result.ToArray();
             }
