@@ -392,8 +392,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.EqualTo(0), "Modification date is not equal");
-            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.EqualTo(0), "Creation Date is not equal");
+            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.Not.GreaterThan(1), "Modification date is not equal");
+            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.Not.GreaterThan(1), "Creation Date is not equal");
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
@@ -760,13 +760,13 @@ namespace TestLibrary.IntegrationTests
 
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
             foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.EqualTo(0), string.Format("remote modification date of {0}", remoteFile.Name));
-                Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.EqualTo(0), string.Format("remote creation date of {0}", remoteFile.Name));
+                Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote modification date of {0}", remoteFile.Name));
+                Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote creation date of {0}", remoteFile.Name));
             }
 
             foreach (var localFile in this.localRootDir.GetFiles()) {
-                Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.EqualTo(0), string.Format("local modification date of {0}", localFile.Name));
-                Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.EqualTo(0), string.Format("local creation date of {0}", localFile.Name));
+                Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local modification date of {0}", localFile.Name));
+                Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local creation date of {0}", localFile.Name));
             }
         }
 
@@ -932,7 +932,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             doc.Refresh();
-            Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.EqualTo(0));
+            Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.Not.GreaterThan(1));
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
         }
 
