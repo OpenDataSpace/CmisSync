@@ -188,6 +188,7 @@
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectMovedTest.cs" />
     <Compile Include="IntegrationTests\RepositoryUtilsTests.cs" />
     <Compile Include="QueueingTests\ConnectionSchedulerTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\LocalEventGeneratorTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
