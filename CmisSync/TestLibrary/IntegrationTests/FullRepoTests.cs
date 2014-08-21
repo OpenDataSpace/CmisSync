@@ -524,6 +524,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             content += content;
+            doc.Refresh();
             doc.SetContent(content);
 
             Thread.Sleep(5000);
