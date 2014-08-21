@@ -365,11 +365,6 @@ namespace CmisSync.Lib.Cmis
             // Enable FS Watcher events
             this.WatcherProducer.EnableEvents = true;
 
-            // Sync up everything that changed
-            // since we've been offline
-            // start full crawl sync on beginning
-            this.Queue.AddEvent(new StartNextSyncEvent(true));
-
             // start scheduler for event based sync mechanisms
             this.Scheduler.Start();
         }

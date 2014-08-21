@@ -208,6 +208,11 @@ namespace CmisSync.Lib
 
                 Logger.Debug("Saving Root Folder to DataBase");
                 this.storage.SaveMappedObject(rootFolder);
+
+                // Sync up everything that changed
+                // since we've been offline
+                // start full crawl sync on beginning
+                this.Queue.AddEvent(new StartNextSyncEvent(true));
                 return true;
             }
 
