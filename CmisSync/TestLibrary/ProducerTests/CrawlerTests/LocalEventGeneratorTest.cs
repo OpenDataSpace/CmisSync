@@ -21,7 +21,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
     using System;
     using System.Collections.Generic;
     using System.IO;
- 
+
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Storage.FileSystem;
@@ -36,34 +36,34 @@ namespace TestLibrary.ProducerTests.CrawlerTests
     public class LocalEventGeneratorTest
     {
         static DateTime zeroDate = new DateTime(0);
-        
+
         [Test, Category("Fast")]
         public void RenameOnSubFolder() {
             var storage = new Mock<IMetaDataStorage>();
             var fsFactory = new Mock<IFileSystemInfoFactory>();
             var underTest = new LocalEventGenerator(storage.Object, fsFactory.Object);
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap = new Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>>();
-            
+
             Guid rootGuid = Guid.NewGuid();
             var rootName = "root";
             var rootPath = Path.Combine(Path.GetTempPath(), rootName);
             var rootObjectId = "rootId";
             ObjectTree<IFileSystemInfo> rootTree = CreateTreeFromPathAndGuid(rootName, rootPath, rootGuid);
-            
+
             Guid subFolderGuid = Guid.NewGuid();
             var subName = "A";
             var subPath = Path.Combine(rootPath, subName);
             var subFolderId = "subId";
             ObjectTree<IFileSystemInfo> subFolder = CreateTreeFromPathAndGuid(subName, subPath, subFolderGuid);
             rootTree.Children.Add(subFolder);
-            
+
             Guid subSubFolderGuid = Guid.NewGuid();
             var subSubName = "B";
             var subSubPath = Path.Combine(subPath, subSubName);
             var subSubFolderId = "subId";
             ObjectTree<IFileSystemInfo> subSubFolder = CreateTreeFromPathAndGuid(subSubName, subSubPath, subSubFolderGuid);
             subFolder.Children.Add(subSubFolder);
-            
+
             List<IMappedObject> storedObjectsForLocal = new List<IMappedObject>();
             var rootMappedObject = CreateStoredObjectMock(rootGuid, rootObjectId, rootName, null);
             storedObjectsForLocal.Add(rootMappedObject);
@@ -71,11 +71,11 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             storedObjectsForLocal.Add(subMappedObject);
             var subSubMappedObject = CreateStoredObjectMock(subSubFolderGuid, subSubFolderId, "oldsubsubName", subSubFolderId);
             storedObjectsForLocal.Add(subSubMappedObject);
-            
+
             storage.Setup(s => s.GetLocalPath(rootMappedObject)).Returns(rootPath);
             storage.Setup(s => s.GetLocalPath(subMappedObject)).Returns(subPath);
             storage.Setup(s => s.GetLocalPath(subSubMappedObject)).Returns(subSubPath);
-            
+
             List<AbstractFolderEvent> creationEvents = underTest.CreateEvents(storedObjectsForLocal, rootTree, eventMap);
             storedObjectsForLocal.Remove(rootMappedObject);
             Assert.That(creationEvents, Is.Empty);
@@ -84,7 +84,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             Assert.That(eventMap[subSubFolderId], Is.Not.Null);
             Assert.That(eventMap[subSubFolderId].Item1.Local, Is.EqualTo(MetaDataChangeType.CHANGED));
         }
-        
+
         private ObjectTree<IFileSystemInfo> CreateTreeFromPathAndGuid(string name, string path, Guid guid) {
             var localTree = new ObjectTree<IFileSystemInfo>();
             var fsInfo = new Mock<IDirectoryInfo>();
@@ -96,7 +96,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             localTree.Children = new List<IObjectTree<IFileSystemInfo>>();
             return localTree;
         }
-        
+
         private IMappedObject CreateStoredObjectMock(Guid guid, string remoteId, string name, string parentId){
             var mock = new Mock<IMappedObject>();
             mock.Setup(m => m.ParentId).Returns(parentId);
