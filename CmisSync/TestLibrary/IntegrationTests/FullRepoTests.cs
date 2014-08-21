@@ -749,6 +749,7 @@ namespace TestLibrary.IntegrationTests
                     sw.WriteLine(string.Format("content of file \"{0}\"", filePath));
                 }
 
+                fileInfo.Refresh();
                 fileInfo.CreationTimeUtc = creationDate;
                 fileInfo.LastWriteTimeUtc = modificationDate;
             }
@@ -759,13 +760,13 @@ namespace TestLibrary.IntegrationTests
 
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
             foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                Assert.That(((DateTime)remoteFile.LastModificationDate - modificationDate).Seconds, Is.EqualTo(0), string.Format("remote modification date of {0}", remoteFile.Name));
-                Assert.That(((DateTime)remoteFile.CreationDate - creationDate).Seconds, Is.EqualTo(0), string.Format("remote creation date of {0}", remoteFile.Name));
+                Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.EqualTo(0), string.Format("remote modification date of {0}", remoteFile.Name));
+                Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.EqualTo(0), string.Format("remote creation date of {0}", remoteFile.Name));
             }
 
             foreach (var localFile in this.localRootDir.GetFiles()) {
-                Assert.That((localFile.LastWriteTimeUtc - modificationDate).Seconds, Is.EqualTo(0), string.Format("local modification date of {0}", localFile.Name));
-                Assert.That((localFile.CreationTimeUtc - creationDate).Seconds, Is.EqualTo(0), string.Format("local creation date of {0}", localFile.Name));
+                Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.EqualTo(0), string.Format("local modification date of {0}", localFile.Name));
+                Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.EqualTo(0), string.Format("local creation date of {0}", localFile.Name));
             }
         }
 
