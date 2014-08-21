@@ -81,6 +81,7 @@ SOURCES =  \
 	ProducerTests/ContentChangeTests/ContentChangesTest.cs \
 	ProducerTests/CrawlerTests/DescendantsCrawlerTest.cs \
 	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
+	ProducerTests/CrawlerTests/LocalEventGeneratorTest.cs \
 	ProducerTests/WatcherTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
 	ProducerTests/WatcherTests/MacWatcherTest.cs \
 	ProducerTests/WatcherTests/NetWatcherTest.cs \
