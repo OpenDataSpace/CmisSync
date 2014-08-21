@@ -512,8 +512,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Length, Is.EqualTo(content.Length));
         }
 
-        // TODO Should also work, but the content change of the server aggregates created and update events atm.
-        [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFileUpdated()
         {
@@ -526,6 +524,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             content += content;
+            doc.Refresh();
             doc.SetContent(content);
 
             Thread.Sleep(5000);
@@ -735,6 +734,8 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Erratic"), Timeout(1800000)]
         public void CreateHundredFilesAndSync()
         {
+            DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
+            DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(2);
             int count = 100;
 
             this.repo.Initialize();
@@ -747,6 +748,9 @@ namespace TestLibrary.IntegrationTests
                 using (StreamWriter sw = fileInfo.CreateText()) {
                     sw.WriteLine(string.Format("content of file \"{0}\"", filePath));
                 }
+
+                fileInfo.CreationTimeUtc = creationDate;
+                fileInfo.LastWriteTimeUtc = modificationDate;
             }
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
@@ -754,6 +758,15 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
+            foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
+                Assert.That(((DateTime)remoteFile.LastModificationDate - modificationDate).Seconds, Is.EqualTo(0), string.Format("remote modification date of {0}", remoteFile.Name));
+                Assert.That(((DateTime)remoteFile.CreationDate - creationDate).Seconds, Is.EqualTo(0), string.Format("remote creation date of {0}", remoteFile.Name));
+            }
+
+            foreach (var localFile in this.localRootDir.GetFiles()) {
+                Assert.That((localFile.LastWriteTimeUtc - modificationDate).Seconds, Is.EqualTo(0), string.Format("local modification date of {0}", localFile.Name));
+                Assert.That((localFile.CreationTimeUtc - creationDate).Seconds, Is.EqualTo(0), string.Format("local creation date of {0}", localFile.Name));
+            }
         }
 
         [Test, Category("Slow")]
