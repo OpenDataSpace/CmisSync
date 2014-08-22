@@ -16,11 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
 
 namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Security.Cryptography;
 
