@@ -131,7 +131,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void RemoteFileAddedAndExtendedAttributesAreAvailable()
         {
             var fileInfo = new Mock<IFileInfo>();
-            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile(fileInfo.Object);
+            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile();
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
             fileInfo.SetupAllProperties();
             fileInfo.Setup(f => f.FullName).Returns(this.path);
@@ -165,7 +165,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void RemoteFileAddedAndExceptionOnModificationDateIsThrown()
         {
             var fileInfo = new Mock<IFileInfo>();
-            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile(fileInfo.Object);
+            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile();
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
             fileInfo.SetupAllProperties();
             fileInfo.Setup(f => f.FullName).Returns(this.path);
@@ -205,7 +205,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string conflictPath = this.path + ".conflict";
             var conflictFileInfo = Mock.Of<IFileInfo>(i => i.FullName == conflictPath);
             var fileInfo = new Mock<IFileInfo>();
-            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile(fileInfo.Object);
+            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile();
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
             fileInfo.SetupAllProperties();
             fileInfo.Setup(f => f.FullName).Returns(this.path);

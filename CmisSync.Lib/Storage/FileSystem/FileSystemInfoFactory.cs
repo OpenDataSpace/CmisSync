@@ -102,8 +102,16 @@ namespace CmisSync.Lib.Storage.FileSystem
             if (uuid == null | uuid == Guid.Empty) {
                 return this.CreateFileInfo(file.FullName + ".sync");
             } else {
-                return this.CreateFileInfo(Path.Combine(Path.GetTempPath(), uuid.ToString() + ".sync"));
+                return this.CreateDownloadCacheFileInfo((Guid)uuid);
             }
+        }
+
+        public IFileInfo CreateDownloadCacheFileInfo(Guid uuid) {
+            if (uuid == Guid.Empty) {
+                throw new ArgumentException("Given Guid is empty");
+            }
+
+            return this.CreateFileInfo(Path.Combine(Path.GetTempPath(), uuid.ToString() + ".sync"));
         }
     }
 }

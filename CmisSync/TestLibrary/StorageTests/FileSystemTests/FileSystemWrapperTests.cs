@@ -518,6 +518,18 @@ namespace TestLibrary.StorageTests.FileSystemTests
             Assert.That(cacheFile1.FullName, Is.EqualTo(cacheFile2.FullName));
         }
 
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheWithGivenUuid() {
+            Guid uuid = Guid.NewGuid();
+            var cacheFile = Factory.CreateDownloadCacheFileInfo(uuid);
+            Assert.That(cacheFile.Name, Is.EqualTo(uuid.ToString() + ".sync"));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheWithEmptyUuidThrowsException() {
+            Assert.Throws<ArgumentException>(()=> Factory.CreateDownloadCacheFileInfo(Guid.Empty));
+        }
+
         // Test is not implemented yet
         [Ignore]
         [Test, Category("Fast")]

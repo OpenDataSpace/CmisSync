@@ -60,5 +60,12 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <returns>The download cache file info.</returns>
         /// <param name="file">File which should be updated.</param>
         IFileInfo CreateDownloadCacheFileInfo(IFileInfo file);
+
+        /// <summary>
+        /// Creates the download cache file info.
+        /// </summary>
+        /// <returns>The download cache file info.</returns>
+        /// <param name="file">File which should be updated.</param>
+        IFileInfo CreateDownloadCacheFileInfo(Guid uuid);
     }
 }

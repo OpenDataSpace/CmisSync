@@ -76,13 +76,20 @@ namespace TestLibrary.TestUtils
             });
         }
 
-        public static Mock<IFileInfo> SetupDownloadCacheFile(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo expectedInput = null) {
+        public static Mock<IFileInfo> SetupDownloadCacheFile(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo expectedInput = null, Guid? expectedUuid = null) {
             var downloadFile = new Mock<IFileInfo>();
             if (expectedInput == null) {
                 fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo(It.IsAny<IFileInfo>())).Returns(downloadFile.Object);
             } else {
                 fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo(expectedInput)).Returns(downloadFile.Object);
             }
+
+            if (expectedUuid == null) {
+                fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo(It.IsAny<Guid>())).Returns(downloadFile.Object);
+            } else {
+                fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo((Guid)expectedUuid)).Returns(downloadFile.Object);
+            }
+
             return downloadFile;
         }
 
