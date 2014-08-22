@@ -166,6 +166,7 @@ namespace TestLibrary.IntegrationTests
                 }
             }
 
+            root.Refresh();
             this.remoteRootDir = root.CreateFolder(this.subfolder);
         }
 
