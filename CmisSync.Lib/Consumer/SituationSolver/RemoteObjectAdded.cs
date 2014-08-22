@@ -123,7 +123,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
 
-                var cacheFile = this.fsFactory.CreateFileInfo(Path.Combine(file.Directory.FullName, file.Name + ".sync"));
+                var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(file);
 
                 IDocument remoteDoc = remoteId as IDocument;
                 var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);

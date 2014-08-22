@@ -76,6 +76,16 @@ namespace TestLibrary.TestUtils
             });
         }
 
+        public static Mock<IFileInfo> SetupDownloadCacheFile(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo expectedInput = null) {
+            var downloadFile = new Mock<IFileInfo>();
+            if (expectedInput == null) {
+                fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo(It.IsAny<IFileInfo>())).Returns(downloadFile.Object);
+            } else {
+                fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo(expectedInput)).Returns(downloadFile.Object);
+            }
+            return downloadFile;
+        }
+
         public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children)
         {
             List<IDirectoryInfo> dirs = new List<IDirectoryInfo>();

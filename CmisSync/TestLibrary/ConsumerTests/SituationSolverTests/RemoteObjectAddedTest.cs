@@ -130,8 +130,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedAndExtendedAttributesAreAvailable()
         {
-            var cacheFileInfo = new Mock<IFileInfo>();
             var fileInfo = new Mock<IFileInfo>();
+            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile(fileInfo.Object);
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
             fileInfo.SetupAllProperties();
             fileInfo.Setup(f => f.FullName).Returns(this.path);
@@ -164,8 +164,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedAndExceptionOnModificationDateIsThrown()
         {
-            var cacheFileInfo = new Mock<IFileInfo>();
             var fileInfo = new Mock<IFileInfo>();
+            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile(fileInfo.Object);
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
             fileInfo.SetupAllProperties();
             fileInfo.Setup(f => f.FullName).Returns(this.path);
@@ -204,8 +204,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             string uuid = Guid.NewGuid().ToString();
             string conflictPath = this.path + ".conflict";
             var conflictFileInfo = Mock.Of<IFileInfo>(i => i.FullName == conflictPath);
-            var cacheFileInfo = new Mock<IFileInfo>();
             var fileInfo = new Mock<IFileInfo>();
+            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile(fileInfo.Object);
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
             fileInfo.SetupAllProperties();
             fileInfo.Setup(f => f.FullName).Returns(this.path);

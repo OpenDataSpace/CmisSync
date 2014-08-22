@@ -231,10 +231,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 LastChecksum = oldHash
             };
 
-            var cacheFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
             using (var oldContentStream = new MemoryStream(oldContent))
             using (var stream = new MemoryStream()) {
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
                 var backupFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
 
                 this.storage.AddMappedFile(mappedObject, path);
@@ -245,7 +243,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 Mock<IFileInfo> localFile = new Mock<IFileInfo>();
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
-
+                var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
+                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -303,10 +302,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             };
 
             this.fsFactory.Setup(f => f.CreateConflictFileInfo(It.IsAny<IFileInfo>())).Returns(Mock.Of<IFileInfo>(i => i.FullName == confictFilePath));
-            var cacheFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".sync"), false);
             using (var changedContentStream = new MemoryStream(changedContent))
             using (var stream = new MemoryStream()) {
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
                 var backupFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
 
                 this.storage.AddMappedFile(mappedObject, path);
@@ -317,6 +314,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 Mock<IFileInfo> localFile = new Mock<IFileInfo>();
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
+                var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
+                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
 
                 this.SetupContentWithCallBack(remoteObject, newContent, fileName).Callback(
                     () =>
