@@ -67,6 +67,15 @@ namespace TestLibrary.TestUtils
             parent.Setup(p => p.GetFiles()).Returns(files);
         }
 
+        public static void SetupMoveTo(this Mock<IDirectoryInfo> folder, string path = null) {
+            var setup = path == null ? folder.Setup(f => f.MoveTo(It.IsAny<string>())) : folder.Setup(f => f.MoveTo(path));
+            setup.Callback<string>(
+                (p) => {
+                folder.Setup(f => f.FullName).Returns(p);
+                folder.Setup(f => f.Name).Returns(Path.GetFileName(p));
+            });
+        }
+
         public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children)
         {
             List<IDirectoryInfo> dirs = new List<IDirectoryInfo>();
