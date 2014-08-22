@@ -78,6 +78,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFile.Name));
                     return;
                 }
+
                 OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteObject.Id, oldName, localFile.Name));
             } else {
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
