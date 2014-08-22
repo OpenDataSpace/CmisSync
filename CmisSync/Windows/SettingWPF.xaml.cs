@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SettingWPF.xaml.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -137,7 +137,6 @@ namespace CmisSync
         {
             ProxyTab.Header = Properties_Resources.SettingProxy;
             FeatureTogglesTab.Header = Properties_Resources.Features;
-            FeatureTogglesTab.IsEnabled = false;
             NotificationToggle.Content = Properties_Resources.Notifications;
             ProxyNone.GroupName = ProxySystem.GroupName = ProxyCustom.GroupName = "proxy";
             ProxyNone.Content = Properties_Resources.NetworkProxySelectNone;

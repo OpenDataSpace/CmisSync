@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Setting.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -109,6 +109,9 @@ namespace CmisSync
                 proxy.ObfuscatedPassword = Crypto.Obfuscate(PasswordText.Password);
 
                 ConfigManager.CurrentConfig.Proxy = proxy;
+
+                ConfigManager.CurrentConfig.Notifications = NotificationsCheck.IsChecked.GetValueOrDefault();
+
                 ConfigManager.CurrentConfig.Save();
 
                 Controller.HideWindow();
@@ -130,6 +133,9 @@ namespace CmisSync
         private TextBox UserText;
         private TextBlock PasswordLabel;
         private PasswordBox PasswordText;
+
+        private CheckBox NotificationsCheck;
+
         private Button FinishButton;
         private Button CancelButton;
 
@@ -156,6 +162,8 @@ namespace CmisSync
                     break;
             }
 
+            NotificationsCheck.IsChecked = ConfigManager.CurrentConfig.Notifications;
+
             FinishButton.Focus();
         }
 
@@ -174,6 +182,9 @@ namespace CmisSync
             UserText = wpf.FindName("UserText") as TextBox;
             PasswordLabel = wpf.FindName("PasswordLabel") as TextBlock;
             PasswordText = wpf.FindName("PasswordText") as PasswordBox;
+
+            NotificationsCheck = wpf.FindName("NotificationToggle") as CheckBox;
+
             FinishButton = wpf.FindName("FinishButton") as Button;
             CancelButton = wpf.FindName("CancelButton") as Button;
 
