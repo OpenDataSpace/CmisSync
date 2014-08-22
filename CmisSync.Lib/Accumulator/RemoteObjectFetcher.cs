@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Accumulator {
     using System;
     using System.IO;
+    using System.Threading;
 
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Events;
@@ -160,7 +161,18 @@ namespace CmisSync.Lib.Accumulator {
             }
 
             if (path != null && path.Exists) {
-                Guid? uuid = path.Uuid;
+                Guid? uuid = null;
+                int retries = 1000;
+                while(retries > 0) {
+                    try {
+                        uuid = path.Uuid;
+                        break;
+                    } catch (ExtendedAttributeException) {
+                        Thread.Sleep(50);
+                        retries--;
+                    }
+                }
+
                 if (uuid != null) {
                     var mappedObject = this.storage.GetObjectByGuid((Guid)uuid);
                     if (mappedObject != null) {
