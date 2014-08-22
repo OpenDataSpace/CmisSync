@@ -49,6 +49,19 @@ namespace TestLibrary.TestUtils
             folder.Setup(f => f.GetDescendants(It.Is<int>(d => d != -1))).Throws(new ArgumentOutOfRangeException("Get Descendants should not be limited"));
         }
 
+        public static void SetupLastModificationDate(this Mock<IFolder> folder, DateTime? modificationDate) {
+            folder.Setup(f => f.LastModificationDate).Returns(modificationDate);
+            folder.Setup(f => f.UpdateProperties(It.IsAny<IDictionary<string, object>>(), true)).Callback<IDictionary<string, object>, bool>((d, b) => {
+                if (d.ContainsKey("cmis:lastModificationDate")) {
+                    folder.SetupLastModificationDate((DateTime?)d["cmis:lastModificationDate"]);
+                }
+            });
+        }
+
+        public static void SetupChangeToken(this Mock<IFolder> folder, string changeToken) {
+            folder.Setup(f => f.ChangeToken).Returns(changeToken);
+        }
+
         public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken") {
             var newRemoteObject = new Mock<IFolder>();
             newRemoteObject.Setup(d => d.Id).Returns(id);
