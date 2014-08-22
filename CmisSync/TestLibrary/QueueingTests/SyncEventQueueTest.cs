@@ -41,7 +41,7 @@ namespace TestLibrary.QueueingTests
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueueTest));
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void EventlessStartStop()
         {
             using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
@@ -54,7 +54,7 @@ namespace TestLibrary.QueueingTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void AddEvent()
         {
             var managerMock = new Mock<ISyncEventManager>();
@@ -72,7 +72,7 @@ namespace TestLibrary.QueueingTests
             managerMock.Verify(foo => foo.Handle(eventMock.Object), Times.Exactly(2));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void AddEventToStoppedQueueDoesNotRaise()
         {
             using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
@@ -83,7 +83,7 @@ namespace TestLibrary.QueueingTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void AddEventToDisposedQueueDoesNotRaise()
         {
             SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object);
@@ -92,7 +92,7 @@ namespace TestLibrary.QueueingTests
             queue.AddEvent(new Mock<ISyncEvent>().Object);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void WaitForStop()
         {
             Task t;
@@ -106,7 +106,7 @@ namespace TestLibrary.QueueingTests
             t.Wait();
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void WaitForStopWithTimeout()
         {
             Task t;
@@ -121,7 +121,7 @@ namespace TestLibrary.QueueingTests
             t.Wait();
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void WaitForStopWithTimeSpan()
         {
             Task t;
@@ -136,7 +136,7 @@ namespace TestLibrary.QueueingTests
             t.Wait();
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ExceptionsInManagerAreHandled() {
             var managerMock = new Mock<ISyncEventManager>();
             managerMock.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Exception("Generic Exception Message"));

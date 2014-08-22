@@ -88,7 +88,7 @@ namespace TestLibrary.IntegrationTests
             this.engine.Dispose();
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void RunFakeEvent()
         {
             var session = new Mock<ISession>();
@@ -101,7 +101,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(observer.List.Count, Is.EqualTo(1));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void RunStartNewSyncEvent()
         {
             string rootFolderName = "/";
@@ -119,7 +119,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(observer.List[0], Is.TypeOf(typeof(FullSyncCompletedEvent)));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void RunFSEventFileDeleted()
         {
             var storage = this.GetInitializedStorage();
@@ -146,7 +146,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void RunFSEventFolderDeleted()
         {
             var storage = this.GetInitializedStorage();
@@ -173,7 +173,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ContentChangeIndicatesFolderDeletionOfExistingFolder()
         {
             var storage = this.GetInitializedStorage();
@@ -197,7 +197,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(storage.GetObjectByRemoteId(id), Is.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ContentChangeIndicatesFolderRenameOfExistingFolder()
         {
             var storage = this.GetInitializedStorage();
@@ -244,7 +244,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(storage.GetObjectByLocalPath(Mock.Of<IDirectoryInfo>(d => d.FullName == newPath)), Is.Not.Null);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ContentChangeIndicatesFolderCreation()
         {
             string rootFolderName = "/";
@@ -279,7 +279,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(mappedObject.Type, Is.EqualTo(MappedObjectType.Folder), "Type incorrect");
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ContentChangeIndicatesFolderMove()
         {
             // Moves /a/b to /b

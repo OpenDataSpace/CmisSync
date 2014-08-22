@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ControllerBase.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -231,10 +231,6 @@ namespace CmisSync
             // Create the CmisSync folder and add it to the bookmarks
             if (this.CreateCmisSyncFolder()) {
                 this.AddToBookmarks();
-            }
-
-            if (firstRun) {
-                ConfigManager.CurrentConfig.Notifications = true;
             }
         }
 

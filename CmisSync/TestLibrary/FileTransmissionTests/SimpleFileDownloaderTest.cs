@@ -154,7 +154,7 @@ namespace TestLibrary.FileTransmissionTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void AbortWhileDownloadTest()
         {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
