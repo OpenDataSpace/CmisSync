@@ -20,9 +20,12 @@
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
+    using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
@@ -61,7 +64,69 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            if (localFileSystemInfo is IDirectoryInfo) {
+                IDirectoryInfo localFolder = localFileSystemInfo as IDirectoryInfo;
+                IDirectoryInfo localParent = localFolder.Parent;
+                IFolder remoteFolder = remoteId as IFolder;
+                string remoteParentId = remoteFolder.ParentId;
+                IMappedObject mappedParent = this.Storage.GetObjectByRemoteId(remoteFolder.ParentId);
+                IMappedObject mappedObject = this.Storage.GetObjectByRemoteId(remoteFolder.Id);
+                if (localParent.Uuid == mappedParent.Guid) {
+                    // Both folders are in the same parent folder
+                    this.SyncNamesAndDates(localFolder, remoteFolder, mappedObject);
+                } else {
+                    throw new NotImplementedException();
+                }
+            } else {
+                throw new NotImplementedException();
+            }
+        }
+
+        private void SyncNamesAndDates(IDirectoryInfo localFolder, IFolder remoteFolder, IMappedObject mappedObject)
+        {
+            DateTime? oldRemoteModificationDate = remoteFolder.LastModificationDate;
+            DateTime oldLocalModificationDate = localFolder.LastWriteTimeUtc;
+
+            // Sync Names
+            if (mappedObject.Name != localFolder.Name && mappedObject.Name == remoteFolder.Name) {
+                // local folder has been renamed => rename remote folder
+                remoteFolder.Rename(localFolder.Name, true);
+                mappedObject.Name = localFolder.Name;
+            } else if (mappedObject.Name == localFolder.Name && mappedObject.Name != remoteFolder.Name) {
+                // remote folder has been renamed => rename local folder
+                localFolder.MoveTo(Path.Combine(localFolder.Parent.FullName, remoteFolder.Name));
+                mappedObject.Name = remoteFolder.Name;
+            } else if (mappedObject.Name != localFolder.Name && mappedObject.Name != remoteFolder.Name) {
+                // both folders are renamed => rename to the latest change
+                DateTime localModification = localFolder.LastWriteTimeUtc;
+                DateTime remoteModification = (DateTime)remoteFolder.LastModificationDate;
+                if (localModification > remoteModification) {
+                    // local modification is newer
+                    remoteFolder.Rename(localFolder.Name, true);
+                    mappedObject.Name = localFolder.Name;
+                } else {
+                    // remote modification is newer
+                    localFolder.MoveTo(Path.Combine(localFolder.Parent.FullName, remoteFolder.Name));
+                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
+                    mappedObject.Name = remoteFolder.Name;
+                }
+            }
+
+            // Sync modification dates
+            if (oldRemoteModificationDate != null) {
+                if (oldLocalModificationDate > oldRemoteModificationDate && this.ServerCanModifyDateTimes) {
+                    remoteFolder.UpdateLastWriteTimeUtc(oldLocalModificationDate);
+                    localFolder.LastWriteTimeUtc = oldLocalModificationDate;
+                } else if (oldLocalModificationDate < (DateTime)oldRemoteModificationDate) {
+                    localFolder.LastWriteTimeUtc = (DateTime)oldRemoteModificationDate;
+                }
+            }
+
+            mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
+            mappedObject.LastRemoteWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
+            mappedObject.ParentId = remoteFolder.ParentId;
+            mappedObject.LastChangeToken = remoteFolder.ChangeToken;
+            this.Storage.SaveMappedObject(mappedObject);
         }
     }
 }
