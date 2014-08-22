@@ -481,6 +481,43 @@ namespace TestLibrary.StorageTests.FileSystemTests
             Assert.Throws<FileNotFoundException>(() => Factory.CreateDownloadCacheFileInfo(file));
         }
 
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheCreatesIdenticalFileNames() {
+            Guid uuid = Guid.NewGuid();
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == uuid &&
+                f.Exists == true);
+
+            var cacheFile1 = Factory.CreateDownloadCacheFileInfo(file);
+            var cacheFile2 = Factory.CreateDownloadCacheFileInfo(file);
+
+            Assert.That(cacheFile1.Name, Is.EqualTo(cacheFile2.Name));
+            Assert.That(cacheFile1.FullName, Is.EqualTo(cacheFile2.FullName));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheCreatesIdenticalFileNamesIfUuidIsAvailableAndOriginalNamesAreDifferent() {
+            Guid uuid = Guid.NewGuid();
+            var file1 = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == uuid &&
+                f.Name == "name1" &&
+                f.Exists == true);
+
+            var file2 = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == uuid &&
+                f.Name == "name2" &&
+                f.Exists == true);
+
+            var cacheFile1 = Factory.CreateDownloadCacheFileInfo(file1);
+            var cacheFile2 = Factory.CreateDownloadCacheFileInfo(file2);
+
+            Assert.That(cacheFile1.Name, Is.EqualTo(cacheFile2.Name));
+            Assert.That(cacheFile1.FullName, Is.EqualTo(cacheFile2.FullName));
+        }
+
         // Test is not implemented yet
         [Ignore]
         [Test, Category("Fast")]
