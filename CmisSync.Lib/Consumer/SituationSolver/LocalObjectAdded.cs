@@ -132,7 +132,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             if (localFile != null) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
-                this.queue.AddEvent(transmissionEvent);
                 this.transmissionManager.AddTransmission(transmissionEvent);
                 if (localFile.Length > 0) {
                     Stopwatch watch = new Stopwatch();

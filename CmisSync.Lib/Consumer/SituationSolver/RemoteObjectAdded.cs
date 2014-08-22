@@ -127,7 +127,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                 IDocument remoteDoc = remoteId as IDocument;
                 var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
-                this.queue.AddEvent(transmissionEvent);
                 this.manager.AddTransmission(transmissionEvent);
                 byte[] hash = null;
                 using (var hashAlg = new SHA1Managed())
