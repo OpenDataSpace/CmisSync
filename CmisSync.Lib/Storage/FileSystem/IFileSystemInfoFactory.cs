@@ -53,5 +53,12 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <returns><c>true</c> if this path points to a directory;<c>false</c> if this path points to a file; otherwise if nothing exists on the path <c>null</c>.</returns>
         /// <param name="path">Full path.</param>
         bool? IsDirectory(string path);
+
+        /// <summary>
+        /// Creates the download cache file info.
+        /// </summary>
+        /// <returns>The download cache file info.</returns>
+        /// <param name="file">File which should be updated.</param>
+        IFileInfo CreateDownloadCacheFileInfo(IFileInfo file);
     }
 }

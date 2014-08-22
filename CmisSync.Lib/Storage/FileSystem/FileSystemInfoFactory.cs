@@ -92,5 +92,18 @@ namespace CmisSync.Lib.Storage.FileSystem
 
             return null;
         }
+
+        public IFileInfo CreateDownloadCacheFileInfo(IFileInfo file) {
+            if (!file.Exists) {
+                throw new FileNotFoundException(string.Format("Given file {0} does not exists", file.FullName));
+            }
+
+            Guid? uuid = file.Uuid;
+            if (uuid == null | uuid == Guid.Empty) {
+                return this.CreateFileInfo(file.FullName + ".sync");
+            } else {
+                return this.CreateFileInfo(Path.Combine(Path.GetTempPath(), uuid.ToString() + ".sync"));
+            }
+        }
     }
 }

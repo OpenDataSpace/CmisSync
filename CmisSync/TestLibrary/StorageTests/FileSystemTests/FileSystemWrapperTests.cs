@@ -444,6 +444,43 @@ namespace TestLibrary.StorageTests.FileSystemTests
             Assert.That(Factory.CreateFileInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));
         }
 
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheIfExtendedAttributesAreAvailable() {
+            Guid uuid = Guid.NewGuid();
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == uuid &&
+                f.Exists == true);
+            var cacheFile = Factory.CreateDownloadCacheFileInfo(file);
+            Assert.That(cacheFile.Name, Is.EqualTo(uuid.ToString() + ".sync"));
+            Assert.That(cacheFile.FullName.Contains(Path.GetTempPath()));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheIfExtendedAttributesAreNotAvailable() {
+            var file = Mock.Of<IFileInfo>(
+                f => f.Name == "file" &&
+                f.Exists == true &&
+                f.FullName == Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), "file"));
+            var cacheFile = Factory.CreateDownloadCacheFileInfo(file);
+            Assert.That(cacheFile.Name, Is.EqualTo(file.Name + ".sync"));
+            Assert.That(cacheFile.FullName, Is.EqualTo(file.FullName + ".sync"));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheFailsIfOriginalFileCannotBeAccessed() {
+            var fileMock = new Mock<IFileInfo>();
+            fileMock.Setup(f => f.Exists).Returns(true);
+            fileMock.Setup(f => f.Uuid).Throws<ExtendedAttributeException>();
+            Assert.Throws<ExtendedAttributeException>(() => Factory.CreateDownloadCacheFileInfo(fileMock.Object));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheFailsIfFileDoesNotExists() {
+            var file = Mock.Of<IFileInfo>(f => f.Exists == false);
+            Assert.Throws<FileNotFoundException>(() => Factory.CreateDownloadCacheFileInfo(file));
+        }
+
         // Test is not implemented yet
         [Ignore]
         [Test, Category("Fast")]
