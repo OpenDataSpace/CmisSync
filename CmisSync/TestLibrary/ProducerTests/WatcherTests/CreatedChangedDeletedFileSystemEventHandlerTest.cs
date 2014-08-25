@@ -257,6 +257,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
                 System.Threading.Thread.Sleep(20);
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
+
                 // negativ numbers lead to ArgumentException so this would break here
             }
         }
