@@ -103,6 +103,8 @@ namespace CmisSync
 
         public event Action ShowSettingWindowEvent = delegate { };
 
+        public event Action ShowTransmissionWindowEvent = delegate { };
+
         public event Action ShowAboutWindowEvent = delegate { };
 
         public event FolderFetchedEventHandler FolderFetched = delegate { };
@@ -633,6 +635,14 @@ namespace CmisSync
         public void ShowSettingWindow()
         {
             this.ShowSettingWindowEvent();
+        }
+
+        /// <summary>
+        /// Show transmission window
+        /// </summary>
+        public void ShowTransmissionWindow()
+        {
+            this.ShowTransmissionWindowEvent();
         }
 
         /// <summary>

@@ -435,6 +435,10 @@ namespace CmisSync
             address_box.Focus();
             address_box.Select(address_box.Text.Length, 0);
 
+            address_box.Text = "https://dataspace27.bdtgroup.local/cmis/atom11";
+            user_box.Text = "more";
+            password_box.Password = "hello123";
+
             // Actions.
             ControllerLoginInsertAction();
             Controller.CheckAddPage(address_box.Text);
