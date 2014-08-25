@@ -453,7 +453,9 @@ namespace TestLibrary.StorageTests.FileSystemTests
                 f.Exists == true);
             var cacheFile = Factory.CreateDownloadCacheFileInfo(file);
             Assert.That(cacheFile.Name, Is.EqualTo(uuid.ToString() + ".sync"));
-            Assert.That(cacheFile.FullName.Contains(Path.GetTempPath()));
+
+            // Ensure that the path does not maps to temp path to avoid problems with extended attribute support
+            Assert.That(cacheFile.FullName.Contains(Path.GetTempPath()), Is.False);
         }
 
         [Test, Category("Fast")]
@@ -527,7 +529,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Test, Category("Fast")]
         public void CreateDownloadCacheWithEmptyUuidThrowsException() {
-            Assert.Throws<ArgumentException>(()=> Factory.CreateDownloadCacheFileInfo(Guid.Empty));
+            Assert.Throws<ArgumentException>(() => Factory.CreateDownloadCacheFileInfo(Guid.Empty));
         }
 
         // Test is not implemented yet
