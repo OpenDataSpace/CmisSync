@@ -438,4 +438,7 @@ This could lead to a lot of conflict files!</value>
   <data name="Notifications" xml:space="preserve">
     <value>Notifications</value>
   </data>
+  <data name="Transmission" xml:space="preserve">
+    <value>Transmission</value>
+  </data>
 </root>

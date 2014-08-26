@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Setup.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -434,10 +434,6 @@ namespace CmisSync
                 address_box.Text = Controller.PreviousAddress.ToString();
             address_box.Focus();
             address_box.Select(address_box.Text.Length, 0);
-
-            address_box.Text = "https://dataspace27.bdtgroup.local/cmis/atom11";
-            user_box.Text = "more";
-            password_box.Password = "hello123";
 
             // Actions.
             ControllerLoginInsertAction();

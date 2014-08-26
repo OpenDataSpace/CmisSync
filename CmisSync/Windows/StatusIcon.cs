@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="StatusIcon.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -411,7 +411,7 @@ namespace CmisSync
             // Create the menu item that lets the uer view transmission.
             ToolStripMenuItem transmission_item = new ToolStripMenuItem()
             {
-                Text = CmisSync.Properties_Resources.TransmissionFailedOnRepo
+                Text = CmisSync.Properties_Resources.Transmission
             };
             transmission_item.Click += delegate
             {

@@ -140,6 +140,9 @@
     </Compile>
     <Compile Include="Transmission.cs" />
     <Compile Include="TransmissionController.cs" />
+    <Compile Include="TransmissionWPF.xaml.cs">
+      <DependentUpon>TransmissionWPF.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI.cs" />
     <Compile Include="About.cs" />
     <Compile Include="Controller.cs" />
@@ -395,6 +398,10 @@
     <Page Include="SetupAddCustomizeWPF.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TransmissionWPF.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
