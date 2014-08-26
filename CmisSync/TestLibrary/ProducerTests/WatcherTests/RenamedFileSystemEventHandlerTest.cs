@@ -136,7 +136,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
 #if __MonoCS__
             return new RenamedEventArgs(WatcherChangeTypes.Renamed, RootPath, newName, Path.Combine(RootPath, oldName));
 #else
-            return new RenamedEventArgs(WatcherChangeTypes.Renamed, rootPath, newName, oldName);
+            return new RenamedEventArgs(WatcherChangeTypes.Renamed, RootPath, newName, oldName);
 #endif
         }
     }
