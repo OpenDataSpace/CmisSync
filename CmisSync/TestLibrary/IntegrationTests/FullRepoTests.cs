@@ -256,6 +256,7 @@ namespace TestLibrary.IntegrationTests
             using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create)) {
             }
 
+            this.remoteRootDir.Refresh();
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(false, null, true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
 
