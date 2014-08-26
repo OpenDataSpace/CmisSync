@@ -612,6 +612,8 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            this.session.GetObject(this.remoteRootDir.Id);
+            this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
