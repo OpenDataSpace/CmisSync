@@ -1,11 +1,10 @@
-using CmisSync.Lib.Queueing;
-
-
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
+    using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -30,7 +29,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            var mappedObject = this.Storage.GetObjectByGuid((Guid)localFileSystemInfo.Uuid);
+            this.Storage.RemoveObject(mappedObject);
+            if (localFileSystemInfo is IFileInfo) {
+                this.secondSolver.Solve(localFileSystemInfo, null, ContentChangeType.CREATED, ContentChangeType.NONE);
+            } else if (localFileSystemInfo is IDirectoryInfo) {
+                this.secondSolver.Solve(localFileSystemInfo, null, ContentChangeType.NONE, ContentChangeType.NONE);
+                var dir = localFileSystemInfo as IDirectoryInfo;
+                if (dir.GetFiles().Length > 0 || dir.GetDirectories().Length > 0) {
+                    throw new IOException(string.Format("There are unsynced file in local folder {0} => starting crawl sync", dir.FullName));
+                }
+            }
         }
     }
 }

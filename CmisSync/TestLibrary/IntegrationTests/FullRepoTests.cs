@@ -969,6 +969,35 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
         }
 
+        [Test, Category("Slow")]
+        public void LocalFileRenamedAndDeletedRemotely() {
+            string newName = "newtestfile.txt";
+            string oldName = "testfile.txt";
+            string content = "text";
+            this.remoteRootDir.CreateDocument(oldName, content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
+            this.remoteRootDir.Refresh();
+            this.remoteRootDir.GetChildren().First().Delete(true);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+            Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(newName));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            var doc = remoteRootDir.GetChildren().First() as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            Assert.That(doc.Name, Is.EqualTo(newName));
+        }
+
         // Not yet correct on the server side
         [Ignore]
         [Test, Category("Slow")]
