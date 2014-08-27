@@ -86,7 +86,7 @@ namespace CmisSync
                     removed = false;
                     foreach (TransmissionItem i in TransmissionItems)
                     {
-                        if (i.Path == item.Path)
+                        if (i.FullPath == item.FullPath)
                         {
                             TransmissionItems.Remove(i);
                             removed = true;

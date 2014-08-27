@@ -105,6 +105,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Properties.Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="..\TransmissionController.cs">
+      <Link>TransmissionController.cs</Link>
+    </Compile>
     <Compile Include="AboutWPF.xaml.cs">
       <DependentUpon>AboutWPF.xaml</DependentUpon>
     </Compile>
@@ -139,7 +142,6 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Transmission.cs" />
-    <Compile Include="TransmissionController.cs" />
     <Compile Include="TransmissionWPF.xaml.cs">
       <DependentUpon>TransmissionWPF.xaml</DependentUpon>
     </Compile>
