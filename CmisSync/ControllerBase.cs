@@ -232,10 +232,6 @@ namespace CmisSync
             if (this.CreateCmisSyncFolder()) {
                 this.AddToBookmarks();
             }
-
-            if (firstRun) {
-                ConfigManager.CurrentConfig.Notifications = true;
-            }
         }
 
         /// <summary>

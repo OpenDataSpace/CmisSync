@@ -65,6 +65,7 @@ namespace TestLibrary.IntegrationTests
     using DotCMIS.Binding;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -165,6 +166,7 @@ namespace TestLibrary.IntegrationTests
                 }
             }
 
+            root.Refresh();
             this.remoteRootDir = root.CreateFolder(this.subfolder);
         }
 
@@ -392,8 +394,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.EqualTo(0), "Modification date is not equal");
-            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.EqualTo(0), "Creation Date is not equal");
+            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.Not.GreaterThan(1), "Modification date is not equal");
+            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.Not.GreaterThan(1), "Creation Date is not equal");
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
@@ -512,8 +514,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Length, Is.EqualTo(content.Length));
         }
 
-        // TODO Should also work, but the content change of the server aggregates created and update events atm.
-        [Ignore]
         [Test, Category("Slow")]
         public void OneRemoteFileUpdated()
         {
@@ -526,6 +526,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             content += content;
+            doc.Refresh();
             doc.SetContent(content);
 
             Thread.Sleep(5000);
@@ -700,6 +701,34 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(remoteName));
         }
 
+        [Test, Category("Slow")]
+        public void LocalAndRemoteFolderAreMovedIntoTheSameSubfolder() {
+            string oldParentName = "oldParent";
+            string newParentName = "newParent";
+            string oldName = "moveThis";
+            var source = this.remoteRootDir.CreateFolder(oldParentName);
+            var folder = source.CreateFolder(oldName);
+            var target = this.remoteRootDir.CreateFolder(newParentName);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            folder.Refresh();
+            folder.Move(source, target);
+
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            var localSource = this.localRootDir.GetDirectories(oldParentName).First();
+            var localTarget = this.localRootDir.GetDirectories(newParentName).First();
+            Assert.That(localSource.GetFileSystemInfos(), Is.Empty);
+            Assert.That(localTarget.GetFileSystemInfos().Count(), Is.EqualTo(1));
+            var localFolder = localTarget.GetDirectories().First();
+            folder.Refresh();
+            Assert.That(localFolder.Name, Is.EqualTo(folder.Name));
+            Assert.That(folder.Name, Is.EqualTo(oldName));
+        }
+
         [Test, Category("Slow"), Category("Erratic")]
         public void OneLocalFileContentIsChanged()
         {
@@ -750,6 +779,7 @@ namespace TestLibrary.IntegrationTests
                     sw.WriteLine(string.Format("content of file \"{0}\"", filePath));
                 }
 
+                fileInfo.Refresh();
                 fileInfo.CreationTimeUtc = creationDate;
                 fileInfo.LastWriteTimeUtc = modificationDate;
             }
@@ -760,13 +790,13 @@ namespace TestLibrary.IntegrationTests
 
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
             foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                Assert.That(((DateTime)remoteFile.LastModificationDate - modificationDate).Seconds, Is.EqualTo(0), string.Format("remote modification date of {0}", remoteFile.Name));
-                Assert.That(((DateTime)remoteFile.CreationDate - creationDate).Seconds, Is.EqualTo(0), string.Format("remote creation date of {0}", remoteFile.Name));
+                Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote modification date of {0}", remoteFile.Name));
+                Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote creation date of {0}", remoteFile.Name));
             }
 
             foreach (var localFile in this.localRootDir.GetFiles()) {
-                Assert.That((localFile.LastWriteTimeUtc - modificationDate).Seconds, Is.EqualTo(0), string.Format("local modification date of {0}", localFile.Name));
-                Assert.That((localFile.CreationTimeUtc - creationDate).Seconds, Is.EqualTo(0), string.Format("local creation date of {0}", localFile.Name));
+                Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local modification date of {0}", localFile.Name));
+                Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local creation date of {0}", localFile.Name));
             }
         }
 
@@ -932,8 +962,22 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             doc.Refresh();
-            Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.EqualTo(0));
+            Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.Not.GreaterThan(1));
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+        }
+
+        // Not yet correct on the server side
+        [Ignore]
+        [Test, Category("Slow")]
+        public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
+            var source = this.remoteRootDir.CreateFolder("source");
+            var target = this.remoteRootDir.CreateFolder("target");
+            var folder = source.CreateFolder("folder");
+            var anotherFolderInstance = this.session.GetObject(folder) as IFolder;
+
+            folder.Move(source, target);
+
+            Assert.Throws<CmisInvalidArgumentException>(() => anotherFolderInstance.Move(source, target));
         }
 
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {

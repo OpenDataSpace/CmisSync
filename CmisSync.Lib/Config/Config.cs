@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Config.cs" company="GRAU DATA AG">
 //
 //  CmisSync, a collaboration and sharing tool.
@@ -138,12 +138,24 @@ namespace CmisSync.Lib.Config
             this.configPath = Path.GetDirectoryName(this.fullpath);
         }
 
+        private bool notifications = true;
+
         /// <summary>
         /// Gets or sets a value indicating whether notifications are enabled or not.
         /// </summary>
         /// <value><c>true</c> if notifications; otherwise, <c>false</c>.</value>
         [XmlElement("notifications")]
-        public bool Notifications { get; set; }
+        public bool Notifications
+        {
+            get
+            {
+                return notifications;
+            }
+            set
+            {
+                notifications = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the log4net config.

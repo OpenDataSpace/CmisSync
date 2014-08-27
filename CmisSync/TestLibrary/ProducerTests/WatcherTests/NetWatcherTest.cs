@@ -52,7 +52,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             base.TearDown();
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ConstructorSuccessTest() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
             using (var watcher = new NetWatcher(fswatcher, queue.Object, Mock.Of<IMetaDataStorage>()))
@@ -61,7 +61,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithNullWatcher() {
             using (new NetWatcher(null, queue.Object, Mock.Of<IMetaDataStorage>()))
@@ -69,7 +69,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithNullQueue() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;
@@ -78,7 +78,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         [ExpectedException(typeof(ArgumentException))]
         public void ConstructorFailsWithWatcherOnNullPath() {
             var fswatcher = new Mock<FileSystemWatcher>().Object;
@@ -87,7 +87,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorFailsWithNullStorage() {
             var fswatcher = new Mock<FileSystemWatcher>(localFolder.FullName).Object;

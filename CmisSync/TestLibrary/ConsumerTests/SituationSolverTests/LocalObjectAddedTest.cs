@@ -114,7 +114,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
             document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
-            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -151,7 +150,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
             document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
-            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -182,7 +180,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
-            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -212,7 +209,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
-            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -245,7 +241,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
-            this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]

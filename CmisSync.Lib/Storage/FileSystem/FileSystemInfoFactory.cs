@@ -22,6 +22,8 @@ namespace CmisSync.Lib.Storage.FileSystem
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Config;
+
     /// <summary>
     /// Wrapps all interfaced methods and calls the Systems.IO classes
     /// </summary>
@@ -91,6 +93,42 @@ namespace CmisSync.Lib.Storage.FileSystem
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Creates a download cache file info based on the given file instance.
+        /// </summary>
+        /// <returns>The download cache file info.</returns>
+        /// <param name="file">File which should be updated.</param>
+        public IFileInfo CreateDownloadCacheFileInfo(IFileInfo file) {
+            if (!file.Exists) {
+                throw new FileNotFoundException(string.Format("Given file {0} does not exists", file.FullName));
+            }
+
+            Guid? uuid = file.Uuid;
+            if (uuid == null | uuid == Guid.Empty) {
+                return this.CreateFileInfo(file.FullName + ".sync");
+            } else {
+                return this.CreateDownloadCacheFileInfo((Guid)uuid);
+            }
+        }
+
+        /// <summary>
+        /// Creates the download cache file info based on a uuid.
+        /// </summary>
+        /// <returns>The download cache file info.</returns>
+        /// <param name="uuid">UUID of the file.</param>
+        public IFileInfo CreateDownloadCacheFileInfo(Guid uuid) {
+            if (uuid == Guid.Empty) {
+                throw new ArgumentException("Given Guid is empty");
+            }
+
+            var cacheDir = this.CreateDirectoryInfo(Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), "Download Cache"));
+            if (!cacheDir.Exists) {
+                cacheDir.Create();
+            }
+
+            return this.CreateFileInfo(Path.Combine(cacheDir.FullName, uuid.ToString() + ".sync"));
         }
     }
 }

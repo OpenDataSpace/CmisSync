@@ -58,7 +58,7 @@ namespace TestLibrary.FileTransmissionTests
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
             }
-                
+
             this.localFileStream = new MemoryStream();
             if (this.hashAlg != null) {
                 this.hashAlg.Dispose();
@@ -107,7 +107,7 @@ namespace TestLibrary.FileTransmissionTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void FullDownloadTest()
         {
             this.mockedStream.Setup(stream => stream.Length).Returns(this.remoteLength);
@@ -148,7 +148,7 @@ namespace TestLibrary.FileTransmissionTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ResumeDownloadTest()
         {
             long startPos = this.remoteLength / 2;
@@ -249,7 +249,7 @@ namespace TestLibrary.FileTransmissionTests
             memStream.Dispose();
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void FullDownloadWithoutLengthTest()
         {
             this.mockedStream.Setup(stream => stream.Length).Returns((long?)null);

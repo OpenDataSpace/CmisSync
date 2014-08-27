@@ -444,6 +444,94 @@ namespace TestLibrary.StorageTests.FileSystemTests
             Assert.That(Factory.CreateFileInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));
         }
 
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheIfExtendedAttributesAreAvailable() {
+            Guid uuid = Guid.NewGuid();
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == uuid &&
+                f.Exists == true);
+            var cacheFile = Factory.CreateDownloadCacheFileInfo(file);
+            Assert.That(cacheFile.Name, Is.EqualTo(uuid.ToString() + ".sync"));
+
+            // Ensure that the path does not maps to temp path to avoid problems with extended attribute support
+            Assert.That(cacheFile.FullName.Contains(Path.GetTempPath()), Is.False);
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheIfExtendedAttributesAreNotAvailable() {
+            var file = Mock.Of<IFileInfo>(
+                f => f.Name == "file" &&
+                f.Exists == true &&
+                f.FullName == Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), "file"));
+            var cacheFile = Factory.CreateDownloadCacheFileInfo(file);
+            Assert.That(cacheFile.Name, Is.EqualTo(file.Name + ".sync"));
+            Assert.That(cacheFile.FullName, Is.EqualTo(file.FullName + ".sync"));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheFailsIfOriginalFileCannotBeAccessed() {
+            var fileMock = new Mock<IFileInfo>();
+            fileMock.Setup(f => f.Exists).Returns(true);
+            fileMock.Setup(f => f.Uuid).Throws<ExtendedAttributeException>();
+            Assert.Throws<ExtendedAttributeException>(() => Factory.CreateDownloadCacheFileInfo(fileMock.Object));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheFailsIfFileDoesNotExists() {
+            var file = Mock.Of<IFileInfo>(f => f.Exists == false);
+            Assert.Throws<FileNotFoundException>(() => Factory.CreateDownloadCacheFileInfo(file));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheCreatesIdenticalFileNames() {
+            Guid uuid = Guid.NewGuid();
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == uuid &&
+                f.Exists == true);
+
+            var cacheFile1 = Factory.CreateDownloadCacheFileInfo(file);
+            var cacheFile2 = Factory.CreateDownloadCacheFileInfo(file);
+
+            Assert.That(cacheFile1.Name, Is.EqualTo(cacheFile2.Name));
+            Assert.That(cacheFile1.FullName, Is.EqualTo(cacheFile2.FullName));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheCreatesIdenticalFileNamesIfUuidIsAvailableAndOriginalNamesAreDifferent() {
+            Guid uuid = Guid.NewGuid();
+            var file1 = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == uuid &&
+                f.Name == "name1" &&
+                f.Exists == true);
+
+            var file2 = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == uuid &&
+                f.Name == "name2" &&
+                f.Exists == true);
+
+            var cacheFile1 = Factory.CreateDownloadCacheFileInfo(file1);
+            var cacheFile2 = Factory.CreateDownloadCacheFileInfo(file2);
+
+            Assert.That(cacheFile1.Name, Is.EqualTo(cacheFile2.Name));
+            Assert.That(cacheFile1.FullName, Is.EqualTo(cacheFile2.FullName));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheWithGivenUuid() {
+            Guid uuid = Guid.NewGuid();
+            var cacheFile = Factory.CreateDownloadCacheFileInfo(uuid);
+            Assert.That(cacheFile.Name, Is.EqualTo(uuid.ToString() + ".sync"));
+        }
+
+        [Test, Category("Fast")]
+        public void CreateDownloadCacheWithEmptyUuidThrowsException() {
+            Assert.Throws<ArgumentException>(() => Factory.CreateDownloadCacheFileInfo(Guid.Empty));
+        }
+
         // Test is not implemented yet
         [Ignore]
         [Test, Category("Fast")]

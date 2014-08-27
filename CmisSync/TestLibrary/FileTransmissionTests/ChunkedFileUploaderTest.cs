@@ -123,7 +123,7 @@ namespace TestLibrary.FileTransmissionTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void NormalUpload()
         {
             this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
@@ -139,7 +139,7 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         // Resumes to upload a file half uploaded in the past
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ResumeUpload()
         {
             double successfulUploadPart = 0.5;
@@ -162,7 +162,7 @@ namespace TestLibrary.FileTransmissionTests
             Assert.AreEqual(1, this.lastChunk);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void ResumeUploadWithUtils()
         {
             double successfulUploadPart = 0.2;
@@ -201,7 +201,7 @@ namespace TestLibrary.FileTransmissionTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void NormalUploadReplacesRemoteStreamIfRemoteStreamExists()
         {
             this.mockedDocument.Setup(doc => doc.ContentStreamId).Returns("StreamId");

@@ -215,6 +215,27 @@ namespace TestLibrary.AccumulatorTests
         }
 
         [Test, Category("Fast")]
+        public void FolderEventWithoutObjectIdAndExtendedAttributeExceptionOnUuidRequest() {
+            var session = new Mock<ISession>();
+            session.SetupSessionDefaultValues();
+            IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(Id, "name", "/name").Object;
+            session.Setup(s => s.GetObject(Id, It.IsAny<IOperationContext>())).Returns(remote);
+
+            var storage = new Mock<IMetaDataStorage>();
+            storage.AddLocalFolder(Path, Id, Uuid);
+
+            var dirMock = new Mock<IDirectoryInfo>();
+            dirMock.Setup(d => d.Exists).Returns(true);
+            dirMock.Setup(d => d.Uuid).Callback(() => dirMock.Setup(d => d.Uuid).Returns(Uuid)).Throws<ExtendedAttributeException>();
+
+            var folderEvent = new FolderEvent(dirMock.Object);
+            var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
+
+            Assert.That(fetcher.Handle(folderEvent), Is.False);
+            Assert.That(folderEvent.RemoteFolder, Is.Not.Null);
+        }
+
+        [Test, Category("Fast")]
         public void FolderEventForRemovedFolder() {
             var session = new Mock<ISession>();
             session.SetupSessionDefaultValues();

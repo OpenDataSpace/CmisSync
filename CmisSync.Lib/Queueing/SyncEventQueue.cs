@@ -210,7 +210,9 @@ namespace CmisSync.Lib.Queueing
                 if (syncEvent != null) {
                     try {
                         if (this.suspend) {
+                            Logger.Debug("Suspending sync");
                             waitHandle.WaitOne();
+                            Logger.Debug("Continue sync");
                         }
 
                         manager.Handle(syncEvent);

@@ -67,6 +67,32 @@ namespace TestLibrary.TestUtils
             parent.Setup(p => p.GetFiles()).Returns(files);
         }
 
+        public static void SetupMoveTo(this Mock<IDirectoryInfo> folder, string path = null) {
+            var setup = path == null ? folder.Setup(f => f.MoveTo(It.IsAny<string>())) : folder.Setup(f => f.MoveTo(path));
+            setup.Callback<string>(
+                (p) => {
+                folder.Setup(f => f.FullName).Returns(p);
+                folder.Setup(f => f.Name).Returns(Path.GetFileName(p));
+            });
+        }
+
+        public static Mock<IFileInfo> SetupDownloadCacheFile(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo expectedInput = null, Guid? expectedUuid = null) {
+            var downloadFile = new Mock<IFileInfo>();
+            if (expectedInput == null) {
+                fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo(It.IsAny<IFileInfo>())).Returns(downloadFile.Object);
+            } else {
+                fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo(expectedInput)).Returns(downloadFile.Object);
+            }
+
+            if (expectedUuid == null) {
+                fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo(It.IsAny<Guid>())).Returns(downloadFile.Object);
+            } else {
+                fsFactory.Setup(factory => factory.CreateDownloadCacheFileInfo((Guid)expectedUuid)).Returns(downloadFile.Object);
+            }
+
+            return downloadFile;
+        }
+
         public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children)
         {
             List<IDirectoryInfo> dirs = new List<IDirectoryInfo>();
