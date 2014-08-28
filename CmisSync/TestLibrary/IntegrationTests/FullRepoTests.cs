@@ -160,13 +160,6 @@ namespace TestLibrary.IntegrationTests
             this.session = factory.CreateSession(cmisParameters);
 
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
-            foreach (var child in root.GetChildren()) {
-                if (child is IFolder && child.Name == this.subfolder) {
-                    (child as IFolder).DeleteTree(true, null, true);
-                }
-            }
-
-            root.Refresh();
             this.remoteRootDir = root.CreateFolder(this.subfolder);
         }
 
