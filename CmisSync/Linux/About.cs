@@ -55,7 +55,7 @@ namespace CmisSync
             DefaultSize    = new Gdk.Size (600, 260);
             Resizable      = false;
             BorderWidth    = 0;
-            IconName       = "folder-cmissync";
+            IconName       = "dataspacesyc-folder";
             WindowPosition = WindowPosition.Center;
             Title          = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
             AppPaintable   = true;
