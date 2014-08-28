@@ -189,6 +189,8 @@ namespace CmisSync
         public event Action<TransmissionItem> UpdateTransmissionEvent = delegate { };
         public event Action<TransmissionItem> DeleteTransmissionEvent = delegate { };
 
+        public event Action ShowTransmissionListEvent = delegate { };
+
         private List<TransmissionItem> TransmissionList = new List<TransmissionItem>();
 
         public TransmissionController()
@@ -211,6 +213,11 @@ namespace CmisSync
         public void UpdateTransmission(TransmissionItem item)
         {
             UpdateTransmissionEvent(item);
+        }
+
+        public void ShowTransmissionList()
+        {
+            ShowTransmissionListEvent();
         }
 
         private void Controller_OnTransmissionListChanged()
@@ -240,6 +247,8 @@ namespace CmisSync
                 //  register TransmissionController.UpdateTransmissionEvent
                 item.Controller = this;
             }
+
+            ShowTransmissionListEvent();
         }
     }
 }

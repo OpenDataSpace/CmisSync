@@ -185,6 +185,14 @@
     <Compile Include="..\SettingController.cs">
       <Link>SettingController.cs</Link>
     </Compile>
+    <Compile Include="..\TransmissionController.cs">
+      <Link>TransmissionController.cs</Link>
+    </Compile>
+    <Compile Include="TransmissionWidget.cs" />
+    <Compile Include="TransmissionWidgetController.cs" />
+    <Compile Include="TransmissionWidget.designer.cs">
+      <DependentUpon>TransmissionWidget.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -318,6 +326,7 @@
     <InterfaceDefinition Include="EditWizard.xib" />
     <InterfaceDefinition Include="GeneralSettings.xib" />
     <InterfaceDefinition Include="ProxySettings.xib" />
+    <InterfaceDefinition Include="TransmissionWidget.xib" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Properties\Properties.Resources.cs.resx" />
