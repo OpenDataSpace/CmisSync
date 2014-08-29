@@ -2,12 +2,12 @@ light_theme = ubuntu-mono-light
 light_themedir = $(datadir)/icons/$(light_theme)
 
 light_theme_icons = \
-	status,process-syncing-i-24.png \
-	status,process-syncing-ii-24.png \
-	status,process-syncing-iii-24.png \
-	status,process-syncing-iiii-24.png \
-	status,process-syncing-iiiii-24.png \
-	status,process-syncing-error-24.png
+	status,dataspacesync-process-syncing-i-24.png \
+	status,dataspacesync-process-syncing-ii-24.png \
+	status,dataspacesync-process-syncing-iii-24.png \
+	status,dataspacesync-process-syncing-iiii-24.png \
+	status,dataspacesync-process-syncing-iiiii-24.png \
+	status,dataspacesync-process-syncing-error-24.png
 
 install_icon_exec = $(top_srcdir)/build/icon-theme-installer \
 	-t "$(light_theme)" \
