@@ -43,6 +43,7 @@ using MonoMac.AppKit;
 using MonoMac.ObjCRuntime;
 
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Config;
 
 namespace CmisSync {
 
@@ -176,6 +177,9 @@ namespace CmisSync {
             };
 
             OnTransmissionListChanged += delegate {
+                if(!ConfigManager.CurrentConfig.Notifications) {
+                    return;
+                }
 
                 using (var a = new NSAutoreleasePool()) {
                     notificationCenter.BeginInvokeOnMainThread(delegate {

@@ -49,6 +49,7 @@ using MonoMac.ObjCRuntime;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Config;
 
 namespace CmisSync {
 
@@ -169,12 +170,16 @@ namespace CmisSync {
                         } else {
                             state_item.Submenu = new NSMenu();
                         }
-                        foreach(FileTransmissionEvent transmission in transmissions) {
-                            NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
-                            state_item.Submenu.AddItem(transmissionItem);
-                        }
-                        if(transmissions.Count > 0) {
-                            state_item.Enabled = true;
+                        if(ConfigManager.CurrentConfig.Notifications){
+                            foreach(FileTransmissionEvent transmission in transmissions) {
+                                NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
+                                state_item.Submenu.AddItem(transmissionItem);
+                            }
+                            if(transmissions.Count > 0) {
+                                state_item.Enabled = true;
+                            }else{
+                                state_item.Enabled = false;
+                            }
                         }else{
                             state_item.Enabled = false;
                         }

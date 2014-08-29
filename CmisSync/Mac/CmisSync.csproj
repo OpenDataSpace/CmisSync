@@ -261,18 +261,6 @@
     <BundleResource Include="Pixmaps\process-syncing-error-active.png">
       <Link>Pixmaps\process-syncing-error-active.png</Link>
     </BundleResource>
-    <BundleResource Include="..\Linux\Pixmaps\icons\document-added-12.png">
-      <Link>Pixmaps\document-added-12.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\Linux\Pixmaps\icons\document-edited-12.png">
-      <Link>Pixmaps\document-edited-12.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\Linux\Pixmaps\icons\document-deleted-12.png">
-      <Link>Pixmaps\document-deleted-12.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\Linux\Pixmaps\icons\document-moved-12.png">
-      <Link>Pixmaps\document-moved-12.png</Link>
-    </BundleResource>
     <BundleResource Include="..\Common\Pixmaps\about.png">
       <Link>Pixmaps\about.png</Link>
     </BundleResource>
