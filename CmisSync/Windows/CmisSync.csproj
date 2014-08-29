@@ -267,21 +267,6 @@
     <EmbeddedResource Include="..\Common\Pixmaps\avatar-k.png">
       <Link>Pixmaps\avatar-k.png</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Linux\Pixmaps\icons\document-added-12.png">
-      <Link>Pixmaps\document-added-12.png</Link>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Linux\Pixmaps\icons\document-deleted-12.png">
-      <Link>Pixmaps\document-deleted-12.png</Link>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Linux\Pixmaps\icons\document-edited-12.png">
-      <Link>Pixmaps\document-edited-12.png</Link>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Linux\Pixmaps\icons\document-moved-12.png">
-      <Link>Pixmaps\document-moved-12.png</Link>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Linux\Pixmaps\icons\process-working-22.png">
-      <Link>Pixmaps\process-working-22.png</Link>
-    </EmbeddedResource>
     <EmbeddedResource Include="..\Properties\Properties.Resources.de.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>

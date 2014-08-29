@@ -118,16 +118,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
+                Guid guid = Guid.NewGuid();
                 var file = localFile as IFileInfo;
                 if (!(remoteId is IDocument)) {
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
 
-                var cacheFile = this.fsFactory.CreateFileInfo(Path.Combine(file.Directory.FullName, file.Name + ".sync"));
+                var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
                 var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
-                this.queue.AddEvent(transmissionEvent);
                 this.manager.AddTransmission(transmissionEvent);
                 byte[] hash = null;
                 using (var hashAlg = new SHA1Managed())
@@ -144,7 +144,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     hash = hashAlg.Hash;
                 }
 
-                Guid guid = Guid.NewGuid();
                 cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), false);
                 try {
                     cacheFile.MoveTo(file.FullName);

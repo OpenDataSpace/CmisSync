@@ -28,12 +28,13 @@ SOURCES =  \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	ConsumerTests/SituationSolverTests/AbstractEnhancedSolverTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectAddedTest.cs \
-	ConsumerTests/SituationSolverTests/LocalObjectChangedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectChangedRemoteObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectChangedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectDeletedTest.cs \
-	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectMovedRemoteObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \
@@ -79,9 +80,11 @@ SOURCES =  \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventTransformerTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangesTest.cs \
+	ProducerTests/CrawlerTests/CrawlEventGeneratorTest.cs \
+	ProducerTests/CrawlerTests/CrawlEventNotifierTest.cs \
 	ProducerTests/CrawlerTests/DescendantsCrawlerTest.cs \
-	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
 	ProducerTests/CrawlerTests/LocalEventGeneratorTest.cs \
+	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
 	ProducerTests/WatcherTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
 	ProducerTests/WatcherTests/MacWatcherTest.cs \
 	ProducerTests/WatcherTests/NetWatcherTest.cs \

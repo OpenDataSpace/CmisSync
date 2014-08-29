@@ -115,7 +115,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
                 var doc = remoteId as IDocument;
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                this.queue.AddEvent(transmissionEvent);
                 this.transmissionManager.AddTransmission(transmissionEvent);
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
                 using (var hashAlg = new SHA1Managed())

@@ -65,6 +65,7 @@ namespace TestLibrary.IntegrationTests
     using DotCMIS.Binding;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -165,6 +166,7 @@ namespace TestLibrary.IntegrationTests
                 }
             }
 
+            root.Refresh();
             this.remoteRootDir = root.CreateFolder(this.subfolder);
         }
 
@@ -254,6 +256,7 @@ namespace TestLibrary.IntegrationTests
             using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create)) {
             }
 
+            this.remoteRootDir.Refresh();
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(false, null, true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
 
@@ -610,6 +613,8 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            this.session.GetObject(this.remoteRootDir.Id);
+            this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
@@ -697,6 +702,34 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(remoteName));
+        }
+
+        [Test, Category("Slow")]
+        public void LocalAndRemoteFolderAreMovedIntoTheSameSubfolder() {
+            string oldParentName = "oldParent";
+            string newParentName = "newParent";
+            string oldName = "moveThis";
+            var source = this.remoteRootDir.CreateFolder(oldParentName);
+            var folder = source.CreateFolder(oldName);
+            var target = this.remoteRootDir.CreateFolder(newParentName);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            folder.Refresh();
+            folder.Move(source, target);
+
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            var localSource = this.localRootDir.GetDirectories(oldParentName).First();
+            var localTarget = this.localRootDir.GetDirectories(newParentName).First();
+            Assert.That(localSource.GetFileSystemInfos(), Is.Empty);
+            Assert.That(localTarget.GetFileSystemInfos().Count(), Is.EqualTo(1));
+            var localFolder = localTarget.GetDirectories().First();
+            folder.Refresh();
+            Assert.That(localFolder.Name, Is.EqualTo(folder.Name));
+            Assert.That(folder.Name, Is.EqualTo(oldName));
         }
 
         [Test, Category("Slow"), Category("Erratic")]
@@ -934,6 +967,49 @@ namespace TestLibrary.IntegrationTests
             doc.Refresh();
             Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.Not.GreaterThan(1));
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+        }
+
+        [Test, Category("Slow")]
+        public void LocalFileRenamedAndDeletedRemotely() {
+            string newName = "newtestfile.txt";
+            string oldName = "testfile.txt";
+            string content = "text";
+            this.remoteRootDir.CreateDocument(oldName, content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
+            this.remoteRootDir.Refresh();
+            this.remoteRootDir.GetChildren().First().Delete(true);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+            Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(newName));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            var doc = remoteRootDir.GetChildren().First() as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            Assert.That(doc.Name, Is.EqualTo(newName));
+        }
+
+        // Not yet correct on the server side
+        [Ignore]
+        [Test, Category("Slow")]
+        public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
+            var source = this.remoteRootDir.CreateFolder("source");
+            var target = this.remoteRootDir.CreateFolder("target");
+            var folder = source.CreateFolder("folder");
+            var anotherFolderInstance = this.session.GetObject(folder) as IFolder;
+
+            folder.Move(source, target);
+
+            Assert.Throws<CmisInvalidArgumentException>(() => anotherFolderInstance.Move(source, target));
         }
 
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {

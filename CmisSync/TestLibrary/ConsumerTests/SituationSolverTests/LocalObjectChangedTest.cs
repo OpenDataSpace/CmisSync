@@ -16,11 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
 
 namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Security.Cryptography;
 
@@ -317,7 +317,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     expectedHash,
                     fileLength);
                 remoteFile.VerifySetContentStream();
-                this.queue.Verify(q => q.AddEvent(It.Is<FileTransmissionEvent>(e => e.Path == localFile.Object.FullName && e.Type == FileTransmissionType.UPLOAD_MODIFIED_FILE)), Times.Once());
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
                 localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
                 this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());

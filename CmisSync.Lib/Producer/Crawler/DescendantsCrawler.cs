@@ -135,7 +135,7 @@ namespace CmisSync.Lib.Producer.Crawler
         /// <returns>true if handled</returns>
         public override bool Handle(ISyncEvent e)
         {
-            if(e is StartNextSyncEvent) {
+            if (e is StartNextSyncEvent) {
                 Logger.Debug("Starting DecendantsCrawlSync upon " + e);
                 using (var activity = new ActivityListenerResource(this.activityListener)) {
                     this.CrawlDescendants();

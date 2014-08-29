@@ -116,7 +116,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                         // Download changes
                         var file = localFile as IFileInfo;
-                        var cacheFile = this.fsFactory.CreateFileInfo(file.FullName + ".sync");
+                        var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(file);
                         var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName, cacheFile.FullName);
                         this.queue.AddEvent(transmissionEvent);
                         this.transmissonManager.AddTransmission(transmissionEvent);

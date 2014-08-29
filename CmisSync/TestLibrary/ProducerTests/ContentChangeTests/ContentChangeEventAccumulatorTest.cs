@@ -22,9 +22,9 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
     using System;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
@@ -78,7 +78,6 @@ namespace TestLibrary.ProducerTests.ContentChangeTests
             Assert.That(contentChange.CmisObject, Is.EqualTo(remoteObject));
             Assert.That(contentChange.CmisObject, Is.Not.EqualTo(newRemoteObject));
         }
-
 
         [Test, Category("Fast"), Category("ContentChange")]
         public void DocumentDeletionNotAccumulated() {
