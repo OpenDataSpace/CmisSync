@@ -66,6 +66,7 @@ namespace CmisSync
             this.RequiresAuthorizationCheckBox.StringValue = Properties_Resources.NetworkProxyLogin;
             this.ProxyPasswordLabel.StringValue = Properties_Resources.Password;
             this.ProxyUsernameLabel.StringValue = Properties_Resources.User;
+            this.NotificationsFeaturesButton.Title = Properties_Resources.Notifications;
 
             Controller = (this.WindowController as GeneralSettingsController).Controller;
 
@@ -212,6 +213,7 @@ namespace CmisSync
             settings.ObfuscatedPassword = Crypto.Obfuscate(this.ProxyPassword.StringValue);
             this.ProxySettings = settings;
             ConfigManager.CurrentConfig.Proxy = settings;
+            ConfigManager.CurrentConfig.Notifications = (NotificationsFeaturesButton.State == NSCellStateValue.On) ? true : false;
             ConfigManager.CurrentConfig.Save();
             PerformClose(this);
         }
@@ -271,6 +273,7 @@ namespace CmisSync
             } else {
                 Controller.CheckProxyNone ();
             }
+            this.NotificationsFeaturesButton.State = ConfigManager.CurrentConfig.Notifications ? NSCellStateValue.On : NSCellStateValue.Off;
         }
     }
 }
