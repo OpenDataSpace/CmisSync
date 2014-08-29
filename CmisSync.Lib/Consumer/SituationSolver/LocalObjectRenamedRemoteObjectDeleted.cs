@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 this.secondSolver.Solve(localFileSystemInfo, null, ContentChangeType.NONE, ContentChangeType.NONE);
                 var dir = localFileSystemInfo as IDirectoryInfo;
                 if (dir.GetFiles().Length > 0 || dir.GetDirectories().Length > 0) {
-                    throw new IOException(string.Format("There are unsynced file in local folder {0} => starting crawl sync", dir.FullName));
+                    throw new IOException(string.Format("There are unsynced files in local folder {0} => starting crawl sync", dir.FullName));
                 }
             }
         }
