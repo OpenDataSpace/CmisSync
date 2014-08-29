@@ -6,6 +6,7 @@
         "@TEST_URL@",
         "@TEST_USER@",
         "@TEST_PASSWORD@",
-        "@TEST_REPOID@"
+        "@TEST_REPOID@",
+        "@TEST_BINDING@"
     ]
 ]

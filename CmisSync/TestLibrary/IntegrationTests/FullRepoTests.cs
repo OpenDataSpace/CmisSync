@@ -131,7 +131,8 @@ namespace TestLibrary.IntegrationTests
                 RemotePath = config[2].ToString() + "/" + this.subfolder,
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
-                RepositoryId = config[6].ToString()
+                RepositoryId = config[6].ToString(),
+                Binding = config[7].ToString()
             };
             this.repoInfo.RemotePath = this.repoInfo.RemotePath.Replace("//", "/");
             this.repoInfo.SetPassword(config[5].ToString());
@@ -150,8 +151,14 @@ namespace TestLibrary.IntegrationTests
 
             // Session
             var cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+            if (this.repoInfo.Binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+            } else if (this.repoInfo.Binding.Equals(BindingType.Browser, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
+                cmisParameters[SessionParameter.BrowserUrl] = this.repoInfo.Address.ToString();
+            }
+
             cmisParameters[SessionParameter.User] = this.repoInfo.User;
             cmisParameters[SessionParameter.Password] = this.repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
@@ -1001,7 +1008,7 @@ namespace TestLibrary.IntegrationTests
             }
 
             public override void Start() {
-                if (!base.Connect()) {
+                if (!this.Connect()) {
                     Assert.Fail("Connection failed");
                 }
             }
