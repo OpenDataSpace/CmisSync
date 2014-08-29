@@ -991,6 +991,76 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.Name, Is.EqualTo(newName));
         }
 
+        [Test, Category("Slow")]
+        public void LocalFileMovedAndDeletedRemotely() {
+            string newName = "newtestfile.txt";
+            string oldName = "testfile.txt";
+            string content = "text";
+
+            this.remoteRootDir.CreateFolder("folder").CreateDocument(oldName, content);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetDirectories().First().GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
+            this.remoteRootDir.Refresh();
+            ((this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument).Delete(true);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo("folder"));
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+            Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(newName));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+            foreach (var child in this.remoteRootDir.GetChildren()) {
+                if (child is IFolder) {
+                    Assert.That(child.Name, Is.EqualTo("folder"));
+                } else if (child is IDocument) {
+                    var doc = child as IDocument;
+                    Assert.That(doc.Name, Is.EqualTo(newName));
+                    Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+                } else {
+                    Assert.Fail("Child is neither folder nor document");
+                }
+            }
+        }
+
+        [Test, Category("Slow")]
+        public void LocalFolderWithContentRenamedAndDeletedRemotely() {
+            string newName = "newtestfile.txt";
+            string oldName = "testfile.txt";
+            string content = "text";
+            this.remoteRootDir.CreateFolder("folder").CreateFolder(oldName).CreateDocument("doc", content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetDirectories().First().GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
+            this.remoteRootDir.Refresh();
+            (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(true, null, true);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles(), Is.Empty);
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newName));
+            Assert.That(this.localRootDir.GetDirectories().First().GetFiles().First().Name, Is.EqualTo("doc"));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(newName));
+            var doc = (remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            Assert.That(doc.Name, Is.EqualTo("doc"));
+        }
+
         // Not yet correct on the server side
         [Ignore]
         [Test, Category("Slow")]
