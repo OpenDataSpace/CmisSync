@@ -10,10 +10,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using DotCMIS.Client;
 
-    public class LocalObjectRenamedRemoteObjectDeleted : AbstractEnhancedSolver
+    public class LocalObjectRenamedOrMovedRemoteObjectDeleted : AbstractEnhancedSolver
     {
         private ISolver secondSolver;
-        public LocalObjectRenamedRemoteObjectDeleted(
+        public LocalObjectRenamedOrMovedRemoteObjectDeleted(
             ISession session,
             IMetaDataStorage storage,
             ISyncEventQueue queue,

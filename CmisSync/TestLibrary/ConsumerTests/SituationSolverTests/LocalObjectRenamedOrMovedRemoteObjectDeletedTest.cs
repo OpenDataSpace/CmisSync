@@ -27,7 +27,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private Mock<ISolver> secondSolver;
         private Mock<ActiveActivitiesManager> manager;
         private Mock<ISyncEventQueue> queue;
-        private LocalObjectRenamedRemoteObjectDeleted underTest;
+        private LocalObjectRenamedOrMovedRemoteObjectDeleted underTest;
 
         [SetUp]
         public void SetUp() {
@@ -36,7 +36,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.queue = new Mock<ISyncEventQueue>();
             this.manager = new Mock<ActiveActivitiesManager> { CallBase = true };
             this.secondSolver = new Mock<ISolver>();
-            this.underTest = new LocalObjectRenamedRemoteObjectDeleted(
+            this.underTest = new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 this.storage.Object,
                 this.queue.Object,
@@ -47,7 +47,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithDateModification() {
-            new LocalObjectRenamedRemoteObjectDeleted(
+            new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 Mock.Of<ISession>(),
                 Mock.Of<IMetaDataStorage>(),
                 Mock.Of<ISyncEventQueue>(),
@@ -57,7 +57,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithoutDateModification() {
-            new LocalObjectRenamedRemoteObjectDeleted(
+            new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 Mock.Of<ISession>(),
                 Mock.Of<IMetaDataStorage>(),
                 Mock.Of<ISyncEventQueue>(),

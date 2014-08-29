@@ -179,8 +179,8 @@ namespace CmisSync.Lib.Consumer
             solver[(int)SituationType.NOCHANGE, (int)SituationType.REMOVED] = new RemoteObjectDeleted(this.session, this.storage);
             solver[(int)SituationType.ADDED, (int)SituationType.REMOVED] = null;
             solver[(int)SituationType.CHANGED, (int)SituationType.REMOVED] = new RemoteObjectDeleted(this.session, this.storage);
-            solver[(int)SituationType.MOVED, (int)SituationType.REMOVED] = null;
-            solver[(int)SituationType.RENAMED, (int)SituationType.REMOVED] = new LocalObjectRenamedRemoteObjectDeleted(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
+            solver[(int)SituationType.MOVED, (int)SituationType.REMOVED] = new LocalObjectRenamedOrMovedRemoteObjectDeleted(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
+            solver[(int)SituationType.RENAMED, (int)SituationType.REMOVED] = new LocalObjectRenamedOrMovedRemoteObjectDeleted(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
             solver[(int)SituationType.REMOVED, (int)SituationType.REMOVED] = new LocalObjectDeletedRemoteObjectDeleted(this.session, this.storage);
 
             return solver;
