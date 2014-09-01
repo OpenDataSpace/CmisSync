@@ -43,7 +43,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectChanged));
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
-        private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
         private ActiveActivitiesManager transmissonManager;
 
@@ -52,25 +51,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="queue">Event Queue to report transmission events to.</param>
         /// <param name="transmissonManager">Transmisson manager.</param>
         /// <param name="fsFactory">File System Factory.</param>
         public RemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ISyncEventQueue queue,
             ActiveActivitiesManager transmissonManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage)
         {
-            if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
-            }
-
             if (transmissonManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
-            this.queue = queue;
             this.transmissonManager = transmissonManager;
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
@@ -118,7 +110,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         var file = localFile as IFileInfo;
                         var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(file);
                         var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName, cacheFile.FullName);
-                        this.queue.AddEvent(transmissionEvent);
                         this.transmissonManager.AddTransmission(transmissionEvent);
                         using (SHA1 hashAlg = new SHA1Managed())
                             using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
@@ -162,7 +153,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     }
 
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
-                    obj.LastContentSize = (long)remoteDocument.ContentStreamLength;
+                    obj.LastContentSize = remoteDocument.ContentStreamLength ?? 0;
                 }
 
                 obj.LastChangeToken = remoteDocument.ChangeToken;
