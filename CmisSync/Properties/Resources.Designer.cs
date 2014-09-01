@@ -898,6 +898,42 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Path.
+        /// </summary>
+        internal static string TransmissionTitlePath {
+            get {
+                return ResourceManager.GetString("TransmissionTitlePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Progress.
+        /// </summary>
+        internal static string TransmissionTitleProgress {
+            get {
+                return ResourceManager.GetString("TransmissionTitleProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Repo.
+        /// </summary>
+        internal static string TransmissionTitleRepo {
+            get {
+                return ResourceManager.GetString("TransmissionTitleRepo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status.
+        /// </summary>
+        internal static string TransmissionTitleStatus {
+            get {
+                return ResourceManager.GetString("TransmissionTitleStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to establish a trusted Connection. Please inform your server administrator..
         /// </summary>
         internal static string TrustFailure {

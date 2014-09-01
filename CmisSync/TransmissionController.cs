@@ -15,11 +15,19 @@ namespace CmisSync
         public string Repo { get; private set; }
         public string Path { get; private set; }
 
-        public string Status { get; set; }
-        public string Progress { get; set; }
+        public string Status { get; private set; }
+        public string Progress { get; private set; }
 
-        private string State;
+        public bool Done { get; private set; }
+
+        public DateTime UpdateTime { get; private set; }
+
+        private static readonly double UpdateIntervalSeconds = 1;
+
+        private FileTransmissionEvent Transmission;
+
         private FileTransmissionType Type;
+        private string State;
 
         private bool Disposed = false;
 
@@ -42,11 +50,6 @@ namespace CmisSync
                 }
             }
         }
-
-        private FileTransmissionEvent Transmission;
-
-        private static readonly double UpdateIntervalSeconds = 1;
-        private DateTime UpdateTime;
 
         public TransmissionItem(FileTransmissionEvent transmission)
         {
@@ -93,6 +96,8 @@ namespace CmisSync
         private void Update(object sender, TransmissionProgressEventArgs status)
         {
             string oldState = State;
+            string oldStatus = Status;
+            string oldProgress = Progress;
 
             State = string.Empty;
             switch (Type)
@@ -113,26 +118,41 @@ namespace CmisSync
             if (status.Completed.GetValueOrDefault())
             {
                 State += " Finished";
+                Done = true;
             }
             else if (status.Aborted.GetValueOrDefault())
             {
                 State += " Aborted";
+                Done = true;
+            }
+            else if (status.FailedException != null)
+            {
+                State += " Aborted";
+                Done = true;
             }
             else if (status.Aborting.GetValueOrDefault())
             {
                 State += " Aborting";
+                Done = false;
             }
             else if (status.Paused.GetValueOrDefault())
             {
                 State += " Paused";
+                Done = false;
             }
             else if (status.Resumed.GetValueOrDefault())
             {
                 State += " Resumed";
+                Done = false;
             }
             else if (status.Started.GetValueOrDefault())
             {
                 State += " Started";
+                Done = false;
+            }
+            else
+            {
+                Done = false;
             }
 
             if (oldState == State)
@@ -170,11 +190,17 @@ namespace CmisSync
                 Progress += ")";
             }
 
+            if (oldStatus == Status && oldProgress == Progress)
+            {
+                return;
+            }
+
             lock (lockController)
             {
                 if (Controller != null)
                 {
                     Controller.UpdateTransmission(this);
+                    Controller.ShowTransmission(this);
                 }
             }
         }
@@ -190,8 +216,11 @@ namespace CmisSync
         public event Action<TransmissionItem> DeleteTransmissionEvent = delegate { };
 
         public event Action ShowTransmissionListEvent = delegate { };
+        public event Action<TransmissionItem> ShowTransmissionEvent = delegate { };
 
         private List<TransmissionItem> TransmissionList = new List<TransmissionItem>();
+        private int TransmissionLimit = 5;
+        private HashSet<string> FullPathList = new HashSet<string>();
 
         public TransmissionController()
         {
@@ -220,32 +249,66 @@ namespace CmisSync
             ShowTransmissionListEvent();
         }
 
+        public void ShowTransmission(TransmissionItem item)
+        {
+            ShowTransmissionEvent(item);
+        }
+
+        public class TransmissionCompare : IComparer<TransmissionItem>
+        {
+            public int Compare(TransmissionItem x, TransmissionItem y)
+            {
+                if (x.UpdateTime == y.UpdateTime)
+                {
+                    return 0;
+                }
+                if (x.UpdateTime > y.UpdateTime)
+                {
+                    return -1;
+                }
+                return 1;
+            }
+        }
+
         private void Controller_OnTransmissionListChanged()
         {
-            foreach (TransmissionItem item in TransmissionList)
-            {
-                //  un-register TransmissionController.UpdateTransmissionEvent
-                item.Controller = null;
-
-                DeleteTransmissionEvent(item);
-            }
-            foreach (TransmissionItem item in TransmissionList)
-            {
-                //  un-register FileTransmissionEvent.TransmissionStatus
-                item.Dispose();
-            }
-            TransmissionList.Clear();
-
             List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
             foreach (FileTransmissionEvent transmission in transmissions)
             {
-                TransmissionItem item = new TransmissionItem(transmission);
-                TransmissionList.Add(item);
+                string fullPath = transmission.Path;
+                if (FullPathList.Contains(fullPath))
+                {
+                    continue;
+                }
 
+                FullPathList.Add(fullPath);
+                TransmissionItem item = new TransmissionItem(transmission);
+                TransmissionList.Insert(0, item);
                 InsertTransmissionEvent(item);
 
                 //  register TransmissionController.UpdateTransmissionEvent
                 item.Controller = this;
+            }
+
+            if (FullPathList.Count > TransmissionLimit)
+            {
+                TransmissionList.Sort(new TransmissionCompare());
+                for (int i = FullPathList.Count - 1; i >= 0 && TransmissionList.Count > TransmissionLimit; --i)
+                {
+                    TransmissionItem item = TransmissionList[i];
+                    if (item.Done)
+                    {
+                        //  un-register TransmissionController.UpdateTransmissionEvent
+                        item.Controller = null;
+
+                        DeleteTransmissionEvent(TransmissionList[i]);
+                        TransmissionList.RemoveAt(i);
+                        FullPathList.Remove(item.FullPath);
+
+                        //  un-register FileTransmissionEvent.TransmissionStatus
+                        item.Dispose();
+                    }
+                }
             }
 
             ShowTransmissionListEvent();

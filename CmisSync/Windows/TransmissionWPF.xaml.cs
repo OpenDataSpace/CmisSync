@@ -22,6 +22,16 @@ namespace CmisSync
         public TransmissionWPF()
         {
             InitializeComponent();
+            ApplyTransmission();
+        }
+
+        private void ApplyTransmission()
+        {
+            ColumnRepo.Header = Properties_Resources.TransmissionTitleRepo;
+            ColumnPath.Header = Properties_Resources.TransmissionTitlePath;
+            ColumnStatus.Header = Properties_Resources.TransmissionTitleStatus;
+            ColumnProgress.Header = Properties_Resources.TransmissionTitleProgress;
+            OkButton.Content = Properties_Resources.Finish;
         }
     }
 }

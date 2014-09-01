@@ -80,21 +80,13 @@ namespace CmisSync
         {
             Dispatcher.BeginInvoke((Action)delegate
             {
-                bool removed = false;
-                do
+                for (int i = TransmissionItems.Count - 1; i >= 0; --i)
                 {
-                    removed = false;
-                    foreach (TransmissionItem i in TransmissionItems)
+                    if (TransmissionItems[i].FullPath == item.FullPath)
                     {
-                        if (i.FullPath == item.FullPath)
-                        {
-                            TransmissionItems.Remove(i);
-                            removed = true;
-                            break;
-                        }
+                        TransmissionItems.RemoveAt(i);
                     }
-                } while (removed);
-                //TransmissionItems.Remove(item);
+                }
             });
         }
 
@@ -124,8 +116,8 @@ namespace CmisSync
             Binding binding = new Binding();
             binding.Source = TransmissionItems;
             ListView.SetBinding(ListView.ItemsSourceProperty, binding);
+
             OkButton = wpf.FindName("OkButton") as Button;
-            OkButton.Content = Properties_Resources.Finish;
 
             Content = wpf;
         }

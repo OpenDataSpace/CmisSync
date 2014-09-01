@@ -441,4 +441,16 @@ This could lead to a lot of conflict files!</value>
   <data name="Transmission" xml:space="preserve">
     <value>Transmission</value>
   </data>
+  <data name="TransmissionTitlePath" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="TransmissionTitleProgress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+  <data name="TransmissionTitleRepo" xml:space="preserve">
+    <value>Repo</value>
+  </data>
+  <data name="TransmissionTitleStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
 </root>
