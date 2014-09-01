@@ -20,34 +20,51 @@
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
+    using System.IO;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
+    /// <summary>
+    /// Local object deleted and the corresponding remote object is renamed or moved.
+    /// </summary>
     public class LocalObjectDeletedRemoteObjectRenamedOrMoved : AbstractEnhancedSolver
     {
-        private ISolver secondSolver;
-
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectDeletedRemoteObjectRenamedOrMoved"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
         public LocalObjectDeletedRemoteObjectRenamedOrMoved(
             ISession session,
-            IMetaDataStorage storage,
-            ActiveActivitiesManager manager,
-            bool serverCanModifyDates,
-            ISolver secondSolver = null) : base(session, storage, serverCanModifyDates) {
-            this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, manager, serverCanModifyDates);
+            IMetaDataStorage storage) : base(session, storage) {
         }
 
+        /// <summary>
+        /// Solve the specified situation by using the storage and remote object id to remove existing db entries and forces a crawl sync by throwing an IOException.
+        /// </summary>
+        /// <param name="localFile">Deleted Local filesystem info instance.</param>
+        /// <param name="remoteId">Remote identifier or object.</param>
+        /// <param name="localContent">Hint if the local content has been changed. Is not used by this solver.</param>
+        /// <param name="remoteContent">Information if the remote content has been changed. Is not used by this solver.</param>
         public override void Solve(
             IFileSystemInfo localFile,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            throw new NotImplementedException();
+            var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            this.Storage.RemoveObject(mappedObject);
+            throw new IOException(
+                string.Format(
+                "Local deleted {0} is renamed or moved remotely => invoking crawl sync to download them again",
+                mappedObject.Type == MappedObjectType.File ? "file" : "directory"));
         }
     }
 }

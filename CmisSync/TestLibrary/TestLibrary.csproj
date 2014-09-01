@@ -192,6 +192,7 @@
     <Compile Include="ProducerTests\CrawlerTests\CrawlEventNotifierTest.cs" />
     <Compile Include="ProducerTests\CrawlerTests\CrawlEventGeneratorTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectDeletedRemoteObjectRenamedOrMovedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

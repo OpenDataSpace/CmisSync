@@ -167,14 +167,14 @@ namespace CmisSync.Lib.Consumer
             solver[(int)SituationType.CHANGED, (int)SituationType.MOVED] = null;
             solver[(int)SituationType.MOVED, (int)SituationType.MOVED] = new LocalObjectMovedRemoteObjectMoved(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
             solver[(int)SituationType.RENAMED, (int)SituationType.MOVED] = null; //new LocalObjectRenamedRemoteObjectMoved(this.session, this.storage);
-            solver[(int)SituationType.REMOVED, (int)SituationType.MOVED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
+            solver[(int)SituationType.REMOVED, (int)SituationType.MOVED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.RENAMED] = new RemoteObjectRenamed(this.session, this.storage);
             solver[(int)SituationType.ADDED, (int)SituationType.RENAMED] = null;
             solver[(int)SituationType.CHANGED, (int)SituationType.RENAMED] = null;
             solver[(int)SituationType.MOVED, (int)SituationType.RENAMED] = null; //new LocalObjectMovedRemoteObjectRenamed(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
             solver[(int)SituationType.RENAMED, (int)SituationType.RENAMED] = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.REMOVED, (int)SituationType.RENAMED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
+            solver[(int)SituationType.REMOVED, (int)SituationType.RENAMED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.REMOVED] = new RemoteObjectDeleted(this.session, this.storage);
             solver[(int)SituationType.ADDED, (int)SituationType.REMOVED] = null;
