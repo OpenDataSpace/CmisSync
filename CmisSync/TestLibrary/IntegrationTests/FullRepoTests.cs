@@ -509,6 +509,47 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
+        public void OneEmptyRemoteFileCreated()
+        {
+            string fileName = "file";
+            this.remoteRootDir.CreateDocument(fileName, null);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            var children = this.localRootDir.GetFiles();
+            Assert.That(children.Length, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(child.Length, Is.EqualTo(0));
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFileContentIsDeleted()
+        {
+            string fileName = "file";
+            string content = "content";
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            doc.Refresh();
+            doc.DeleteContentStream(true);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            var children = this.localRootDir.GetFiles();
+            Assert.That(children.Length, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(child.Length, Is.EqualTo(0));
+        }
+
+        [Test, Category("Slow")]
         public void OneRemoteFileUpdated()
         {
             string fileName = "file.txt";

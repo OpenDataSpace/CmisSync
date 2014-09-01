@@ -112,7 +112,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, localFile.FullName, cacheFile.FullName);
                         this.transmissonManager.AddTransmission(transmissionEvent);
                         using (SHA1 hashAlg = new SHA1Managed())
-                            using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+                        using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
                         using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                             try {
                                 download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
