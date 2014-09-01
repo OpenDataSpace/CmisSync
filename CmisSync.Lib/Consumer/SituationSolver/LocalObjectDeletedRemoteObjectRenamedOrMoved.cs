@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="LocalObjectRenamedOrMovedRemoteObjectDeleted.cs" company="GRAU DATA AG">
+// <copyright file="LocalObjectDeletedRemoteObjectRenamedOrMoved.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -20,7 +20,6 @@
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
-    using System.IO;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -29,14 +28,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using DotCMIS.Client;
 
-    /// <summary>
-    /// Local object renamed or moved and the corresponding remote object is deleted.
-    /// </summary>
-    public class LocalObjectRenamedOrMovedRemoteObjectDeleted : AbstractEnhancedSolver
+    public class LocalObjectDeletedRemoteObjectRenamedOrMoved : AbstractEnhancedSolver
     {
         private ISolver secondSolver;
 
-        public LocalObjectRenamedOrMovedRemoteObjectDeleted(
+        public LocalObjectDeletedRemoteObjectRenamedOrMoved(
             ISession session,
             IMetaDataStorage storage,
             ActiveActivitiesManager manager,
@@ -46,22 +42,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         }
 
         public override void Solve(
-            IFileSystemInfo localFileSystemInfo,
+            IFileSystemInfo localFile,
             IObjectId remoteId,
-            ContentChangeType localContent,
-            ContentChangeType remoteContent)
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            var mappedObject = this.Storage.GetObjectByGuid((Guid)localFileSystemInfo.Uuid);
-            this.Storage.RemoveObject(mappedObject);
-            if (localFileSystemInfo is IFileInfo) {
-                this.secondSolver.Solve(localFileSystemInfo, null, ContentChangeType.CREATED, ContentChangeType.NONE);
-            } else if (localFileSystemInfo is IDirectoryInfo) {
-                this.secondSolver.Solve(localFileSystemInfo, null, ContentChangeType.NONE, ContentChangeType.NONE);
-                var dir = localFileSystemInfo as IDirectoryInfo;
-                if (dir.GetFiles().Length > 0 || dir.GetDirectories().Length > 0) {
-                    throw new IOException(string.Format("There are unsynced files in local folder {0} => starting crawl sync", dir.FullName));
-                }
-            }
+            throw new NotImplementedException();
         }
     }
 }

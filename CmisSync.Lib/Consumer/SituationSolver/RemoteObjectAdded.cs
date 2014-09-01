@@ -49,7 +49,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="queue">Queue to report new transmissions to.</param>
         /// <param name="transmissonManager">Transmisson manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
@@ -57,7 +56,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             IMetaDataStorage storage,
             ActiveActivitiesManager transmissonManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
-
             if (transmissonManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }

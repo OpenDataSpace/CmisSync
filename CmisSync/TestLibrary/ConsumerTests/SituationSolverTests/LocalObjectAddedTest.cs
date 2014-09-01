@@ -50,7 +50,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
-        private Mock<ISyncEventQueue> queue;
         private byte[] emptyhash = SHA1.Create().ComputeHash(new byte[0]);
 
         [SetUp]
@@ -58,26 +57,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         {
             this.session = new Mock<ISession>();
             this.storage = new Mock<IMetaDataStorage>();
-            this.queue = new Mock<ISyncEventQueue>();
             this.session.SetupCreateOperationContext();
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorWithGivenQueueAndActivityManager()
         {
-            new LocalObjectAdded(this.session.Object, this.storage.Object, Mock.Of<ISyncEventQueue>(), new ActiveActivitiesManager());
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorThrowsExceptionIfQueueIsNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectAdded(this.session.Object, this.storage.Object, null, new ActiveActivitiesManager()));
+            new LocalObjectAdded(this.session.Object, this.storage.Object, new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectAdded(this.session.Object, this.storage.Object, Mock.Of<ISyncEventQueue>(), null));
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectAdded(this.session.Object, this.storage.Object, null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -302,7 +294,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        [ExpectedException(typeof(RetryException))]
         public void LocalFileIsUsedByAnotherProcess() {
             string fileName = "fileName";
             string fileId = "fileId";
@@ -318,13 +309,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             try {
                 Mock<IDocument> document;
                 this.RunSolveFile(fileName, fileId, parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
+                Assert.Fail();
             } catch (RetryException e) {
                 Assert.That(e.InnerException, Is.EqualTo(exception));
                 fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
                 this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
-                this.queue.Verify(q => q.AddEvent(It.IsAny<FileTransmissionEvent>()), Times.Never());
                 fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-                throw;
             }
         }
 
@@ -377,7 +367,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
             var transmissionManager = new ActiveActivitiesManager();
-            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.queue.Object, transmissionManager);
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
             solver.Solve(fileInfo.Object, null);
             this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
@@ -447,7 +437,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
             var transmissionManager = new ActiveActivitiesManager();
-            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.queue.Object, transmissionManager);
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
 
             solver.Solve(fileInfo.Object, null);
             documentMock = Mock.Get(futureRemoteDoc);
@@ -493,7 +483,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
             var transmissionManager = new ActiveActivitiesManager();
-            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.queue.Object, transmissionManager);
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
 
             solver.Solve(dirInfo.Object, null);
 

@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
@@ -26,20 +44,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private Mock<ISession> session;
         private Mock<ISolver> secondSolver;
         private Mock<ActiveActivitiesManager> manager;
-        private Mock<ISyncEventQueue> queue;
         private LocalObjectRenamedOrMovedRemoteObjectDeleted underTest;
 
         [SetUp]
         public void SetUp() {
             this.session = new Mock<ISession>();
             this.storage = new Mock<IMetaDataStorage>();
-            this.queue = new Mock<ISyncEventQueue>();
             this.manager = new Mock<ActiveActivitiesManager> { CallBase = true };
             this.secondSolver = new Mock<ISolver>();
             this.underTest = new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 this.storage.Object,
-                this.queue.Object,
                 this.manager.Object,
                 true,
                 this.secondSolver.Object);
@@ -50,7 +65,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 Mock.Of<ISession>(),
                 Mock.Of<IMetaDataStorage>(),
-                Mock.Of<ISyncEventQueue>(),
                 Mock.Of<ActiveActivitiesManager>(),
                 true);
         }
@@ -60,7 +74,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 Mock.Of<ISession>(),
                 Mock.Of<IMetaDataStorage>(),
-                Mock.Of<ISyncEventQueue>(),
                 Mock.Of<ActiveActivitiesManager>(),
                 false);
         }
