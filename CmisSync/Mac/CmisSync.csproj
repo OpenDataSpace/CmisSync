@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>10.0.0</ProductVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{CF5BC8DB-A633-4FCC-8A3E-E3AC9B59FABC}</ProjectGuid>
     <ProjectTypeGuids>{42C0BBD9-55CE-4FC1-8D90-A7348ABAFB23};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -196,21 +196,6 @@
     <Folder Include="CmisTree\" />
     <Folder Include="Notifications\" />
   </ItemGroup>
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="True" RelativeConfigureInPath="../..">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
-          <DeployFilesVar />
-          <ResourcesVar Sync="True" Name="RESOURCES_RESX_XAMARIN" Prefix="CmisSync" />
-          <OthersVar />
-          <GacRefVar />
-          <AsmRefVar />
-          <ProjectRefVar />
-        </MonoDevelop.Autotools.MakefileInfo>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
   <ItemGroup>
     <BundleResource Include="Pixmaps\cmissync-app.icns">
       <Link>cmissync-app.icns</Link>
@@ -260,18 +245,6 @@
     </BundleResource>
     <BundleResource Include="Pixmaps\process-syncing-error-active.png">
       <Link>Pixmaps\process-syncing-error-active.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\Linux\Pixmaps\icons\document-added-12.png">
-      <Link>Pixmaps\document-added-12.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\Linux\Pixmaps\icons\document-edited-12.png">
-      <Link>Pixmaps\document-edited-12.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\Linux\Pixmaps\icons\document-deleted-12.png">
-      <Link>Pixmaps\document-deleted-12.png</Link>
-    </BundleResource>
-    <BundleResource Include="..\Linux\Pixmaps\icons\document-moved-12.png">
-      <Link>Pixmaps\document-moved-12.png</Link>
     </BundleResource>
     <BundleResource Include="..\Common\Pixmaps\about.png">
       <Link>Pixmaps\about.png</Link>

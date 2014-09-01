@@ -102,7 +102,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         public void ReplaceFile() {
             var sourceFile = Factory.CreateFileInfo(Path.Combine(this.longPath, "source"));
             var destFile = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName));
-            var backupFile = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName.ToUpper()));
+            var backupFile = Factory.CreateFileInfo(Path.Combine(this.longPath, this.longName.Substring(1)));
             using (sourceFile.Open(FileMode.CreateNew)) {
             }
 
