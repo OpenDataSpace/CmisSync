@@ -101,6 +101,7 @@ SOURCES =  \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderDosTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
+	StorageTests/FileSystemTests/LongFileAndPathNameSupportTest.cs \
 	StorageTests/FileSystemTests/Utf8FileNameNormalizationTest.cs \
 	StreamsTests/BandwidthLimitedStreamTest.cs \
 	StreamsTests/ChunkedStreamTest.cs \
