@@ -160,7 +160,7 @@ namespace CmisSync.Lib.Consumer
             solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
             solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = null;
             solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = null;
-            solver[(int)SituationType.REMOVED, (int)SituationType.CHANGED] = null;
+            solver[(int)SituationType.REMOVED, (int)SituationType.CHANGED] = new LocalObjectDeletedRemoteObjectChanged(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.MOVED] = new RemoteObjectMoved(this.session, this.storage);
             solver[(int)SituationType.ADDED, (int)SituationType.MOVED] = null;
