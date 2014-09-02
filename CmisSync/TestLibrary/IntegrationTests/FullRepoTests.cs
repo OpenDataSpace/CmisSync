@@ -175,13 +175,13 @@ namespace TestLibrary.IntegrationTests
         [TearDown]
         public void TestDown()
         {
+            this.repo.Dispose();
             if (this.localRootDir.Exists) {
                 this.localRootDir.Delete(true);
             }
 
             this.remoteRootDir.Refresh();
             this.remoteRootDir.DeleteTree(true, null, true);
-            this.repo.Dispose();
         }
 
         [Test, Category("Slow")]
@@ -1047,6 +1047,33 @@ namespace TestLibrary.IntegrationTests
                     Assert.That(syncedFileInfo.Uuid, Is.Not.Null);
                     Assert.That(syncedFileInfo.Uuid, Is.Not.EqualTo(uuid));
                 }
+            }
+        }
+
+        [Test, Category("Slow")]
+        public void CreateFilesWithLongNames() {
+            this.repo.Initialize();
+            this.repo.Run();
+            string content = "content";
+            int count = 20;
+            string fileNameFormat = "Toller_Langer_Name mit Leerzeichen - Kopie ({0}) - Kopie.txt";
+            for (int i = 0; i < count; i++) {
+                var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
+                using (var stream = file.CreateText()) {
+                    stream.Write(content);
+                }
+            }
+
+            Thread.Sleep(500);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(count));
+            for (int i = 0; i < count; i++) {
+                var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
+                Assert.That(file.Length, Is.EqualTo(content.Length), file.FullName);
             }
         }
 
