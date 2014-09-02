@@ -11,6 +11,7 @@ namespace CmisSync
     {
         object lockTransmissionItems = new object();
         private List<TransmissionItem> TransmissionItems = new List<TransmissionItem>();
+        private bool changeAll = false;
 
         TransmissionController Controller;
 
@@ -24,25 +25,35 @@ namespace CmisSync
 
         private void HandleUpdateTransmissionEvent (TransmissionItem item)
         {
-            HandleDeleteTransmissionEvent (item);
-            HandleInsertTransmissionEvent (item);
-            Controller.ShowTransmissionList ();
+            lock (lockTransmissionItems) {
+                for (int i = 0; i < TransmissionItems.Count; ++i) {
+                    if (TransmissionItems [i].FullPath == item.FullPath) {
+                        TransmissionItems [i] = item;
+                        if (item.Done) {
+                            // finished TransmissionItem should put to the tail
+                            if (i < TransmissionItems.Count - 1 && !TransmissionItems [i + 1].Done) {
+                                TransmissionItems [i] = TransmissionItems [i + 1];
+                                TransmissionItems [i + 1] = item;
+                                changeAll = true;
+                                continue;
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
         }
 
         private void HandleDeleteTransmissionEvent (TransmissionItem item)
         {
             lock (lockTransmissionItems) {
-                bool removeItem = false;
-                do {
-                    removeItem = false;
-                    foreach (TransmissionItem transmissionItem in TransmissionItems) {
-                        if (transmissionItem.FullPath == item.FullPath) {
-                            TransmissionItems.Remove (transmissionItem);
-                            removeItem = true;
-                            break;
-                        }
+                for (int i = TransmissionItems.Count - 1; i >= 0; --i) {
+                    if (TransmissionItems [i].FullPath == item.FullPath) {
+                        TransmissionItems.RemoveAt (i);
+                        changeAll = true;
+                        return;
                     }
-                } while(removeItem);
+                }
             }
         }
 
@@ -50,6 +61,7 @@ namespace CmisSync
         {
             lock (lockTransmissionItems) {
                 TransmissionItems.Insert (0, item);
+                changeAll = true;
             }
         }
 
@@ -81,6 +93,35 @@ namespace CmisSync
                 return TransmissionItems.Count;
             }
         }
+
+        public void UpdateTableView(NSTableView tableView,TransmissionItem item)
+        {
+            if (changeAll) {
+                changeAll = false;
+                BeginInvokeOnMainThread (delegate
+                {
+                    tableView.ReloadData ();
+                });
+                return;
+            }
+
+            if (item == null) {
+                return;
+            }
+
+            lock (lockTransmissionItems) {
+                for (int i = 0; i < TransmissionItems.Count; ++i) {
+                    if (TransmissionItems [i].FullPath == item.FullPath) {
+                        BeginInvokeOnMainThread (delegate
+                        {
+                            tableView.ReloadData (new NSIndexSet (i), NSIndexSet.FromArray (new int[]{ 0, 1, 2, 3 }));
+                        });
+                        return;
+                    }
+                }
+            }
+        }
+
     }
 
     public partial class TransmissionWidgetController : MonoMac.AppKit.NSWindowController
@@ -133,20 +174,24 @@ namespace CmisSync
         #endregion
 
         private TransmissionController Controller = new TransmissionController();
+        TransmissionDataSource DataSource;
 
         public override void AwakeFromNib ()
         {
             base.AwakeFromNib ();
-            TableView.DataSource = new TransmissionDataSource (Controller);
+
             FinishButton.Title = Properties_Resources.Finish;
+
+            DataSource = new TransmissionDataSource (Controller);
+            TableView.DataSource = DataSource;
+
             Controller.ShowTransmissionListEvent += delegate
             {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    BeginInvokeOnMainThread (delegate {
-                        TableView.ReloadData();
-                    });
-                }
+                DataSource.UpdateTableView(TableView,null);
+            };
+            Controller.ShowTransmissionEvent += delegate (TransmissionItem item)
+            {
+                DataSource.UpdateTableView(TableView,item);
             };
         }
 
