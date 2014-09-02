@@ -1,3 +1,22 @@
+//-----------------------------------------------------------------------
+// <copyright file="LocalObjectRenamedOrMovedRemoteObjectDeleted.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
@@ -10,17 +29,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using DotCMIS.Client;
 
-    public class LocalObjectRenamedRemoteObjectDeleted : AbstractEnhancedSolver
+    /// <summary>
+    /// Local object renamed or moved and the corresponding remote object is deleted.
+    /// </summary>
+    public class LocalObjectRenamedOrMovedRemoteObjectDeleted : AbstractEnhancedSolver
     {
         private ISolver secondSolver;
-        public LocalObjectRenamedRemoteObjectDeleted(
+
+        public LocalObjectRenamedOrMovedRemoteObjectDeleted(
             ISession session,
             IMetaDataStorage storage,
-            ISyncEventQueue queue,
             ActiveActivitiesManager manager,
             bool serverCanModifyDates,
             ISolver secondSolver = null) : base(session, storage, serverCanModifyDates) {
-            this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, queue, manager, serverCanModifyDates);
+            this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, manager, serverCanModifyDates);
         }
 
         public override void Solve(
@@ -37,7 +59,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 this.secondSolver.Solve(localFileSystemInfo, null, ContentChangeType.NONE, ContentChangeType.NONE);
                 var dir = localFileSystemInfo as IDirectoryInfo;
                 if (dir.GetFiles().Length > 0 || dir.GetDirectories().Length > 0) {
-                    throw new IOException(string.Format("There are unsynced file in local folder {0} => starting crawl sync", dir.FullName));
+                    throw new IOException(string.Format("There are unsynced files in local folder {0} => starting crawl sync", dir.FullName));
                 }
             }
         }

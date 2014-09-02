@@ -41,7 +41,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
-        private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
         private ActiveActivitiesManager manager;
 
@@ -50,25 +49,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="queue">Queue to report new transmissions to.</param>
         /// <param name="transmissonManager">Transmisson manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ISyncEventQueue queue,
             ActiveActivitiesManager transmissonManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
-            if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
-            }
-
             if (transmissonManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
-            this.queue = queue;
             this.manager = transmissonManager;
         }
 
