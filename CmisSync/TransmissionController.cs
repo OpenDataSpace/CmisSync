@@ -219,7 +219,7 @@ namespace CmisSync
         public event Action<TransmissionItem> ShowTransmissionEvent = delegate { };
 
         private List<TransmissionItem> TransmissionList = new List<TransmissionItem>();
-        private int TransmissionLimit = 5;
+        private int TransmissionLimit = 15;
         private HashSet<string> FullPathList = new HashSet<string>();
 
         public TransmissionController()

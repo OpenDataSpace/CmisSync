@@ -136,11 +136,25 @@ namespace CmisSync
         {
             Dispatcher.BeginInvoke((Action)delegate
             {
-                foreach (TransmissionData data in TransmissionList)
+                for (int i = 0; i < TransmissionList.Count - 1; ++i)
                 {
-                    if (data.FullPath == item.FullPath)
+                    if (TransmissionList[i].FullPath == item.FullPath)
                     {
-                        data.Update(item);
+                        TransmissionList[i].Update(item);
+                        if (item.Done)
+                        {
+                            //  put finished TransmissionData to the tail
+                            for (; i + 1 < TransmissionList.Count - 1; ++i)
+                            {
+                                if (TransmissionList[i + 1].Done)
+                                {
+                                    break;
+                                }
+                                TransmissionData data = TransmissionList[i];
+                                TransmissionList[i] = TransmissionList[i + 1];
+                                TransmissionList[i + 1] = data;
+                            }
+                        }
                         return;
                     }
                 }
