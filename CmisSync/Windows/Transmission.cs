@@ -74,17 +74,51 @@ namespace CmisSync
             });
         }
 
-        private ObservableCollection<TransmissionItem> TransmissionItems = new ObservableCollection<TransmissionItem>();
+        class TransmissionData : INotifyPropertyChanged
+        {
+            public event PropertyChangedEventHandler PropertyChanged = delegate { };
+
+            public TransmissionData(TransmissionItem item)
+            {
+                Update(item);
+            }
+
+            public DateTime UpdateTime { get; private set; }
+            public string FullPath { get; private set; }
+            public string Repo { get; private set; }
+            public string Path { get; private set; }
+            public string Status { get; private set; }
+            public string Progress { get; private set; }
+            public bool Done { get; private set; }
+
+            public void Update(TransmissionItem item)
+            {
+                UpdateTime = item.UpdateTime;
+                FullPath = item.FullPath;
+                Repo = item.Repo;
+                Path = item.Path;
+                Status = item.Status;
+                Progress = item.Progress;
+                Done = item.Done;
+                PropertyChanged(this, new PropertyChangedEventArgs("Repo"));
+                PropertyChanged(this, new PropertyChangedEventArgs("Path"));
+                PropertyChanged(this, new PropertyChangedEventArgs("Status"));
+                PropertyChanged(this, new PropertyChangedEventArgs("Progress"));
+            }
+        }
+
+        private ObservableCollection<TransmissionData> TransmissionList = new ObservableCollection<TransmissionData>();
 
         private void Controller_DeleteTransmissionEvent(TransmissionItem item)
         {
             Dispatcher.BeginInvoke((Action)delegate
             {
-                for (int i = TransmissionItems.Count - 1; i >= 0; --i)
+                for (int i = TransmissionList.Count - 1; i >= 0; --i)
                 {
-                    if (TransmissionItems[i].FullPath == item.FullPath)
+                    if (TransmissionList[i].FullPath == item.FullPath)
                     {
-                        TransmissionItems.RemoveAt(i);
+                        TransmissionList.RemoveAt(i);
+                        return;
                     }
                 }
             });
@@ -94,14 +128,23 @@ namespace CmisSync
         {
             Dispatcher.BeginInvoke((Action)delegate
             {
-                TransmissionItems.Insert(0, item);
+                TransmissionList.Insert(0, new TransmissionData(item));
             });
         }
 
         private void Controller_UpdateTransmissionEvent(TransmissionItem item)
         {
-            Controller_DeleteTransmissionEvent(item);
-            Controller_InsertTransmissionEvent(item);
+            Dispatcher.BeginInvoke((Action)delegate
+            {
+                foreach (TransmissionData data in TransmissionList)
+                {
+                    if (data.FullPath == item.FullPath)
+                    {
+                        data.Update(item);
+                        return;
+                    }
+                }
+            });
         }
 
         private ListView ListView;
@@ -114,7 +157,7 @@ namespace CmisSync
 
             ListView = wpf.FindName("ListView") as ListView;
             Binding binding = new Binding();
-            binding.Source = TransmissionItems;
+            binding.Source = TransmissionList;
             ListView.SetBinding(ListView.ItemsSourceProperty, binding);
 
             OkButton = wpf.FindName("OkButton") as Button;

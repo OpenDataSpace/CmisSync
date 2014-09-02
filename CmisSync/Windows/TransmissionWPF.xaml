@@ -16,7 +16,7 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Button Name ="OkButton" Content="Ok" HorizontalAlignment="Left" Margin="510,408,0,0" VerticalAlignment="Top" Width="100"/>
+        <Button Name ="OkButton" Content="Ok" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" Width="100"/>
 
     </Grid>
 </UserControl>
