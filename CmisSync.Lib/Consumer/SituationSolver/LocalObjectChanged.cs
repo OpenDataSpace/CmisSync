@@ -108,6 +108,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
             }
 
+            if (mappedObject == null) {
+                throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", localFileSystemInfo.FullName));
+            }
+
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
             if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
                 Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
