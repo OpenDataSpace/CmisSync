@@ -44,14 +44,15 @@ namespace TestLibrary.StorageTests.FileSystemTests
             var config = ITUtils.GetConfig();
             string localPath = config[1].ToString();
             this.testFolder = Path.Combine(localPath, Guid.NewGuid().ToString());
-            this.longPath = this.testFolder;
+            this.longPath = Path.GetFullPath(this.testFolder);
             string shortName = "1234567890";
             for (int i = 0; i < 30; i++) {
                 this.longPath = Path.Combine(this.longPath, shortName);
             }
 
-            Directory.CreateDirectory(this.longPath);
-
+            var dir = Factory.CreateDirectoryInfo(this.longPath);
+            Console.WriteLine(dir.FullName);
+            dir.Create();
             this.longName = string.Empty;
             for (int i = 0; i < MaxFileNameLength; i++) {
                 this.longName += "a";
