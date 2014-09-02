@@ -60,6 +60,8 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
     using DotCMIS.Binding;
@@ -1005,6 +1007,47 @@ namespace TestLibrary.IntegrationTests
             doc.Refresh();
             Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.Not.GreaterThan(1));
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+        }
+
+        [Test, Category("Slow")]
+        public void OneFileIsCopiedAFewTimes() {
+            FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
+            var fileNames = new List<string>();
+            string fileName = "file";
+            string content = "content";
+            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            fileNames.Add(file.FullName);
+            var fileInfo = fsFactory.CreateFileInfo(file.FullName);
+            Guid uuid = (Guid)fileInfo.Uuid;
+            for (int i = 0; i < 10; i++) {
+                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + i + ".txt"));
+                file.CopyTo(fileCopy.FullName);
+                fileCopy.Refresh();
+                fileCopy.Uuid = uuid;
+                fileNames.Add(fileCopy.FullName);
+            }
+
+            Thread.Sleep(500);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(fileNames.Count));
+            foreach (var localFile in this.localRootDir.GetFiles()) {
+                Assert.That(fileNames.Contains(localFile.FullName));
+                var syncedFileInfo = fsFactory.CreateFileInfo(localFile.FullName);
+                Assert.That(syncedFileInfo.Length, Is.EqualTo(content.Length));
+                if (localFile.FullName.Equals(file.FullName)) {
+                    Assert.That(syncedFileInfo.Uuid, Is.EqualTo(uuid));
+                } else {
+                    Assert.That(syncedFileInfo.Uuid, Is.Not.Null);
+                    Assert.That(syncedFileInfo.Uuid, Is.Not.EqualTo(uuid));
+                }
+            }
         }
 
         // Not yet correct on the server side
