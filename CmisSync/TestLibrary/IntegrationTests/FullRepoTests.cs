@@ -1026,6 +1026,7 @@ namespace TestLibrary.IntegrationTests
             for (int i = 0; i < 10; i++) {
                 var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + i + ".txt"));
                 file.CopyTo(fileCopy.FullName);
+                Thread.Sleep(50);
                 fileCopy.Refresh();
                 fileCopy.Uuid = uuid;
                 fileNames.Add(fileCopy.FullName);
