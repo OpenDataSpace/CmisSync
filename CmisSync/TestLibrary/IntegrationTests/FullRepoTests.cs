@@ -1052,6 +1052,37 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
+        public void OneFileIsCopiedAndTheCopyIsRemoved() {
+            FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
+            var fileNames = new List<string>();
+            string fileName = "file";
+            string content = "content";
+            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            fileNames.Add(file.FullName);
+            var fileInfo = fsFactory.CreateFileInfo(file.FullName);
+            Guid uuid = (Guid)fileInfo.Uuid;
+            var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + " - copy.txt"));
+            file.CopyTo(fileCopy.FullName);
+            fileCopy.Refresh();
+            fileCopy.Uuid = uuid;
+            fileCopy.Delete();
+            Thread.Sleep(500);
+
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            var child = this.localRootDir.GetFiles().First();
+            Assert.That(child.Length, Is.EqualTo(content.Length));
+            Assert.That(child.Name, Is.EqualTo(fileName + ".txt"));
+        }
+
+        [Test, Category("Slow")]
         public void CreateFilesWithLongNames() {
             this.repo.Initialize();
             this.repo.Run();
@@ -1070,6 +1101,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
             this.repo.Run();
 
+            this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(count));
             for (int i = 0; i < count; i++) {
