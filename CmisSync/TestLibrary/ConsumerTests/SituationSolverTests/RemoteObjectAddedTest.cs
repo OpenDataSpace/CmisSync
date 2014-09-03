@@ -124,7 +124,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             dirInfo.Verify(d => d.Create(), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>(), true), Times.Once());
+            dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -154,7 +154,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
                 cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
-                cacheFileInfo.Verify(f => f.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>(), It.IsAny<bool>()), Times.Once());
+                cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
@@ -191,7 +191,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
                 cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
-                cacheFileInfo.Verify(f => f.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>(), It.IsAny<bool>()), Times.Once());
+                cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, modification, this.creationDate, expectedHash, content.Length);
@@ -201,7 +201,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedAndLocalFileIsCreatedWhileDownloadIsInProgress()
         {
-            string uuid = Guid.NewGuid().ToString();
             string conflictPath = this.path + ".conflict";
             var conflictFileInfo = Mock.Of<IFileInfo>(i => i.FullName == conflictPath);
             var fileInfo = new Mock<IFileInfo>();
@@ -211,7 +210,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.Setup(f => f.FullName).Returns(this.path);
             fileInfo.Setup(f => f.Name).Returns(this.objectName);
             fileInfo.Setup(f => f.Directory).Returns(parentDir);
-            fileInfo.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(uuid);
+            fileInfo.Setup(f => f.Uuid).Returns(Guid.NewGuid());
             byte[] content = Encoding.UTF8.GetBytes("content");
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
             cacheFileInfo.SetupAllProperties();
@@ -232,13 +231,27 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
                 cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
-                cacheFileInfo.Verify(f => f.SetExtendedAttribute(It.Is<string>(s => s.Equals(MappedObject.ExtendedAttributeKey)), It.IsAny<string>(), It.IsAny<bool>()), Times.Once());
+                cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 cacheFileInfo.Verify(f => f.Replace(fileInfo.Object, conflictFileInfo, true), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
                 Mock.Get(conflictFileInfo).Verify(c => c.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, It.IsAny<bool>()), Times.Once());
             }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ExceptionIsThrownIfAnAlreadySyncedFileShouldBeSyncedAgain() {
+            string remoteId = "remoteId";
+            Guid uuid = Guid.NewGuid();
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.Exists == true &&
+                f.Uuid == uuid &&
+                f.FullName == "path");
+            this.storage.AddLocalFile(file.FullName, remoteId, uuid);
+            Assert.Throws<ArgumentException>(() => this.underTest.Solve(file, Mock.Of<IDocument>(d => d.Id == remoteId)));
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
     }
 }
