@@ -953,6 +953,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
 
             // Wait for all fs change events
             Thread.Sleep(500);
