@@ -100,7 +100,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
-                    localFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
+                    localFolder.Uuid = uuid;
                 }
 
                 var mappedObject = new MappedObject(remoteFolder);
@@ -114,6 +114,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 var file = localFile as IFileInfo;
                 if (!(remoteId is IDocument)) {
                     throw new ArgumentException("remoteId has to be a prefetched Document");
+                }
+
+                if (file.Exists) {
+                    Guid? uuid = file.Uuid;
+                    if (uuid != null) {
+                        if (this.Storage.GetObjectByGuid((Guid)uuid) != null) {
+                            throw new ArgumentException("This file has already been synced => force crawl sync");
+                        }
+                    }
+
+                    Logger.Debug(string.Format("This file {0} conflicts with remote file => conflict file will be produced after download", file.FullName));
                 }
 
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
@@ -136,7 +147,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     hash = hashAlg.Hash;
                 }
 
-                cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), false);
+                cacheFile.Uuid = guid;
                 try {
                     cacheFile.MoveTo(file.FullName);
                 } catch (IOException e) {

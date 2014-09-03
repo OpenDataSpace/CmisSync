@@ -115,6 +115,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void LocalObjectChangeFailsIfObjectIsNotAvailableInStorage() {
+            var modificationDate = DateTime.UtcNow;
+            var localDirectory = new Mock<IDirectoryInfo>();
+            localDirectory.Setup(f => f.LastWriteTimeUtc).Returns(modificationDate.AddMinutes(1));
+            localDirectory.Setup(f => f.Exists).Returns(true);
+
+            Assert.Throws<ArgumentException>(() => this.underTest.Solve(localDirectory.Object, Mock.Of<IFolder>()));
+
+            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            localDirectory.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void LocalFolderChangedFetchByGuidInExtendedAttribute()
         {
             Guid guid = Guid.NewGuid();

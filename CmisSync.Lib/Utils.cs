@@ -216,18 +216,18 @@ namespace CmisSync.Lib
         }
 
         /// <summary>
-        /// Determines whether this instance is valid ISO-8859-1 specified input.
+        /// Determines whether this instance is valid ISO-8859-15 specified input.
         /// </summary>
         /// <returns>
-        /// <c>true</c> if this instance is valid ISO-8859-1 specified input; otherwise, <c>false</c>.
+        /// <c>true</c> if this instance is valid ISO-8859-15 specified input; otherwise, <c>false</c>.
         /// </returns>
         /// <param name='input'>
         /// If set to <c>true</c> input.
         /// </param>
-        public static bool IsValidISO88591(string input)
+        public static bool IsValidISO885915(string input)
         {
-            byte[] bytes = Encoding.GetEncoding(28591).GetBytes(input);
-            string result = Encoding.GetEncoding(28591).GetString(bytes);
+            byte[] bytes = Encoding.GetEncoding(28605).GetBytes(input);
+            string result = Encoding.GetEncoding(28605).GetString(bytes);
             return string.Equals(input, result);
         }
 
@@ -242,7 +242,7 @@ namespace CmisSync.Lib
                 return ret;
             }
 
-            ret = !IsValidISO88591(name);
+            ret = !IsValidISO885915(name);
             if (ret) {
                 Logger.Debug(string.Format("The given file name {0} contains invalid characters", name));
             }
@@ -279,7 +279,7 @@ namespace CmisSync.Lib
                 }
             }
 
-            ret = !IsValidISO88591(name);
+            ret = !IsValidISO885915(name);
             if (ret) {
                 Logger.Debug(string.Format("The given directory name {0} contains invalid characters", name));
             }

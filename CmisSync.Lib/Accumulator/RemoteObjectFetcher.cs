@@ -162,15 +162,10 @@ namespace CmisSync.Lib.Accumulator {
 
             if (path != null && path.Exists) {
                 Guid? uuid = null;
-                int retries = 1000;
-                while(retries > 0) {
-                    try {
-                        uuid = path.Uuid;
-                        break;
-                    } catch (ExtendedAttributeException) {
-                        Thread.Sleep(50);
-                        retries--;
-                    }
+                try {
+                    uuid = path.Uuid;
+                } catch (ExtendedAttributeException ex) {
+                    Logger.Debug("Could not read extended attributes from path, do not fetch", ex);
                 }
 
                 if (uuid != null) {

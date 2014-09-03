@@ -125,6 +125,11 @@ namespace TestLibrary.TestUtils
             }
         }
 
+        public static void VerifyThatNoObjectIsManipulated(this Mock<IMetaDataStorage> db) {
+            db.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            db.Verify(s => s.RemoveObject(It.IsAny<IMappedObject>()), Times.Never());
+        }
+
         public static void VerifySavedMappedObject(
             this Mock<IMetaDataStorage> db,
             MappedObjectType type,

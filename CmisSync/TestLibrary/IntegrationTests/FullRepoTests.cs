@@ -60,6 +60,8 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
     using DotCMIS.Binding;
@@ -166,6 +168,7 @@ namespace TestLibrary.IntegrationTests
         [TearDown]
         public void TestDown()
         {
+            this.repo.Dispose();
             if (this.localRootDir.Exists) {
                 this.localRootDir.Delete(true);
             }
@@ -947,6 +950,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
 
             // Wait for all fs change events
             Thread.Sleep(500);
@@ -1100,6 +1104,107 @@ namespace TestLibrary.IntegrationTests
             var doc = (remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
             Assert.That(doc.Name, Is.EqualTo("doc"));
+        }
+
+        [Test, Category("Slow")]
+        public void OneFileIsCopiedAFewTimes() {
+            FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
+            var fileNames = new List<string>();
+            string fileName = "file";
+            string content = "content";
+            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            fileNames.Add(file.FullName);
+            var fileInfo = fsFactory.CreateFileInfo(file.FullName);
+            Guid uuid = (Guid)fileInfo.Uuid;
+            for (int i = 0; i < 10; i++) {
+                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + i + ".txt"));
+                file.CopyTo(fileCopy.FullName);
+                Thread.Sleep(50);
+                fileCopy.Refresh();
+                fileCopy.Uuid = uuid;
+                fileNames.Add(fileCopy.FullName);
+            }
+
+            Thread.Sleep(500);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(fileNames.Count));
+            foreach (var localFile in this.localRootDir.GetFiles()) {
+                Assert.That(fileNames.Contains(localFile.FullName));
+                var syncedFileInfo = fsFactory.CreateFileInfo(localFile.FullName);
+                Assert.That(syncedFileInfo.Length, Is.EqualTo(content.Length));
+                if (localFile.FullName.Equals(file.FullName)) {
+                    Assert.That(syncedFileInfo.Uuid, Is.EqualTo(uuid));
+                } else {
+                    Assert.That(syncedFileInfo.Uuid, Is.Not.Null);
+                    Assert.That(syncedFileInfo.Uuid, Is.Not.EqualTo(uuid));
+                }
+            }
+        }
+
+        [Test, Category("Slow")]
+        public void OneFileIsCopiedAndTheCopyIsRemoved() {
+            FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
+            var fileNames = new List<string>();
+            string fileName = "file";
+            string content = "content";
+            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            fileNames.Add(file.FullName);
+            var fileInfo = fsFactory.CreateFileInfo(file.FullName);
+            Guid uuid = (Guid)fileInfo.Uuid;
+            var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + " - copy.txt"));
+            file.CopyTo(fileCopy.FullName);
+            fileCopy.Refresh();
+            fileCopy.Uuid = uuid;
+            fileCopy.Delete();
+            Thread.Sleep(500);
+
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            var child = this.localRootDir.GetFiles().First();
+            Assert.That(child.Length, Is.EqualTo(content.Length));
+            Assert.That(child.Name, Is.EqualTo(fileName + ".txt"));
+        }
+
+        [Test, Category("Slow")]
+        public void CreateFilesWithLongNames() {
+            this.repo.Initialize();
+            this.repo.Run();
+            string content = "content";
+            int count = 40;
+            string fileNameFormat = "Toller_Langer_Name mit Leerzeichen - Kopie ({0}) - Kopie.pdf";
+            for (int i = 0; i < count; i++) {
+                var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
+                using (var stream = file.CreateText()) {
+                    stream.Write(content);
+                }
+            }
+
+            Thread.Sleep(500);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(count));
+            for (int i = 0; i < count; i++) {
+                var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
+                Assert.That(file.Length, Is.EqualTo(content.Length), file.FullName);
+            }
         }
 
         // Not yet correct on the server side
