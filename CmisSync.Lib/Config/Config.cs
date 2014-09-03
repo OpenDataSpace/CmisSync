@@ -157,6 +157,24 @@ namespace CmisSync.Lib.Config
             }
         }
 
+        private int transmissionLimit = 15;
+
+        /// <summary>
+        /// Gets or sets a value for the transmission history list limit number
+        /// </summary>
+        [XmlElement("TransmissionLimit")]
+        public int TransmissionLimit
+        {
+            get
+            {
+                return transmissionLimit;
+            }
+            set
+            {
+                transmissionLimit = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the log4net config.
         /// </summary>

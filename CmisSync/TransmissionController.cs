@@ -219,7 +219,7 @@ namespace CmisSync
         public event Action<TransmissionItem> ShowTransmissionEvent = delegate { };
 
         private List<TransmissionItem> TransmissionList = new List<TransmissionItem>();
-        private int TransmissionLimit = 15;
+        private readonly int TransmissionLimitLeast = 15;
         private HashSet<string> FullPathList = new HashSet<string>();
 
         public TransmissionController()
@@ -272,6 +272,12 @@ namespace CmisSync
 
         private void Controller_OnTransmissionListChanged()
         {
+            int transmissionLimit = ConfigManager.CurrentConfig.TransmissionLimit;
+            if (transmissionLimit < TransmissionLimitLeast)
+            {
+                transmissionLimit = TransmissionLimitLeast;
+            }
+
             List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
             foreach (FileTransmissionEvent transmission in transmissions)
             {
@@ -290,10 +296,10 @@ namespace CmisSync
                 item.Controller = this;
             }
 
-            if (FullPathList.Count > TransmissionLimit)
+            if (FullPathList.Count > transmissionLimit)
             {
                 TransmissionList.Sort(new TransmissionCompare());
-                for (int i = FullPathList.Count - 1; i >= 0 && TransmissionList.Count > TransmissionLimit; --i)
+                for (int i = FullPathList.Count - 1; i >= 0 && TransmissionList.Count > transmissionLimit; --i)
                 {
                     TransmissionItem item = TransmissionList[i];
                     if (item.Done)
@@ -301,7 +307,7 @@ namespace CmisSync
                         //  un-register TransmissionController.UpdateTransmissionEvent
                         item.Controller = null;
 
-                        DeleteTransmissionEvent(TransmissionList[i]);
+                        DeleteTransmissionEvent(item);
                         TransmissionList.RemoveAt(i);
                         FullPathList.Remove(item.FullPath);
 
