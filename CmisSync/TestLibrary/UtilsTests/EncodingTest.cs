@@ -30,80 +30,66 @@ namespace TestLibrary.UtilsTests
     [TestFixture]
     public class EncodingTest
     {
+        private readonly string validChars = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ÄÖÜäöüß-_.:,;#+*?!/\|<>§$%&()[]{}`'@~¹²³±×¡¢£¥©ª«¬®¯°µ¶·º»¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞàáâãäåæçèéê€";
+        private readonly string invalidChars = "–¦´¤¨¸¼¼¾";
+        private readonly string invalidFolderNameChars = "?:/\\\"<>|*";
+        private readonly string invalidFileNameChars = "?:/\\\"<>|*";
+
         [Test, Category("Fast")]
-        public void IsoEncodingTest()
-        {
-            Assert.IsTrue(Utils.IsValidISO88591("abcdefghijklmnopqrstuvwxyz"));
-            Assert.IsTrue(Utils.IsValidISO88591("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-            Assert.IsTrue(Utils.IsValidISO88591("1234567890"));
-            Assert.IsTrue(Utils.IsValidISO88591("ÄÖÜäöüß"));
-            Assert.IsTrue(Utils.IsValidISO88591("-_.:,;#+*?!"));
-            Assert.IsTrue(Utils.IsValidISO88591("/\\|¦<>§$%&()[]{}"));
-            Assert.IsTrue(Utils.IsValidISO88591("'\"´`"));
-            Assert.IsTrue(Utils.IsValidISO88591("@~¹²³±×"));
-            Assert.IsTrue(Utils.IsValidISO88591("¡¢£¤¥¨©ª«¬®¯°µ¶·¸º»¼¼¾¿"));
-            Assert.IsTrue(Utils.IsValidISO88591("ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ"));
-            Assert.IsTrue(Utils.IsValidISO88591("Þàáâãäåæçèéê"));
-            Assert.IsFalse(Utils.IsValidISO88591("–€"));
+        public void IsoEncodingTestValidChars() {
+            foreach (char c in this.validChars.ToCharArray()) {
+                Assert.IsTrue(Utils.IsValidISO885915(c.ToString()), c.ToString());
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void IsoEncodingTestInvaidChars() {
+            foreach (char c in this.invalidChars.ToCharArray()) {
+                Assert.IsFalse(Utils.IsValidISO885915(c.ToString()), c.ToString());
+            }
         }
 
         [Test, Category("Fast")]
         public void ValidFileNameTest()
         {
-            Assert.IsFalse(Utils.IsInvalidFileName("abcdefghijklmnopqrstuvwxyz"));
-            Assert.IsFalse(Utils.IsInvalidFileName("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-            Assert.IsFalse(Utils.IsInvalidFileName("1234567890"));
-            Assert.IsFalse(Utils.IsInvalidFileName("ÄÖÜäöüß"));
-            Assert.IsFalse(Utils.IsInvalidFileName("-_.,;#+"));
-            Assert.IsFalse(Utils.IsInvalidFileName("¦§$%&()[]{}"));
-            Assert.IsFalse(Utils.IsInvalidFileName("'´`"));
-            Assert.IsFalse(Utils.IsInvalidFileName("@~¹²³±×"));
-            Assert.IsFalse(Utils.IsInvalidFileName("¡¢£¤¥¨©ª«¬®¯°µ¶·¸º»¼¼¾¿"));
-            Assert.IsFalse(Utils.IsInvalidFileName("ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ"));
-            Assert.IsFalse(Utils.IsInvalidFileName("Þàáâãäåæçèéê"));
-            Assert.IsTrue(Utils.IsInvalidFileName("?"), "?");
-            Assert.IsTrue(Utils.IsInvalidFileName(":"), ":");
-            Assert.IsTrue(Utils.IsInvalidFileName("/"), "/");
-            Assert.IsTrue(Utils.IsInvalidFileName("\\"), "\\");
-            Assert.IsTrue(Utils.IsInvalidFileName("\""), "\"");
-            Assert.IsTrue(Utils.IsInvalidFileName("<"), "<");
-            Assert.IsTrue(Utils.IsInvalidFileName(">"), ">");
-            Assert.IsTrue(Utils.IsInvalidFileName("*"), "*");
-            Assert.IsTrue(Utils.IsInvalidFileName("|"), "|");
-            Assert.IsTrue(Utils.IsInvalidFileName("–€"), "Non Valid ISO 8859-1 Character accepted");
+            foreach (char c in this.invalidFileNameChars.ToCharArray()) {
+                Assert.That(Utils.IsInvalidFileName(c.ToString()), Is.True, c.ToString());
+            }
+
+            foreach (char c in this.validChars.ToCharArray()) {
+                if (!this.invalidFileNameChars.Contains(c.ToString())) {
+                    Assert.That(Utils.IsInvalidFileName(c.ToString()), Is.False, c.ToString());
+                }
+            }
+
+            foreach (char c in this.invalidChars.ToCharArray()) {
+                Assert.That(Utils.IsInvalidFileName(c.ToString()), Is.True, c.ToString());
+            }
         }
 
         [Test, Category("Fast")]
         public void ValidFolderNameTest()
         {
-            Assert.IsFalse(Utils.IsInvalidFolderName("abcdefghijklmnopqrstuvwxyz", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("ABCDEFGHIJKLMNOPQRSTUVWXYZ", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("1234567890", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("ÄÖÜäöüß", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("-_.,;#+", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("¦§$%&()[]{}", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("'´`", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("@~¹²³±×", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("¡¢£¤¥¨©ª«¬®¯°µ¶·¸º»¼¼¾¿", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝ", new List<string>()));
-            Assert.IsFalse(Utils.IsInvalidFolderName("Þàáâãäåæçèéê", new List<string>()));
-            Assert.IsTrue(Utils.IsInvalidFolderName("?", new List<string>()), "?");
-            Assert.IsTrue(Utils.IsInvalidFolderName(":", new List<string>()), ":");
-            Assert.IsTrue(Utils.IsInvalidFolderName("/", new List<string>()), "/");
-            Assert.IsTrue(Utils.IsInvalidFolderName("\\", new List<string>()), "\\");
-            Assert.IsTrue(Utils.IsInvalidFolderName("\"", new List<string>()), "\"");
-            Assert.IsTrue(Utils.IsInvalidFolderName("<", new List<string>()), "<");
-            Assert.IsTrue(Utils.IsInvalidFolderName(">", new List<string>()), ">");
-            Assert.IsTrue(Utils.IsInvalidFolderName("*", new List<string>()), "*");
-            Assert.IsTrue(Utils.IsInvalidFolderName("|", new List<string>()), "|");
-            Assert.IsTrue(Utils.IsInvalidFolderName("–€", new List<string>()), "Non Valid ISO 8859-1 Character accepted");
+            foreach (char c in this.invalidFolderNameChars.ToCharArray()) {
+                Assert.That(Utils.IsInvalidFolderName(c.ToString()), Is.True, c.ToString());
+            }
+
+            foreach (char c in this.validChars.ToCharArray()) {
+                if (!this.invalidFolderNameChars.Contains(c.ToString())) {
+                    Assert.That(Utils.IsInvalidFolderName(c.ToString()), Is.False, c.ToString());
+                }
+            }
+
+            foreach (char c in this.invalidChars.ToCharArray()) {
+                Assert.That(Utils.IsInvalidFolderName(c.ToString()), Is.True, c.ToString());
+            }
         }
 
         [Test, Category("Fast")]
         public void IsStringNormalizedInFormD()
         {
             Assert.That(@"ä".IsNormalized(NormalizationForm.FormD));
-            Assert.That(Utils.IsValidISO88591(@"ä"), Is.False);
+            Assert.That(Utils.IsValidISO885915(@"ä"), Is.False);
         }
     }
 }
