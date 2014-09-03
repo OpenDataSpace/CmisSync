@@ -1056,8 +1056,8 @@ namespace TestLibrary.IntegrationTests
             this.repo.Initialize();
             this.repo.Run();
             string content = "content";
-            int count = 20;
-            string fileNameFormat = "Toller_Langer_Name mit Leerzeichen - Kopie ({0}) - Kopie.txt";
+            int count = 40;
+            string fileNameFormat = "Toller_Langer_Name mit Leerzeichen - Kopie ({0}) - Kopie.pdf";
             for (int i = 0; i < count; i++) {
                 var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
                 using (var stream = file.CreateText()) {
