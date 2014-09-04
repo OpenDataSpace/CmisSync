@@ -28,7 +28,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
     using TestLibrary.IntegrationTests;
 
-    [TestFixture]
+    [TestFixture, Ignore]
     public class LongFileAndPathNameSupportTest
     {
         private static readonly IFileSystemInfoFactory Factory = new FileSystemInfoFactory();
