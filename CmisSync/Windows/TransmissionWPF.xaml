@@ -7,6 +7,12 @@
              d:DesignHeight="440" d:DesignWidth="620">
     <Grid>
         <ListView Name ="ListView" Margin="0,0,0,50">
+            <ListView.Resources>
+                <ContextMenu x:Key="ListViewItemContextMenu">
+                    <MenuItem Header="_Open" Click="ListViewItem_Open"/>
+                    <MenuItem Header="Open _file location" Click="ListViewItem_OpenFileLocation"/>
+                </ContextMenu>
+            </ListView.Resources>
             <ListView.View>
                 <GridView>
                     <GridViewColumn x:Name="ColumnRepo" Header="Repo" DisplayMemberBinding="{Binding Repo}" Width="150"/>
@@ -15,8 +21,13 @@
                     <GridViewColumn x:Name="ColumnProgress" Header="Progress" DisplayMemberBinding="{Binding Progress}" Width="100"/>
                 </GridView>
             </ListView.View>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="ContextMenu" Value="{StaticResource ListViewItemContextMenu}"/>
+                    <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_Open"/>
+                </Style>
+            </ListView.ItemContainerStyle>
         </ListView>
         <Button Name ="OkButton" Content="Ok" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" Width="100"/>
-
     </Grid>
 </UserControl>

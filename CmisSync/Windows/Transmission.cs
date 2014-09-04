@@ -74,7 +74,7 @@ namespace CmisSync
             });
         }
 
-        class TransmissionData : INotifyPropertyChanged
+        public class TransmissionData : INotifyPropertyChanged
         {
             public event PropertyChangedEventHandler PropertyChanged = delegate { };
 

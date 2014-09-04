@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 namespace CmisSync
 {
@@ -32,6 +33,37 @@ namespace CmisSync
             ColumnStatus.Header = Properties_Resources.TransmissionTitleStatus;
             ColumnProgress.Header = Properties_Resources.TransmissionTitleProgress;
             OkButton.Content = Properties_Resources.Finish;
+        }
+
+        private void ListViewItem_Open(object sender, RoutedEventArgs e)
+        {
+            if (ListView.SelectedItems == null)
+            {
+                return;
+            }
+
+            foreach (object item in ListView.SelectedItems)
+            {
+                Transmission.TransmissionData data = item as Transmission.TransmissionData;
+                if (data.Done)
+                {
+                    Process.Start(data.FullPath);
+                }
+            }
+        }
+
+        private void ListViewItem_OpenFileLocation(object sender, RoutedEventArgs e)
+        {
+            if (ListView.SelectedItems == null)
+            {
+                return;
+            }
+
+            foreach (object item in ListView.SelectedItems)
+            {
+                Transmission.TransmissionData data = item as Transmission.TransmissionData;
+                Process.Start("explorer.exe", "/select,\"" + data.FullPath + "\"");
+            }
         }
     }
 }

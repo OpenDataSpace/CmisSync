@@ -157,7 +157,7 @@ namespace CmisSync.Lib.Config
             }
         }
 
-        private int transmissionLimit = 15;
+        private int transmissionLimit = 100;
 
         /// <summary>
         /// Gets or sets a value for the transmission history list limit number
