@@ -105,7 +105,7 @@ namespace TestLibrary.TestUtils
         }
 
         public static void VerifyUpdateLastModificationDate(this Mock<IDocument> doc, DateTime modificationDate, Times times, bool refresh = true) {
-            doc.Verify(d => d.UpdateProperties(It.Is<IDictionary<string, object>>(dic => VerifyDictContainsLastModification(dic, modificationDate)), refresh));
+            doc.Verify(d => d.UpdateProperties(It.Is<IDictionary<string, object>>(dic => VerifyDictContainsLastModification(dic, modificationDate)), refresh), times);
         }
 
         private static bool VerifyDictContainsLastModification(IDictionary<string, object> dic, DateTime modificationDate) {
