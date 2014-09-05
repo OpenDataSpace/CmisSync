@@ -102,7 +102,7 @@ namespace CmisSync.Lib.Producer.Crawler
                 if (!filter.InvalidFolderNamesFilter.CheckFolderName(child.Name, out reason) && !filter.FolderNamesFilter.CheckFolderName(child.Name, out reason)) {
                     children.Add(GetLocalDirectoryTree(child, filter));
                 } else {
-                    Logger.Debug(reason);
+                    Logger.Info(reason);
                 }
             }
 
@@ -114,7 +114,7 @@ namespace CmisSync.Lib.Producer.Crawler
                         Children = new List<IObjectTree<IFileSystemInfo>>()
                     });
                 } else {
-                    Logger.Debug(reason);
+                    Logger.Info(reason);
                 }
             }
 
@@ -141,7 +141,7 @@ namespace CmisSync.Lib.Producer.Crawler
                         if (!filter.FolderNamesFilter.CheckFolderName(child.Item.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(child.Item.Name, out reason)) {
                             children.Add(GetRemoteDirectoryTree(child.Item as IFolder, child.Children, filter));
                         } else {
-                            Logger.Debug(reason);
+                            Logger.Info(reason);
                         }
                     } else if (child.Item is IDocument) {
                         string reason;
@@ -151,7 +151,7 @@ namespace CmisSync.Lib.Producer.Crawler
                                 Children = new List<IObjectTree<IFileableCmisObject>>()
                             });
                         } else {
-                            Logger.Debug(reason);
+                            Logger.Info(reason);
                         }
                     }
                 }

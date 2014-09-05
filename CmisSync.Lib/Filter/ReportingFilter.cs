@@ -24,11 +24,15 @@ namespace CmisSync.Lib.Filter
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
+    using log4net;
+
     /// <summary>
     /// Reporting filter.
     /// </summary>
     public class ReportingFilter : ReportingSyncEventHandler
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ReportingSyncEventHandler));
+
         /// <summary>
         /// The ignored folders filter.
         /// </summary>
@@ -100,11 +104,13 @@ namespace CmisSync.Lib.Filter
                     if (nameEvent.IsDirectory) {
                         if (this.ignoredFolderNameFilter.CheckFolderName(nameEvent.Name, out reason)) {
                             this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
+                            Logger.Info(reason);
                             return true;
                         }
                     } else {
                         if (this.ignoredFileNameFilter.CheckFile(nameEvent.Name, out reason)) {
                             this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
+                            Logger.Info(reason);
                             return true;
                         }
                     }
@@ -114,6 +120,7 @@ namespace CmisSync.Lib.Filter
                 if (pathEvent != null && pathEvent.RemotePath != null) {
                     if (this.ignoredFoldersFilter.CheckPath(pathEvent.RemotePath, out reason)) {
                         this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
+                        Logger.Info(reason);
                         return true;
                     }
 
@@ -121,6 +128,7 @@ namespace CmisSync.Lib.Filter
                     foreach(var name in folderNames) {
                         if (this.invalidFolderNameFilter.CheckFolderName(name, out reason)) {
                             this.Queue.AddEvent(new RequestIgnoredEvent(e, reason, this));
+                            Logger.Info(reason);
                             return true;
                         }
                     }
