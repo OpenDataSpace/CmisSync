@@ -390,8 +390,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.Not.GreaterThan(1), "Modification date is not equal");
-            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.Not.GreaterThan(1), "Creation Date is not equal");
+            this.AssertThatDatesAreEqual(doc.LastModificationDate, modificationDate, "Modification date is not equal");
+            this.AssertThatDatesAreEqual(doc.CreationDate, creationDate, "Creation Date is not equal");
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
@@ -829,13 +829,13 @@ namespace TestLibrary.IntegrationTests
 
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
             foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote modification date of {0}", remoteFile.Name));
-                Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote creation date of {0}", remoteFile.Name));
+                this.AssertThatDatesAreEqual(modificationDate, remoteFile.LastModificationDate, string.Format("remote modification date of {0}", remoteFile.Name));
+                this.AssertThatDatesAreEqual(creationDate, remoteFile.CreationDate, string.Format("remote creation date of {0}", remoteFile.Name));
             }
 
             foreach (var localFile in this.localRootDir.GetFiles()) {
-                Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local modification date of {0}", localFile.Name));
-                Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local creation date of {0}", localFile.Name));
+                this.AssertThatDatesAreEqual(modificationDate, localFile.LastWriteTimeUtc, string.Format("local modification date of {0}", localFile.Name));
+                this.AssertThatDatesAreEqual(creationDate, localFile.CreationTimeUtc, string.Format("local creation date of {0}", localFile.Name));
             }
         }
 
@@ -1235,7 +1235,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
             Assert.That(file.Length, Is.EqualTo(newContent.Length));
             Assert.That(file.Length, Is.EqualTo(doc.ContentStreamLength));
-            Assert.That(file.LastWriteTimeUtc, Is.EqualTo(doc.LastModificationDate));
+            this.AssertThatDatesAreEqual(file.LastWriteTimeUtc, doc.LastModificationDate);
         }
 
         // Not yet correct on the server side
@@ -1263,6 +1263,16 @@ namespace TestLibrary.IntegrationTests
                 waited += interval;
                 if (waited > timeout) {
                     Assert.Fail("Timeout exceeded");
+                }
+            }
+        }
+
+        private void AssertThatDatesAreEqual(DateTime? date1, DateTime? date2, string msg = null) {
+            if (((DateTime)date1 - (DateTime)date2).Duration().Seconds > 1) {
+                if (msg != null) {
+                    Assert.That(date1, Is.EqualTo(date2), msg);
+                } else {
+                    Assert.That(date1, Is.EqualTo(date2));
                 }
             }
         }
