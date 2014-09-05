@@ -16,21 +16,43 @@ namespace CmisSync
 		MonoMac.AppKit.NSButton FinishButton { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSMenu TableRowContextMenu { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSMenuItem TableRowMenuOpen { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSTableView TableView { get; set; }
 
 		[Action ("OnFinish:")]
 		partial void OnFinish (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnOpen:")]
+		partial void OnOpen (MonoMac.Foundation.NSObject sender);
+
+		[Action ("OnOpenLocation:")]
+		partial void OnOpenLocation (MonoMac.Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (TableView != null) {
-				TableView.Dispose ();
-				TableView = null;
-			}
-
 			if (FinishButton != null) {
 				FinishButton.Dispose ();
 				FinishButton = null;
+			}
+
+			if (TableRowContextMenu != null) {
+				TableRowContextMenu.Dispose ();
+				TableRowContextMenu = null;
+			}
+
+			if (TableRowMenuOpen != null) {
+				TableRowMenuOpen.Dispose ();
+				TableRowMenuOpen = null;
+			}
+
+			if (TableView != null) {
+				TableView.Dispose ();
+				TableView = null;
 			}
 		}
 	}

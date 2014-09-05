@@ -65,6 +65,16 @@ namespace CmisSync
             }
         }
 
+        public TransmissionItem GetTransmissionItem(int row)
+        {
+            lock (lockTransmissionItems) {
+                if (row < TransmissionItems.Count) {
+                    return TransmissionItems [row];
+                }
+                return null;
+            }
+        }
+
         public override NSObject GetObjectValue (NSTableView tableView, NSTableColumn tableColumn, int row)
         {
             lock (lockTransmissionItems) {
@@ -185,6 +195,18 @@ namespace CmisSync
             DataSource = new TransmissionDataSource (Controller);
             TableView.DataSource = DataSource;
 
+            TableView.ShouldSelectRow += delegate(NSTableView tableView, int row)
+            {
+                return true;
+            };
+            TableView.SelectionDidChange += HandleSelectionDidChange;
+            TableView.SelectionShouldChange += delegate(NSTableView tableView)
+            {
+                return true;
+            };
+            TableView.AllowsEmptySelection = true;
+            TableView.AllowsMultipleSelection = true;
+
             Controller.ShowTransmissionListEvent += delegate
             {
                 DataSource.UpdateTableView(TableView,null);
@@ -195,9 +217,61 @@ namespace CmisSync
             };
         }
 
+        void HandleSelectionDidChange (object sender, EventArgs e)
+        {
+            if (TableView.SelectedRowCount > 0) {
+                TableView.Menu = TableRowContextMenu;
+                TableRowMenuOpen.Enabled = false;
+                foreach (int row in TableView.SelectedRows) {
+                    TransmissionItem item = DataSource.GetTransmissionItem(row);
+                    if (item!=null && item.Done) {
+                        TableRowMenuOpen.Enabled = true;
+                        break;
+                    }
+                }
+            } else {
+                TableView.Menu = new NSMenu ();
+            }
+        }
+
         partial void OnFinish (MonoMac.Foundation.NSObject sender)
         {
             Controller.HideWindow();
+        }
+
+        partial void OnOpen (MonoMac.Foundation.NSObject sender)
+        {
+            if (TableView.SelectedRowCount <= 0) {
+                return;
+            }
+            NSWorkspace.SharedWorkspace.BeginInvokeOnMainThread (delegate
+            {
+                foreach (int row in TableView.SelectedRows) {
+                    TransmissionItem item = DataSource.GetTransmissionItem(row);
+                    if (item!=null && item.Done) {
+                        NSWorkspace.SharedWorkspace.OpenFile (item.FullPath);
+                    }
+                }
+            });
+        }
+
+        partial void OnOpenLocation (MonoMac.Foundation.NSObject sender)
+        {
+            if (TableView.SelectedRowCount <= 0) {
+                return;
+            }
+            NSWorkspace.SharedWorkspace.BeginInvokeOnMainThread (delegate
+            {
+                if (TableView.SelectedRows == null) {
+                    return;
+                }
+                foreach (int row in TableView.SelectedRows) {
+                    TransmissionItem item = DataSource.GetTransmissionItem(row);
+                    if (item!=null) { 
+                        NSWorkspace.SharedWorkspace.OpenFile (System.IO.Path.GetDirectoryName(item.FullPath));
+                    }
+                }
+            });
         }
 
         //strongly typed window accessor

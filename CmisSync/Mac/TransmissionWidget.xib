@@ -7,6 +7,8 @@
         <customObject id="-2" userLabel="File's Owner" customClass="TransmissionWidgetController">
             <connections>
                 <outlet property="FinishButton" destination="hdT-2e-MQs" id="G3S-dG-CXO"/>
+                <outlet property="TableRowContextMenu" destination="osZ-6l-Trc" id="E4G-q9-M3T"/>
+                <outlet property="TableRowMenuOpen" destination="YqM-tE-2du" id="KBM-hl-WXR"/>
                 <outlet property="TableView" destination="c88-RI-CR0" id="Zs2-mT-DGo"/>
                 <outlet property="window" destination="2" id="6"/>
             </connections>
@@ -29,7 +31,7 @@
                             <rect key="frame" x="1" y="17" width="640" height="323"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" headerView="iIV-YN-N5c" id="c88-RI-CR0">
+                                <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" autosaveColumns="NO" headerView="iIV-YN-N5c" id="c88-RI-CR0">
                                     <rect key="frame" x="0.0" y="0.0" width="640" height="323"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <size key="intercellSpacing" width="3" height="2"/>
@@ -120,5 +122,21 @@
                 </subviews>
             </view>
         </window>
+        <menu id="osZ-6l-Trc" userLabel="TableRowContextMenu">
+            <items>
+                <menuItem title="Open" id="YqM-tE-2du">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="OnOpen:" target="-2" id="aZ7-Sy-gQU"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Open file location" id="oLg-vP-OVu">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="OnOpenLocation:" target="-2" id="Uf6-8z-Ee7"/>
+                    </connections>
+                </menuItem>
+            </items>
+        </menu>
     </objects>
 </document>
