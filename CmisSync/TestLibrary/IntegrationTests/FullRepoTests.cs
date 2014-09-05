@@ -61,7 +61,6 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
     using DotCMIS.Binding;
@@ -1109,6 +1108,38 @@ namespace TestLibrary.IntegrationTests
                 var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
                 Assert.That(file.Length, Is.EqualTo(content.Length), file.FullName);
             }
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalAndOneRemoteFileAreBothChangedToTheSameContent() {
+            string oldContent = "a";
+            string newContent = "bbb";
+            this.remoteRootDir.CreateDocument("fileName.txt", oldContent);
+            this.repo.Initialize();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            var doc = this.remoteRootDir.GetChildren().First() as IDocument;
+            doc.SetContent(newContent);
+            var file = this.localRootDir.GetFiles().First();
+            using (var stream = file.Open(FileMode.Open, FileAccess.Write, FileShare.None)) {
+                byte[] content = Encoding.UTF8.GetBytes(newContent);
+                stream.Write(content, 0, content.Length);
+            }
+
+            Thread.Sleep(500);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            doc.Refresh();
+            file.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
+            Assert.That(file.Length, Is.EqualTo(newContent.Length));
+            Assert.That(file.Length, Is.EqualTo(doc.ContentStreamLength));
+            Assert.That(file.LastWriteTimeUtc, Is.EqualTo(doc.LastModificationDate));
         }
 
         // Not yet correct on the server side
