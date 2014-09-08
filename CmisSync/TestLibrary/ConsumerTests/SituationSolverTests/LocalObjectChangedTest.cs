@@ -166,7 +166,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileContentChanged() {
             this.SetUpMocks();
-            var newModificationDate = this.modificationDate.AddHours(1);
+            var newModificationDateOnServerAfterUpload = this.modificationDate.AddHours(1);
             int fileLength = 20;
             byte[] content = new byte[fileLength];
             byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
@@ -177,23 +177,25 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                     f =>
                     f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
                 var mappedObject = this.CreateMappedFile(this.modificationDate.AddMinutes(1), fileLength, new byte[20]);
-                    
+
                 this.storage.AddMappedFile(mappedObject);
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteId, this.objectName, this.parentId, fileLength, new byte[fileLength], this.oldChangeToken);
                 remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Callback<IContentStream, bool, bool>(
                     (s, o, r) =>
                     { s.Stream.CopyTo(uploadedContent);
-                    remoteFile.Setup(f => f.LastModificationDate).Returns(newModificationDate);
+                    remoteFile.Setup(f => f.LastModificationDate).Returns(newModificationDateOnServerAfterUpload);
                     remoteFile.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
                 });
+                remoteFile.SetupUpdateModificationDate();
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
 
-                this.VerifySavedFile(this.newChangeToken, localFile.Object.LastWriteTimeUtc, localFile.Object.LastWriteTimeUtc, expectedHash, fileLength);
+                remoteFile.VerifyUpdateLastModificationDate(localFile.Object.LastWriteTimeUtc);
                 remoteFile.VerifySetContentStream();
                 Assert.That(uploadedContent.ToArray(), Is.EqualTo(content));
                 localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
                 this.manager.Verify(m => m.AddTransmission(It.IsAny<FileTransmissionEvent>()), Times.Once());
+                this.VerifySavedFile(this.newChangeToken, localFile.Object.LastWriteTimeUtc, localFile.Object.LastWriteTimeUtc, expectedHash, fileLength);
             }
         }
 

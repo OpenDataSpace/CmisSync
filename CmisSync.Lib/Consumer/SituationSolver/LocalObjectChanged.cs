@@ -147,11 +147,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             if (this.ServerCanModifyDateTimes) {
                 try {
                     if (remoteId is IDocument) {
-                        (remoteId as IDocument).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
-                        mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                        var doc = remoteId as IDocument;
+                        doc.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
+                        mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     } else if (remoteId is IFolder) {
-                        (remoteId as IFolder).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
-                        mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                        var folder = (remoteId as IFolder);
+                        folder.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
+                        mappedObject.LastRemoteWriteTimeUtc = folder.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     }
                 } catch(CmisPermissionDeniedException) {
                     Logger.Debug(string.Format("Locally changed modification date \"{0}\"is not uploaded to the server: PermissionDenied", localFileSystemInfo.LastWriteTimeUtc));
