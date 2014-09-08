@@ -85,7 +85,6 @@ namespace TestLibrary.StorageTests.FileSystemTests
         }
 
         [Test, Category("Medium"), Category("ExtendedAttribute")]
-        [Category("ExtendedAttribute")]
         public void OverwriteAttributeOnFile()
         {
             using (File.Create(path));
