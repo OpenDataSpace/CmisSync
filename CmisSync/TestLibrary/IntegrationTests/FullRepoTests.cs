@@ -1267,12 +1267,12 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        private void AssertThatDatesAreEqual(DateTime? date1, DateTime? date2, string msg = null) {
-            if (((DateTime)date1 - (DateTime)date2).Duration().Seconds > 1) {
+        private void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
+            if (((DateTime)expected - (DateTime)actual).Duration().TotalSeconds >= 1) {
                 if (msg != null) {
-                    Assert.That(date1, Is.EqualTo(date2), msg);
+                    Assert.That(actual, Is.EqualTo(expected), msg);
                 } else {
-                    Assert.That(date1, Is.EqualTo(date2));
+                    Assert.That(actual, Is.EqualTo(expected));
                 }
             }
         }
