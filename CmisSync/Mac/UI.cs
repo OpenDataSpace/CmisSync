@@ -73,6 +73,7 @@ namespace CmisSync {
                 StatusIcon = new StatusIcon ();
                 Settings   = new GeneralSettingsController();
                 Transmission   = new TransmissionWidgetController ();
+                Transmission.LoadWindow ();
 
                 Program.Controller.UIHasLoaded ();
             }

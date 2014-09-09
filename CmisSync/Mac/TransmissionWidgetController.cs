@@ -210,28 +210,35 @@ namespace CmisSync
             Controller.ShowTransmissionListEvent += delegate
             {
                 DataSource.UpdateTableView(TableView,null);
+                HandleSelectionDidChange(this,new EventArgs());
             };
             Controller.ShowTransmissionEvent += delegate (TransmissionItem item)
             {
                 DataSource.UpdateTableView(TableView,item);
+                HandleSelectionDidChange(this,new EventArgs());
             };
         }
 
         void HandleSelectionDidChange (object sender, EventArgs e)
         {
-            if (TableView.SelectedRowCount > 0) {
-                TableView.Menu = TableRowContextMenu;
-                TableRowMenuOpen.Enabled = false;
-                foreach (int row in TableView.SelectedRows) {
-                    TransmissionItem item = DataSource.GetTransmissionItem(row);
-                    if (item!=null && item.Done) {
-                        TableRowMenuOpen.Enabled = true;
-                        break;
+            using (var a = new NSAutoreleasePool ()) {
+                BeginInvokeOnMainThread (delegate
+                {
+                    if (TableView.SelectedRowCount > 0) {
+                        TableRowMenuOpen.Enabled = false;
+                        foreach (int row in TableView.SelectedRows) {
+                            TransmissionItem item = DataSource.GetTransmissionItem (row);
+                            if (item != null && item.Done) {
+                                TableRowMenuOpen.Enabled = true;
+                                break;
+                            }
+                        }
+                        TableView.Menu = TableRowContextMenu;
+                    } else {
+                        TableView.Menu = new NSMenu ();
                     }
-                }
-            } else {
-                TableView.Menu = new NSMenu ();
-            }
+                });
+            };
         }
 
         partial void OnFinish (MonoMac.Foundation.NSObject sender)
