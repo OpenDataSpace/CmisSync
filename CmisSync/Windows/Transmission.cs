@@ -155,6 +155,7 @@ namespace CmisSync
                                 TransmissionList[i + 1] = data;
                             }
                         }
+                        ListView_SelectionChanged(this, null);
                         return;
                     }
                 }
@@ -173,10 +174,30 @@ namespace CmisSync
             Binding binding = new Binding();
             binding.Source = TransmissionList;
             ListView.SetBinding(ListView.ItemsSourceProperty, binding);
+            ListView.SelectionChanged += ListView_SelectionChanged;
 
             OkButton = wpf.FindName("OkButton") as Button;
 
             Content = wpf;
+        }
+
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bool open = false;
+            foreach (object item in ListView.SelectedItems)
+            {
+                Transmission.TransmissionData data = item as Transmission.TransmissionData;
+                if (data.Done)
+                {
+                    open = true;
+                    break;
+                }
+            }
+            MenuItem openMenu = ListView.FindResource("ListViewItemContextMenuOpen") as MenuItem;
+            if (openMenu != null)
+            {
+                openMenu.IsEnabled = open;
+            }
         }
     }
 }

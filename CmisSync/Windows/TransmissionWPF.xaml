@@ -8,8 +8,9 @@
     <Grid>
         <ListView Name ="ListView" Margin="0,0,0,50">
             <ListView.Resources>
+                <MenuItem x:Key="ListViewItemContextMenuOpen" Header="_Open" Click="ListViewItem_Open"/>
                 <ContextMenu x:Key="ListViewItemContextMenu">
-                    <MenuItem Header="_Open" Click="ListViewItem_Open"/>
+                    <StaticResourceExtension ResourceKey="ListViewItemContextMenuOpen"/>
                     <MenuItem Header="Open _file location" Click="ListViewItem_OpenFileLocation"/>
                 </ContextMenu>
             </ListView.Resources>

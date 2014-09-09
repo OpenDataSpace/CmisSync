@@ -37,11 +37,6 @@ namespace CmisSync
 
         private void ListViewItem_Open(object sender, RoutedEventArgs e)
         {
-            if (ListView.SelectedItems == null)
-            {
-                return;
-            }
-
             foreach (object item in ListView.SelectedItems)
             {
                 Transmission.TransmissionData data = item as Transmission.TransmissionData;
@@ -54,11 +49,6 @@ namespace CmisSync
 
         private void ListViewItem_OpenFileLocation(object sender, RoutedEventArgs e)
         {
-            if (ListView.SelectedItems == null)
-            {
-                return;
-            }
-
             foreach (object item in ListView.SelectedItems)
             {
                 Transmission.TransmissionData data = item as Transmission.TransmissionData;
