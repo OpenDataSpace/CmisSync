@@ -16,6 +16,18 @@ namespace CmisSync
 		MonoMac.AppKit.NSButton FinishButton { get; set; }
 
 		[Outlet]
+		MonoMac.AppKit.NSTableColumn TableColumnPath { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTableColumn TableColumnProgress { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTableColumn TableColumnRepo { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSTableColumn TableColumnStatus { get; set; }
+
+		[Outlet]
 		MonoMac.AppKit.NSMenu TableRowContextMenu { get; set; }
 
 		[Outlet]
@@ -35,6 +47,26 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (TableColumnRepo != null) {
+				TableColumnRepo.Dispose ();
+				TableColumnRepo = null;
+			}
+
+			if (TableColumnPath != null) {
+				TableColumnPath.Dispose ();
+				TableColumnPath = null;
+			}
+
+			if (TableColumnStatus != null) {
+				TableColumnStatus.Dispose ();
+				TableColumnStatus = null;
+			}
+
+			if (TableColumnProgress != null) {
+				TableColumnProgress.Dispose ();
+				TableColumnProgress = null;
+			}
+
 			if (FinishButton != null) {
 				FinishButton.Dispose ();
 				FinishButton = null;

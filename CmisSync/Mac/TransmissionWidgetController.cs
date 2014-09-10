@@ -190,6 +190,10 @@ namespace CmisSync
         {
             base.AwakeFromNib ();
 
+            TableColumnRepo.HeaderCell.Title = Properties_Resources.TransmissionTitleRepo;
+            TableColumnPath.HeaderCell.Title = Properties_Resources.TransmissionTitlePath;
+            TableColumnStatus.HeaderCell.Title = Properties_Resources.TransmissionTitleStatus;
+            TableColumnProgress.HeaderCell.Title = Properties_Resources.TransmissionTitleProgress;
             FinishButton.Title = Properties_Resources.Finish;
 
             DataSource = new TransmissionDataSource (Controller);
