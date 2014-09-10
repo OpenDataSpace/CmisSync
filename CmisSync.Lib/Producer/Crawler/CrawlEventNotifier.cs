@@ -22,31 +22,43 @@ namespace CmisSync.Lib.Producer.Crawler
     using System.Collections.Generic;
     using System.Linq;
 
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
+    /// <summary>
+    /// Crawl event notifier takes crawled events and notifies the queue about them.
+    /// </summary>
     public class CrawlEventNotifier
     {
-        private ISyncEventQueue Queue {get; set;}
+        private ISyncEventQueue queue;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Producer.Crawler.CrawlEventNotifier"/> class.
+        /// </summary>
+        /// <param name="queue">Sync event queue which should be notified about the crawled events.</param>
         public CrawlEventNotifier(ISyncEventQueue queue)
         {
-            this.Queue = queue;
+            if (queue == null) {
+                throw new ArgumentNullException("Given queue is null");
+            }
+
+            this.queue = queue;
         }
 
         public void MergeEventsAndAddToQueue(CrawlEventCollection events) {
+            if (events.creationEvents == null) {
+                throw new ArgumentNullException("Given creationEvents list is null");
+            }
+
+            if (events.mergableEvents == null) {
+                throw new ArgumentNullException("Given mergable events are null");
+            }
+
             this.MergeAndSendEvents(events.mergableEvents);
-
-
-            this.FindReportAndRemoveMutualDeletedObjects(events.removedRemoteObjects, events.removedLocalObjects);
-
-            // Send out Events to queue
-            this.InformAboutRemoteObjectsDeleted(events.removedRemoteObjects.Values);
-            this.InformAboutLocalObjectsDeleted(events.removedLocalObjects.Values);
-            events.creationEvents.ForEach(e => this.Queue.AddEvent(e));
+            events.creationEvents.ForEach(e => this.queue.AddEvent(e));
         }
 
         private void MergeAndSendEvents(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap)
@@ -58,11 +70,11 @@ namespace CmisSync.Lib.Producer.Crawler
                     continue;
                 } else if (entry.Value.Item1 == null) {
                     if (entry.Value.Item2.Remote != MetaDataChangeType.NONE) {
-                        this.Queue.AddEvent(entry.Value.Item2);
+                        this.queue.AddEvent(entry.Value.Item2);
                     }
                 } else if (entry.Value.Item2 == null) {
                     if (entry.Value.Item1.Local != MetaDataChangeType.NONE) {
-                        this.Queue.AddEvent(entry.Value.Item1);
+                        this.queue.AddEvent(entry.Value.Item1);
                     }
                 } else {
                     var localEvent = entry.Value.Item1;
@@ -81,42 +93,9 @@ namespace CmisSync.Lib.Producer.Crawler
                         (newEvent as FileEvent).RemoteContent = (remoteEvent as FileEvent).RemoteContent;
                     }
 
-                    this.Queue.AddEvent(newEvent);
+                    this.queue.AddEvent(newEvent);
                 }
-            }
-        }
-
-        private void InformAboutLocalObjectsDeleted(IEnumerable<IFileSystemInfo> objects) {
-            foreach (var deleted in objects) {
-                if (deleted is IDirectoryInfo) {
-                    this.Queue.AddEvent(new FolderEvent(deleted as IDirectoryInfo, null, this) { Local = MetaDataChangeType.DELETED });
-                } else if (deleted is IFileInfo) {
-                    this.Queue.AddEvent(new FileEvent(deleted as IFileInfo) { Local = MetaDataChangeType.DELETED });
-                }
-            }
-        }
-
-        private void InformAboutRemoteObjectsDeleted(IEnumerable<IFileSystemInfo> objects) {
-            foreach (var deleted in objects) {
-                AbstractFolderEvent deletedEvent = FileOrFolderEventFactory.CreateEvent(null, deleted, MetaDataChangeType.DELETED, src: this);
-                this.Queue.AddEvent(deletedEvent);
-            }
-        }
-
-        private void FindReportAndRemoveMutualDeletedObjects(IDictionary<string, IFileSystemInfo> removedRemoteObjects, IDictionary<string, IFileSystemInfo> removedLocalObjects) {
-            IEnumerable<string> intersect = removedRemoteObjects.Keys.Intersect(removedLocalObjects.Keys);
-            IList<string> mutualIds = new List<string>();
-            foreach (var id in intersect) {
-                AbstractFolderEvent deletedEvent = FileOrFolderEventFactory.CreateEvent(null, removedLocalObjects[id], MetaDataChangeType.DELETED, MetaDataChangeType.DELETED, src: this);
-                mutualIds.Add(id);
-                this.Queue.AddEvent(deletedEvent);
-            }
-
-            foreach(var id in mutualIds) {
-                removedLocalObjects.Remove(id);
-                removedRemoteObjects.Remove(id);
             }
         }
     }
 }
-

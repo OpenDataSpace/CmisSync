@@ -689,6 +689,24 @@ namespace TestLibrary.IntegrationTests
             newFolder.Delete(true);
         }
 
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Erratic")]
+        public void GetChildrenDoesNotProducesServerProtocolViolationException(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            for (int i = 0; i < 1000; i++) {
+                IFolder root = (IFolder)session.GetObjectByPath(remoteFolderPath);
+                foreach (var child in root.GetChildren()) {
+                    Console.WriteLine(child.Name);
+                }
+            }
+        }
+
         private class AssertingStream : StreamWrapper {
             private Action verification;
 

@@ -226,13 +226,13 @@ namespace TestLibrary.AccumulatorTests
 
             var dirMock = new Mock<IDirectoryInfo>();
             dirMock.Setup(d => d.Exists).Returns(true);
-            dirMock.Setup(d => d.Uuid).Callback(() => dirMock.Setup(d => d.Uuid).Returns(Uuid)).Throws<ExtendedAttributeException>();
+            dirMock.Setup(d => d.Uuid).Throws<ExtendedAttributeException>();
 
             var folderEvent = new FolderEvent(dirMock.Object);
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(folderEvent), Is.False);
-            Assert.That(folderEvent.RemoteFolder, Is.Not.Null);
+            Assert.That(folderEvent.RemoteFolder, Is.Null);
         }
 
         [Test, Category("Fast")]

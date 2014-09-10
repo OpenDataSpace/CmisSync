@@ -1,21 +1,3 @@
-//-----------------------------------------------------------------------
-// <copyright file="GeneralSettings.designer.cs" company="GRAU DATA AG">
-//
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General private License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//   GNU General private License for more details.
-//
-//   You should have received a copy of the GNU General private License
-//   along with this program. If not, see http://www.gnu.org/licenses/.
-//
-// </copyright>
-//-----------------------------------------------------------------------
 // WARNING
 //
 // This file has been generated automatically by Xamarin Studio to store outlets and
@@ -41,6 +23,9 @@ namespace CmisSync
 
 		[Outlet]
 		MonoMac.AppKit.NSButtonCell NoProxyButton { get; set; }
+
+		[Outlet]
+		MonoMac.AppKit.NSButtonCell NotificationsFeaturesButton { get; set; }
 
 		[Outlet]
 		MonoMac.AppKit.NSSecureTextField ProxyPassword { get; set; }
@@ -136,14 +121,14 @@ namespace CmisSync
 				ProxyServer = null;
 			}
 
-			if (ProxyServerLabel != null) {
-				ProxyServerLabel.Dispose ();
-				ProxyServerLabel = null;
-			}
-
 			if (ProxyServerHelp != null) {
 				ProxyServerHelp.Dispose ();
 				ProxyServerHelp = null;
+			}
+
+			if (ProxyServerLabel != null) {
+				ProxyServerLabel.Dispose ();
+				ProxyServerLabel = null;
 			}
 
 			if (ProxyTab != null) {
@@ -174,6 +159,11 @@ namespace CmisSync
 			if (SystemDefaultProxyButton != null) {
 				SystemDefaultProxyButton.Dispose ();
 				SystemDefaultProxyButton = null;
+			}
+
+			if (NotificationsFeaturesButton != null) {
+				NotificationsFeaturesButton.Dispose ();
+				NotificationsFeaturesButton = null;
 			}
 
 			if (TabView != null) {
