@@ -69,6 +69,12 @@ namespace CmisSync {
 
 
         /// <summary>
+        /// Window showing transmissions.
+        /// </summary>
+        public Transmission Transmission;
+
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public UI ()
@@ -79,6 +85,7 @@ namespace CmisSync {
             Setup      = new Setup ();
             About      = new About ();
             Setting    = new Setting ();
+            Transmission   = new Transmission();
             
             Program.Controller.UIHasLoaded ();
         }

@@ -51,7 +51,8 @@ namespace CmisSync {
         public SetupWizardController Setup;
         public About About;
         public GeneralSettingsController Settings;
-        
+        public TransmissionWidgetController Transmission;
+
         public static NSFont Font = NSFontManager.SharedFontManager.FontWithFamily (
             "Lucida Grande", NSFontTraitMask.Condensed, 0, 13);
         
@@ -71,6 +72,8 @@ namespace CmisSync {
                 About      = new About ();
                 StatusIcon = new StatusIcon ();
                 Settings   = new GeneralSettingsController();
+                Transmission   = new TransmissionWidgetController ();
+                Transmission.LoadWindow ();
 
                 Program.Controller.UIHasLoaded ();
             }
@@ -95,10 +98,19 @@ namespace CmisSync {
 
         public void UpdateDockIconVisibility ()
         {
-            if ((Setup.IsWindowLoaded && Setup.Window.IsVisible) || About.IsVisible || Program.Controller.IsEditWindowVisible || (Settings.IsWindowLoaded && Settings.Window.IsVisible))
+            if (Setup.IsWindowLoaded && Setup.Window.IsVisible) {
                 ShowDockIcon ();
-            else
+            } else if (About.IsVisible) {
+                ShowDockIcon ();
+            } else if (Program.Controller.IsEditWindowVisible) {
+                ShowDockIcon ();
+            } else if (Settings.IsWindowLoaded && Settings.Window.IsVisible) {
+                ShowDockIcon ();
+            } else if (Transmission.IsWindowLoaded && Transmission.Window.IsVisible) {
+                ShowDockIcon ();
+            } else {
                 HideDockIcon ();
+            }
         }
 
 
