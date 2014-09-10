@@ -136,7 +136,7 @@ namespace CmisSync
         {
             Dispatcher.BeginInvoke((Action)delegate
             {
-                for (int i = 0; i < TransmissionList.Count - 1; ++i)
+                for (int i = 0; i < TransmissionList.Count; ++i)
                 {
                     if (TransmissionList[i].FullPath == item.FullPath)
                     {
@@ -144,7 +144,7 @@ namespace CmisSync
                         if (item.Done)
                         {
                             //  put finished TransmissionData to the tail
-                            for (; i + 1 < TransmissionList.Count - 1; ++i)
+                            for (; i + 1 < TransmissionList.Count; ++i)
                             {
                                 if (TransmissionList[i + 1].Done)
                                 {
