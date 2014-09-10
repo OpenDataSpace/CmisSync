@@ -237,6 +237,7 @@
     <Compile Include="Producer\Crawler\RemoteEventGenerator.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectRenamedOrMovedRemoteObjectDeleted.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectDeletedRemoteObjectRenamedOrMoved.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectDeletedRemoteObjectChanged.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

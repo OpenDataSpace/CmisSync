@@ -60,6 +60,7 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
     using DotCMIS.Binding;
@@ -166,6 +167,7 @@ namespace TestLibrary.IntegrationTests
         [TearDown]
         public void TestDown()
         {
+            this.repo.Dispose();
             if (this.localRootDir.Exists) {
                 this.localRootDir.Delete(true);
             }
@@ -388,8 +390,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.Not.GreaterThan(1), "Modification date is not equal");
-            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.Not.GreaterThan(1), "Creation Date is not equal");
+            this.AssertThatDatesAreEqual(doc.LastModificationDate, modificationDate, "Modification date is not equal");
+            this.AssertThatDatesAreEqual(doc.CreationDate, creationDate, "Creation Date is not equal");
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
@@ -506,6 +508,47 @@ namespace TestLibrary.IntegrationTests
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(content.Length));
+        }
+
+        [Test, Category("Slow")]
+        public void OneEmptyRemoteFileCreated()
+        {
+            string fileName = "file";
+            this.remoteRootDir.CreateDocument(fileName, null);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            var children = this.localRootDir.GetFiles();
+            Assert.That(children.Length, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(child.Length, Is.EqualTo(0));
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFileContentIsDeleted()
+        {
+            string fileName = "file";
+            string content = "content";
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            doc.Refresh();
+            doc.DeleteContentStream(true);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            var children = this.localRootDir.GetFiles();
+            Assert.That(children.Length, Is.EqualTo(1));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(child.Length, Is.EqualTo(0));
         }
 
         [Test, Category("Slow")]
@@ -786,13 +829,13 @@ namespace TestLibrary.IntegrationTests
 
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
             foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote modification date of {0}", remoteFile.Name));
-                Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote creation date of {0}", remoteFile.Name));
+                this.AssertThatDatesAreEqual(modificationDate, remoteFile.LastModificationDate, string.Format("remote modification date of {0}", remoteFile.Name));
+                this.AssertThatDatesAreEqual(creationDate, remoteFile.CreationDate, string.Format("remote creation date of {0}", remoteFile.Name));
             }
 
             foreach (var localFile in this.localRootDir.GetFiles()) {
-                Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local modification date of {0}", localFile.Name));
-                Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local creation date of {0}", localFile.Name));
+                this.AssertThatDatesAreEqual(modificationDate, localFile.LastWriteTimeUtc, string.Format("local modification date of {0}", localFile.Name));
+                this.AssertThatDatesAreEqual(creationDate, localFile.CreationTimeUtc, string.Format("local creation date of {0}", localFile.Name));
             }
         }
 
@@ -906,6 +949,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
 
             // Wait for all fs change events
             Thread.Sleep(500);
@@ -1061,6 +1105,139 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.Name, Is.EqualTo("doc"));
         }
 
+        [Test, Category("Slow")]
+        public void OneFileIsCopiedAFewTimes() {
+            FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
+            var fileNames = new List<string>();
+            string fileName = "file";
+            string content = "content";
+            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            fileNames.Add(file.FullName);
+            var fileInfo = fsFactory.CreateFileInfo(file.FullName);
+            Guid uuid = (Guid)fileInfo.Uuid;
+            for (int i = 0; i < 10; i++) {
+                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + i + ".txt"));
+                file.CopyTo(fileCopy.FullName);
+                Thread.Sleep(50);
+                fileCopy.Refresh();
+                fileCopy.Uuid = uuid;
+                fileNames.Add(fileCopy.FullName);
+            }
+
+            Thread.Sleep(500);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(fileNames.Count));
+            foreach (var localFile in this.localRootDir.GetFiles()) {
+                Assert.That(fileNames.Contains(localFile.FullName));
+                var syncedFileInfo = fsFactory.CreateFileInfo(localFile.FullName);
+                Assert.That(syncedFileInfo.Length, Is.EqualTo(content.Length));
+                if (localFile.FullName.Equals(file.FullName)) {
+                    Assert.That(syncedFileInfo.Uuid, Is.EqualTo(uuid));
+                } else {
+                    Assert.That(syncedFileInfo.Uuid, Is.Not.Null);
+                    Assert.That(syncedFileInfo.Uuid, Is.Not.EqualTo(uuid));
+                }
+            }
+        }
+
+        [Test, Category("Slow")]
+        public void OneFileIsCopiedAndTheCopyIsRemoved() {
+            FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
+            var fileNames = new List<string>();
+            string fileName = "file";
+            string content = "content";
+            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var file = this.localRootDir.GetFiles().First();
+            fileNames.Add(file.FullName);
+            var fileInfo = fsFactory.CreateFileInfo(file.FullName);
+            Guid uuid = (Guid)fileInfo.Uuid;
+            var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + " - copy.txt"));
+            file.CopyTo(fileCopy.FullName);
+            fileCopy.Refresh();
+            fileCopy.Uuid = uuid;
+            fileCopy.Delete();
+            Thread.Sleep(500);
+
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            var child = this.localRootDir.GetFiles().First();
+            Assert.That(child.Length, Is.EqualTo(content.Length));
+            Assert.That(child.Name, Is.EqualTo(fileName + ".txt"));
+        }
+
+        [Test, Category("Slow")]
+        public void CreateFilesWithLongNames() {
+            this.repo.Initialize();
+            this.repo.Run();
+            string content = "content";
+            int count = 40;
+            string fileNameFormat = "Toller_Langer_Name mit Leerzeichen - Kopie ({0}) - Kopie.pdf";
+            for (int i = 0; i < count; i++) {
+                var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
+                using (var stream = file.CreateText()) {
+                    stream.Write(content);
+                }
+            }
+
+            Thread.Sleep(500);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(count));
+            for (int i = 0; i < count; i++) {
+                var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
+                Assert.That(file.Length, Is.EqualTo(content.Length), file.FullName);
+            }
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalAndOneRemoteFileAreBothChangedToTheSameContent() {
+            string oldContent = "a";
+            string newContent = "bbb";
+            this.remoteRootDir.CreateDocument("fileName.txt", oldContent);
+            this.repo.Initialize();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            var doc = this.remoteRootDir.GetChildren().First() as IDocument;
+            doc.SetContent(newContent);
+            var file = this.localRootDir.GetFiles().First();
+            using (var stream = file.Open(FileMode.Open, FileAccess.Write, FileShare.None)) {
+                byte[] content = Encoding.UTF8.GetBytes(newContent);
+                stream.Write(content, 0, content.Length);
+            }
+
+            Thread.Sleep(500);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+            doc.Refresh();
+            file.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
+            Assert.That(file.Length, Is.EqualTo(newContent.Length));
+            Assert.That(file.Length, Is.EqualTo(doc.ContentStreamLength));
+            this.AssertThatDatesAreEqual(file.LastWriteTimeUtc, doc.LastModificationDate);
+        }
+
         // Not yet correct on the server side
         [Ignore]
         [Test, Category("Slow")]
@@ -1086,6 +1263,16 @@ namespace TestLibrary.IntegrationTests
                 waited += interval;
                 if (waited > timeout) {
                     Assert.Fail("Timeout exceeded");
+                }
+            }
+        }
+
+        private void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
+            if (((DateTime)expected - (DateTime)actual).Duration().TotalSeconds >= 1) {
+                if (msg != null) {
+                    Assert.That(actual, Is.EqualTo(expected), msg);
+                } else {
+                    Assert.That(actual, Is.EqualTo(expected));
                 }
             }
         }

@@ -21,6 +21,8 @@ namespace TestLibrary.StorageTests.FileSystemTests
 {
     using System;
     using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -243,9 +245,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Test, Category("Medium")]
         public void ReplaceFileContentAndExtendedAttributes() {
-            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
-                Assert.Ignore("Extended Attributes are not available => test skipped.");
-            }
+            this.SkipIfExtendedAttributesAreNotAvailable();
 
             string sourceFile = "source";
             string targetFile = "target";
@@ -275,10 +275,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Test, Category("Medium")]
         public void SetUuidOnFolderToNull() {
-            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
-                Assert.Ignore("Extended Attributes are not available => test skipped.");
-            }
-
+            this.SkipIfExtendedAttributesAreNotAvailable();
             var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
             underTest.Create();
 
@@ -289,10 +286,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Test, Category("Medium")]
         public void SetUuidOnFolder() {
-            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
-                Assert.Ignore("Extended Attributes are not available => test skipped.");
-            }
-
+            this.SkipIfExtendedAttributesAreNotAvailable();
             var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
             underTest.Create();
 
@@ -304,10 +298,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Test, Category("Medium")]
         public void GetUuidFromFolder() {
-            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
-                Assert.Ignore("Extended Attributes are not available => test skipped.");
-            }
-
+            this.SkipIfExtendedAttributesAreNotAvailable();
             var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
             underTest.Create();
 
@@ -320,10 +311,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Test, Category("Medium")]
         public void UuidIsNullIfStoredStringIsNotAnUuid() {
-            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
-                Assert.Ignore("Extended Attributes are not available => test skipped.");
-            }
-
+            this.SkipIfExtendedAttributesAreNotAvailable();
             var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
             underTest.Create();
 
@@ -334,15 +322,55 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Test, Category("Medium")]
         public void UuidIsNullIfNothingIsStored() {
-            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
-                Assert.Ignore("Extended Attributes are not available => test skipped.");
-            }
-
+            this.SkipIfExtendedAttributesAreNotAvailable();
             var underTest = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "folder"));
             underTest.Create();
 
             Assert.That(underTest.Uuid, Is.Null);
         }
+
+        /*
+        [Test, Category("Medium")]
+        public void GetUuidIsReadMultipleTimesBeforeInsteadOfFailing() {
+            this.SkipIfExtendedAttributesAreNotAvailable();
+            IFileInfo underTest = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
+            using (underTest.Open(FileMode.CreateNew)) {
+            }
+
+            Guid uuid = Guid.NewGuid();
+
+            using (var stream = underTest.Open(FileMode.Open, FileAccess.Write, FileShare.None)) {
+                TaskFactory.StartNew(() => SetUuid(underTest, uuid.ToString()));
+                Thread.Sleep(100);
+            }
+
+            Thread.Sleep(100);
+
+            Assert.That(underTest.Uuid, Is.EqualTo(uuid));
+            uuid = Guid.NewGuid();
+            underTest.Uuid = uuid;
+            Guid? readUuid = null;
+            using (var task = TaskFactory.StartNew(() => {
+                Thread.Sleep(100);
+                readUuid = underTest.Uuid;
+            }))
+            {
+                using (var stream = underTest.Open(FileMode.Open, FileAccess.Write, FileShare.None)) {
+                    Thread.Sleep(200);
+                }
+                task.Wait();
+            }
+
+            Assert.That(uuid, Is.EqualTo(readUuid));
+        }
+
+        private static void SetUuid(IFileSystemInfo fsObject, string uuid) {
+            fsObject.Uuid = Guid.Parse(uuid);
+        }
+
+        private static void GetUuid(IFileSystemInfo fsObject, out Guid? uuid) {
+            uuid = fsObject.Uuid;
+        } */
 
         [Test, Category("Fast")]
         public void CreatesFirstConflictFile()
@@ -555,6 +583,12 @@ namespace TestLibrary.StorageTests.FileSystemTests
                 string conflictParent = Directory.GetParent(conflictFilePath).FullName;
                 Assert.AreEqual(originalParent, conflictParent, "The conflict file must exists in the same directory like the orignial file");
             } */
+        }
+
+        private void SkipIfExtendedAttributesAreNotAvailable() {
+            if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
+                Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
         }
     }
 }

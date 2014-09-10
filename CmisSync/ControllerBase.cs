@@ -435,25 +435,6 @@ namespace CmisSync
                 Directory.Delete(folder.GetDatabasePath(), true);
             } catch (DirectoryNotFoundException) {
             }
-
-
-            // Remove Legacy Cmis Database File
-            string dbfilename = folder.DisplayName;
-            dbfilename = dbfilename.Replace("\\", "_");
-            dbfilename = dbfilename.Replace("/", "_");
-            this.RemoveDatabase(dbfilename);
-        }
-
-        /// <summary>
-        /// Remove the local database associated with a CmisSync synchronized folder.
-        /// </summary>
-        /// <param name="folder_path">The synchronized folder whose database is to be removed</param>
-        private void RemoveDatabase(string folder_path)
-        {
-            string databasefile = Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), Path.GetFileName(folder_path) + ".cmissync");
-            if (File.Exists(databasefile)) {
-                File.Delete(databasefile);
-            }
         }
 
         /// <summary>

@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Storage.FileSystem
 {
     using System;
     using System.IO;
+    using System.Threading;
 
     /// <summary>
     /// Wrapper for DirectoryInfo
@@ -116,17 +117,42 @@ namespace CmisSync.Lib.Storage.FileSystem
 
         public Guid? Uuid {
             get {
-                Guid uuid;
-                string storedValue = this.GetExtendedAttribute(ExtendedAttributeKey);
-                if (storedValue != null && Guid.TryParse(storedValue, out uuid)) {
-                    return uuid;
-                } else {
-                    return null;
+                int retries = 100;
+                while (retries > 0) {
+                    try {
+                        Guid uuid;
+                        string storedValue = this.GetExtendedAttribute(ExtendedAttributeKey);
+                        if (storedValue != null && Guid.TryParse(storedValue, out uuid)) {
+                            return uuid;
+                        } else {
+                            return null;
+                        }
+                    } catch (ExtendedAttributeException) {
+                        Thread.Sleep(50);
+                        retries--;
+                        if (retries <= 0) {
+                            throw;
+                        }
+                    }
                 }
+
+                return null;
             }
 
             set {
-                this.SetExtendedAttribute(ExtendedAttributeKey, value == null ? null : value.ToString(), true);
+                int retries = 100;
+                while (retries > 0) {
+                    try {
+                        this.SetExtendedAttribute(ExtendedAttributeKey, value == null ? null : value.ToString(), true);
+                        break;
+                    } catch (ExtendedAttributeException) {
+                        Thread.Sleep(50);
+                        retries--;
+                        if (retries <= 0) {
+                            throw;
+                        }
+                    }
+                }
             }
         }
 
