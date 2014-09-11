@@ -831,14 +831,16 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
-            foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote modification date of {0}", remoteFile.Name));
-                Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote creation date of {0}", remoteFile.Name));
-            }
+            if (this.session.IsServerAbleToUpdateModificationDate()) {
+                foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
+                    Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote modification date of {0}", remoteFile.Name));
+                    Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote creation date of {0}", remoteFile.Name));
+                }
 
-            foreach (var localFile in this.localRootDir.GetFiles()) {
-                Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local modification date of {0}", localFile.Name));
-                Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local creation date of {0}", localFile.Name));
+                foreach (var localFile in this.localRootDir.GetFiles()) {
+                    Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local modification date of {0}", localFile.Name));
+                    Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local creation date of {0}", localFile.Name));
+                }
             }
         }
 
@@ -1139,7 +1141,9 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
             Assert.That(file.Length, Is.EqualTo(newContent.Length));
             Assert.That(file.Length, Is.EqualTo(doc.ContentStreamLength));
-            Assert.That(file.LastWriteTimeUtc, Is.EqualTo(doc.LastModificationDate));
+            if (this.session.IsServerAbleToUpdateModificationDate()) {
+                Assert.That(file.LastWriteTimeUtc, Is.EqualTo(doc.LastModificationDate).Within(1).Seconds);
+            }
         }
 
         // Not yet correct on the server side
