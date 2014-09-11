@@ -22,15 +22,6 @@ namespace CmisSync
 		MonoMac.AppKit.NSTextField AddressText { get; set; }
 
 		[Outlet]
-		MonoMac.AppKit.NSButtonCell BindingAtomPub { get; set; }
-
-		[Outlet]
-		MonoMac.AppKit.NSButtonCell BindingBrowser { get; set; }
-
-		[Outlet]
-		MonoMac.AppKit.NSTextField BindingLabel { get; set; }
-
-		[Outlet]
 		MonoMac.AppKit.NSButton CancelButton { get; set; }
 
 		[Outlet]
@@ -62,21 +53,6 @@ namespace CmisSync
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (BindingLabel != null) {
-				BindingLabel.Dispose ();
-				BindingLabel = null;
-			}
-
-			if (BindingAtomPub != null) {
-				BindingAtomPub.Dispose ();
-				BindingAtomPub = null;
-			}
-
-			if (BindingBrowser != null) {
-				BindingBrowser.Dispose ();
-				BindingBrowser = null;
-			}
-
 			if (AddressHelp != null) {
 				AddressHelp.Dispose ();
 				AddressHelp = null;

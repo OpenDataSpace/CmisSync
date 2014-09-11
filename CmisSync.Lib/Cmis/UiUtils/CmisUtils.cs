@@ -84,30 +84,44 @@ namespace CmisSync.Lib.Cmis.UiUtils
             Dictionary<string, string> repositories = null;
             Exception firstException = null;
 
-            // Try the given URL, maybe user directly entered the CMIS AtomPub endpoint URL.
-            try
-            {
-                repositories = GetRepositories(credentials);
+            string[] bindings = {
+                BindingType.Browser,
+                BindingType.AtomPub
+            };
+            if (credentials.Binding == BindingType.AtomPub) {
+                bindings = new string[] {
+                    BindingType.AtomPub,
+                    BindingType.Browser
+                };
             }
-            catch (DotCMIS.Exceptions.CmisRuntimeException e)
-            {
-                if (e.Message == "ConnectFailure") {
-                    return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, null), new CmisServerNotFoundException(e.Message, e));
+            for (int i = 0; i < bindings.Length; ++i) {
+                credentials.Binding = bindings [i];
+                // Try the given URL, maybe user directly entered the CMIS endpoint URL.
+                try
+                {
+                    repositories = GetRepositories(credentials);
+                }
+                catch (DotCMIS.Exceptions.CmisRuntimeException e)
+                {
+                    if (e.Message == "ConnectFailure") {
+                        return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, null), new CmisServerNotFoundException(e.Message, e));
+                    }
+
+                    firstException = e;
+                }
+                catch (Exception e)
+                {
+                    // Save first Exception and try other possibilities.
+                    firstException = e;
                 }
 
-                firstException = e;
+                if (repositories != null)
+                {
+                    // Found!
+                    return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, repositories), null);
+                }
             }
-            catch (Exception e)
-            {
-                // Save first Exception and try other possibilities.
-                firstException = e;
-            }
-
-            if (repositories != null)
-            {
-                // Found!
-                return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, repositories), null);
-            }
+            credentials.Binding = bindings [0];
 
             // Extract protocol and server name or IP address
             string prefix = credentials.Address.GetLeftPart(UriPartial.Authority);
@@ -133,7 +147,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
                 "/cmis/atom"
             };
 
-            string[] bindings = {
+            bindings = new string[] {
                 BindingType.Browser,
                 BindingType.AtomPub
             };
