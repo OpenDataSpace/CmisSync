@@ -408,6 +408,17 @@ namespace CmisSync
             };
             this.traymenu.Items.Add(setting_item);
 
+            // Create the menu item that lets the uer view transmission.
+            ToolStripMenuItem transmission_item = new ToolStripMenuItem()
+            {
+                Text = CmisSync.Properties_Resources.Transmission
+            };
+            transmission_item.Click += delegate
+            {
+                Controller.TransmissionClicked();
+            };
+            this.traymenu.Items.Add(transmission_item);
+
             // Create the menu item that lets the user view the log.
             ToolStripMenuItem log_item = new ToolStripMenuItem()
             {

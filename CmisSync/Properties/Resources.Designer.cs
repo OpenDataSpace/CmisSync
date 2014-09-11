@@ -889,11 +889,56 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Transmission.
+        /// </summary>
+        internal static string Transmission {
+            get {
+                return ResourceManager.GetString("Transmission", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [{0}] Transmission failed:.
         /// </summary>
         internal static string TransmissionFailedOnRepo {
             get {
                 return ResourceManager.GetString("TransmissionFailedOnRepo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path.
+        /// </summary>
+        internal static string TransmissionTitlePath {
+            get {
+                return ResourceManager.GetString("TransmissionTitlePath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Progress.
+        /// </summary>
+        internal static string TransmissionTitleProgress {
+            get {
+                return ResourceManager.GetString("TransmissionTitleProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Repo.
+        /// </summary>
+        internal static string TransmissionTitleRepo {
+            get {
+                return ResourceManager.GetString("TransmissionTitleRepo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status.
+        /// </summary>
+        internal static string TransmissionTitleStatus {
+            get {
+                return ResourceManager.GetString("TransmissionTitleStatus", resourceCulture);
             }
         }
         
