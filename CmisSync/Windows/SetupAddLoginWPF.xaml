@@ -21,10 +21,5 @@
             <Button x:Name="continue_button" Content="Button" Margin="129,10,107,10" RenderTransformOrigin="-0.813,0.364"/>
             <Button x:Name="cancel_button" Content="Button" Margin="221,10,15,10"/>
         </Grid>
-        <TextBlock x:Name="bind_label" TextWrapping="Wrap" Text="TextBlock" FontWeight="Bold" Margin="10,-10,343,244"/>
-        <StackPanel>
-            <RadioButton Content="Atompub" x:Name="atompub_radio" Height="15" Margin="10,8,255,10"/>
-            <RadioButton Content="Browser" x:Name="browser_radio" Margin="220,-30,10,10"/>
-        </StackPanel>
     </Grid>
 </UserControl>

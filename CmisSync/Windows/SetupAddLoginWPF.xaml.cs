@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SetupAddLoginWPF.xaml.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -48,7 +48,6 @@ namespace CmisSync
         
         private void ApplyAddLogin()
         {
-            bind_label.Text = Properties_Resources.BindingType + ":";
             address_label.Text = Properties_Resources.EnterWebAddress;
             address_help_label.Text = Properties_Resources.Help + ": ";
             Run run = new Run(Properties_Resources.WhereToFind);

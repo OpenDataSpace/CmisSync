@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Setup.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -389,8 +389,6 @@ namespace CmisSync
         private CircularProgressBar password_progress;
         private TextBlock password_help_label;
         private TextBox address_error_label;
-        private RadioButton browser_radio;
-        private RadioButton atompub_radio;
 
         private void LoadAddLoginWPF()
         {
@@ -413,8 +411,6 @@ namespace CmisSync
             address_error_label = LoadAddLoginWPF.FindName("address_error_label") as TextBox;
             continue_button = LoadAddLoginWPF.FindName("continue_button") as Button;
             cancel_button = LoadAddLoginWPF.FindName("cancel_button") as Button;
-            browser_radio = LoadAddLoginWPF.FindName("browser_radio") as RadioButton;
-            atompub_radio = LoadAddLoginWPF.FindName("atompub_radio") as RadioButton;
 
             ContentCanvas.Children.Add(LoadAddLoginWPF);
 
@@ -466,24 +462,6 @@ namespace CmisSync
                 binding = CmisRepoCredentials.BindingBrowser;
             }
 
-            atompub_radio.Click += delegate
-            {
-                binding = CmisRepoCredentials.BindingAtomPub;
-            };
-            if (binding == CmisRepoCredentials.BindingAtomPub)
-            {
-                atompub_radio.IsChecked = true;
-            }
-
-            browser_radio.Click += delegate
-            {
-                binding = CmisRepoCredentials.BindingBrowser;
-            };
-            if (binding == CmisRepoCredentials.BindingBrowser)
-            {
-                browser_radio.IsChecked = true;
-            }
-
             continue_button.Click += delegate
             {
                 // Show wait cursor
@@ -511,6 +489,7 @@ namespace CmisSync
                 Controller.repositories = cmisServer != null ? cmisServer.Repositories : null;
 
                 address_box.Text = cmisServer.Url.ToString();
+                binding = cmisServer.Binding;
 
                 // Hide wait cursor
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;

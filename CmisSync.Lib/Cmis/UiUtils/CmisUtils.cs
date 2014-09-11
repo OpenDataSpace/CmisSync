@@ -48,6 +48,8 @@ namespace CmisSync.Lib.Cmis.UiUtils
         /// <value>The URL.</value>
         public Uri Url { get; private set; }
 
+        public string Binding { get; private set; }
+
         /// <summary>
         /// Gets the Repositories contained in the CMIS server.
         /// </summary>
@@ -57,9 +59,10 @@ namespace CmisSync.Lib.Cmis.UiUtils
         /// <summary>
         /// Constructor.
         /// </summary>
-        public CmisServer(Uri url, Dictionary<string, string> repositories)
+        public CmisServer(Uri url, string binding, Dictionary<string, string> repositories)
         {
             this.Url = url;
+            this.Binding = binding;
             this.Repositories = repositories;
         }
     }
@@ -89,7 +92,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
             catch (DotCMIS.Exceptions.CmisRuntimeException e)
             {
                 if (e.Message == "ConnectFailure") {
-                    return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, null), new CmisServerNotFoundException(e.Message, e));
+                    return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, null), new CmisServerNotFoundException(e.Message, e));
                 }
 
                 firstException = e;
@@ -103,11 +106,15 @@ namespace CmisSync.Lib.Cmis.UiUtils
             if (repositories != null)
             {
                 // Found!
-                return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, repositories), null);
+                return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, repositories), null);
             }
 
             // Extract protocol and server name or IP address
             string prefix = credentials.Address.GetLeftPart(UriPartial.Authority);
+
+            string[] browserSuffixes = {
+                "/cmis/browser"
+            };
 
             // See https://github.com/nicolas-raoul/CmisSync/wiki/What-address for the list of ECM products prefixes
             // Please send us requests to support more CMIS servers: https://github.com/nicolas-raoul/CmisSync/issues
@@ -125,52 +132,58 @@ namespace CmisSync.Lib.Cmis.UiUtils
                 "/nuxeo/atom/cmis",
                 "/cmis/atom"
             };
-            string[] browserSuffixes = {
-                "/cmis/browser"
+
+            string[] bindings = {
+                BindingType.Browser,
+                BindingType.AtomPub
             };
-            string[] suffixes = atompubSuffixes;
-            if (credentials.Binding == BindingType.Browser) {
-                suffixes = browserSuffixes;
-            }
+            string[][] suffixes = {
+                browserSuffixes,
+                atompubSuffixes
+            };
 
             string bestUrl = null;
-
-            // Try all suffixes
-            for (int i = 0; i < suffixes.Length; i++)
+            string bestBinding = null;
+            for (int i = 0; i < bindings.Length; ++i)
             {
-                string fuzzyUrl = prefix + suffixes[i];
-                Logger.Info("Sync | Trying with " + fuzzyUrl);
-                try
+                // Try all suffixes
+                for (int j = 0; j < suffixes[i].Length; ++j)
                 {
-                    ServerCredentials cred = new ServerCredentials()
+                    string fuzzyUrl = prefix + suffixes[i][j];
+                    Logger.Info("Sync | Trying with " + fuzzyUrl + " on " + bindings[i]);
+                    try
                     {
-                        UserName = credentials.UserName,
-                        Password = credentials.Password.ToString(),
-                        Binding = credentials.Binding,
-                        Address = new Uri(fuzzyUrl)
-                    };
-                    repositories = GetRepositories(cred);
-                }
-                catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
-                {
-                    firstException = new CmisPermissionDeniedException(e.Message, e);
-                    bestUrl = fuzzyUrl;
-                }
-                catch (Exception e)
-                {
-                    // Do nothing, try other possibilities.
-                    Logger.Debug(e.Message);
-                }
+                        ServerCredentials cred = new ServerCredentials()
+                        {
+                            UserName = credentials.UserName,
+                            Password = credentials.Password.ToString(),
+                            Binding = bindings[i],
+                            Address = new Uri(fuzzyUrl)
+                        };
+                        repositories = GetRepositories(cred);
+                    }
+                    catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
+                    {
+                        firstException = new CmisPermissionDeniedException(e.Message, e);
+                        bestUrl = fuzzyUrl;
+                        bestBinding = bindings[i];
+                    }
+                    catch (Exception e)
+                    {
+                        // Do nothing, try other possibilities.
+                        Logger.Debug(e.Message);
+                    }
 
-                if (repositories != null)
-                {
-                    // Found!
-                    return new Tuple<CmisServer, Exception>(new CmisServer(new Uri(fuzzyUrl), repositories), null);
+                    if (repositories != null)
+                    {
+                        // Found!
+                        return new Tuple<CmisServer, Exception>(new CmisServer(new Uri(fuzzyUrl), bindings[i], repositories), null);
+                    }
                 }
             }
 
             // Not found. Return also the first exception to inform the user correctly
-            return new Tuple<CmisServer, Exception>(new CmisServer(bestUrl == null ? credentials.Address : new Uri(bestUrl), null), firstException);
+            return new Tuple<CmisServer, Exception>(new CmisServer(bestUrl == null ? credentials.Address : new Uri(bestUrl), bestBinding, null), firstException);
         }
 
         static public Dictionary<string, string> GetCmisParameters(ServerCredentials credentials)

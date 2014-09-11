@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="DotCMISTests.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -697,8 +697,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId) {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            string repositoryId,
+            string binding)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             for (int i = 0; i < 1000; i++) {
                 IFolder root = (IFolder)session.GetObjectByPath(remoteFolderPath);
                 foreach (var child in root.GetChildren()) {

@@ -128,7 +128,7 @@ namespace CmisSync
         public double ProgressBarPercentage { get; private set; }
 
         public Uri saved_address = null;
-        public string saved_binding = CmisRepoCredentials.BindingAtomPub;
+        public string saved_binding = CmisRepoCredentials.BindingBrowser;
         public string saved_remote_path = String.Empty;
         public string saved_user = String.Empty;
         public string saved_password = String.Empty;
