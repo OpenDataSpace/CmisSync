@@ -1146,6 +1146,29 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
+        [Test, Category("Slow")]
+        public void OneRemoteFolderIsRenamedToLowerCase() {
+            string oldFolderName = "A";
+            string newFolderName = oldFolderName.ToLower();
+            var folder = this.remoteRootDir.CreateFolder(oldFolderName);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            folder.Refresh();
+            folder.Rename(newFolderName);
+            Thread.Sleep(5000);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            folder.Refresh();
+            Assert.That(this.localRootDir.GetDirectories().Count(), Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName).Or.EqualTo(oldFolderName));
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(newFolderName));
+        }
+
         // Not yet correct on the server side
         [Ignore]
         [Test, Category("Slow")]

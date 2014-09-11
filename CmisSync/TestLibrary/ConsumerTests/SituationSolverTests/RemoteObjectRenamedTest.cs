@@ -42,22 +42,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private Mock<IMetaDataStorage> storage;
         private RemoteObjectRenamed underTest;
 
-        [SetUp]
-        public void SetUp() {
-            this.session = new Mock<ISession>();
-            this.storage = new Mock<IMetaDataStorage>();
-            this.underTest = new RemoteObjectRenamed(this.session.Object, this.storage.Object);
-        }
-
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new RemoteObjectRenamed(this.session.Object, this.storage.Object);
+            new RemoteObjectRenamed(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void RenameFolder()
         {
+            this.SetUpMocks();
             DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
             string oldFolderName = "a";
             string newFolderName = "b";
@@ -98,9 +92,97 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 Times.Once());
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void RenameFolderToLowerCaseAndIOExceptionIsHandled()
+        {
+            this.SetUpMocks();
+            DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
+            string oldFolderName = "A";
+            string newFolderName = "a";
+            string oldPath = Path.Combine(Path.GetTempPath(), oldFolderName);
+            string oldRemotePath = "/" + oldFolderName;
+            string newPath = Path.Combine(Path.GetTempPath(), newFolderName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.FullName).Returns(oldPath);
+            dirInfo.Setup(d => d.Name).Returns(oldFolderName);
+            dirInfo.SetupProperty(d => d.LastWriteTimeUtc);
+            dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
+
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, newFolderName, newPath, parentId, lastChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
+
+            var mappedFolder = Mock.Of<IMappedObject>(
+                f =>
+                f.Name == oldFolderName &&
+                f.RemoteObjectId == id &&
+                f.LastChangeToken == "oldToken" &&
+                f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
+                f.Type == MappedObjectType.Folder &&
+                f.ParentId == parentId);
+            this.storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
+            dirInfo.Setup(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath)))).Throws<IOException>();
+
+            this.underTest.Solve(dirInfo.Object, remoteObject.Object);
+
+            dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
+
+            dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modifiedDate)), Times.Once());
+            this.storage.Verify(
+                s => s.SaveMappedObject(
+                It.Is<IMappedObject>(f => this.VerifySavedObject(f, MappedObjectType.Folder, id, oldFolderName, parentId, lastChangeToken, modifiedDate))),
+                Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RenameFolderAndLocalIOExceptionIsThrownOnMove()
+        {
+            this.SetUpMocks();
+            DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
+            string oldFolderName = "a";
+            string newFolderName = "b";
+            string oldPath = Path.Combine(Path.GetTempPath(), oldFolderName);
+            string oldRemotePath = "/" + oldFolderName;
+            string newPath = Path.Combine(Path.GetTempPath(), newFolderName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.FullName).Returns(oldPath);
+            dirInfo.Setup(d => d.Name).Returns(oldFolderName);
+            dirInfo.SetupProperty(d => d.LastWriteTimeUtc);
+            dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>(p => p.FullName == Path.GetTempPath()));
+
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, newFolderName, newPath, parentId, lastChangeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)modifiedDate);
+
+            var mappedFolder = Mock.Of<IMappedObject>(
+                f =>
+                f.Name == oldFolderName &&
+                f.RemoteObjectId == id &&
+                f.LastChangeToken == "oldToken" &&
+                f.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
+                f.Type == MappedObjectType.Folder &&
+                f.ParentId == parentId);
+            this.storage.AddMappedFolder(mappedFolder, oldPath, oldRemotePath);
+            dirInfo.Setup(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath)))).Throws<IOException>();
+
+            Assert.Throws<IOException>(() => this.underTest.Solve(dirInfo.Object, remoteObject.Object));
+
+            dirInfo.Verify(d => d.MoveTo(It.Is<string>(p => p.Equals(newPath))), Times.Once());
+
+            dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(modifiedDate)), Times.Never());
+            this.storage.VerifyThatNoObjectIsManipulated();
+        }
+
         [Test, Category("Fast")]
         public void RenameFile()
         {
+            this.SetUpMocks();
             DateTime modifiedDate = DateTime.UtcNow.AddMinutes(1);
             string oldFileName = "a";
             string newFileName = "b";
@@ -150,6 +232,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Assert.That(obj.LastRemoteWriteTimeUtc, Is.EqualTo(modifiedTime));
             Assert.That(obj.LastLocalWriteTimeUtc, Is.EqualTo(modifiedTime));
             return true;
+        }
+
+        private void SetUpMocks() {
+            this.session = new Mock<ISession>();
+            this.storage = new Mock<IMetaDataStorage>();
+            this.underTest = new RemoteObjectRenamed(this.session.Object, this.storage.Object);
         }
     }
 }
