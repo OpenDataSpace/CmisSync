@@ -317,7 +317,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 cacheFile.Verify(c => c.Replace(localFile.Object, backupFile.Object, true), Times.Once());
                 backupFile.Verify(b => b.MoveTo(confictFilePath), Times.Once());
                 backupFile.Verify(b => b.Delete(), Times.Never());
-                backupFile.Verify(b => b.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true), Times.Once());
+                backupFile.VerifySet(b => b.Uuid = null, Times.Once());
             }
         }
 
