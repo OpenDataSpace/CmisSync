@@ -120,24 +120,24 @@ namespace CmisSync {
             VBox layout_user       = new VBox (true, 0);
             VBox layout_password   = new VBox (true, 0);
 
-            // Binding
-            Label binding_label = new Label() {
-                UseMarkup = true,
-                Xalign = 0,
-                Markup = "<b>" +
-                Properties_Resources.BindingType + ":" +
-                "</b>"
-            };
-            RadioButton binding_atompub = new RadioButton("AtomPub");
-            RadioButton binding_browser = new RadioButton(binding_atompub, "Browser");
-            if (string.IsNullOrEmpty(Controller.saved_binding) || Controller.saved_binding == ServerCredentials.BindingAtomPub)
-            {
-                binding_atompub.Active = true;
-            }
-            else
-            {
-                binding_browser.Active = true;
-            }
+//            // Binding
+//            Label binding_label = new Label() {
+//                UseMarkup = true,
+//                Xalign = 0,
+//                Markup = "<b>" +
+//                Properties_Resources.BindingType + ":" +
+//                "</b>"
+//            };
+//            RadioButton binding_atompub = new RadioButton("AtomPub");
+//            RadioButton binding_browser = new RadioButton(binding_atompub, "Browser");
+//            if (string.IsNullOrEmpty(Controller.saved_binding) || Controller.saved_binding == ServerCredentials.BindingAtomPub)
+//            {
+//                binding_atompub.Active = true;
+//            }
+//            else
+//            {
+//                binding_browser.Active = true;
+//            }
 
             // Address
             Label address_label = new Label()
@@ -245,11 +245,11 @@ namespace CmisSync {
                 }
             };
 
-            // Binding
-            layout_binding_choose.PackStart(binding_atompub, true, true, 0);
-            layout_binding_choose.PackStart(binding_browser, true, true, 0);
-            layout_binding.PackStart(binding_label, true, true, 0);
-            layout_binding.PackStart(layout_binding_choose, true, true, 0);
+//            // Binding
+//            layout_binding_choose.PackStart(binding_atompub, true, true, 0);
+//            layout_binding_choose.PackStart(binding_browser, true, true, 0);
+//            layout_binding.PackStart(binding_label, true, true, 0);
+//            layout_binding.PackStart(layout_binding_choose, true, true, 0);
 
             // Address
             layout_address_help.PackStart(address_help_label, false, false, 0);
@@ -277,7 +277,7 @@ namespace CmisSync {
             layout_fields.PackStart (layout_password);
 
 //            layout_vertical.PackStart (new Label (""), false, false, 0);
-            layout_vertical.PackStart (layout_binding, false, false, 12);
+//            layout_vertical.PackStart (layout_binding, false, false, 12);
             layout_vertical.PackStart (layout_address, false, false, 0);
             layout_vertical.PackStart (layout_fields, false, false, 0);
             layout_vertical.PackStart (address_error_label, true, true, 0);
@@ -303,16 +303,17 @@ namespace CmisSync {
                 // Try to find the CMIS server (asynchronous using a delegate)
                 GetRepositoriesFuzzyDelegate dlgt =
                     new GetRepositoriesFuzzyDelegate(CmisUtils.GetRepositoriesFuzzy);
-                string binding = ServerCredentials.BindingAtomPub;
-                if (binding_browser.Active)
-                {
-                    binding = ServerCredentials.BindingBrowser;
-                }
+//                string binding = ServerCredentials.BindingAtomPub;
+//                if (binding_browser.Active)
+//                {
+//                    binding = ServerCredentials.BindingBrowser;
+//                }
                 ServerCredentials credentials = new ServerCredentials() {
                     UserName = user_entry.Text,
                     Password = password_entry.Text,
                     Address = new Uri(address_entry.Text),
-                    Binding = binding
+//                    Binding = binding
+                    Binding = (Controller.saved_binding == null) ? ServerCredentials.BindingBrowser : Controller.saved_binding
                 };
                 IAsyncResult ar = dlgt.BeginInvoke(credentials, null, null);
                 while (!ar.AsyncWaitHandle.WaitOne(100)) {
@@ -345,7 +346,7 @@ namespace CmisSync {
                 {
                     // Continue to folder selection
                     Controller.Add1PageCompleted(
-                            new Uri(address_entry.Text), binding, user_entry.Text, password_entry.Text);
+                            new Uri(address_entry.Text), cmisServer.Binding, user_entry.Text, password_entry.Text);
                 }
             };
 
