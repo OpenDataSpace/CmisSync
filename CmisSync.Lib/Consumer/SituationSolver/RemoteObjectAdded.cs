@@ -93,7 +93,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             if(localFile is IDirectoryInfo) {
-                if(!(remoteId is IFolder)) {
+                if (!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
                 }
 
@@ -101,14 +101,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IDirectoryInfo localFolder = localFile as IDirectoryInfo;
                 localFolder.Create();
 
-                if(remoteFolder.LastModificationDate != null) {
-                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
-                }
-
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
-                    localFolder.Uuid = uuid;
+                    try {
+                        localFolder.Uuid = uuid;
+                    } catch (RestoreModificationDateException) {
+                    }
+                }
+
+                if (remoteFolder.LastModificationDate != null) {
+                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 }
 
                 var mappedObject = new MappedObject(remoteFolder);
