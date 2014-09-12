@@ -79,19 +79,16 @@ namespace CmisSync.Lib.FileTransmission
 
             long? fileLength = remoteDocument.ContentStreamLength;
 
-            // Skip downloading empty content, just go on with an empty file
-            if (null == fileLength || fileLength == 0) {
-                hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                return;
-            }
-
-            long offset = localFileStream.Position;
-            long remainingBytes = (fileLength != null) ? (long)fileLength - offset : this.ChunkSize;
-            try {
-                do {
-                    offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, status, localFileStream, hashAlg);
-                } while(fileLength == null);
-            } catch (DotCMIS.Exceptions.CmisConstraintException) {
+            // Download content if exists
+            if (fileLength > 0) {
+                long offset = localFileStream.Position;
+                long remainingBytes = (fileLength != null) ? (long)fileLength - offset : this.ChunkSize;
+                try {
+                    do {
+                        offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, status, localFileStream, hashAlg);
+                    } while(fileLength == null);
+                } catch (DotCMIS.Exceptions.CmisConstraintException) {
+                }
             }
 
             hashAlg.TransformFinalBlock(new byte[0], 0, 0);
