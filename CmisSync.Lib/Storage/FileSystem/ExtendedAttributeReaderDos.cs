@@ -343,10 +343,14 @@ namespace CmisSync.Lib.Storage.FileSystem
                 }
             }
 
-            if (File.Exists(path)) {
-                File.SetLastWriteTimeUtc(path, oldDate);
-            } else {
-                Directory.SetLastWriteTimeUtc(path, oldDate);
+            try {
+                if (File.Exists(path)) {
+                    File.SetLastWriteTimeUtc(path, oldDate);
+                } else {
+                    Directory.SetLastWriteTimeUtc(path, oldDate);
+                }
+            } catch (IOException ex) {
+                throw new RestoreModificationDateException("Cannot restore last modification date on " + path, ex);
             }
             #else
             throw new WrongPlatformException();

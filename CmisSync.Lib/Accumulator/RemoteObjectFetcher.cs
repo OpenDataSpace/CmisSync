@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Accumulator {
     using System;
     using System.IO;
+    using System.Threading;
 
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Events;
@@ -160,7 +161,13 @@ namespace CmisSync.Lib.Accumulator {
             }
 
             if (path != null && path.Exists) {
-                Guid? uuid = path.Uuid;
+                Guid? uuid = null;
+                try {
+                    uuid = path.Uuid;
+                } catch (ExtendedAttributeException ex) {
+                    Logger.Debug("Could not read extended attributes from path, do not fetch", ex);
+                }
+
                 if (uuid != null) {
                     var mappedObject = this.storage.GetObjectByGuid((Guid)uuid);
                     if (mappedObject != null) {

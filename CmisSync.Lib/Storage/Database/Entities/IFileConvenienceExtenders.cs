@@ -37,8 +37,10 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// <returns><c>true</c> if is the file content is different to the specified obj otherwise, <c>false</c>.</returns>
         /// <param name="file">File instance.</param>
         /// <param name="obj">Object to check the file content against.</param>
+        /// <param name="actualHash">Contains the hash of the local file if scanned, or null if file wasn't scanned</param>
         /// <param name="scanOnlyIfModificationDateDiffers">If set to <c>true</c> content scan runs only if the modification date differs to given one.</param>
-        public static bool IsContentChangedTo(this IFileInfo file, IMappedObject obj, bool scanOnlyIfModificationDateDiffers = false) {
+        public static bool IsContentChangedTo(this IFileInfo file, IMappedObject obj, out byte[] actualHash, bool scanOnlyIfModificationDateDiffers = false) {
+            actualHash = null;
             if (obj == null) {
                 throw new ArgumentNullException("Given obj is null");
             }
@@ -61,12 +63,25 @@ namespace CmisSync.Lib.Storage.Database.Entities
                 } else {
                     using (var f = file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                         byte[] fileHash = SHA1Managed.Create().ComputeHash(f);
+                        actualHash = fileHash;
                         return !fileHash.SequenceEqual(obj.LastChecksum);
                     }
                 }
             } else {
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Determines if file content is changed to the specified obj.
+        /// </summary>
+        /// <returns><c>true</c> if is the file content is different to the specified obj otherwise, <c>false</c>.</returns>
+        /// <param name="file">File instance.</param>
+        /// <param name="obj">Object to check the file content against.</param>
+        /// <param name="scanOnlyIfModificationDateDiffers">If set to <c>true</c> content scan runs only if the modification date differs to given one.</param>
+        public static bool IsContentChangedTo(this IFileInfo file, IMappedObject obj, bool scanOnlyIfModificationDateDiffers = false) {
+            byte[] actualHash;
+            return file.IsContentChangedTo(obj, out actualHash, scanOnlyIfModificationDateDiffers);
         }
     }
 }

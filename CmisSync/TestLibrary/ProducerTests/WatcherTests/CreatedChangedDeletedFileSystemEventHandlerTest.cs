@@ -81,7 +81,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandlesFileCreatedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
@@ -94,7 +94,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandlesTwoFileCreatedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
@@ -108,7 +108,31 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
+        public void HandlesCreatedAndChangedEventsInOrder() {
+            using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
+                this.fsFactory.AddFile(this.path, true);
+                this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Type != WatcherChangeTypes.Created))).Throws<ArgumentException>();
+                this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Type == WatcherChangeTypes.Created))).Callback(
+                    () => {
+                    this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Type == WatcherChangeTypes.Created))).Throws<ArgumentException>();
+                    this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Type == WatcherChangeTypes.Changed)));
+                });
+
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+
+                this.WaitForThreshold();
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Created)), Times.Exactly(1));
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Changed)), Times.Exactly(3));
+                this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+            }
+        }
+
+        [Test, Category("Medium")]
         public void HandlesFileChangedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
@@ -121,7 +145,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandlesFileDeletedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object, Threshold)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)null);
@@ -136,7 +160,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandlesTwoFileDeletedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object, Threshold)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)null);
@@ -152,7 +176,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void IgnoresEventOnNonExistingPath() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)null);
@@ -163,7 +187,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void IgnoresDeletionOfPathWithNoEntryInStorage() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
@@ -171,7 +195,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandlesFolderCreatedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)true);
@@ -184,7 +208,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void AggregatesFolderDeletedAndCreatedEventToFSMovedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 string newName = "new";
@@ -207,12 +231,12 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void DoesNotAggregateFolderChangedEventsToFSMovedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 Guid guid = Guid.NewGuid();
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)true);
-                
+
                 this.fsFactory.AddDirectory(this.path, guid, true);
                 this.storage.AddLocalFolder(this.path, "id", guid);
 
@@ -224,7 +248,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void AggregatesFolderDeletedAndCreatedEventToFSMovedEventIfTheyOccurInDifferentOrder() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 string newName = "new";
@@ -247,7 +271,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void TestThatCalculateIntervalAlwaysReturnsPositiveNumbers() {
             using (var underTest = new HandlerMockWithoutTimerAction(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)null);
@@ -257,11 +281,12 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
                 System.Threading.Thread.Sleep(20);
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
+
                 // negativ numbers lead to ArgumentException so this would break here
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandleExceptionsOnProcessingByInvokingCrawlSync() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Throws(new Exception("Generic exception"));
@@ -276,7 +301,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandleExceptionsOnUuidReadingByJustPassingEmptyUuid() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
@@ -292,7 +317,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandleExceptionsOnTransformingByInvokingCrawlSync() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
@@ -310,7 +335,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandleFileNotFoundExceptionOnExtendedAttributeByJustIgnoringTheEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
@@ -324,7 +349,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandleDirectoryNotFoundExceptionOnExtendedAttributeByJustIgnoringTheEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)true);
@@ -338,7 +363,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void HandleChangeEventOnNoMoreExistingFileOrFolderByJustPassingTheEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)true);

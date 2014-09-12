@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ControllerBase.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -102,6 +102,8 @@ namespace CmisSync
         public delegate void ShowSetupWindowEventHandler(PageType page_type);
 
         public event Action ShowSettingWindowEvent = delegate { };
+
+        public event Action ShowTransmissionWindowEvent = delegate { };
 
         public event Action ShowAboutWindowEvent = delegate { };
 
@@ -231,10 +233,6 @@ namespace CmisSync
             // Create the CmisSync folder and add it to the bookmarks
             if (this.CreateCmisSyncFolder()) {
                 this.AddToBookmarks();
-            }
-
-            if (firstRun) {
-                ConfigManager.CurrentConfig.Notifications = true;
             }
         }
 
@@ -437,25 +435,6 @@ namespace CmisSync
                 Directory.Delete(folder.GetDatabasePath(), true);
             } catch (DirectoryNotFoundException) {
             }
-
-
-            // Remove Legacy Cmis Database File
-            string dbfilename = folder.DisplayName;
-            dbfilename = dbfilename.Replace("\\", "_");
-            dbfilename = dbfilename.Replace("/", "_");
-            this.RemoveDatabase(dbfilename);
-        }
-
-        /// <summary>
-        /// Remove the local database associated with a CmisSync synchronized folder.
-        /// </summary>
-        /// <param name="folder_path">The synchronized folder whose database is to be removed</param>
-        private void RemoveDatabase(string folder_path)
-        {
-            string databasefile = Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), Path.GetFileName(folder_path) + ".cmissync");
-            if (File.Exists(databasefile)) {
-                File.Delete(databasefile);
-            }
         }
 
         /// <summary>
@@ -637,6 +616,14 @@ namespace CmisSync
         public void ShowSettingWindow()
         {
             this.ShowSettingWindowEvent();
+        }
+
+        /// <summary>
+        /// Show transmission window
+        /// </summary>
+        public void ShowTransmissionWindow()
+        {
+            this.ShowTransmissionWindowEvent();
         }
 
         /// <summary>

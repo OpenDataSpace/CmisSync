@@ -44,55 +44,35 @@ namespace TestLibrary.PathMatcherTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTest()
-        {
+        public void ContructorFailsIfLocalPathIsNull() {
+            Assert.Throws<ArgumentException>(() => new PathMatcher(null, this.remotepath));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorFailsIfBothPathsAreNull() {
+            Assert.Throws<ArgumentException>(() => new PathMatcher(null, null));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorFailsIfRemotePathIsNull() {
+            Assert.Throws<ArgumentException>(() => new PathMatcher(this.localpath, null));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorFailsIfLocalPathIsAnEmptyString() {
+            Assert.Throws<ArgumentException>(() => new PathMatcher(string.Empty, this.remotepath));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorFailsIfRemotePathIsAnEmptyString() {
+            Assert.Throws<ArgumentException>(() => new PathMatcher(this.localpath, string.Empty));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorTakesLocalAndRemotePath() {
             var matcher = new PathMatcher(this.localpath, this.remotepath);
             Assert.AreEqual(this.localpath, matcher.LocalTargetRootPath);
-            AssertPathEqual(this.remotepath, matcher.RemoteTargetRootPath);
-            try
-            {
-                new PathMatcher(null, this.remotepath);
-                Assert.Fail();
-            }
-            catch (ArgumentException)
-            {
-            }
-
-            try
-            {
-                new PathMatcher(null, null);
-                Assert.Fail();
-            }
-            catch (ArgumentException)
-            {
-            }
-
-            try
-            {
-                new PathMatcher(this.localpath, null);
-                Assert.Fail();
-            }
-            catch (ArgumentException)
-            {
-            }
-
-            try
-            {
-                new PathMatcher(string.Empty, this.remotepath);
-                Assert.Fail();
-            }
-            catch (ArgumentException)
-            {
-            }
-
-            try
-            {
-                new PathMatcher(this.localpath, string.Empty);
-                Assert.Fail();
-            }
-            catch (ArgumentException)
-            {
-            }
+            this.AssertPathEqual(this.remotepath, matcher.RemoteTargetRootPath);
         }
 
         [Test, Category("Fast")]
@@ -197,7 +177,7 @@ namespace TestLibrary.PathMatcherTests
         {
             var matcher = new PathMatcher(this.localpath, this.remotepath);
             string result = matcher.CreateRemotePath(this.localpath);
-            AssertPathEqual(this.remotepath, result);
+            this.AssertPathEqual(this.remotepath, result);
             string subfolder = "sub";
             result = matcher.CreateRemotePath(Path.Combine(this.localpath, subfolder));
             Assert.AreEqual(this.remotepath + "/" + subfolder, result);
@@ -219,17 +199,17 @@ namespace TestLibrary.PathMatcherTests
         {
             var matcher = new PathMatcher(this.localpath, this.remotepath);
             string result = matcher.CreateRemotePath(this.localpath);
-            AssertPathEqual(this.remotepath, result);
+            this.AssertPathEqual(this.remotepath, result);
             result = matcher.CreateLocalPath(result);
-            AssertPathEqual(this.localpath, result);
+            this.AssertPathEqual(this.localpath, result);
 
             result = matcher.CreateRemotePath(Path.Combine(this.localpath, "sub"));
             result = matcher.CreateLocalPath(result);
-            AssertPathEqual(Path.Combine(this.localpath, "sub"), result);
+            this.AssertPathEqual(Path.Combine(this.localpath, "sub"), result);
 
             result = matcher.CreateLocalPath(this.remotepath + "/sub");
             result = matcher.CreateRemotePath(result);
-            AssertPathEqual(this.remotepath + "/sub", result);
+            this.AssertPathEqual(this.remotepath + "/sub", result);
         }
 
         [Test, Category("Fast")]
@@ -294,13 +274,13 @@ namespace TestLibrary.PathMatcherTests
 
         private void AssertPathEqual(string left, string right)
         {
-            if(right.EndsWith("/") && !left.EndsWith("/")) {
+            if (right.EndsWith("/") && !left.EndsWith("/")) {
                 Assert.That(right, Is.EqualTo(left + "/"));
-            } else if(!right.EndsWith("/") && left.EndsWith("/")) {
+            } else if (!right.EndsWith("/") && left.EndsWith("/")) {
                 Assert.That(right + "/", Is.EqualTo(left));
-            } else if(right.EndsWith("\\") && !left.EndsWith("\\")) {
+            } else if (right.EndsWith("\\") && !left.EndsWith("\\")) {
                 Assert.That(right, Is.EqualTo(left + "\\"));
-            } else if(!right.EndsWith("\\") && left.EndsWith("\\")) {
+            } else if (!right.EndsWith("\\") && left.EndsWith("\\")) {
                 Assert.That(right + "\\", Is.EqualTo(left));
             } else {
                 Assert.That(right, Is.EqualTo(left));

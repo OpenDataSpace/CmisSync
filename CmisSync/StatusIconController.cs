@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="StatusIconController.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -260,6 +260,15 @@ namespace CmisSync {
         public void SettingClicked()
         {
             Program.Controller.ShowSettingWindow();
+        }
+
+
+        /// <summary>
+        /// Show the Transmission window.
+        /// </summary>
+        public void TransmissionClicked()
+        {
+            Program.Controller.ShowTransmissionWindow();
         }
 
 

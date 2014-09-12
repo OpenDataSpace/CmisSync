@@ -49,6 +49,7 @@ using MonoMac.ObjCRuntime;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Config;
 
 namespace CmisSync {
 
@@ -68,6 +69,7 @@ namespace CmisSync {
         private NSMenuItem quit_item;
         private NSMenuItem log_item;
         private NSMenuItem general_settings_item;
+        private NSMenuItem transmission_item;
 
         private NSImage [] animation_frames;
         private NSImage [] animation_frames_active;
@@ -169,12 +171,16 @@ namespace CmisSync {
                         } else {
                             state_item.Submenu = new NSMenu();
                         }
-                        foreach(FileTransmissionEvent transmission in transmissions) {
-                            NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
-                            state_item.Submenu.AddItem(transmissionItem);
-                        }
-                        if(transmissions.Count > 0) {
-                            state_item.Enabled = true;
+                        if(ConfigManager.CurrentConfig.Notifications){
+                            foreach(FileTransmissionEvent transmission in transmissions) {
+                                NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
+                                state_item.Submenu.AddItem(transmissionItem);
+                            }
+                            if(transmissions.Count > 0) {
+                                state_item.Enabled = true;
+                            }else{
+                                state_item.Enabled = false;
+                            }
                         }else{
                             state_item.Enabled = false;
                         }
@@ -262,6 +268,15 @@ namespace CmisSync {
                     Controller.SettingClicked();
                 };
 
+                this.transmission_item = new NSMenuItem () {
+                    Title = Properties_Resources.Transmission
+                };
+
+                this.transmission_item.Activated += delegate
+                {
+                    Controller.TransmissionClicked();
+                };
+
                 this.log_item = new NSMenuItem () {
                     Title = Properties_Resources.ViewLog
                 };
@@ -322,6 +337,7 @@ namespace CmisSync {
                 this.menu.AddItem (this.add_item);
                 this.menu.AddItem (NSMenuItem.SeparatorItem);
                 this.menu.AddItem (this.general_settings_item);
+                this.menu.AddItem (this.transmission_item);
                 this.menu.AddItem (this.log_item);
                 this.menu.AddItem (this.about_item);
                 this.menu.AddItem (NSMenuItem.SeparatorItem);

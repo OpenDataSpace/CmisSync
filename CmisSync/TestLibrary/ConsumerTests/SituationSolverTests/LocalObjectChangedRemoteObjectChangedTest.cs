@@ -20,6 +20,9 @@
 namespace TestLibrary.ConsumerTests.SituationSolverTests
 {
     using System;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Text;
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
@@ -38,48 +41,185 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     [TestFixture]
     public class LocalObjectChangedRemoteObjectChangedTest
     {
+        private readonly string remoteId = "remoteId";
+        private readonly string parentId = "parentId";
+        private readonly string oldChangeToken = "oldChangeToken";
+        private readonly string newChangeToken = "newChangeToken";
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private LocalObjectChangedRemoteObjectChanged underTest;
 
-        [SetUp]
-        public void SetUp() {
-            this.session = new Mock<ISession>();
-            this.storage = new Mock<IMetaDataStorage>();
-            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object);
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorTakesSessionAndStorageAndDateSyncEnabled() {
+            new LocalObjectChangedRemoteObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), true);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorTakesSessionAndStorage() {
-            new LocalObjectChangedRemoteObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>());
+        public void ConstructorTakesSessionAndStorageAndDateSyncDisabled() {
+            new LocalObjectChangedRemoteObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), false);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void LocalAndRemoteFolderAreChanged() {
-            string folderId = "folderId";
+            this.InitMocks();
             string folderName = "folderName";
-            string parentId = "parentId";
-            string lastChangeToken = "lastChangeToken";
-            string newChangeToken = "newChangeToken";
             DateTime lastLocalModification = DateTime.UtcNow.AddDays(1);
             DateTime lastRemoteModification = DateTime.UtcNow.AddHours(1);
             var localFolder = Mock.Of<IDirectoryInfo>(f => f.LastWriteTimeUtc == lastLocalModification);
-            var remoteFolder = Mock.Of<IFolder>(f => f.LastModificationDate == lastRemoteModification && f.Id == folderId && f.ChangeToken == newChangeToken);
+            var remoteFolder = Mock.Of<IFolder>(f => f.LastModificationDate == lastRemoteModification && f.Id == this.remoteId && f.ChangeToken == this.newChangeToken);
             var mappedFolder = Mock.Of<IMappedObject>(
                 o =>
                 o.Name == folderName &&
-                o.RemoteObjectId == folderId &&
-                o.LastChangeToken == lastChangeToken &&
+                o.RemoteObjectId == this.remoteId &&
+                o.LastChangeToken == this.oldChangeToken &&
                 o.LastLocalWriteTimeUtc == DateTime.UtcNow &&
                 o.LastRemoteWriteTimeUtc == DateTime.UtcNow &&
-                o.ParentId == parentId &&
+                o.ParentId == this.parentId &&
                 o.Type == MappedObjectType.Folder &&
                 o.Guid == Guid.NewGuid());
-            storage.AddMappedFolder(mappedFolder);
+            this.storage.AddMappedFolder(mappedFolder);
 
             this.underTest.Solve(localFolder, remoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, folderId, folderName, parentId, newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteId, folderName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalAndRemoteFileDatesAreChangedAndLocalDateIsNewerUpdatesRemoteDate() {
+            this.InitMocks();
+            string fileName = "fileName";
+            DateTime lastLocalModification = DateTime.UtcNow.AddDays(1);
+            DateTime lastRemoteModification = DateTime.UtcNow.AddHours(1);
+            var localFile = new Mock<IFileInfo>();
+            byte[] contentHash;
+            using (var stream = this.SetUpFileWithContent(localFile, "content", out contentHash, lastLocalModification)) {
+                long length = stream.Length;
+                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash);
+                var mappedObject = new MappedObject(fileName, this.remoteId, MappedObjectType.File, this.parentId, this.oldChangeToken, length) {
+                    Guid = Guid.NewGuid(),
+                    LastChecksum = contentHash,
+                    LastLocalWriteTimeUtc = DateTime.UtcNow,
+                    LastRemoteWriteTimeUtc = DateTime.UtcNow,
+                    ChecksumAlgorithmName = "SHA-1"
+                };
+                this.storage.AddMappedFile(mappedObject);
+
+                this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+
+                remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, Times.Once(), true);
+                localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length);
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalAndRemoteFileDatesAreChangedAndRemoteDateIsNewerUpdatesLocalDate() {
+            this.InitMocks();
+            string fileName = "fileName";
+            DateTime lastLocalModification = DateTime.UtcNow.AddHours(1);
+            DateTime lastRemoteModification = DateTime.UtcNow.AddDays(1);
+            var localFile = new Mock<IFileInfo>();
+            byte[] contentHash;
+            using (var stream = this.SetUpFileWithContent(localFile, "content", out contentHash, lastLocalModification)) {
+                long length = stream.Length;
+                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash);
+                var mappedObject = new MappedObject(fileName, this.remoteId, MappedObjectType.File, this.parentId, this.oldChangeToken, length) {
+                    Guid = Guid.NewGuid(),
+                    LastChecksum = contentHash,
+                    LastLocalWriteTimeUtc = DateTime.UtcNow,
+                    LastRemoteWriteTimeUtc = DateTime.UtcNow,
+                    ChecksumAlgorithmName = "SHA-1"
+                };
+                this.storage.AddMappedFile(mappedObject);
+
+                this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+
+                remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, Times.Never(), true);
+                localFile.VerifySet(f => f.LastWriteTimeUtc = lastRemoteModification);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length);
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalAndRemoteContentIsChangedToTheSameContentAndRemoteDateIsNewerUpdatesLocalDate() {
+            this.InitMocks();
+            string fileName = "fileName";
+            DateTime lastLocalModification = DateTime.UtcNow.AddHours(1);
+            DateTime lastRemoteModification = DateTime.UtcNow.AddDays(1);
+            var localFile = new Mock<IFileInfo>();
+            byte[] contentHash;
+            using (var stream = this.SetUpFileWithContent(localFile, "newcontent", out contentHash, lastLocalModification)) {
+                long length = stream.Length;
+                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash);
+                var mappedObject = new MappedObject(fileName, this.remoteId, MappedObjectType.File, this.parentId, this.oldChangeToken, length) {
+                    Guid = Guid.NewGuid(),
+                    LastChecksum = new byte[20],
+                    LastLocalWriteTimeUtc = DateTime.UtcNow,
+                    LastRemoteWriteTimeUtc = DateTime.UtcNow,
+                    ChecksumAlgorithmName = "SHA-1"
+                };
+                this.storage.AddMappedFile(mappedObject);
+
+                this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.CHANGED);
+
+                remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, Times.Never(), true);
+                localFile.VerifySet(f => f.LastWriteTimeUtc = lastRemoteModification);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length);
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalAndRemoteContentIsChangedToTheSameContentAndLocalDateIsNewerUpdatesRemoteDate() {
+            this.InitMocks();
+            string fileName = "fileName";
+            DateTime lastLocalModification = DateTime.UtcNow.AddDays(1);
+            DateTime lastRemoteModification = DateTime.UtcNow.AddHours(1);
+            var localFile = new Mock<IFileInfo>();
+            byte[] contentHash;
+            using (var stream = this.SetUpFileWithContent(localFile, "newcontent", out contentHash, lastLocalModification)) {
+                long length = stream.Length;
+                var remoteFile = this.CreateRemoteDocument(lastRemoteModification, length, contentHash);
+                var mappedObject = new MappedObject(fileName, this.remoteId, MappedObjectType.File, this.parentId, this.oldChangeToken, length) {
+                    Guid = Guid.NewGuid(),
+                    LastChecksum = new byte[20],
+                    LastLocalWriteTimeUtc = DateTime.UtcNow,
+                    LastRemoteWriteTimeUtc = DateTime.UtcNow,
+                    ChecksumAlgorithmName = "SHA-1"
+                };
+                this.storage.AddMappedFile(mappedObject);
+
+                this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.CHANGED);
+
+                remoteFile.VerifyUpdateLastModificationDate(lastLocalModification, Times.Once(), true);
+                localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteId, fileName, this.parentId, this.newChangeToken, lastLocalModification: lastLocalModification, lastRemoteModification: lastRemoteModification, checksum: contentHash, contentSize: length);
+            }
+        }
+
+        private void InitMocks(bool dateSyncEnabled = true) {
+            this.session = new Mock<ISession>();
+            this.storage = new Mock<IMetaDataStorage>();
+            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, dateSyncEnabled);
+        }
+
+        private Mock<IDocument> CreateRemoteDocument(DateTime lastRemoteModification, long contentLength, byte[] contentHash) {
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.SetupGet(d => d.LastModificationDate).Returns(lastRemoteModification);
+            remoteFile.SetupGet(d => d.Id).Returns(this.remoteId);
+            remoteFile.SetupContentStreamHash(contentHash);
+            remoteFile.SetupGet(d => d.ChangeToken).Returns(this.newChangeToken);
+            return remoteFile;
+        }
+
+        private Stream SetUpFileWithContent(Mock<IFileInfo> file, string content, out byte[] hash, DateTime lastModification) {
+            byte[] bytes = Encoding.UTF8.GetBytes(content);
+            hash = SHA1.Create().ComputeHash(bytes);
+            var stream = new MemoryStream(bytes);
+            file.Setup(f => f.Length).Returns(bytes.Length);
+            file.Setup(f => f.Exists).Returns(true);
+            file.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream);
+            file.Setup(f => f.LastWriteTimeUtc).Returns(lastModification);
+            return stream;
         }
     }
 }

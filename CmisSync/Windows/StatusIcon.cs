@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="StatusIcon.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -230,16 +230,16 @@ namespace CmisSync
                 }
             };
 
-            if (ConfigManager.CurrentConfig.Notifications)
+            //Transmission Submenu.
+            Controller.UpdateTransmissionMenuEvent += delegate
             {
-                //Transmission Submenu.
-                Controller.UpdateTransmissionMenuEvent += delegate
+                if (IsHandleCreated)
                 {
-                    if (IsHandleCreated)
+                    BeginInvoke((Action)delegate
                     {
-                        BeginInvoke((Action)delegate
+                        this.stateItem.DropDownItems.Clear();
+                        if (ConfigManager.CurrentConfig.Notifications)
                         {
-                            this.stateItem.DropDownItems.Clear();
                             List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
                             foreach (FileTransmissionEvent transmission in transmissions)
                             {
@@ -254,10 +254,14 @@ namespace CmisSync
                             {
                                 this.stateItem.Enabled = false;
                             }
-                        });
-                    }
-                };
-            }
+                        }
+                        else
+                        {
+                            this.stateItem.Enabled = false;
+                        }
+                    });
+                }
+            };
         }
 
 
@@ -403,6 +407,17 @@ namespace CmisSync
                 Controller.SettingClicked();
             };
             this.traymenu.Items.Add(setting_item);
+
+            // Create the menu item that lets the uer view transmission.
+            ToolStripMenuItem transmission_item = new ToolStripMenuItem()
+            {
+                Text = CmisSync.Properties_Resources.Transmission
+            };
+            transmission_item.Click += delegate
+            {
+                Controller.TransmissionClicked();
+            };
+            this.traymenu.Items.Add(transmission_item);
 
             // Create the menu item that lets the user view the log.
             ToolStripMenuItem log_item = new ToolStripMenuItem()

@@ -53,7 +53,7 @@ namespace TestLibrary.IntegrationTests
     /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
     /// </summary>
     [TestFixture, Timeout(900000)]
-    public class DotCMISTests
+    public class DotCMISTests : IsTestWithConfiguredLog4Net
     {
         /// <summary>
         /// Disable HTTPS Verification
@@ -675,6 +675,24 @@ namespace TestLibrary.IntegrationTests
             Assert.That(newFolder.ChangeToken, Is.Not.EqualTo(changeToken));
 
             newFolder.Delete(true);
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Erratic")]
+        public void GetChildrenDoesNotProducesServerProtocolViolationException(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            for (int i = 0; i < 1000; i++) {
+                IFolder root = (IFolder)session.GetObjectByPath(remoteFolderPath);
+                foreach (var child in root.GetChildren()) {
+                    Console.WriteLine(child.Name);
+                }
+            }
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]

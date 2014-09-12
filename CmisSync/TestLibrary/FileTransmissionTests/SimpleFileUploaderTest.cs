@@ -136,7 +136,7 @@ namespace TestLibrary.FileTransmissionTests
             }
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void AbortTest()
         {
             this.mockedDocument.Setup(doc => doc.SetContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == true), It.Is<bool>(b => b == true)))

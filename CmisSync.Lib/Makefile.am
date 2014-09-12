@@ -43,10 +43,13 @@ SOURCES =  \
 	Consumer/SituationSolver/LocalObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectChangedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectDeleted.cs \
+	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectDeleted.cs \
+	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectRenamedOrMoved.cs \
 	Consumer/SituationSolver/LocalObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectMovedRemoteObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectRenamed.cs \
+	Consumer/SituationSolver/LocalObjectRenamedOrMovedRemoteObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/NothingToDoSolver.cs \
 	Consumer/SituationSolver/RemoteObjectAdded.cs \
@@ -174,6 +177,7 @@ SOURCES =  \
 	Storage/FileSystem/IFileSystemInfo.cs \
 	Storage/FileSystem/IFileSystemInfoFactory.cs \
 	Storage/FileSystem/IFileSystemWatcher.cs \
+	Storage/FileSystem/RestoreModificationDateException.cs \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/ChunkedStream.cs \
 	Streams/ForwardReadingStream.cs \

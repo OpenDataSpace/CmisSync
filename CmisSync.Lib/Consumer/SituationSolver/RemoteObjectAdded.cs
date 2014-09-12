@@ -41,7 +41,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
-        private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
         private ActiveActivitiesManager manager;
 
@@ -50,25 +49,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="queue">Queue to report new transmissions to.</param>
         /// <param name="transmissonManager">Transmisson manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ISyncEventQueue queue,
             ActiveActivitiesManager transmissonManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
-            if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
-            }
-
             if (transmissonManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
-            this.queue = queue;
             this.manager = transmissonManager;
         }
 
@@ -93,7 +85,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             if(localFile is IDirectoryInfo) {
-                if(!(remoteId is IFolder)) {
+                if (!(remoteId is IFolder)) {
                     throw new ArgumentException("remoteId has to be a prefetched Folder");
                 }
 
@@ -101,14 +93,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IDirectoryInfo localFolder = localFile as IDirectoryInfo;
                 localFolder.Create();
 
-                if(remoteFolder.LastModificationDate != null) {
-                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
-                }
-
                 Guid uuid = Guid.Empty;
                 if (localFolder.IsExtendedAttributeAvailable()) {
                     uuid = Guid.NewGuid();
-                    localFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
+                    try {
+                        localFolder.Uuid = uuid;
+                    } catch (RestoreModificationDateException) {
+                    }
+                }
+
+                if (remoteFolder.LastModificationDate != null) {
+                    localFolder.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 }
 
                 var mappedObject = new MappedObject(remoteFolder);
@@ -118,16 +113,27 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
+                Guid guid = Guid.NewGuid();
                 var file = localFile as IFileInfo;
                 if (!(remoteId is IDocument)) {
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
 
-                var cacheFile = this.fsFactory.CreateFileInfo(Path.Combine(file.Directory.FullName, file.Name + ".sync"));
+                if (file.Exists) {
+                    Guid? uuid = file.Uuid;
+                    if (uuid != null) {
+                        if (this.Storage.GetObjectByGuid((Guid)uuid) != null) {
+                            throw new ArgumentException("This file has already been synced => force crawl sync");
+                        }
+                    }
+
+                    Logger.Debug(string.Format("This file {0} conflicts with remote file => conflict file will be produced after download", file.FullName));
+                }
+
+                var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
                 var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
-                this.queue.AddEvent(transmissionEvent);
                 this.manager.AddTransmission(transmissionEvent);
                 byte[] hash = null;
                 using (var hashAlg = new SHA1Managed())
@@ -144,8 +150,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     hash = hashAlg.Hash;
                 }
 
-                Guid guid = Guid.NewGuid();
-                cacheFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), false);
+                cacheFile.Uuid = guid;
                 try {
                     cacheFile.MoveTo(file.FullName);
                 } catch (IOException e) {

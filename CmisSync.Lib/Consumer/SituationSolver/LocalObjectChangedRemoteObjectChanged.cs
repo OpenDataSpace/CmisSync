@@ -20,9 +20,14 @@
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
+    using System.IO;
+    using System.Linq;
+    using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
@@ -42,7 +47,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChangedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            bool serverCanModifyCreationAndModificationDate) : base(session, storage, serverCanModifyCreationAndModificationDate) {
         }
 
         /// <summary>
@@ -58,15 +63,78 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
+            var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
             if (localFileSystemInfo is IDirectoryInfo) {
-                var obj = this.Storage.GetObjectByRemoteId((remoteId as IFolder).Id);
                 obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
                 obj.LastRemoteWriteTimeUtc = (remoteId as IFolder).LastModificationDate;
                 obj.LastChangeToken = (remoteId as IFolder).ChangeToken;
-                this.Storage.SaveMappedObject(obj);
-            } else {
-                throw new NotImplementedException();
+            } else if (localFileSystemInfo is IFileInfo) {
+                var fileInfo = localFileSystemInfo as IFileInfo;
+                var doc = remoteId as IDocument;
+                bool updateLocalDate = false;
+                bool updateRemoteDate = false;
+                if (remoteContent == ContentChangeType.NONE) {
+                    if (fileInfo.IsContentChangedTo(obj, true)) {
+                        // Upload local content
+                        updateRemoteDate = true;
+                        throw new NotImplementedException();
+                    } else {
+                        // Just date sync
+                        if (doc.LastModificationDate != null && fileInfo.LastWriteTimeUtc < (DateTime)doc.LastModificationDate) {
+                            updateLocalDate = true;
+                        } else {
+                            updateRemoteDate = true;
+                        }
+                    }
+                } else {
+                    byte[] actualLocalHash;
+                    if (fileInfo.IsContentChangedTo(obj, out actualLocalHash, true)) {
+                        // Check if both are changed to the same value
+                        if (actualLocalHash == null) {
+                            using (var f = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                                actualLocalHash = SHA1Managed.Create().ComputeHash(f);
+                            }
+                        }
+
+                        byte[] remoteHash = doc.ContentStreamHash();
+                        if (remoteHash != null && actualLocalHash.SequenceEqual(remoteHash)) {
+                            // Both files are equal
+                            obj.LastChecksum = remoteHash;
+                            obj.LastContentSize = fileInfo.Length;
+
+                            // Sync dates
+                            if (doc.LastModificationDate != null && fileInfo.LastWriteTimeUtc < (DateTime)doc.LastModificationDate) {
+                                updateLocalDate = true;
+                            } else {
+                                updateRemoteDate = true;
+                            }
+                        } else {
+                            // Both are different => Check modification dates
+                            throw new NotImplementedException();
+                        }
+                    } else {
+                        // Download remote content
+                        updateLocalDate = true;
+                        throw new NotImplementedException();
+                    }
+                }
+
+                if (this.ServerCanModifyDateTimes) {
+                    if (updateLocalDate) {
+                        fileInfo.LastWriteTimeUtc = (DateTime)doc.LastModificationDate;
+                    } else if (updateRemoteDate) {
+                        doc.UpdateLastWriteTimeUtc(fileInfo.LastWriteTimeUtc);
+                    } else {
+                        throw new ArgumentException();
+                    }
+                }
+
+                obj.LastChangeToken = doc.ChangeToken;
+                obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                obj.LastRemoteWriteTimeUtc = doc.LastModificationDate;
             }
+
+            this.Storage.SaveMappedObject(obj);
         }
     }
 }
