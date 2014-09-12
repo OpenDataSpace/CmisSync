@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ExtendedAttributeException.cs" company="GRAU DATA AG">
+// <copyright file="RestoreModificationDateException.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -20,42 +20,41 @@
 namespace CmisSync.Lib.Storage.FileSystem
 {
     using System;
-    using System.IO;
     using System.Runtime.Serialization;
 
     /// <summary>
-    /// Extended attribute exception.
+    /// Restore modification date exception is thrown if the modification date of a file cannot be restored because of an IOException
     /// </summary>
     [Serializable]
-    public class ExtendedAttributeException : IOException
+    public class RestoreModificationDateException : ExtendedAttributeException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.RestoreModificationDateException"/> class.
         /// </summary>
-        public ExtendedAttributeException() : base("ExtendedAttribute manipulation exception") {
+        public RestoreModificationDateException() : base("Exception on restoring modification date") {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.RestoreModificationDateException"/> class.
         /// </summary>
         /// <param name="msg">Eception message.</param>
-        public ExtendedAttributeException(string msg) : base(msg) {
+        public RestoreModificationDateException(string msg) : base(msg) {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.RestoreModificationDateException"/> class.
         /// </summary>
         /// <param name="message">Exception message.</param>
         /// <param name="inner">Inner exception.</param>
-        public ExtendedAttributeException(string message, Exception inner) : base(message, inner) {
+        public RestoreModificationDateException(string message, Exception inner) : base(message, inner) {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.RestoreModificationDateException"/> class.
         /// </summary>
         /// <param name="info">Serialization info.</param>
         /// <param name="context">Streaming context.</param>
-        protected ExtendedAttributeException(SerializationInfo info, StreamingContext context) : base(info, context) {
+        protected RestoreModificationDateException(SerializationInfo info, StreamingContext context) : base(info, context) {
         }
     }
 }
