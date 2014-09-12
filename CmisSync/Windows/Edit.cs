@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Edit.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -269,7 +269,8 @@ namespace CmisSync
 
             passwordBox.LostFocus += delegate { backgroundWorker.RunWorkerAsync(); };
             passwordBox.PasswordChanged += delegate { passwordChanged = true; };
-            passwordChanged = false;
+            passwordChanged = true;
+            backgroundWorker.RunWorkerAsync();
         }
     }
 }
