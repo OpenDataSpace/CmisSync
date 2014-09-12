@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Storage.FileSystem
 {
     using System;
+    using System.Runtime.Serialization;
 
     /// <summary>
     /// Restore modification date exception is thrown if the modification date of a file cannot be restored because of an IOException
@@ -27,5 +28,33 @@ namespace CmisSync.Lib.Storage.FileSystem
     [Serializable]
     public class RestoreModificationDateException : ExtendedAttributeException
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.RestoreModificationDateException"/> class.
+        /// </summary>
+        public RestoreModificationDateException() : base("Exception on restoring modification date") {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.RestoreModificationDateException"/> class.
+        /// </summary>
+        /// <param name="msg">Eception message.</param>
+        public RestoreModificationDateException(string msg) : base(msg) {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.RestoreModificationDateException"/> class.
+        /// </summary>
+        /// <param name="message">Exception message.</param>
+        /// <param name="inner">Inner exception.</param>
+        public RestoreModificationDateException(string message, Exception inner) : base(message, inner) {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.RestoreModificationDateException"/> class.
+        /// </summary>
+        /// <param name="info">Serialization info.</param>
+        /// <param name="context">Streaming context.</param>
+        protected RestoreModificationDateException(SerializationInfo info, StreamingContext context) : base(info, context) {
+        }
     }
 }
