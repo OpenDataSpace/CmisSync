@@ -57,12 +57,5 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="context">Streaming context.</param>
         protected ExtendedAttributeException(SerializationInfo info, StreamingContext context) : base(info, context) {
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this
-        /// <see cref="CmisSync.Lib.Storage.FileSystem.ExtendedAttributeException"/> exception happens just on updating the modification date.
-        /// </summary>
-        /// <value><c>true</c> if exception is thrown on updating date; otherwise, <c>false</c>.</value>
-        public bool ExceptionOnUpdatingModificationDate { get; set; }
     }
 }

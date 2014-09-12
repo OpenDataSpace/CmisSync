@@ -174,6 +174,7 @@ SOURCES =  \
 	Storage/FileSystem/IFileSystemInfo.cs \
 	Storage/FileSystem/IFileSystemInfoFactory.cs \
 	Storage/FileSystem/IFileSystemWatcher.cs \
+	Storage/FileSystem/RestoreModificationDateException.cs \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/ChunkedStream.cs \
 	Streams/ForwardReadingStream.cs \
