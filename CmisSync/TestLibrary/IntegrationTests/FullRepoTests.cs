@@ -1265,6 +1265,27 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(newFolderName));
         }
 
+        [Test, Category("Slow")]
+        public void SyncLocalSavedMails() {
+            string mailName1 = "mail1.msg";
+            var mailPath1 = Path.Combine(this.localRootDir.FullName, mailName1);
+            var mailInfo1 = new FileInfo(mailPath1);
+            using (StreamWriter sw = mailInfo1.CreateText());
+            string mailName2 = "mail2.eml";
+            var mailPath2 = Path.Combine(this.localRootDir.FullName, mailName2);
+            var mailInfo2 = new FileInfo(mailPath2);
+            using (StreamWriter sw = mailInfo2.CreateText());
+
+            this.repo.Initialize();
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.Run();
+
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+            foreach (var mail in this.remoteRootDir.GetChildren()) {
+                Assert.That(mail.Name, Is.EqualTo(mailName1).Or.EqualTo(mailName2));
+            }
+        }
+
         // Not yet correct on the server side
         [Ignore]
         [Test, Category("Slow")]
