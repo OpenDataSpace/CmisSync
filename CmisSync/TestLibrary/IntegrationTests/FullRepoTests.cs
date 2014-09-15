@@ -1286,8 +1286,61 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        // Not yet correct on the server side
-        [Ignore]
+        [Ignore("It is not possible to handle this situation at the moment")]
+        [Test, Category("Slow"), Category("Erratic")]
+        public void CyclicRenaming() {
+            string folderName1 = "A";
+            string folderName2 = "B";
+            string subFolderName = "sub";
+            var folder1 = this.localRootDir.CreateSubdirectory(folderName1);
+            var folder2 = this.localRootDir.CreateSubdirectory(folderName2);
+            folder1.CreateSubdirectory(subFolderName);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var children = this.remoteRootDir.GetChildren();
+            IFolder remoteA = null;
+            IFolder remoteB = null;
+            foreach (var child in children) {
+                if (child.Name.Equals(folderName1)) {
+                    remoteA = child as IFolder;
+                } else if (child.Name.Equals(folderName2)) {
+                    remoteB = child as IFolder;
+                }
+            }
+
+            Assert.That(remoteA, Is.Not.Null);
+            Assert.That(remoteB, Is.Not.Null);
+
+            string fullName1 = folder1.FullName;
+            string fullName2 = folder2.FullName;
+            folder1.MoveTo(folder1.FullName + "_renamed");
+            folder2.MoveTo(fullName1);
+            new DirectoryInfo(fullName1 + "_renamed").MoveTo(fullName2);
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.Run();
+
+            var dirs = this.localRootDir.GetDirectories();
+            Assert.That(dirs.Count(), Is.EqualTo(2));
+            var A = dirs.First().Name.Equals(folderName1) ? dirs.First() : dirs.Last();
+            var B = dirs.First().Name.Equals(folderName2) ? dirs.First() : dirs.Last();
+            Assert.That(A.GetDirectories(), Is.Empty);
+            Assert.That(B.GetDirectories().Count(), Is.EqualTo(1));
+            Assert.That(B.GetDirectories().First().Name, Is.EqualTo(subFolderName));
+
+            remoteA.Refresh();
+            remoteB.Refresh();
+            Assert.That(remoteA.Name, Is.EqualTo(folderName2));
+            Assert.That(remoteB.Name, Is.EqualTo(folderName1));
+            Assert.That((remoteA as IFolder).GetChildren().First().Name, Is.EqualTo(subFolderName));
+            Assert.That((remoteB as IFolder).GetChildren().Count(), Is.EqualTo(0));
+        }
+
+        [Ignore("Not yet correct on the server side")]
         [Test, Category("Slow")]
         public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
