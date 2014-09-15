@@ -71,9 +71,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             contentStream.FileName = name;
             contentStream.MimeType = MimeType.GetMIMEType(name);
             contentStream.Length = content.Length;
-            contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
-
-            return folder.CreateDocument(properties, contentStream, null);
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
+                contentStream.Stream = stream;
+                return folder.CreateDocument(properties, contentStream, null);
+            }
         }
 
         /// <summary>

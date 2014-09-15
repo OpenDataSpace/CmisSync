@@ -66,12 +66,22 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IFolder remoteFolder = remoteId as IFolder;
                 IDirectoryInfo dirInfo = localFile as IDirectoryInfo;
                 string oldPath = dirInfo.FullName;
-                dirInfo.MoveTo(Path.Combine(dirInfo.Parent.FullName, remoteFolder.Name));
+                try {
+                    dirInfo.MoveTo(Path.Combine(dirInfo.Parent.FullName, remoteFolder.Name));
+                    obj.Name = remoteFolder.Name;
+                } catch (IOException) {
+                    if (dirInfo.Name.Equals(remoteFolder.Name, StringComparison.OrdinalIgnoreCase)) {
+                        obj.Name = dirInfo.Name;
+                    } else {
+                        throw;
+                    }
+                }
+
                 if (remoteFolder.LastModificationDate != null) {
                     dirInfo.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 }
 
-                obj.Name = remoteFolder.Name;
+
                 obj.LastChangeToken = remoteFolder.ChangeToken;
                 obj.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 obj.LastLocalWriteTimeUtc = dirInfo.LastWriteTimeUtc;

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="EditController.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -44,6 +44,11 @@ namespace CmisSync
         public event Action CloseWindowEvent = delegate { };
 
         /// <summary>
+        /// Resource Cleanup for Edit Window after Close
+        /// </summary>
+        public event Action CleanWindowEvent = delegate { };
+
+        /// <summary>
         /// Show Edit Window
         /// </summary>
         public void OpenWindow()
@@ -60,11 +65,17 @@ namespace CmisSync
         }
 
         /// <summary>
-        /// Close Edit Window
+        /// Close Edit Window and Cleanup Resource
         /// </summary>
         public void CloseWindow()
         {
             this.CloseWindowEvent();
+            this.CleanWindowEvent();
+        }
+
+        public void CleanWindow()
+        {
+            this.CleanWindowEvent();
         }
     }
 }

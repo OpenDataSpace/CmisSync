@@ -53,7 +53,7 @@ namespace TestLibrary.IntegrationTests
     /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
     /// </summary>
     [TestFixture, Timeout(900000)]
-    public class DotCMISTests
+    public class DotCMISTests : IsTestWithConfiguredLog4Net
     {
         /// <summary>
         /// Disable HTTPS Verification

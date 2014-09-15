@@ -145,10 +145,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             var backupFile = fsFactory.CreateFileInfo(target.FullName + ".bak.sync");
-            string uuid = target.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
+            Guid? uuid = target.Uuid;
             cacheFile.Replace(target, backupFile, true);
-            target.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid, true);
-            backupFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+            try {
+                target.Uuid = uuid;
+            } catch (RestoreModificationDateException e) {
+                Logger.Debug("Failed to restore modification date of original file", e);
+            }
+
+            try {
+                backupFile.Uuid = null;
+            } catch (RestoreModificationDateException e) {
+                Logger.Debug("Failed to restore modification date of backup file", e);
+            }
+
             byte[] checksumOfOldFile = null;
             using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
                 checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);

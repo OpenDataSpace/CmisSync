@@ -317,7 +317,131 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 cacheFile.Verify(c => c.Replace(localFile.Object, backupFile.Object, true), Times.Once());
                 backupFile.Verify(b => b.MoveTo(confictFilePath), Times.Once());
                 backupFile.Verify(b => b.Delete(), Times.Never());
-                backupFile.Verify(b => b.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true), Times.Once());
+                backupFile.VerifySet(b => b.Uuid = null, Times.Once());
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteDocumentChangedAndResetUuidFailsOnLocalModificationDate()
+        {
+            DateTime creationDate = DateTime.UtcNow;
+            string fileName = "a";
+            string path = Path.Combine(Path.GetTempPath(), fileName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+            string newChangeToken = "newToken";
+            byte[] newContent = Encoding.UTF8.GetBytes("content");
+            byte[] oldContent = Encoding.UTF8.GetBytes("older content");
+            long oldContentSize = oldContent.Length;
+            long newContentSize = newContent.Length;
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(newContent);
+            byte[] oldHash = SHA1Managed.Create().ComputeHash(oldContent);
+            var mappedObject = new MappedObject(
+                fileName,
+                id,
+                MappedObjectType.File,
+                parentId,
+                lastChangeToken,
+                oldContentSize)
+            {
+                Guid = Guid.NewGuid(),
+                LastLocalWriteTimeUtc = new DateTime(0),
+                LastRemoteWriteTimeUtc = new DateTime(0),
+                LastChecksum = oldHash
+            };
+
+            using (var oldContentStream = new MemoryStream(oldContent))
+                using (var stream = new MemoryStream()) {
+                var backupFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
+
+                this.storage.AddMappedFile(mappedObject, path);
+
+                Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, fileName, parentId, newContentSize, newContent, newChangeToken);
+                remoteObject.Setup(r => r.LastModificationDate).Returns(creationDate);
+
+                Mock<IFileInfo> localFile = new Mock<IFileInfo>();
+                localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
+                localFile.Setup(f => f.FullName).Returns(path);
+                var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
+                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(
+                    c =>
+                    c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
+                    () =>
+                    backupFile.Setup(
+                    b =>
+                    b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(oldContentStream));
+                backupFile.SetupSet(b => b.Uuid = It.IsAny<Guid?>()).Throws<RestoreModificationDateException>();
+
+                this.underTest.Solve(localFile.Object, remoteObject.Object, remoteContent:ContentChangeType.CHANGED);
+
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, creationDate, expectedHash, newContent.Length);
+                Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
+                cacheFile.Verify(c => c.Replace(localFile.Object, backupFile.Object, true), Times.Once());
+                backupFile.Verify(b => b.Delete(), Times.Once());
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteDocumentChangedAndSetUuidFailsOnLocalModificationDate()
+        {
+            DateTime creationDate = DateTime.UtcNow;
+            string fileName = "a";
+            string path = Path.Combine(Path.GetTempPath(), fileName);
+            string id = "id";
+            string parentId = "papa";
+            string lastChangeToken = "token";
+            string newChangeToken = "newToken";
+            byte[] newContent = Encoding.UTF8.GetBytes("content");
+            byte[] oldContent = Encoding.UTF8.GetBytes("older content");
+            long oldContentSize = oldContent.Length;
+            long newContentSize = newContent.Length;
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(newContent);
+            byte[] oldHash = SHA1Managed.Create().ComputeHash(oldContent);
+            var mappedObject = new MappedObject(
+                fileName,
+                id,
+                MappedObjectType.File,
+                parentId,
+                lastChangeToken,
+                oldContentSize)
+            {
+                Guid = Guid.NewGuid(),
+                LastLocalWriteTimeUtc = new DateTime(0),
+                LastRemoteWriteTimeUtc = new DateTime(0),
+                LastChecksum = oldHash
+            };
+
+            using (var oldContentStream = new MemoryStream(oldContent))
+                using (var stream = new MemoryStream()) {
+                var backupFile = this.fsFactory.AddFile(Path.Combine(Path.GetTempPath(), fileName + ".bak.sync"), false);
+
+                this.storage.AddMappedFile(mappedObject, path);
+
+                Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, fileName, parentId, newContentSize, newContent, newChangeToken);
+                remoteObject.Setup(r => r.LastModificationDate).Returns(creationDate);
+
+                Mock<IFileInfo> localFile = new Mock<IFileInfo>();
+                localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
+                localFile.Setup(f => f.FullName).Returns(path);
+                var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
+                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(
+                    c =>
+                    c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
+                    () =>
+                    backupFile.Setup(
+                    b =>
+                    b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(oldContentStream));
+                localFile.SetupSet(l => l.Uuid = It.IsAny<Guid?>()).Throws<RestoreModificationDateException>();
+
+                this.underTest.Solve(localFile.Object, remoteObject.Object, remoteContent:ContentChangeType.CHANGED);
+
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, id, fileName, parentId, newChangeToken, true, creationDate, creationDate, expectedHash, newContent.Length);
+                Assert.That(localFile.Object.LastWriteTimeUtc, Is.EqualTo(creationDate));
+                cacheFile.Verify(c => c.Replace(localFile.Object, backupFile.Object, true), Times.Once());
+                backupFile.Verify(b => b.Delete(), Times.Once());
             }
         }
 

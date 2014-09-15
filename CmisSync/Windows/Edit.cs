@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Edit.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -116,7 +116,7 @@ namespace CmisSync
 
             Controller.CloseWindowEvent += delegate
             {
-                asyncLoader.Cancel();
+                Close();
             };
 
             finishButton.Click += delegate
@@ -124,21 +124,25 @@ namespace CmisSync
                 Ignores = NodeModelUtils.GetIgnoredFolder(repo);
                 Credentials.Password = passwordBox.Password;
                 Controller.SaveFolder();
-                Close();
+                Controller.CloseWindow();
             };
 
             cancelButton.Click += delegate
             {
-                Close();
+                Controller.CloseWindow();
+            };
+
+            Closed += delegate
+            {
+                Controller.CleanWindow();
             };
         }
 
-
         protected override void Close(object sender, CancelEventArgs args)
         {
+            asyncLoader.Cancel();
             backgroundWorker.CancelAsync();
             backgroundWorker.Dispose();
-            Controller.CloseWindow();
         }
 
 
@@ -269,7 +273,8 @@ namespace CmisSync
 
             passwordBox.LostFocus += delegate { backgroundWorker.RunWorkerAsync(); };
             passwordBox.PasswordChanged += delegate { passwordChanged = true; };
-            passwordChanged = false;
+            passwordChanged = true;
+            backgroundWorker.RunWorkerAsync();
         }
     }
 }

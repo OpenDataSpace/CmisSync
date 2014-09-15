@@ -835,14 +835,16 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
-            foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                this.AssertThatDatesAreEqual(modificationDate, remoteFile.LastModificationDate, string.Format("remote modification date of {0}", remoteFile.Name));
-                this.AssertThatDatesAreEqual(creationDate, remoteFile.CreationDate, string.Format("remote creation date of {0}", remoteFile.Name));
-            }
+            if (this.session.IsServerAbleToUpdateModificationDate()) {
+                foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
+                    this.AssertThatDatesAreEqual(modificationDate, remoteFile.LastModificationDate, string.Format("remote modification date of {0}", remoteFile.Name));
+                    this.AssertThatDatesAreEqual(creationDate, remoteFile.CreationDate, string.Format("remote creation date of {0}", remoteFile.Name));
+                }
 
-            foreach (var localFile in this.localRootDir.GetFiles()) {
-                this.AssertThatDatesAreEqual(modificationDate, localFile.LastWriteTimeUtc, string.Format("local modification date of {0}", localFile.Name));
-                this.AssertThatDatesAreEqual(creationDate, localFile.CreationTimeUtc, string.Format("local creation date of {0}", localFile.Name));
+                foreach (var localFile in this.localRootDir.GetFiles()) {
+                    this.AssertThatDatesAreEqual(modificationDate, localFile.LastWriteTimeUtc, string.Format("local modification date of {0}", localFile.Name));
+                    this.AssertThatDatesAreEqual(creationDate, localFile.CreationTimeUtc, string.Format("local creation date of {0}", localFile.Name));
+                }
             }
         }
 
@@ -1242,7 +1244,53 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
             Assert.That(file.Length, Is.EqualTo(newContent.Length));
             Assert.That(file.Length, Is.EqualTo(doc.ContentStreamLength));
-            this.AssertThatDatesAreEqual(file.LastWriteTimeUtc, doc.LastModificationDate);
+            if (this.session.IsServerAbleToUpdateModificationDate()) {
+                this.AssertThatDatesAreEqual(file.LastWriteTimeUtc, doc.LastModificationDate);
+            }
+        }
+
+        [Test, Category("Slow")]
+        public void OneRemoteFolderIsRenamedToLowerCase() {
+            string oldFolderName = "A";
+            string newFolderName = oldFolderName.ToLower();
+            var folder = this.remoteRootDir.CreateFolder(oldFolderName);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            folder.Refresh();
+            folder.Rename(newFolderName);
+            Thread.Sleep(5000);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            folder.Refresh();
+            Assert.That(this.localRootDir.GetDirectories().Count(), Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName).Or.EqualTo(oldFolderName));
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(newFolderName));
+        }
+
+        [Test, Category("Slow")]
+        public void SyncLocalSavedMails() {
+            string mailName1 = "mail1.msg";
+            var mailPath1 = Path.Combine(this.localRootDir.FullName, mailName1);
+            var mailInfo1 = new FileInfo(mailPath1);
+            using (StreamWriter sw = mailInfo1.CreateText());
+            string mailName2 = "mail2.eml";
+            var mailPath2 = Path.Combine(this.localRootDir.FullName, mailName2);
+            var mailInfo2 = new FileInfo(mailPath2);
+            using (StreamWriter sw = mailInfo2.CreateText());
+
+            this.repo.Initialize();
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.Run();
+
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+            foreach (var mail in this.remoteRootDir.GetChildren()) {
+                Assert.That(mail.Name, Is.EqualTo(mailName1).Or.EqualTo(mailName2));
+            }
         }
 
         // Not yet correct on the server side
@@ -1275,12 +1323,10 @@ namespace TestLibrary.IntegrationTests
         }
 
         private void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
-            if (((DateTime)expected - (DateTime)actual).Duration().TotalSeconds >= 1) {
-                if (msg != null) {
-                    Assert.That(actual, Is.EqualTo(expected), msg);
-                } else {
-                    Assert.That(actual, Is.EqualTo(expected));
-                }
+            if (msg != null) {
+                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
+            } else {
+                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds);
             }
         }
 

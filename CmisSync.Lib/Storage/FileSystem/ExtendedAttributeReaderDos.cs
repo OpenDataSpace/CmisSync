@@ -350,9 +350,7 @@ namespace CmisSync.Lib.Storage.FileSystem
                     Directory.SetLastWriteTimeUtc(path, oldDate);
                 }
             } catch (IOException ex) {
-                throw new ExtendedAttributeException("Cannot restore last modification date on " + path, ex) {
-                    ExceptionOnUpdatingModificationDate = true
-                };
+                throw new RestoreModificationDateException("Cannot restore last modification date on " + path, ex);
             }
             #else
             throw new WrongPlatformException();

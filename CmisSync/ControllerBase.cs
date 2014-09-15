@@ -406,7 +406,7 @@ namespace CmisSync
                     }
                 };
 
-                edit.Controller.CloseWindowEvent += delegate
+                edit.Controller.CleanWindowEvent += delegate
                 {
                     lock (this.repo_lock)
                     {

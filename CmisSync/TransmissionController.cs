@@ -258,6 +258,11 @@ namespace CmisSync
         {
             public int Compare(TransmissionItem x, TransmissionItem y)
             {
+                if (x.Done != y.Done)
+                {
+                    return x.Done ? 1 : -1;
+                }
+
                 if (x.UpdateTime == y.UpdateTime)
                 {
                     return 0;
@@ -302,18 +307,19 @@ namespace CmisSync
                 for (int i = FullPathList.Count - 1; i >= 0 && TransmissionList.Count > transmissionLimit; --i)
                 {
                     TransmissionItem item = TransmissionList[i];
-                    if (item.Done)
+                    if (!item.Done)
                     {
-                        //  un-register TransmissionController.UpdateTransmissionEvent
-                        item.Controller = null;
-
-                        DeleteTransmissionEvent(item);
-                        TransmissionList.RemoveAt(i);
-                        FullPathList.Remove(item.FullPath);
-
-                        //  un-register FileTransmissionEvent.TransmissionStatus
-                        item.Dispose();
+                        break;
                     }
+                    //  un-register TransmissionController.UpdateTransmissionEvent
+                    item.Controller = null;
+
+                    DeleteTransmissionEvent(item);
+                    TransmissionList.RemoveAt(i);
+                    FullPathList.Remove(item.FullPath);
+
+                    //  un-register FileTransmissionEvent.TransmissionStatus
+                    item.Dispose();
                 }
             }
 
