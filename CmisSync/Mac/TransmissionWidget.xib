@@ -7,6 +7,10 @@
         <customObject id="-2" userLabel="File's Owner" customClass="TransmissionWidgetController">
             <connections>
                 <outlet property="FinishButton" destination="hdT-2e-MQs" id="G3S-dG-CXO"/>
+                <outlet property="TableColumnPath" destination="nLc-oU-Rv2" id="SHn-MU-8Ph"/>
+                <outlet property="TableColumnProgress" destination="PL0-uQ-LEH" id="qq3-9v-1Jw"/>
+                <outlet property="TableColumnRepo" destination="RZH-JJ-57l" id="w4N-Pg-TaL"/>
+                <outlet property="TableColumnStatus" destination="kkT-ea-Amy" id="d0H-MF-n8T"/>
                 <outlet property="TableRowContextMenu" destination="osZ-6l-Trc" id="E4G-q9-M3T"/>
                 <outlet property="TableRowMenuOpen" destination="YqM-tE-2du" id="KBM-hl-WXR"/>
                 <outlet property="TableView" destination="c88-RI-CR0" id="Zs2-mT-DGo"/>
