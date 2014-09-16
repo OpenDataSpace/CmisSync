@@ -91,10 +91,7 @@ namespace CmisSync
             {
                 lock (repoCreditsErrorListLock)
                 {
-                    if (string.IsNullOrEmpty(repoCreditsErrorList.Find((string name) => { return name == reponame; })))
-                    {
-                        repoCreditsErrorList.Add(reponame);
-                    }
+                    repoCreditsErrorList.Add(reponame);
                 }
                 Controller.Warning = true;
                 this.trayicon.ShowBalloonTip(
@@ -116,7 +113,7 @@ namespace CmisSync
             this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
         }
 
-        private List<string> repoCreditsErrorList = new List<string>();
+        private HashSet<string> repoCreditsErrorList = new HashSet<string>();
 
         private Object repoCreditsErrorListLock = new Object();
 
@@ -124,11 +121,20 @@ namespace CmisSync
         {
             lock (repoCreditsErrorListLock)
             {
-                foreach (string reponame in repoCreditsErrorList) {
-                    Program.Controller.EditRepositoryCredentials(reponame);
+                while (repoCreditsErrorList.Count > 0)
+                {
+                    HashSet<string>.Enumerator i = repoCreditsErrorList.GetEnumerator();
+                    if (i.MoveNext())
+                    {
+                        string reponame = i.Current;
+                        repoCreditsErrorList.Remove(reponame);
+                        Program.Controller.EditRepositoryCredentials(reponame);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-
-                repoCreditsErrorList.Clear();
             }
 
             Controller.Warning = false;
