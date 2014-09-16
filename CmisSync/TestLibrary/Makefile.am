@@ -125,7 +125,8 @@ SOURCES =  \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
 	UtilsTests/EncodingTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs
+	UtilsTests/HttpProxyUtilsTest.cs \
+	UtilsTests/ProcessDiagnosticsTest.cs
 
 EXTRA_DIST = TestLibrary.csproj \
 	$(MOQ_PATH)
