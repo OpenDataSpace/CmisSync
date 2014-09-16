@@ -35,35 +35,25 @@ namespace CmisSync.Lib.FileTransmission
     /// </summary>
     public class ChunkedUploader : SimpleFileUploader
     {
-        private long chunkSize;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ChunkedUploader"/> class.
         /// </summary>
         /// <param name='chunkSize'>
         /// Chunk size.
         /// </param>
-        public ChunkedUploader(long chunkSize = 1024 * 1024)
-        {
-            if (chunkSize <= 0)
-            {
+        public ChunkedUploader(long chunkSize = 1024 * 1024) {
+            if (chunkSize <= 0) {
                 throw new ArgumentException("The chunk size must be a positive number and cannot be zero or less");
             }
 
-            this.chunkSize = chunkSize;
+            this.ChunkSize = chunkSize;
         }
 
         /// <summary>
         /// Gets the size of a chunk.
         /// </summary>
         /// <value>The size of the chunk.</value>
-        public long ChunkSize
-        {
-            get
-            {
-                return this.chunkSize;
-            }
-        }
+        public long ChunkSize { get; private set; }
 
         /// <summary>
         ///  Uploads the file.
@@ -93,12 +83,12 @@ namespace CmisSync.Lib.FileTransmission
         public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true)
         {
             IDocument result = remoteDocument;
-            for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.chunkSize)
+            for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize)
             {
                 bool isFirstChunk = offset == 0;
-                bool isLastChunk = (offset + this.chunkSize) >= localFileStream.Length;
+                bool isLastChunk = (offset + this.ChunkSize) >= localFileStream.Length;
                 using (NonClosingHashStream hashstream = new NonClosingHashStream(localFileStream, hashAlg, CryptoStreamMode.Read))
-                using (ChunkedStream chunkstream = new ChunkedStream(hashstream, this.chunkSize))
+                using (ChunkedStream chunkstream = new ChunkedStream(hashstream, this.ChunkSize))
                 using (OffsetStream offsetstream = new OffsetStream(chunkstream, offset))
                 using (ProgressStream progressstream = new ProgressStream(offsetstream, status))
                 {
@@ -109,27 +99,20 @@ namespace CmisSync.Lib.FileTransmission
                     ContentStream contentStream = new ContentStream();
                     contentStream.FileName = remoteDocument.Name;
                     contentStream.MimeType = Cmis.MimeType.GetMIMEType(remoteDocument.Name);
-                    if (isLastChunk)
-                    {
+                    if (isLastChunk) {
                         contentStream.Length = localFileStream.Length - offset;
-                    }
-                    else
-                    {
-                        contentStream.Length = this.chunkSize;
+                    } else {
+                        contentStream.Length = this.ChunkSize;
                     }
 
                     contentStream.Stream = progressstream;
-                    try
-                    {
-                        if(isFirstChunk && result.ContentStreamId != null && overwrite)
-                        {
+                    try {
+                        if (isFirstChunk && result.ContentStreamId != null && overwrite) {
                             result.DeleteContentStream(true);
                         }
 
                         result.AppendContentStream(contentStream, isLastChunk, true);
-                    }
-                    catch(Exception e)
-                    {
+                    } catch(Exception e) {
                         throw new UploadFailedException(e, result);
                     }
                 }

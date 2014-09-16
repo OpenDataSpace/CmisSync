@@ -33,14 +33,8 @@ namespace CmisSync.Lib.FileTransmission
         /// </summary>
         /// <returns>The uploader.</returns>
         /// <param name="chunkSize">Chunk size.</param>
-        public static IFileUploader CreateUploader(long chunkSize = 0)
-        {
-            if (chunkSize > 0)
-            {
-                return new ChunkedUploader(chunkSize);
-            }
-
-            return new SimpleFileUploader();
+        public static IFileUploader CreateUploader(long chunkSize = 0) {
+            return chunkSize > 0 ? new ChunkedUploader(chunkSize) : new SimpleFileUploader();
         }
 
         /// <summary>
@@ -49,15 +43,12 @@ namespace CmisSync.Lib.FileTransmission
         /// <param name="successfulLength">Successful length.</param>
         /// <param name="successfulPart">Successful part.</param>
         /// <param name="hashAlg">Hash algorithm</param>
-        public static void PrepareResume(long successfulLength, Stream successfulPart, HashAlgorithm hashAlg)
-        {
+        public static void PrepareResume(long successfulLength, Stream successfulPart, HashAlgorithm hashAlg) {
             byte[] buffer = new byte[4096];
             int pos = 0;
-            while(pos < successfulLength)
-            {
+            while (pos < successfulLength) {
                 int l = successfulPart.Read(buffer, 0, (int)Math.Min(buffer.Length, successfulLength - pos));
-                if (l <= 0)
-                {
+                if (l <= 0) {
                     throw new IOException(string.Format("File stream is shorter ({0}) than the given length {1}", pos, successfulLength));
                 }
 
@@ -71,14 +62,8 @@ namespace CmisSync.Lib.FileTransmission
         /// </summary>
         /// <returns>The downloader.</returns>
         /// <param name="chunkSize">Chunk size.</param>
-        public static IFileDownloader CreateDownloader(long chunkSize = 0)
-        {
-            if(chunkSize > 0)
-            {
-                return new ChunkedDownloader(chunkSize);
-            }
-
-            return new SimpleFileDownloader();
+        public static IFileDownloader CreateDownloader(long chunkSize = 0) {
+            return chunkSize > 0 ? (IFileDownloader)new ChunkedDownloader(chunkSize) : (IFileDownloader)new SimpleFileDownloader();
         }
     }
 }
