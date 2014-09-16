@@ -61,21 +61,20 @@ namespace CmisSync.Lib.FileTransmission
         ///  If true, the local content will overwrite the existing content.
         /// </param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If upload fails</exception>
-        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true)
-        {
-            if(remoteDocument == null) {
+        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true) {
+            if (remoteDocument == null) {
                 throw new ArgumentException("remoteDocument can not be null");
             }
 
-            if(localFileStream == null) {
+            if (localFileStream == null) {
                 throw new ArgumentException("localFileStream can not be null");
             }
 
-            if(status == null) {
+            if (status == null) {
                 throw new ArgumentException("status can not be null");
             }
 
-            if(hashAlg == null) {
+            if (hashAlg == null) {
                 throw new ArgumentException("hashAlg can not be null");
             }
 
@@ -116,8 +115,7 @@ namespace CmisSync.Lib.FileTransmission
         ///  Hash alg which should be used to calculate a checksum over the appended content.
         /// </param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If Upload fails</exception>
-        public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
-        {
+        public virtual IDocument AppendFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg) {
             using(ProgressStream progressstream = new ProgressStream(localFileStream, status))
             using(CryptoStream hashstream = new CryptoStream(progressstream, hashAlg, CryptoStreamMode.Read))
             {
@@ -162,8 +160,7 @@ namespace CmisSync.Lib.FileTransmission
             lock(this.disposeLock)
             {
                 // Check to see if Dispose has already been called.
-                if(!this.disposed)
-                {
+                if(!this.disposed) {
                     // Note disposing has been done.
                     this.disposed = true;
                 }
