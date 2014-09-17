@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="SetupWindow.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -14,7 +32,6 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,7 +44,8 @@ using Mono.Unix;
 
 namespace CmisSync {
 
-    public class SetupWindow : Window    {
+    [CLSCompliant(false)]
+    public class SetupWindow : Window {
 
         // TODO: capscmi
         private HBox HBox;
@@ -47,7 +65,7 @@ namespace CmisSync {
         {
             Title          = String.Format("{0} {1}", Properties_Resources.ApplicationName, Catalog.GetString ("Setup"));
             BorderWidth    = 0;
-            IconName       = "app-cmissync";
+            IconName       = "dataspacesync-app";
             Resizable      = false;
             WindowPosition = WindowPosition.Center;
             Deletable      = false;
@@ -57,7 +75,7 @@ namespace CmisSync {
             };
 
             SecondaryTextColor = UIHelpers.GdkColorToHex (Style.Foreground (StateType.Insensitive));
-                        
+
             SecondaryTextColorSelected =
                 UIHelpers.GdkColorToHex (
                     MixColors (
@@ -121,20 +139,20 @@ namespace CmisSync {
             };
         }
 
-
+        [CLSCompliant(false)]
         public void AddButton (Button button)
         {
             (button.Child as Label).Xpad = 15;
             Buttons.Add (button);
         }
 
-
+        [CLSCompliant(false)]
         public void AddOption (Widget widget)
-        {            
+        {
             OptionArea.Add (widget);
         }
 
-
+        [CLSCompliant(false)]
         new public void Add (Widget widget)
         {
             Label header = new Label ("<span size='large'><b>" + Header + "</b></span>") {
@@ -152,7 +170,7 @@ namespace CmisSync {
                     LineWrap = true,
                     LineWrapMode = Pango.WrapMode.WordChar
                 };
-                
+
                 layout_vertical.PackStart (description, false, false, 21);
             }
 
@@ -163,7 +181,7 @@ namespace CmisSync {
             ShowAll ();
         }
 
-    
+
         public void Reset ()
         {
             Header      = "";
@@ -180,22 +198,22 @@ namespace CmisSync {
 
             ShowAll ();
         }
-        
-        
+
+
         new public void ShowAll ()
         {
             if (Buttons.Children.Length > 0) {
                 Button default_button = (Button) Buttons.Children [Buttons.Children.Length - 1];
-            
+
                 default_button.CanDefault = true;
                 Default = default_button;
             }
-        
+
             base.ShowAll ();
             base.Present ();
         }
-        
-        
+
+
         private Gdk.Color MixColors (Gdk.Color first_color, Gdk.Color second_color, double ratio)
         {
             return new Gdk.Color (

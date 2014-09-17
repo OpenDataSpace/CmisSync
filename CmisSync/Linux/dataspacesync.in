@@ -1,14 +1,21 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-if [[ $UID -eq 0 ]]; then
+if [ `id -u` = "0" ] ; then
   echo "DataSpace Sync can't be run as root. Things would go utterly wrong."
   exit 1
 fi
 
-if [ "$XDG_RUNTIME_DIR" ]; then
+if [ -n "$XDG_RUNTIME_DIR" ]; then
   pidfile=${XDG_RUNTIME_DIR}/cmissync.pid
 else
   pidfile=/tmp/cmissync-${USER}.pid
+fi
+
+EXE=
+CLI=
+if [ -f @expanded_libdir@/@PACKAGE@/DataSpaceSync.exe ] ; then
+  EXE=.exe
+  CLI=mono
 fi
 
 start() {
@@ -25,9 +32,9 @@ start() {
 
   echo -n "Starting DataSpace Sync... "
   if [ -n "${SSH_AGENT_PID}" -o -n "${SSH_AUTH_SOCK}" ] ; then
-    @SLIMMONO@ @expanded_libdir@/@PACKAGE@/DataSpaceSync@MONOEXE@ $2 &
+    $CLI @expanded_libdir@/@PACKAGE@/DataSpaceSync$EXE $2 &
   else
-    ssh-agent @SLIMMONO@ @expanded_libdir@/@PACKAGE@/DataSpaceSync@MONOEXE@ $2 &
+    ssh-agent $CLI @expanded_libdir@/@PACKAGE@/DataSpaceSync$EXE $2 &
   fi
   ( umask 066; echo $! > ${pidfile} )
   echo "Done."
@@ -68,6 +75,6 @@ case $1 in
     curl --insecure --output ~/DataSpace Sync/$invite.xml $open
     ;;
   *)
-    @SLIMMONO@ @expanded_libdir@/@PACKAGE@/DataSpaceSync@MONOEXE@ --help
+    $CLI @expanded_libdir@/@PACKAGE@/DataSpaceSync$EXE --help
     ;;
 esac

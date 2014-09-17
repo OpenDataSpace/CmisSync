@@ -1,11 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [1.3.1])
+m4_define([cmissync_version], [2.0.0])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
 AC_CONFIG_SRCDIR([CmisSync/Program.cs])
 AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE([foreign dist-bzip2 dist-zip no-dist-gzip])
+AM_INIT_AUTOMAKE([foreign tar-ustar dist-bzip2 dist-zip no-dist-gzip])
 AM_MAINTAINER_MODE
 
 dnl Export Version Info
@@ -24,10 +24,10 @@ SHAMROCK_EXPAND_DATADIR
 AC_PROG_INSTALL
 
 dnl Mono and gmcs
-SHAMROCK_CHECK_MONO_MODULE(2.8)
+SHAMROCK_CHECK_MONO_MODULE(3.2)
 SHAMROCK_FIND_MONO_RUNTIME
     
-PKG_CHECK_EXISTS([mono >= 2.8],
+PKG_CHECK_EXISTS([mono >= 3.2],
 [SHAMROCK_FIND_MONO_4_0_COMPILER
 SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
     System
@@ -37,118 +37,31 @@ SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
 ])]
 )
 
-AC_ARG_WITH([nunit],
-            AS_HELP_STRING([--with-nunit=PATH],[Specify path to nunit.framework.dll]),
-            [nunit_dll=${withval}],[nunit_dll=no])
-if test "x$nunit_dll" = "xno" ; then
-    PKG_CHECK_MODULES(NUNIT, nunit >= 2.6.0, have_nunit=yes, have_nunit=no)
-    if test "x$have_nunit" = "xno" ; then
-      dnl On som distro's the package is named mono-nunit
-      PKG_CHECK_MODULES(NUNIT, mono-nunit >= 2.6.0, have_nunit=yes, have_nunit=no)
-      if test "x$have_nunit" = "xno" ; then
-          AC_ERROR("nunit is a required dependency: you need to install the appropriate devel package before you can compile")
-      fi
-    fi
-    AC_SUBST(NUNIT_LIBS)
-else
- if test -f ${nunit_dll} ; then
-        case ${nunit_dll} in
-            /*)
-            AC_SUBST(NUNIT_LIBS,[-r:${nunit_dll}])
-            AC_SUBST(NUNIT_PATH,[${nunit_dll}])
-            ;;
-            *)
-            AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/${nunit_dll}]])
-            AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/${nunit_dll}]])
-            ;;
-        esac
-    else
-        AC_ERROR([${nunit_dll} not found])
-    fi
-fi
+AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
+AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
 
-AC_ARG_WITH([newtonsoft-json],
-            AS_HELP_STRING([--with-newtonsoft-json=PATH],[Specify path to NewtonSoft.Json.dll]),
-            [newtonsoft_json_dll=${withval}],[newtonsoft_json_dll=no])
-if test "x$newtonsoft_json_dll" = "xno" ; then
-    PKG_CHECK_MODULES(JSON, [newtonsoft-json >= 4.5r6], have_newtonsoft_json=yes, have_newtonsoft_json=no)
-    if test "x$have_newtonsoft_json" = "xno" ; then
-        AC_ERROR("newtonsoft-json is a required dependency: you need to install the appropriate devel package before you can compile")
-    fi
-else
-    if test -f ${newtonsoft_json_dll} ; then
-        case ${newtonsoft_json_dll} in
-            /*)
-            AC_SUBST(JSON_LIBS,[-r:${newtonsoft_json_dll}])
-            AC_SUBST(JSON_PATH,[${newtonsoft_json_dll}])
-            ;;
-            *)
-            AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/${newtonsoft_json_dll}]])
-            AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/${newtonsoft_json_dll}]])
-            ;;
-        esac
-    else
-        AC_ERROR([${newtonsoft_json_dll} not found])
-    fi
-fi
+AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
+
+AC_SUBST(LOG4NET_LIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
+AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
+
+AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
+AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
+
+AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
+
+AC_SUBST(DOTCMIS_LIBS,[[-r:\$\(top_srcdir\)/Extras/DotCMIS.dll]])
+AC_SUBST(DOTCMIS_PATH,[[\$\(top_srcdir\)/Extras/DotCMIS.dll]])
 
 CMISSYNC_CHECK_NOTIFY_SHARP
 CMISSYNC_CHECK_GTK_SHARP
-
-AC_ARG_ENABLE(fat-binary,
-  AS_HELP_STRING([--enable-fat-binary[=@<:@no/yes@:>@]],[Build fat binary after compilation]),
-  [enable_fat_binary=$enableval],
-  [enable_fat_binary="no"])
-
-if test "x$enable_fat_binary" = "xno" ; then
-    AC_SUBST(SLIMMONO, "mono")
-    AC_SUBST(MONOEXE, ".exe")
-  else
-    AC_SUBST(SLIMMONO, "")
-    AC_SUBST(MONOEXE, "")
-fi
 
 AC_ARG_ENABLE(appindicator,
 	AS_HELP_STRING([--enable-appindicator[=@<:@no/auto/yes@:>@]],[Build support for application indicators ]),
 	[enable_appindicator=$enableval],
 	[enable_appindicator="auto"])
-
-AC_ARG_WITH([dotcmis],
-            AS_HELP_STRING([--with-dotcmis=PATH],[Specify path to DotCMIS.dll]),
-            [dotcmis_dll=${withval}],[dotcmis_dll=no])
-if test "x$dotcmis_dll" = "xno" ; then
-    AC_ERROR([Please specify the path to DotCMIS.dll using --with-dotcmis (use --help for more information.)])
-fi
-if test -f ${dotcmis_dll} ; then
-    case ${dotcmis_dll} in
-        /*)
-        AC_SUBST(DOTCMISLIBS,[-r:${dotcmis_dll}])
-        AC_SUBST(DOTCMISPATH,[${dotcmis_dll}])
-        ;;
-        *)
-        AC_SUBST(DOTCMISLIBS,[[-r:\$\(top_srcdir\)/${dotcmis_dll}]])
-        AC_SUBST(DOTCMISPATH,[[\$\(top_srcdir\)/${dotcmis_dll}]])
-        ;;
-    esac
-else
-    AC_ERROR([${dotcmis_dll} not found])
-fi
-
-AC_ARG_WITH([log4net],
-            AS_HELP_STRING([--with-log4net=PATH],[Specify path to log4net.dll]),
-            [log4net_dll=${withval}],[log4net_dll=no])
-if test ${log4net_dll} != "no" ; then
-    case ${log4net_dll} in
-        /*)
-        AC_SUBST(LOG4NETLIBS,[-r:${log4net_dll}])
-        AC_SUBST(LOG4NETPATH,[${log4net_dll}])
-        ;;
-        *)
-        AC_SUBST(LOG4NETLIBS,[[-r:\$\(top_srcdir\)/${log4net_dll}]])
-        AC_SUBST(LOG4NETPATH,[[\$\(top_srcdir\)/${log4net_dll}]])
-        ;;
-    esac
-fi
 
 TEST_URL="https://devel.dataspace.cc/cmis/atom11"
 AC_ARG_WITH([test-url],
@@ -219,17 +132,7 @@ if test "$OSNAME" = "Linux" ; then
 	fi
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
-    dnl check for log4net
-	PKG_CHECK_MODULES(LOG4NET, log4net, have_log4net=yes, have_log4net=no)
-	if test "x$have_log4net" = "xno" ; then
-        if test "$log4net_dll" != "no" ; then
-            LOG4NET_LIBS=$LOG4NETLIBS
-        else
-		    AC_ERROR([log4net is a required dependency: you need to install the appropriate devel package before you can compile])
-        fi
-	fi
-	AC_SUBST(LOG4NET_LIBS)
-
+	dnl check for appindicator
 	APPINDICATOR_REQUIRED=0.0.7
 	if test x$enable_appindicator = xauto ; then
 			PKG_CHECK_EXISTS([appindicator-sharp-0.1 >= $APPINDICATOR_REQUIRED],
@@ -251,17 +154,14 @@ if test "$OSNAME" = "Linux" ; then
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
 
+
     AC_SUBST(BUILD_DEFINES,"${BUILD_DEFINES}")
     GUISUBDIRS=CmisSync
     enable_gtkui=yes
 	cocoa=false
 	macos=false
     OSOK=yes
-    if test -f /etc/redhat-release; then
-        PACKAGE_TARGET=rpm-package
-    else
-        PACKAGE_TARGET=debian-package
-    fi
+    PACKAGE_TARGET=debian-package
 fi
 
 if test "$OSNAME" = "Darwin" ; then
@@ -269,18 +169,6 @@ if test "$OSNAME" = "Darwin" ; then
 
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
-	dnl check for log4net
-        LOG4NET_LIBS=
-	PKG_CHECK_MODULES(LOG4NET, log4net, have_log4net=yes, have_log4net=no)
-	if test "x$have_log4net" = "xno" ; then
-        if test "x$log4net_dll" != "xno" ; then
-            LOG4NET_LIBS=$LOG4NETLIBS
-        else
-            AC_ERROR([log4net is a required dependency: you need to install the appropriate devel package before you can compile])
-        fi
-	fi
-	AC_SUBST(LOG4NET_LIBS)
-	
 
     AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
@@ -375,11 +263,13 @@ CmisSync/Mac/Pixmaps/Makefile
 CmisSync/TestLibrary/Makefile
 CmisSync/TestLibrary/test-servers.json
 CmisSync/TestLibrary/proxy-server.json
-CmisSync/TestLibraryRunner/Makefile
 CmisSync/Linux/dataspacesync
 DataSpaceSync.Console/Makefile
 DataSpaceSync.Console/dsscli
+packaging/Makefile
+packaging/dataspacesync/debian/changelog
 CmisSync/Makefile
+Extras/Makefile
 Makefile
 ])
 

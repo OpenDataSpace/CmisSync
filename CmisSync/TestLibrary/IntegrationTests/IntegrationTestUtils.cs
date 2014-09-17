@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="IntegrationTestUtils.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace TestLibrary.IntegrationTests
 {
@@ -22,13 +40,7 @@ namespace TestLibrary.IntegrationTests
         {
             get
             {
-                string path = "../../test-servers.json";
-                bool exists = File.Exists(path);
-
-                if (!exists)
-                {
-                    path = "../CmisSync/TestLibrary/test-servers.json";
-                }
+                var path = GetServerPath();
 
                 return JsonConvert.DeserializeObject<List<object[]>>(
                     File.ReadAllText(path));
@@ -78,6 +90,30 @@ namespace TestLibrary.IntegrationTests
                 return JsonConvert.DeserializeObject<List<object[]>>(
                     File.ReadAllText(path));
             }
+        }
+
+        private static dynamic config = null;
+
+        public static dynamic GetConfig()
+        {
+            if(config == null){
+                var path = GetServerPath();
+                config = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
+            }
+            return config;
+        }
+
+        private static string GetServerPath()
+        {
+            string path = "../../test-servers.json";
+            bool exists = File.Exists(path);
+
+            if (!exists)
+            {
+                path = "../CmisSync/TestLibrary/test-servers.json";
+            }
+
+            return path;
         }
     }
 }

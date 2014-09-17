@@ -1,15 +1,3 @@
 [submodule "Extras/OpenDataSpaceDotCMIS"]
 	path = Extras/OpenDataSpaceDotCMIS
 	url = git@github.com:OpenDataSpace/chemistry-dotcmis.git
-[submodule "debian"]
-	path = debian
-	url = git@git.dataspace.cc:gds2/DataSpaceSyncDebianTarget.git
-[submodule "Extras/OpenDataSpace.System.Data.SQLite"]
-	path = Extras/OpenDataSpace.System.Data.SQLite
-	url = git@github.com:OpenDataSpace/System.Data.SQLite.git
-[submodule "Extras/OpenDataSpace.entityframework"]
-	path = Extras/OpenDataSpace.entityframework
-	url = git@github.com:OpenDataSpace/entityframework.git
-[submodule "Extras/OpenDataSpace.System.Data.SQLite.Linq"]
-	path = Extras/OpenDataSpace.System.Data.SQLite.Linq
-	url = git@github.com:OpenDataSpace/System.Data.SQLite.Linq.git

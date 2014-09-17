@@ -1,73 +1,160 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+//-----------------------------------------------------------------------
+// <copyright file="ActiveActivitiesManagerTest.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 namespace TestLibrary
 {
-    using NUnit.Framework;
-    using Moq;
-    using CmisSync.Lib;
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
+
+    using Moq;
+
+    using NUnit.Framework;
 
     [TestFixture]
     public class ActiveActivitiesManagerTest
     {
         [Test, Category("Fast")]
-        public void AddTransmissionTest() {
-            ActiveActivitiesManager manager = new ActiveActivitiesManager();
-            FileTransmissionType downloadType = FileTransmissionType.DOWNLOAD_NEW_FILE;
-            FileTransmissionType downloadModifiedType = FileTransmissionType.DOWNLOAD_MODIFIED_FILE;
-            string downloadfile = "Download.txt";
-            FileTransmissionEvent downloadTransmission = new FileTransmissionEvent(downloadType, downloadfile);
-            Assert.True(manager.AddTransmission(downloadTransmission), "A new file transmission event should be able to be added on the first time, but wasn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadTransmission), "An already existing file transmission event should be rejected on the second insertion, but wasn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
+        public void DefaultConstructorDoesNotFail()
+        {
+            new ActiveActivitiesManager();
+        }
 
-            downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { ActualPosition = 0, Length = 1024 });
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadTransmission), "Transmission is not completed, so the addition of the same event must fail, but didn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = 1024 });
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadTransmission), "Transmission is not completed, so the addition of the same event must fail, but didn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { ActualPosition = 1024 });
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadTransmission), "Transmission is not completed, so the addition of the same event must fail, but didn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { Completed = false });
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadTransmission), "Transmission is not completed, so the addition of the same event must fail, but didn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
+        [Test, Category("Fast")]
+        public void AddingNullAsTransmissionReturnsFalse()
+        {
+            var manager = new ActiveActivitiesManager();
 
-            FileTransmissionEvent downloadModifiedTransmission = new FileTransmissionEvent(downloadModifiedType, downloadfile);
-            Assert.True(manager.AddTransmission(downloadModifiedTransmission), "A new modified transmission event should be able to be added on the first time, but wasn't");
-            Assert.AreEqual(2, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadModifiedTransmission), "An already existing file transmission event should be rejected on the second insertion, but wasn't");
-            Assert.AreEqual(2, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadModifiedTransmission), "An already existing file transmission event should be rejected on the third insertion, but wasn't");
-            Assert.AreEqual(2, manager.ActiveTransmissions.Count);
-            downloadModifiedTransmission.ReportProgress(new TransmissionProgressEventArgs() { Completed = true });
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            Assert.True(manager.AddTransmission(downloadModifiedTransmission), "A completed file transmission event should be able to be readded after, but wasn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            downloadModifiedTransmission.ReportProgress(new TransmissionProgressEventArgs() { Completed = true });
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
+            Assert.Throws<ArgumentNullException>(() => manager.AddTransmission(null));
+        }
 
-            downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadTransmission), "An already existing file transmission event should be rejected on the second insertion, but wasn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            Assert.False(manager.AddTransmission(downloadTransmission), "An already existing file transmission event should be rejected on the third insertion, but wasn't");
-            Assert.AreEqual(1, manager.ActiveTransmissions.Count);
-            downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
-            Assert.AreEqual(0, manager.ActiveTransmissions.Count);
-            Assert.True(manager.AddTransmission(downloadTransmission), "A aborted file transmission event should be able to be readded after, but wasn't");
-            Assert.AreEqual(0, manager.ActiveTransmissions.Count);
-            downloadTransmission.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
-            Assert.AreEqual(0, manager.ActiveTransmissions.Count);
+        [Test, Category("Fast")]
+        public void AddSingleTransmissionIncreasesListCountByOne()
+        {
+            var manager = new ActiveActivitiesManager();
+
+            Assert.IsTrue(manager.AddTransmission(new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path")));
+
+            Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(1));
+        }
+
+        [Test, Category("Fast")]
+        public void ListedTransmissionIsEqualToAdded()
+        {
+            var manager = new ActiveActivitiesManager();
+            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+
+            Assert.That(manager.AddTransmission(trans), Is.True);
+
+            Assert.That(manager.ActiveTransmissions[0], Is.EqualTo(trans));
+            Assert.That(manager.ActiveTransmissionsAsList()[0], Is.EqualTo(trans));
+        }
+
+        [Test, Category("Fast")]
+        public void AFinishedTransmissionIsRemovedFromList()
+        {
+            var manager = new ActiveActivitiesManager();
+            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            manager.AddTransmission(trans);
+
+            trans.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+
+            Assert.That(manager.ActiveTransmissions, Is.Empty);
+        }
+
+        [Test, Category("Fast")]
+        public void AddingTheSameInstanceASecondTimeReturnsFalseAndIsNotListed()
+        {
+            var manager = new ActiveActivitiesManager();
+            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+
+            Assert.That(manager.AddTransmission(trans), Is.True);
+
+            Assert.That(manager.AddTransmission(trans), Is.False);
+
+            Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(1));
+            Assert.That(manager.ActiveTransmissions[0], Is.EqualTo(trans));
+        }
+
+        [Test, Category("Fast")]
+        public void AnAbortedTransmissionIsRemovedFromList()
+        {
+            var manager = new ActiveActivitiesManager();
+            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            manager.AddTransmission(trans);
+
+            trans.ReportProgress(new TransmissionProgressEventArgs { Aborted = true });
+
+            Assert.That(manager.ActiveTransmissions, Is.Empty);
+        }
+
+        [Test, Category("Fast")]
+        public void AddingNonEqualTransmissionProducesNewEntryInList()
+        {
+            var manager = new ActiveActivitiesManager();
+            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans2 = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path2");
+
+            Assert.That(manager.AddTransmission(trans), Is.True);
+            Assert.That(manager.AddTransmission(trans2), Is.True);
+
+            Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(2));
+        }
+
+        [Test, Category("Fast")]
+        public void AddingATransmissionFiresEvent()
+        {
+            var manager = new ActiveActivitiesManager();
+            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            int eventCounter = 0;
+
+            manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+            {
+                eventCounter++;
+                Assert.That(e.NewItems.Count, Is.EqualTo(1));
+                Assert.That(e.NewItems[0], Is.EqualTo(trans));
+            };
+            manager.AddTransmission(trans);
+
+            Assert.That(eventCounter, Is.EqualTo(1));
+        }
+
+        [Test, Category("Fast")]
+        public void AFinishedTransmissionFiresEvent()
+        {
+            var manager = new ActiveActivitiesManager();
+            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            int eventCounter = 0;
+            manager.AddTransmission(trans);
+
+            manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+            {
+                eventCounter++;
+                Assert.That(e.NewItems, Is.Null);
+                Assert.That(e.OldItems.Count, Is.EqualTo(1));
+                Assert.That(e.OldItems[0], Is.EqualTo(trans));
+            };
+            trans.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+
+            Assert.That(eventCounter, Is.EqualTo(1));
         }
     }
 }

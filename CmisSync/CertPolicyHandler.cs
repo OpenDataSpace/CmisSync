@@ -1,36 +1,40 @@
-//   CmisSync, a collaboration and sharing tool.
+//-----------------------------------------------------------------------
+// <copyright file="CertPolicyHandler.cs" company="GRAU DATA AG">
+//
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
 //   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
+//   it under the terms of the GNU General private License as published by
 //   the Free Software Foundation, either version 3 of the License, or
 //   (at your option) any later version.
 //
 //   This program is distributed in the hope that it will be useful,
 //   but WITHOUT ANY WARRANTY; without even the implied warranty of
 //   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//   GNU General Public License for more details.
+//   GNU General private License for more details.
 //
-//   You should have received a copy of the GNU General Public License
-//   along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-
-using System;
-using System.Net;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace CmisSync
 {
-    /**
-     * Certificate policy handler.
-     * This handler gets invoked when an untrusted certificate is encountered
-     * while connecting via https.
-     * It Presents the user with a dialog, asking if the cert should be trusted.
-     */
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
 
-    class CertPolicyHandler : ICertificatePolicy
+    /// <summary>
+    /// Certificate policy handler.
+    /// This handler gets invoked when an untrusted certificate is encountered while connecting via https.
+    /// It Presents the user with a dialog, asking if the cert should be trusted.
+    /// </summary>
+    public class CertPolicyHandler : ICertificatePolicy
     {
+        private object storeLock = new object();
+
         private enum CertificateProblem : long {
             CertEXPIRED                   = 0x800B0101,
             CertVALIDITYPERIODNESTING     = 0x800B0102,
@@ -52,7 +56,7 @@ namespace CmisSync
 
         public CertPolicyHandler()
         {
-            Window = new CertPolicyWindow (this);
+            this.Window = new CertPolicyWindow(this);
         }
 
         private CertPolicyWindow Window { get; set; }
@@ -68,7 +72,7 @@ namespace CmisSync
         /// </summary>
         public void ShowWindow()
         {
-            ShowWindowEvent();
+            this.ShowWindowEvent();
         }
 
         /**
@@ -85,6 +89,7 @@ namespace CmisSync
         /// Gets the message to display for user.
         /// </summary>
         public string UserMessage { get; private set; }
+
         /// <summary>
         /// Gets or sets the user response.
         /// </summary>
@@ -94,10 +99,12 @@ namespace CmisSync
         /// List of temporarily accepted certs.
         /// </summary>
         private static List<X509Certificate2> acceptedCerts = new List<X509Certificate2>();
+
         /// <summary>
         /// List of already denied certs. Just for this session.
         /// </summary>
         private static List<X509Certificate2> deniedCerts = new List<X509Certificate2>();
+
         /// <summary>
         /// Persistent store of saved certificates
         /// </summary>
@@ -107,38 +114,41 @@ namespace CmisSync
          * Verification callback.
          * Return true to accept a certificate.
          */
-        public bool CheckValidationResult (ServicePoint sp, X509Certificate certificate,
+        public bool CheckValidationResult(ServicePoint sp, X509Certificate certificate,
                 WebRequest request, int error)
         {
-            if (0 == error)
-            {
-                return true;
-            }
-            X509Certificate2 cert = new X509Certificate2(certificate);
-            {
-                store.Open(OpenFlags.ReadOnly);
-                bool found = store.Certificates.Contains(cert);
-                store.Close();
-                // If the certificate has been stored persistent, accept it
-                if (found) return true;
-            }
-            if (acceptedCerts.Contains(cert))
-            {
-                // User has already accepted this certificate in this session.
+            if (0 == error) {
                 return true;
             }
 
-            if (deniedCerts.Contains(cert))
-            {
-                // User has already denied this certificate in this session.
-                return false;
-            }
+            lock (this.storeLock) {
+                X509Certificate2 cert = new X509Certificate2(certificate);
+                {
+                    store.Open(OpenFlags.ReadOnly);
+                    bool found = store.Certificates.Contains(cert);
+                    store.Close();
 
-            UserMessage = GetCertificateHR(certificate) +
-                GetProblemMessage((CertificateProblem)error);
-            ShowWindow ();
-            switch (UserResponse)
-            {
+                    // If the certificate has been stored persistent, accept it
+                    if (found) {
+                        return true;
+                    }
+                }
+
+                if (acceptedCerts.Contains(cert)) {
+                    // User has already accepted this certificate in this session.
+                    return true;
+                }
+
+                if (deniedCerts.Contains(cert)) {
+                    // User has already denied this certificate in this session.
+                    return false;
+                }
+
+                this.UserMessage = this.GetCertificateHR(certificate) +
+                    this.GetProblemMessage((CertificateProblem)error);
+                this.ShowWindow();
+                switch (this.UserResponse)
+                {
                 case Response.CertDeny:
                     // Deny this cert for the actual session
                     deniedCerts.Add(cert);
@@ -153,41 +163,46 @@ namespace CmisSync
                     store.Add(cert);
                     store.Close();
                     return true;
+                }
             }
 
             return false;
         }
 
-        private String GetProblemMessage(CertificateProblem Problem)
+        private string GetProblemMessage(CertificateProblem problem)
         {
-            String ProblemMessage = "";
+            string problemMessage = string.Empty;
             CertificateProblem problemList = new CertificateProblem();
-            String ProblemCodeName = Enum.GetName(problemList.GetType(), Problem);
-            if (null != ProblemCodeName) {
-                ProblemMessage = ProblemMessage + "-Certificateproblem:" +
-                    ProblemCodeName;
+            string problemCodeName = Enum.GetName(problemList.GetType(), problem);
+            if (null != problemCodeName) {
+                problemMessage = problemMessage + "-Certificateproblem:" +
+                    problemCodeName;
             } else {
-                ProblemMessage = "Unknown Certificate Problem";
+                problemMessage = "Unknown Certificate Problem";
             }
-            return ProblemMessage;
+
+            return problemMessage;
         }
 
-        /**
-         * Return a human readable string, describing the general Cert properties.
-         */
-        private String GetCertificateHR(X509Certificate x509) {
+        /// <summary>
+        /// Return a human readable string, describing the general Cert properties.
+        /// </summary>
+        /// <returns>The certificate string.</returns>
+        /// <param name="x509">x509 certificate.</param>
+        private string GetCertificateHR(X509Certificate x509) {
             X509Certificate2 x509_2 = new X509Certificate2(x509);
-            bool selfsigned = (x509_2.IssuerName == x509_2.SubjectName);
-            String ret = String.Format("{0}X.509 v{1} Certificate\n",
-                    (selfsigned ? "Self-signed " : String.Empty), x509_2.Version);
-            ret += String.Format("  Serial Number: {0}\n", x509_2.SerialNumber);
-            ret += String.Format("  Issuer Name:   {0}\n", x509.Issuer);
-            ret += String.Format("  Subject Name:  {0}\n", x509.Subject);
-            ret += String.Format("  Valid From:    {0}\n", x509_2.NotBefore);
-            ret += String.Format("  Valid Until:   {0}\n", x509_2.NotAfter);
-            ret += String.Format("  Unique Hash:   {0}\n", x509.GetCertHashString());
+            bool selfsigned = x509_2.IssuerName == x509_2.SubjectName;
+            string ret = string.Format(
+                "{0}X.509 v{1} Certificate\n",
+                selfsigned ? "Self-signed " : string.Empty,
+                x509_2.Version);
+            ret += string.Format("  Serial Number: {0}\n", x509_2.SerialNumber);
+            ret += string.Format("  Issuer Name:   {0}\n", x509.Issuer);
+            ret += string.Format("  Subject Name:  {0}\n", x509.Subject);
+            ret += string.Format("  Valid From:    {0}\n", x509_2.NotBefore);
+            ret += string.Format("  Valid Until:   {0}\n", x509_2.NotAfter);
+            ret += string.Format("  Unique Hash:   {0}\n", x509.GetCertHashString());
             return ret;
         }
     }
-
 }

@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="Spinner.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -14,98 +32,95 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace CmisSync
+{
+    using System;
+    using System.Timers;
 
-using System.Timers;
-using Gtk;
+    using Gtk;
 
-namespace CmisSync {
-        
     // This is a close implementation of GtkSpinner
+    [CLSCompliant(false)]
     public class Spinner : Image {
 
         public bool Active;
 
-        private Gdk.Pixbuf [] Images;
+        private Gdk.Pixbuf[] Images;
         private Timer Timer;
         private int CycleDuration;
         private int CurrentStep;
         private int NumSteps;
         private int Size;
 
-
-        public Spinner (int size) : base ()
+        public Spinner(int size) : base()
         {
-            Size = size;
+            this.Size = size;
 
-            CycleDuration = 600;
-            CurrentStep = 0;
+            this.CycleDuration = 600;
+            this.CurrentStep = 0;
 
-            Gdk.Pixbuf spinner_gallery = UIHelpers.GetIcon ("process-working", Size);
+            Gdk.Pixbuf spinner_gallery = UIHelpers.GetIcon("process-working", this.Size);
 
-            int frames_in_width  = spinner_gallery.Width / Size;
-            int frames_in_height = spinner_gallery.Height / Size;
+            int frames_in_width  = spinner_gallery.Width  / this.Size;
+            int frames_in_height = spinner_gallery.Height / this.Size;
 
-            NumSteps = frames_in_width * frames_in_height;
-            Images   = new Gdk.Pixbuf [NumSteps - 1];
+            this.NumSteps = frames_in_width * frames_in_height;
+            this.Images   = new Gdk.Pixbuf[this.NumSteps - 1];
 
             int i = 0;
 
             for (int y = 0; y < frames_in_height; y++) {
                 for (int x = 0; x < frames_in_width; x++) {
                     if (!(y == 0 && x == 0)) {
-                        Images [i] = new Gdk.Pixbuf (spinner_gallery, x * Size, y * Size, Size, Size);
+                        this.Images[i] = new Gdk.Pixbuf(spinner_gallery, x * this.Size, y * this.Size, this.Size, this.Size);
                         i++;
                     }
                 }
             }
 
-            Timer = new Timer () {
-                Interval = (double)CycleDuration / NumSteps
+            this.Timer = new Timer() {
+                Interval = (double)this.CycleDuration / this.NumSteps
             };
 
-            Timer.Elapsed += delegate {
-                NextImage ();
+            this.Timer.Elapsed += delegate {
+                this.NextImage();
             };
 
-            Start ();
+            this.Start();
         }
 
-
-        private void NextImage ()
+        private void NextImage()
         {
-            if (CurrentStep < NumSteps - 2)
-                CurrentStep++;
-            else
-                CurrentStep = 0;
+            if (this.CurrentStep < this.NumSteps - 2) {
+                this.CurrentStep++;
+            } else {
+                this.CurrentStep = 0;
+            }
 
-            Application.Invoke (delegate { SetImage (); });
+            Application.Invoke(delegate { this.SetImage(); });
         }
 
-
-        private void SetImage ()
+        private void SetImage()
         {
-            Pixbuf = Images [CurrentStep];
+            this.Pixbuf = this.Images[this.CurrentStep];
         }
 
-
-        public bool IsActive ()
+        public bool IsActive()
         {
-            return Active;
+            return this.Active;
         }
 
-
-        public void Start ()
+        public void Start()
         {
-            CurrentStep = 0;
-            Active = true;
-            Timer.Start ();
+            this.CurrentStep = 0;
+            this.Active = true;
+            this.Timer.Start();
         }
 
-
-        public void Stop ()
+        public void Stop()
         {
-            Active = false;
-            Timer.Stop ();
+            this.Active = false;
+            this.Timer.Stop();
         }
     }
 }

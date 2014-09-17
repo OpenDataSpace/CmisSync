@@ -1,0 +1,27 @@
+Source: dataspacesync
+Section: net
+Priority: extra
+Maintainer: Till Lorentzen <till.lorentzen@graudata.com>
+Build-Depends: debhelper (>= 8.0.0), autotools-dev, mono-devel, libtool, intltool, desktop-file-utils, libappindicator0.1-cil-dev, libnewtonsoft-json-cil-dev, zbgtk2.0-cil-dev, libnotify-cil-dev, lib1g-dev
+Standards-Version: 3.9.3
+Homepage: http://graudata.com
+Vcs-Git: git@github.com:OpenDataSpace/CmisSync.git
+Vcs-Browser: https://github.com/OpenDataSpace/CmisSync
+
+Package: dataspacesync
+Architecture: any
+Depends: ${misc:Depends}, dataspacesync-common (= ${binary:Version})
+Description: DataSpace Sync Client
+ DataSpace Sync allows you to keep in sync with your DataSpace (CMIS) repository. See: https://graudata.com
+
+Package: dataspacesync-common
+Architecture: all
+Depends: ${misc:Depends}, curl, libgtk2.0-cil
+Description: DataSpace Sync Client (dynamic variant)
+ DataSpace Sync allows you to keep in sync with your DataSpace (CMIS) repository. See: https://graudata.com
+
+Package: dataspacesync-dynamic
+Architecture: all
+Depends: ${misc:Depends}, dataspacesync-common (= ${binary:Version})
+Description: DataSpace Sync Client (dynamic variant)
+ DataSpace Sync allows you to keep in sync with your DataSpace (CMIS) repository. See: https://graudata.com

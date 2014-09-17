@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="EditWizardController.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +25,10 @@ using MonoMac.Foundation;
 using MonoMac.AppKit;
 
 using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Credentials;
+using CmisSync.Lib.Config;
 using CmisSync.CmisTree;
 using System.Threading.Tasks;
+using CmisSync.Lib.Cmis.UiUtils;
 
 namespace CmisSync
 {
@@ -139,6 +158,9 @@ namespace CmisSync
                 TabView.SelectAt (0);
                 break;
             }
+            //  GUI workaround to remove ignore folder {{
+            this.TabView.Remove (this.FolderTab);
+            //  GUI workaround to remove ignore folder }}
 
             Controller.CloseWindowEvent += delegate
             {

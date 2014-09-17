@@ -9,9 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DataSpaceSync.Console</RootNamespace>
     <AssemblyName>DataSpaceSync.Console</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -43,6 +43,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -50,15 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CmisSync.Lib\CmisSync.Lib.csproj">
       <Project>{2C914413-B31C-4362-93C7-1AE34F09112A}</Project>
       <Name>CmisSync.Lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Extras\log4net-1.2.11\src\log4net.vs2010.csproj">
-      <Project>{181fe707-e161-4722-9f38-6aaab6faa106}</Project>
-      <Name>log4net.vs2010</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

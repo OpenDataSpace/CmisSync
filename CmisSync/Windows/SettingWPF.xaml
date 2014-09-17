@@ -22,12 +22,15 @@
                     <PasswordBox x:Name="PasswordText" HorizontalAlignment="Left" Margin="330,210,0,0" VerticalAlignment="Top" Width="240"/>
                 </Grid>
             </TabItem>
-            <!--<TabItem Name="BandwidthTab" Header="Bandwidth">
+            <TabItem Name="FeatureTogglesTab" Header="Features">
                 <Grid>
+                    <CheckBox x:Name="NotificationToggle" Content="Notifications" Margin="10,10,10,0" VerticalAlignment="Top"/>
                 </Grid>
-            </TabItem>-->
+            </TabItem>
         </TabControl>
-        <Button x:Name="FinishButton" Content="Finish" HorizontalAlignment="Left" Margin="350,270,0,0" VerticalAlignment="Top" Width="100"/>
-        <Button x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Left" Margin="470,270,0,0" VerticalAlignment="Top" Width="100"/>
+        <Grid HorizontalAlignment="Left" Height="50" Margin="321,250,0,0" Width="300">
+            <Button x:Name="FinishButton" Content="Finish" HorizontalAlignment="Left" Margin="80,19,0,0" VerticalAlignment="Top" Width="100"/>
+            <Button x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Left" Margin="190,19,0,0" VerticalAlignment="Top" Width="100"/>
+        </Grid>
     </Grid>
 </UserControl>

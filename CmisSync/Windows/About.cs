@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="About.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons (hylkebons@gmail.com)
 //
@@ -39,11 +57,6 @@ namespace CmisSync {
         public AboutController Controller = new AboutController ();
 
         /// <summary>
-        /// Shows a message about software updates.
-        /// </summary>
-        private Label updates;
-
-        /// <summary>
         /// Constructor.
         /// </summary>
         public About ()
@@ -57,7 +70,10 @@ namespace CmisSync {
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
             Closing += Close;
 
-            CreateAbout ();
+            //CreateAbout ();
+            LoadAbout();
+
+            CreateLink();
 
             Controller.ShowWindowEvent += delegate {
                Dispatcher.BeginInvoke ((Action) delegate {
@@ -95,79 +111,53 @@ namespace CmisSync {
             };
         }
 
-        /// <summary>
-        /// Create the UI.
-        /// </summary>
-        private void CreateAbout ()
-        {
-            Image image = new Image () {
-                Width  = 640,
-                Height = 260
-            };
-        
-            image.Source = UIHelpers.GetImageSource ("about");
-            
-            
-            Label version = new Label () {
-                Content    = String.Format(Properties_Resources.Version, Controller.RunningVersion),
-                FontSize   = 11,
-                Foreground = new SolidColorBrush (Color.FromRgb (15, 133, 203))
-            };
+        private Canvas canvas;
+        private Image image;
+        private Label version;
+        private Label updates;
+        private TextBlock credits;
 
-            this.updates = new Label () {
-                Content    = "", //"Checking for updates...",
-                FontSize   = 11,
-                Foreground = new SolidColorBrush (Color.FromRgb (15, 133, 203))
-            };
-            
-            TextBlock credits = new TextBlock () {
-                FontSize     = 11,
-                Foreground = new SolidColorBrush (Color.FromRgb (15, 133, 203)),
-                Text         = String.Format("Copyright © {0}–{1} {2}\n\n{3} {4}",
+        private void LoadAbout()
+        {
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/AboutWPF.xaml", System.UriKind.Relative);
+            UserControl aboutWPF = Application.LoadComponent(resourceLocater) as UserControl;
+
+            canvas = aboutWPF.FindName("canvas") as Canvas;
+            image = aboutWPF.FindName("image") as Image;
+            version = aboutWPF.FindName("version") as Label;
+            updates = aboutWPF.FindName("updates") as Label;
+            credits = aboutWPF.FindName("credits") as TextBlock;
+
+            image.Source = UIHelpers.GetImageSource("about");
+            version.Content = String.Format(Properties_Resources.Version, Controller.RunningVersion);
+            updates.Content = "";
+            credits.Text = String.Format("Copyright © {0}–{1} {2}\n\n{3} {4}",
                     "2013",
                     DateTime.Now.Year.ToString(),
                     " GRAU DATA AG, Aegif and others.",
                     Properties_Resources.ApplicationName,
-                    "is Open Source software. You are free to use, modify, and redistribute it under the GNU General Public License version 3 or later."),
-                TextWrapping = TextWrapping.Wrap,
-                Width        = 318
-            };
-            
-            Link website_link = new Link (Properties_Resources.Website, Controller.WebsiteLinkAddress);
-            Link credits_link = new Link (Properties_Resources.Credits, Controller.CreditsLinkAddress);
-            Link report_problem_link = new Link (Properties_Resources.ReportProblem, Controller.ReportProblemLinkAddress);
+                    "is Open Source software. You are free to use, modify, and redistribute it under the GNU General Public License version 3 or later.");
 
-            Canvas canvas = new Canvas ();
-            
-            canvas.Children.Add (image);
-            Canvas.SetLeft (image, 0);
-            Canvas.SetTop (image, 0);
+            Content = aboutWPF;
+        }
 
-            canvas.Children.Add (version);
-            Canvas.SetLeft (version, 289);
-            Canvas.SetTop (version, 92);
-            
-            canvas.Children.Add (this.updates);
-            Canvas.SetLeft (this.updates, 289);
-            Canvas.SetTop (this.updates, 109);
-            
-            canvas.Children.Add (credits);
-            Canvas.SetLeft (credits, 294);
-            Canvas.SetTop (credits, 142);
+        private void CreateLink()
+        {
+            Link website_link = new Link(Properties_Resources.Website, Controller.WebsiteLinkAddress);
+            Link credits_link = new Link(Properties_Resources.Credits, Controller.CreditsLinkAddress);
+            Link report_problem_link = new Link(Properties_Resources.ReportProblem, Controller.ReportProblemLinkAddress);
 
-            canvas.Children.Add (website_link);
-            Canvas.SetLeft (website_link, 289);
-            Canvas.SetTop (website_link, 222);
+            canvas.Children.Add(website_link);
+            Canvas.SetLeft(website_link, 289);
+            Canvas.SetTop(website_link, 222);
 
-            canvas.Children.Add (credits_link);
-            Canvas.SetLeft (credits_link, 289 + website_link.ActualWidth + 60);
-            Canvas.SetTop (credits_link, 222);
+            canvas.Children.Add(credits_link);
+            Canvas.SetLeft(credits_link, 289 + website_link.ActualWidth + 60);
+            Canvas.SetTop(credits_link, 222);
 
-            canvas.Children.Add (report_problem_link);
-            Canvas.SetLeft (report_problem_link, 289 + website_link.ActualWidth + credits_link.ActualWidth + 115);
-            Canvas.SetTop (report_problem_link, 222);
-            
-            Content = canvas;
+            canvas.Children.Add(report_problem_link);
+            Canvas.SetLeft(report_problem_link, 289 + website_link.ActualWidth + credits_link.ActualWidth + 115);
+            Canvas.SetTop(report_problem_link, 222);
         }
         
         /// <summary>

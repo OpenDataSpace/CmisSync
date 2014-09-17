@@ -326,6 +326,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Features.
+        /// </summary>
+        internal static string Features {
+            get {
+                return ResourceManager.GetString("Features", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Files up to date.
         /// </summary>
         internal static string FilesUpToDate {
@@ -638,6 +647,15 @@ namespace CmisSync {
         internal static string NotificationFileUpload {
             get {
                 return ResourceManager.GetString("NotificationFileUpload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Notifications.
+        /// </summary>
+        internal static string Notifications {
+            get {
+                return ResourceManager.GetString("Notifications", resourceCulture);
             }
         }
         

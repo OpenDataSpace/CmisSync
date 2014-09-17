@@ -1,10 +1,30 @@
-using System;
-
-using Gtk;
+//-----------------------------------------------------------------------
+// <copyright file="CmisTreeStore.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace CmisSync.CmisTree
 {
-    public class CmisTreeStore
+    using System;
+
+    using Gtk;
+
+    [CLSCompliant(false)]
+    public class CmisTreeStore : TreeStore
     {
         public enum Column : int
         {
@@ -16,45 +36,45 @@ namespace CmisSync.CmisTree
             ColumnStatus = 5,
             NumberColumn = 6,
         };
-
-        public TreeStore CmisStore { get; set; }
+  
 
         private object lockCmisStore = new object();
 
-        public CmisTreeStore ()
+        public CmisTreeStore() : base(typeof(Node), typeof(string), typeof(bool), typeof(bool), typeof(bool), typeof(string))
         {
-            CmisStore = new TreeStore (typeof(Node), typeof(string), typeof(bool), typeof(bool), typeof(bool), typeof(string));
         }
 
         public void UpdateCmisTree(RootFolder root)
         {
-            lock (lockCmisStore)
+            lock (this.lockCmisStore)
             {
                 TreeIter iter;
-                if (CmisStore.GetIterFirst (out iter))
+                if (this.GetIterFirst(out iter))
                 {
                     do
                     {
-                        string name = CmisStore.GetValue (iter, (int)Column.ColumnName) as string;
+                        string name = this.GetValue(iter, (int)Column.ColumnName) as string;
                         if (name == null)
                         {
-                            Console.WriteLine ("UpdateCmisTree GetValue Error");
+                            Console.WriteLine("UpdateCmisTree GetValue Error");
                             return;
                         }
+
                         if (name == root.Name)
                         {
-                            UpdateCmisTreeNode (iter, root);
+                            this.UpdateCmisTreeNode(iter, root);
                             return;
                         }
-                    } while (CmisStore.IterNext(ref iter));
+                    } while (this.IterNext(ref iter));
                 }
-                iter = CmisStore.AppendNode ();
-                UpdateCmisTreeNode (iter, root);
+
+                iter = this.AppendNode();
+                this.UpdateCmisTreeNode(iter, root);
                 return;
             }
         }
 
-        private void UpdateCmisTreeNode (TreeIter iter, Node node)
+        private void UpdateCmisTreeNode(TreeIter iter, Node node)
         {
 //            Node oldNode = CmisStore.GetValue (iter, (int)Column.ColumnNode) as Node;
 //            if (oldNode != node)
@@ -86,7 +106,7 @@ namespace CmisSync.CmisTree
 //                CmisStore.SetValue (iter, (int)Column.ColumnSelectedThreeState, newSelectedThreeState);
 //            }
 //            string oldStatus = CmisStore.GetValue (iter, (int)Column.ColumnStatus) as string;
-            string newStatus = "";
+            string newStatus = string.Empty;
             switch (node.Status) {
             case LoadingStatus.START:
                 newStatus = Properties_Resources.LoadingStatusSTART;
@@ -98,46 +118,48 @@ namespace CmisSync.CmisTree
                 newStatus = Properties_Resources.LoadingStatusABORTED;
                 break;
             default:
-                newStatus = "";
+                newStatus = string.Empty;
                 break;
             }
-//            if (oldStatus != newStatus)
-//            {
-//                CmisStore.SetValue (iter, (int)Column.ColumnStatus, newStatus);
-//            }
 
-            CmisStore.SetValues (iter, node, node.Name, node.Parent == null, node.Selected != false, node.Selected == null, newStatus);
+/*          if (oldStatus != newStatus)
+            {
+                CmisStore.SetValue (iter, (int)Column.ColumnStatus, newStatus);
+            }*/
+            this.SetValues(iter, node, node.Name, node.Parent == null, node.Selected != false, node.Selected == null, newStatus);
             foreach (Node child in node.Children)
             {
                 TreeIter iterChild;
-                GetChild (iter, out iterChild, child);
-                UpdateCmisTreeNode (iterChild, child);
+                this.GetChild(iter, out iterChild, child);
+                this.UpdateCmisTreeNode(iterChild, child);
             }
+
             return;
         }
 
-        private void GetChild (TreeIter iterParent, out TreeIter iterChild, Node child)
+        private void GetChild(TreeIter iterParent, out TreeIter iterChild, Node child)
         {
             TreeIter iter;
-            if (CmisStore.IterChildren (out iter, iterParent))
+            if (this.IterChildren(out iter, iterParent))
             {
                 do
                 {
-                    string name = CmisStore.GetValue (iter, (int)Column.ColumnName) as string;
-                    Node node = CmisStore.GetValue (iter, (int)Column.ColumnNode) as Node;
+                    string name = this.GetValue(iter, (int)Column.ColumnName) as string;
+                    Node node = this.GetValue(iter, (int)Column.ColumnNode) as Node;
                     if (name == child.Name)
                     {
                         if (node != child)
                         {
-                            Console.WriteLine ("GetChild Error " + name);
+                            Console.WriteLine("GetChild Error " + name);
                         }
+
                         iterChild = iter;
                         return;
                     }
-                } while (CmisStore.IterNext(ref iter));
+                } while (this.IterNext(ref iter));
             }
-            iterChild = CmisStore.AppendNode (iterParent);
+
+            iterChild = this.AppendNode(iterParent);
         }
     }
 }
-

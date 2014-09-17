@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="SetupWindow.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons (hylkebons@gmail.com)
 //
@@ -50,10 +68,13 @@ namespace CmisSync {
         /// </summary>
         public string Description;
 
+        private Label headerLabel;
+        private TextBlock descriptionLabel;
+
         /// <summary>
         /// Image that appears on the left of the window, showing the CmisSync logo.
         /// </summary>
-        private Image side_splash;
+        private Image sideSplash;
 
         /// <summary>
         /// Line of buttons that appears at the bottom, usually Cancel, Next, etc.
@@ -69,7 +90,8 @@ namespace CmisSync {
         /// Background for the bar line of buttons.
         /// </summary>
         private Rectangle buttonsBackground;
-        
+
+        private bool useXAML = true;
 
         /// <summary>
         /// Constructor.
@@ -88,10 +110,25 @@ namespace CmisSync {
             Closing += Close;
 
             // Taskbar
-            TaskbarItemInfo = new TaskbarItemInfo () {
+            TaskbarItemInfo = new TaskbarItemInfo()
+            {
                 Description = Properties_Resources.ApplicationName
             };
 
+            if (useXAML)
+            {
+                Padding = new Thickness(0);
+                LoadSetup();
+            }
+            else
+            {
+                CreateSetup();
+            }
+        }
+
+
+        private void CreateSetup()
+        {
             // Separation and background for the line of buttons.
             this.buttonsLine = new Rectangle()
             {
@@ -101,31 +138,47 @@ namespace CmisSync {
             };
             this.buttonsBackground = new Rectangle()
             {
-                Width  = Width,
+                Width = Width,
                 Height = 40,
-                Fill   = new SolidColorBrush (Color.FromRgb (240, 240, 240))    
+                Fill = new SolidColorBrush(Color.FromRgb(240, 240, 240))
             };
-            
+
             // Splash image.
-            this.side_splash = new Image () {
-                Width  = 150,
+            this.sideSplash = new Image()
+            {
+                Width = 150,
                 Height = 482
             };
-            this.side_splash.Source = UIHelpers.GetImageSource ("side-splash");
-            
+            this.sideSplash.Source = UIHelpers.GetImageSource("side-splash");
+
             // Components position.
 
-            ContentCanvas.Children.Add (this.buttonsBackground);
-            Canvas.SetRight (buttonsBackground, 0);
-            Canvas.SetBottom (buttonsBackground, 0);
-            
-            ContentCanvas.Children.Add (this.buttonsLine);
-            Canvas.SetRight (this.buttonsLine, 0);
-            Canvas.SetBottom (this.buttonsLine, 40);
-            
-            ContentCanvas.Children.Add (this.side_splash);
-            Canvas.SetLeft (this.side_splash, 0);
-            Canvas.SetBottom (this.side_splash, 0);
+            ContentCanvas.Children.Add(this.buttonsBackground);
+            Canvas.SetRight(buttonsBackground, 0);
+            Canvas.SetBottom(buttonsBackground, 0);
+
+            ContentCanvas.Children.Add(this.buttonsLine);
+            Canvas.SetRight(this.buttonsLine, 0);
+            Canvas.SetBottom(this.buttonsLine, 40);
+
+            ContentCanvas.Children.Add(this.sideSplash);
+            Canvas.SetLeft(this.sideSplash, 0);
+            Canvas.SetBottom(this.sideSplash, 0);
+        }
+
+
+        private void LoadSetup()
+        {
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/SetupWPF.xaml", System.UriKind.Relative);
+            UserControl SetupWPF = Application.LoadComponent(resourceLocater) as UserControl;
+
+            this.ContentCanvas = SetupWPF.FindName("ContentCanvas") as Canvas;
+            this.sideSplash = SetupWPF.FindName("SideSplash") as Image;
+            this.sideSplash.Source = UIHelpers.GetImageSource("side-splash");
+            this.headerLabel = SetupWPF.FindName("HeaderLabel") as Label;
+            this.descriptionLabel = SetupWPF.FindName("DescriptionLabel") as TextBlock;
+
+            Content = SetupWPF;
         }
         
         
@@ -134,22 +187,29 @@ namespace CmisSync {
         /// </summary>
         public void Reset ()
         {
-            // Remove elements.
-            ContentCanvas.Children.Remove (this.buttonsBackground);
-            ContentCanvas.Children.Remove (this.buttonsLine);
-            ContentCanvas.Children.Remove (this.side_splash);
+            if (useXAML)
+            {
+                LoadSetup();
+            }
+            else
+            {
+                // Remove elements.
+                ContentCanvas.Children.Remove(this.buttonsBackground);
+                ContentCanvas.Children.Remove(this.buttonsLine);
+                ContentCanvas.Children.Remove(this.sideSplash);
 
-            // Re-insert components on a new canvas.
-            ContentCanvas = new Canvas ();
-            Content       = ContentCanvas;
-            ContentCanvas.Children.Add (this.buttonsBackground);
-            ContentCanvas.Children.Add (this.buttonsLine);
-            ContentCanvas.Children.Add (this.side_splash);
+                // Re-insert components on a new canvas.
+                ContentCanvas = new Canvas();
+                Content = ContentCanvas;
+                ContentCanvas.Children.Add(this.buttonsBackground);
+                ContentCanvas.Children.Add(this.buttonsLine);
+                ContentCanvas.Children.Add(this.sideSplash);
+            }
 
             // Reset buttons and labels.
-            Buttons       = new List <Button> ();
-            Header        = "";
-            Description   = "";
+            Buttons = new List<Button>();
+            Header = "";
+            Description = "";
         }
         
         
@@ -158,53 +218,64 @@ namespace CmisSync {
         /// </summary>
         public void ShowAll ()
         {
-            // Create header and description.
-            Label header_label = new Label () {
-                Content    = Header,
-                Foreground = new SolidColorBrush (Color.FromRgb (0, 51, 153)),
-                FontSize   = 16
-            };          
-            TextBlock description_label = new TextBlock () {
-                Text         = Description, 
-                TextWrapping = TextWrapping.Wrap,
-                Width        = 375
-            };
+            if (useXAML)
+            {
+                this.headerLabel.Content = Header;
+                this.descriptionLabel.Text = Description;
+            }
+            else
+            {
+                // Create header and description.
+                Label header_label = new Label()
+                {
+                    Content = Header,
+                    Foreground = new SolidColorBrush(Color.FromRgb(0, 51, 153)),
+                    FontSize = 16
+                };
+                TextBlock description_label = new TextBlock()
+                {
+                    Text = Description,
+                    TextWrapping = TextWrapping.Wrap,
+                    Width = 375
+                };
 
-            // Labels position.
-            
-            ContentCanvas.Children.Add (header_label);
-            Canvas.SetLeft (header_label, 180);
-            Canvas.SetTop (header_label, 18);    
-            
-            ContentCanvas.Children.Add (description_label);
-            Canvas.SetLeft (description_label, 185);
-            Canvas.SetTop (description_label, 60);
-            
-        
+                // Labels position.
+
+                ContentCanvas.Children.Add(header_label);
+                Canvas.SetLeft(header_label, 180);
+                Canvas.SetTop(header_label, 18);
+
+                ContentCanvas.Children.Add(description_label);
+                Canvas.SetLeft(description_label, 185);
+                Canvas.SetTop(description_label, 60);
+            }
+
             // If there are buttons, position them.
-            if (Buttons.Count > 0) {
-                Buttons [0].IsDefault = true;
-				Buttons.Reverse ();
-                
+            if (Buttons.Count > 0)
+            {
+                Buttons[0].IsDefault = true;
+                Buttons.Reverse();
+
                 int right = 9;
-                
-                foreach (Button button in Buttons) {
-                    button.Measure (new Size (Double.PositiveInfinity, Double.PositiveInfinity));
-                    Rect rect = new Rect (button.DesiredSize);
-            
+
+                foreach (Button button in Buttons)
+                {
+                    button.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+                    Rect rect = new Rect(button.DesiredSize);
+
                     button.Width = rect.Width + 26;
-                    
+
                     if (button.Width < 75)
                         button.Width = 75;
-                    
-                    ContentCanvas.Children.Add (button);
-                    Canvas.SetRight (button, right);
-                    Canvas.SetBottom (button, 9);
-                    
-                    right += (int) button.Width + 9;
+
+                    ContentCanvas.Children.Add(button);
+                    Canvas.SetRight(button, right);
+                    Canvas.SetBottom(button, 9);
+
+                    right += (int)button.Width + 9;
                 }
             }
-            
+
             // Enables the window to receive keyboard messages when it is opened modelessly from Windows Forms.
             ElementHost.EnableModelessKeyboardInterop (this);
         }

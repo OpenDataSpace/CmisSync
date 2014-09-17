@@ -48,8 +48,8 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\Extras\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="DBreeze">
+      <HintPath>..\..\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -58,100 +58,143 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="xunit.extensions">
-      <HintPath>lib\xunit.extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Moq">
-      <HintPath>lib\Moq.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\Extras\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="xunit">
-      <HintPath>lib\xunit.dll</HintPath>
-    </Reference>
     <Reference Include="XamMac">
       <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\..\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveActivitiesManagerTest.cs" />
-    <Compile Include="CmisDatabaseTest.cs" />
-    <Compile Include="ConfigurationTest.cs" />
-    <Compile Include="EncodingTest.cs" />
-    <Compile Include="LocalFilesystemActivityGenerator.cs" />
-    <Compile Include="WatcherTest.cs" />
-    <Compile Include="DebugLoggingHandlerTest.cs" />
-    <Compile Include="FSDeletionHandlerTest.cs" />
-    <Compile Include="StreamTests\OffsetStreamTest.cs" />
-    <Compile Include="StreamTests\ChunkedStreamTest.cs" />
-    <Compile Include="StreamTests\BandwidthLimitedStreamTest.cs" />
-    <Compile Include="StreamTests\ProgressStreamTest.cs" />
-    <Compile Include="EventsTests\EventTypesTest.cs" />
-    <Compile Include="EventsTests\SyncEventManagerTest.cs" />
-    <Compile Include="EventsTests\SyncEventQueueTest.cs" />
-    <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\InvalidFolderNameFilterTest.cs" />
-    <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
-    <Compile Include="StreamTests\NonClosingHashStreamTest.cs" />
-    <Compile Include="StorageTests\PersistentStorageTest.cs" />
-    <Compile Include="IntegrationTests\CmisSyncTests.cs" />
-    <Compile Include="IntegrationTests\DotCMISTests.cs" />
-    <Compile Include="IntegrationTests\ContentChangeIT.cs" />
-    <Compile Include="SyncStrategiesTests\FileSynchronizerTest.cs" />
-    <Compile Include="SyncStrategiesTests\FolderSynchronizerTest.cs" />
-    <Compile Include="SyncStrategiesTests\MacWatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\NetWatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\WatcherTestUtils.cs" />
-    <Compile Include="SyncStrategiesTests\CrawlerTest.cs" />
-    <Compile Include="SyncStrategiesTests\WatcherTest.cs" />
-    <Compile Include="SyncStrategiesTests\ContentChangesTest.cs" />
-    <Compile Include="SyncStrategiesTests\ContentChangeEventAccumulatorTest.cs" />
-    <Compile Include="SyncStrategiesTests\ContentChangeEventTransformerTest.cs" />
-    <Compile Include="SyncStrategiesTests\SingleStepEventQueue.cs" />
-    <Compile Include="SyncStrategiesTests\SingleStepEventQueueTest.cs" />
-    <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
-    <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
-    <Compile Include="DataTests\PathMatcherTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoreFileNamesFilterTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoredFoldersFilterTest.cs" />
-    <Compile Include="SyncStrategiesTests\SituationDetectionTests\LocalSituationDetectionTest.cs" />
-    <Compile Include="SyncStrategiesTests\SituationDetectionTests\RemoteSituationDetectionTest.cs" />
-    <Compile Include="DataTests\MappedObjectsTest.cs" />
-    <Compile Include="ContentTasksTests\ChunkedDownloaderTest.cs" />
-    <Compile Include="ContentTasksTests\SimpleFileDownloaderTest.cs" />
-    <Compile Include="ContentTasksTests\SimpleFileUploaderTest.cs" />
-    <Compile Include="ContentTasksTests\ChunkedFileUploaderTest.cs" />
-    <Compile Include="AuthenticationProviderTests\PersistentAuthenticationProviderTest.cs" />
-    <Compile Include="AuthenticationProviderTests\KerberosAuthenticationProviderTest.cs" />
-    <Compile Include="SyncStrategiesTests\SyncMechanismTest.cs" />
-    <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
-    <Compile Include="UtilsTests\CmisSyncLibUtilsTest.cs" />
+    <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
     <Compile Include="EventsTests\ExceptionEventTest.cs" />
-    <Compile Include="TestUtils\MockUtil.cs" />
-    <Compile Include="TestUtils\ObservableHandler.cs" />
-    <Compile Include="TestUtils\ObservableHandlerTest.cs" />
-    <Compile Include="ContentTasksTests\ContentTaskUtilsTest.cs" />
+    <Compile Include="EventsTests\FileEventTest.cs" />
+    <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
+    <Compile Include="EventsTests\FullSyncCompletedEventTest.cs" />
+    <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
+    <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
+    <Compile Include="IntegrationTests\AllHandlersIT.cs" />
+    <Compile Include="IntegrationTests\ContentChangeIT.cs" />
+    <Compile Include="IntegrationTests\DotCMISTests.cs" />
+    <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\LocalObjectAddedTest.cs" />
-    <Compile Include="SyncStrategiesTests\SolverTests\RemoteObjectAddedTest.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\IgnoredFolderNamesFilterTest.cs" />
-    <Compile Include="EventsTests\EventsFilterTests\GenericHandleDoublicatedEventsFilterTest.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
-    <Compile Include="LegacyCodeTests\RepoInfoTests.cs" />
-    <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
+    <Compile Include="TestUtils\MockMetaDataStorageUtil.cs" />
+    <Compile Include="TestUtils\MockSessionUtil.cs" />
+    <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
+    <Compile Include="TestUtils\ObservableHandler.cs" />
+    <Compile Include="TestUtils\ObservableHandlerTest.cs" />
+    <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
+    <Compile Include="TestUtils\SingleStepEventQueue.cs" />
+    <Compile Include="TestUtils\SingleStepEventQueueTest.cs" />
+    <Compile Include="IntegrationTests\FullRepoTests.cs" />
+    <Compile Include="EventsTests\FsEventTest.cs" />
+    <Compile Include="TestUtils\MockOfIFolderUtil.cs" />
+    <Compile Include="TestUtils\MockOfIDocumentUtil.cs" />
+    <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
+    <Compile Include="TestUtils\MockOfIFilterAggregatorUtil.cs" />
+    <Compile Include="TestUtils\IsTestWithConfiguredLog4Net.cs" />
+    <Compile Include="EventsTests\ActivityListenerAggregatorTest.cs" />
+    <Compile Include="TestUtils\MockOfISyncEventQueue.cs" />
+    <Compile Include="IntegrationTests\FileSystemEventOrderTest.cs" />
+    <Compile Include="CmisTests\AuthenticationTests\AuthProviderFactoryTest.cs" />
+    <Compile Include="CmisTests\AuthenticationTests\KerberosAuthenticationProviderTest.cs" />
+    <Compile Include="CmisTests\AuthenticationTests\PersistentStandardAuthenticationProviderTest.cs" />
+    <Compile Include="CmisTests\OperationContextFactoryTest.cs" />
+    <Compile Include="AccumulatorTests\LocalObjectFetcherTest.cs" />
+    <Compile Include="AccumulatorTests\RemoteObjectFetcherTest.cs" />
+    <Compile Include="CmisTests\UiUtilsTests\CmisUtilsTest.cs" />
+    <Compile Include="ConfigTests\ConfigurationTest.cs" />
+    <Compile Include="ConfigTests\CredentialsTest.cs" />
+    <Compile Include="UtilsTests\EncodingTest.cs" />
+    <Compile Include="ConfigTests\RepoInfoTests.cs" />
+    <Compile Include="ConsumerTests\SyncMechanismTest.cs" />
+    <Compile Include="ConsumerTests\LocalSituationDetectionTest.cs" />
+    <Compile Include="ConsumerTests\RemoteSituationDetectionTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectAddedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectDeletedRemoteObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectRenamedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectAddedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectChangedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectMovedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\RemoteObjectRenamedTest.cs" />
+    <Compile Include="FileTransmissionTests\ChunkedDownloaderTest.cs" />
+    <Compile Include="FileTransmissionTests\ChunkedFileUploaderTest.cs" />
+    <Compile Include="FileTransmissionTests\ContentTaskUtilsTest.cs" />
+    <Compile Include="FileTransmissionTests\SimpleFileDownloaderTest.cs" />
+    <Compile Include="FileTransmissionTests\SimpleFileUploaderTest.cs" />
+    <Compile Include="PathMatcherTests\PathMatcherTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\MetaDataStorageTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\PersistentCookieStorageTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\EntitiesTests\MappedObjectsTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\ObjectTreeTest.cs" />
+    <Compile Include="ProducerTests\ContentChangeTests\ContentChangeEventTransformerTest.cs" />
+    <Compile Include="ProducerTests\ContentChangeTests\ContentChangesTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\MacWatcherTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\NetWatcherTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\CreatedChangedDeletedFileSystemEventHandlerTest.cs" />
+    <Compile Include="AccumulatorTests\RemoteObjectMovedOrRenamedAccumulatorTest.cs" />
+    <Compile Include="ProducerTests\ContentChangeTests\ContentChangeEventAccumulatorTest.cs" />
+    <Compile Include="StreamsTests\BandwidthLimitedStreamTest.cs" />
+    <Compile Include="StreamsTests\ChunkedStreamTest.cs" />
+    <Compile Include="StreamsTests\NonClosingHashStreamTest.cs" />
+    <Compile Include="StreamsTests\OffsetStreamTest.cs" />
+    <Compile Include="StreamsTests\ProgressStreamTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\WatcherTest.cs" />
+    <Compile Include="ProducerTests\WatcherTests\WatcherTestUtils.cs" />
+    <Compile Include="ProducerTests\WatcherTests\RenamedFileSystemEventHandlerTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\DescendantsCrawlerTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeReaderDosTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeReaderUnixTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\FileSystemWrapperTests.cs" />
+    <Compile Include="StorageTests\DataBaseTests\DBreezeTests.cs" />
+    <Compile Include="StorageTests\FileSystemTests\Utf8FileNameNormalizationTest.cs" />
+    <Compile Include="QueueingTests\DebugLoggingHandlerTest.cs" />
+    <Compile Include="QueueingTests\SyncEventManagerTest.cs" />
+    <Compile Include="QueueingTests\SyncEventQueueTest.cs" />
+    <Compile Include="FilterTests\FilterAggregatorTest.cs" />
+    <Compile Include="FilterTests\GenericHandleDublicatedEventsFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoreAlreadyHandledContentChangeEventsFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoreAlreadyHandledFsEventsFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoredFolderNamesFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoredFoldersFilterTest.cs" />
+    <Compile Include="FilterTests\IgnoreFileNamesFilterTest.cs" />
+    <Compile Include="FilterTests\InvalidFolderNameFilterTest.cs" />
+    <Compile Include="FilterTests\ReportingFilterTest.cs" />
+    <Compile Include="EventManagerInitializerTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeChangesModificationDateTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\AbstractEnhancedSolverTest.cs" />
+    <Compile Include="CmisTests\ConvenienceExtendersTests\CmisConvenienceExtendersTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectChangedTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\EntitiesTests\IFileConvenienceExtendersTest.cs" />
+    <Compile Include="QueueingTests\DelayRetryAndNextSyncEventHandlerTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectMovedTest.cs" />
+    <Compile Include="IntegrationTests\RepositoryUtilsTests.cs" />
+    <Compile Include="QueueingTests\ConnectionSchedulerTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\LocalEventGeneratorTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\LongFileAndPathNameSupportTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
       <Project>{2C914413-B31C-4362-93C7-1AE34F09112A}</Project>
       <Name>CmisSync.Lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Extras\log4net-1.2.11\src\log4net.vs2010.csproj">
-      <Project>{181FE707-E161-4722-9F38-6AAAB6FAA106}</Project>
-      <Name>log4net.vs2010</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Extras\OpenDataSpaceDotCMIS\DotCMIS\DotCMIS.csproj">
       <Project>{529EF90F-A34C-4426-A4F9-65113AC23841}</Project>
@@ -159,6 +202,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="test-servers-fuzzy.json" />
     <None Include="test-servers-disabled.json" />
     <None Include="test-servers.json" />
@@ -176,34 +220,23 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="StreamTests\" />
-    <Folder Include="IntegrationTests\" />
-    <Folder Include="EventsTests\" />
-    <Folder Include="EventsTests\EventsFilterTests\" />
-    <Folder Include="StorageTests\" />
-    <Folder Include="SyncStrategiesTests\" />
-    <Folder Include="DataTests\" />
-    <Folder Include="SyncStrategiesTests\SituationDetectionTests\" />
-    <Folder Include="ContentTasksTests\" />
-    <Folder Include="AuthenticationProviderTests\" />
-    <Folder Include="UtilsTests\" />
-    <Folder Include="SyncStrategiesTests\SolverTests\" />
-    <Folder Include="LegacyCodeTests\" />
+    <Folder Include="CmisTests\" />
+    <Folder Include="CmisTests\UiUtilsTests\" />
+    <Folder Include="AccumulatorTests\" />
+    <Folder Include="ConfigTests\" />
+    <Folder Include="ConsumerTests\" />
+    <Folder Include="StorageTests\DataBaseTests\" />
+    <Folder Include="StorageTests\FileSystemTests\" />
+    <Folder Include="StorageTests\DataBaseTests\EntitiesTests\" />
+    <Folder Include="PathMatcherTests\" />
+    <Folder Include="ProducerTests\" />
+    <Folder Include="ProducerTests\CrawlerTests\" />
+    <Folder Include="ProducerTests\WatcherTests\" />
+    <Folder Include="ProducerTests\ContentChangeTests\" />
+    <Folder Include="QueueingTests\" />
+    <Folder Include="FilterTests\" />
+    <Folder Include="CmisTests\ConvenienceExtendersTests\" />
   </ItemGroup>
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="True" RelativeMakefileName="Makefile.am" BuildTargetName="" CleanTargetName="" IsAutotoolsProject="True" RelativeConfigureInPath="../..">
-          <BuildFilesVar Sync="True" Name="SOURCES" />
-          <DeployFilesVar />
-          <ResourcesVar />
-          <OthersVar />
-          <GacRefVar Name="LIBS" Prefix="-r:" />
-          <AsmRefVar Name="LIBS" Prefix="-r:" />
-          <ProjectRefVar Name="LIBS" Prefix="-r:" />
-        </MonoDevelop.Autotools.MakefileInfo>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
 </Project>

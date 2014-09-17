@@ -1,12 +1,31 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// <copyright file="StatusIcon.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Windows;
 using System.Globalization;
-using CmisSync.Lib;
 using CmisSync.Lib.Events;
+using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Config;
 
 namespace CmisSync
 {
@@ -72,13 +91,11 @@ namespace CmisSync
             {
                 lock (repoCreditsErrorListLock)
                 {
-                    if (string.IsNullOrEmpty(repoCreditsErrorList.Find((string name) => { return name == reponame; })))
-                    {
-                        repoCreditsErrorList.Add(reponame);
-                    }
+                    repoCreditsErrorList.Add(reponame);
                 }
                 Controller.Warning = true;
-                this.trayicon.ShowBalloonTip(30000,
+                this.trayicon.ShowBalloonTip(
+                    30000,
                     String.Format(Properties_Resources.NotificationCredentialsError, reponame),
                     Properties_Resources.NotificationChangeCredentials,
                     ToolTipIcon.Warning);
@@ -96,7 +113,7 @@ namespace CmisSync
             this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
         }
 
-        private List<string> repoCreditsErrorList = new List<string>();
+        private HashSet<string> repoCreditsErrorList = new HashSet<string>();
 
         private Object repoCreditsErrorListLock = new Object();
 
@@ -104,12 +121,22 @@ namespace CmisSync
         {
             lock (repoCreditsErrorListLock)
             {
-                foreach (string reponame in repoCreditsErrorList)
+                while (repoCreditsErrorList.Count > 0)
                 {
-                    Program.Controller.EditRepositoryCredentials(reponame);
+                    HashSet<string>.Enumerator i = repoCreditsErrorList.GetEnumerator();
+                    if (i.MoveNext())
+                    {
+                        string reponame = i.Current;
+                        repoCreditsErrorList.Remove(reponame);
+                        Program.Controller.EditRepositoryCredentials(reponame);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                repoCreditsErrorList.Clear();
             }
+
             Controller.Warning = false;
         }
 
@@ -141,21 +168,21 @@ namespace CmisSync
                 {
                     BeginInvoke((Action)delegate
                     {
-                        if (icon_frame < 0)
-                        {
+                        if (icon_frame < 0) {
                             this.trayicon.Icon = SystemIcons.Error;
                             return;
                         }
-                        if (icon_frame > 0)
-                        {
+
+                        if (icon_frame > 0) {
                             this.trayicon.Icon = animationFrames[icon_frame];
                             return;
                         }
-                        if (Controller.Warning)
-                        {
+
+                        if (Controller.Warning) {
                             this.trayicon.Icon = SystemIcons.Warning;
                             return;
                         }
+
                         this.trayicon.Icon = animationFrames[icon_frame];
                         return;
                     });
@@ -197,7 +224,7 @@ namespace CmisSync
                     {
                         ToolStripMenuItem repoitem = (ToolStripMenuItem)this.traymenu.Items["tsmi" + reponame];
                         ToolStripMenuItem syncitem = (ToolStripMenuItem)repoitem.DropDownItems[2];
-                        foreach (RepoBase aRepo in Program.Controller.Repositories)
+                        foreach (Repository aRepo in Program.Controller.Repositories)
                         {
                             if (aRepo.Name == reponame)
                             {
@@ -212,22 +239,29 @@ namespace CmisSync
             //Transmission Submenu.
             Controller.UpdateTransmissionMenuEvent += delegate
             {
-                if(IsHandleCreated)
+                if (IsHandleCreated)
                 {
                     BeginInvoke((Action)delegate
                     {
                         this.stateItem.DropDownItems.Clear();
-                        List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
-                        foreach (FileTransmissionEvent transmission in transmissions)
+                        if (ConfigManager.CurrentConfig.Notifications)
                         {
-                            ToolStripMenuItem transmission_sub_menu_item = new TransmissionMenuItem(transmission, this);
-                            this.stateItem.DropDownItems.Add(transmission_sub_menu_item);
+                            List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
+                            foreach (FileTransmissionEvent transmission in transmissions)
+                            {
+                                ToolStripMenuItem transmission_sub_menu_item = new TransmissionMenuItem(transmission, this);
+                                this.stateItem.DropDownItems.Add(transmission_sub_menu_item);
+                            }
+                            if (transmissions.Count > 0)
+                            {
+                                this.stateItem.Enabled = true;
+                            }
+                            else
+                            {
+                                this.stateItem.Enabled = false;
+                            }
                         }
-                        if (transmissions.Count > 0)
-                        {
-                            this.stateItem.Enabled = true;
-                        }
-                        else 
+                        else
                         {
                             this.stateItem.Enabled = false;
                         }
@@ -324,7 +358,7 @@ namespace CmisSync
                     // Sub-item: suspend sync.
                     ToolStripMenuItem suspendFolderItem = new ToolStripMenuItem();
                     setSyncItemState(suspendFolderItem, SyncStatus.Idle);
-                    foreach (RepoBase aRepo in Program.Controller.Repositories)
+                    foreach (Repository aRepo in Program.Controller.Repositories)
                     {
                         if (aRepo.Name.Equals(folderName))
                         {
@@ -415,7 +449,6 @@ namespace CmisSync
             this.traymenu.Items.Add(this.exitItem);
         }
 
-
         /// <summary>
         /// Create the animation frames from image files.
         /// </summary>
@@ -498,7 +531,7 @@ namespace CmisSync
     {
         private FileTransmissionType Type { get; set; }
         private string Path { get; set; }
-        private Control Parent;
+        private Control ParentControl;
         private FileTransmissionEvent transmissionEvent;
 
         private int updateInterval = 1;
@@ -535,7 +568,7 @@ namespace CmisSync
         {
             Path = e.Path;
             Type = e.Type;
-            Parent = parent;
+            ParentControl = parent;
             transmissionEvent = e;
             switch (Type)
             {
@@ -569,7 +602,7 @@ namespace CmisSync
                 }
                 updateTime = DateTime.Now;
 
-                Parent.BeginInvoke((Action)delegate()
+                ParentControl.BeginInvoke((Action)delegate()
                 {
                     lock (disposeLock)
                     {

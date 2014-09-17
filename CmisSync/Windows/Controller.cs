@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="Controller.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -21,8 +39,8 @@ using System.IO;
 using System.Reflection;
 using Forms = System.Windows.Forms;
 
-using CmisSync.Lib;
 using CmisSync.Lib.Cmis;
+using CmisSync.Lib.Config;
 
 namespace CmisSync
 {
@@ -140,7 +158,7 @@ namespace CmisSync
         /// </summary>
         public void OpenCmisSyncFolder()
         {
-            Utils.OpenFolder(ConfigManager.CurrentConfig.FoldersPath);
+            Utils.OpenFolder(ConfigManager.CurrentConfig.GetFoldersPath());
         }
 
 
@@ -150,7 +168,7 @@ namespace CmisSync
         /// <param name="name">Name of the synchronized folder</param>
         public void OpenCmisSyncFolder(string name)
         {
-            Config.SyncConfig.Folder folder = ConfigManager.CurrentConfig.getFolder(name);
+            RepoInfo folder = ConfigManager.CurrentConfig.GetRepoInfo(name);
             if (folder != null)
                 Utils.OpenFolder(folder.LocalPath);
             else if (String.IsNullOrWhiteSpace(name))
@@ -158,25 +176,6 @@ namespace CmisSync
             else
                 Logger.Warn("Could not find requested config for \"" + name + "\"");
         }
-
-        /// <summary>
-        /// With the default web browser, open the remote folder of a CmisSync synchronized folder.
-        /// </summary>
-        /// <param name="name">Name of the synchronized folder</param>
-        public void OpenRemoteFolder(string name)
-        {
-            Config.SyncConfig.Folder folder = ConfigManager.CurrentConfig.getFolder(name);
-            if (folder != null)
-            {
-                RepoInfo repo = folder.GetRepoInfo();
-                Process.Start(CmisUtils.GetBrowsableURL(repo));
-            }
-            else
-            {
-                Logger.Warn("Could not find requested config for \"" + name + "\"");
-            }
-        }
-
 
         /// <summary>
         /// Quit CmisSync.

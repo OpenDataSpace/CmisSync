@@ -1,3 +1,21 @@
+//-----------------------------------------------------------------------
+// <copyright file="StatusIcon.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 //   CmisSync, a collaboration and sharing tool.
 //   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
 //
@@ -17,6 +35,7 @@
 using System;
 using System.Diagnostics;
 using CmisSync.Notifications;
+using CmisSync.Lib.Config;
 
 #if HAVE_APP_INDICATOR
 using AppIndicator;
@@ -27,14 +46,12 @@ using System.Globalization;
 using CmisSync.Lib.Events;
 using System.Collections.Generic;
 using log4net;
-using CmisSync.Lib;
+
+using CmisSync.Lib.Cmis;
 
 namespace CmisSync {
 
     public class StatusIcon {
-
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(StatusIcon));
-
         public StatusIconController Controller = new StatusIconController ();
 
         private Gdk.Pixbuf [] animation_frames;
@@ -56,8 +73,8 @@ namespace CmisSync {
             CreateAnimationFrames ();
 
 #if HAVE_APP_INDICATOR
-            this.indicator = new ApplicationIndicator ("cmissync",
-                    "process-syncing-i", Category.ApplicationStatus);
+            this.indicator = new ApplicationIndicator ("dataspacesync",
+                    "dataspacesync-process-syncing-i", Category.ApplicationStatus);
 
             this.indicator.Status = Status.Active;
 #else
@@ -75,7 +92,7 @@ namespace CmisSync {
                 Application.Invoke (delegate {
                         if (icon_frame > -1) {
 #if HAVE_APP_INDICATOR
-                        string icon_name = "process-syncing-";
+                        string icon_name = "dataspacesync-process-syncing-";
                         for (int i = 0; i <= icon_frame; i++)
                         icon_name += "i";
 
@@ -90,13 +107,13 @@ namespace CmisSync {
 
                         } else {
 #if HAVE_APP_INDICATOR
-                        this.indicator.IconName = "process-syncing-error";
+                        this.indicator.IconName = "dataspacesync-process-syncing-error";
 
                         // Force update of the icon
                         this.indicator.Status = Status.Attention;
                         this.indicator.Status = Status.Active;
 #else
-                        this.status_icon.Pixbuf = UIHelpers.GetIcon ("process-syncing-error", 24);
+                        this.status_icon.Pixbuf = UIHelpers.GetIcon ("dataspacesync-process-syncing-error", 24);
 #endif
                         }
                 });
@@ -119,11 +136,11 @@ namespace CmisSync {
             Controller.UpdateSuspendSyncFolderEvent += delegate (string reponame) {
                 if(!IsHandleCreated) return;
                 Application.Invoke(delegate {
-                    foreach (var menuItem in this.menu.Children) 
+                    foreach (var menuItem in this.menu.Children)
                     {
                         if(menuItem is CmisSyncMenuItem && reponame.Equals(((CmisSyncMenuItem)menuItem).RepoName))
                         {
-                            foreach (RepoBase aRepo in Program.Controller.Repositories)
+                            foreach (Repository aRepo in Program.Controller.Repositories)
                             {
                                 if (aRepo.Name.Equals(reponame))
                                 {
@@ -166,14 +183,14 @@ namespace CmisSync {
         {
             switch (status)
             {
-                case SyncStatus.Idle:
-                    (syncitem.Child as Label).Text = CmisSync.Properties_Resources.PauseSync;
-                    syncitem.Image = new Image (UIHelpers.GetIcon ("media_playback_pause", 12));
-                    break;
-                case SyncStatus.Suspend:
-                    (syncitem.Child as Label).Text = CmisSync.Properties_Resources.ResumeSync;
-                    syncitem.Image = new Image (UIHelpers.GetIcon ("media_playback_start", 12));
-                    break;
+            case SyncStatus.Idle:
+                (syncitem.Child as Label).Text = CmisSync.Properties_Resources.PauseSync;
+                syncitem.Image = new Image (UIHelpers.GetIcon ("dataspacesync-pause", 12));
+                break;
+            case SyncStatus.Suspend:
+                (syncitem.Child as Label).Text = CmisSync.Properties_Resources.ResumeSync;
+                syncitem.Image = new Image (UIHelpers.GetIcon ("dataspacesync-start", 12));
+                break;
             }
         }
 
@@ -193,23 +210,16 @@ namespace CmisSync {
                 foreach (string folder_name in Controller.Folders) {
                     Menu submenu = new Menu();
                     ImageMenuItem subfolder_item = new CmisSyncMenuItem (folder_name) {
-                        Image = new Image (UIHelpers.GetIcon ("folder-cmissync", 16)),
+                        Image = new Image (UIHelpers.GetIcon ("dataspacesync-folder", 16)),
                         Submenu = submenu,
                         RepoName = folder_name
                     };
 
                     ImageMenuItem open_localfolder_item = new CmisSyncMenuItem(
                             CmisSync.Properties_Resources.OpenLocalFolder) {
-                        Image = new Image (UIHelpers.GetIcon ("folder-cmissync", 16))
+                        Image = new Image (UIHelpers.GetIcon ("dataspacesync-folder", 16))
                     };
                     open_localfolder_item.Activated += OpenFolderDelegate(folder_name);
-/*
-                    ImageMenuItem browse_remotefolder_item = new CmisSyncMenuItem(
-                            CmisSync.Properties_Resources.BrowseRemoteFolder) {
-                        Image = new Image (UIHelpers.GetIcon ("folder-cmissync", 16))
-                    };
-                    browse_remotefolder_item.Activated += OpenRemoteFolderDelegate(folder_name);
-*/
 
                     ImageMenuItem edit_folder_item = new CmisSyncMenuItem (
                         CmisSync.Properties_Resources.EditTitle);
@@ -219,7 +229,7 @@ namespace CmisSync {
                             CmisSync.Properties_Resources.PauseSync) {
                         RepoName = folder_name
                     };
-                    foreach (RepoBase aRepo in Program.Controller.Repositories)
+                    foreach (Repository aRepo in Program.Controller.Repositories)
                     {
                         if (aRepo.Name.Equals(folder_name))
                         {
@@ -231,13 +241,15 @@ namespace CmisSync {
 
                     ImageMenuItem remove_folder_from_sync_item = new CmisSyncMenuItem(
                             CmisSync.Properties_Resources.RemoveFolderFromSync) {
-                        Image = new Image (UIHelpers.GetIcon ("document-deleted", 12))
+                        Image = new Image (UIHelpers.GetIcon ("dataspacesync-deleted", 12))
                     };
                     remove_folder_from_sync_item.Activated += RemoveFolderFromSyncDelegate(folder_name);
 
                     submenu.Add(open_localfolder_item);
                     submenu.Add(suspend_folder_item);
-                    submenu.Add(edit_folder_item);
+                    //  GUI workaround to remove ignore folder {{
+                    //submenu.Add(edit_folder_item);
+                    //  GUI workaround to remove ignore folder }}
                     submenu.Add(new SeparatorMenuItem());
                     submenu.Add(remove_folder_from_sync_item);
 
@@ -342,11 +354,11 @@ namespace CmisSync {
         private void CreateAnimationFrames ()
         {
             this.animation_frames = new Gdk.Pixbuf [] {
-                UIHelpers.GetIcon ("process-syncing-i", 24),
-                    UIHelpers.GetIcon ("process-syncing-ii", 24),
-                    UIHelpers.GetIcon ("process-syncing-iii", 24),
-                    UIHelpers.GetIcon ("process-syncing-iiii", 24),
-                    UIHelpers.GetIcon ("process-syncing-iiiii", 24)
+                UIHelpers.GetIcon ("dataspacesync-process-syncing-i", 24),
+                UIHelpers.GetIcon ("dataspacesync-process-syncing-ii", 24),
+                UIHelpers.GetIcon ("dataspacesync-process-syncing-iii", 24),
+                UIHelpers.GetIcon ("dataspacesync-process-syncing-iiii", 24),
+                UIHelpers.GetIcon ("dataspacesync-process-syncing-iiiii", 24)
             };
         }
 
@@ -367,7 +379,7 @@ namespace CmisSync {
 #endif
     }
 
-
+    [CLSCompliant(false)]
     public class CmisSyncMenuItem : ImageMenuItem {
         public string RepoName {get;set;}
         public CmisSyncMenuItem (string text) : base (text)
@@ -376,8 +388,9 @@ namespace CmisSync {
         }
     }
 
+    [CLSCompliant(false)]
     public class TransmissionMenuItem : ImageMenuItem {
-
+        private DateTime updateTime;
         public FileTransmissionType Type { get; private set; }
         public string Path { get; private set; }
         private string TypeString;
@@ -387,20 +400,20 @@ namespace CmisSync {
             TypeString = Type.ToString();
             switch(Type) {
             case FileTransmissionType.DOWNLOAD_NEW_FILE:
-                Image = new Image (UIHelpers.GetIcon ("Downloading", 16));
+                Image = new Image (UIHelpers.GetIcon ("dataspacesync-downloading", 16));
                 TypeString = Properties_Resources.NotificationFileDownload;
                 break;
             case FileTransmissionType.UPLOAD_NEW_FILE:
-                Image = new Image (UIHelpers.GetIcon ("Uploading", 16));
+                Image = new Image (UIHelpers.GetIcon ("dataspacesync-uploading", 16));
                 TypeString = Properties_Resources.NotificationFileUpload;
                 break;
             case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
                 TypeString = Properties_Resources.NotificationFileUpdateLocal;
-                Image = new Image (UIHelpers.GetIcon ("Updating", 16));
+                Image = new Image (UIHelpers.GetIcon ("dataspacesync-updating", 16));
                 break;
             case FileTransmissionType.UPLOAD_MODIFIED_FILE:
                 TypeString = Properties_Resources.NotificationFileUpdateRemote;
-                Image = new Image (UIHelpers.GetIcon ("Updating", 16));
+                Image = new Image (UIHelpers.GetIcon ("dataspacesync-updating", 16));
                 break;
             }
 
@@ -415,6 +428,13 @@ namespace CmisSync {
             }
 
             e.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs status) {
+                TimeSpan diff = DateTime.Now - updateTime;
+                if (diff.Seconds < 1) {
+                    return;
+                }
+
+                updateTime = DateTime.Now;
+
                 percent = (status.Percent != null)? (double) status.Percent: 0;
                 long? bitsPerSecond = status.BitsPerSecond;
                 if( status.Percent != null && bitsPerSecond != null && text != null) {

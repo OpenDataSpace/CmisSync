@@ -1,16 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-
-using log4net;
-using log4net.Config;
-using CmisSync.Lib;
-using CmisSync.Lib.Sync;
-
+//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace DataSpaceSync.Console
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
+
+    using log4net;
+    using log4net.Config;
+
     class ActivityListener : IActivityListener
     {
         public void ActivityStarted()
@@ -27,7 +49,7 @@ namespace DataSpaceSync.Console
         /// <summary>
         /// Mutex checking whether CmisSync is already running or not.
         /// </summary>
-        private static Mutex program_mutex = new Mutex(false, "DataSpaceSync");
+        private static Mutex programMutex = new Mutex(false, "DataSpaceSync");
 
         /// <summary>
         /// Logging.
@@ -39,51 +61,54 @@ namespace DataSpaceSync.Console
         /// </summary>
         private static bool verbose = false;
 
+        /// <summary>
+        /// The entry point of the program, where the program control starts and ends.
+        /// </summary>
+        /// <param name="args">The command-line arguments.</param>
         static void Main(string[] args)
         {
-
             // Only allow one instance of DataSpace Sync (on Windows)
-            if (!program_mutex.WaitOne(0, false))
-            {
+            if (!programMutex.WaitOne(0, false)) {
                 System.Console.WriteLine("DataSpaceSync is already running.");
                 Environment.Exit(-1);
             }
-            if (File.Exists(ConfigManager.CurrentConfigFile))
+
+            if (File.Exists(ConfigManager.CurrentConfigFile)) {
                 ConfigMigration.Migrate();
+            }
 
             log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
             CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
-            if (args.Length != 0)
-            {
-                foreach(string arg in args) {
+            if (args.Length != 0) {
+                foreach (string arg in args) {
                     // Check, if the user would like to read console logs
-                    if (arg.Equals("-v") || arg.Equals("--verbose"))
+                    if (arg.Equals("-v") || arg.Equals("--verbose")) {
                         verbose = true;
+                    }
                 }
             }
+
             // Add Console Logging if user wants to
-            if (verbose)
+            if (verbose) {
                 BasicConfigurator.Configure();
+            }
 
             Logger.Info("Starting.");
 
-            List<RepoBase> repositories = new List<RepoBase>();
-
-            foreach (Config.SyncConfig.Folder folder in ConfigManager.CurrentConfig.Folder)
-            {
-                string path = folder.LocalPath;
-                if (!Directory.Exists(path))
-                {
+            List<Repository> repositories = new List<Repository>();
+            var transmissionManager = new ActiveActivitiesManager();
+            foreach (RepoInfo repoInfo in ConfigManager.CurrentConfig.Folders) {
+                string path = repoInfo.LocalPath;
+                if (!Directory.Exists(path)) {
                     Directory.CreateDirectory(path);
                 }
 
-                RepoBase repo = new CmisSync.Lib.Sync.CmisRepo(folder.GetRepoInfo(),new ActivityListener());
+                Repository repo = new Repository(repoInfo, new ActivityListenerAggregator(new ActivityListener(), transmissionManager));
                 repositories.Add(repo);
                 repo.Initialize();
             }
 
-            while(true)
-            {
+            while (true) {
                 System.Threading.Thread.Sleep(100);
             }
         }

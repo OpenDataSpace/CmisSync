@@ -1,0 +1,11 @@
+[DEFAULT]
+default_host_main = gds2repo
+allowed_distributions = unstable
+
+[gds2repo]
+fqdn = repo.dataspace.cc
+method = scp
+login = devrepo
+incoming = /home/devrepo/dist/mini-dinstall/incoming
+allow_unsigned_uploads = true
+post_upload_command = ssh devrepo@repo.dataspace.cc bin/repoupdate

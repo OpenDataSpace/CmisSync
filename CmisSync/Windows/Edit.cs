@@ -1,9 +1,28 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Edit.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
-using CmisSync.Lib.Credentials;
+using CmisSync.Lib.Config;
+using CmisSync.Lib.Cmis.UiUtils;
 using CmisSync.CmisTree;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -37,6 +56,8 @@ namespace CmisSync
         /// </summary>
         public CmisRepoCredentials Credentials;
 
+        private BackgroundWorker backgroundWorker = new BackgroundWorker();
+
         private string remotePath;
         private string localPath;
 
@@ -58,9 +79,29 @@ namespace CmisSync
             this.Ignores = new List<string>(ignores);
             this.localPath = localPath;
             this.type = type;
+            this.backgroundWorker.WorkerSupportsCancellation = true;
+            this.backgroundWorker.DoWork += CheckPassword;
+            this.backgroundWorker.RunWorkerCompleted += PasswordChecked;
 
-            CreateEdit();
+            CreateTreeView();
+            LoadEdit();
+            switch (type)
+            {
+                case EditType.EditFolder:
+                    //  GUI workaround to remove ignore folder {{
+                    //tab.SelectedItem = tabItemSelection;
+                    //break;
+                    //  GUI workaround to remove ignore folder }}
+                case EditType.EditCredentials:
+                    tab.SelectedItem = tabItemCredentials;
+                    break;
+                default:
+                    break;
+            }
 
+            this.Title = Properties_Resources.EditTitle;
+            this.Description = "";
+            this.ShowAll();
 
             // Defines how to show the setup window.
             Controller.OpenWindowEvent += delegate
@@ -72,74 +113,99 @@ namespace CmisSync
                     BringIntoView();
                 });
             };
+
+            Controller.CloseWindowEvent += delegate
+            {
+                asyncLoader.Cancel();
+            };
+
+            finishButton.Click += delegate
+            {
+                Ignores = NodeModelUtils.GetIgnoredFolder(repo);
+                Credentials.Password = passwordBox.Password;
+                Controller.SaveFolder();
+                Close();
+            };
+
+            cancelButton.Click += delegate
+            {
+                Close();
+            };
         }
 
 
         protected override void Close(object sender, CancelEventArgs args)
         {
+            backgroundWorker.CancelAsync();
+            backgroundWorker.Dispose();
             Controller.CloseWindow();
         }
 
+
+        CmisSync.CmisTree.RootFolder repo;
+        private AsyncNodeLoader asyncLoader;
+
+        TreeView treeView;
+        private TabControl tab;
+        private TabItem tabItemSelection;
+        private TabItem tabItemCredentials;
         private TextBlock addressLabel;
         private TextBox addressBox;
         private TextBlock userLabel;
         private TextBox userBox;
         private TextBlock passwordLabel;
         private PasswordBox passwordBox;
-        private CircularProgressBar loggingProgress;
+        private CircularProgressBar passwordProgress;
         private TextBlock passwordHelp;
-        private bool passwordChanged = false;
+        bool passwordChanged;
+        private Button finishButton;
+        private Button cancelButton;
 
-        private void CheckPassword()
+
+        private void CheckPassword(object sender, DoWorkEventArgs args)
         {
-            if (!passwordChanged)
-            {
+            if (!passwordChanged) {
                 return;
             }
 
-            passwordHelp.Text = Properties_Resources.LoginCheck;
-            passwordBox.IsEnabled = false;
+            Dispatcher.BeginInvoke((Action)delegate
+            {
+                passwordHelp.Text = Properties_Resources.LoginCheck;
+                passwordBox.IsEnabled = false;
+                passwordProgress.Visibility = Visibility.Visible;
+            });
+
             ServerCredentials cred = new ServerCredentials()
             {
                 Address = Credentials.Address,
                 UserName = Credentials.UserName,
                 Password = passwordBox.Password
             };
-            new TaskFactory().StartNew(() =>
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    loggingProgress.Visibility = Visibility.Visible;
-                });
-                string output;
-                try
-                {
-                    CmisSync.Lib.Cmis.CmisUtils.GetRepositories(cred);
-                    output = Properties_Resources.LoginSuccess;
-                }
-                catch (Exception e)
-                {
-                    output = string.Format(Properties_Resources.LoginFailed, e.Message);
-                }
-                Dispatcher.BeginInvoke((Action)delegate
-                {
-                    passwordChanged = false;
-                    passwordHelp.Text = output;
-                    passwordBox.IsEnabled = true;
-                    loggingProgress.Visibility = Visibility.Hidden;
-                });
-            });
+
+            CmisUtils.GetRepositories(cred);
         }
 
-        /// <summary>
-        /// Create the UI
-        /// </summary>
-        private void CreateEdit()
+        private void PasswordChecked(object sender, RunWorkerCompletedEventArgs args)
+        {
+            if (args.Cancelled) {
+                return;
+            } else if (args.Error != null) {
+                passwordHelp.Text = string.Format(Properties_Resources.LoginFailed, args.Error.Message);
+            } else {
+                passwordHelp.Text = Properties_Resources.LoginSuccess;
+            }
+
+            passwordProgress.Visibility = Visibility.Hidden;
+            passwordChanged = false;
+            passwordBox.IsEnabled = true;
+        }
+
+        private void CreateTreeView()
         {
             System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/FolderTreeMVC/TreeView.xaml", System.UriKind.Relative);
-            TreeView treeView = Application.LoadComponent(resourceLocater) as TreeView;
+            treeView = Application.LoadComponent(resourceLocater) as TreeView;
 
-            CmisSync.CmisTree.RootFolder repo = new CmisSync.CmisTree.RootFolder()
+            repo = new CmisSync.CmisTree.RootFolder()
             {
                 Name = FolderName,
                 Id = Credentials.RepoId,
@@ -150,7 +216,7 @@ namespace CmisSync
             repos.Add(repo);
             repo.Selected = true;
 
-            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
+            asyncLoader = new AsyncNodeLoader(repo, Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
             IgnoredFolderLoader.AddIgnoredFolderToRootNode(repo, Ignores);
             LocalFolderLoader.AddLocalFolderToRootNode(repo, localPath);
             asyncLoader.Load(repo);
@@ -166,151 +232,45 @@ namespace CmisSync
                     asyncLoader.Load(expandedNode);
                 }
             }));
+        }
 
-            addressLabel = new TextBlock()
-            {
-                Text = Properties_Resources.CmisWebAddress + ":",
-                FontWeight = FontWeights.Bold
-            };
-            addressBox = new TextBox()
-            {
-                Width = 410,
-                Text = this.Credentials.Address.ToString(),
-                IsEnabled = false
-            };
-            userLabel = new TextBlock()
-            {
-                Width = 200,
-                Text = Properties_Resources.User + ":",
-                FontWeight = FontWeights.Bold
-            };
-            userBox = new TextBox()
-            {
-                Width = 200,
-                Text = this.Credentials.UserName,
-                IsEnabled = false
-            };
-            passwordLabel = new TextBlock()
-            {
-                Width = 200,
-                Text = Properties_Resources.Password + ":",
-                FontWeight = FontWeights.Bold
-            };
-            passwordBox = new PasswordBox()
-            {
-                Width = 200,
-                Password = this.Credentials.Password.ToString()
-            };
-            loggingProgress = new CircularProgressBar();
-            passwordHelp = new TextBlock()
-            {
-                Width = 200,
-            };
 
-            Canvas canvasSelection = new Canvas();
-            canvasSelection.Width = 430;
-            canvasSelection.Height = 287;
-            canvasSelection.Children.Add(treeView);
+        private void LoadEdit()
+        {
+            System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/EditWPF.xaml", System.UriKind.Relative);
+            UserControl editWPF = Application.LoadComponent(resourceLocater) as UserControl;
 
-            Canvas canvasCredentials = new Canvas();
-            canvasCredentials.Width = 430;
-            canvasCredentials.Height = 287;
-            canvasCredentials.Children.Add(addressLabel);
-            Canvas.SetTop(addressLabel, 40);
-            Canvas.SetLeft(addressLabel, 10);
-            canvasCredentials.Children.Add(addressBox);
-            Canvas.SetTop(addressBox, 60);
-            Canvas.SetLeft(addressBox, 10);
-            canvasCredentials.Children.Add(userLabel);
-            Canvas.SetTop(userLabel, 100);
-            Canvas.SetLeft(userLabel, 10);
-            canvasCredentials.Children.Add(userBox);
-            Canvas.SetTop(userBox, 120);
-            Canvas.SetLeft(userBox, 10);
-            canvasCredentials.Children.Add(passwordLabel);
-            Canvas.SetTop(passwordLabel, 100);
-            Canvas.SetLeft(passwordLabel, 220);
-            canvasCredentials.Children.Add(passwordBox);
-            Canvas.SetTop(passwordBox, 120);
-            Canvas.SetLeft(passwordBox, 220);
-            canvasCredentials.Children.Add(loggingProgress);
-            Canvas.SetTop(loggingProgress, 120);
-            Canvas.SetLeft(loggingProgress, 400);
-            canvasCredentials.Children.Add(passwordHelp);
-            Canvas.SetTop(passwordHelp, 140);
-            Canvas.SetLeft(passwordHelp, 220);
+            tab = editWPF.FindName("tab") as TabControl;
+            //  GUI workaround to remove ignore folder {{
+            //tabItemSelection = editWPF.FindName("tabItemSelection") as TabItem;
+            //  GUI workaround to remove ignore folder }}
+            tabItemCredentials = editWPF.FindName("tabItemCredentials") as TabItem;
+            addressLabel = editWPF.FindName("addressLabel") as TextBlock;
+            addressBox = editWPF.FindName("addressBox") as TextBox;
+            userLabel = editWPF.FindName("userLabel") as TextBlock;
+            userBox = editWPF.FindName("userBox") as TextBox;
+            passwordLabel = editWPF.FindName("passwordLabel") as TextBlock;
+            passwordBox = editWPF.FindName("passwordBox") as PasswordBox;
+            passwordProgress = editWPF.FindName("passwordProgress") as CircularProgressBar;
+            passwordHelp = editWPF.FindName("passwordHelp") as TextBlock;
+            finishButton = editWPF.FindName("finishButton") as Button;
+            cancelButton = editWPF.FindName("cancelButton") as Button;
 
-            TabControl tab = new TabControl();
+            //  GUI workaround to remove ignore folder {{
+            //tabItemSelection.Content = treeView;
+            //  GUI workaround to remove ignore folder }}
 
-            TabItem tabItemSelection = new TabItem();
-            tabItemSelection.Header = Properties_Resources.AddingFolder;
-            tabItemSelection.Content = canvasSelection;
-            tab.Items.Add(tabItemSelection);
+            addressBox.Text = Credentials.Address.ToString();
+            userBox.Text = Credentials.UserName;
+            passwordBox.Password = Credentials.Password.ToString();
+            passwordHelp.Text = string.Empty;
 
-            TabItem tabItemCredentials = new TabItem();
-            tabItemCredentials.Header = Properties_Resources.Credentials;
-            tabItemCredentials.Content = canvasCredentials;
-            tab.Items.Add(tabItemCredentials);
+            ContentCanvas.Children.Add(editWPF);
 
-            switch (type)
-            {
-                case EditType.EditFolder:
-                    tab.SelectedItem = tabItemSelection;
-                    break;
-                case EditType.EditCredentials:
-                    tab.SelectedItem = tabItemCredentials;
-                    break;
-                default:
-                    break;
-            }
-
-            ContentCanvas.Children.Add(tab);
-            Canvas.SetTop(tab, 30);
-            Canvas.SetLeft(tab, 175);
-
-            passwordBox.LostFocus += delegate { CheckPassword(); };
+            passwordBox.LostFocus += delegate { backgroundWorker.RunWorkerAsync(); };
             passwordBox.PasswordChanged += delegate { passwordChanged = true; };
             passwordChanged = true;
-            CheckPassword();
-
-            Controller.CloseWindowEvent += delegate
-            {
-                asyncLoader.Cancel();
-            };
-
-
-            Button finish_button = new Button()
-            {
-                Content = Properties_Resources.SaveChanges,
-                IsDefault = false
-            };
-
-            Button cancel_button = new Button()
-            {
-                Content = Properties_Resources.DiscardChanges,
-                IsDefault = false
-            };
-
-            Buttons.Add(finish_button);
-            Buttons.Add(cancel_button);
-
-            finish_button.Focus();
-
-            finish_button.Click += delegate
-            {
-                Ignores = NodeModelUtils.GetIgnoredFolder(repo);
-                Credentials.Password = passwordBox.Password;
-                Controller.SaveFolder();
-                Close();
-            };
-
-            cancel_button.Click += delegate
-            {
-                Close();
-            };
-            this.Title = Properties_Resources.EditTitle;
-            this.Description = "";
-            this.ShowAll();
+            backgroundWorker.RunWorkerAsync();
         }
     }
 }

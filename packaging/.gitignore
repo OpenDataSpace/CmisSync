@@ -1,0 +1,6 @@
+usr/
+dataspacesync*.changes
+dataspacesync*.deb
+dataspacesync/dataspacesync.tar.gz
+Makefile
+Makefile.in
