@@ -366,8 +366,10 @@ namespace CmisSync
                 CmisRepoCredentials credentials = new CmisRepoCredentials()
                 {
                     Address = folder.Address,
+                    Binding = folder.Binding,
                     UserName = folder.User,
-                    Password = new Password() {
+                    Password = new Password()
+                    {
                         ObfuscatedPassword = folder.ObfuscatedPassword
                     },
                     RepoId = folder.RepositoryId

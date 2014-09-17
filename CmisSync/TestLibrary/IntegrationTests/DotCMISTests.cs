@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="DotCMISTests.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -108,10 +108,11 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
             // var watch = Stopwatch.StartNew();
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
             // watch.Stop();
             // Console.WriteLine(String.Format("Created Session in {0} msec",watch.ElapsedMilliseconds));
@@ -163,9 +164,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
@@ -209,9 +211,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder remoteFolder = (IFolder)session.GetObject(repositoryId);
             Assert.IsNotNull(remoteFolder);
         }
@@ -248,9 +251,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "testfile.txt";
             try {
@@ -309,9 +313,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId) {
+            string repositoryId,
+            string binding) {
             Regex entryRegex = new Regex(@"^\{.+\}[0-9a-fA-F]+$");
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "hashedfile.txt";
             try {
@@ -385,9 +390,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
@@ -454,8 +460,9 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId) {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            string repositoryId,
+            string binding) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string content = "content";
@@ -473,8 +480,9 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId) {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            string repositoryId,
+            string binding) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             if (!session.IsServerAbleToUpdateModificationDate()) {
                 Assert.Ignore("Server is not able to sync modification dates");
             }
@@ -514,8 +522,9 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId) {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            string repositoryId,
+            string binding) {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
@@ -557,9 +566,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "testfile.jpg";
             Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -607,9 +617,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder rootFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string folderName = "1";
             string newFolderName = "was 1 in past";
@@ -644,9 +655,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder rootFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string folderName = "1";
             string newFolderName = "2";
@@ -685,8 +697,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId) {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            string repositoryId,
+            string binding)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             for (int i = 0; i < 1000; i++) {
                 IFolder root = (IFolder)session.GetObjectByPath(remoteFolderPath);
                 foreach (var child in root.GetChildren()) {
@@ -738,11 +752,17 @@ namespace TestLibrary.IntegrationTests
             string user,
             Password password,
             string url,
-            string repoId)
+            string repoId,
+            string binding)
         {
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = url;
+            if (binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                cmisParameters[SessionParameter.AtomPubUrl] = url;
+            } else if (binding.Equals(BindingType.Browser, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
+                cmisParameters[SessionParameter.BrowserUrl] = url;
+            }
             cmisParameters[SessionParameter.User] = user;
             cmisParameters[SessionParameter.Password] = password.ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoId;
@@ -817,9 +837,10 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            CreateSession(user, password, url, repositoryId);
+            CreateSession(user, password, url, repositoryId, binding);
         }
 
         /// <summary>
@@ -854,11 +875,18 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = url.ToString();
+            if (binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                cmisParameters[SessionParameter.AtomPubUrl] = url;
+            } else if (binding.Equals(BindingType.Browser, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
+                cmisParameters[SessionParameter.BrowserUrl] = url;
+            }
+
             cmisParameters[SessionParameter.User] = user;
             cmisParameters[SessionParameter.Password] = password;
             cmisParameters[SessionParameter.RepositoryId] = repositoryId;
@@ -905,11 +933,18 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = url.ToString();
+            if (binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                cmisParameters[SessionParameter.AtomPubUrl] = url;
+            } else if (binding.Equals(BindingType.Browser, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
+                cmisParameters[SessionParameter.BrowserUrl] = url;
+            }
+
             cmisParameters[SessionParameter.User] = user;
             cmisParameters[SessionParameter.Password] = password;
             cmisParameters[SessionParameter.RepositoryId] = repositoryId;
