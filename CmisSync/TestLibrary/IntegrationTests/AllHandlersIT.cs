@@ -359,17 +359,18 @@ namespace TestLibrary.IntegrationTests
             var remoteDetection = new RemoteSituationDetection();
             var transmissionManager = new ActiveActivitiesManager();
             var activityAggregator = new ActivityListenerAggregator(Mock.Of<IActivityListener>(), transmissionManager);
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator, isServerAbleToUpdateModificationDate: true);
-            manager.AddEventHandler(syncMechanism);
-
-            var remoteFolder = MockSessionUtil.CreateCmisFolder();
 
             var ignoreFolderFilter = new IgnoredFoldersFilter();
             var ignoreFolderNameFilter = new IgnoredFolderNameFilter();
             var ignoreFileNamesFilter = new IgnoredFileNamesFilter();
             var invalidFolderNameFilter = new InvalidFolderNameFilter();
-
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
+
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator, filterAggregator, isServerAbleToUpdateModificationDate: true);
+            manager.AddEventHandler(syncMechanism);
+
+            var remoteFolder = MockSessionUtil.CreateCmisFolder();
+
             var localFolder = new Mock<IDirectoryInfo>();
             var generator = new CrawlEventGenerator(storage, fsFactory);
             var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator);

@@ -84,7 +84,7 @@ namespace CmisSync.Lib
         private AbstractFolderEvent CreateRemoteEventBasedOnStorage(IFileableCmisObject cmisObject, IMappedObject storedParent, IMappedObject storedMappedChild)
         {
             AbstractFolderEvent newEvent = null;
-            if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
+            if (storedParent != null && storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                 // Renamed or Equal
                 if (storedMappedChild.Name == cmisObject.Name) {
                     // Equal or property update

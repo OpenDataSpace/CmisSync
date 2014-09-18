@@ -49,16 +49,14 @@ namespace CmisSync.Lib.Filter
         {
             set
             {
-                if (value == null)
-                {
+                if (value == null) {
                     throw new ArgumentNullException("Given wildcards are null");
                 }
 
                 lock (this.listLock)
                 {
                     this.wildcards.Clear();
-                    foreach (string wildcard in value)
-                    {
+                    foreach (string wildcard in value) {
                         this.wildcards.Add(Utils.IgnoreLineToRegex(wildcard));
                     }
                 }
@@ -75,10 +73,8 @@ namespace CmisSync.Lib.Filter
             lock (this.listLock)
             {
                 reason = string.Empty;
-                foreach (Regex wildcard in this.wildcards)
-                {
-                    if (wildcard.IsMatch(name))
-                    {
+                foreach (Regex wildcard in this.wildcards) {
+                    if (wildcard.IsMatch(name)) {
                         reason = string.Format("Folder \"{0}\" matches regex {1}", name, wildcard.ToString());
                         return true;
                     }
