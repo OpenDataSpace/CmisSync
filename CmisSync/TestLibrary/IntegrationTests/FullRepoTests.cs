@@ -161,13 +161,6 @@ namespace TestLibrary.IntegrationTests
             this.session = factory.CreateSession(cmisParameters);
 
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
-            foreach (var child in root.GetChildren()) {
-                if (child is IFolder && child.Name == this.subfolder) {
-                    (child as IFolder).DeleteTree(true, null, true);
-                }
-            }
-
-            root.Refresh();
             this.remoteRootDir = root.CreateFolder(this.subfolder);
         }
 
@@ -181,6 +174,7 @@ namespace TestLibrary.IntegrationTests
 
             this.remoteRootDir.Refresh();
             this.remoteRootDir.DeleteTree(true, null, true);
+            this.repo.Dispose();
         }
 
         [Test, Category("Slow")]
@@ -257,6 +251,7 @@ namespace TestLibrary.IntegrationTests
             using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create)) {
             }
 
+            this.remoteRootDir.Refresh();
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(false, null, true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
 
@@ -395,8 +390,8 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child, Is.InstanceOf(typeof(IDocument)));
             var doc = child as IDocument;
             Assert.That(doc.ContentStreamLength, Is.GreaterThan(0), "ContentStream not set");
-            Assert.That(((DateTime)doc.LastModificationDate - modificationDate).Seconds, Is.Not.GreaterThan(1), "Modification date is not equal");
-            Assert.That(((DateTime)doc.CreationDate - creationDate).Seconds, Is.Not.GreaterThan(1), "Creation Date is not equal");
+            this.AssertThatDatesAreEqual(doc.LastModificationDate, modificationDate, "Modification date is not equal");
+            this.AssertThatDatesAreEqual(doc.CreationDate, creationDate, "Creation Date is not equal");
             Assert.That(this.localRootDir.GetFiles().First().LastWriteTimeUtc, Is.EqualTo(modificationDate));
         }
 
@@ -654,6 +649,8 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Run();
 
+            this.session.GetObject(this.remoteRootDir.Id);
+            this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
         }
@@ -833,13 +830,13 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
             if (this.session.IsServerAbleToUpdateModificationDate()) {
                 foreach (var remoteFile in this.remoteRootDir.GetChildren()) {
-                    Assert.That((modificationDate - (DateTime)remoteFile.LastModificationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote modification date of {0}", remoteFile.Name));
-                    Assert.That((creationDate - (DateTime)remoteFile.CreationDate).Seconds, Is.Not.GreaterThan(1), string.Format("remote creation date of {0}", remoteFile.Name));
+                    this.AssertThatDatesAreEqual(modificationDate, remoteFile.LastModificationDate, string.Format("remote modification date of {0}", remoteFile.Name));
+                    this.AssertThatDatesAreEqual(creationDate, remoteFile.CreationDate, string.Format("remote creation date of {0}", remoteFile.Name));
                 }
 
                 foreach (var localFile in this.localRootDir.GetFiles()) {
-                    Assert.That((modificationDate - localFile.LastWriteTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local modification date of {0}", localFile.Name));
-                    Assert.That((creationDate - localFile.CreationTimeUtc).Seconds, Is.Not.GreaterThan(1), string.Format("local creation date of {0}", localFile.Name));
+                    this.AssertThatDatesAreEqual(modificationDate, localFile.LastWriteTimeUtc, string.Format("local modification date of {0}", localFile.Name));
+                    this.AssertThatDatesAreEqual(creationDate, localFile.CreationTimeUtc, string.Format("local creation date of {0}", localFile.Name));
                 }
             }
         }
@@ -1012,6 +1009,105 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
+        public void LocalFileRenamedAndDeletedRemotely() {
+            string newName = "newtestfile.txt";
+            string oldName = "testfile.txt";
+            string content = "text";
+            this.remoteRootDir.CreateDocument(oldName, content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
+            this.remoteRootDir.Refresh();
+            this.remoteRootDir.GetChildren().First().Delete(true);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+            Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(newName));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            var doc = remoteRootDir.GetChildren().First() as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            Assert.That(doc.Name, Is.EqualTo(newName));
+        }
+
+        [Test, Category("Slow")]
+        public void LocalFileMovedAndDeletedRemotely() {
+            string newName = "newtestfile.txt";
+            string oldName = "testfile.txt";
+            string content = "text";
+
+            this.remoteRootDir.CreateFolder("folder").CreateDocument(oldName, content);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetDirectories().First().GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
+            this.remoteRootDir.Refresh();
+            ((this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument).Delete(true);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo("folder"));
+            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+            Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(newName));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+            foreach (var child in this.remoteRootDir.GetChildren()) {
+                if (child is IFolder) {
+                    Assert.That(child.Name, Is.EqualTo("folder"));
+                } else if (child is IDocument) {
+                    var doc = child as IDocument;
+                    Assert.That(doc.Name, Is.EqualTo(newName));
+                    Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+                } else {
+                    Assert.Fail("Child is neither folder nor document");
+                }
+            }
+        }
+
+        [Test, Category("Slow")]
+        public void LocalFolderWithContentRenamedAndDeletedRemotely() {
+            string newName = "newtestfile.txt";
+            string oldName = "testfile.txt";
+            string content = "text";
+            this.remoteRootDir.CreateFolder("folder").CreateFolder(oldName).CreateDocument("doc", content);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetDirectories().First().GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
+            this.remoteRootDir.Refresh();
+            (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(true, null, true);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles(), Is.Empty);
+            Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newName));
+            Assert.That(this.localRootDir.GetDirectories().First().GetFiles().First().Name, Is.EqualTo("doc"));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(newName));
+            var doc = (remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument;
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            Assert.That(doc.Name, Is.EqualTo("doc"));
+        }
+
+        [Test, Category("Slow")]
         public void OneFileIsCopiedAFewTimes() {
             FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
             var fileNames = new List<string>();
@@ -1142,7 +1238,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(file.Length, Is.EqualTo(newContent.Length));
             Assert.That(file.Length, Is.EqualTo(doc.ContentStreamLength));
             if (this.session.IsServerAbleToUpdateModificationDate()) {
-                Assert.That(file.LastWriteTimeUtc, Is.EqualTo(doc.LastModificationDate).Within(1).Seconds);
+                this.AssertThatDatesAreEqual(file.LastWriteTimeUtc, doc.LastModificationDate);
             }
         }
 
@@ -1190,8 +1286,61 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        // Not yet correct on the server side
-        [Ignore]
+        [Ignore("It is not possible to handle this situation at the moment")]
+        [Test, Category("Slow"), Category("Erratic")]
+        public void CyclicRenaming() {
+            string folderName1 = "A";
+            string folderName2 = "B";
+            string subFolderName = "sub";
+            var folder1 = this.localRootDir.CreateSubdirectory(folderName1);
+            var folder2 = this.localRootDir.CreateSubdirectory(folderName2);
+            folder1.CreateSubdirectory(subFolderName);
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            var children = this.remoteRootDir.GetChildren();
+            IFolder remoteA = null;
+            IFolder remoteB = null;
+            foreach (var child in children) {
+                if (child.Name.Equals(folderName1)) {
+                    remoteA = child as IFolder;
+                } else if (child.Name.Equals(folderName2)) {
+                    remoteB = child as IFolder;
+                }
+            }
+
+            Assert.That(remoteA, Is.Not.Null);
+            Assert.That(remoteB, Is.Not.Null);
+
+            string fullName1 = folder1.FullName;
+            string fullName2 = folder2.FullName;
+            folder1.MoveTo(folder1.FullName + "_renamed");
+            folder2.MoveTo(fullName1);
+            new DirectoryInfo(fullName1 + "_renamed").MoveTo(fullName2);
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.Run();
+
+            var dirs = this.localRootDir.GetDirectories();
+            Assert.That(dirs.Count(), Is.EqualTo(2));
+            var A = dirs.First().Name.Equals(folderName1) ? dirs.First() : dirs.Last();
+            var B = dirs.First().Name.Equals(folderName2) ? dirs.First() : dirs.Last();
+            Assert.That(A.GetDirectories(), Is.Empty);
+            Assert.That(B.GetDirectories().Count(), Is.EqualTo(1));
+            Assert.That(B.GetDirectories().First().Name, Is.EqualTo(subFolderName));
+
+            remoteA.Refresh();
+            remoteB.Refresh();
+            Assert.That(remoteA.Name, Is.EqualTo(folderName2));
+            Assert.That(remoteB.Name, Is.EqualTo(folderName1));
+            Assert.That((remoteA as IFolder).GetChildren().First().Name, Is.EqualTo(subFolderName));
+            Assert.That((remoteB as IFolder).GetChildren().Count(), Is.EqualTo(0));
+        }
+
+        [Ignore("Not yet correct on the server side")]
         [Test, Category("Slow")]
         public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
@@ -1216,6 +1365,14 @@ namespace TestLibrary.IntegrationTests
                 if (waited > timeout) {
                     Assert.Fail("Timeout exceeded");
                 }
+            }
+        }
+
+        private void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
+            if (msg != null) {
+                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
+            } else {
+                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds);
             }
         }
 
