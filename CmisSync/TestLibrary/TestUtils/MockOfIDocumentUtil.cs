@@ -92,6 +92,16 @@ namespace TestLibrary.TestUtils
             doc.Setup(d => d.Properties).Returns(properties);
         }
 
+        public static void SetupUpdateModificationDate(this Mock<IDocument> doc, DateTime? oldDate = null) {
+            doc.Setup(d => d.LastModificationDate).Returns(oldDate);
+            doc.Setup(d => d.UpdateProperties(
+                It.Is<IDictionary<string, object>>(dic => dic.ContainsKey(PropertyIds.LastModificationDate)), true))
+                .Callback<IDictionary<string, object>, bool>(
+                    (dict, b) =>
+                    doc.Setup(d => d.LastModificationDate).Returns((DateTime?)dict[PropertyIds.LastModificationDate]))
+                .Returns(doc.Object);
+        }
+
         public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {
             doc.VerifySetContentStream(Times.Once(), overwrite, refresh, mimeType);
         }

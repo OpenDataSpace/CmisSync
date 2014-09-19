@@ -53,7 +53,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     {
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
-        private ISyncEventQueue queue;
         private ActiveActivitiesManager transmissionManager;
 
         /// <summary>
@@ -61,24 +60,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="queue">Queue to report transmission events to.</param>
         /// <param name="manager">Activitiy manager for transmission propagations</param>
         /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ISyncEventQueue queue,
             ActiveActivitiesManager manager,
             bool serverCanModifyCreationAndModificationDate = true) : base(session, storage, serverCanModifyCreationAndModificationDate) {
-            if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
-            }
-
             if (manager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
-            this.queue = queue;
             this.transmissionManager = manager;
         }
 
@@ -123,8 +115,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 LastLocalWriteTimeUtc = localFileSystemInfo is IFileInfo && (localFileSystemInfo as IFileInfo).Length > 0 ? (DateTime?)null : (DateTime?)localFileSystemInfo.LastWriteTimeUtc,
                 LastChangeToken = addedObject.ChangeToken,
                 LastContentSize = localFileSystemInfo is IDirectoryInfo ? -1 : 0,
-                ChecksumAlgorithmName =  localFileSystemInfo is IDirectoryInfo ? null : "SHA-1",
-                LastChecksum =  localFileSystemInfo is IDirectoryInfo ? null : SHA1.Create().ComputeHash(new byte[0])
+                ChecksumAlgorithmName = localFileSystemInfo is IDirectoryInfo ? null : "SHA-1",
+                LastChecksum = localFileSystemInfo is IDirectoryInfo ? null : SHA1.Create().ComputeHash(new byte[0])
             };
             this.Storage.SaveMappedObject(mapped);
 

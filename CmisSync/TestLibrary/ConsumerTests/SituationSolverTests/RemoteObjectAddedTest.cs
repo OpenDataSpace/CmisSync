@@ -50,7 +50,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         private string path;
         private ActiveActivitiesManager manager;
-        private Mock<ISyncEventQueue> queue;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private RemoteObjectAdded underTest;
@@ -63,27 +62,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.manager = new ActiveActivitiesManager();
             this.session = new Mock<ISession>();
             this.storage = new Mock<IMetaDataStorage>();
-            this.queue = new Mock<ISyncEventQueue>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
-            this.underTest = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.queue.Object, this.manager, this.fsFactory.Object);
+            this.underTest = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.manager, this.fsFactory.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesQueue()
         {
-            new RemoteObjectAdded(this.session.Object, this.storage.Object, Mock.Of<ISyncEventQueue>(), this.manager);
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfQueueIsNull() {
-            new RemoteObjectAdded(this.session.Object, this.storage.Object, null, this.manager);
+            new RemoteObjectAdded(this.session.Object, this.storage.Object, this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
-            new RemoteObjectAdded(this.session.Object, this.storage.Object, Mock.Of<ISyncEventQueue>(), null);
+            new RemoteObjectAdded(this.session.Object, this.storage.Object, null);
         }
 
         [Test, Category("Fast"), Category("Solver")]

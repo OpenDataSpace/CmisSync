@@ -76,6 +76,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 if (remoteContent == ContentChangeType.NONE) {
                     if (fileInfo.IsContentChangedTo(obj, true)) {
                         // Upload local content
+                        updateRemoteDate = true;
                         throw new NotImplementedException();
                     } else {
                         // Just date sync
@@ -113,6 +114,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         }
                     } else {
                         // Download remote content
+                        updateLocalDate = true;
                         throw new NotImplementedException();
                     }
                 }

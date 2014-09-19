@@ -109,6 +109,30 @@ namespace TestLibrary.ProducerTests.WatcherTests
         }
 
         [Test, Category("Medium")]
+        public void HandlesCreatedAndChangedEventsInOrder() {
+            using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
+                this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
+                this.fsFactory.AddFile(this.path, true);
+                this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Type != WatcherChangeTypes.Created))).Throws<ArgumentException>();
+                this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Type == WatcherChangeTypes.Created))).Callback(
+                    () => {
+                    this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Type == WatcherChangeTypes.Created))).Throws<ArgumentException>();
+                    this.queue.Setup(q => q.AddEvent(It.Is<FSEvent>(e => e.Type == WatcherChangeTypes.Changed)));
+                });
+
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Created, Directory, Name));
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+                underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Changed, Directory, Name));
+
+                this.WaitForThreshold();
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Created)), Times.Exactly(1));
+                this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory == false && e.Name == Name && e.LocalPath == this.path && e.Type == WatcherChangeTypes.Changed)), Times.Exactly(3));
+                this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
+            }
+        }
+
+        [Test, Category("Medium")]
         public void HandlesFileChangedEvent() {
             using (var underTest = new CreatedChangedDeletedFileSystemEventHandler(this.queue.Object, this.storage.Object, this.fsFactory.Object)) {
                 this.fsFactory.Setup(f => f.IsDirectory(this.path)).Returns((bool?)false);
@@ -257,6 +281,7 @@ namespace TestLibrary.ProducerTests.WatcherTests
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
                 System.Threading.Thread.Sleep(20);
                 underTest.Handle(null, new FileSystemEventArgs(WatcherChangeTypes.Deleted, Directory, Name));
+
                 // negativ numbers lead to ArgumentException so this would break here
             }
         }

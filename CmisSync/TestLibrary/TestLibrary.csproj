@@ -189,7 +189,10 @@
     <Compile Include="IntegrationTests\RepositoryUtilsTests.cs" />
     <Compile Include="QueueingTests\ConnectionSchedulerTest.cs" />
     <Compile Include="ProducerTests\CrawlerTests\LocalEventGeneratorTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectDeletedRemoteObjectRenamedOrMovedTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\LongFileAndPathNameSupportTest.cs" />
+    <Compile Include="UtilsTests\ProcessDiagnosticsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

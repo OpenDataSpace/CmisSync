@@ -45,7 +45,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
         private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
-        private ISyncEventQueue queue;
         private ActiveActivitiesManager transmissionManager;
 
         /// <summary>
@@ -53,24 +52,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="queue">Event queue for publishing upload transmission.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ISyncEventQueue queue,
             ActiveActivitiesManager transmissionManager,
             bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
-            if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
-            }
+
 
             if(transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
-            this.queue = queue;
             this.transmissionManager = transmissionManager;
         }
 
@@ -96,10 +90,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             // Match local changes to remote changes and updated them remotely
             IMappedObject mappedObject = null;
             try {
-                string ea = localFileSystemInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                Guid guid;
-                if (Guid.TryParse(ea, out guid)) {
-                    mappedObject = this.Storage.GetObjectByGuid(guid);
+                Guid? guid = localFileSystemInfo.Uuid;
+                if (guid != null) {
+                    mappedObject = this.Storage.GetObjectByGuid((Guid)guid);
                 }
             } catch(Exception) {
             }
@@ -110,6 +103,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             if (mappedObject == null) {
                 throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", localFileSystemInfo.FullName));
+            }
+
+            if (mappedObject.LastChangeToken != (remoteId as ICmisObjectProperties).ChangeToken) {
+                throw new ArgumentException(string.Format("remote {1} {0} has also been changed since last sync => invoke crawl sync", remoteId.Id, remoteId is IDocument ? "document" : "folder"));
             }
 
             IFileInfo localFile = localFileSystemInfo as IFileInfo;
@@ -138,7 +135,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     mappedObject.LastChecksum = hashAlg.Hash;
                 }
 
-                mappedObject.LastChangeToken = doc.ChangeToken;
                 mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 mappedObject.LastContentSize = localFile.Length;
@@ -151,17 +147,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             if (this.ServerCanModifyDateTimes) {
                 try {
                     if (remoteId is IDocument) {
-                        (remoteId as IDocument).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
-                        mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                        var doc = remoteId as IDocument;
+                        doc.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
+                        mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     } else if (remoteId is IFolder) {
-                        (remoteId as IFolder).UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
-                        mappedObject.LastRemoteWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+                        var folder = (remoteId as IFolder);
+                        folder.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
+                        mappedObject.LastRemoteWriteTimeUtc = folder.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     }
                 } catch(CmisPermissionDeniedException) {
                     Logger.Debug(string.Format("Locally changed modification date \"{0}\"is not uploaded to the server: PermissionDenied", localFileSystemInfo.LastWriteTimeUtc));
                 }
             }
 
+            mappedObject.LastChangeToken = (remoteId as ICmisObjectProperties).ChangeToken;
             mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
             this.Storage.SaveMappedObject(mappedObject);
         }

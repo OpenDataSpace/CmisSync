@@ -28,12 +28,14 @@ SOURCES =  \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	ConsumerTests/SituationSolverTests/AbstractEnhancedSolverTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectAddedTest.cs \
-	ConsumerTests/SituationSolverTests/LocalObjectChangedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectChangedRemoteObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectChangedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectDeletedRemoteObjectDeletedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectDeletedRemoteObjectRenamedOrMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectDeletedTest.cs \
-	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectMovedRemoteObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \
@@ -80,8 +82,8 @@ SOURCES =  \
 	ProducerTests/ContentChangeTests/ContentChangeEventTransformerTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangesTest.cs \
 	ProducerTests/CrawlerTests/DescendantsCrawlerTest.cs \
-	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
 	ProducerTests/CrawlerTests/LocalEventGeneratorTest.cs \
+	ProducerTests/CrawlerTests/ObjectTreeTest.cs \
 	ProducerTests/WatcherTests/CreatedChangedDeletedFileSystemEventHandlerTest.cs \
 	ProducerTests/WatcherTests/MacWatcherTest.cs \
 	ProducerTests/WatcherTests/NetWatcherTest.cs \
@@ -121,7 +123,8 @@ SOURCES =  \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
 	UtilsTests/EncodingTest.cs \
-	UtilsTests/HttpProxyUtilsTest.cs
+	UtilsTests/HttpProxyUtilsTest.cs \
+	UtilsTests/ProcessDiagnosticsTest.cs
 
 EXTRA_DIST = TestLibrary.csproj \
 	$(MOQ_PATH)
