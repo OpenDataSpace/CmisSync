@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RepositoryUtilsTests.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -145,11 +145,13 @@ namespace TestLibrary.IntegrationTests
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
             ServerCredentials credentials = new ServerCredentials()
             {
                 Address = new Uri(url),
+                Binding = binding,
                 UserName = user,
                 Password = password
             };

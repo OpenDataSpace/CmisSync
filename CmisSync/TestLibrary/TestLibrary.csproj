@@ -85,6 +85,7 @@
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
     <Compile Include="IntegrationTests\AllHandlersIT.cs" />
+    <Compile Include="IntegrationTests\ClientBrandTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
@@ -225,22 +226,5 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="CmisTests\" />
-    <Folder Include="CmisTests\UiUtilsTests\" />
-    <Folder Include="AccumulatorTests\" />
-    <Folder Include="ConfigTests\" />
-    <Folder Include="ConsumerTests\" />
-    <Folder Include="StorageTests\DataBaseTests\" />
-    <Folder Include="StorageTests\FileSystemTests\" />
-    <Folder Include="StorageTests\DataBaseTests\EntitiesTests\" />
-    <Folder Include="PathMatcherTests\" />
-    <Folder Include="ProducerTests\" />
-    <Folder Include="ProducerTests\CrawlerTests\" />
-    <Folder Include="ProducerTests\WatcherTests\" />
-    <Folder Include="ProducerTests\ContentChangeTests\" />
-    <Folder Include="QueueingTests\" />
-    <Folder Include="FilterTests\" />
-    <Folder Include="CmisTests\ConvenienceExtendersTests\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

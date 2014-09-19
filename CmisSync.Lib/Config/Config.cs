@@ -183,6 +183,12 @@ namespace CmisSync.Lib.Config
         public XmlNode Log4Net { get; set; }
 
         /// <summary>
+        /// Gets or sets the Client Brand.
+        /// </summary>
+        [XmlElement("brand")]
+        public Brand Brand { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of the CmisSync synchronized folders.
         /// </summary>
         /// <value>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -60,7 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Backend.cs" />
+    <Compile Include="ClientBrandBase.cs" />
     <Compile Include="Cmis\MimeType.cs" />
+    <Compile Include="Config\Brand.cs" />
     <Compile Include="Defines.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />
@@ -292,14 +294,5 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Config\" />
-    <Folder Include="Storage\FileSystem\" />
-    <Folder Include="Storage\Database\" />
-    <Folder Include="Storage\Database\Entities\" />
-    <Folder Include="Cmis\Authentication\" />
-    <Folder Include="Cmis\UiUtils\" />
-    <Folder Include="Producer\ContentChange\" />
-    <Folder Include="Cmis\ConvenienceExtenders\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>
