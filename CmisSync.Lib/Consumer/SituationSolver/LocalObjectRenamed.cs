@@ -70,7 +70,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ICmisObject remoteObject;
 
             // Rename remote object
-            if(remoteId is ICmisObject) {
+            if (remoteId is ICmisObject) {
+                if ((remoteId as ICmisObject).ChangeToken != obj.LastChangeToken) {
+                    throw new ArgumentException("Last changetoken is invalid => force crawl sync");
+                }
+
                 string oldName = (remoteId as ICmisObject).Name;
                 try {
                     remoteObject = (remoteId as ICmisObject).Rename(localFile.Name, true) as ICmisObject;
