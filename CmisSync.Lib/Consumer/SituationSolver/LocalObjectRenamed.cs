@@ -67,7 +67,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
-            ICmisObject remoteObject;
 
             // Rename remote object
             if (remoteId is ICmisObject) {
@@ -77,23 +76,23 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                 string oldName = (remoteId as ICmisObject).Name;
                 try {
-                    remoteObject = (remoteId as ICmisObject).Rename(localFile.Name, true) as ICmisObject;
+                    (remoteId as ICmisObject).Rename(localFile.Name, true);
                 } catch (CmisPermissionDeniedException) {
                     OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFile.Name));
                     return;
                 }
 
-                OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteObject.Id, oldName, localFile.Name));
+                OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteId.Id, oldName, localFile.Name));
             } else {
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
             }
 
             bool isContentChanged = localFile is IFileInfo ? (localFile as IFileInfo).IsContentChangedTo(obj) : false;
 
-            obj.Name = remoteObject.Name;
-            obj.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
+            obj.Name = (remoteId as ICmisObject).Name;
+            obj.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
             obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFile.LastWriteTimeUtc;
-            obj.LastChangeToken = remoteObject.ChangeToken;
+            obj.LastChangeToken = (remoteId as ICmisObject).ChangeToken;
             this.Storage.SaveMappedObject(obj);
             if (isContentChanged) {
                 throw new ArgumentException("Local file content is also changed => force crawl sync.");
