@@ -822,7 +822,7 @@ namespace TestLibrary.IntegrationTests
         /// <summary>
         /// Creates the hundred files and sync.
         /// </summary>
-        [Test, Category("Slow"), Category("Erratic"), Timeout(1800000)]
+        [Test, Category("Slow"), Category("Erratic"), Timeout(1800000), Ignore("Just for benchmarks")]
         public void CreateHundredFilesAndSync()
         {
             DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
@@ -1202,7 +1202,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Name, Is.EqualTo(fileName + ".txt"));
         }
 
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Ignore("Not needed anymore")]
         public void CreateFilesWithLongNames() {
             this.repo.Initialize();
             this.repo.Run();
@@ -1306,6 +1306,27 @@ namespace TestLibrary.IntegrationTests
             foreach (var mail in this.remoteRootDir.GetChildren()) {
                 Assert.That(mail.Name, Is.EqualTo(mailName1).Or.EqualTo(mailName2));
             }
+        }
+
+        [Test, Category("Slow")]
+        public void OneLocalFileIsRemovedAndChangedRemotely() {
+            string fileName = "file.bin";
+            string oldContent = "old content";
+            string newContent = "new content replaces old content";
+            this.remoteRootDir.CreateDocument(fileName, oldContent);
+
+            this.repo.Initialize();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            this.localRootDir.GetFiles().First().Delete();
+            (this.remoteRootDir.GetChildren().First() as IDocument).SetContent(newContent);
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(newContent.Length));
         }
 
         [Ignore("It is not possible to handle this situation at the moment")]
