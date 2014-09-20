@@ -128,14 +128,14 @@ namespace TestLibrary.IntegrationTests
             path.Setup(p => p.FullName).Returns(Path.Combine(this.localRoot, name));
             string id = "id";
 
-            var mappedObject = new MappedObject(name, id, MappedObjectType.File, null, null);
+            var mappedObject = new MappedObject(name, id, MappedObjectType.File, null, "changeToken");
             storage.SaveMappedObject(mappedObject);
 
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
-            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, name, (string)null).Object;
+            IDocument remote = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, id, name, (string)null, changeToken: "changeToken").Object;
             session.Setup(s => s.GetObject(id, It.IsAny<IOperationContext>())).Returns(remote);
             var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName, false);
             var queue = this.CreateQueue(session, storage);
@@ -155,14 +155,14 @@ namespace TestLibrary.IntegrationTests
             path.Setup(p => p.FullName).Returns(Path.Combine(this.localRoot, name));
             string id = "id";
 
-            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, null);
+            var mappedObject = new MappedObject(name, id, MappedObjectType.Folder, null, "changeToken");
             storage.SaveMappedObject(mappedObject);
 
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
             session.SetupSessionDefaultValues();
             session.SetupChangeLogToken("default");
-            IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(id, name, (string)null).Object;
+            IFolder remote = MockOfIFolderUtil.CreateRemoteFolderMock(id, name, (string)null, changetoken: "changeToken").Object;
             session.Setup(s => s.GetObject(id, It.IsAny<IOperationContext>())).Returns(remote);
             var myEvent = new FSEvent(WatcherChangeTypes.Deleted, path.Object.FullName, true);
             var queue = this.CreateQueue(session, storage);
