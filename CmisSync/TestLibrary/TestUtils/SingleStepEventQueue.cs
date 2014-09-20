@@ -55,22 +55,21 @@ namespace TestLibrary
             }
         }
 
-        public bool SwallowExceptions { get; set;}
+        public bool SwallowExceptions { get; set; }
 
         public void AddEvent(ISyncEvent e) {
             this.Queue.Enqueue(e);
         }
 
         public void Step() {
-
             ISyncEvent e;
-            if(this.Queue.TryDequeue(out e)){
-                try{
+            if (this.Queue.TryDequeue(out e)) {
+                try {
                     this.Manager.Handle(e);
-                }catch(Exception exp){
-                    if(!SwallowExceptions) {
+                } catch (Exception exp) {
+                    if (!this.SwallowExceptions) {
                         throw;
-                    }else{
+                    } else {
                         Console.WriteLine(exp.ToString());
                     }
                 }
