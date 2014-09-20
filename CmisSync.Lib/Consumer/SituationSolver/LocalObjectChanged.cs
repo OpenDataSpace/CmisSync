@@ -61,7 +61,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
 
 
-            if(transmissionManager == null) {
+            if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
@@ -113,26 +113,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
                 Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
-                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
                 var doc = remoteId as IDocument;
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                this.transmissionManager.AddTransmission(transmissionEvent);
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
-                using (var hashAlg = new SHA1Managed())
-                using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
-                    try {
-                        uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
-                    } catch(Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        if (ex.InnerException is CmisPermissionDeniedException) {
-                            OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has been not been uploaded: PermissionDenied", localFile.FullName));
-                            return;
-                        }
-
-                        throw;
+                try {
+                    mappedObject.LastChecksum = UploadFile(localFile, doc, this.transmissionManager);
+                } catch(Exception ex) {
+                    if (ex.InnerException is CmisPermissionDeniedException) {
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
+                        return;
                     }
 
-                    mappedObject.LastChecksum = hashAlg.Hash;
+                    throw;
                 }
 
                 mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
@@ -141,7 +131,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                 OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
 
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
 
             if (this.ServerCanModifyDateTimes) {
@@ -163,6 +152,35 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             mappedObject.LastChangeToken = (remoteId as ICmisObjectProperties).ChangeToken;
             mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
             this.Storage.SaveMappedObject(mappedObject);
+        }
+
+        /// <summary>
+        /// Uploads the file content to the remote document.
+        /// </summary>
+        /// <returns>The SHA-1 hash of the uploaded file content.</returns>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="doc">Remote document.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
+        public static byte[] UploadFile(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
+            byte[] hash = null;
+            IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
+            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+            transmissionManager.AddTransmission(transmissionEvent);
+            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
+            using (var hashAlg = new SHA1Managed())
+            using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                try {
+                    uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                } catch(Exception ex) {
+                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                    throw;
+                }
+
+                hash = hashAlg.Hash;
+            }
+
+            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+            return hash;
         }
     }
 }
