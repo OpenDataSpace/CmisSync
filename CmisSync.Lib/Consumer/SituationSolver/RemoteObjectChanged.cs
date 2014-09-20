@@ -105,7 +105,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             throw new ArgumentException("The local file has been changed since last write => aborting update");
                         }
 
-                        DownloadChanges(localFile as IFileInfo, ref remoteDocument, ref obj, this.fsFactory, this.transmissonManager);
+                        obj.LastChecksum = DownloadChanges(localFile as IFileInfo, remoteDocument, obj, this.fsFactory, this.transmissonManager);
                     }
 
                     obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
@@ -124,15 +124,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             this.Storage.SaveMappedObject(obj);
         }
 
-        private static void DownloadChanges(IFileInfo target, ref IDocument remoteDocument, ref IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager) {
+        public static byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager) {
             // Download changes
             byte[] lastChecksum = obj.LastChecksum;
+            byte[] hash = null;
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
             var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
             using (SHA1 hashAlg = new SHA1Managed())
-                using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
-                    using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
+            using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+            using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                 try {
                     download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
                 } catch(Exception ex) {
@@ -141,7 +142,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 obj.ChecksumAlgorithmName = "SHA-1";
-                obj.LastChecksum = hashAlg.Hash;
+                hash = hashAlg.Hash;
             }
 
             var backupFile = fsFactory.CreateFileInfo(target.FullName + ".bak.sync");
@@ -174,6 +175,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+            return hash;
         }
     }
 }

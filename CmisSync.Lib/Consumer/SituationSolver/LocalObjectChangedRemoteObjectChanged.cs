@@ -26,17 +26,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
+
+    using log4net;
 
     /// <summary>
     /// Local object changed and remote object changed.
     /// </summary>
     public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver
     {
+        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
+        private ActiveActivitiesManager transmissionManager;
+        private FileSystemInfoFactory fsFactory;
+
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChangedRemoteObjectChanged"/> class.
@@ -47,7 +56,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChangedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            ActiveActivitiesManager transmissionManager, 
+            bool serverCanModifyCreationAndModificationDate,
+            FileSystemInfoFactory fsFactory = null) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            if (transmissionManager == null) {
+                throw new ArgumentNullException("Given transmission manager is null");
+            }
+
+            this.transmissionManager = transmissionManager;
+            this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
         }
 
         /// <summary>
@@ -68,6 +85,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
                 obj.LastRemoteWriteTimeUtc = (remoteId as IFolder).LastModificationDate;
                 obj.LastChangeToken = (remoteId as IFolder).ChangeToken;
+                this.Storage.SaveMappedObject(obj);
             } else if (localFileSystemInfo is IFileInfo) {
                 var fileInfo = localFileSystemInfo as IFileInfo;
                 var doc = remoteId as IDocument;
@@ -77,7 +95,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     if (fileInfo.IsContentChangedTo(obj, true)) {
                         // Upload local content
                         updateRemoteDate = true;
-                        throw new NotImplementedException();
+                        try {
+                            obj.LastChecksum = LocalObjectChanged.UploadFile(fileInfo, doc, this.transmissionManager);
+                            obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
+                        } catch(Exception ex) {
+                            if (ex.InnerException is CmisPermissionDeniedException) {
+                                OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", fileInfo.FullName), ex.InnerException);
+                                return;
+                            }
+
+                            throw;
+                        }
                     } else {
                         // Just date sync
                         if (doc.LastModificationDate != null && fileInfo.LastWriteTimeUtc < (DateTime)doc.LastModificationDate) {
@@ -110,12 +138,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             }
                         } else {
                             // Both are different => Check modification dates
-                            throw new NotImplementedException();
+                            // Download remote version and create conflict file
+                            updateLocalDate = true;
+                            obj.LastChecksum = RemoteObjectChanged.DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager);
+                            obj.LastContentSize = doc.ContentStreamLength ?? 0;
                         }
                     } else {
                         // Download remote content
                         updateLocalDate = true;
-                        throw new NotImplementedException();
+                        obj.LastChecksum = RemoteObjectChanged.DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager);
+                        obj.LastContentSize = doc.ContentStreamLength ?? 0;
                     }
                 }
 
@@ -132,9 +164,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 obj.LastChangeToken = doc.ChangeToken;
                 obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
                 obj.LastRemoteWriteTimeUtc = doc.LastModificationDate;
+                this.Storage.SaveMappedObject(obj);
             }
-
-            this.Storage.SaveMappedObject(obj);
         }
     }
 }

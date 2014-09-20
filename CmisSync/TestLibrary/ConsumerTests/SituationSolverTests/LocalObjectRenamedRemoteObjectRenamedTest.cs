@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.IO;
 
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -47,6 +48,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private LocalObjectRenamedRemoteObjectRenamed underTest;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private ActiveActivitiesManager manager;
 
 
         [SetUp]
@@ -56,12 +58,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.storage = new Mock<IMetaDataStorage>();
             this.InitializeMappedFolderOnStorage();
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object);
+            this.manager = new ActiveActivitiesManager();
+            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.manager);
         }
 
         [Test]
         public void DefaultConstructor() {
-            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object);
+            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
