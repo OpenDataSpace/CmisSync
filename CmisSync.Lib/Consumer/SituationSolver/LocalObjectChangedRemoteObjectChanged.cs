@@ -34,11 +34,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
+    using log4net;
+
     /// <summary>
     /// Local object changed and remote object changed.
     /// </summary>
     public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedRemoteObjectChanged));
+
         private ActiveActivitiesManager transmissionManager;
         private FileSystemInfoFactory fsFactory;
 
@@ -136,13 +140,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             // Both are different => Check modification dates
                             // Download remote version and create conflict file
                             updateLocalDate = true;
-                            obj.LastChecksum = RemoteObjectChanged.DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager);
+                            obj.LastChecksum = DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
                             obj.LastContentSize = doc.ContentStreamLength ?? 0;
                         }
                     } else {
                         // Download remote content
                         updateLocalDate = true;
-                        obj.LastChecksum = RemoteObjectChanged.DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager);
+                        obj.LastChecksum = DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
                         obj.LastContentSize = doc.ContentStreamLength ?? 0;
                     }
                 }

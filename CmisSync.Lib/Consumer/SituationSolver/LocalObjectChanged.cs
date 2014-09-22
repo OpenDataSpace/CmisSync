@@ -152,34 +152,5 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             mappedObject.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
             this.Storage.SaveMappedObject(mappedObject);
         }
-
-        /// <summary>
-        /// Uploads the file content to the remote document.
-        /// </summary>
-        /// <returns>The SHA-1 hash of the uploaded file content.</returns>
-        /// <param name="localFile">Local file.</param>
-        /// <param name="doc">Remote document.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
-        public static byte[] UploadFile(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
-            byte[] hash = null;
-            IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
-            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-            transmissionManager.AddTransmission(transmissionEvent);
-            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
-            using (var hashAlg = new SHA1Managed())
-            using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
-                try {
-                    uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
-                } catch(Exception ex) {
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                    throw;
-                }
-
-                hash = hashAlg.Hash;
-            }
-
-            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
-            return hash;
-        }
     }
 }
