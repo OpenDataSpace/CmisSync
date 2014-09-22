@@ -157,12 +157,12 @@ namespace CmisSync.Lib.Consumer
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
             solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
-            solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = new LocalObjectMovedRemoteObjectChanged(this.session, this.storage);
-            solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage);
+            solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = new LocalObjectMovedRemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
             solver[(int)SituationType.REMOVED, (int)SituationType.CHANGED] = new LocalObjectDeletedRemoteObjectChanged(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.MOVED] = new RemoteObjectMoved(this.session, this.storage);
-            solver[(int)SituationType.CHANGED, (int)SituationType.MOVED] = new LocalObjectChangedRemoteObjectMoved(this.session, this.storage);
+            solver[(int)SituationType.CHANGED, (int)SituationType.MOVED] = new LocalObjectChangedRemoteObjectMoved(this.session, this.storage, this.activityListener.TransmissionManager);
             solver[(int)SituationType.MOVED, (int)SituationType.MOVED] = new LocalObjectMovedRemoteObjectMoved(this.session, this.storage);
             solver[(int)SituationType.RENAMED, (int)SituationType.MOVED] = new LocalObjectRenamedRemoteObjectMoved(this.session, this.storage);
             solver[(int)SituationType.REMOVED, (int)SituationType.MOVED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage);
