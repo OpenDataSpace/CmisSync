@@ -38,7 +38,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// </summary>
     public class RemoteObjectAdded : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
         private IFileSystemInfoFactory fsFactory;

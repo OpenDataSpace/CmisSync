@@ -26,15 +26,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using CmisSync.Lib.Storage.FileSystem;
     using DotCMIS.Client;
 
-    using log4net;
-
     /// <summary>
     /// Local object is deleted and the corresponding remote object has been changed.
     /// </summary>
     public class LocalObjectDeletedRemoteObjectChanged : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectDeletedRemoteObjectChanged"/> class.

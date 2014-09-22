@@ -30,15 +30,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using DotCMIS.Client;
 
-    using log4net;
-
     /// <summary>
     /// Local object renamed and also the remote object has been renamed.
     /// </summary>
     public class LocalObjectRenamedRemoteObjectRenamed : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
         private ISolver secondSolver;
 
         /// <summary>

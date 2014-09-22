@@ -34,15 +34,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    using log4net;
-
     /// <summary>
     /// Local object changed and remote object changed.
     /// </summary>
     public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
         private ActiveActivitiesManager transmissionManager;
         private FileSystemInfoFactory fsFactory;
 

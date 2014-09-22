@@ -51,7 +51,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// </summary>
     public class LocalObjectAdded : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
         private ActiveActivitiesManager transmissionManager;
 

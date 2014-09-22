@@ -27,11 +27,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// Abstract enhanced solver.
     /// </summary>
     public abstract class AbstractEnhancedSolver : ISolver
     {
+        protected static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.AbstractEnhancedSolver"/> class.
         /// </summary>
