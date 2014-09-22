@@ -31,15 +31,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    using log4net;
-
     /// <summary>
     /// A Local object has been moved. => Move the corresponding object on the server.
     /// </summary>
     public class LocalObjectMoved : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectMoved"/> class.
         /// </summary>
@@ -69,6 +65,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             // Move Remote Object
             var remoteObject = remoteId as IFileableCmisObject;
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
+
+            if (mappedObject.LastChangeToken != (remoteId as ICmisObject).ChangeToken) {
+                throw new ArgumentException("The remote change token is different to the last synchronization");
+            }
+
             var targetPath = localFile is IDirectoryInfo ? (localFile as IDirectoryInfo).Parent : (localFile as IFileInfo).Directory;
             var targetId = this.Storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
             try {

@@ -41,7 +41,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     public class RemoteObjectChanged : AbstractEnhancedSolver
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectChanged));
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         private IFileSystemInfoFactory fsFactory;
         private ActiveActivitiesManager transmissonManager;
@@ -105,7 +104,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             throw new ArgumentException("The local file has been changed since last write => aborting update");
                         }
 
-                        DownloadChanges(localFile as IFileInfo, ref remoteDocument, ref obj, this.fsFactory, this.transmissonManager);
+                        obj.LastChecksum = DownloadChanges(localFile as IFileInfo, remoteDocument, obj, this.fsFactory, this.transmissonManager, Logger);
                     }
 
                     obj.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
@@ -122,58 +121,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             this.Storage.SaveMappedObject(obj);
-        }
-
-        private static void DownloadChanges(IFileInfo target, ref IDocument remoteDocument, ref IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager) {
-            // Download changes
-            byte[] lastChecksum = obj.LastChecksum;
-            var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
-            var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
-            transmissonManager.AddTransmission(transmissionEvent);
-            using (SHA1 hashAlg = new SHA1Managed())
-                using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
-                    using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
-                try {
-                    download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
-                } catch(Exception ex) {
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                    throw;
-                }
-
-                obj.ChecksumAlgorithmName = "SHA-1";
-                obj.LastChecksum = hashAlg.Hash;
-            }
-
-            var backupFile = fsFactory.CreateFileInfo(target.FullName + ".bak.sync");
-            Guid? uuid = target.Uuid;
-            cacheFile.Replace(target, backupFile, true);
-            try {
-                target.Uuid = uuid;
-            } catch (RestoreModificationDateException e) {
-                Logger.Debug("Failed to restore modification date of original file", e);
-            }
-
-            try {
-                backupFile.Uuid = null;
-            } catch (RestoreModificationDateException e) {
-                Logger.Debug("Failed to restore modification date of backup file", e);
-            }
-
-            byte[] checksumOfOldFile = null;
-            using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
-                checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
-            }
-
-            if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
-                var conflictFile = fsFactory.CreateConflictFileInfo(target);
-                backupFile.MoveTo(conflictFile.FullName);
-                OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", target.FullName, remoteDocument.Id, conflictFile.FullName));
-            } else {
-                backupFile.Delete();
-                OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", target.FullName, remoteDocument.Id));
-            }
-
-            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
         }
     }
 }

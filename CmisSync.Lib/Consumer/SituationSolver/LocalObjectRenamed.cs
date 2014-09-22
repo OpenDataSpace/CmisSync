@@ -32,15 +32,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    using log4net;
-
     /// <summary>
     /// Local object has been renamed. => Rename the corresponding object on the server.
     /// </summary>
     public class LocalObjectRenamed : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectRenamed"/> class.
         /// </summary>
@@ -67,29 +63,32 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
-            ICmisObject remoteObject;
 
             // Rename remote object
-            if(remoteId is ICmisObject) {
+            if (remoteId is ICmisObject) {
+                if ((remoteId as ICmisObject).ChangeToken != obj.LastChangeToken) {
+                    throw new ArgumentException("Last changetoken is invalid => force crawl sync");
+                }
+
                 string oldName = (remoteId as ICmisObject).Name;
                 try {
-                    remoteObject = (remoteId as ICmisObject).Rename(localFile.Name, true) as ICmisObject;
+                    (remoteId as ICmisObject).Rename(localFile.Name, true);
                 } catch (CmisPermissionDeniedException) {
                     OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFile.Name));
                     return;
                 }
 
-                OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteObject.Id, oldName, localFile.Name));
+                OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteId.Id, oldName, localFile.Name));
             } else {
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
             }
 
             bool isContentChanged = localFile is IFileInfo ? (localFile as IFileInfo).IsContentChangedTo(obj) : false;
 
-            obj.Name = remoteObject.Name;
-            obj.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
+            obj.Name = (remoteId as ICmisObject).Name;
+            obj.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
             obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFile.LastWriteTimeUtc;
-            obj.LastChangeToken = remoteObject.ChangeToken;
+            obj.LastChangeToken = (remoteId as ICmisObject).ChangeToken;
             this.Storage.SaveMappedObject(obj);
             if (isContentChanged) {
                 throw new ArgumentException("Local file content is also changed => force crawl sync.");

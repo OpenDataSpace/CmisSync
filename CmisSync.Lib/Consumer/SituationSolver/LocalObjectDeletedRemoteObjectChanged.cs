@@ -47,7 +47,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            // User Interaction needed or the content will be downloaded on next sync.
+            // Possibilities:
+            // - Download new remote content (default, because no user interaction is needed and it is simple to solve)
+            // - Remove remote element
+            // - Ignore until situation is cleared
+            OperationsLogger.Warn(string.Format("The remote object {0} of the corresponding locally deleted element has been changed => Downloading the remote changes", remoteId.Id));
+            this.Storage.RemoveObject(this.Storage.GetObjectByRemoteId(remoteId.Id));
+            throw new ArgumentException("Remote object has been changed while the object was deleted locally => force crawl sync");
         }
     }
 }

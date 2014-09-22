@@ -103,7 +103,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(fileInfo.Object, null);
 
             fileInfo.Verify(f => f.Delete(), Times.Never());
-            fileInfo.Verify(f => f.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true), Times.Once());
+            fileInfo.VerifySet(f => f.Uuid = null, Times.Once());
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == file.Object)), Times.Once());
         }
 
@@ -117,7 +117,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(fileInfo.Object, null);
 
             fileInfo.Verify(f => f.Delete(), Times.Never());
-            this.storage.Verify(s => s.RemoveObject(It.IsAny<IMappedObject>()), Times.Never());
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         [Test, Category("Fast"), Category("Solver")]

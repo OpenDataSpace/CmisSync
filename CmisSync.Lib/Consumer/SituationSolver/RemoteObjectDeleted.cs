@@ -30,15 +30,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using DotCMIS.Client;
 
-    using log4net;
-
     /// <summary>
     /// Remote object has been deleted. => Delete the corresponding local object as well.
     /// </summary>
     public class RemoteObjectDeleted : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
         private IFilterAggregator filters;
 
         /// <summary>
@@ -81,7 +77,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     file.Delete();
                     OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", file.FullName, mappedFile.RemoteObjectId));
                 } else {
-                    file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                    file.Uuid = null;
                     if (mappedFile == null) {
                         return;
                     }

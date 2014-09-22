@@ -69,9 +69,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.session.Setup(s => s.Delete(It.Is<IObjectId>((id) => id.Id == remoteDocumentId), true));
 
-            var docId = new Mock<IObjectId>(MockBehavior.Strict);
+            var docId = new Mock<ICmisObject>(MockBehavior.Strict);
             docId.Setup(d => d.Id).Returns(remoteDocumentId);
-            this.storage.AddLocalFile(tempFile, remoteDocumentId);
+            docId.Setup(d => d.ChangeToken).Returns("changeToken");
+            this.storage.AddLocalFile(tempFile, remoteDocumentId).Setup(o => o.LastChangeToken).Returns("changeToken");
             this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
 
             this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object);
@@ -101,29 +102,29 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        [ExpectedException(typeof(CmisConnectionException))]
         public void LocalFileDeletedWhileNetworkError()
         {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
             this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisConnectionException());
-            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId));
-            var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
+            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId && o.LastChangeToken == "changeToken"));
+            var docId = Mock.Of<ICmisObject>(d => d.Id == remoteDocumentId && d.ChangeToken == "changeToken");
 
-            this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+            Assert.Throws<CmisConnectionException>(() => this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId));
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        [ExpectedException(typeof(CmisRuntimeException))]
         public void LocalFileDeletedWhileServerError()
         {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
-            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId));
+            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId && o.LastChangeToken == "changeToken"));
             this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisRuntimeException());
-            var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
+            var docId = Mock.Of<ICmisObject>(d => d.Id == remoteDocumentId && d.ChangeToken == "changeToken");
 
-            this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
+            Assert.Throws<CmisRuntimeException>(() => this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId));
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -131,13 +132,29 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
-            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId));
+            this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId && o.LastChangeToken == "changeToken"));
             this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisPermissionDeniedException());
-            var docId = Mock.Of<IObjectId>(d => d.Id == remoteDocumentId);
+            var docId = Mock.Of<ICmisObject>(d => d.Id == remoteDocumentId && d.ChangeToken == "changeToken");
 
             this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId);
 
-            this.storage.Verify(s => s.RemoveObject(It.IsAny<IMappedObject>()), Times.Never());
+            this.storage.VerifyThatNoObjectIsManipulated();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void AbortDeletionIfRemoteObjectHasBeenChanged()
+        {
+            string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+            string remoteDocumentId = "DocumentId";
+            var docId = new Mock<ICmisObject>(MockBehavior.Strict);
+            docId.Setup(d => d.Id).Returns(remoteDocumentId);
+            docId.Setup(d => d.ChangeToken).Returns("Another ChangeToken");
+            this.storage.AddLocalFile(tempFile, remoteDocumentId).Setup(o => o.LastChangeToken).Returns("changeToken");
+            this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
+
+            Assert.Throws<ArgumentException>(() => this.underTest.Solve(new FileSystemInfoFactory().CreateFileInfo(tempFile), docId.Object));
+
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         private void SetupSessionExceptionOnDeletion(string remoteId, Exception ex) {

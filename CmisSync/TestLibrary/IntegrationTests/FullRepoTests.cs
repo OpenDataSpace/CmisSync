@@ -716,15 +716,13 @@ namespace TestLibrary.IntegrationTests
             Assert.That((long)(this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(expectedLength));
         }
 
-        // Conflict solver is not yet implemented
-        [Ignore]
         [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalAndTheRemoteFileAreBothRenamed() {
             string originalName = "original.txt";
             string localName = "local.txt";
             string remoteName = "remote.txt";
 
-            this.remoteRootDir.CreateDocument(originalName, string.Empty);
+            this.remoteRootDir.CreateDocument(originalName, "content");
 
             this.repo.Initialize();
 
@@ -735,6 +733,30 @@ namespace TestLibrary.IntegrationTests
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(localName));
+            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(remoteName));
+
+            // In Conflict situation
+            // Resolve the conflict by renaming the remote file to the local name
+            this.remoteRootDir.GetChildren().First().Rename(localName);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Run();
+
+            // Conflict is solved
+            Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(localName));
+            Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(localName));
+
+            this.remoteRootDir.GetChildren().First().Rename(remoteName);
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.SingleStepQueue.SwallowExceptions = false;
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(remoteName));
@@ -800,7 +822,7 @@ namespace TestLibrary.IntegrationTests
         /// <summary>
         /// Creates the hundred files and sync.
         /// </summary>
-        [Test, Category("Slow"), Category("Erratic"), Timeout(1800000)]
+        [Test, Category("Slow"), Category("Erratic"), Timeout(1800000), Ignore("Just for benchmarks")]
         public void CreateHundredFilesAndSync()
         {
             DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
@@ -1032,7 +1054,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(newName));
             this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
-            var doc = remoteRootDir.GetChildren().First() as IDocument;
+            var doc = this.remoteRootDir.GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
             Assert.That(doc.Name, Is.EqualTo(newName));
         }
@@ -1102,7 +1124,7 @@ namespace TestLibrary.IntegrationTests
             this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(newName));
-            var doc = (remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument;
+            var doc = (this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
             Assert.That(doc.Name, Is.EqualTo("doc"));
         }
@@ -1180,7 +1202,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Name, Is.EqualTo(fileName + ".txt"));
         }
 
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Ignore("Not needed anymore")]
         public void CreateFilesWithLongNames() {
             this.repo.Initialize();
             this.repo.Run();
@@ -1286,6 +1308,67 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
+        [Test, Category("Slow")]
+        public void OneLocalFileIsRemovedAndChangedRemotely() {
+            string fileName = "file.bin";
+            string oldContent = "old content";
+            string newContent = "new content replaces old content";
+            this.remoteRootDir.CreateDocument(fileName, oldContent);
+
+            this.repo.Initialize();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            this.localRootDir.GetFiles().First().Delete();
+            (this.remoteRootDir.GetChildren().First() as IDocument).SetContent(newContent);
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(newContent.Length));
+        }
+
+        [Test, Category("Slow"), Ignore("Ignore this until the server does not change the changetoken on move operation")]
+        public void LocalFileMovedAndRemoteFileMovedToOtherFolder() {
+            string fileName = "file.bin";
+            string content = "content";
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
+            var a = this.remoteRootDir.CreateFolder("A");
+            var b = this.remoteRootDir.CreateFolder("B");
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, a.Name, fileName));
+            doc.Refresh();
+            this.remoteRootDir.Refresh();
+            b.Refresh();
+            doc.Move(this.remoteRootDir, b);
+
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            doc.Refresh();
+            a.Refresh();
+            b.Refresh();
+            this.remoteRootDir.Refresh();
+            var localA = this.localRootDir.GetDirectories().First().Name == "A" ? this.localRootDir.GetDirectories().First() : this.localRootDir.GetDirectories().Last();
+            var localB = this.localRootDir.GetDirectories().First().Name == "B" ? this.localRootDir.GetDirectories().First() : this.localRootDir.GetDirectories().Last();
+
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+            Assert.That(this.localRootDir.GetDirectories().Count(), Is.EqualTo(2));
+            Assert.That(b.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(b.GetChildren().First().Name, Is.EqualTo(fileName));
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            Assert.That(a.GetChildren().Count(), Is.EqualTo(0));
+            Assert.That(this.repo.SingleStepQueue.IsEmpty);
+            Assert.That(localA.GetFiles().First().Name, Is.EqualTo(fileName));
+            Assert.That(localB.GetFiles().Count(), Is.EqualTo(0));
+        }
+
         [Ignore("It is not possible to handle this situation at the moment")]
         [Test, Category("Slow"), Category("Erratic")]
         public void CyclicRenaming() {
@@ -1326,11 +1409,11 @@ namespace TestLibrary.IntegrationTests
 
             var dirs = this.localRootDir.GetDirectories();
             Assert.That(dirs.Count(), Is.EqualTo(2));
-            var A = dirs.First().Name.Equals(folderName1) ? dirs.First() : dirs.Last();
-            var B = dirs.First().Name.Equals(folderName2) ? dirs.First() : dirs.Last();
-            Assert.That(A.GetDirectories(), Is.Empty);
-            Assert.That(B.GetDirectories().Count(), Is.EqualTo(1));
-            Assert.That(B.GetDirectories().First().Name, Is.EqualTo(subFolderName));
+            var a = dirs.First().Name.Equals(folderName1) ? dirs.First() : dirs.Last();
+            var b = dirs.First().Name.Equals(folderName2) ? dirs.First() : dirs.Last();
+            Assert.That(a.GetDirectories(), Is.Empty);
+            Assert.That(b.GetDirectories().Count(), Is.EqualTo(1));
+            Assert.That(b.GetDirectories().First().Name, Is.EqualTo(subFolderName));
 
             remoteA.Refresh();
             remoteB.Refresh();
@@ -1377,7 +1460,6 @@ namespace TestLibrary.IntegrationTests
         }
 
         private class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
-
             public BlockingSingleConnectionScheduler(ConnectionScheduler original) : base(original) {
             }
 
