@@ -77,7 +77,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     file.Delete();
                     OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", file.FullName, mappedFile.RemoteObjectId));
                 } else {
-                    file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                    file.Uuid = null;
                     if (mappedFile == null) {
                         return;
                     }
