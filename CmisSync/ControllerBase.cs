@@ -205,6 +205,10 @@ namespace CmisSync
         /// </summary>
         private Object repo_lock = new Object();
 
+        private Object brand_lock = new Object();
+        private bool firstCheckBrand = true;
+        private readonly string brandConfigFolder = "ClientBrand";
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -216,10 +220,147 @@ namespace CmisSync
             this.transmissionManager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 this.OnTransmissionListChanged();
             };
+            this.FolderListChanged += delegate {
+                new Thread(() =>
+                {
+                    lock (brand_lock)
+                    {
+                        if (CheckBrand(firstCheckBrand))
+                        {
+                            firstCheckBrand = false;
+                            return;
+                        }
+                        SetupBrand();
+                    }
+                }).Start();
+            };
         }
 
         public List<FileTransmissionEvent> ActiveTransmissions() {
             return this.transmissionManager.ActiveTransmissionsAsList();
+        }
+
+        private bool CheckBrand(bool checkFiles)
+        {
+            Config config = ConfigManager.CurrentConfig;
+            if (config.Brand == null || config.Brand.Server == null)
+            {
+                return false;
+            }
+
+            ClientBrand clientBrand = new ClientBrand();
+            foreach (string path in clientBrand.GetPathList())
+            {
+                if (!File.Exists(Path.Combine(config.GetConfigPath(), brandConfigFolder, path.Substring(1))))
+                {
+                    return false;
+                }
+            }
+
+            List<RepoInfo> folders;
+            lock (repo_lock)
+            {
+                folders = config.Folders.ToList();
+            }
+
+            foreach (RepoInfo folder in folders)
+            {
+                if (folder.Address.ToString() != config.Brand.Server.ToString())
+                {
+                    continue;
+                }
+                if (!checkFiles)
+                {
+                    return true;
+                }
+
+                if (clientBrand.SetupServer(folder.Credentials))
+                {
+                    bool success = true;
+                    foreach (string path in clientBrand.GetPathList())
+                    {
+                        DateTime date;
+                        if (!clientBrand.GetFileDateTime(path, out date))
+                        {
+                            success = false;
+                            break;
+                        }
+                        BrandFile file = config.Brand.Files.Find((BrandFile current) => { return (current.Path == path); });
+                        if (file == null || file.Date != date)
+                        {
+                            success = false;
+                            break;
+                        }
+                    }
+                    if (success)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void SetupBrand()
+        {
+            Config config = ConfigManager.CurrentConfig;
+
+            List<RepoInfo> folders;
+            lock (repo_lock)
+            {
+                folders = config.Folders.ToList();
+            }
+
+            foreach (RepoInfo folder in folders)
+            {
+                List<BrandFile> files = new List<BrandFile>();
+                ClientBrand clientBrand = new ClientBrand();
+                if (clientBrand.SetupServer(folder.Credentials))
+                {
+                    bool success = true;
+                    foreach (string path in clientBrand.GetPathList())
+                    {
+                        DateTime date;
+                        if (!clientBrand.GetFileDateTime(path, out date))
+                        {
+                            success = false;
+                            break;
+                        }
+                        string pathname = Path.Combine(config.GetConfigPath(), brandConfigFolder, path.Substring(1));
+                        Directory.CreateDirectory(Path.GetDirectoryName(pathname));
+                        using (FileStream output = File.OpenWrite(pathname))
+                        {
+                            if (!clientBrand.GetFile(path, output))
+                            {
+                                success = false;
+                                break;
+                            }
+                        }
+                        BrandFile file = new BrandFile();
+                        file.Date = date;
+                        file.Path = path;
+                        files.Add(file);
+                    }
+                    if (success)
+                    {
+                        config.Brand = new Brand();
+                        config.Brand.Server = folder.Address;
+                        config.Brand.Files = files;
+                        lock (repo_lock)
+                        {
+                            config.Save();
+                        }
+                        return;
+                    }
+                }
+            }
+
+            config.Brand = null;
+            lock (repo_lock)
+            {
+                config.Save();
+            }
         }
 
         /// <summary>
@@ -249,8 +390,8 @@ namespace CmisSync
                     CheckRepositories();
                     RepositoriesLoaded = true;
 
-                    // Update UI.
-                    FolderListChanged();
+                    //// Update UI.
+                    //FolderListChanged();
                 }).Start();
             }
         }
