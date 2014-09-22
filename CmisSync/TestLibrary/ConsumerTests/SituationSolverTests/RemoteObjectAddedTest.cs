@@ -61,6 +61,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.path = Path.Combine(Path.GetTempPath(), this.objectName);
             this.manager = new ActiveActivitiesManager();
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>(MockBehavior.Strict);
             this.underTest = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.manager, this.fsFactory.Object);

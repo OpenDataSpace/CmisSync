@@ -61,12 +61,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest() {
-            new LocalObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), null));
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -272,7 +276,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             };
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
-            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, this.manager.Object, true);
+            this.session.SetupTypeSystem();
+            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, this.manager.Object);
             this.uuid = Guid.NewGuid();
             this.modificationDate = DateTime.UtcNow;
             this.localPath = Path.Combine("temp", this.objectName);

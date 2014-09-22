@@ -56,6 +56,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void SetUp()
         {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.session.SetupCreateOperationContext();
         }

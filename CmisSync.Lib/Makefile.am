@@ -42,14 +42,20 @@ SOURCES =  \
 	Consumer/SituationSolver/LocalObjectAdded.cs \
 	Consumer/SituationSolver/LocalObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectChangedRemoteObjectChanged.cs \
+	Consumer/SituationSolver/LocalObjectChangedRemoteObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectChangedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectRenamedOrMoved.cs \
 	Consumer/SituationSolver/LocalObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectMovedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectMovedRemoteObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectMovedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectRenamedOrMovedRemoteObjectDeleted.cs \
+	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectChanged.cs \
+	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/NothingToDoSolver.cs \
 	Consumer/SituationSolver/RemoteObjectAdded.cs \

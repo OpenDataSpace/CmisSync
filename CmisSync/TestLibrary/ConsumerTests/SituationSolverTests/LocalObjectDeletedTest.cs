@@ -49,7 +49,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [SetUp]
         public void SetUp()
         {
-            this.session = new Mock<ISession>(MockBehavior.Strict);
+            this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>(MockBehavior.Strict);
             this.underTest = new LocalObjectDeleted(this.session.Object, this.storage.Object);
         }

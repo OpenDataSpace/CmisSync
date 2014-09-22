@@ -56,6 +56,7 @@ namespace TestLibrary.ConsumerTests
         public void SetUp()
         {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.queue = new Mock<ISyncEventQueue>();
             this.storage = new Mock<IMetaDataStorage>();
             this.activityListener = new Mock<IActivityListener>();

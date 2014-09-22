@@ -56,6 +56,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.newLocalName = string.Empty;
             this.newRemoteName = string.Empty;
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.InitializeMappedFolderOnStorage();
             this.manager = new ActiveActivitiesManager();

@@ -64,8 +64,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager manager,
-            bool serverCanModifyCreationAndModificationDate = true) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            ActiveActivitiesManager manager) : base(session, storage) {
             if (manager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
