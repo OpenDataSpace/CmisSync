@@ -69,16 +69,45 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IDirectoryInfo localParent = localFolder.Parent;
                 IFolder remoteFolder = remoteId as IFolder;
                 string remoteParentId = remoteFolder.ParentId;
-                IMappedObject mappedParent = this.Storage.GetObjectByRemoteId(remoteFolder.ParentId);
+                IMappedObject mappedParent = this.Storage.GetObjectByRemoteId(remoteParentId);
                 IMappedObject mappedObject = this.Storage.GetObjectByRemoteId(remoteFolder.Id);
                 if (localParent.Uuid == mappedParent.Guid) {
                     // Both folders are in the same parent folder
                     this.SyncNamesAndDates(localFolder, remoteFolder, mappedObject);
                 } else {
-                    throw new NotImplementedException();
+                    OperationsLogger.Warn(
+                        string.Format(
+                        "Synchronization Conflict: The local directory {0} has been moved to {1} with id {2},{4}" +
+                        "but the remote folder was moved to {3}{4}You can fix this situation by moving them into the same folder",
+                        localFileSystemInfo.Name,
+                        localFileSystemInfo.FullName,
+                        remoteFolder.Path,
+                        Environment.NewLine));
+                    return;
                 }
-            } else {
-                throw new NotImplementedException();
+            } else if (localFileSystemInfo is IFileInfo) {
+                IFileInfo localFile = localFileSystemInfo as IFileInfo;
+                IDirectoryInfo localParent = localFile.Directory;
+                IDocument remoteFile = remoteId as IDocument;
+                string remoteParentId = remoteFile.Parents[0].Id;
+                IMappedObject mappedParent = this.Storage.GetObjectByRemoteId(remoteParentId);
+                IMappedObject mappedObject = this.Storage.GetObjectByRemoteId(remoteFile.Id);
+                if (localParent.Uuid == mappedParent.Guid) {
+                    // Both files are in the same parent folder
+                    mappedObject.ParentId = remoteParentId;
+                    this.Storage.SaveMappedObject(mappedObject);
+                    throw new ArgumentException("Solved move conflict => invoke crawl sync to detect other changes");
+                } else {
+                    OperationsLogger.Warn(
+                        string.Format(
+                        "Synchronization Conflict: The local file {0} has been moved to {1} with id {2},{4}" +
+                        "but the remote file was moved to {3}{4}You can fix this situation by moving them into the same folder",
+                        localFileSystemInfo.Name,
+                        localFileSystemInfo.FullName,
+                        remoteFile.Paths[0],
+                        Environment.NewLine));
+                    return;
+                }
             }
         }
 
