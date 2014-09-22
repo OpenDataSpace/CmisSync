@@ -84,7 +84,6 @@ namespace TestLibrary.TestUtils
 
         public static void SetupTypeSystem(this Mock<ISession> session, bool serverCanModifyLastModificationDate = true) {
             string repoId = "repoId";
-            var repositoryService = new Mock<IRepositoryService>();
             IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
             if (serverCanModifyLastModificationDate) {
                 props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "cmis:lastModificationDate" && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
@@ -94,6 +93,13 @@ namespace TestLibrary.TestUtils
 
             var docType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
             var folderType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
+
+            Mock<IRepositoryService> repositoryService = new Mock<IRepositoryService>();
+
+            if (session.Object.Binding != null && session.Object.Binding.GetRepositoryService() != null) {
+                repositoryService = Mock.Get(session.Object.Binding.GetRepositoryService());
+            }
+
             repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:document", null)).Returns(docType);
             repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:folder", null)).Returns(folderType);
             session.Setup(s => s.Binding.GetRepositoryService()).Returns(repositoryService.Object);
