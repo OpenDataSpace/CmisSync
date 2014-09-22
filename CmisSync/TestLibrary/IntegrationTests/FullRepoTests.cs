@@ -1329,6 +1329,46 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(newContent.Length));
         }
 
+        [Test, Category("Slow"), Ignore("Ignore this until the server does not change the changetoken on move operation")]
+        public void LocalFileMovedAndRemoteFileMovedToOtherFolder() {
+            string fileName = "file.bin";
+            string content = "content";
+            var doc = this.remoteRootDir.CreateDocument(fileName, content);
+            var a = this.remoteRootDir.CreateFolder("A");
+            var b = this.remoteRootDir.CreateFolder("B");
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, a.Name, fileName));
+            doc.Refresh();
+            this.remoteRootDir.Refresh();
+            b.Refresh();
+            doc.Move(this.remoteRootDir, b);
+
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            doc.Refresh();
+            a.Refresh();
+            b.Refresh();
+            this.remoteRootDir.Refresh();
+            var localA = this.localRootDir.GetDirectories().First().Name == "A" ? this.localRootDir.GetDirectories().First() : this.localRootDir.GetDirectories().Last();
+            var localB = this.localRootDir.GetDirectories().First().Name == "B" ? this.localRootDir.GetDirectories().First() : this.localRootDir.GetDirectories().Last();
+
+            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(2));
+            Assert.That(this.localRootDir.GetDirectories().Count(), Is.EqualTo(2));
+            Assert.That(b.GetChildren().Count(), Is.EqualTo(1));
+            Assert.That(b.GetChildren().First().Name, Is.EqualTo(fileName));
+            Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
+            Assert.That(a.GetChildren().Count(), Is.EqualTo(0));
+            Assert.That(this.repo.SingleStepQueue.IsEmpty);
+            Assert.That(localA.GetFiles().First().Name, Is.EqualTo(fileName));
+            Assert.That(localB.GetFiles().Count(), Is.EqualTo(0));
+        }
+
         [Ignore("It is not possible to handle this situation at the moment")]
         [Test, Category("Slow"), Category("Erratic")]
         public void CyclicRenaming() {
