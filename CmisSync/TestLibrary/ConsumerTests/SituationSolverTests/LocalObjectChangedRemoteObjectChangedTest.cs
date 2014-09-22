@@ -53,12 +53,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesSessionAndStorageAndDateSyncEnabled() {
-            new LocalObjectChangedRemoteObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager(), true);
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesSessionAndStorageAndDateSyncDisabled() {
-            new LocalObjectChangedRemoteObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager(), false);
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -200,9 +204,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         private void InitMocks(bool dateSyncEnabled = true) {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.manager = new ActiveActivitiesManager();
-            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, this.manager, dateSyncEnabled);
+            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, this.manager);
         }
 
         private Mock<IDocument> CreateRemoteDocument(DateTime lastRemoteModification, long contentLength, byte[] contentHash) {

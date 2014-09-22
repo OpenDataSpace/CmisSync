@@ -56,8 +56,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager,
-            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            ActiveActivitiesManager transmissionManager) : base(session, storage) {
 
 
             if (transmissionManager == null) {

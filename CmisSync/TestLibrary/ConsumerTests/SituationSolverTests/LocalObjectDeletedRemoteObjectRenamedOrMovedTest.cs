@@ -49,6 +49,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [SetUp]
         public void SetUp() {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.remoteObject = new Mock<IObjectId>(MockBehavior.Strict);
             this.remoteObject.Setup(o => o.Id).Returns(RemoteId);

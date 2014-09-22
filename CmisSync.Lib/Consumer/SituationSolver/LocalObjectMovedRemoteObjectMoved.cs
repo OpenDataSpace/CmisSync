@@ -44,11 +44,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="isServerAbleToUpdateModificationDate">If set to <c>true</c> the server is able to update modification date.</param>
         public LocalObjectMovedRemoteObjectMoved(
             ISession session,
-            IMetaDataStorage storage,
-            bool isServerAbleToUpdateModificationDate) : base(
+            IMetaDataStorage storage) : base(
             session,
-            storage,
-            isServerAbleToUpdateModificationDate) {
+            storage) {
         }
 
         /// <summary>

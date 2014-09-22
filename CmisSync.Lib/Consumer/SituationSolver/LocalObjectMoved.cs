@@ -44,8 +44,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectMoved(
             ISession session,
-            IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate)
+            IMetaDataStorage storage) : base(session, storage)
         {
         }
 

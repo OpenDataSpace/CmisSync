@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
@@ -50,8 +51,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="serverCanModifyCreationAndModificationDate">Enables the last modification date sync.</param>
         public AbstractEnhancedSolver(
             ISession session,
-            IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate = false)
+            IMetaDataStorage storage)
         {
             this.Storage = storage;
             if (session == null) {
@@ -64,7 +64,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.Session = session;
             this.Storage = storage;
-            this.ServerCanModifyDateTimes = serverCanModifyCreationAndModificationDate;
+            this.ServerCanModifyDateTimes = this.Session.IsServerAbleToUpdateModificationDate();
         }
 
         /// <summary>

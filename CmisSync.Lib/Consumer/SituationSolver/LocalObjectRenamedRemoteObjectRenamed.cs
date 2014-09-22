@@ -48,9 +48,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ISession session,
             IMetaDataStorage storage,
             ActiveActivitiesManager transmissionManager,
-            bool serverCanModifyCreationAndModificationDate = false,
-            ISolver secondSolver = null) : base(session, storage, serverCanModifyCreationAndModificationDate) {
-            this.secondSolver = secondSolver ?? new LocalObjectChangedRemoteObjectChanged(this.Session, this.Storage, transmissionManager, serverCanModifyCreationAndModificationDate);
+            ISolver secondSolver = null) : base(session, storage) {
+            this.secondSolver = secondSolver ?? new LocalObjectChangedRemoteObjectChanged(this.Session, this.Storage, transmissionManager);
         }
 
         /// <summary>

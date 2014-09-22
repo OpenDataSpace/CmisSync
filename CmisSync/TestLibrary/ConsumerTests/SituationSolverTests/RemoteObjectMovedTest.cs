@@ -47,6 +47,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [SetUp]
         public void SetUp() {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.matcher = new Mock<IPathMatcher>();
             this.storage.Setup(s => s.Matcher).Returns(this.matcher.Object);

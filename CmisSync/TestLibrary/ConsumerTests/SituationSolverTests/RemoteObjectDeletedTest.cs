@@ -51,12 +51,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest() {
-            new RemoteObjectDeleted(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFilterAggregator>());
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            new RemoteObjectDeleted(session.Object, Mock.Of<IMetaDataStorage>(), Mock.Of<IFilterAggregator>());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorThrowsExceptionIfFiltersAreNull() {
-            Assert.Throws<ArgumentNullException>(() => new RemoteObjectDeleted(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), null));
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            Assert.Throws<ArgumentNullException>(() => new RemoteObjectDeleted(session.Object, Mock.Of<IMetaDataStorage>(), null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -183,6 +187,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         private void SetUpTestMocks() {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.filters = new Mock<IFilterAggregator>();
             this.fileNameFilter = new IgnoredFileNamesFilter();

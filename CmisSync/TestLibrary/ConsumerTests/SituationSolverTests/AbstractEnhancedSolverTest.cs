@@ -32,6 +32,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using NUnit.Framework;
 
+    using TestLibrary.TestUtils;
+
     [TestFixture]
     public class AbstractEnhancedSolverTest
     {
@@ -47,26 +49,35 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorSetsPropertiesCorrectly() {
-            var session = Mock.Of<ISession>();
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
             var storage = Mock.Of<IMetaDataStorage>();
-            var solver = new SolverClass(session, storage);
-            Assert.That(solver.GetSession(), Is.EqualTo(session));
+            var solver = new SolverClass(session.Object, storage);
+            Assert.That(solver.GetSession(), Is.EqualTo(session.Object));
             Assert.That(solver.GetStorage(), Is.EqualTo(storage));
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorSetsServerPropertyCorrectly() {
-            var solver = new SolverClass(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), true);
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem(true);
+            var solver = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
             Assert.That(solver.GetModification(), Is.True);
-            solver = new SolverClass(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), false);
+
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorSetsModificationPossibilityToFalse() {
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem(false);
+            var solver = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
             Assert.That(solver.GetModification(), Is.False);
         }
 
         private class SolverClass : AbstractEnhancedSolver {
             public SolverClass(
                 ISession session,
-                IMetaDataStorage storage,
-                bool modificationsAllowed = true) : base(session, storage, modificationsAllowed) {
+                IMetaDataStorage storage) : base(session, storage) {
             }
 
             public ISession GetSession() {

@@ -49,6 +49,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [SetUp]
         public void SetUp() {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.manager = new Mock<ActiveActivitiesManager> { CallBase = true };
             this.secondSolver = new Mock<ISolver>();
@@ -56,26 +57,23 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.session.Object,
                 this.storage.Object,
                 this.manager.Object,
-                true,
                 this.secondSolver.Object);
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithDateModification() {
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
-                Mock.Of<ISession>(),
+                this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
-                Mock.Of<ActiveActivitiesManager>(),
-                true);
+                Mock.Of<ActiveActivitiesManager>());
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithoutDateModification() {
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
-                Mock.Of<ISession>(),
+                this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
-                Mock.Of<ActiveActivitiesManager>(),
-                false);
+                Mock.Of<ActiveActivitiesManager>());
         }
 
         [Test, Category("Fast")]

@@ -69,6 +69,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.newParentUuid = Guid.NewGuid();
             this.localUuid = Guid.NewGuid();
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.oldLocalParentFolder = new Mock<IDirectoryInfo>();
             this.oldLocalParentFolder.SetupGuid(this.oldParentUuid);
@@ -76,7 +77,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 Guid = this.oldParentUuid
             };
             this.storage.AddMappedFolder(this.mappedParent);
-            this.underTest = new LocalObjectMovedRemoteObjectMoved(this.session.Object, this.storage.Object, true);
+            this.underTest = new LocalObjectMovedRemoteObjectMoved(this.session.Object, this.storage.Object);
             var mappedNewLocalParent = new MappedObject(this.newParentName, this.newRemoteParentId, MappedObjectType.Folder, null, this.oldChangeToken) {
                 Guid = this.newParentUuid
             };
@@ -88,7 +89,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesValidInput() {
-            new LocalObjectMovedRemoteObjectMoved(this.session.Object, this.storage.Object, true);
+            new LocalObjectMovedRemoteObjectMoved(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]

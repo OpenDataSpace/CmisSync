@@ -56,9 +56,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChangedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager, 
-            bool serverCanModifyCreationAndModificationDate,
-            FileSystemInfoFactory fsFactory = null) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            ActiveActivitiesManager transmissionManager,
+            FileSystemInfoFactory fsFactory = null) : base(session, storage) {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
