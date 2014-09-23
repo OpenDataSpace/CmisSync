@@ -11,6 +11,7 @@ SOURCES =  \
 	Accumulator/RemoteObjectMovedOrRenamedAccumulator.cs \
 	ActivityListenerAggregator.cs \
 	Backend.cs \
+	ClientBrandBase.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
