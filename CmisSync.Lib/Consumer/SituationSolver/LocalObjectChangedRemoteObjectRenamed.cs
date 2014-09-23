@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
+    using System.IO;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
@@ -29,10 +30,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     public class LocalObjectChangedRemoteObjectRenamed : AbstractEnhancedSolver
     {
+        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
         public LocalObjectChangedRemoteObjectRenamed(
             ISession session,
-            IMetaDataStorage storage) : base(session, storage)
+            IMetaDataStorage storage,
+            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage)
         {
+            if (changeSolver == null) {
+                throw new ArgumentNullException("Given solver for the situation of local and remote changes is null");
+            }
+
+            this.changeChangeSolver = changeSolver;
         }
 
         public override void Solve(
@@ -41,7 +49,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            // Rename local object and call change/change solver
+            var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            string oldPath = localFileSystemInfo.FullName;
+            string parentPath = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).Directory.FullName : (localFileSystemInfo as IDirectoryInfo).Parent.FullName;
+            string newPath = Path.Combine(parentPath, (remoteId as ICmisObject).Name);
+            this.MoveTo(localFileSystemInfo, oldPath, newPath);
+            savedObject.Name = (remoteId as ICmisObject).Name;
+            this.Storage.SaveMappedObject(savedObject);
+            this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+        }
+
+        private void MoveTo(IFileSystemInfo localFsInfo, string oldPath, string newPath) {
+            if (localFsInfo is IFileInfo) {
+                (localFsInfo as IFileInfo).MoveTo(newPath);
+                OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
+            } else {
+                (localFsInfo as IDirectoryInfo).MoveTo(newPath);
+                OperationsLogger.Info(string.Format("Moved local folder {0} to {1}", oldPath, newPath));
+            }
         }
     }
 }

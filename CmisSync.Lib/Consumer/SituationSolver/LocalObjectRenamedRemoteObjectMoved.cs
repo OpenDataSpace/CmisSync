@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
+    using System.IO;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -58,16 +59,31 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent)
         {
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            string oldPath = localFileSystemInfo.FullName;
+            string oldName = (remoteId as ICmisObject).Name;
             if ((remoteId as ICmisObject).Name != savedObject.Name) {
                 // Both are renamed and remote is also moved => move & rename/rename
-                throw new NotImplementedException();
-                // Move local object
-                // this.renameRenameSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                string newPath = remoteId is IFolder ? this.Storage.Matcher.CreateLocalPath(remoteId as IFolder) : this.Storage.Matcher.CreateLocalPath(remoteId as IDocument);
+                if ((remoteId as ICmisObject).Name == localFileSystemInfo.Name) {
+                    // Move local object to new name, bacause it is the same => only change/change solver is needed
+                    this.MoveTo(localFileSystemInfo, oldPath, newPath);
+                    savedObject.Name = localFileSystemInfo.Name;
+                    savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
+                    this.Storage.SaveMappedObject(savedObject);
+                    this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                } else {
+                    // Only move local object to new folder but keep the old name => both names are different => rename/rename solver needed
+                    newPath = newPath.TrimEnd(Path.DirectorySeparatorChar);
+                    newPath = newPath.Substring(0, newPath.Length - (remoteId as ICmisObject).Name.Length) + oldName;
+                    this.MoveTo(localFileSystemInfo, oldPath, newPath);
+                    savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
+                    this.Storage.SaveMappedObject(savedObject);
+                    this.renameRenameSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                }
             } else {
                 // Local rename and remote move => move locally and rename remote => change/change
                 try {
                     // rename remote file
-                    string oldName = (remoteId as ICmisObject).Name;
                     (remoteId as ICmisObject).Rename(localFileSystemInfo.Name, true);
                     OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteId.Id, oldName, localFileSystemInfo.Name));
                     savedObject.Name = (remoteId as ICmisObject).Name;
@@ -75,22 +91,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     OperationsLogger.Info(string.Format("Permission Denied: Cannot rename remote object ({1}): {0}", (remoteId as ICmisObject).Name, remoteId.Id));
                     return;
                 }
-                string oldPath = localFileSystemInfo.FullName;
+
                 string newPath = remoteId is IFolder ? this.Storage.Matcher.CreateLocalPath(remoteId as IFolder) : this.Storage.Matcher.CreateLocalPath(remoteId as IDocument);
                 // move local object to same directory as the remote object is
-                if (localFileSystemInfo is IFileInfo) {
-                    (localFileSystemInfo as IFileInfo).MoveTo(newPath);
-                    OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
-                } else {
-                    (localFileSystemInfo as IDirectoryInfo).MoveTo(newPath);
-                    OperationsLogger.Info(string.Format("Moved local folder {0} to {1}", oldPath, newPath));
-                }
+                this.MoveTo(localFileSystemInfo, oldPath, newPath);
 
                 savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
                 this.Storage.SaveMappedObject(savedObject);
 
                 // Synchronize the rest with the change change solver
                 this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+            }
+        }
+
+        private void MoveTo(IFileSystemInfo localFsInfo, string oldPath, string newPath) {
+            if (localFsInfo is IFileInfo) {
+                (localFsInfo as IFileInfo).MoveTo(newPath);
+                OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
+            } else {
+                (localFsInfo as IDirectoryInfo).MoveTo(newPath);
+                OperationsLogger.Info(string.Format("Moved local folder {0} to {1}", oldPath, newPath));
             }
         }
     }

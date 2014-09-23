@@ -171,8 +171,8 @@ namespace CmisSync.Lib.Consumer
             solver[(int)SituationType.REMOVED, (int)SituationType.MOVED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.RENAMED] = new RemoteObjectRenamed(this.session, this.storage);
-            solver[(int)SituationType.CHANGED, (int)SituationType.RENAMED] = new LocalObjectChangedRemoteObjectRenamed(this.session, this.storage);
-            solver[(int)SituationType.MOVED, (int)SituationType.RENAMED] = new LocalObjectMovedRemoteObjectRenamed(this.session, this.storage);
+            solver[(int)SituationType.CHANGED, (int)SituationType.RENAMED] = new LocalObjectChangedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
+            solver[(int)SituationType.MOVED, (int)SituationType.RENAMED] = new LocalObjectMovedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver, renameRenameSolver);
             solver[(int)SituationType.RENAMED, (int)SituationType.RENAMED] = renameRenameSolver;
             solver[(int)SituationType.REMOVED, (int)SituationType.RENAMED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage);
 
