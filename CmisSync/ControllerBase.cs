@@ -207,7 +207,7 @@ namespace CmisSync
 
         private Object brand_lock = new Object();
         private bool firstCheckBrand = true;
-        private readonly string brandConfigFolder = "ClientBrand";
+        public readonly string BrandConfigFolder = "ClientBrand";
 
         /// <summary>
         /// Constructor.
@@ -251,7 +251,7 @@ namespace CmisSync
             ClientBrand clientBrand = new ClientBrand();
             foreach (string path in clientBrand.GetPathList())
             {
-                if (!File.Exists(Path.Combine(config.GetConfigPath(), brandConfigFolder, path.Substring(1))))
+                if (!File.Exists(Path.Combine(config.GetConfigPath(), BrandConfigFolder, path.Substring(1))))
                 {
                     return false;
                 }
@@ -327,15 +327,24 @@ namespace CmisSync
                             success = false;
                             break;
                         }
-                        string pathname = Path.Combine(config.GetConfigPath(), brandConfigFolder, path.Substring(1));
+                        string pathname = Path.Combine(config.GetConfigPath(), BrandConfigFolder, path.Substring(1));
                         Directory.CreateDirectory(Path.GetDirectoryName(pathname));
-                        using (FileStream output = File.OpenWrite(pathname))
+                        try
                         {
-                            if (!clientBrand.GetFile(path, output))
+                            using (FileStream output = File.OpenWrite(pathname))
                             {
-                                success = false;
-                                break;
+                                if (!clientBrand.GetFile(path, output))
+                                {
+                                    success = false;
+                                    break;
+                                }
                             }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error(string.Format("Fail to update the cilent brand file {0}: {1}", pathname, e));
+                            success = false;
+                            break;
                         }
                         BrandFile file = new BrandFile();
                         file.Date = date;
