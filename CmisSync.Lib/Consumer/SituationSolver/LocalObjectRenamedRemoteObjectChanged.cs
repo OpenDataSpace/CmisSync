@@ -22,14 +22,24 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     public class LocalObjectRenamedRemoteObjectChanged : AbstractEnhancedSolver
     {
-        public LocalObjectRenamedRemoteObjectChanged(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+
+        public LocalObjectRenamedRemoteObjectChanged(
+            ISession session,
+            IMetaDataStorage storage,
+            ActiveActivitiesManager transmissionManager,
+            FileSystemInfoFactory fsFactory = null,
+            LocalObjectChangedRemoteObjectChanged changeSolver = null) : base(session, storage) {
+            this.changeChangeSolver = changeSolver ?? new LocalObjectChangedRemoteObjectChanged(this.Session, this.Storage, transmissionManager, fsFactory);
         }
 
         public override void Solve(
@@ -38,7 +48,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            string oldName = (remoteId as ICmisObject).Name;
+
+            // Rename object
+            try {
+                (remoteId as ICmisObject).Rename(localFileSystemInfo.Name, true);
+            } catch (CmisPermissionDeniedException) {
+                OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFileSystemInfo.Name));
+                return;
+            }
+
+            obj.Name = localFileSystemInfo.Name;
+            this.Storage.SaveMappedObject(obj);
+            this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
         }
     }
 }

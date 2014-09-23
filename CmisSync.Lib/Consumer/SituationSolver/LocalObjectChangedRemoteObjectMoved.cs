@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -29,10 +30,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     public class LocalObjectChangedRemoteObjectMoved : AbstractEnhancedSolver
     {
+        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+        private IFileSystemInfoFactory fsFactory;
         public LocalObjectChangedRemoteObjectMoved(
             ISession session,
-            IMetaDataStorage storage) : base(session, storage)
+            IMetaDataStorage storage,
+            ActiveActivitiesManager transmissionManager,
+            FileSystemInfoFactory fsFactory = null,
+            LocalObjectChangedRemoteObjectChanged changeSolver = null) : base(session, storage)
         {
+            this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
+            this.changeChangeSolver = changeSolver ?? new LocalObjectChangedRemoteObjectChanged(
+                this.Session,
+                this.Storage,
+                transmissionManager,
+                fsFactory);
         }
 
         public override void Solve(
@@ -41,7 +53,30 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            string newPath = remoteId is IFolder ? this.Storage.Matcher.CreateLocalPath(remoteId as IFolder) : this.Storage.Matcher.CreateLocalPath(remoteId as IDocument);
+            if (remoteId is IFolder) {
+                IDirectoryInfo dirInfo = localFileSystemInfo as IDirectoryInfo;
+                string oldPath = dirInfo.FullName;
+                if (!dirInfo.FullName.Equals(newPath)) {
+                    dirInfo.MoveTo(newPath);
+                    OperationsLogger.Info(string.Format("Moved local folder {0} to {1}", oldPath, newPath));
+                } else {
+                    return;
+                }
+            } else if (remoteId is IDocument) {
+                IFileInfo fileInfo = localFileSystemInfo as IFileInfo;
+                string oldPath = fileInfo.FullName;
+                fileInfo.MoveTo(newPath);
+                OperationsLogger.Info(string.Format("Moved local file {0} to {1}", oldPath, newPath));
+            }
+
+            savedObject.Name = (remoteId as ICmisObject).Name;
+            savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
+            this.Storage.SaveMappedObject(savedObject);
+
+            localFileSystemInfo = remoteId is IFolder ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(newPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(newPath);
+            this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
         }
     }
 }

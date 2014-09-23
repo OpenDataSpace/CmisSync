@@ -22,14 +22,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     public class LocalObjectMovedRemoteObjectChanged : AbstractEnhancedSolver
     {
-        public LocalObjectMovedRemoteObjectChanged(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        private LocalObjectRenamedRemoteObjectChanged renameChangeSolver;
+        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+        public LocalObjectMovedRemoteObjectChanged(
+            ISession session,
+            IMetaDataStorage storage,
+            ActiveActivitiesManager transmissionManager,
+            FileSystemInfoFactory fsFactory = null,
+            LocalObjectRenamedRemoteObjectChanged renameSolver = null,
+            LocalObjectChangedRemoteObjectChanged changeSolver = null) : base(session, storage) {
+            this.renameChangeSolver = renameSolver ?? new LocalObjectRenamedRemoteObjectChanged(this.Session, this.Storage, transmissionManager, fsFactory);
+            this.changeChangeSolver = changeSolver ?? new LocalObjectChangedRemoteObjectChanged(this.Session, this.Storage, transmissionManager, fsFactory);
         }
 
         public override void Solve(
@@ -38,7 +50,29 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            var localParent = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).Directory : (localFileSystemInfo as IDirectoryInfo).Parent;
+            var mappedLocalParent = this.Storage.GetObjectByGuid((Guid)localParent.Uuid);
+            var remoteObject = remoteId as IFileableCmisObject;
+            var targetId = mappedLocalParent.RemoteObjectId;
+            var src = this.Session.GetObject(obj.ParentId);
+            var target = this.Session.GetObject(targetId);
+            try {
+                OperationsLogger.Info(string.Format("Moving remote object {2} from folder {0} to folder {1}", src.Name, target.Name, remoteId.Id));
+                remoteObject = remoteObject.Move(src, target);
+            } catch (CmisPermissionDeniedException) {
+                OperationsLogger.Info(string.Format("Moving remote object failed {0}: Permission Denied", localFileSystemInfo.FullName));
+                return;
+            }
+
+            obj.ParentId = targetId;
+            this.Storage.SaveMappedObject(obj);
+
+            if (obj.Name != localFileSystemInfo.Name) {
+                this.renameChangeSolver.Solve(localFileSystemInfo, remoteObject, localContent, remoteContent);
+            } else {
+                this.changeChangeSolver.Solve(localFileSystemInfo, remoteObject, localContent, remoteContent);
+            }
         }
     }
 }
