@@ -35,7 +35,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// </summary>
     public class LocalObjectRenamedRemoteObjectRenamed : AbstractEnhancedSolver
     {
-        private ISolver secondSolver;
+        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -47,9 +47,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectRenamedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager,
-            ISolver secondSolver = null) : base(session, storage) {
-            this.secondSolver = secondSolver ?? new LocalObjectChangedRemoteObjectChanged(this.Session, this.Storage, transmissionManager);
+            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
+            if (changeSolver == null) {
+                throw new ArgumentNullException("Given solver for the situation of local and remote object changed is null");
+            }
+
+            this.changeChangeSolver = changeSolver;
         }
 
         /// <summary>
@@ -94,7 +97,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 if (localFile.Name.Equals(remoteFile.Name)) {
                     mappedObject.Name = localFile.Name;
                     this.Storage.SaveMappedObject(mappedObject);
-                    this.secondSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                    this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
                 } else {
                     OperationsLogger.Warn(string.Format(
                         "Synchronization Conflict: The local file {0} has been locally renamed from {1} to {2} and remotely to {3}. " +

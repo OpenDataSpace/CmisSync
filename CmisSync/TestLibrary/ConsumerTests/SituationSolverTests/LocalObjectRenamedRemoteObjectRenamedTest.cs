@@ -48,8 +48,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private LocalObjectRenamedRemoteObjectRenamed underTest;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
-        private ActiveActivitiesManager manager;
-
+        private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
 
         [SetUp]
         public void SetUp() {
@@ -59,13 +58,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.InitializeMappedFolderOnStorage();
-            this.manager = new ActiveActivitiesManager();
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.manager);
+            var transmissionManager = new ActiveActivitiesManager();
+            var fsFactory = Mock.Of<IFileSystemInfoFactory>();
+            this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, transmissionManager, fsFactory);
+            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 
         [Test]
         public void DefaultConstructor() {
-            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.manager);
+            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
