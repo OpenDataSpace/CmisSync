@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedRemoteObjectChanged));
 
         private ActiveActivitiesManager transmissionManager;
-        private FileSystemInfoFactory fsFactory;
+        private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -57,7 +57,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ISession session,
             IMetaDataStorage storage,
             ActiveActivitiesManager transmissionManager,
-            FileSystemInfoFactory fsFactory = null) : base(session, storage) {
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
