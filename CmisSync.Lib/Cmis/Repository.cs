@@ -307,11 +307,6 @@ namespace CmisSync.Lib.Cmis
         public IDisposableSyncEventQueue Queue { get; protected set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this Repo is stopped, to control for machine sleep/wake power management.
-        /// </summary>
-        public bool Stopped { get; set; }
-
-        /// <summary>
         /// Gets the watcherproducer of the local filesystem for changes.
         /// </summary>
         public IWatcherProducer WatcherProducer { get; private set; }
