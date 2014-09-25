@@ -191,7 +191,7 @@ namespace CmisSync.Lib.Consumer
             SituationType remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
             ISolver solver = this.Solver[(int)localSituation, (int)remoteSituation];
 
-            if(solver == null) {
+            if (solver == null) {
                 throw new NotImplementedException(string.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));
             }
 

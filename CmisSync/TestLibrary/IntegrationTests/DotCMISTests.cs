@@ -125,7 +125,7 @@ namespace TestLibrary.IntegrationTests
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
@@ -254,7 +254,7 @@ namespace TestLibrary.IntegrationTests
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "testfile.txt";
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
@@ -315,7 +315,7 @@ namespace TestLibrary.IntegrationTests
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "hashedfile.txt";
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
@@ -396,7 +396,7 @@ namespace TestLibrary.IntegrationTests
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
@@ -481,7 +481,7 @@ namespace TestLibrary.IntegrationTests
             string filename = "name";
             IDocument doc;
             try {
-                doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
@@ -524,7 +524,7 @@ namespace TestLibrary.IntegrationTests
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
@@ -566,7 +566,7 @@ namespace TestLibrary.IntegrationTests
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath + "/" + filename) as IDocument;
+                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
@@ -617,12 +617,12 @@ namespace TestLibrary.IntegrationTests
             properties.Add(PropertyIds.Name, folderName);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
             try {
-                IFolder folder = session.GetObjectByPath(remoteFolderPath + "/" + folderName) as IFolder;
+                IFolder folder = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + folderName) as IFolder;
                 if (folder != null) {
                     folder.Delete(true);
                 }
 
-                folder = session.GetObjectByPath(remoteFolderPath + "/" + newFolderName) as IFolder;
+                folder = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + newFolderName) as IFolder;
                 if (folder != null) {
                     folder.Delete(true);
                 }
@@ -654,12 +654,12 @@ namespace TestLibrary.IntegrationTests
             properties.Add(PropertyIds.Name, folderName);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
             try {
-                IFolder folder = session.GetObjectByPath(remoteFolderPath + "/" + folderName) as IFolder;
+                IFolder folder = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + folderName) as IFolder;
                 if (folder != null) {
                     folder.Delete(true);
                 }
 
-                folder = session.GetObjectByPath(remoteFolderPath + "/" + newFolderName) as IFolder;
+                folder = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + newFolderName) as IFolder;
                 if (folder != null) {
                     folder.Delete(true);
                 }
