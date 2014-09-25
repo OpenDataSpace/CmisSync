@@ -143,7 +143,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var syncedFileInfo = new Mock<IFileInfo>();
             syncedFileInfo.Setup(s => s.FullName).Returns(syncedFilePath);
             syncedFileInfo.Setup(s => s.Name).Returns(syncedFileName);
-            syncedFileInfo.Setup(s => s.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(syncedFileGuid.ToString());
+            syncedFileInfo.SetupGuid(syncedFileGuid);
             syncedFileInfo.Setup(s => s.LastWriteTimeUtc).Returns(lastModified);
             dirInfo.SetupFiles(fileInfo.Object, syncedFileInfo.Object);
             var mappedSyncedFile = new MappedObject(syncedFileName, "id", MappedObjectType.File, "parentId", "changeToken", 0) { Guid = syncedFileGuid, LastLocalWriteTimeUtc = lastModified };

@@ -23,11 +23,11 @@ namespace TestLibrary.TestUtils
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;
@@ -82,9 +82,9 @@ namespace TestLibrary.TestUtils
                                                  d.FullName == path &&
                                                  d.Name == Path.GetDirectoryName(path));
             return db.AddLocalFolder(folder, id);
-        }            
-        
-        public static void AddLocalFolder(this Mock<IMetaDataStorage> storage, string path, string id, Guid uuid){
+        }
+
+        public static void AddLocalFolder(this Mock<IMetaDataStorage> storage, string path, string id, Guid uuid) {
             var folder = new Mock<IMappedObject>();
             folder.Setup(f => f.Name).Returns(System.IO.Path.GetDirectoryName(path));
             folder.Setup(f => f.RemoteObjectId).Returns(id);
@@ -109,7 +109,7 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == file.RemoteObjectId))).Returns(file);
             db.Setup(foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns(localPath);
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns(remotePath);
-            if(!file.Guid.Equals(Guid.Empty)) {
+            if (!file.Guid.Equals(Guid.Empty)) {
                 db.Setup(foo => foo.GetObjectByGuid(It.Is<Guid>(g => g.Equals(file.Guid)))).Returns(file);
             }
         }
@@ -120,7 +120,7 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == folder.RemoteObjectId))).Returns(folder);
             db.Setup(foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(localPath);
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(remotePath);
-            if(!folder.Guid.Equals(Guid.Empty)) {
+            if (!folder.Guid.Equals(Guid.Empty)) {
                 db.Setup(foo => foo.GetObjectByGuid(It.Is<Guid>(g => g.Equals(folder.Guid)))).Returns(folder);
             }
         }
@@ -198,9 +198,7 @@ namespace TestLibrary.TestUtils
             Assert.That(o.Type, Is.EqualTo(type));
             if (extendedAttributeAvailable) {
                 Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty), "Given Guid must not be empty");
-            }
-            else
-            {
+            } else {
                 Assert.That(o.Guid, Is.EqualTo(Guid.Empty), "Given Guid must be empty");
             }
 

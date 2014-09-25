@@ -95,10 +95,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         private bool DeleteLocalObjectIfHasBeenSyncedBefore(IMetaDataStorage storage, IFileSystemInfo fsInfo) {
             bool delete = true;
             string reason;
-            Guid uuid;
+            Guid? uuid = fsInfo.Uuid;
             IMappedObject obj = null;
-            if (Guid.TryParse(fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out uuid)) {
-                obj = storage.GetObjectByGuid(uuid);
+            if (uuid != null) {
+                obj = storage.GetObjectByGuid((Guid)uuid);
             } else {
                 obj = storage.GetObjectByLocalPath(fsInfo);
             }
@@ -108,7 +108,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     (fsInfo as IFileInfo).Delete();
                     OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", fsInfo.FullName, obj.RemoteObjectId));
                 } else {
-                    fsInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                    fsInfo.Uuid = null;
                     return false;
                 }
             } else if (fsInfo is IDirectoryInfo) {
@@ -136,11 +136,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             (fsInfo as IDirectoryInfo).Delete(false);
                             OperationsLogger.Info(string.Format("Deleted local folder {0} because the mapped remote folder has been deleted", fsInfo.FullName));
                         } catch (IOException) {
-                            fsInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                            fsInfo.Uuid = null;
                             return false;
                         }
                     } else {
-                        fsInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                        fsInfo.Uuid = null;
                     }
                 } else {
                     try {
