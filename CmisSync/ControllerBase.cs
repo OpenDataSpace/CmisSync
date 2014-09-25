@@ -468,10 +468,6 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
-                foreach (Repository repo in this.repositories) {
-                    repo.Stopped = true;
-                }
-
                 Logger.Debug("Start to stop all active file transmissions");
                 do {
                     List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
@@ -492,16 +488,6 @@ namespace CmisSync
                     }
                 } while (true);
                 Logger.Debug("Finish to stop all active file transmissions");
-            }
-        }
-
-        public void StartAll()
-        {
-            lock (this.repo_lock)
-            {
-                foreach (Repository repo in this.repositories) {
-                    repo.Stopped = false;
-                }
             }
         }
 
