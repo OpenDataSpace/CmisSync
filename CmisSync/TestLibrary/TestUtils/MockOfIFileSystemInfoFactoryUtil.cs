@@ -53,7 +53,7 @@ namespace TestLibrary.TestUtils
         {
             var dir = fsFactory.AddDirectory(path, exists);
             dir.Setup(d => d.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(guid.ToString());
-            dir.Setup(d =>d.Uuid).Returns(guid);
+            dir.Setup(d => d.Uuid).Returns(guid);
             return dir;
         }
 
@@ -124,7 +124,7 @@ namespace TestLibrary.TestUtils
         public static void AddIFileInfo(this Mock<IFileSystemInfoFactory> fsFactory, IFileInfo fileInfo, bool exists = true)
         {
             fsFactory.Setup(f => f.CreateFileInfo(fileInfo.FullName)).Returns(fileInfo);
-            if(exists){
+            if (exists) {
                 fsFactory.Setup(f => f.IsDirectory(fileInfo.FullName)).Returns(false);
             }
         }
