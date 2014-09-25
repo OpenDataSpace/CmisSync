@@ -103,7 +103,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 null,
                 null),
                 Times.Once());
-            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+            fileInfo.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
             document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
@@ -139,7 +139,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 null,
                 null),
                 Times.Once());
-            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
+            fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
             document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
@@ -170,7 +170,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 null,
                 null),
                 Times.Once());
-            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+            fileInfo.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
@@ -199,7 +199,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 null,
                 null),
                 Times.Once());
-            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
+            fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
@@ -231,7 +231,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 null,
                 null),
                 Times.Once());
-            fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Never());
+            fileInfo.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
@@ -251,7 +251,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
             dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            dirInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+            dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -270,7 +270,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
             dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k == MappedObject.ExtendedAttributeKey), It.Is<string>(v => !v.Equals(Guid.Empty)), true), Times.Once());
+            dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => !uuid.Equals(Guid.Empty)), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -291,7 +291,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, lastChangeToken, extendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == parentId)), Times.Once());
             dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            dirInfo.Verify(d => d.SetExtendedAttribute(It.Is<string>(k => k == MappedObject.ExtendedAttributeKey), It.Is<string>(v => !v.Equals(guid.ToString())), true), Times.Once());
+            dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => !uuid.Equals(guid)), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -305,7 +305,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(0);
-            fileInfo.Setup(f => f.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).Throws(exception);
+            fileInfo.SetupSet(f => f.Uuid = It.IsAny<Guid?>()).Throws(exception);
 
             try {
                 Mock<IDocument> document;
@@ -313,7 +313,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 Assert.Fail();
             } catch (RetryException e) {
                 Assert.That(e.InnerException, Is.EqualTo(exception));
-                fileInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), true), Times.Once());
+                fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
                 this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
                 fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             }
@@ -477,8 +477,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             dirInfo.Setup(d => d.Name).Returns(folderName);
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(extendedAttributes);
-            if(existingGuid != null) {
-                dirInfo.Setup(d => d.GetExtendedAttribute(It.IsAny<string>())).Returns(existingGuid.ToString());
+            if (existingGuid != null) {
+                dirInfo.SetupGuid((Guid)existingGuid);
             }
 
             var parentDirInfo = this.SetupParentFolder(parentId);
