@@ -24,6 +24,7 @@ SOURCES =  \
 	../Windows/FolderTreeMVC/NodeModelUtils.cs \
 	About.cs \
 	CertPolicyWindow.cs \
+	ClientBrand.cs \
 	CmisTree/CmisTreeStore.cs \
 	CmisTree/StatusCellRenderer.cs \
 	Controller.cs \

@@ -60,7 +60,7 @@ namespace CmisSync
             Title          = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
             AppPaintable   = true;
 
-            string image_path = System.IO.Path.Combine(UI.AssetsPath, "pixmaps", "about.png");
+            string image_path = UIHelpers.GetImagePath ("about.png");
 
             Realize ();
             Gdk.Pixbuf buf = new Gdk.Pixbuf (image_path);
