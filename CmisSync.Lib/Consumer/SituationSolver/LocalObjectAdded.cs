@@ -204,9 +204,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             try {
-                Guid uuid;
-                if (Guid.TryParse(parent.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out uuid)) {
-                    return storage.GetObjectByGuid(uuid).RemoteObjectId;
+                Guid? uuid = parent.Uuid;
+                if (uuid != null) {
+                    return storage.GetObjectByGuid((Guid)uuid).RemoteObjectId;
                 }
             } catch (IOException) {
             }
