@@ -97,7 +97,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             dirInfo.Verify(d => d.Create(), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, false, this.creationDate);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-            dirInfo.Verify(d => d.SetExtendedAttribute(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+            dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
