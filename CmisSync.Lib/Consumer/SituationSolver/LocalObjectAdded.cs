@@ -173,10 +173,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             if (localFile.IsExtendedAttributeAvailable())
             {
                 try {
-                    string ea = localFile.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-                    if (ea == null || !Guid.TryParse(ea, out uuid) || this.Storage.GetObjectByGuid(uuid) != null) {
+                    Guid? localUuid = localFile.Uuid;
+                    if (localUuid == null || this.Storage.GetObjectByGuid((Guid)localUuid) != null) {
                         uuid = Guid.NewGuid();
-                        localFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, uuid.ToString(), true);
+                        try {
+                            localFile.Uuid = uuid;
+                        } catch (RestoreModificationDateException restoreException) {
+                            Logger.Debug("Could not retore the last modification date of " + localFile.FullName, restoreException);
+                        }
+                    } else {
+                        uuid = (Guid)localUuid;
                     }
                 } catch (ExtendedAttributeException ex) {
                     throw new RetryException(ex.Message, ex);
