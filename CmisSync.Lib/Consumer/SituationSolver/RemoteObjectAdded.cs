@@ -149,7 +149,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     hash = hashAlg.Hash;
                 }
 
-                cacheFile.Uuid = guid;
+                try {
+                    cacheFile.Uuid = guid;
+                } catch(RestoreModificationDateException e) {
+                    Logger.Debug("Could not retore the last modification date of " + cacheFile.FullName, e);
+                }
+
                 try {
                     cacheFile.MoveTo(file.FullName);
                 } catch (IOException e) {
@@ -157,8 +162,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     if (file.Exists) {
                         IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
                         IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
-                        targetFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), true);
-                        conflictFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                        try {
+                            targetFile.Uuid = guid;
+                        } catch (RestoreModificationDateException restoreException) {
+                            Logger.Debug("Could not retore the last modification date of " + targetFile.FullName, restoreException);
+                        }
+
+                        try {
+                            conflictFile.Uuid = null;
+                        } catch(RestoreModificationDateException restoreException) {
+                            Logger.Debug("Could not retore the last modification date of " + conflictFile.FullName, restoreException);
+                        }
                     } else {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = e });
                         throw;

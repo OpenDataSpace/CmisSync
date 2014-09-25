@@ -229,7 +229,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 cacheFileInfo.Verify(f => f.Replace(fileInfo.Object, conflictFileInfo, true), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
-                Mock.Get(conflictFileInfo).Verify(c => c.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, It.IsAny<bool>()), Times.Once());
+                Mock.Get(conflictFileInfo).VerifySet(c => c.Uuid = null, Times.Once());
             }
         }
 
