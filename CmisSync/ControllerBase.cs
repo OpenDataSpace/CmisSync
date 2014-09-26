@@ -469,6 +469,7 @@ namespace CmisSync
             lock (this.repo_lock)
             {
                 Logger.Debug("Start to stop all active file transmissions");
+                int wait = 0;
                 do {
                     List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
                     foreach (FileTransmissionEvent transmissionEvent in activeList) {
@@ -483,6 +484,11 @@ namespace CmisSync
 
                     if (activeList.Count > 0) {
                         Thread.Sleep(100);
+                        wait ++;
+                        if(wait > 100) {
+                            Logger.Debug("Start to abort all HttpWebRequest");
+                            DotCMIS.Binding.HttpWebRequestResource.AbortAll();
+                        }
                     } else {
                         break;
                     }
