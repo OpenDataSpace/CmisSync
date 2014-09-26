@@ -140,6 +140,7 @@ namespace CmisSync {
                 delegate
                 {
                     Logger.Info (String.Format ("Machine sleep event detected, start all repositories"));
+                    StartAll();
                 }
             );
 

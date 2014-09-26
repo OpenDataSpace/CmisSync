@@ -87,6 +87,11 @@ namespace CmisSync
         private List<Repository> repositories = new List<Repository>();
 
         /// <summary>
+        /// A list of repositories sent to suspend because of a sleep event.
+        /// </summary>
+        private List<Repository> sleepingRepositories = new List<Repository>();
+
+        /// <summary>
         /// Dictionary of the edit folder diaglogs
         /// Key: synchronized folder name
         /// Value: <c>Edit</c>
@@ -466,6 +471,14 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
+                foreach (var repo in this.Repositories) {
+                    if (repo.Status != SyncStatus.Suspend)
+                    {
+                        repo.Suspend();
+                        this.sleepingRepositories.Add(repo);
+                    }
+                }
+
                 Logger.Debug("Start to stop all active file transmissions");
                 do {
                     List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
@@ -486,6 +499,18 @@ namespace CmisSync
                     }
                 } while (true);
                 Logger.Debug("Finish to stop all active file transmissions");
+            }
+        }
+
+        public void StartAll() {
+            lock (this.repo_lock)
+            {
+                foreach (var repo in this.sleepingRepositories)
+                {
+                    repo.Resume();
+                }
+
+                this.sleepingRepositories.Clear();
             }
         }
 
