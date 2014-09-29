@@ -36,10 +36,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectRenamedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager,
-            FileSystemInfoFactory fsFactory = null,
-            LocalObjectChangedRemoteObjectChanged changeSolver = null) : base(session, storage) {
-            this.changeChangeSolver = changeSolver ?? new LocalObjectChangedRemoteObjectChanged(this.Session, this.Storage, transmissionManager, fsFactory);
+            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
+            if (changeSolver == null) {
+                throw new ArgumentNullException("Given situation solver for local and remote changes is null");
+            }
+
+            this.changeChangeSolver = changeSolver;
         }
 
         public override void Solve(
