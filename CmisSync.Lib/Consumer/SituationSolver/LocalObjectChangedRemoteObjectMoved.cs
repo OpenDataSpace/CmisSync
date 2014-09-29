@@ -35,16 +35,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChangedRemoteObjectMoved(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager,
-            FileSystemInfoFactory fsFactory = null,
-            LocalObjectChangedRemoteObjectChanged changeSolver = null) : base(session, storage)
+            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage)
         {
-            this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
-            this.changeChangeSolver = changeSolver ?? new LocalObjectChangedRemoteObjectChanged(
-                this.Session,
-                this.Storage,
-                transmissionManager,
-                fsFactory);
+            if (changeSolver == null) {
+                throw new ArgumentNullException("Given solver for the conflict situation of local and remote change is null");
+            }
+
+            this.changeChangeSolver = changeSolver;
         }
 
         public override void Solve(
@@ -75,7 +72,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
             this.Storage.SaveMappedObject(savedObject);
 
-            localFileSystemInfo = remoteId is IFolder ? (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(newPath) : (IFileSystemInfo)this.fsFactory.CreateFileInfo(newPath);
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
         }
     }

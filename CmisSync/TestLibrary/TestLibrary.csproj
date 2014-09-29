@@ -195,6 +195,7 @@
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectDeletedRemoteObjectRenamedOrMovedTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\LongFileAndPathNameSupportTest.cs" />
     <Compile Include="UtilsTests\ProcessDiagnosticsTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectMovedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
