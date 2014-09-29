@@ -148,6 +148,7 @@ namespace CmisSync.Lib.Consumer
             ISolver[,] solver = new ISolver[dim, dim];
             var changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
             var renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
+            var renameChangeSolver = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, changeChangeSolver);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = new NothingToDoSolver();
             solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.session, this.storage, this.activityListener.TransmissionManager);
@@ -160,12 +161,12 @@ namespace CmisSync.Lib.Consumer
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
             solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = changeChangeSolver;
-            solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = new LocalObjectMovedRemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
-            solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = new LocalObjectMovedRemoteObjectChanged(this.session, this.storage, renameChangeSolver, changeChangeSolver);
+            solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = renameChangeSolver;
             solver[(int)SituationType.REMOVED, (int)SituationType.CHANGED] = new LocalObjectDeletedRemoteObjectChanged(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.MOVED] = new RemoteObjectMoved(this.session, this.storage);
-            solver[(int)SituationType.CHANGED, (int)SituationType.MOVED] = new LocalObjectChangedRemoteObjectMoved(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.CHANGED, (int)SituationType.MOVED] = new LocalObjectChangedRemoteObjectMoved(this.session, this.storage, changeChangeSolver);
             solver[(int)SituationType.MOVED, (int)SituationType.MOVED] = new LocalObjectMovedRemoteObjectMoved(this.session, this.storage);
             solver[(int)SituationType.RENAMED, (int)SituationType.MOVED] = new LocalObjectRenamedRemoteObjectMoved(this.session, this.storage, renameRenameSolver, changeChangeSolver);
             solver[(int)SituationType.REMOVED, (int)SituationType.MOVED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage);
