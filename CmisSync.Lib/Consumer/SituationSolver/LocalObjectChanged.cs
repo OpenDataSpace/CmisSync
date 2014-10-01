@@ -118,6 +118,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     if (ex.InnerException is CmisPermissionDeniedException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
                         return;
+                    } else if (ex.InnerException is CmisStorageException) {
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", localFile.FullName), ex);
+                        return;
                     }
 
                     throw;
