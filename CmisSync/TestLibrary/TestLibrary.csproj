@@ -199,6 +199,7 @@
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectRenamedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectChangedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectRenamedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

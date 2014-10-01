@@ -227,6 +227,29 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void StorageExceptionTriggersNoOperation() {
+            this.SetUpMocks();
+            int fileLength = 20;
+            byte[] content = new byte[fileLength];
+
+            var localFile = this.CreateLocalFile(fileLength, this.modificationDate.AddMinutes(1));
+            using (var uploadedContent = new MemoryStream()) {
+                localFile.Setup(
+                    f =>
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
+                var mappedObject = this.CreateMappedFile(this.modificationDate.AddMinutes(1), fileLength, new byte[20]);
+                this.storage.AddMappedFile(mappedObject);
+                var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteId, this.objectName, this.parentId, fileLength, new byte[20], this.oldChangeToken);
+                remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Throws(new CmisStorageException());
+
+                this.underTest.Solve(localFile.Object, remoteFile.Object);
+
+                this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+                remoteFile.VerifySetContentStream();
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void PermissionDeniedOnModificationDateSavesTheLocalDate() {
             this.SetUpMocks();
             var localFolder = this.CreateLocalDirectory(this.modificationDate.AddMinutes(1));

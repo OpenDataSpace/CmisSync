@@ -58,7 +58,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent)
         {
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
-            string newParentId = this.Storage.GetObjectByGuid((Guid)localFileSystemInfo.Uuid).ParentId;
+            Guid? newParentUuid = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).Directory.Uuid : (localFileSystemInfo as IDirectoryInfo).Parent.Uuid;
+            string newParentId = this.Storage.GetObjectByGuid((Guid)newParentUuid).RemoteObjectId;
             if (localFileSystemInfo.Name == (remoteId as ICmisObject).Name) {
                 // Both names are equal => only move to new remote parent
                 try {
@@ -77,7 +78,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 if (localFileSystemInfo.Name == savedObject.Name) {
                     // Remote rename and local move => Move remote and rename locally => change change solver
                     try {
-                        (remoteId as IFileableCmisObject).Move(this.Session.GetObject(savedObject.ParentId), this.Session.GetObject(newParentId));
+                        remoteId = (remoteId as IFileableCmisObject).Move(this.Session.GetObject(savedObject.ParentId), this.Session.GetObject(newParentId));
                     } catch (CmisPermissionDeniedException) {
                         OperationsLogger.Info(string.Format("Permission Denied: Cannot move remote object {0} from {1} to {2}", remoteId.Id, savedObject.ParentId, newParentId));
                         return;
