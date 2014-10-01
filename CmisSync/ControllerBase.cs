@@ -500,7 +500,7 @@ namespace CmisSync
                         wait ++;
                         if(wait > 100) {
                             Logger.Debug("Start to abort all HttpWebRequest");
-                            DotCMIS.Binding.HttpWebRequestResource.AbortAll();
+                            //DotCMIS.Binding.HttpWebRequestResource.AbortAll();
                         }
                     } else {
                         break;
