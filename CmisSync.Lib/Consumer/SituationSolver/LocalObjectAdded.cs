@@ -133,6 +133,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         try {
                             uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
                         } catch (Exception ex) {
+                            if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
+                                OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                                return;
+                            }
+
                             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                             throw;
                         }
