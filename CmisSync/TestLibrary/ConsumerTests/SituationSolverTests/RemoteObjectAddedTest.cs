@@ -235,16 +235,37 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast"), Category("Solver")]
         public void ExceptionIsThrownIfAnAlreadySyncedFileShouldBeSyncedAgain() {
-            string remoteId = "remoteId";
             Guid uuid = Guid.NewGuid();
             var file = Mock.Of<IFileInfo>(
                 f =>
                 f.Exists == true &&
                 f.Uuid == uuid &&
                 f.FullName == "path");
-            this.storage.AddLocalFile(file.FullName, remoteId, uuid);
-            Assert.Throws<ArgumentException>(() => this.underTest.Solve(file, Mock.Of<IDocument>(d => d.Id == remoteId)));
+            this.storage.AddLocalFile(file.FullName, this.id, uuid);
+            Assert.Throws<ArgumentException>(() => this.underTest.Solve(file, Mock.Of<IDocument>(d => d.Id == this.id)));
             this.storage.VerifyThatNoObjectIsManipulated();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalAndRemoteFilesAreSavedAsEqualIfTheContentIsEqual() {
+            var fileInfo = new Mock<IFileInfo>();
+            var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
+            fileInfo.SetupAllProperties();
+            fileInfo.Setup(f => f.FullName).Returns(this.path);
+            fileInfo.Setup(f => f.Name).Returns(this.objectName);
+            fileInfo.Setup(f => f.Directory).Returns(parentDir);
+            fileInfo.Setup(f => f.Uuid).Returns(Guid.NewGuid());
+            fileInfo.Setup(f => f.Exists).Returns(true);
+            byte[] content = Encoding.UTF8.GetBytes("content");
+            fileInfo.SetupStream(content);
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
+            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
+            remoteObject.SetupContentStreamHash(expectedHash);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+
+            this.underTest.Solve(fileInfo.Object, remoteObject.Object);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
         }
     }
 }

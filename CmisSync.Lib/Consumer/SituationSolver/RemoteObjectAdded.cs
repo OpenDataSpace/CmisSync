@@ -21,8 +21,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -126,6 +128,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         }
                     }
 
+                    if (this.MergeExistingFileWithRemoteFile(file, remoteId as IDocument, guid)) {
+                        return;
+                    }
+
                     Logger.Debug(string.Format("This file {0} conflicts with remote file => conflict file will be produced after download", file.FullName));
                 }
 
@@ -206,6 +212,45 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
+        }
+
+        private bool MergeExistingFileWithRemoteFile(IFileInfo file, IDocument remoteDoc, Guid guid) {
+            byte[] remoteHash = remoteDoc.ContentStreamHash();
+            if (file.Length.Equals(remoteDoc.ContentStreamLength) && remoteHash != null) {
+                byte[] localHash;
+                using (var f = file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                    localHash = SHA1Managed.Create().ComputeHash(f);
+                }
+
+                if (localHash != null && localHash.SequenceEqual(remoteHash)) {
+                    if (remoteDoc.LastModificationDate != null) {
+                        try {
+                            file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
+                        } catch(IOException e) {
+                            Logger.Debug("Cannot set last modification date", e);
+                        }
+                    }
+
+                    MappedObject mappedObject = new MappedObject(
+                        file.Name,
+                        remoteDoc.Id,
+                        MappedObjectType.File,
+                        remoteDoc.Parents[0].Id,
+                        remoteDoc.ChangeToken,
+                        remoteDoc.ContentStreamLength ?? 0)
+                    {
+                        Guid = guid,
+                        LastLocalWriteTimeUtc = file.LastWriteTimeUtc,
+                        LastRemoteWriteTimeUtc = remoteDoc.LastModificationDate,
+                        LastChecksum = localHash,
+                        ChecksumAlgorithmName = "SHA-1"
+                    };
+                    this.Storage.SaveMappedObject(mappedObject);
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
