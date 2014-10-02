@@ -1144,7 +1144,7 @@ namespace TestLibrary.IntegrationTests
             var fileInfo = fsFactory.CreateFileInfo(file.FullName);
             Guid uuid = (Guid)fileInfo.Uuid;
             for (int i = 0; i < 10; i++) {
-                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + i + ".txt"));
+                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, string.Format("{0}{1}.txt", fileName, i)));
                 file.CopyTo(fileCopy.FullName);
                 Thread.Sleep(50);
                 fileCopy.Refresh();
