@@ -108,19 +108,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(1);
             var fileContent = new byte[1];
-            var localFileStream = new MemoryStream(fileContent);
-            byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
+            using (var localFileStream = new MemoryStream(fileContent)) {
+                byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
 
-            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
+                fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
 
-            Mock<IDocument> document;
-            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, null, hash, 1);
-            this.VerifyCreateDocument();
-            fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
-            fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
-            document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
+                Mock<IDocument> document;
+                this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, extendedAttributes, fileInfo, out document);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, Times.Exactly(2), extendedAttributes, null, null, hash, 1);
+                this.VerifyCreateDocument();
+                fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
+                fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+                document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
+                document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
+            }
         }
 
         [Test, Category("Fast"), Category("Solver")]
