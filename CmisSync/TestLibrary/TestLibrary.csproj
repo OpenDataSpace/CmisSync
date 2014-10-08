@@ -200,6 +200,7 @@
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectRenamedTest.cs" />
+    <Compile Include="SelectiveIgnoreTests\IgnoredEntityTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -248,5 +249,6 @@
     <Folder Include="QueueingTests\" />
     <Folder Include="FilterTests\" />
     <Folder Include="CmisTests\ConvenienceExtendersTests\" />
+    <Folder Include="SelectiveIgnoreTests\" />
   </ItemGroup>
 </Project>

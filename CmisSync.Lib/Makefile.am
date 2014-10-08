@@ -158,6 +158,10 @@ SOURCES =  \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	SelectiveIgnore/IgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IgnoredEntity.cs \
+	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
+	SelectiveIgnore/SelectiveIgnoreFilter.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
 	Storage/Database/Entities/IFileConvenienceExtenders.cs \

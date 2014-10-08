@@ -245,6 +245,10 @@
     <Compile Include="Consumer\SituationSolver\LocalObjectRenamedRemoteObjectMoved.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectRenamed.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectRenamed.cs" />
+    <Compile Include="SelectiveIgnore\SelectiveIgnoreFilter.cs" />
+    <Compile Include="SelectiveIgnore\SelectiveIgnoreEventTransformer.cs" />
+    <Compile Include="SelectiveIgnore\IgnoredEntitiesCollection.cs" />
+    <Compile Include="SelectiveIgnore\IgnoredEntity.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -307,5 +311,6 @@
     <Folder Include="Cmis\UiUtils\" />
     <Folder Include="Producer\ContentChange\" />
     <Folder Include="Cmis\ConvenienceExtenders\" />
+    <Folder Include="SelectiveIgnore\" />
   </ItemGroup>
 </Project>
