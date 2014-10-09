@@ -89,7 +89,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             completewatch.Start();
             Logger.Debug("Starting LocalObjectAdded");
             string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
-            Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
 
             ICmisObject addedObject;
             try {
@@ -98,6 +97,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
                 return;
             }
+
+            Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
 
             OperationsLogger.Info(string.Format("Created remote {2} {0} for {1}", addedObject.Id, localFileSystemInfo.FullName, addedObject is IFolder ? "folder" : "document"));
 
@@ -188,7 +189,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             Logger.Debug("Could not retore the last modification date of " + localFile.FullName, restoreException);
                         }
                     } else {
-                        uuid = (Guid)localUuid;
+                        uuid = localUuid ?? Guid.NewGuid();
                     }
                 } catch (ExtendedAttributeException ex) {
                     throw new RetryException(ex.Message, ex);
