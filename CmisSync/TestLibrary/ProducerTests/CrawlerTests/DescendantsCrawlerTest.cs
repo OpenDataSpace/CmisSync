@@ -85,7 +85,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.localFolder.Setup(f => f.FullName).Returns(this.localRootPath);
             this.localFolder.Setup(f => f.Exists).Returns(true);
             this.localFolder.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
-            this.localFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(this.rootGuid.ToString());
+            this.localFolder.SetupGuid(this.rootGuid);
             this.localFolder.Setup(f => f.LastWriteTimeUtc).Returns(this.lastLocalWriteTime);
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
             this.fsFactory.AddIDirectoryInfo(this.localFolder.Object);
@@ -312,7 +312,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "oldFolder"));
             var newLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
             oldLocalFolder.Setup(f => f.Exists).Returns(false);
-            newLocalFolder.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(uuid.ToString());
+            newLocalFolder.SetupGuid(uuid);
             var remoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("oldFolderId", "oldFolder", this.remoteRootPath + "oldFolder", this.remoteRootId, "oldChange");
             var storedFolder = new MappedObject("oldFolder", "oldFolderId", MappedObjectType.Folder, this.remoteRootId, "oldChange") {
                 Guid = uuid
@@ -409,7 +409,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             var localGuid = Guid.NewGuid();
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, oldFolderName));
             oldLocalFolder.Setup(f => f.LastWriteTimeUtc).Returns(modification);
-            oldLocalFolder.Setup(f => f.GetExtendedAttribute(MappedObject.ExtendedAttributeKey)).Returns(localGuid.ToString());
+            oldLocalFolder.SetupGuid(localGuid);
             var storedFolder = new MappedObject(oldFolderName, folderId, MappedObjectType.Folder, this.remoteRootId, "changeToken") {
                 Guid = localGuid,
                 LastLocalWriteTimeUtc = modification
