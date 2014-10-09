@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace TestLibrary.ProducerTests.CrawlerTests
 {
     using System;
@@ -31,6 +32,8 @@ namespace TestLibrary.ProducerTests.CrawlerTests
     using Moq;
 
     using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture]
     public class LocalEventGeneratorTest
@@ -88,7 +91,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         private ObjectTree<IFileSystemInfo> CreateTreeFromPathAndGuid(string name, string path, Guid guid) {
             var localTree = new ObjectTree<IFileSystemInfo>();
             var fsInfo = new Mock<IDirectoryInfo>();
-            fsInfo.Setup(f => f.GetExtendedAttribute(It.IsAny<string>())).Returns(guid.ToString());
+            fsInfo.SetupGuid(guid);
             fsInfo.Setup(f => f.FullName).Returns(path);
             fsInfo.Setup(f => f.Name).Returns(name);
             fsInfo.Setup(f => f.LastWriteTimeUtc).Returns(zeroDate);

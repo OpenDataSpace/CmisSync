@@ -77,10 +77,10 @@ namespace CmisSync.Lib.Producer.Crawler
             List<AbstractFolderEvent> creationEvents = new List<AbstractFolderEvent>();
             var parent = localTree.Item;
             IMappedObject storedParent = null;
-            Guid guid;
+            Guid? guid = parent.Uuid;
 
-            if (this.TryGetExtendedAttribute(parent, out guid)) {
-                storedParent = storedObjects.Find(o => o.Guid.Equals(guid));
+            if (guid != null) {
+                storedParent = storedObjects.Find(o => o.Guid.Equals((Guid)guid));
             }
 
             foreach (var child in localTree.Children) {
@@ -151,21 +151,10 @@ namespace CmisSync.Lib.Producer.Crawler
             return createdEvent;
         }
 
-        private bool TryGetExtendedAttribute(IFileSystemInfo fsInfo, out Guid guid) {
-            string ea = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-            if (!string.IsNullOrEmpty(ea) &&
-                Guid.TryParse(ea, out guid)) {
-                return true;
-            } else {
-                guid = Guid.Empty;
-                return false;
-            }
-        }
-
         private IMappedObject FindStoredObjectByFileSystemInfo(List<IMappedObject> storedObjects, IFileSystemInfo fsInfo) {
-            Guid childGuid;
-            if (this.TryGetExtendedAttribute(fsInfo, out childGuid)) {
-               return storedObjects.Find(o => o.Guid == childGuid);
+            Guid? childGuid = fsInfo.Uuid;
+            if (childGuid != null) {
+               return storedObjects.Find(o => o.Guid == (Guid)childGuid);
             }
 
             return null;
