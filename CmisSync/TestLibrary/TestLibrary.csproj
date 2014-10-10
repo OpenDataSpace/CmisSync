@@ -200,6 +200,10 @@
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectRenamedTest.cs" />
+    <Compile Include="MockedServer\MockOfISessionFactory.cs" />
+    <Compile Include="MockedServer\MockOfIRepository.cs" />
+    <Compile Include="MockedServer\MockedCmisServer.cs" />
+    <Compile Include="MockedServer\MockedCmisUserAccount.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -248,5 +252,6 @@
     <Folder Include="QueueingTests\" />
     <Folder Include="FilterTests\" />
     <Folder Include="CmisTests\ConvenienceExtendersTests\" />
+    <Folder Include="MockedServer\" />
   </ItemGroup>
 </Project>
