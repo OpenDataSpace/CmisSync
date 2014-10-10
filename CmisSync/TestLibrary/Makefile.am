@@ -81,6 +81,11 @@ SOURCES =  \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
+	MockedServer/MockOfIAclCapabilities.cs \
+	MockedServer/MockOfIRepository.cs \
+	MockedServer/MockOfISessionFactory.cs \
+	MockedServer/MockedCmisServer.cs \
+	MockedServer/MockedCmisUserAccount.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
