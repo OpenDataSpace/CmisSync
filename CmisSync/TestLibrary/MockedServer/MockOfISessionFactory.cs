@@ -1,4 +1,6 @@
-
+using DotCMIS;
+using DotCMIS.Binding;
+using DotCMIS.Client.Impl.Cache;
 
 namespace TestLibrary.MockedServer
 {
@@ -9,13 +11,25 @@ namespace TestLibrary.MockedServer
 
     using Moq;
 
-    public static class MockOfISessionFactory
+    using TestLibrary.TestUtils;
+
+    public class MockOfISessionFactory : Mock<ISessionFactory>
     {
-        public static ISessionFactory CreateSessionFactory(params IRepository[] repos) {
-            var factory = new Mock<ISessionFactory>();
-            factory.Setup(f => f.GetRepositories(It.IsAny<IDictionary<string, string>>())).Returns(new List<IRepository>(repos));
-            factory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>())).Returns((ISession)null);
-            return factory.Object;
+        public MockOfISessionFactory(params IRepository[] repos) {
+            this.Setup(f => f.GetRepositories(It.IsAny<IDictionary<string, string>>())).Returns(new List<IRepository>(repos));
+            foreach (var repo in repos) {
+                this.Setup(
+                    f => f.CreateSession(
+                    It.Is<IDictionary<string, string>>(d => d[SessionParameter.RepositoryId] == repo.Id)))
+                    .Returns(repo.CreateSession());
+                this.Setup(
+                    f => f.CreateSession(
+                    It.Is<IDictionary<string, string>>(d => d[SessionParameter.RepositoryId] == repo.Id),
+                    It.IsAny<IObjectFactory>(),
+                    It.IsAny<IAuthenticationProvider>(),
+                    It.IsAny<ICache>()))
+                    .Returns(repo.CreateSession());
+            }
         }
     }
 }
