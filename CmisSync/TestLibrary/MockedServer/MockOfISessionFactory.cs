@@ -13,16 +13,16 @@ namespace TestLibrary.MockedServer
 
     using TestLibrary.TestUtils;
 
-    public class MockOfISessionFactory : Mock<ISessionFactory>
+    public static class MockOfISessionFactory
     {
-        public MockOfISessionFactory(params IRepository[] repos) {
-            this.Setup(f => f.GetRepositories(It.IsAny<IDictionary<string, string>>())).Returns(new List<IRepository>(repos));
+        public static void SetupRepositories(this Mock<ISessionFactory> factory, params IRepository[] repos) {
+            factory.Setup(f => f.GetRepositories(It.IsAny<IDictionary<string, string>>())).Returns(new List<IRepository>(repos));
             foreach (var repo in repos) {
-                this.Setup(
+                factory.Setup(
                     f => f.CreateSession(
                     It.Is<IDictionary<string, string>>(d => d[SessionParameter.RepositoryId] == repo.Id)))
                     .Returns(repo.CreateSession());
-                this.Setup(
+                factory.Setup(
                     f => f.CreateSession(
                     It.Is<IDictionary<string, string>>(d => d[SessionParameter.RepositoryId] == repo.Id),
                     It.IsAny<IObjectFactory>(),
