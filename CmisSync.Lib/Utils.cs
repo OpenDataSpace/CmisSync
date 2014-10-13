@@ -216,22 +216,6 @@ namespace CmisSync.Lib
         }
 
         /// <summary>
-        /// Determines whether this instance is valid ISO-8859-15 specified input.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if this instance is valid ISO-8859-15 specified input; otherwise, <c>false</c>.
-        /// </returns>
-        /// <param name='input'>
-        /// If set to <c>true</c> input.
-        /// </param>
-        public static bool IsValidISO885915(string input)
-        {
-            byte[] bytes = Encoding.GetEncoding(28605).GetBytes(input);
-            string result = Encoding.GetEncoding(28605).GetString(bytes);
-            return string.Equals(input, result);
-        }
-
-        /// <summary>
         /// Check whether a file name is valid or not.
         /// </summary>
         public static bool IsInvalidFileName(string name)
@@ -240,11 +224,6 @@ namespace CmisSync.Lib
             if (ret) {
                 Logger.Debug(string.Format("The given file name {0} contains invalid patterns", name));
                 return ret;
-            }
-
-            ret = !IsValidISO885915(name);
-            if (ret) {
-                Logger.Debug(string.Format("The given file name {0} contains invalid characters", name));
             }
 
             return ret;
@@ -277,11 +256,6 @@ namespace CmisSync.Lib
                     Logger.Debug(string.Format("The given folder name \"{0}\" matches the wildcard \"{1}\"", name, wildcard));
                     return true;
                 }
-            }
-
-            ret = !IsValidISO885915(name);
-            if (ret) {
-                Logger.Debug(string.Format("The given directory name {0} contains invalid characters", name));
             }
 
             return ret;

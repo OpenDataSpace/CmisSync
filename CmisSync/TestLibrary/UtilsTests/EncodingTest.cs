@@ -30,24 +30,9 @@ namespace TestLibrary.UtilsTests
     [TestFixture]
     public class EncodingTest
     {
-        private readonly string validChars = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ÄÖÜäöüß-_.:,;#+*?!/\|<>§$%&()[]{}`'@~¹²³±×¡¢£¥©ª«¬®¯°µ¶·º»¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞàáâãäåæçèéê€";
-        private readonly string invalidChars = "–¦´¤¨¸¼¼¾";
+        private readonly string validChars = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ÄÖÜäöüß-_.:,;#+*?!/\|<>§$%&()[]{}`'@~¹²³±×¡¢£¥©ª«¬®¯°µ¶·º»¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞàáâãäåæçèéê€–¦´¤¨¸¼¼¾";
         private readonly string invalidFolderNameChars = "?:/\\\"<>|*";
         private readonly string invalidFileNameChars = "?:/\\\"<>|*";
-
-        [Test, Category("Fast")]
-        public void IsoEncodingTestValidChars() {
-            foreach (char c in this.validChars.ToCharArray()) {
-                Assert.IsTrue(Utils.IsValidISO885915(c.ToString()), c.ToString());
-            }
-        }
-
-        [Test, Category("Fast")]
-        public void IsoEncodingTestInvaidChars() {
-            foreach (char c in this.invalidChars.ToCharArray()) {
-                Assert.IsFalse(Utils.IsValidISO885915(c.ToString()), c.ToString());
-            }
-        }
 
         [Test, Category("Fast")]
         public void ValidFileNameTest()
@@ -60,10 +45,6 @@ namespace TestLibrary.UtilsTests
                 if (!this.invalidFileNameChars.Contains(c.ToString())) {
                     Assert.That(Utils.IsInvalidFileName(c.ToString()), Is.False, c.ToString());
                 }
-            }
-
-            foreach (char c in this.invalidChars.ToCharArray()) {
-                Assert.That(Utils.IsInvalidFileName(c.ToString()), Is.True, c.ToString());
             }
         }
 
@@ -79,17 +60,12 @@ namespace TestLibrary.UtilsTests
                     Assert.That(Utils.IsInvalidFolderName(c.ToString()), Is.False, c.ToString());
                 }
             }
-
-            foreach (char c in this.invalidChars.ToCharArray()) {
-                Assert.That(Utils.IsInvalidFolderName(c.ToString()), Is.True, c.ToString());
-            }
         }
 
         [Test, Category("Fast")]
         public void IsStringNormalizedInFormD()
         {
             Assert.That(@"ä".IsNormalized(NormalizationForm.FormD));
-            Assert.That(Utils.IsValidISO885915(@"ä"), Is.False);
         }
     }
 }
