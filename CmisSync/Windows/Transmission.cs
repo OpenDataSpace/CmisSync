@@ -100,7 +100,7 @@ namespace CmisSync
                 Status = item.Status;
                 Progress = item.Progress;
                 Done = item.Done;
-                EventHandler changeHandler = PropertyChanged;
+                var changeHandler = PropertyChanged;
                 if (changeHandler != null) {
                     changeHandler(this, new PropertyChangedEventArgs("Repo"));
                     changeHandler(this, new PropertyChangedEventArgs("Path"));
