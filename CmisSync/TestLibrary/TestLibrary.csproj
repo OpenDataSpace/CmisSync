@@ -205,6 +205,9 @@
     <Compile Include="MockedServer\MockedCmisServer.cs" />
     <Compile Include="MockedServer\MockedCmisUserAccount.cs" />
     <Compile Include="MockedServer\MockOfIAclCapabilities.cs" />
+    <Compile Include="IntegrationTests\FullInMemoryRepoTest.cs" />
+    <Compile Include="MockedServer\MockOfISession.cs" />
+    <Compile Include="MockedServer\MockedFolder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

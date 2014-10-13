@@ -1470,7 +1470,7 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        private class CmisRepoMock : CmisSync.Lib.Cmis.Repository
+        public class CmisRepoMock : CmisSync.Lib.Cmis.Repository
         {
             public SingleStepEventQueue SingleStepQueue;
 

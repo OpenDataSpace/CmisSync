@@ -4,6 +4,7 @@ namespace TestLibrary.MockedServer
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -17,10 +18,21 @@ namespace TestLibrary.MockedServer
     {
         private static Dictionary<string, MockOfIRepository> repositories = new Dictionary<string, MockOfIRepository>();
 
-        public Mock<IRepository> GetRepository(string id) {
+        private MockedFolder rootFolder = new MockedFolder("/");
+        public IFolder RootFolder {
+            get {
+                return this.rootFolder.Object;
+            }
+        }
+
+        public void SetupName(string name) {
+            this.Setup(r => r.Name).Returns(name);
+        }
+
+        public static MockOfIRepository GetRepository(string id) {
             lock(repositories) {
-                var repo = repositories[id];
-                if (repo == null) {
+                MockOfIRepository repo;
+                if (!repositories.TryGetValue(id, out repo)) {
                     repo = new MockOfIRepository(id);
                     repositories[id] = repo;
                 }
@@ -33,7 +45,7 @@ namespace TestLibrary.MockedServer
             repositories.Remove(this.Object.Id);
         }
 
-        private MockOfIRepository(string id) {
+        private MockOfIRepository(string id) : base(MockBehavior.Strict) {
             this.Setup(r => r.Name).Returns("name");
             this.Setup(r => r.Id).Returns(id);
             this.Setup(r => r.Description).Returns("desc");
@@ -44,6 +56,7 @@ namespace TestLibrary.MockedServer
                 c.SupportedPermissions == SupportedPermissions.Basic &&
                 c.PermissionMapping == new Dictionary<string, IPermissionMapping>());
             this.Setup(r => r.AclCapabilities).Returns(acls);
+            this.Setup(r => r.CreateSession()).Returns(new MockOfISession(this).Object);
         }
     }
 }
