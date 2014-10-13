@@ -47,22 +47,14 @@ namespace CmisSync.Lib.Queueing
         private object repoInfoLock = new object();
         private bool isForbidden = false;
 
-        protected ISyncEventQueue Queue { get; set; }
-
-        protected RepoInfo RepoInfo { get; set; }
-
-        protected IAuthenticationProvider AuthProvider { get; set; }
-
-        protected ISessionFactory SessionFactory { get; set; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.ConnectionScheduler"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
-        /// <param name="queue">Queue.</param>
+        /// <param name="queue">Event queue.</param>
         /// <param name="sessionFactory">Session factory.</param>
         /// <param name="authProvider">Auth provider.</param>
-        /// <param name="interval">Interval.</param>
+        /// <param name="interval">Retry interval in msec.</param>
         public ConnectionScheduler(
             RepoInfo repoInfo,
             ISyncEventQueue queue,
@@ -101,7 +93,7 @@ namespace CmisSync.Lib.Queueing
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.ConnectionScheduler"/> class by copy all members.
         /// </summary>
         /// <param name="original">Original Instance.</param>
-        protected ConnectionScheduler(ConnectionScheduler original) : this(original.RepoInfo, original.Queue, original.SessionFactory, original.AuthProvider, original.Interval){
+        protected ConnectionScheduler(ConnectionScheduler original) : this(original.RepoInfo, original.Queue, original.SessionFactory, original.AuthProvider, original.Interval) {
         }
 
         /// <summary>
@@ -109,6 +101,14 @@ namespace CmisSync.Lib.Queueing
         /// </summary>
         /// <value>The interval.</value>
         public int Interval { get; private set; }
+
+        protected ISyncEventQueue Queue { get; set; }
+
+        protected RepoInfo RepoInfo { get; set; }
+
+        protected IAuthenticationProvider AuthProvider { get; set; }
+
+        protected ISessionFactory SessionFactory { get; set; }
 
         /// <summary>
         /// Releases all resource used by the <see cref="CmisSync.Lib.Queueing.SyncScheduler"/> object.
@@ -148,7 +148,7 @@ namespace CmisSync.Lib.Queueing
         /// Handles repository configuration change events by extracting new login informations and returns false
         /// </summary>
         /// <param name="e">The event to handle.</param>
-        /// <returns>false</returns>
+        /// <returns><c>false</c></returns>
         public override bool Handle(ISyncEvent e)
         {
             if (e is RepoConfigChangedEvent) {
@@ -179,6 +179,7 @@ namespace CmisSync.Lib.Queueing
         /// <summary>
         /// Connect this instance.
         /// </summary>
+        /// <returns><c>true</c>, if connection was successful, otherwise <c>false</c></returns>
         protected bool Connect()
         {
             lock(this.repoInfoLock) {
