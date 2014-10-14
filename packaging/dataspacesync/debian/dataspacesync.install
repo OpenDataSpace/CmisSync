@@ -1,2 +1,4 @@
 usr/lib/dataspace-sync/DataSpaceSync
 usr/lib/dataspace-sync/DataSpaceSync.Console
+usr/lib/dataspace-sync/lib/*.so
+usr/lib/dataspace-sync/libMonoPosixHelper.so
