@@ -140,6 +140,8 @@ namespace CmisSync.Lib
 
                 if (this.AreChangeEventsSupported(session))
                 {
+                    Logger.Info("Session supports content changes");
+
                     // Add Accumulator
                     this.ccaccumulator = new ContentChangeEventAccumulator(session, this.Queue);
                     this.Queue.EventManager.AddEventHandler(this.ccaccumulator);
