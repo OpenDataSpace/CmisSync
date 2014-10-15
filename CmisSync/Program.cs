@@ -44,8 +44,8 @@ namespace CmisSync
     using System.Threading;
 
     using CmisSync.Lib;
-    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
 
     using log4net;
     using log4net.Config;
