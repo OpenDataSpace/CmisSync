@@ -100,10 +100,13 @@ namespace CmisSync
                 Status = item.Status;
                 Progress = item.Progress;
                 Done = item.Done;
-                PropertyChanged(this, new PropertyChangedEventArgs("Repo"));
-                PropertyChanged(this, new PropertyChangedEventArgs("Path"));
-                PropertyChanged(this, new PropertyChangedEventArgs("Status"));
-                PropertyChanged(this, new PropertyChangedEventArgs("Progress"));
+                var changeHandler = PropertyChanged;
+                if (changeHandler != null) {
+                    changeHandler(this, new PropertyChangedEventArgs("Repo"));
+                    changeHandler(this, new PropertyChangedEventArgs("Path"));
+                    changeHandler(this, new PropertyChangedEventArgs("Status"));
+                    changeHandler(this, new PropertyChangedEventArgs("Progress"));
+                }
             }
         }
 

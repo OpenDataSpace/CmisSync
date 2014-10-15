@@ -201,6 +201,14 @@
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectRenamedTest.cs" />
     <Compile Include="SelectiveIgnoreTests\IgnoredEntityTests.cs" />
+    <Compile Include="MockedServer\MockOfISessionFactory.cs" />
+    <Compile Include="MockedServer\MockOfIRepository.cs" />
+    <Compile Include="MockedServer\MockedCmisServer.cs" />
+    <Compile Include="MockedServer\MockedCmisUserAccount.cs" />
+    <Compile Include="MockedServer\MockOfIAclCapabilities.cs" />
+    <Compile Include="IntegrationTests\FullInMemoryRepoTest.cs" />
+    <Compile Include="MockedServer\MockOfISession.cs" />
+    <Compile Include="MockedServer\MockedFolder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -249,6 +257,10 @@
     <Folder Include="QueueingTests\" />
     <Folder Include="FilterTests\" />
     <Folder Include="CmisTests\ConvenienceExtendersTests\" />
+<<<<<<< HEAD
     <Folder Include="SelectiveIgnoreTests\" />
+=======
+    <Folder Include="MockedServer\" />
+>>>>>>> develop
   </ItemGroup>
 </Project>

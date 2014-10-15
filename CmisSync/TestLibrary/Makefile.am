@@ -77,10 +77,18 @@ SOURCES =  \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
+	IntegrationTests/FullInMemoryRepoTest.cs \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
+	MockedServer/MockOfIAclCapabilities.cs \
+	MockedServer/MockOfIRepository.cs \
+	MockedServer/MockOfISession.cs \
+	MockedServer/MockOfISessionFactory.cs \
+	MockedServer/MockedCmisServer.cs \
+	MockedServer/MockedCmisUserAccount.cs \
+	MockedServer/MockedFolder.cs \
 	MoqExtensions/MoqExtensions.cs \
 	PathMatcherTests/PathMatcherTest.cs \
 	ProducerTests/ContentChangeTests/ContentChangeEventAccumulatorTest.cs \
