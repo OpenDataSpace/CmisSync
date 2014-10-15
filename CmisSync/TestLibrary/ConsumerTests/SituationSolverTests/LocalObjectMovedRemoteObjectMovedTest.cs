@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectMovedRemoteObjectMovedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -182,10 +182,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.VerifySavedFolder(this.newRemoteName, remoteModification);
         }
 
-        [Ignore]
         [Test, Category("Fast"), Category("Solver")]
         public void FilesMovedToEqualFolderAndNamesAndContentAreEqual() {
-            Assert.Fail("TODO");
+            this.SetupOldMappedFile();
+            this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
+            var newLocalParent = this.CreateNewLocalParent(this.newParentUuid);
+            var localFile = this.CreateLocalFile(this.oldName, newLocalParent, this.localModification);
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, remoteObjectId, this.oldName, newRemoteParentId, 0, new byte[0], newChangeToken);
+            remoteFile.SetupUpdateModificationDate(remoteModification);
+
+            this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+
+            remoteFile.VerifyUpdateLastModificationDate(this.localModification);
+            this.VerifySavedFile(this.oldName, this.localModification, 0);
         }
 
         [Ignore]
@@ -228,7 +237,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             return Mock.Get(folder);
         }
 
-        private IDirectoryInfo CreateNewLocalParent(Guid uuid, string fullName = null) {
+        private Mock<IFileInfo> CreateLocalFile(string name, IDirectoryInfo parent, DateTime modificationDate)
+        {
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.Uuid == this.localUuid &&
+                f.Name == name &&
+                f.Directory == parent &&
+                f.LastWriteTimeUtc == modificationDate);
+            return Mock.Get(file);
+        }
+
+        private IDirectoryInfo CreateNewLocalParent(Guid uuid, string fullName = null)
+        {
             return Mock.Of<IDirectoryInfo>(
                 d =>
                 d.Uuid == uuid &&
@@ -256,19 +277,27 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 Guid = this.localUuid,
                 LastLocalWriteTimeUtc = this.oldModification,
                 LastRemoteWriteTimeUtc = this.oldModification,
+                LastContentSize = isFolder ? -1 : 0
             };
-            this.storage.AddMappedFolder(mappedObject);
+            if (isFolder)
+            {
+                this.storage.AddMappedFolder(mappedObject);
+            }
+            else
+            {
+                this.storage.AddMappedFile(mappedObject);
+            }
         }
 
         private void VerifySavedFolder(string newName, DateTime modificationDate) {
             this.VerifySavedObject(newName, modificationDate, true);
         }
 
-        private void VerifySavedFile(string newName, DateTime modificationDate) {
-            this.VerifySavedObject(newName, modificationDate, false);
+        private void VerifySavedFile(string newName, DateTime modificationDate, long contentSize) {
+            this.VerifySavedObject(newName, modificationDate, false, contentSize);
         }
 
-        private void VerifySavedObject(string newName, DateTime modificationDate, bool isFolder) {
+        private void VerifySavedObject(string newName, DateTime modificationDate, bool isFolder, long contentSize = -1) {
             this.storage.VerifySavedMappedObject(
                 isFolder ? MappedObjectType.Folder : MappedObjectType.File,
                 this.remoteObjectId,
@@ -277,7 +306,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.newChangeToken,
                 true,
                 modificationDate,
-                modificationDate);
+                modificationDate,
+                null,
+                contentSize);
         }
     }
 }

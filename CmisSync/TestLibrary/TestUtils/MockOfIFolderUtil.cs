@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="MockOfIFolderUtil.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -67,6 +67,7 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.Id).Returns(id);
             newRemoteObject.Setup(d => d.Path).Returns(path);
             newRemoteObject.Setup(d => d.ParentId).Returns(parentId);
+            newRemoteObject.Setup(d => d.Parents).Returns(new List<IFolder>() { Mock.Of<IFolder>(f => f.Id == parentId) });
             newRemoteObject.Setup(d => d.Name).Returns(name);
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
             newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
@@ -74,7 +75,8 @@ namespace TestLibrary.TestUtils
             return newRemoteObject;
         }
 
-        public static void VerifyUpdateLastModificationDate(this Mock<IFolder> folder, DateTime modificationDate, bool refresh = true) {
+        public static void VerifyUpdateLastModificationDate(this Mock<IFolder> folder, DateTime modificationDate, bool refresh = true)
+        {
             folder.VerifyUpdateLastModificationDate(modificationDate, Times.Once(), refresh);
         }
 

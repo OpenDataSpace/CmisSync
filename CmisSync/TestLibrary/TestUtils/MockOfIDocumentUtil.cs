@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="MockOfIDocumentUtil.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -44,6 +44,7 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.ContentStreamLength).Returns(contentLength);
             newRemoteObject.Setup(d => d.Id).Returns(id);
             newRemoteObject.Setup(d => d.Name).Returns(name);
+            newRemoteObject.Setup(d => d.Parents).Returns(new List<IFolder>() { parent });
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changeToken);
             newRemoteObject.SetupContent(content, name);
             newRemoteObject.SetupParent(parent);
