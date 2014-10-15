@@ -95,7 +95,7 @@ namespace TestLibrary.TestUtils
 
         public static void SetupStream(this Mock<IFileInfo> file, byte[] content) {
             file.Setup(f => f.Length).Returns(content.Length);
-            file.Setup(f => f.Open(FileMode.Open, FileAccess.Read, It.IsAny<FileShare>())).Returns(new MemoryStream(content));
+            file.Setup(f => f.Open(FileMode.Open, FileAccess.Read, It.IsAny<FileShare>())).Returns(() => new MemoryStream(content));
         }
 
         public static void SetupFilesAndDirectories(this Mock<IDirectoryInfo> parent, params IFileSystemInfo[] children)
