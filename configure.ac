@@ -161,8 +161,8 @@ if test "$OSNAME" = "Linux" ; then
 	macos=false
     OSOK=yes
 
-    # On Debian and xUbuntu, build debian packages, otherwise rpms
-    if test `command -v lsb_release >/dev/null 2>&1 && lsb_release -i | grep -E "(ebian|buntu)"` == ""; then
+    # On Debian and xUbuntu, build debian packages, otherwise rpms. Don't know a better syntax for this
+    if test `command -v lsb_release >/dev/null 2>&1 && lsb_release -i | grep -E "(ebian|buntu)" > /dev/null; echo "$?"` == "0"; then
         PACKAGE_TARGET=debian-package
     else
 	PACKAGE_TARGET=rpm-package
