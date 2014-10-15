@@ -257,10 +257,7 @@
     <Folder Include="QueueingTests\" />
     <Folder Include="FilterTests\" />
     <Folder Include="CmisTests\ConvenienceExtendersTests\" />
-<<<<<<< HEAD
     <Folder Include="SelectiveIgnoreTests\" />
-=======
     <Folder Include="MockedServer\" />
->>>>>>> develop
   </ItemGroup>
 </Project>
