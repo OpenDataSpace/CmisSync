@@ -33,12 +33,12 @@ namespace CmisSync.Lib.SelectiveIgnore
     /// Selective ignore filter.
     /// All file/folder events for affecting files/folders which are inside an ignored folder are filtered out.
     /// </summary>
-    public class SelectiveIgnoreFilter : AbstractFileFilter
+    public class SelectiveIgnoreFilter : SyncEventHandler
     {
         private ObservableCollection<IIgnoredEntity> ignores;
         private ISession session;
 
-        public SelectiveIgnoreFilter(ISyncEventQueue queue, ObservableCollection<IIgnoredEntity> ignores, ISession session) : base(queue) {
+        public SelectiveIgnoreFilter(ObservableCollection<IIgnoredEntity> ignores, ISession session) {
             if (ignores == null) {
                 throw new ArgumentNullException("The collection of ignored entities is null");
             }
@@ -65,7 +65,12 @@ namespace CmisSync.Lib.SelectiveIgnore
             }
 
             if (e is IFilterableLocalPathEvent) {
-
+                var path = (e as IFilterableLocalPathEvent).LocalPath;
+                foreach(var ignore in this.ignores) {
+                    if (path.StartsWith(ignore.LocalPath)) {
+                        return true;
+                    }
+                }
             }
 
             return false;
