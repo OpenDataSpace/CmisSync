@@ -16,8 +16,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using DotCMIS.Client;
-using CmisSync.Lib.PathMatcher;
 
 namespace TestLibrary.SelectiveIgnoreTests
 {
@@ -28,6 +26,8 @@ namespace TestLibrary.SelectiveIgnoreTests
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.FileSystem;
+
+    using DotCMIS.Client;
 
     using Moq;
 
@@ -100,7 +100,7 @@ namespace TestLibrary.SelectiveIgnoreTests
         private void SetupMocks() {
             this.queue = new Mock<ISyncEventQueue>();
             this.ignores = new ObservableCollection<IIgnoredEntity>();
-            var ignoredEntity = Mock.Of<IIgnoredEntity>(i => i.LocalPath == this.ignoredLocalPath && i.ObjectId == ignoredFolderId);
+            var ignoredEntity = Mock.Of<IIgnoredEntity>(i => i.LocalPath == this.ignoredLocalPath && i.ObjectId == this.ignoredFolderId);
             this.ignores.Add(ignoredEntity);
             this.ignores.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => Assert.Fail();
             this.underTest = new SelectiveIgnoreEventTransformer(this.ignores, this.queue.Object);
