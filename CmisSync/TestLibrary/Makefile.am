@@ -111,10 +111,11 @@ SOURCES =  \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
 	SelectiveIgnoreTests/EventTransformerTest.cs \
+	SelectiveIgnoreTests/FilterTest.cs \
 	SelectiveIgnoreTests/IgnoredEntityTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
-	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
+	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderDosTest.cs \
