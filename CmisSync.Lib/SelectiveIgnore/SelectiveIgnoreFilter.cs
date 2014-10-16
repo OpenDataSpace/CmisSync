@@ -35,10 +35,10 @@ namespace CmisSync.Lib.SelectiveIgnore
     /// </summary>
     public class SelectiveIgnoreFilter : AbstractFileFilter
     {
-        private ObservableCollection<IgnoredEntity> ignores;
+        private ObservableCollection<IIgnoredEntity> ignores;
         private ISession session;
 
-        public SelectiveIgnoreFilter(ISyncEventQueue queue, ObservableCollection<IgnoredEntity> ignores, ISession session) : base(queue) {
+        public SelectiveIgnoreFilter(ISyncEventQueue queue, ObservableCollection<IIgnoredEntity> ignores, ISession session) : base(queue) {
             if (ignores == null) {
                 throw new ArgumentNullException("The collection of ignored entities is null");
             }
