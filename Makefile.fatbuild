@@ -32,7 +32,7 @@ INCLIBDIR=lib
 # Oh no! That would be too nice. I found this out by my own with try
 # and error:
 
-GLUELIBS=libatksharpglue-2.so libgdksharpglue-2.so libglibsharpglue-2.so libgtksharpglue-2.so libpangosharpglue-2.so libMonoPosixHelper.so
+GLUELIBS=libatksharpglue-2.so libgdksharpglue-2.so libglibsharpglue-2.so libgtksharpglue-2.so libpangosharpglue-2.so libMonoPosixHelper.so libMonoSupportW.so
 
 #
 # - But how will mono know where these are on the target system?
@@ -53,7 +53,8 @@ SHARPDLLS=4.5/Mono.Posix.dll atk-sharp.dll gdk-sharp.dll glib-sharp.dll gtk-shar
 
 # We will then explicitly name then when calling mkbundle with our program DLLs
 
-FATDLLS=CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtonsoft.Json.dll $(addprefix ./$(INCLIBDIR)/, $(notdir $(SHARPDLLS)))
+I18NDLLS=I18N.Rare.dll I18N.Other.dll I18N.MidEast.dll I18N.dll I18N.West.dll I18N.CJK.dll
+FATDLLS=CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtonsoft.Json.dll $(I18NDLLS) $(addprefix ./$(INCLIBDIR)/, $(notdir $(SHARPDLLS))) 
 
 # - But how do we find the DLLs, configs and gluelibs on our system?
 # Because they are on different locations on each system, this isn't easy.
@@ -97,7 +98,7 @@ $(SHARPDLLS):
 	if [ -n "$$conffile" ]; then \
 	  cp $$conffile ./$(INCLIBDIR)/; \
 	else \
-	  echo -e "<configuration>\n</configuration>\n" > ./$(INCLIBDIR)/$(shell basename $@).config; \
+	  echo "<configuration>\n</configuration>" > ./$(INCLIBDIR)/$(shell basename $@).config; \
         fi
 
 # No look at this beaury, it removes all existing mappings for the gluelibs from the copied
@@ -114,19 +115,19 @@ preparelibs: $(GLUELIBS) $(SHARPDLLS)
 	  sed -i "\$$i  <dllmap dll=\"$${curlibname}\" target=\"$(subst /,\/,$(LIBDIR))\/$(INCLIBDIR)\/$${curlib}\"\/>" $(INCLIBDIR)/*.dll.config;  \
 	done;
 
+
 # Now we can build the fat binaries. mkbundle will now be able to find alle the copied and modified configurations/mappings, because
 # we tell it explicitly to use our copied DLLs (included in $FATDLLs), instead of letting it find them.
-# Also, we will copy the syste config file and bundle it to make sure the mappings exist on the target machine
-fat: preparelibs
+# Also, we will copy the syste config file to make sure the mappings exist on the target machine
+fat: preparelibs 
 	@echo "### Generating fat binaries"
-	mkdir -p mono_config/mono
-	cp /etc/mono/config mono_config/mono/config
+	cp /etc/mono/config mono_config
 	export MONO_PATH="$(EASYDEPS)"; \
-	mkbundle --static --config ./mono_config/mono/config -o DataSpaceSync DataSpaceSync.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z ; \
-	mkbundle --static --config ./mono_config/mono/config -o DataSpaceSync.Console DataSpaceSync.Console.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z
+	mkbundle --static --config ./mono_config -o DataSpaceSync DataSpaceSync.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z ; \
+	mkbundle --static --config ./mono_config -o DataSpaceSync.Console DataSpaceSync.Console.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z
 
 clean:
 	rm -f $(INCLIBDIR)/*.dll
 	rm -f $(INCLIBDIR)/*.dll.config
-	rm -rf ./mono_config
+	rm -f ./mono_config
 
