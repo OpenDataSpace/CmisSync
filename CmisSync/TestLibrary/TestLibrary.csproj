@@ -178,7 +178,6 @@
     <Compile Include="FilterTests\IgnoreFileNamesFilterTest.cs" />
     <Compile Include="FilterTests\InvalidFolderNameFilterTest.cs" />
     <Compile Include="FilterTests\ReportingFilterTest.cs" />
-    <Compile Include="EventManagerInitializerTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\ExtendedAttributeChangesModificationDateTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\AbstractEnhancedSolverTest.cs" />
     <Compile Include="CmisTests\ConvenienceExtendersTests\CmisConvenienceExtendersTest.cs" />
@@ -200,7 +199,6 @@
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectRenamedTest.cs" />
-    <Compile Include="SelectiveIgnoreTests\IgnoredEntityTests.cs" />
     <Compile Include="MockedServer\MockOfISessionFactory.cs" />
     <Compile Include="MockedServer\MockOfIRepository.cs" />
     <Compile Include="MockedServer\MockedCmisServer.cs" />
@@ -209,6 +207,9 @@
     <Compile Include="IntegrationTests\FullInMemoryRepoTest.cs" />
     <Compile Include="MockedServer\MockOfISession.cs" />
     <Compile Include="MockedServer\MockedFolder.cs" />
+    <Compile Include="SelectiveIgnoreTests\EventTransformerTest.cs" />
+    <Compile Include="SelectiveIgnoreTests\IgnoredEntityTest.cs" />
+    <Compile Include="QueueingTests\EventManagerInitializerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

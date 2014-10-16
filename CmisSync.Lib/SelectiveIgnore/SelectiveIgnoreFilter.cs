@@ -21,10 +21,13 @@ namespace CmisSync.Lib.SelectiveIgnore
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.Linq;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
+
+    using DotCMIS.Client;
 
     /// <summary>
     /// Selective ignore filter.
@@ -33,17 +36,38 @@ namespace CmisSync.Lib.SelectiveIgnore
     public class SelectiveIgnoreFilter : AbstractFileFilter
     {
         private ObservableCollection<IgnoredEntity> ignores;
+        private ISession session;
 
-        public SelectiveIgnoreFilter(ISyncEventQueue queue, ObservableCollection<IgnoredEntity> ignores) : base(queue) {
+        public SelectiveIgnoreFilter(ISyncEventQueue queue, ObservableCollection<IgnoredEntity> ignores, ISession session) : base(queue) {
             if (ignores == null) {
                 throw new ArgumentNullException("The collection of ignored entities is null");
             }
 
+            if (session == null) {
+                throw new ArgumentNullException("The given session is null");
+            }
+
             this.ignores = ignores;
+            this.session = session;
         }
 
         public override bool Handle(ISyncEvent e)
         {
+            if (e is IFilterableRemoteObjectEvent) {
+                var ev = e as IFilterableRemoteObjectEvent;
+                if (ev.RemoteObject is IFolder) {
+                    var folder = ev.RemoteObject as IFolder;
+                    var parent = this.session.GetObject(folder.ParentId);
+                    while (parent != null && parent is IFolder) {
+                        parent = this.session.GetObject((parent as IFolder).ParentId);
+                    }
+                }
+            }
+
+            if (e is IFilterableLocalPathEvent) {
+
+            }
+
             return false;
         }
     }

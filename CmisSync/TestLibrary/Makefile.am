@@ -107,10 +107,11 @@ SOURCES =  \
 	ProducerTests/WatcherTests/WatcherTestUtils.cs \
 	QueueingTests/DebugLoggingHandlerTest.cs \
 	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
+	QueueingTests/EventManagerInitializerTest.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
-	EventManagerInitializerTest.cs \
-	SelectiveIgnoreTests/IgnoredEntityTests.cs \
+	SelectiveIgnoreTests/EventTransformerTest.cs \
+	SelectiveIgnoreTests/IgnoredEntityTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \

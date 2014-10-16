@@ -7,7 +7,7 @@ namespace CmisSync.Lib.SelectiveIgnore
 
     using DotCMIS.Client;
 
-    public class IgnoredEntity
+    public class IgnoredEntity : IIgnoredEntity
     {
         public IgnoredEntity(IFolder folder, IPathMatcher matcher) {
             if (folder == null) {

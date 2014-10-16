@@ -249,6 +249,7 @@
     <Compile Include="SelectiveIgnore\SelectiveIgnoreEventTransformer.cs" />
     <Compile Include="SelectiveIgnore\IgnoredEntitiesCollection.cs" />
     <Compile Include="SelectiveIgnore\IgnoredEntity.cs" />
+    <Compile Include="SelectiveIgnore\IIgnoredEntity.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

@@ -32,7 +32,7 @@ namespace TestLibrary.SelectiveIgnoreTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class IgnoredEntityTests
+    public class IgnoredEntityTest
     {
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void ConstructorTakesFolderAndMatcher() {
