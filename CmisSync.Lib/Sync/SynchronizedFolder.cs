@@ -971,7 +971,7 @@ namespace CmisSync.Lib.Sync
                             Dictionary<string, object> properties = new Dictionary<string, object>();
                             properties.Add(PropertyIds.Name, fileName);
                             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
-                            properties.Add(PropertyIds.CreationDate, ((long)(File.GetCreationTimeUtc(filePath) - new DateTime(1970, 1, 1)).TotalMilliseconds).ToString());
+                            properties.Add(PropertyIds.CreationDate, File.GetCreationTimeUtc(filePath));
 
                             // Prepare content stream
                             using (SHA1 hashAlg = new SHA1Managed())
