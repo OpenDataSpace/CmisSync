@@ -21,6 +21,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.IO;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -39,7 +40,7 @@ namespace TestLibrary.SelectiveIgnoreTests
     public class EventTransformerTest
     {
         private readonly string ignoredFolderId = "ignoredId";
-        private readonly string ignoredLocalPath = "ignoredlocalpath";
+        private readonly string ignoredLocalPath = Path.Combine(Path.GetTempPath(), "ignoredlocalpath");
         private Mock<ISyncEventQueue> queue;
         private SelectiveIgnoreEventTransformer underTest;
         private ObservableCollection<IIgnoredEntity> ignores;
@@ -61,40 +62,60 @@ namespace TestLibrary.SelectiveIgnoreTests
             new SelectiveIgnoreEventTransformer(ignores, Mock.Of<ISyncEventQueue>());
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore"), Ignore("TODO")]
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void TransformFileMovedEventToAddedEvent() {
             this.SetupMocks();
-            var oldFile = Mock.Of<IFileInfo>();
-            var newFile = Mock.Of<IFileInfo>();
-            var moveFile = new FileMovedEvent(oldFile, newFile);
+            string fileName = "file.txt";
+            var oldFile = Path.Combine(this.ignoredLocalPath, fileName);
+            var newFile = Path.Combine(Path.GetTempPath(), fileName);
+            var moveFile = new FSMovedEvent(oldFile, newFile, false);
 
             Assert.That(this.underTest.Handle(moveFile), Is.True);
 
-            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => !e.IsDirectory && e.LocalFile == newFile && e.Local == MetaDataChangeType.CREATED)), Times.Once);
-            this.queue.VerifyThatNoOtherEventIsAddedThan<FileEvent>();
+            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => !e.IsDirectory && e.LocalPath == newFile && e.Type == WatcherChangeTypes.Created)), Times.Once);
+            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore"), Ignore("TODO")]
-        public void TransformFileMovedEventToDeletedEvent() {
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void TransformFSMovedEventToDeletedEvent() {
             this.SetupMocks();
-            var oldFile = Mock.Of<IFileInfo>();
-            var newFile = Mock.Of<IFileInfo>();
-            var moveFile = new FileMovedEvent(oldFile, newFile);
+            string fileName = "file.txt";
+            var oldFile = Path.Combine(Path.GetTempPath(), fileName);
+            var newFile = Path.Combine(this.ignoredLocalPath, fileName);
+            var moveFile = new FSMovedEvent(oldFile, newFile, false);
 
             Assert.That(this.underTest.Handle(moveFile), Is.True);
 
-            this.queue.Verify(q => q.AddEvent(It.Is<FileEvent>(e => !e.IsDirectory && e.LocalFile == newFile && e.Local == MetaDataChangeType.DELETED)), Times.Once);
-            this.queue.VerifyThatNoOtherEventIsAddedThan<FileEvent>();
+            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => !e.IsDirectory && e.LocalPath == oldFile && e.Type == WatcherChangeTypes.Deleted)), Times.Once);
+            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore"), Ignore("TODO")]
-        public void TransformFolderMovedEventToAddedEvent() {
-            Assert.Fail("TODO");
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void TransformFSFolderMovedEventToAddedEvent() {
+            this.SetupMocks();
+            string fileName = "folder";
+            var oldFile = Path.Combine(this.ignoredLocalPath, fileName);
+            var newFile = Path.Combine(Path.GetTempPath(), fileName);
+            var moveFile = new FSMovedEvent(oldFile, newFile, true);
+
+            Assert.That(this.underTest.Handle(moveFile), Is.True);
+
+            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory && e.LocalPath == newFile && e.Type == WatcherChangeTypes.Created)), Times.Once);
+            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore"), Ignore("TODO")]
-        public void TransformFolderMovedEventToDeletedEvent() {
-            Assert.Fail("TODO");
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void TransformFSFolderMovedEventToDeletedEvent() {
+            this.SetupMocks();
+            string fileName = "folder";
+            var oldFile = Path.Combine(Path.GetTempPath(), fileName);
+            var newFile = Path.Combine(this.ignoredLocalPath, fileName);
+            var moveFile = new FSMovedEvent(oldFile, newFile, true);
+
+            Assert.That(this.underTest.Handle(moveFile), Is.True);
+
+            this.queue.Verify(q => q.AddEvent(It.Is<FSEvent>(e => e.IsDirectory && e.LocalPath == oldFile && e.Type == WatcherChangeTypes.Deleted)), Times.Once);
+            this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
         private void SetupMocks() {

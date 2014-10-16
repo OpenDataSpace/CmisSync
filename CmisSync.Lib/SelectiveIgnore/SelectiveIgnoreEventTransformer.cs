@@ -21,6 +21,7 @@ namespace CmisSync.Lib.SelectiveIgnore
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.IO;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -45,7 +46,27 @@ namespace CmisSync.Lib.SelectiveIgnore
 
         public override bool Handle(ISyncEvent e)
         {
-            throw new NotImplementedException();
+            if (e is FSMovedEvent) {
+                var movedEvent = e as FSMovedEvent;
+                if (this.IsInsideIgnoredPath(movedEvent.OldPath) && !this.IsInsideIgnoredPath(movedEvent.LocalPath)) {
+                    this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Created, movedEvent.LocalPath, movedEvent.IsDirectory));
+                    return true;
+                } else if (this.IsInsideIgnoredPath(movedEvent.LocalPath) && !this.IsInsideIgnoredPath(movedEvent.OldPath)) {
+                    this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, movedEvent.OldPath, movedEvent.IsDirectory));
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool IsInsideIgnoredPath(string path) {
+            foreach(var ignore in this.ignores) {
+                if (path.StartsWith(ignore.LocalPath)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
