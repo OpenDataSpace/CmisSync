@@ -32,7 +32,7 @@ INCLIBDIR=lib
 # Oh no! That would be too nice. I found this out by my own with try
 # and error:
 
-GLUELIBS=libatksharpglue-2.so libgdksharpglue-2.so libglibsharpglue-2.so libgtksharpglue-2.so libpangosharpglue-2.so libMonoPosixHelper.so libMonoSupportW.so
+GLUELIBS=libatksharpglue-2.so libgdksharpglue-2.so libglibsharpglue-2.so libgtksharpglue-2.so libpangosharpglue-2.so libMonoPosixHelper.so
 
 #
 # - But how will mono know where these are on the target system?
