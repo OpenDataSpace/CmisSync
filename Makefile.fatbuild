@@ -61,8 +61,9 @@ FATDLLS=CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtons
 
 #rpm-package means we're using yum (and yum-utils)
 ifeq ($(PACKAGE_TARGET), rpm-package)
+  # the stuff beginning form "awk" should make sure it takes the one from the GAC if multiple files are installed
   define findinst
-    $(shell repoquery -l --installed --whatprovides "*$(strip $(1))" | grep -vi "gac" | grep -e "/$(strip $(1))$$")
+    $(shell repoquery -l --installed --whatprovides "*$(strip $(1))" | grep -e "/$(strip $(1))$$" | awk '{ print length, $$0 }' | sort -rn | cut -d " " -f2- | head -n 1)
   endef
 
   EASYDEPS:=$(shell repoquery -l --installed --whatprovides "*-sharp.dll" | grep -E "/(notify|dbus)-sharp.dll$$" | xargs -L 1 dirname | paste -s -d ':' -)
@@ -92,7 +93,7 @@ $(SHARPDLLS):
 	@echo "### Copying related DLL $(@) to modify its DLL mapping to match the deployed libs"
 	mkdir -p ./$(INCLIBDIR)/;
 	cp $(call findinst, $@) ./$(INCLIBDIR)/;
-	conffile=$(call findinst, $@.config); \
+	conffile="$(strip $(call findinst, $@.config))"; \
 	if [ -n "$$conffile" ]; then \
 	  cp $$conffile ./$(INCLIBDIR)/; \
 	else \
@@ -111,17 +112,21 @@ preparelibs: $(GLUELIBS) $(SHARPDLLS)
 	  curlibname="$${curlib#lib}"; \
 	  curlibname="$${curlibname%.*}"; \
 	  sed -i "\$$i  <dllmap dll=\"$${curlibname}\" target=\"$(subst /,\/,$(LIBDIR))\/$(INCLIBDIR)\/$${curlib}\"\/>" $(INCLIBDIR)/*.dll.config;  \
-	done; 
+	done;
 
 # Now we can build the fat binaries. mkbundle will now be able to find alle the copied and modified configurations/mappings, because
 # we tell it explicitly to use our copied DLLs (included in $FATDLLs), instead of letting it find them.
+# Also, we will copy the syste config file and bundle it to make sure the mappings exist on the target machine
 fat: preparelibs
 	@echo "### Generating fat binaries"
+	mkdir -p mono_config/mono
+	cp /etc/mono/config mono_config/mono/config
 	export MONO_PATH="$(EASYDEPS)"; \
-	mkbundle --static -o DataSpaceSync DataSpaceSync.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z ; \
-	mkbundle --static -o DataSpaceSync.Console DataSpaceSync.Console.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z
+	mkbundle --static --config ./mono_config/mono/config -o DataSpaceSync DataSpaceSync.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z ; \
+	mkbundle --static --config ./mono_config/mono/config -o DataSpaceSync.Console DataSpaceSync.Console.exe --deps $(FATDLLS) --machine-config /etc/mono/4.5/machine.config -z
 
 clean:
 	rm -f $(INCLIBDIR)/*.dll
 	rm -f $(INCLIBDIR)/*.dll.config
+	rm -rf ./mono_config
 

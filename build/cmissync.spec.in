@@ -17,6 +17,7 @@ BuildRequires: notify-sharp-devel libappindicator-sharp-devel
 BuildRequires: libtool intltool desktop-file-utils
 
 Requires: %{name}-common = %{version}-%{release}
+Requires: libappindicator
 
 %description
 DataSpace Sync allows you to keep in sync with your CMIS repository.
