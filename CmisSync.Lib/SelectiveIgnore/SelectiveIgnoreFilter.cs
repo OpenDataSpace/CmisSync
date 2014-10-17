@@ -26,6 +26,7 @@ namespace CmisSync.Lib.SelectiveIgnore
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
 
     using DotCMIS.Client;
 
@@ -37,8 +38,9 @@ namespace CmisSync.Lib.SelectiveIgnore
     {
         private ObservableCollection<IIgnoredEntity> ignores;
         private ISession session;
+        private IMetaDataStorage storage;
 
-        public SelectiveIgnoreFilter(ObservableCollection<IIgnoredEntity> ignores, ISession session) {
+        public SelectiveIgnoreFilter(ObservableCollection<IIgnoredEntity> ignores, ISession session, IMetaDataStorage storage) {
             if (ignores == null) {
                 throw new ArgumentNullException("The collection of ignored entities is null");
             }
@@ -47,18 +49,27 @@ namespace CmisSync.Lib.SelectiveIgnore
                 throw new ArgumentNullException("The given session is null");
             }
 
+            if (storage == null) {
+                throw new ArgumentNullException("The given storage is null");
+            }
+
             this.ignores = ignores;
             this.session = session;
+            this.storage = storage;
         }
 
         public override bool Handle(ISyncEvent e)
         {
             if (e is IFilterableRemoteObjectEvent) {
                 var ev = e as IFilterableRemoteObjectEvent;
-                if (ev.RemoteObject is IFolder) {
-                    var folder = ev.RemoteObject as IFolder;
-                    var parent = this.session.GetObject(folder.ParentId);
+                if (ev.RemoteObject is IFolder || ev.RemoteObject is IDocument) {
+                    string parentId = ev.RemoteObject is IFolder ? (ev.RemoteObject as IFolder).ParentId : (ev.RemoteObject as IDocument).Parents[0].Id;
+                    var parent = this.session.GetObject(parentId);
                     while (parent != null && parent is IFolder) {
+                        if (this.IsObjectIdIgnored(parent.Id)) {
+                            return true;
+                        }
+
                         parent = this.session.GetObject((parent as IFolder).ParentId);
                     }
                 }
@@ -66,10 +77,22 @@ namespace CmisSync.Lib.SelectiveIgnore
 
             if (e is IFilterableLocalPathEvent) {
                 var path = (e as IFilterableLocalPathEvent).LocalPath;
-                foreach(var ignore in this.ignores) {
-                    if (path.StartsWith(ignore.LocalPath)) {
-                        return true;
+                if (path != null) {
+                    foreach(var ignore in this.ignores) {
+                        if (path.StartsWith(ignore.LocalPath)) {
+                            return true;
+                        }
                     }
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsObjectIdIgnored(string objectId) {
+            foreach(var ignore in this.ignores) {
+                if (ignore.ObjectId == objectId) {
+                    return true;
                 }
             }
 

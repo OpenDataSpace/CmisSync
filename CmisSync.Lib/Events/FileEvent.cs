@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// File event.
     /// </summary>
-    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent
+    public class FileEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent, IFilterableLocalPathEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FileEvent"/> class.
@@ -137,6 +137,16 @@ namespace CmisSync.Lib.Events
         /// The remote file.
         /// </value>
         public IDocument RemoteFile { get; set; }
+
+        /// <summary>
+        /// Gets the local path.
+        /// </summary>
+        /// <value>The local path.</value>
+        public string LocalPath {
+            get {
+                return this.LocalFile != null ? this.LocalFile.FullName : null;
+            }
+        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FileEvent"/>.
