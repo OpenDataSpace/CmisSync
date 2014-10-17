@@ -33,7 +33,7 @@ namespace TestLibrary.IntegrationTests
 
     using NUnit.Framework;
 
-    [TestFixture]
+    [TestFixture, Ignore("Irrelevant")]
     public class FileSystemEventOrderTest
     {
         private string path;
