@@ -154,14 +154,19 @@ if test "$OSNAME" = "Linux" ; then
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
 
-
     AC_SUBST(BUILD_DEFINES,"${BUILD_DEFINES}")
     GUISUBDIRS=CmisSync
     enable_gtkui=yes
 	cocoa=false
 	macos=false
     OSOK=yes
-    PACKAGE_TARGET=debian-package
+
+    # On Debian and xUbuntu, build debian packages, otherwise rpms
+    if test `command -v lsb_release >/dev/null 2>&1 && lsb_release -i | grep -E "(ebian|buntu)"` == ""; then
+        PACKAGE_TARGET=debian-package
+    else
+	PACKAGE_TARGET=rpm-package
+    fi
 fi
 
 if test "$OSNAME" = "Darwin" ; then
