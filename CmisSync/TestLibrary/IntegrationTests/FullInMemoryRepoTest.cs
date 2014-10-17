@@ -7,7 +7,9 @@ using DotCMIS;
 using System.Collections.Generic;
 using DotCMIS.Client;
 using DotCMIS.Client.Impl;
-
+#if __COCOA__
+using MonoMac.AppKit;
+#endif
 
 namespace TestLibrary.IntegrationTests
 {

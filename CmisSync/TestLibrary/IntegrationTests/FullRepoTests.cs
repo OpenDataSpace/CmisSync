@@ -528,6 +528,27 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
+        public void ManyRemoteFilesCreated()
+        {
+            int fileNumber = 100;
+            string content = new string ('A', 1024 * 1024);
+            for (int i = 0; i < fileNumber; ++i) {
+                string fileName = "file" + i.ToString();
+                this.remoteRootDir.CreateDocument (fileName, content);
+            }
+
+            this.repo.Initialize();
+
+            this.repo.Run();
+
+            var children = this.localRootDir.GetFiles();
+            Assert.That(children.Length, Is.EqualTo(fileNumber));
+            var child = children.First();
+            Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
+            Assert.That(child.Length, Is.EqualTo(content.Length));
+        }
+
+        [Test, Category("Slow")]
         public void OneRemoteFileContentIsDeleted()
         {
             string fileName = "file";
