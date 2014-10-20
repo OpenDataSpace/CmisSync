@@ -208,6 +208,7 @@
     <Compile Include="IntegrationTests\FullInMemoryRepoTest.cs" />
     <Compile Include="MockedServer\MockOfISession.cs" />
     <Compile Include="MockedServer\MockedFolder.cs" />
+    <Compile Include="StorageTests\FileSystemTests\DateTimeConverterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

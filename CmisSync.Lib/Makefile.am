@@ -170,6 +170,7 @@ SOURCES =  \
 	Storage/Database/MetaDataStorage.cs \
 	Storage/Database/ObjectTree.cs \
 	Storage/Database/PersistentCookieStorage.cs \
+	Storage/FileSystem/DateTimeToFileConverter.cs \
 	Storage/FileSystem/DirectoryInfoWrapper.cs \
 	Storage/FileSystem/ExtendedAttributeException.cs \
 	Storage/FileSystem/ExtendedAttributeReaderDos.cs \
@@ -177,6 +178,7 @@ SOURCES =  \
 	Storage/FileSystem/FileInfoWrapper.cs \
 	Storage/FileSystem/FileSystemInfoFactory.cs \
 	Storage/FileSystem/FileSystemInfoWrapper.cs \
+	Storage/FileSystem/FSType.cs \
 	Storage/FileSystem/IDirectoryInfo.cs \
 	Storage/FileSystem/IExtendedAttributeReader.cs \
 	Storage/FileSystem/IFileInfo.cs \

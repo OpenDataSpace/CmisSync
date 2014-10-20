@@ -245,6 +245,8 @@
     <Compile Include="Consumer\SituationSolver\LocalObjectRenamedRemoteObjectMoved.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectRenamed.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectRenamed.cs" />
+    <Compile Include="Storage\FileSystem\DateTimeToFileConverter.cs" />
+    <Compile Include="Storage\FileSystem\FSType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
