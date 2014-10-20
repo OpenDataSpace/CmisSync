@@ -1,21 +1,22 @@
-using CmisSync.Lib.Config;
-using CmisSync.Lib;
-using Moq;
-using CmisSync.Lib.Queueing;
-using System.IO;
-using DotCMIS;
-using System.Collections.Generic;
-using DotCMIS.Client;
-using DotCMIS.Client.Impl;
-#if __COCOA__
-using MonoMac.AppKit;
-#endif
 
 namespace TestLibrary.IntegrationTests
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
 
+    using CmisSync.Lib;
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Queueing;
+
+    using DotCMIS;
+    using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
+
+    #if __COCOA__
+    using MonoMac.AppKit;
+    #endif
 
     using Moq;
     using NUnit.Framework;
