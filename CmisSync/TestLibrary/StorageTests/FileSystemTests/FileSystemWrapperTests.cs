@@ -486,7 +486,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
 
         [Test, Category("Medium"), Ignore("https://bugzilla.xamarin.com/show_bug.cgi?id=23934")]
         public void SetOldModificationDate() {
-            string path = Path.Combine("/home/tlorentzen/temp/", Path.GetRandomFileName());
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var file = Factory.CreateFileInfo(path);
             using (file.Open(FileMode.CreateNew)) {
             }
