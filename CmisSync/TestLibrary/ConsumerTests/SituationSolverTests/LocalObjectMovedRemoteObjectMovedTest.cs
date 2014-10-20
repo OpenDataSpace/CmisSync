@@ -197,10 +197,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.VerifySavedFile(this.oldName, this.localModification, 0);
         }
 
-        [Ignore]
         [Test, Category("Fast"), Category("Solver")]
         public void FilesMovedToEqualFolderAndRemoteNameChangedButContentStaysEqual() {
-            Assert.Fail("TODO");
+            this.SetupOldMappedFile();
+            this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
+            var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
+            var localFile = this.CreateLocalFile(this.oldName, newLocalParent, this.localModification);
+            var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, remoteObjectId, this.newRemoteName, newRemoteParentId, 0, new byte[0], newChangeToken);
+            remoteFile.SetupUpdateModificationDate(remoteModification);
+
+            this.underTest.Solve(localFile.Object, remoteFile.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+
+            remoteFile.VerifyUpdateLastModificationDate(this.localModification);
+            this.VerifySavedFile(this.newRemoteName, this.localModification, 0);
         }
 
         [Ignore]
