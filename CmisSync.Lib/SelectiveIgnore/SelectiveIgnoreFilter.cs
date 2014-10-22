@@ -64,13 +64,13 @@ namespace CmisSync.Lib.SelectiveIgnore
                 var ev = e as IFilterableRemoteObjectEvent;
                 if (ev.RemoteObject is IFolder || ev.RemoteObject is IDocument) {
                     string parentId = ev.RemoteObject is IFolder ? (ev.RemoteObject as IFolder).ParentId : (ev.RemoteObject as IDocument).Parents[0].Id;
-                    var parent = this.session.GetObject(parentId);
-                    while (parent != null && parent is IFolder) {
-                        if (this.IsObjectIdIgnored(parent.Id)) {
+                    while (parentId != null) {
+                        if (this.IsObjectIdIgnored(parentId)) {
                             return true;
                         }
 
-                        parent = this.session.GetObject((parent as IFolder).ParentId);
+                        var parent = this.session.GetObject(parentId);
+                        parentId = (parent as IFolder).ParentId;
                     }
                 }
             }
@@ -79,10 +79,19 @@ namespace CmisSync.Lib.SelectiveIgnore
                 var path = (e as IFilterableLocalPathEvent).LocalPath;
                 if (path != null) {
                     foreach(var ignore in this.ignores) {
-                        if (path.StartsWith(ignore.LocalPath)) {
+                        if (path.StartsWith(ignore.LocalPath) && path != ignore.LocalPath) {
                             return true;
                         }
                     }
+                }
+            }
+
+            if (e is FolderEvent) {
+                var folderEvent = e as FolderEvent;
+                if (folderEvent.LocalFolder != null &&
+                    (folderEvent.Local == MetaDataChangeType.CREATED || folderEvent.Local == MetaDataChangeType.DELETED))
+                {
+
                 }
             }
 

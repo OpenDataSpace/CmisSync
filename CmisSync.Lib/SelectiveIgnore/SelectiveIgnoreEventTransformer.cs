@@ -61,7 +61,7 @@ namespace CmisSync.Lib.SelectiveIgnore
 
         private bool IsInsideIgnoredPath(string path) {
             foreach(var ignore in this.ignores) {
-                if (path.StartsWith(ignore.LocalPath)) {
+                if (path.StartsWith(ignore.LocalPath) && !path.TrimEnd(Path.DirectorySeparatorChar).Equals(ignore.LocalPath.TrimEnd(Path.DirectorySeparatorChar))) {
                     return true;
                 }
             }

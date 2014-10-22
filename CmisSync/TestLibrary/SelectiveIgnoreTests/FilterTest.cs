@@ -136,14 +136,38 @@ namespace TestLibrary.SelectiveIgnoreTests
             Assert.That(this.underTest.Handle(fileEvent), Is.True);
         }
 
-        [Test, Category("Fast"), Category("SelectiveIgnore"), Ignore("TODO")]
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void FilterRemoteObjectDeletedEvents() {
             this.SetupMocks();
             string objectId = "objectId";
             this.session.Setup(s => s.GetObject(objectId)).Throws<CmisObjectNotFoundException>();
-            var fileEvent = new FileEvent(null, null) { Remote = MetaDataChangeType.DELETED };
+            var fileEvent = new FileEvent(Mock.Of<IFileInfo>(f => f.FullName == Path.Combine(this.ignoredPath, "file.txt")), null) { Remote = MetaDataChangeType.DELETED };
 
             Assert.That(this.underTest.Handle(fileEvent), Is.True);
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void DoNotFilterIgnoredFolderRenameEvent() {
+            this.SetupMocks();
+            var folderEvent = new FolderMovedEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(Path.GetTempPath(), "newPath")),null,null,null);
+
+            Assert.That(this.underTest.Handle(folderEvent), Is.False);
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void DoNotFilterIgnoredLocalFolderEvent() {
+            this.SetupMocks();
+            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), null) {Local = MetaDataChangeType.CREATED };
+
+            Assert.That(this.underTest.Handle(folderEvent), Is.False);
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void DoNotFilterIgnoredRemoteFolderAddedEvent() {
+            this.SetupMocks();
+            var folderEvent = new FolderEvent(null, Mock.Of<IFolder>(f => f.Id == this.ignoredObjectId)) {Local = MetaDataChangeType.CREATED };
+
+            Assert.That(this.underTest.Handle(folderEvent), Is.False);
         }
 
         private void SetupMocks() {

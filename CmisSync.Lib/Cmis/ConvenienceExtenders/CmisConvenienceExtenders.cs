@@ -157,8 +157,8 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// </summary>
         /// <returns><c>true</c>, if all children are ignored, <c>false</c> otherwise.</returns>
         /// <param name="folder">Remote cmis folder.</param>
-        public static bool AreAllChildrenIgnored(this IFolder folder) {
-            foreach (var ignoredProperty in folder.Properties) {
+        public static bool AreAllChildrenIgnored(this ICmisObject obj) {
+            foreach (var ignoredProperty in obj.Properties) {
                 if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
                     if ((ignoredProperty.FirstValue as string).Contains("*")) {
                         return true;

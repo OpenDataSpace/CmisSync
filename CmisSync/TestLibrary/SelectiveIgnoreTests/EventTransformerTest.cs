@@ -118,6 +118,19 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.queue.VerifyThatNoOtherEventIsAddedThan<FSEvent>();
         }
 
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void DoNotTransformFSIgnoredFolderMovedEventToAddedEvent() {
+            this.SetupMocks();
+            string fileName = "folder";
+            var oldFile = Path.Combine(this.ignoredLocalPath);
+            var newFile = Path.Combine(Path.GetTempPath(), fileName);
+            var moveFile = new FSMovedEvent(oldFile, newFile, true);
+
+            Assert.That(this.underTest.Handle(moveFile), Is.False);
+
+            this.queue.VerifyThatNoEventIsAdded();
+        }
+
         private void SetupMocks() {
             this.queue = new Mock<ISyncEventQueue>();
             this.ignores = new ObservableCollection<IIgnoredEntity>();
