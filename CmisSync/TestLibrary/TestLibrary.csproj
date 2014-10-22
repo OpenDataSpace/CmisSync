@@ -211,6 +211,7 @@
     <Compile Include="SelectiveIgnoreTests\IgnoredEntityTest.cs" />
     <Compile Include="QueueingTests\EventManagerInitializerTest.cs" />
     <Compile Include="SelectiveIgnoreTests\FilterTest.cs" />
+    <Compile Include="StorageTests\FileSystemTests\DateTimeConverterTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

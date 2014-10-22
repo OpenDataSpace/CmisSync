@@ -21,6 +21,7 @@ SOURCES =  \
 	../Windows/FolderTreeMVC/NodeLoader.cs \
 	../Windows/FolderTreeMVC/NodeModel.cs \
 	../Windows/FolderTreeMVC/NodeModelUtils.cs \
+	../TransmissionController.cs \
 	About.cs \
 	AppDelegate.cs \
 	Badger.cs \
@@ -72,6 +73,9 @@ SOURCES =  \
 	SetupWizard.designer.cs \
 	SetupWizardController.cs \
 	StatusIcon.cs \
+	TransmissionWidget.cs \
+	TransmissionWidget.designer.cs \
+	TransmissionWidgetController.cs \
 	TextFieldDelegate.cs \
 	UI.cs
 

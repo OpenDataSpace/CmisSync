@@ -251,6 +251,8 @@
     <Compile Include="SelectiveIgnore\IgnoredEntity.cs" />
     <Compile Include="SelectiveIgnore\IIgnoredEntity.cs" />
     <Compile Include="SelectiveIgnore\IgnoreFlagChangeDetection.cs" />
+    <Compile Include="Storage\FileSystem\DateTimeToFileConverter.cs" />
+    <Compile Include="Storage\FileSystem\FSType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

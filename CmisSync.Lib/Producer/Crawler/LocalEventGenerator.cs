@@ -21,6 +21,9 @@ namespace CmisSync.Lib.Producer.Crawler
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    #if __COCOA__
+    using System.Text;
+    #endif
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
@@ -89,7 +92,11 @@ namespace CmisSync.Lib.Producer.Crawler
                 IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
                     var localPath = this.storage.GetLocalPath(storedMappedChild);
-                    if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
+                    #if __COCOA__
+                    if ((!localPath.Normalize(NormalizationForm.FormD).Equals(child.Item.FullName.Normalize(NormalizationForm.FormD))) && this.fsFactory.IsDirectory(localPath) != null) {
+                    #else
+                    if ((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
+                    #endif
                         // Copied
                         creationEvents.Add(this.GenerateCreatedEvent(child.Item));
                     } else {
@@ -135,7 +142,11 @@ namespace CmisSync.Lib.Producer.Crawler
             AbstractFolderEvent createdEvent = null;
             if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                 // Renamed, Updated or Equal
+                #if __COCOA__
+                if (fsObject.Name.Normalize(NormalizationForm.FormD) == storedMappedChild.Name.Normalize(NormalizationForm.FormD) && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                #else
                 if (fsObject.Name == storedMappedChild.Name && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                #endif
                     // Equal
                     createdEvent = null;
                 } else {
