@@ -677,7 +677,7 @@ namespace TestLibrary.IntegrationTests
             newFolder.Delete(true);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Erratic")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Erratic"), Ignore("Doesn't happend anymore")]
         public void GetChildrenDoesNotProducesServerProtocolViolationException(
             string canonical_name,
             string localPath,
