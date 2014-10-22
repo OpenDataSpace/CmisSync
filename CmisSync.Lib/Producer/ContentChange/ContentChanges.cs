@@ -86,10 +86,8 @@ namespace CmisSync.Lib.Producer.ContentChange
         public override bool Handle(ISyncEvent e)
         {
             StartNextSyncEvent syncEvent = e as StartNextSyncEvent;
-            if(syncEvent != null)
-            {
-                if(syncEvent.FullSyncRequested)
-                {
+            if (syncEvent != null) {
+                if (syncEvent.FullSyncRequested) {
                     // Get last change log token on server side.
                     string lastRemoteChangeLogTokenBeforeFullCrawlSync = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
                     if (this.storage.ChangeLogToken == null) {
@@ -98,9 +96,7 @@ namespace CmisSync.Lib.Producer.ContentChange
 
                     // Use fallback sync algorithm
                     return false;
-                }
-                else
-                {
+                } else {
                     Logger.Debug("Starting ContentChange Sync");
                     bool result = this.StartSync();
                     return result;
@@ -109,10 +105,9 @@ namespace CmisSync.Lib.Producer.ContentChange
 
             // The above started full sync is finished.
             FullSyncCompletedEvent syncCompleted = e as FullSyncCompletedEvent;
-            if(syncCompleted != null) {
+            if (syncCompleted != null) {
                 string lastTokenOnServer = syncCompleted.StartEvent.LastTokenOnServer;
-                if(!string.IsNullOrEmpty(lastTokenOnServer))
-                {
+                if (!string.IsNullOrEmpty(lastTokenOnServer)) {
                     this.storage.ChangeLogToken = lastTokenOnServer;
                 }
             }
@@ -158,8 +153,7 @@ namespace CmisSync.Lib.Producer.ContentChange
             // Get last change token that had been saved on client side.
             string lastTokenOnClient = this.storage.ChangeLogToken;
 
-            if (lastTokenOnClient == null)
-            {
+            if (lastTokenOnClient == null) {
                 // Token is null, which means no content change sync has ever happened yet, so just sync everything from remote.
                 // Force full sync
                 var fullsyncevent = new StartNextSyncEvent(true);
@@ -177,12 +171,11 @@ namespace CmisSync.Lib.Producer.ContentChange
                 foreach (IChangeEvent change in changes.ChangeEventList)
                 {
                     // ignore first event when lists overlapp
-                    if(first) {
+                    if (first) {
                         first = false;
-                        if(this.lastChange != null &&
+                        if (this.lastChange != null &&
                            (this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Created
-                         || this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Deleted))
-                        {
+                         || this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Deleted)) {
                             if (change != null && change.ChangeType == this.lastChange.ChangeType && change.ObjectId == this.lastChange.ObjectId) {
                                 continue;
                             }
@@ -195,12 +188,9 @@ namespace CmisSync.Lib.Producer.ContentChange
                 }
 
                 // Save change log token locally.
-                if (changes.HasMoreItems == true)
-                {
+                if (changes.HasMoreItems == true) {
                     lastTokenOnClient = changes.LatestChangeLogToken;
-                }
-                else
-                {
+                } else {
                     lastTokenOnClient = lastTokenOnServer;
                 }
 
