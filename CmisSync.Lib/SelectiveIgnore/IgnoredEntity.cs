@@ -43,8 +43,5 @@ namespace CmisSync.Lib.SelectiveIgnore
             this.ObjectId = folder.Id;
             this.LocalPath = matcher.CreateLocalPath(folder);
         }
-
-        public string ObjectId { get; private set; }
-        public string LocalPath { get; private set; }
     }
 }

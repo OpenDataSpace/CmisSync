@@ -21,9 +21,13 @@ namespace CmisSync.Lib.SelectiveIgnore
 {
     using System;
 
-    public interface IIgnoredEntity
+    public abstract class IIgnoredEntity : IEquatable<IIgnoredEntity>
     {
-        string ObjectId { get; }
-        string LocalPath { get; }
+        public string ObjectId { get; protected set; }
+        public string LocalPath { get; protected set; }
+
+        public bool Equals(IIgnoredEntity other) {
+            return this.ObjectId == other.ObjectId;
+        }
     }
 }

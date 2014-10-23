@@ -22,25 +22,9 @@ namespace CmisSync.Lib.SelectiveIgnore
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Collections.Specialized;
 
-    public class IgnoredEntitiesCollection : ObservableCollection<IIgnoredEntity>
+    public class IgnoredEntitiesCollection : IIgnoredEntitiesStorage
     {
-        private Dictionary<string, string> ignores = new Dictionary<string, string>();
-        public IgnoredEntitiesCollection() : base() {
-        }
-
-        public IgnoredEntitiesCollection(List<IIgnoredEntity> ignores) : base(ignores) {
-            foreach (var ignore in ignores) {
-                this.ignores.Add(ignore.ObjectId, ignore.LocalPath);
-            }
-        }
-
-        public IgnoredEntitiesCollection(IEnumerable<IIgnoredEntity> ignores) : base(ignores) {
-
-        }
-
-        public bool ContainsObjectId(string objectId) {
-            return false;
-        }
     }
 }

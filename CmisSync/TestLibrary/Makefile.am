@@ -26,7 +26,6 @@ SOURCES =  \
 	ConfigTests/RepoInfoTests.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
-	StorageTests/FileSystemTests/DateTimeConverterTest.cs \
 	ConsumerTests/SituationSolverTests/AbstractEnhancedSolverTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectAddedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectChangedRemoteObjectChangedTest.cs \
@@ -113,12 +112,14 @@ SOURCES =  \
 	QueueingTests/SyncEventQueueTest.cs \
 	SelectiveIgnoreTests/EventTransformerTest.cs \
 	SelectiveIgnoreTests/FilterTest.cs \
+	SelectiveIgnoreTests/IgnoredEntitiesCollectionTest.cs \
 	SelectiveIgnoreTests/IgnoredEntityTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
+	StorageTests/FileSystemTests/DateTimeConverterTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderDosTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
