@@ -161,6 +161,7 @@ SOURCES =  \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
 	Storage/Database/Entities/IFileConvenienceExtenders.cs \
+	Storage/Database/Entities/IFileTransmissionObject.cs \
 	Storage/Database/Entities/IMappedObject.cs \
 	Storage/Database/Entities/MappedObject.cs \
 	Storage/Database/EntryNotFoundException.cs \
