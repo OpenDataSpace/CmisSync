@@ -50,6 +50,7 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/RemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
+	EventManagerInitializerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/ExceptionEventTest.cs \
@@ -82,7 +83,9 @@ SOURCES =  \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
+	IntegrationTests/UploadFileIT.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfIRepository.cs \
 	MockedServer/MockOfISession.cs \
@@ -110,7 +113,6 @@ SOURCES =  \
 	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
-	EventManagerInitializerTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \

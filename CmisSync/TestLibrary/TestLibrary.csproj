@@ -209,6 +209,8 @@
     <Compile Include="MockedServer\MockOfISession.cs" />
     <Compile Include="MockedServer\MockedFolder.cs" />
     <Compile Include="StorageTests\FileSystemTests\DateTimeConverterTest.cs" />
+    <Compile Include="IntegrationTests\UploadFileIT.cs" />
+    <Compile Include="IntegrationTests\NeedsLocalFileSystemFolder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

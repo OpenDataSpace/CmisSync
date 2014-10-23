@@ -129,10 +129,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                     watch.Start();
                     IFileUploader uploader = ContentTaskUtils.CreateUploader();
-                    using (SHA1 hashAlg = new SHA1Managed())
-                    using(var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
+                    using (SHA1 hashAlg = new SHA1Managed()) {
                         try {
-                            uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
+                            using (var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
+                                uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
+                                mapped.ChecksumAlgorithmName = "SHA-1";
+                                mapped.LastChecksum = hashAlg.Hash;
+                            }
                         } catch (Exception ex) {
                             if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
                                 OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
@@ -143,9 +146,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                             throw;
                         }
-
-                        mapped.ChecksumAlgorithmName = "SHA-1";
-                        mapped.LastChecksum = hashAlg.Hash;
                     }
 
                     watch.Stop();

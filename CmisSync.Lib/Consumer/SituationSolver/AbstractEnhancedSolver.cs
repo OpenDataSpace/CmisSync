@@ -41,6 +41,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// </summary>
     public abstract class AbstractEnhancedSolver : ISolver
     {
+        /// <summary>
+        /// The file operations logger.
+        /// </summary>
         protected static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         /// <summary>
@@ -111,16 +114,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
             transmissionManager.AddTransmission(transmissionEvent);
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
-            using (var hashAlg = new SHA1Managed())
-                using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+            using (var hashAlg = new SHA1Managed()) {
                 try {
-                    uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                    using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                        uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                        hash = hashAlg.Hash;
+                    }
                 } catch(Exception ex) {
                     transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                     throw;
                 }
-
-                hash = hashAlg.Hash;
             }
 
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
@@ -134,47 +137,47 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
             var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
-            using (SHA1 hashAlg = new SHA1Managed())
-                using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+            try {
+                using (SHA1 hashAlg = new SHA1Managed()) {
+                    using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
                     using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
-                try {
-                    download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
-                } catch(Exception ex) {
-                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                    throw;
+                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        obj.ChecksumAlgorithmName = "SHA-1";
+                        hash = hashAlg.Hash;
+                    }
                 }
 
-                obj.ChecksumAlgorithmName = "SHA-1";
-                hash = hashAlg.Hash;
-            }
+                var backupFile = fsFactory.CreateFileInfo(target.FullName + ".bak.sync");
+                Guid? uuid = target.Uuid;
+                cacheFile.Replace(target, backupFile, true);
+                try {
+                    target.Uuid = uuid;
+                } catch (RestoreModificationDateException e) {
+                    logger.Debug("Failed to restore modification date of original file", e);
+                }
 
-            var backupFile = fsFactory.CreateFileInfo(target.FullName + ".bak.sync");
-            Guid? uuid = target.Uuid;
-            cacheFile.Replace(target, backupFile, true);
-            try {
-                target.Uuid = uuid;
-            } catch (RestoreModificationDateException e) {
-                logger.Debug("Failed to restore modification date of original file", e);
-            }
+                try {
+                    backupFile.Uuid = null;
+                } catch (RestoreModificationDateException e) {
+                    logger.Debug("Failed to restore modification date of backup file", e);
+                }
 
-            try {
-                backupFile.Uuid = null;
-            } catch (RestoreModificationDateException e) {
-                logger.Debug("Failed to restore modification date of backup file", e);
-            }
+                byte[] checksumOfOldFile = null;
+                using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
+                    checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
+                }
 
-            byte[] checksumOfOldFile = null;
-            using (var oldFileStream = backupFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
-                checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
-            }
-
-            if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
-                var conflictFile = fsFactory.CreateConflictFileInfo(target);
-                backupFile.MoveTo(conflictFile.FullName);
-                OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", target.FullName, remoteDocument.Id, conflictFile.FullName));
-            } else {
-                backupFile.Delete();
-                OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", target.FullName, remoteDocument.Id));
+                if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
+                    var conflictFile = fsFactory.CreateConflictFileInfo(target);
+                    backupFile.MoveTo(conflictFile.FullName);
+                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", target.FullName, remoteDocument.Id, conflictFile.FullName));
+                } else {
+                    backupFile.Delete();
+                    OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", target.FullName, remoteDocument.Id));
+                }
+            } catch(Exception ex) {
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                throw;
             }
 
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
