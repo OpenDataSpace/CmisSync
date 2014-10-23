@@ -15,10 +15,23 @@ namespace TestLibrary.StorageTests.FileSystemTests
         public void RequestingDriveType() {
             foreach (DriveInfo objDrive in DriveInfo.GetDrives())
             {
-                Console.WriteLine("Drive Name :   " + objDrive.Name);
-                Console.WriteLine("Drive Format : " + objDrive.DriveFormat);
-                Console.WriteLine("");
+                if (objDrive.IsReady)
+                {
+                    Console.WriteLine("Drive Name :   " + objDrive.Name);
+                    Console.WriteLine("Drive Format : " + objDrive.DriveFormat);
+                    Console.WriteLine("");
+                }
             }
+        }
+
+        [Test, Category("Fast")]
+        public void CreateOldDateTime() {
+            new DateTime(1601, 1, 1);
+        }
+
+        [Test, Category("Fast")]
+        public void CreateFutureTime() {
+            new DateTime(5000, 1, 1);
         }
     }
 }
