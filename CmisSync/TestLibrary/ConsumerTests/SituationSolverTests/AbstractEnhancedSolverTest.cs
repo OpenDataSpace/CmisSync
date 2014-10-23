@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -52,26 +53,45 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
             var storage = Mock.Of<IMetaDataStorage>();
-            var solver = new SolverClass(session.Object, storage);
-            Assert.That(solver.GetSession(), Is.EqualTo(session.Object));
-            Assert.That(solver.GetStorage(), Is.EqualTo(storage));
+
+            var underTest = new SolverClass(session.Object, storage);
+
+            Assert.That(underTest.GetSession(), Is.EqualTo(session.Object));
+            Assert.That(underTest.GetStorage(), Is.EqualTo(storage));
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorSetsServerPropertyCorrectly() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem(true);
-            var solver = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
-            Assert.That(solver.GetModification(), Is.True);
 
+            var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
+
+            Assert.That(underTest.GetModification(), Is.True);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorSetsModificationPossibilityToFalse() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem(false);
-            var solver = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
-            Assert.That(solver.GetModification(), Is.False);
+            var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
+            Assert.That(underTest.GetModification(), Is.False);
+        }
+
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        public void UploadFileClosesTransmissionOnIOException() {
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+
+            var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
+
+            underTest.Upload(null, null, null);
+            Assert.Fail("TODO");
+        }
+
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        public void DownloadChangesClosesTransmissionOnIOExceptionOnOpenCacheFile() {
+            Assert.Fail("TODO");
         }
 
         private class SolverClass : AbstractEnhancedSolver {
@@ -90,6 +110,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             public bool GetModification() {
                 return this.ServerCanModifyDateTimes;
+            }
+
+            public byte[] Upload(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
+                return AbstractEnhancedSolver.UploadFile(localFile, doc, transmissionManager);
             }
 
             public override void Solve(

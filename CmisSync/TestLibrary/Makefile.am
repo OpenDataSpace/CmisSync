@@ -49,6 +49,7 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/RemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
+	EventManagerInitializerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/ExceptionEventTest.cs \
@@ -81,7 +82,9 @@ SOURCES =  \
 	IntegrationTests/FullRepoTests.cs \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
+	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
+	IntegrationTests/UploadFileIT.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfIRepository.cs \
 	MockedServer/MockOfISession.cs \
