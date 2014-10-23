@@ -200,6 +200,8 @@
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectChangedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectRenamedTest.cs" />
+    <Compile Include="IntegrationTests\UploadFileIT.cs" />
+    <Compile Include="IntegrationTests\NeedsLocalFileSystemFolder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

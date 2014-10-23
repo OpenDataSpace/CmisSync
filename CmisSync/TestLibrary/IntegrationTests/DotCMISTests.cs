@@ -110,35 +110,25 @@ namespace TestLibrary.IntegrationTests
             string password,
             string repositoryId)
         {
-            // var watch = Stopwatch.StartNew();
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
 
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Created Session in {0} msec",watch.ElapsedMilliseconds));
-            // watch.Restart();
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Requested folder in {0} msec", watch.ElapsedMilliseconds));
             string filename = "testfile.txt";
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, filename);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            IDocument doc = null;
             try {
-                IDocument doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
+                doc = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + filename) as IDocument;
                 if (doc != null) {
                     doc.Delete(true);
                 }
             } catch (Exception) {
             }
-
-            // watch.Restart();
-            IDocument emptyDoc = folder.CreateDocument(properties, null, null);
-
-            // watch.Stop();
-            // Console.WriteLine(String.Format("Created empty doc in {0} msec", watch.ElapsedMilliseconds));
-            Assert.That(emptyDoc.ContentStreamLength == 0 || emptyDoc.ContentStreamLength == null, "returned document shouldn't got any content");
             string content = "test";
+            doc = folder.CreateDocument(filename, content);
+            Assert.That(doc.ContentStreamLength == content.Length, "returned document should have got content");
             for (int i = 0; i < 10; i++) {
                 ContentStream contentStream = new ContentStream();
                 contentStream.FileName = filename;
@@ -146,13 +136,26 @@ namespace TestLibrary.IntegrationTests
                 contentStream.Length = content.Length;
                 using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                     contentStream.Stream = memstream;
-                    emptyDoc.AppendContentStream(contentStream, i == 9, true);
+                    doc.AppendContentStream(contentStream, i == 9, true);
                 }
 
-                Assert.AreEqual(content.Length * (i + 1), emptyDoc.ContentStreamLength);
+                Assert.AreEqual(content.Length * (i + 2), doc.ContentStreamLength);
             }
 
-            emptyDoc.DeleteAllVersions();
+            for (int i = 0; i < 10; i++) {
+                ContentStream contentStream = new ContentStream();
+                contentStream.FileName = filename;
+                contentStream.MimeType = MimeType.GetMIMEType(filename);
+                contentStream.Length = content.Length;
+                using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
+                    contentStream.Stream = memstream;
+                    doc.AppendContentStream(contentStream, true, true);
+                }
+
+                Assert.AreEqual(content.Length * (i + 2 + 10), doc.ContentStreamLength);
+            }
+
+            doc.DeleteAllVersions();
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
