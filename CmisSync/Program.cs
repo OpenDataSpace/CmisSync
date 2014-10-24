@@ -89,6 +89,9 @@ namespace CmisSync
 
             bool firstRun = !File.Exists(ConfigManager.CurrentConfigFile);
 
+            // Disable SSLv3 to avoid POODLE Attack
+            ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3;
+
             ServicePointManager.CertificatePolicy = new CertPolicyHandler();
 
             // Migrate config.xml from past versions, if necessary.
