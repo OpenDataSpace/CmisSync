@@ -480,6 +480,7 @@ namespace CmisSync
                 }
 
                 Logger.Debug("Start to stop all active file transmissions");
+                int wait = 0;
                 do {
                     List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
                     foreach (FileTransmissionEvent transmissionEvent in activeList) {
@@ -494,10 +495,13 @@ namespace CmisSync
 
                     if (activeList.Count > 0) {
                         Thread.Sleep(100);
+                        wait++;
                     } else {
                         break;
                     }
-                } while (true);
+                } while (wait < 100);
+                Logger.Debug("Start to abort all open HttpWebRequests");
+                this.transmissionManager.AbortAllRequests();
                 Logger.Debug("Finish to stop all active file transmissions");
             }
         }
