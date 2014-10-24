@@ -105,8 +105,8 @@ SOURCES =  \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
-	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
+	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderDosTest.cs \
@@ -133,7 +133,8 @@ SOURCES =  \
 	TestUtils/SingleStepEventQueueTest.cs \
 	UtilsTests/EncodingTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
-	UtilsTests/ProcessDiagnosticsTest.cs
+	UtilsTests/ProcessDiagnosticsTest.cs \
+	UtilsTests/X509StoreTest.cs
 
 EXTRA_DIST = TestLibrary.csproj \
 	$(MOQ_PATH)
