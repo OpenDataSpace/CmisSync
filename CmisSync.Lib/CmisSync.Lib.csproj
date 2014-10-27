@@ -62,7 +62,9 @@
     <Compile Include="Backend.cs" />
     <Compile Include="Cmis\MimeType.cs" />
     <Compile Include="Defines.cs" />
+    <Compile Include="Storage\Database\Entities\FileTransmissionObject.cs" />
     <Compile Include="Storage\Database\Entities\IFileTransmissionObject.cs" />
+    <Compile Include="Storage\Database\IFileTransmissionStorage.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />
     <Compile Include="Cmis\DotCMISLogListener.cs" />

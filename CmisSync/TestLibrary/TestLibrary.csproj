@@ -91,6 +91,7 @@
     <Compile Include="IntegrationTests\IntegrationTestUtils.cs" />
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\EntitiesTests\FileTransmissionObjectsTest.cs" />
     <Compile Include="TestUtils\MockMetaDataStorageUtil.cs" />
     <Compile Include="TestUtils\MockSessionUtil.cs" />
     <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
@@ -240,23 +241,5 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="CmisTests\" />
-    <Folder Include="CmisTests\UiUtilsTests\" />
-    <Folder Include="AccumulatorTests\" />
-    <Folder Include="ConfigTests\" />
-    <Folder Include="ConsumerTests\" />
-    <Folder Include="StorageTests\DataBaseTests\" />
-    <Folder Include="StorageTests\FileSystemTests\" />
-    <Folder Include="StorageTests\DataBaseTests\EntitiesTests\" />
-    <Folder Include="PathMatcherTests\" />
-    <Folder Include="ProducerTests\" />
-    <Folder Include="ProducerTests\CrawlerTests\" />
-    <Folder Include="ProducerTests\WatcherTests\" />
-    <Folder Include="ProducerTests\ContentChangeTests\" />
-    <Folder Include="QueueingTests\" />
-    <Folder Include="FilterTests\" />
-    <Folder Include="CmisTests\ConvenienceExtendersTests\" />
-    <Folder Include="MockedServer\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

@@ -112,6 +112,7 @@ SOURCES =  \
 	QueueingTests/SyncEventQueueTest.cs \
 	EventManagerInitializerTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
+	StorageTests/DataBaseTests/EntitiesTests/FileTransmissionObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \

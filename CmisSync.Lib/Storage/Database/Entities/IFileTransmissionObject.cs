@@ -24,16 +24,23 @@ namespace CmisSync.Lib.Storage.Database.Entities
     using System.Linq;
     using System.Text;
 
+    using CmisSync.Lib.Events;
+
     /// <summary>
     /// Interface for a file transmission object. A file transmission object is a record for a upload/download file transmission.
     /// </summary>
     public interface IFileTransmissionObject
     {
         /// <summary>
-        /// Gets or sets the relative pathname from the target root path 
+        /// Gets the relative pathname from the target root path 
         /// </summary>
         /// <value>The relative pathname from the target root path</value>
-        string RelativePath { get; set; }
+        string RelativePath { get; }
+
+        /// <summary>
+        /// Gets the type
+        /// </summary>
+        FileTransmissionType Type { get; }
 
         /// <summary>
         /// Gets or sets the last file content checksum for local file
@@ -54,10 +61,10 @@ namespace CmisSync.Lib.Storage.Database.Entities
         DateTime? LastLocalWriteTimeUtc { get; set; }
 
         /// <summary>
-        /// Gets or sets the CMIS remote object identifier
+        /// Gets the CMIS remote object identifier
         /// </summary>
         /// <value>The CMIS remote object identifier</value>
-        string RemoteObjectId { get; set; }
+        string RemoteObjectId { get; }
 
         /// <summary>
         /// Gets or sets the last change token of last action make on CMIS server

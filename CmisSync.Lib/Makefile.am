@@ -163,9 +163,11 @@ SOURCES =  \
 	Storage/Database/Entities/IFileConvenienceExtenders.cs \
 	Storage/Database/Entities/IFileTransmissionObject.cs \
 	Storage/Database/Entities/IMappedObject.cs \
+	Storage/Database/Entities/FileTransmissionObject.cs \
 	Storage/Database/Entities/MappedObject.cs \
 	Storage/Database/EntryNotFoundException.cs \
 	Storage/Database/ICookieStorage.cs \
+	Storage/Database/IFileTransmissionStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
 	Storage/Database/IObjectTree.cs \
 	Storage/Database/MetaDataStorage.cs \
