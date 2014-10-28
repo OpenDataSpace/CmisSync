@@ -122,5 +122,34 @@ namespace TestLibrary.QueueingTests
 
             queue.Verify(q => q.AddEvent(syncEvent1), Times.Never());
         }
+
+        [Test, Category("Fast")]
+        public void FullSyncFlagIsResetAfterOneDelayedFullSyncRequest() {
+            var queue = new Mock<ISyncEventQueue>();
+            var underTest = new DelayRetryAndNextSyncEventHandler(queue.Object);
+            queue.Setup(q => q.IsEmpty).Returns(false);
+
+            Assert.True(underTest.Handle(new StartNextSyncEvent(true)));
+            queue.Setup(q => q.IsEmpty).Returns(true);
+            Assert.True(underTest.Handle(new StartNextSyncEvent(false)));
+
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
+
+            queue.Setup(q => q.IsEmpty).Returns(false);
+            Assert.True(underTest.Handle(new StartNextSyncEvent(false)));
+            queue.Setup(q => q.IsEmpty).Returns(true);
+            Assert.True(underTest.Handle(new StartNextSyncEvent(false)));
+
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == false)), Times.Once());
+
+            queue.Setup(q => q.IsEmpty).Returns(false);
+            Assert.True(underTest.Handle(new StartNextSyncEvent(true)));
+            queue.Setup(q => q.IsEmpty).Returns(true);
+            Assert.True(underTest.Handle(new StartNextSyncEvent(false)));
+
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Exactly(2));
+            queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == false)), Times.Once());
+        }
     }
 }

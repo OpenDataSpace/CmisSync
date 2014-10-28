@@ -8,7 +8,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         {
             switch(fsType) {
             case FSType.NTFS:
-                return limitDateTime(originalDate, new DateTime(1601, 1, 1), new DateTime(60056, 4, 28));
+                return limitDateTime(originalDate, new DateTime(1601, 1, 1), new DateTime(5000, 1, 1));
             case FSType.ext2:
                 goto case FSType.ext3;
             case FSType.ext3:

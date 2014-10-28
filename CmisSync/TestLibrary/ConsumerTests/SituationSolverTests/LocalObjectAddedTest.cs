@@ -257,6 +257,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileIsUsedByAnotherProcessOnOpenFile() {
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(10);
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>())).Throws(new IOException("Alread in use by another process"));
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Throws(new IOException("Alread in use by another process"));
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(new IOException("Alread in use by another process"));
+
+            Mock<IDocument> document;
+            Assert.Throws<IOException>(() => this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, true, fileInfo, out document));
+            fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, true, checksum: this.emptyhash, contentSize: 0);
+            this.VerifyCreateDocument(isEmpty: false);
+            fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void DoNotWriteLastWriteTimeUtcIfNotNecessary()
         {
             bool extendedAttributes = true;
