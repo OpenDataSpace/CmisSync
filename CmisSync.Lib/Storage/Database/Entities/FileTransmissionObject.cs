@@ -20,9 +20,7 @@
 namespace CmisSync.Lib.Storage.Database.Entities
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+    using System.IO;
 
     using DotCMIS.Client;
 
@@ -37,6 +35,71 @@ namespace CmisSync.Lib.Storage.Database.Entities
     {
         public FileTransmissionObject(FileTransmissionType type, string localPath, IDocument remoteFile, IPathMatcher matcher)
         {
+            if (localPath == null)
+            {
+                throw new ArgumentNullException("localPath");
+            }
+            if (string.IsNullOrEmpty(localPath))
+            {
+                throw new ArgumentException("empty string", "localPath");
+            }
+
+            if (remoteFile == null)
+            {
+                throw new ArgumentNullException("remoteFile");
+            }
+            if (remoteFile.Paths == null)
+            {
+                throw new ArgumentNullException("remoteFile.Paths");
+            }
+            if (remoteFile.Paths.Count == 0)
+            {
+                throw new ArgumentException("zero size", "remoteFile.Paths");
+            }
+            if (remoteFile.Paths[0] == null)
+            {
+                throw new ArgumentNullException("remoteFile.Paths[0]");
+            }
+            if (string.IsNullOrEmpty(remoteFile.Paths[0]))
+            {
+                throw new ArgumentException("empty string", "remoteFile.Paths[0]");
+            }
+
+            if (matcher == null)
+            {
+                throw new ArgumentNullException("Path matcher is null");
+            }
+
+            if (!matcher.CanCreateLocalPath(remoteFile))
+            {
+                throw new ArgumentException(string.Format("'{0}' does not match", remoteFile.Paths[0]), "remoteFile");
+            }
+
+            if (!matcher.CanCreateRemotePath(localPath))
+            {
+                throw new ArgumentException(string.Format("'{0}' does not match", localPath), "localPath");
+            }
+
+            if (!matcher.Matches(localPath, remoteFile.Paths[0]))
+            {
+                throw new ArgumentException(string.Format("Local path {0} does not match the remote file {1}", localPath, remoteFile.Paths[0]));
+            }
+
+            if (!File.Exists(localPath))
+            {
+                throw new ArgumentException(string.Format("'{0} file does not exist", localPath), "localPath");
+            }
+
+            RelativePath = matcher.GetRelativeLocalPath(localPath);
+            Type = type;
+            LastLocalWriteTimeUtc = File.GetLastWriteTimeUtc(localPath);
+            RemoteObjectId = remoteFile.Id;
+            LastChangeToken = remoteFile.ChangeToken;
+            LastRemoteWriteTimeUtc = remoteFile.LastModificationDate;
+            if (LastRemoteWriteTimeUtc != null)
+            {
+                LastRemoteWriteTimeUtc = LastRemoteWriteTimeUtc.GetValueOrDefault().ToUniversalTime();
+            }
         }
 
         public string RelativePath { get; private set; }

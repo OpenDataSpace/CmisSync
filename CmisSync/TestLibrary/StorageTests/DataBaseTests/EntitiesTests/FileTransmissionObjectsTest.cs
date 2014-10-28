@@ -78,46 +78,69 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfLocalPathIsNull()
+        public void ConstructorThrowsExceptionIfLocalPathIsInvalid()
         {
-            new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, null, Mock.Of<IDocument>(), Mock.Of<IPathMatcher>());
+            //Local path is null
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, null, Mock.Of<IDocument>(), Mock.Of<IPathMatcher>()));
+
+            //Local path is empty
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, string.Empty, Mock.Of<IDocument>(), Mock.Of<IPathMatcher>()));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfRemoteFileIsNull()
+        public void ConstructorThrowsExceptionIfRemoteFileIsInvalid()
         {
-            new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, null, Mock.Of<IPathMatcher>());
+            //Remote file is null
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, null, Mock.Of<IPathMatcher>()));
+
+            //Paths for remote file is null
+            var remoteFile = new Mock<IDocument>();
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, Mock.Of<IPathMatcher>()));
+
+            //Paths for remote file is zero size
+            remoteFile.Setup(m => m.Paths).Returns(new List<string>());
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, Mock.Of<IPathMatcher>()));
+
+            //Paths[0] for remote file is null
+            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { null });
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, Mock.Of<IPathMatcher>()));
+
+            //Paths[0] for remote file is empty
+            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { string.Empty });
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, Mock.Of<IPathMatcher>()));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfMatcherIsNull()
+        public void ConstructorThrowsExceptionIfMatcherIsInvalid()
         {
-            new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, Mock.Of<IDocument>(), null);
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
+            //Matcher is null
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, null));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
         [ExpectedException(typeof(ArgumentException))]
         public void ConstructorThrowsExceptionIfLocalPathDoesNotMatchMatcher()
         {
-            var remoteFile = Mock.Of<IDocument>();
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
             var matcher = new Mock<IPathMatcher>();
-            matcher.Setup(m => m.CanCreateLocalPath(remoteFile)).Returns(true);
+            matcher.Setup(m => m.CanCreateLocalPath(remoteFile.Object)).Returns(true);
             matcher.Setup(m => m.CanCreateRemotePath(LocalPath)).Returns(false);
-            new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile, matcher.Object);
+            new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, matcher.Object);
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
         [ExpectedException(typeof(ArgumentException))]
         public void ConstructorThrowsExceptionIfRemoteFileDoesNotMatchMatcher()
         {
-            var remoteFile = Mock.Of<IDocument>();
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
             var matcher = new Mock<IPathMatcher>();
-            matcher.Setup(m => m.CanCreateLocalPath(remoteFile)).Returns(false);
+            matcher.Setup(m => m.CanCreateLocalPath(remoteFile.Object)).Returns(false);
             matcher.Setup(m => m.CanCreateRemotePath(LocalPath)).Returns(true);
-            new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile, matcher.Object);
+            new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, matcher.Object);
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
@@ -133,5 +156,25 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, matcher.Object);
         }
 
+        [Test, Category("Fast"), Category("FileTransmissionObjects")]
+        public void ConstructorThrowsExceptionIfLocalPathIsNotFile()
+        {
+            var remoteFile = new Mock<IDocument>();
+            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
+            var matcher = new Mock<IPathMatcher>();
+            matcher.Setup(m => m.CanCreateLocalPath(remoteFile.Object)).Returns(true);
+
+            //Local path does not exist
+            string localPath = LocalPath + ".NoExist";
+            matcher.Setup(m => m.CanCreateRemotePath(localPath)).Returns(true);
+            matcher.Setup(m => m.Matches(localPath, remoteFile.Object.Paths[0])).Returns(true);
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, localPath, remoteFile.Object, matcher.Object));
+
+            //Local path is a directory
+            localPath = Path.GetDirectoryName(LocalPath);
+            matcher.Setup(m => m.CanCreateRemotePath(localPath)).Returns(true);
+            matcher.Setup(m => m.Matches(localPath, remoteFile.Object.Paths[0])).Returns(true);
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, localPath, remoteFile.Object, matcher.Object));
+        }
     }
 }
