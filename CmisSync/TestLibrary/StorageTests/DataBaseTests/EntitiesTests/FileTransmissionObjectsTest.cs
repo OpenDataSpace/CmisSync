@@ -75,6 +75,8 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             Assert.AreEqual(null, obj.ChecksumAlgorithmName);
             Assert.AreEqual(File.GetLastWriteTimeUtc(LocalPath), obj.LastLocalWriteTimeUtc);
             Assert.AreEqual(File.GetLastWriteTimeUtc(LocalPath), obj.LastRemoteWriteTimeUtc);
+            var obj2 = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, matcher.Object);
+            Assert.IsTrue(obj.Equals(obj2));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]

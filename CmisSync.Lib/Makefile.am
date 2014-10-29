@@ -170,6 +170,7 @@ SOURCES =  \
 	Storage/Database/IFileTransmissionStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
 	Storage/Database/IObjectTree.cs \
+	Storage/Database/FileTransmissionStorage.cs \
 	Storage/Database/MetaDataStorage.cs \
 	Storage/Database/ObjectTree.cs \
 	Storage/Database/PersistentCookieStorage.cs \

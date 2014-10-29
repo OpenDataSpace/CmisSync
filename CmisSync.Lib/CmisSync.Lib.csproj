@@ -64,6 +64,7 @@
     <Compile Include="Defines.cs" />
     <Compile Include="Storage\Database\Entities\FileTransmissionObject.cs" />
     <Compile Include="Storage\Database\Entities\IFileTransmissionObject.cs" />
+    <Compile Include="Storage\Database\FileTransmissionStorage.cs" />
     <Compile Include="Storage\Database\IFileTransmissionStorage.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />

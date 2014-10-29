@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="MappedObject.cs" company="GRAU DATA AG">
+// <copyright file="FileTransmissionObject.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -100,6 +100,39 @@ namespace CmisSync.Lib.Storage.Database.Entities
             {
                 LastRemoteWriteTimeUtc = LastRemoteWriteTimeUtc.GetValueOrDefault().ToUniversalTime();
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MappedObject"/> class.
+        /// </summary>
+        [Obsolete("Must not be used manually. This constructor should be used for serialization only.", true)]
+        public FileTransmissionObject()
+        {
+        }
+
+        public override bool Equals(object obj)
+        {
+            // If parameter is null return false.
+            if (obj == null)
+            {
+                return false;
+            }
+
+            // If parameter cannot be cast to MappedObjectData return false.
+            FileTransmissionObject o = obj as FileTransmissionObject;
+            if (o == null)
+            {
+                return false;
+            }
+
+            return object.Equals(RelativePath, o.RelativePath) &&
+                this.Type.Equals(o.Type) &&
+                object.Equals(LastChecksum, o.LastChecksum) &&
+                object.Equals(ChecksumAlgorithmName, o.ChecksumAlgorithmName) &&
+                object.Equals(LastLocalWriteTimeUtc, o.LastLocalWriteTimeUtc) &&
+                object.Equals(RemoteObjectId, o.RemoteObjectId) &&
+                object.Equals(LastChangeToken, o.LastChangeToken) &&
+                object.Equals(LastRemoteWriteTimeUtc, o.LastRemoteWriteTimeUtc);
         }
 
         public string RelativePath { get; private set; }

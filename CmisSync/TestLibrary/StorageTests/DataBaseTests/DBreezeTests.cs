@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="DBreezeTests.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@
 namespace TestLibrary.StorageTests.DataBaseTests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
 
     using CmisSync.Lib.Storage.Database.Entities;
@@ -37,6 +38,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
     {
         private DBreezeEngine engine = null;
         private string path = null;
+        private string file = null;
 
         [TestFixtureSetUp]
         public void InitCustomSerializator()
@@ -51,6 +53,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
         {
             this.path = Path.Combine(Path.GetTempPath(), "DBreeze");
             this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
+            this.file = Path.GetTempFileName();
         }
 
         [TearDown]
@@ -60,6 +63,10 @@ namespace TestLibrary.StorageTests.DataBaseTests
             if (Directory.Exists(this.path))
             {
                 Directory.Delete(this.path, true);
+            }
+            if (File.Exists(this.file))
+            {
+                File.Delete(this.file);
             }
         }
 
@@ -120,6 +127,24 @@ namespace TestLibrary.StorageTests.DataBaseTests
                 var file = new MappedObject(name, key, MappedObjectType.File, null, null);
                 tran.Insert<string, DbCustomSerializer<MappedObject>>("objects", key, file);
                 Assert.That((tran.Select<string, DbCustomSerializer<MappedObject>>("objects", key).Value.Get as MappedObject).Equals(file));
+            }
+        }
+
+        [Test, Category("Fast"), Category("IT")]
+        public void InsertAndSelectFileTransmissionObjectData()
+        {
+            using (var tran = this.engine.GetTransaction())
+            {
+                string key = "key";
+                var remoteFile = new Mock<DotCMIS.Client.IDocument>();
+                remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
+                var matcher = new Mock<CmisSync.Lib.PathMatcher.IPathMatcher>();
+                matcher.Setup(m => m.CanCreateLocalPath(remoteFile.Object)).Returns(true);
+                matcher.Setup(m => m.CanCreateRemotePath(this.file)).Returns(true);
+                matcher.Setup(m => m.Matches(this.file, remoteFile.Object.Paths[0])).Returns(true);
+                var data = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE,this.file,remoteFile.Object,matcher.Object);
+                tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>("objects", key, data);
+                Assert.That((tran.Select<string, DbCustomSerializer<FileTransmissionObject>>("objects", key).Value.Get as FileTransmissionObject).Equals(data));
             }
         }
 

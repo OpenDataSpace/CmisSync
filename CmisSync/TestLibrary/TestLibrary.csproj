@@ -92,6 +92,7 @@
     <Compile Include="MoqExtensions\MoqExtensions.cs" />
     <Compile Include="EventsTests\ProxyAuthRequiredEventTest.cs" />
     <Compile Include="StorageTests\DataBaseTests\EntitiesTests\FileTransmissionObjectsTest.cs" />
+    <Compile Include="StorageTests\DataBaseTests\FileTransmissionStorageTest.cs" />
     <Compile Include="TestUtils\MockMetaDataStorageUtil.cs" />
     <Compile Include="TestUtils\MockSessionUtil.cs" />
     <Compile Include="TestUtils\MockOfIFileSystemInfoFactoryUtil.cs" />
