@@ -135,9 +135,9 @@ namespace CmisSync.Lib.Storage.Database.Entities
                 object.Equals(LastRemoteWriteTimeUtc, o.LastRemoteWriteTimeUtc);
         }
 
-        public string RelativePath { get; private set; }
+        public string RelativePath { get; set; }
 
-        public FileTransmissionType Type { get; private set; }
+        public FileTransmissionType Type { get; set; }
 
         public byte[] LastChecksum { get; set; }
 
@@ -145,7 +145,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
 
         public DateTime? LastLocalWriteTimeUtc { get; set; }
 
-        public string RemoteObjectId { get; private set; }
+        public string RemoteObjectId { get; set; }
 
         public string LastChangeToken { get; set; }
 
