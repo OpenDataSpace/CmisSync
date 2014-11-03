@@ -21,6 +21,7 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Security.Cryptography;
     using System.IO;
 
     using CmisSync.Lib.Events;
@@ -76,6 +77,26 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             Assert.AreEqual(File.GetLastWriteTimeUtc(LocalPath), obj.LastLocalWriteTimeUtc);
             Assert.AreEqual(File.GetLastWriteTimeUtc(LocalPath), obj.LastRemoteWriteTimeUtc);
             var obj2 = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object, matcher.Object);
+            Assert.IsTrue(obj.Equals(obj2));
+
+            obj.ChecksumAlgorithmName = "SHA1";
+            Assert.AreEqual("SHA1", obj.ChecksumAlgorithmName);
+            obj.LastChecksum = new byte[32];
+            using (var random = RandomNumberGenerator.Create())
+            {
+                random.GetBytes(obj.LastChecksum);
+            }
+            Assert.IsFalse(obj.Equals(obj2));
+
+            obj2.ChecksumAlgorithmName = "SHA1";
+            obj2.LastChecksum = new byte[32];
+            using (var random = RandomNumberGenerator.Create())
+            {
+                random.GetBytes(obj.LastChecksum);
+            }
+            Assert.IsFalse(obj.Equals(obj2));
+
+            Buffer.BlockCopy(obj2.LastChecksum, 0, obj.LastChecksum, 0, 32);
             Assert.IsTrue(obj.Equals(obj2));
         }
 

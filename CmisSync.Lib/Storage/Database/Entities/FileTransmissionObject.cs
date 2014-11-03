@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Storage.Database.Entities
 {
     using System;
+    using System.Linq;
     using System.IO;
 
     using DotCMIS.Client;
@@ -126,8 +127,8 @@ namespace CmisSync.Lib.Storage.Database.Entities
             }
 
             return object.Equals(RelativePath, o.RelativePath) &&
-                this.Type.Equals(o.Type) &&
-                object.Equals(LastChecksum, o.LastChecksum) &&
+                Type.Equals(o.Type) &&
+                ((LastChecksum == null && o.LastChecksum == null) || (LastChecksum != null && o.LastChecksum != null && LastChecksum.SequenceEqual(o.LastChecksum))) &&
                 object.Equals(ChecksumAlgorithmName, o.ChecksumAlgorithmName) &&
                 object.Equals(LastLocalWriteTimeUtc, o.LastLocalWriteTimeUtc) &&
                 object.Equals(RemoteObjectId, o.RemoteObjectId) &&
