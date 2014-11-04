@@ -45,7 +45,6 @@ namespace CmisSync.Lib.Consumer
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
             SituationType type = this.DoAnalyse(storage, actualEvent);
-            Logger.Debug(string.Format("Local Situation is: {0}", type));
             return type;
         }
 
