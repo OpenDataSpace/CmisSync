@@ -69,8 +69,6 @@ namespace CmisSync.Lib.Producer.Watcher
                 return false;
             }
 
-            Logger.Debug("Handling FSEvent: " + e);
-
             if (fsevent.IsDirectory) {
                 this.HandleFolderEvents(fsevent);
             } else {
@@ -109,7 +107,6 @@ namespace CmisSync.Lib.Producer.Watcher
                 }
             }
 
-            Logger.Debug("Adding Event: " + folderEvent);
             Queue.AddEvent(folderEvent);
         }
 
@@ -130,7 +127,6 @@ namespace CmisSync.Lib.Producer.Watcher
                     newfile,
                     null,
                     null);
-                Logger.Debug("Adding Event: " + newEvent);
                 Queue.AddEvent(newEvent);
             } else {
                 var file = this.fsFactory.CreateFileInfo(e.LocalPath);
@@ -148,8 +144,6 @@ namespace CmisSync.Lib.Producer.Watcher
                     newEvent.LocalContent = ContentChangeType.DELETED;
                     break;
                 }
-
-                Logger.Debug("Adding Event: " + newEvent);
 
                 Queue.AddEvent(newEvent);
             }
