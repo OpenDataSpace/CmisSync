@@ -34,7 +34,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     [Serializable]
     public class FileTransmissionObject : IFileTransmissionObject
     {
-        public FileTransmissionObject(FileTransmissionType type, string localPath, IDocument remoteFile, IPathMatcher matcher)
+        public FileTransmissionObject(FileTransmissionType type, string localPath, IDocument remoteFile)
         {
             if (localPath == null)
             {
@@ -48,6 +48,14 @@ namespace CmisSync.Lib.Storage.Database.Entities
             if (remoteFile == null)
             {
                 throw new ArgumentNullException("remoteFile");
+            }
+            if (remoteFile.Id == null)
+            {
+                throw new ArgumentNullException("remoteFile.Id");
+            }
+            if (string.IsNullOrEmpty(remoteFile.Id))
+            {
+                throw new ArgumentException("empty string", "remoteFile.Id");
             }
             if (remoteFile.Paths == null)
             {
@@ -66,33 +74,13 @@ namespace CmisSync.Lib.Storage.Database.Entities
                 throw new ArgumentException("empty string", "remoteFile.Paths[0]");
             }
 
-            if (matcher == null)
-            {
-                throw new ArgumentNullException("Path matcher is null");
-            }
-
-            if (!matcher.CanCreateLocalPath(remoteFile))
-            {
-                throw new ArgumentException(string.Format("'{0}' does not match", remoteFile.Paths[0]), "remoteFile");
-            }
-
-            if (!matcher.CanCreateRemotePath(localPath))
-            {
-                throw new ArgumentException(string.Format("'{0}' does not match", localPath), "localPath");
-            }
-
-            if (!matcher.Matches(localPath, remoteFile.Paths[0]))
-            {
-                throw new ArgumentException(string.Format("Local path {0} does not match the remote file {1}", localPath, remoteFile.Paths[0]));
-            }
-
             if (!File.Exists(localPath))
             {
                 throw new ArgumentException(string.Format("'{0} file does not exist", localPath), "localPath");
             }
 
-            RelativePath = matcher.GetRelativeLocalPath(localPath);
             Type = type;
+            LocalPath = localPath;
             LastLocalWriteTimeUtc = File.GetLastWriteTimeUtc(localPath);
             RemoteObjectId = remoteFile.Id;
             LastChangeToken = remoteFile.ChangeToken;
@@ -113,21 +101,25 @@ namespace CmisSync.Lib.Storage.Database.Entities
 
         public override bool Equals(object obj)
         {
-            // If parameter is null return false.
             if (obj == null)
             {
                 return false;
             }
 
-            // If parameter cannot be cast to MappedObjectData return false.
+            if (this == obj)
+            {
+                return true;
+            }
+
+            // If parameter cannot be casted to FileTransmissionObject return false.
             FileTransmissionObject o = obj as FileTransmissionObject;
             if (o == null)
             {
                 return false;
             }
 
-            return object.Equals(RelativePath, o.RelativePath) &&
-                Type.Equals(o.Type) &&
+            return Type.Equals(o.Type) && 
+                object.Equals(LocalPath, o.LocalPath) &&
                 ((LastChecksum == null && o.LastChecksum == null) || (LastChecksum != null && o.LastChecksum != null && LastChecksum.SequenceEqual(o.LastChecksum))) &&
                 object.Equals(ChecksumAlgorithmName, o.ChecksumAlgorithmName) &&
                 object.Equals(LastLocalWriteTimeUtc, o.LastLocalWriteTimeUtc) &&
@@ -136,9 +128,9 @@ namespace CmisSync.Lib.Storage.Database.Entities
                 object.Equals(LastRemoteWriteTimeUtc, o.LastRemoteWriteTimeUtc);
         }
 
-        public string RelativePath { get; set; }
-
         public FileTransmissionType Type { get; set; }
+
+        public string LocalPath { get; set; }
 
         public byte[] LastChecksum { get; set; }
 

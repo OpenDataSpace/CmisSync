@@ -81,13 +81,13 @@ namespace CmisSync.Lib.Storage.Database
                 throw new ArgumentNullException("obj");
             }
 
-            if (obj.RelativePath == null)
+            if (obj.LocalPath == null)
             {
-                throw new ArgumentNullException("obj.RelativePath");
+                throw new ArgumentNullException("obj.LocalPath");
             }
-            if (string.IsNullOrEmpty(obj.RelativePath))
+            if (string.IsNullOrEmpty(obj.LocalPath))
             {
-                throw new ArgumentException("empty string", "obj.RelativePath");
+                throw new ArgumentException("empty string", "obj.LocalPath");
             }
 
             if (obj.RemoteObjectId == null)
@@ -106,27 +106,31 @@ namespace CmisSync.Lib.Storage.Database
 
             using (var tran = Engine.GetTransaction())
             {
-                tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, obj.RelativePath, obj as FileTransmissionObject);
+                tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, obj.RemoteObjectId, obj as FileTransmissionObject);
                 tran.Commit();
             }
         }
 
-        public void RemoveObjectByRelativePath(string relativePath)
+        public void RemoveObjectByRemoteObjectId(string remoteObjectId)
         {
-            if (relativePath == null)
+            if (remoteObjectId == null)
             {
-                throw new ArgumentNullException("relativePath");
+                throw new ArgumentNullException("remoteObjectId");
             }
-            if (string.IsNullOrEmpty(relativePath))
+            if (string.IsNullOrEmpty(remoteObjectId))
             {
-                throw new ArgumentException("empty string", "relativePath");
+                throw new ArgumentException("empty string", "remoteObjectId");
             }
 
             using (var tran = Engine.GetTransaction())
             {
-                tran.RemoveKey(FileTransmissionObjectsTable, relativePath);
+                tran.RemoveKey(FileTransmissionObjectsTable, remoteObjectId);
                 tran.Commit();
             }
+        }
+
+        public void ClearObjectList()
+        {
         }
     }
 }

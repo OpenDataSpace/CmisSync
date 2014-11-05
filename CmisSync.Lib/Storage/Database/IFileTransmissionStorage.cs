@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Storage.Database
     /// Interface for the saved <c>IFileTransmissionObject</c> list in the storage
     /// </summary>
     /// <remarks>
-    /// The <c>IFileTransmissionObject.RelativePath</c> is the primary key for the saved <code>IFileTransmissionObject</code> list.
+    /// The <c>IFileTransmissionObject.RemoteObjectId</c> is the primary key for the saved <code>IFileTransmissionObject</code> list.
     /// </remarks>
     interface IFileTransmissionStorage
     {
@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Storage.Database
         /// Save the <c>IFileTransmissionObject</c> object
         /// </summary>
         /// <remarks>
-        /// If one saved <c>IFileTransmissionObject</c> has the same <c>IFileTransmissionObject.RelativePath</c> as <paramref name="obj"/>, it will be replaced with <paramref name="obj"/>
+        /// If one saved <c>IFileTransmissionObject</c> has the same <c>IFileTransmissionObject.RemoteObjectId</c> as <paramref name="obj"/>, it will be replaced with <paramref name="obj"/>
         /// </remarks>
         /// <param name="obj">
         /// The <c>IFileTransmissionObject</c> object to be saved
@@ -52,11 +52,16 @@ namespace CmisSync.Lib.Storage.Database
         void SaveObject(IFileTransmissionObject obj);
 
         /// <summary>
-        /// Remove any saved <c>IFileTransmissionObject</c> that has the <c>IFileTransmissionObject.RelativePath</c> with <paramref name="relativePath"/>
+        /// Remove any saved <c>IFileTransmissionObject</c> that has the <c>IFileTransmissionObject.RemoteObjectId</c> with <paramref name="remoteObjectId"/>
         /// </summary>
-        /// <param name="relativePath">
-        /// <c>IFileTransmissionObject.RelativePath</c> value
+        /// <param name="remoteObjectId">
+        /// <c>IFileTransmissionObject.RemoteObjectId</c> value
         /// </param>
-        void RemoveObjectByRelativePath(string relativePath);
+        void RemoveObjectByRemoteObjectId(string remoteObjectId);
+
+        /// <summary>
+        /// Remove all saved <c>IFileTransmissionObject</c> list
+        /// </summary>
+        void ClearObjectList();
     }
 }

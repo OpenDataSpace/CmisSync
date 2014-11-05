@@ -32,15 +32,15 @@ namespace CmisSync.Lib.Storage.Database.Entities
     public interface IFileTransmissionObject
     {
         /// <summary>
-        /// Gets the relative pathname from the target root path 
-        /// </summary>
-        /// <value>The relative pathname from the target root path</value>
-        string RelativePath { get; }
-
-        /// <summary>
         /// Gets the type
         /// </summary>
         FileTransmissionType Type { get; }
+
+        /// <summary>
+        /// Gets the local file path 
+        /// </summary>
+        /// <value>The local file path</value>
+        string LocalPath { get; }
 
         /// <summary>
         /// Gets or sets the last file content checksum for local file
