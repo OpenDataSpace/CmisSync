@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Repository.cs" company="GRAU DATA AG">
 //
 //   Copyright (C) 2012  Nicolas Raoul &lt;nicolas.raoul@aegif.jp&gt;
@@ -149,6 +149,8 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         protected MetaDataStorage storage;
 
+        protected FileTransmissionStorage fileTransmissionStorage;
+
         /// <summary>
         /// The connection scheduler.
         /// </summary>
@@ -215,6 +217,7 @@ namespace CmisSync.Lib.Cmis
 
             // Initialize storage
             this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+            this.fileTransmissionStorage = new FileTransmissionStorage(this.db);
 
             // Add ignore file/folder filter
             this.ignoredFoldersFilter = new IgnoredFoldersFilter { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
@@ -261,7 +264,7 @@ namespace CmisSync.Lib.Cmis
                 this.Status = status;
             };
 
-            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
+            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
 
             this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
 

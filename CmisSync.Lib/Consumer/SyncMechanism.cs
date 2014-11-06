@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SyncMechanism.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -47,6 +47,7 @@ namespace CmisSync.Lib.Consumer
 
         private ISession session;
         private IMetaDataStorage storage;
+        private IFileTransmissionStorage fileTransmissionStorage;
         private ActivityListenerAggregator activityListener;
         private IFilterAggregator filters;
 
@@ -67,6 +68,7 @@ namespace CmisSync.Lib.Consumer
             ISyncEventQueue queue,
             ISession session,
             IMetaDataStorage storage,
+            IFileTransmissionStorage fileTransmissionStorage,
             ActivityListenerAggregator activityListener,
             IFilterAggregator filters,
             ISolver[,] solver = null) : base(queue)
@@ -79,7 +81,13 @@ namespace CmisSync.Lib.Consumer
                 throw new ArgumentNullException("Given storage is null");
             }
 
-            if (localSituation == null) {
+            if (fileTransmissionStorage == null)
+            {
+                throw new ArgumentNullException("Given fileTransmissionStorage is null");
+            }
+
+            if (localSituation == null)
+            {
                 throw new ArgumentNullException("Given local situation detection is null");
             }
 
@@ -97,6 +105,7 @@ namespace CmisSync.Lib.Consumer
 
             this.session = session;
             this.storage = storage;
+            this.fileTransmissionStorage = fileTransmissionStorage;
             this.LocalSituation = localSituation;
             this.RemoteSituation = remoteSituation;
             this.activityListener = activityListener;

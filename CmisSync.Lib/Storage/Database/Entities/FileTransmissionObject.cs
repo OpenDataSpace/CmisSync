@@ -25,7 +25,6 @@ namespace CmisSync.Lib.Storage.Database.Entities
 
     using DotCMIS.Client;
 
-    using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Events;
 
     /// <summary>

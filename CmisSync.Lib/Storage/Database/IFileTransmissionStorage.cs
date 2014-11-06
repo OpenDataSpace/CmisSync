@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Storage.Database
     /// <remarks>
     /// The <c>IFileTransmissionObject.RemoteObjectId</c> is the primary key for the saved <code>IFileTransmissionObject</code> list.
     /// </remarks>
-    interface IFileTransmissionStorage
+    public interface IFileTransmissionStorage
     {
         /// <summary>
         /// Get the saved <c>IFileTransmissionObject</c> list
