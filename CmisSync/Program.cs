@@ -124,14 +124,14 @@ namespace CmisSync
                     "designed to keep things simple and to stay out of your way." + n +
                     n +
                     "Version: " + CmisSync.Lib.Backend.Version + n +
-                    "Copyright (C) 2013 GRAU DATA AG" + n +
+                    "Copyright (C) 2014 GRAU DATA AG" + n +
                     "Copyright (C) 2010 Hylke Bons" + n +
                     "This program comes with ABSOLUTELY NO WARRANTY." + n +
                     n +
                     "This is free software, and you are welcome to redistribute it" + n +
                     "under certain conditions. Please read the GNU GPLv3 for details." + n +
                     n +
-                    "Usage: DataSpaceSync [start|stop|restart]");
+                    "Usage: dataspacesync [start|stop|restart]");
                     Environment.Exit(-1);
                 }
 
