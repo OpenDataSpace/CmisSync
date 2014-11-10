@@ -52,13 +52,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager) : base(session, storage) {
-
-
+            ActiveActivitiesManager transmissionManager) : base(session, storage)
+        {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
@@ -113,7 +111,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                 var doc = remoteId as IDocument;
                 try {
-                    mappedObject.LastChecksum = UploadFile(localFile, doc, this.transmissionManager);
+                    mappedObject.LastChecksum = AbstractEnhancedSolver.UploadFile(localFile, doc, this.transmissionManager);
                 } catch(Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
@@ -131,7 +129,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject.LastContentSize = localFile.Length;
 
                 OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
-
             }
 
             if (this.ServerCanModifyDateTimes) {
@@ -141,7 +138,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         doc.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
                         mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     } else if (remoteId is IFolder) {
-                        var folder = (remoteId as IFolder);
+                        var folder = remoteId as IFolder;
                         folder.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
                         mappedObject.LastRemoteWriteTimeUtc = folder.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     }
