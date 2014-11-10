@@ -1423,7 +1423,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That((remoteB as IFolder).GetChildren().Count(), Is.EqualTo(0));
         }
 
-        [Ignore("Not yet correct on the server side")]
         [Test, Category("Slow")]
         public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
