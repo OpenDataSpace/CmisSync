@@ -1432,7 +1432,7 @@ namespace TestLibrary.IntegrationTests
 
             folder.Move(source, target);
 
-            Assert.Throws<CmisInvalidArgumentException>(() => anotherFolderInstance.Move(source, target));
+            Assert.Throws<CmisNameConstraintViolationException>(() => anotherFolderInstance.Move(source, target));
         }
 
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
