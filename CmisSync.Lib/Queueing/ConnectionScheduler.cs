@@ -45,7 +45,7 @@ namespace CmisSync.Lib.Queueing
         private Task task;
         private object connectionLock = new object();
         private object repoInfoLock = new object();
-        private bool isForbidden = false;
+        private DateTime isForbiddenUntil = DateTime.MinValue;
 
         protected ISyncEventQueue Queue { get; set; }
 
@@ -156,7 +156,7 @@ namespace CmisSync.Lib.Queueing
                 if (changedConfig != null) {
                     lock(this.repoInfoLock) {
                         this.RepoInfo = changedConfig;
-                        this.isForbidden = false;
+                        this.isForbiddenUntil = DateTime.MinValue;
                         lock(this.connectionLock) {
                             if (this.task != null) {
                                 try {
@@ -183,7 +183,7 @@ namespace CmisSync.Lib.Queueing
         {
             lock(this.repoInfoLock) {
                 try {
-                    if (this.isForbidden) {
+                    if (this.isForbiddenUntil > DateTime.UtcNow) {
                         return false;
                     }
 
@@ -195,13 +195,14 @@ namespace CmisSync.Lib.Queueing
                     return true;
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {
                     Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
-                    this.Queue.AddEvent(new PermissionDeniedEvent(e));
-                    this.isForbidden = true;
+                    var permissionDeniedEvent = new PermissionDeniedEvent(e);
+                    this.Queue.AddEvent(permissionDeniedEvent);
+                    this.isForbiddenUntil = permissionDeniedEvent.IsBlockedUntil ?? DateTime.MaxValue;
                 } catch (CmisRuntimeException e) {
                     if (e.Message == "Proxy Authentication Required") {
                         this.Queue.AddEvent(new ProxyAuthRequiredEvent(e));
                         Logger.Warn("Proxy Settings Problem", e);
-                        this.isForbidden = true;
+                        this.isForbiddenUntil = DateTime.MaxValue;
                     } else {
                         Logger.Error("Connection to repository failed: ", e);
                         this.Queue.AddEvent(new ExceptionEvent(e));

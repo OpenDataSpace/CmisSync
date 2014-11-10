@@ -203,6 +203,7 @@
     <Compile Include="IntegrationTests\UploadFileIT.cs" />
     <Compile Include="IntegrationTests\NeedsLocalFileSystemFolder.cs" />
     <Compile Include="UtilsTests\X509StoreTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedEventCalculatesBlockingUntilTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

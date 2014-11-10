@@ -28,12 +28,28 @@ namespace CmisSync.Lib.Events
     /// </summary>
     public class PermissionDeniedEvent : ExceptionEvent
     {
+        private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.PermissionDeniedEvent"/> class.
         /// </summary>
         /// <param name="e">thrown permission denied exception</param>
         public PermissionDeniedEvent(DotCMIS.Exceptions.CmisPermissionDeniedException e) : base(e)
         {
+            if (e.ErrorContent != null) {
+                try {
+                    long unixMiliSeconds = Convert.ToInt64(e.ErrorContent);
+                    this.IsBlockedUntil = PermissionDeniedEvent.UnixEpoch.AddMilliseconds(unixMiliSeconds);
+                } catch(FormatException) {
+                } catch(OverflowException) {
+                }
+            }
         }
+
+        /// <summary>
+        /// Gets the DateTime until the login is blocked.
+        /// </summary>
+        /// <value>The blocked until.</value>
+        public DateTime? IsBlockedUntil { get; private set; }
     }
 }

@@ -300,7 +300,15 @@ namespace CmisSync
                 new GenericSyncEventHandler<PermissionDeniedEvent>(
                 0,
                 delegate(ISyncEvent e) {
-                this.ShowChangePassword(repositoryInfo.DisplayName);
+                var permissionDeniedEvent = e as PermissionDeniedEvent;
+                if (permissionDeniedEvent.IsBlockedUntil == null) {
+                    this.ShowChangePassword(repositoryInfo.DisplayName);
+                } else {
+                    this.ShowException(
+                        string.Format(Properties_Resources.LoginFailed, "Account is blocked"),
+                        string.Format("This account for {0} is blocked until:{1}{2}", repo.Name, Environment.NewLine, permissionDeniedEvent.IsBlockedUntil));
+                }
+
                 return true;
             }));
             repo.Queue.EventManager.AddEventHandler(
