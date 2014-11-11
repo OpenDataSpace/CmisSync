@@ -130,7 +130,7 @@ namespace CmisSync.Lib.Queueing
                     // Disposing the login task before it is finished is not a problem
                 } catch (TaskCanceledException) {
                     // It is fine if the task is canceled
-                } catch (AggregateException agg) {
+                } catch (AggregateException) {
                     // It is also fine if the task is canceled
                 }
             }
@@ -178,7 +178,7 @@ namespace CmisSync.Lib.Queueing
                                     // Disposing the login task before it is finished is not a problem.
                                 } catch (TaskCanceledException) {
                                     // It is also fine if the task is canceled
-                                } catch (AggregateException agg) {
+                                } catch (AggregateException) {
                                     // It is also fine if the task is canceled
                                 } finally {
                                     this.task = null;
