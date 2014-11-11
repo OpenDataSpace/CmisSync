@@ -131,9 +131,6 @@ namespace CmisSync.Lib.Queueing
                 } catch (TaskCanceledException) {
                     // It is fine if the task is canceled
                 } catch (AggregateException agg) {
-                    if (!(agg.InnerException is TaskCanceledException)) {
-                        throw;
-                    }
                     // It is also fine if the task is canceled
                 }
             }
@@ -182,9 +179,6 @@ namespace CmisSync.Lib.Queueing
                                 } catch (TaskCanceledException) {
                                     // It is also fine if the task is canceled
                                 } catch (AggregateException agg) {
-                                    if (!(agg.InnerException is TaskCanceledException)) {
-                                        throw;
-                                    }
                                     // It is also fine if the task is canceled
                                 } finally {
                                     this.task = null;
