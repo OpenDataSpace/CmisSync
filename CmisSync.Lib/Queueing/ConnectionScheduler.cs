@@ -43,6 +43,8 @@ namespace CmisSync.Lib.Queueing
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionScheduler));
         private Task task;
+        private CancellationTokenSource cancelTaskSource;
+        private CancellationToken cancelToken;
         private object connectionLock = new object();
         private object repoInfoLock = new object();
         private DateTime isForbiddenUntil = DateTime.MinValue;
@@ -121,9 +123,18 @@ namespace CmisSync.Lib.Queueing
         public void Dispose() {
             if (this.task != null) {
                 try {
+                    this.cancelTaskSource.Cancel();
+                    this.task.Wait(this.Interval);
                     this.task.Dispose();
-                } catch(InvalidOperationException) {
+                } catch (InvalidOperationException) {
                     // Disposing the login task before it is finished is not a problem
+                } catch (TaskCanceledException) {
+                    // It is fine if the task is canceled
+                } catch (AggregateException agg) {
+                    if (!(agg.InnerException is TaskCanceledException)) {
+                        throw;
+                    }
+                    // It is also fine if the task is canceled
                 }
             }
         }
@@ -134,12 +145,16 @@ namespace CmisSync.Lib.Queueing
         public virtual void Start() {
             lock(this.connectionLock) {
                 if (this.task == null) {
+                    this.cancelTaskSource = new CancellationTokenSource();
+                    this.cancelToken = this.cancelTaskSource.Token;
                     this.task = Task.Factory.StartNew(
                         () => {
-                        while (!this.Connect()) {
+                        this.cancelToken.ThrowIfCancellationRequested();
+                        while (!this.cancelToken.IsCancellationRequested && !this.Connect()) {
+                            this.cancelToken.ThrowIfCancellationRequested();
                             Thread.Sleep(this.Interval);
                         }
-                    });
+                    }, this.cancelTaskSource.Token);
                 }
             }
         }
@@ -160,10 +175,20 @@ namespace CmisSync.Lib.Queueing
                         lock(this.connectionLock) {
                             if (this.task != null) {
                                 try {
+                                    this.cancelTaskSource.Cancel();
+                                    this.task.Wait(this.Interval);
                                     this.task.Dispose();
-                                    this.task = null;
-                                } catch(InvalidOperationException) {
+                                } catch (InvalidOperationException) {
                                     // Disposing the login task before it is finished is not a problem.
+                                } catch (TaskCanceledException) {
+                                    // It is also fine if the task is canceled
+                                } catch (AggregateException agg) {
+                                    if (!(agg.InnerException is TaskCanceledException)) {
+                                        throw;
+                                    }
+                                    // It is also fine if the task is canceled
+                                } finally {
+                                    this.task = null;
                                 }
                             }
 
@@ -189,8 +214,9 @@ namespace CmisSync.Lib.Queueing
 
                     // Create session.
                     var session = this.SessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.AuthProvider, null);
-
+                    this.cancelToken.ThrowIfCancellationRequested();
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
+                    this.cancelToken.ThrowIfCancellationRequested();
                     this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session));
                     return true;
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {

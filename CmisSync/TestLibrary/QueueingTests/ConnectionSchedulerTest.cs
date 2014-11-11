@@ -326,9 +326,9 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void LoginBlocked() {
+        public void LoginBlockedWithOldDate() {
             var waitHandle = new AutoResetEvent(false);
-            var exception = Mock.Of<CmisPermissionDeniedException>(e => e.ErrorContent == "0");
+            var exception = Mock.Of<CmisPermissionDeniedException>(e => e.Data == EventsTests.PermissionDeniedEventCalculatesBlockingUntilTest.CreateHeader(DateTime.UtcNow.ToString()));
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
                 .Callback<IDictionary<string, string>, object, object, object>(
                     (d, x, y, z) => this.VerifyConnectionProperties(d)).Throws(exception);
@@ -350,12 +350,11 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void LoginBlockedWithLockedUntilDate() {
+        public void LoginBlockedWithLockedUntilTimeSpan() {
             var waitHandle = new AutoResetEvent(false);
             var now = DateTime.UtcNow;
-            var unixTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            long millisecs = (long)((now - unixTime).TotalMilliseconds) + 10 * this.interval;
-            var exception = Mock.Of<CmisPermissionDeniedException>(e => e.ErrorContent == millisecs.ToString());
+            long seconds = 1;
+            var exception = Mock.Of<CmisPermissionDeniedException>(e => e.Data == EventsTests.PermissionDeniedEventCalculatesBlockingUntilTest.CreateHeader(seconds.ToString()));
             this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
                 .Callback<IDictionary<string, string>, object, object, object>(
                     (d, x, y, z) => this.VerifyConnectionProperties(d)).Throws(exception);
@@ -370,6 +369,33 @@ namespace TestLibrary.QueueingTests
                         (d, x, y, z) => this.VerifyConnectionProperties(d)).Returns(this.session.Object);
                 Assert.That(waitHandle.WaitOne(5 * this.interval), Is.False);
                 Assert.That(waitHandle.WaitOne(10 * this.interval), Is.True);
+                this.queue.Verify(q => q.AddEvent(It.Is<SuccessfulLoginEvent>(l => l.Session == this.session.Object)), Times.Once());
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
+            }
+
+            this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void LoginBlockedWithLockedUntilFutureDate() {
+            var waitHandle = new AutoResetEvent(false);
+            var now = DateTime.UtcNow;
+            long seconds = 5;
+            var exception = Mock.Of<CmisPermissionDeniedException>(e => e.Data == EventsTests.PermissionDeniedEventCalculatesBlockingUntilTest.CreateHeader(now.AddSeconds(seconds).ToString()));
+            this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                .Callback<IDictionary<string, string>, object, object, object>(
+                    (d, x, y, z) => this.VerifyConnectionProperties(d)).Throws(exception);
+            this.queue.Setup(q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback(() => waitHandle.Set());
+            using (var scheduler = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
+                scheduler.Start();
+                waitHandle.WaitOne();
+                this.queue.VerifyThatNoOtherEventIsAddedThan<PermissionDeniedEvent>();
+                this.queue.Verify(q => q.AddEvent(It.Is<PermissionDeniedEvent>(e => e.IsBlockedUntil != null)));
+                this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                    .Callback<IDictionary<string, string>, object, object, object>(
+                        (d, x, y, z) => this.VerifyConnectionProperties(d)).Returns(this.session.Object);
+                Assert.That(waitHandle.WaitOne(5 * this.interval), Is.False);
+                Assert.That(waitHandle.WaitOne((int)seconds * 1000 + 1000), Is.True);
                 this.queue.Verify(q => q.AddEvent(It.Is<SuccessfulLoginEvent>(l => l.Session == this.session.Object)), Times.Once());
                 this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
             }

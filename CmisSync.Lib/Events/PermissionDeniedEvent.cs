@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Events
 {
     using System;
+    using System.Collections.Generic;
 
     using DotCMIS.Exceptions;
 
@@ -28,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// </summary>
     public class PermissionDeniedEvent : ExceptionEvent
     {
-        private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly string HttpHeaderRetryAfter = "Retry-After";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.PermissionDeniedEvent"/> class.
@@ -36,13 +37,27 @@ namespace CmisSync.Lib.Events
         /// <param name="e">thrown permission denied exception</param>
         public PermissionDeniedEvent(DotCMIS.Exceptions.CmisPermissionDeniedException e) : base(e)
         {
-            if (e.ErrorContent != null) {
-                try {
-                    long unixMiliSeconds = Convert.ToInt64(e.ErrorContent);
-                    this.IsBlockedUntil = PermissionDeniedEvent.UnixEpoch.AddMilliseconds(unixMiliSeconds);
-                } catch(FormatException) {
-                } catch(OverflowException) {
+            if (e.Data != null && e.Data.Contains(HttpHeaderRetryAfter)) {
+                string[] values = e.Data[HttpHeaderRetryAfter] as string[];
+                if (values == null) {
+                    return;
                 }
+
+                List<DateTime> dates = new List<DateTime>();
+                foreach (var value in values) {
+                    try {
+                        long seconds = Convert.ToInt64(value);
+                        dates.Add(DateTime.UtcNow + TimeSpan.FromSeconds(seconds));
+                    } catch(FormatException) {
+                        DateTime parsed;
+                        if (DateTime.TryParse(value, out parsed)) {
+                            dates.Add(parsed);
+                        }
+                    }
+                }
+
+                dates.Sort();
+                this.IsBlockedUntil = dates.Count > 0 ? dates[0] : (DateTime?)null;
             }
         }
 

@@ -306,7 +306,7 @@ namespace CmisSync
                 } else {
                     this.ShowException(
                         string.Format(Properties_Resources.LoginFailed, "Account is blocked"),
-                        string.Format("This account for {0} is blocked until:{1}{2}", repo.Name, Environment.NewLine, permissionDeniedEvent.IsBlockedUntil));
+                        string.Format("blocked until:{2}", repo.Name, Environment.NewLine, permissionDeniedEvent.IsBlockedUntil));
                 }
 
                 return true;
