@@ -151,8 +151,7 @@ namespace CmisSync.Lib.Queueing
                         () => {
                         this.cancelToken.ThrowIfCancellationRequested();
                         while (!this.cancelToken.IsCancellationRequested && !this.Connect()) {
-                            this.cancelToken.ThrowIfCancellationRequested();
-                            Thread.Sleep(this.Interval);
+                            this.cancelToken.WaitHandle.WaitOne(this.Interval);
                         }
                     }, this.cancelTaskSource.Token);
                 }
