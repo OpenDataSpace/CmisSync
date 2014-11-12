@@ -16,17 +16,19 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Diagnostics;
-using System.IO;
 using Notifications;
 
 namespace CmisSync.Notifications
 {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+
     public static class NotificationUtils
     {
-        static private Notification notification = new Notification();
-        static private object notificationLock = new object();
+        private static readonly string IconName = Path.Combine("dataspacesync-app");
+        private static Notification notification = new Notification();
+        private static object notificationLock = new object();
 
         /// <summary>
         /// Creates a Notification by Notificatoin Daemon
@@ -42,18 +44,14 @@ namespace CmisSync.Notifications
         /// </param>
         public static void NotifyAsync(string title, string content = null, string iconPath = null)
         {
-            string IconPath = Path.Combine("/","usr","share","icons","hicolor", "32x32", "apps", "dataspacesync-app.png");
-            if (!String.IsNullOrEmpty(iconPath)) {
-                IconPath = iconPath;
-            }
-
-            if (content==null) {
+            if (content == null) {
                 content = string.Empty;
             }
 
             lock(notificationLock) {
                 notification.Summary = title;
                 notification.Body = content;
+                notification.IconName = string.IsNullOrEmpty(iconPath) ? IconName : iconPath;
                 notification.Show();
             }
         }
