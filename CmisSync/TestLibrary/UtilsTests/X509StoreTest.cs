@@ -51,7 +51,7 @@ namespace TestLibrary.UtilsTests
         public void HttpsWebRequest() {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            response.GetResponseStream();
+            using(response.GetResponseStream());
         }
     }
 }
