@@ -56,6 +56,7 @@ tmpinst:
 	rm -rf tmpinst
 
 debian-package: tmpinst
+	$(eval PACKAGE_TARGET := debian-package)
 	make BASEDIR=$(abs_top_builddir)/packaging VERSION=$(VERSION) -C packaging build
 
 apple-package:
@@ -64,6 +65,7 @@ apple-package:
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
 
 rpm-package: tmpinst
+	$(eval PACKAGE_TARGET := rpm-package)
 	rm -f *.rpm
 	rpmbuild -bb --define "_topdir $(abs_top_builddir)" --define "_libdir $(libdir)" build/cmissync.spec
 	mv `find RPMS -name "*.rpm"` .
