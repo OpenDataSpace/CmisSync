@@ -1,6 +1,7 @@
 ACLOCAL_AMFLAGS = -I build/m4/cmissync -I build/m4/shamrock
 
 basedirs = build Extras CmisSync.Lib DataSpaceSync.Console
+FATBUILD_MAKEFILE=Makefile.fatbuild
 
 SUBDIRS = $(basedirs) $(GUISUBDIRS)
 DIST_SUBDIRS = $(basedirs) CmisSync
@@ -46,6 +47,9 @@ uninstall-local:
 tmpinst:
 	rm -rf tmpinst
 	$(MAKE) DESTDIR=$(abs_top_builddir)/tmpinst install
+	cp $(FATBUILD_MAKEFILE) tmpinst$(pkglibdir)/Makefile
+	$(MAKE) LIBDIR=$(pkglibdir) PACKAGE_TARGET=$(PACKAGE_TARGET) -C tmpinst$(pkglibdir)
+	rm tmpinst$(pkglibdir)/Makefile
 	rm -rf SOURCES SRPMS SPECS RPMS BUILD BUILDROOT
 	mkdir SOURCES
 	tar cjCf tmpinst SOURCES/dataspacesync.tar.bz2 usr
