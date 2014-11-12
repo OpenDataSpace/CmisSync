@@ -17,7 +17,13 @@ system_theme_icons = \
         status,dataspacesync-process-syncing-iii-24.png \
         status,dataspacesync-process-syncing-iiii-24.png \
         status,dataspacesync-process-syncing-iiiii-24.png \
-        status,dataspacesync-process-syncing-error-24.png
+        status,dataspacesync-process-syncing-error-24.png \
+        status,dataspacesync-process-syncing-i-48.png \
+        status,dataspacesync-process-syncing-ii-48.png \
+        status,dataspacesync-process-syncing-iii-48.png \
+        status,dataspacesync-process-syncing-iiii-48.png \
+        status,dataspacesync-process-syncing-iiiii-48.png \
+        status,dataspacesync-process-syncing-error-48.png
 
 app_theme_icons = \
 	places,dataspacesync-folder-16.png \
