@@ -44,6 +44,8 @@ uninstall-local:
 		$(DESTDIR)$(pkglibdir)/$(notdir $(LOG4NET_PATH)) \
 		$(DESTDIR)$(pkglibdir)/$(notdir $(DOTCMIS_PATH))
 
+# make it a .PHONY target, so it's always executed
+.PHONY: tmpinst
 tmpinst:
 	rm -rf tmpinst
 	$(MAKE) DESTDIR=$(abs_top_builddir)/tmpinst install
@@ -55,8 +57,8 @@ tmpinst:
 	tar cjCf tmpinst SOURCES/dataspacesync.tar.bz2 usr
 	rm -rf tmpinst
 
+debian-package: PACKAGE_TARGET := debian-package
 debian-package: tmpinst
-	$(eval PACKAGE_TARGET := debian-package)
 	make BASEDIR=$(abs_top_builddir)/packaging VERSION=$(VERSION) -C packaging build
 
 apple-package:
@@ -64,8 +66,8 @@ apple-package:
 	"/Applications/Xamarin Studio.app/Contents/MacOS/mdtool" build CmisSync/Mac/CmisSync.sln -c:Release
 	(cd build; sh dmg-creator.sh ../bin/DataSpaceSync.app/; cd ..)
 
+rpm-package: PACKAGE_TARGET := rpm-package
 rpm-package: tmpinst
-	$(eval PACKAGE_TARGET := rpm-package)
 	rm -f *.rpm
 	rpmbuild -bb --define "_topdir $(abs_top_builddir)" --define "_libdir $(libdir)" build/cmissync.spec
 	mv `find RPMS -name "*.rpm"` .
