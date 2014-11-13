@@ -1454,10 +1454,9 @@ namespace TestLibrary.IntegrationTests
 
             folder.Move(source, target);
 
-            Assert.Throws<CmisNameConstraintViolationException>(() => anotherFolderInstance.Move(source, target));
+            Assert.Throws<CmisConstraintException>(() => anotherFolderInstance.Move(source, target));
         }
 
-        [Ignore("Open mantis issue on server: 4185")]
         [Test, Category("Slow")]
         public void ExecutingTheSameFolderMoveToDifferentTargetsThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
@@ -1468,7 +1467,7 @@ namespace TestLibrary.IntegrationTests
 
             folder.Move(source, target1);
 
-            Assert.Throws<CmisNameConstraintViolationException>(() => anotherFolderInstance.Move(source, target2));
+            Assert.Throws<CmisConstraintException>(() => anotherFolderInstance.Move(source, target2));
         }
 
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
