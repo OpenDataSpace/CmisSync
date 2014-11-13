@@ -302,7 +302,15 @@ namespace CmisSync
                 new GenericSyncEventHandler<PermissionDeniedEvent>(
                 0,
                 delegate(ISyncEvent e) {
-                this.ShowChangePassword(repositoryInfo.DisplayName);
+                var permissionDeniedEvent = e as PermissionDeniedEvent;
+                if (permissionDeniedEvent.IsBlockedUntil == null) {
+                    this.ShowChangePassword(repositoryInfo.DisplayName);
+                } else {
+                    this.ShowException(
+                        string.Format(Properties_Resources.LoginFailed, repo.Name),
+                        string.Format("Account is locked until: {0}", permissionDeniedEvent.IsBlockedUntil));
+                }
+
                 return true;
             }));
             repo.Queue.EventManager.AddEventHandler(
@@ -497,15 +505,13 @@ namespace CmisSync
 
                     if (activeList.Count > 0) {
                         Thread.Sleep(100);
-                        wait ++;
-                        if(wait > 100) {
-                            Logger.Debug("Start to abort all HttpWebRequest");
-                            //DotCMIS.Binding.HttpWebRequestResource.AbortAll();
-                        }
+                        wait++;
                     } else {
                         break;
                     }
-                } while (true);
+                } while (wait < 100);
+                Logger.Debug("Start to abort all open HttpWebRequests");
+                this.transmissionManager.AbortAllRequests();
                 Logger.Debug("Finish to stop all active file transmissions");
             }
         }
