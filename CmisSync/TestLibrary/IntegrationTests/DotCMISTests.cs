@@ -168,11 +168,18 @@ namespace TestLibrary.IntegrationTests
             string password,
             string repositoryId)
         {
+            string subFolderName = "subFolder";
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
-
+            try {
+                IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
+                if (dir != null) {
+                    dir.DeleteTree(true, null, true);
+                }
+            } catch (CmisObjectNotFoundException) {
+            }
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
-            IFolder subFolder = folder.CreateFolder("subFolder");
+            IFolder subFolder = folder.CreateFolder(subFolderName);
 
             IFolder subFolderInstanceCopy = (IFolder)session.GetObject(subFolder.Id);
             subFolder.DeleteTree(true, null, true);
