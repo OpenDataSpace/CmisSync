@@ -453,4 +453,7 @@ This could lead to a lot of conflict files!</value>
   <data name="TransmissionTitleStatus" xml:space="preserve">
     <value>Status</value>
   </data>
+  <data name="LoginFailedLockedUntil" xml:space="preserve">
+    <value>Account is locked until {0}</value>
+  </data>
 </root>

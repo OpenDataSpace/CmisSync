@@ -308,7 +308,7 @@ namespace CmisSync
                 } else {
                     this.ShowException(
                         string.Format(Properties_Resources.LoginFailed, repo.Name),
-                        string.Format("Account is locked until: {0}", permissionDeniedEvent.IsBlockedUntil));
+                        string.Format(Properties_Resources.LoginFailedLockedUntil, permissionDeniedEvent.IsBlockedUntil));
                 }
 
                 return true;

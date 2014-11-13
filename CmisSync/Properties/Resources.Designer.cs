@@ -489,6 +489,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Account is locked until {0}.
+        /// </summary>
+        internal static string LoginFailedLockedUntil {
+            get {
+                return ResourceManager.GetString("LoginFailedLockedUntil", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to login successful.
         /// </summary>
         internal static string LoginSuccess {
