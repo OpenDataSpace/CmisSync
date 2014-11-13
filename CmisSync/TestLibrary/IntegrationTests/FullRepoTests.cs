@@ -1456,6 +1456,7 @@ namespace TestLibrary.IntegrationTests
             Assert.Throws<CmisConstraintException>(() => anotherFolderInstance.Move(source, target));
         }
 
+        [Ignore("Mantis issue 4285")]
         [Test, Category("Slow")]
         public void ExecutingTheSameFolderMoveToDifferentTargetsThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
