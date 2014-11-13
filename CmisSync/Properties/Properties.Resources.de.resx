@@ -355,4 +355,7 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="TransmissionFailedOnRepo" xml:space="preserve">
     <value>[{0}] Übertragung fehlgeschlagen:</value>
   </data>
+  <data name="LoginFailedLockedUntil" xml:space="preserve">
+    <value>Die Anmeldung wird bis {0} blockiert</value>
+  </data>
 </root>
