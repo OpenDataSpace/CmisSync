@@ -1423,7 +1423,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That((remoteB as IFolder).GetChildren().Count(), Is.EqualTo(0));
         }
 
-        [Ignore("Open mantis issue on server: 4185")]
         [Test, Category("Slow")]
         public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
