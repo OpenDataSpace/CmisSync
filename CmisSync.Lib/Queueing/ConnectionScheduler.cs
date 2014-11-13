@@ -132,6 +132,8 @@ namespace CmisSync.Lib.Queueing
                     // It is fine if the task is canceled
                 } catch (AggregateException) {
                     // It is also fine if the task is canceled
+                } finally {
+                    this.cancelTaskSource.Dispose();
                 }
             }
         }
@@ -181,6 +183,7 @@ namespace CmisSync.Lib.Queueing
                                 } catch (AggregateException) {
                                     // It is also fine if the task is canceled
                                 } finally {
+                                    this.cancelTaskSource.Dispose();
                                     this.task = null;
                                 }
                             }
