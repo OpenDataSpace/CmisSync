@@ -305,8 +305,8 @@ namespace CmisSync
                     this.ShowChangePassword(repositoryInfo.DisplayName);
                 } else {
                     this.ShowException(
-                        string.Format(Properties_Resources.LoginFailed, "Account is blocked"),
-                        string.Format("blocked until:{2}", repo.Name, Environment.NewLine, permissionDeniedEvent.IsBlockedUntil));
+                        string.Format(Properties_Resources.LoginFailed, repo.Name),
+                        string.Format("Account is locked until: {0}", permissionDeniedEvent.IsBlockedUntil));
                 }
 
                 return true;
