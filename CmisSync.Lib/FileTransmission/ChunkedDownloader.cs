@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ChunkedDownloader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -20,11 +20,15 @@
 namespace CmisSync.Lib.FileTransmission
 {
     using System;
+    using System.Linq;
+    using System.Collections.Generic;
     using System.IO;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Streams;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -43,12 +47,14 @@ namespace CmisSync.Lib.FileTransmission
         /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> class.
         /// </summary>
         /// <param name="chunkSize">Chunk size.</param>
-        public ChunkedDownloader(long chunkSize = 1024 * 1024) {
+        /// <param name="storage"><c>IFileTransmissionStorage</c> to persist</param>
+        public ChunkedDownloader(long chunkSize = 1024 * 1024, IFileTransmissionStorage storage = null) {
             if (chunkSize <= 0) {
                 throw new ArgumentException("The chunk size must be a positive number and cannot be zero or less");
             }
 
             this.ChunkSize = chunkSize;
+            this.Storage = storage;
         }
 
         /// <summary>
@@ -56,6 +62,11 @@ namespace CmisSync.Lib.FileTransmission
         /// </summary>
         /// <value>The size of the chunk.</value>
         public long ChunkSize { get; private set; }
+
+        /// <summary>
+        /// Gets the <c>IFileTransmissionStorage for persistence support</c>.
+        /// </summary>
+        public IFileTransmissionStorage Storage { get; private set; }
 
         /// <summary>
         /// Downloads the file and returns the SHA-1 hash of the content of the saved file
