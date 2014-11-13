@@ -358,4 +358,7 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="LoginFailedLockedUntil" xml:space="preserve">
     <value>Die Anmeldung wird bis {0} blockiert</value>
   </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
 </root>

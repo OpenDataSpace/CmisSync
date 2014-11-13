@@ -441,4 +441,7 @@ This could lead to a lot of conflict files!</value>
   <data name="LoginFailedLockedUntil" xml:space="preserve">
     <value>Account is locked until {0}</value>
   </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
 </root>
