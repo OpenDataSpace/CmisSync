@@ -74,7 +74,6 @@ namespace CmisSync.Lib.Queueing
             map[typeof(DebugLoggingHandler)] = DEBUG;
 
             map[typeof(ReportingFilter)] = FILTER;
-            map[typeof(InvalidFolderNameFilter)] = FILTER;
             map[typeof(GenericHandleDublicatedEventsFilter<,>)] = FILTER;
             map[typeof(IgnoreAlreadyHandledFsEventsFilter)] = FILTER;
             map[typeof(IgnoreAlreadyHandledContentChangeEventsFilter)] = FILTER;
