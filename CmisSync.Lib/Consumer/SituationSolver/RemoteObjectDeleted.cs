@@ -86,6 +86,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
+                file.Refresh();
                 if (file.Exists) {
                     throw new IOException(string.Format("Deletion of local file {0} skipped because of not yet uploaded changes", localFileInfo.FullName));
                 }
