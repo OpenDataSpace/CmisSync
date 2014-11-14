@@ -27,7 +27,10 @@ SOURCES =  \
 	CmisTree/CmisTreeStore.cs \
 	CmisTree/StatusCellRenderer.cs \
 	Controller.cs \
+	CredentialsWidget.cs \
 	Edit.cs \
+	gtk-gui/CmisSync.CredentialsWidget.cs \
+	gtk-gui/generated.cs \
 	Notification/NotificationUtils.cs \
 	Setup.cs \
 	SetupWindow.cs \

@@ -201,7 +201,14 @@ namespace CmisSync
 
             layout_vertical.PackStart(new Label(string.Empty), false, false, 0);
             layout_vertical.PackStart(sw, true, true, 0);
-            this.Add(layout_vertical);
+            Notebook tab_view = new Notebook();
+            //tab_view.AppendPage(layout_vertical, new Label("Edit Folders"));
+            var credentialsWidget = new CredentialsWidget();
+            credentialsWidget.Password = this.Credentials.Password.ToString();
+            credentialsWidget.Address = this.Credentials.Address.ToString();
+            credentialsWidget.UserName = this.Credentials.UserName;
+            tab_view.AppendPage(credentialsWidget, new Label("Credentials"));
+            this.Add(tab_view);
             this.AddButton(cancel_button);
             this.AddButton(finish_button);
 
