@@ -110,6 +110,8 @@
     <Compile Include="gtk-gui\generated.cs" />
     <Compile Include="CredentialsWidget.cs" />
     <Compile Include="gtk-gui\CmisSync.CredentialsWidget.cs" />
+    <Compile Include="UrlWidget.cs" />
+    <Compile Include="gtk-gui\CmisSync.Widgets.UrlWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -236,12 +236,12 @@ namespace CmisSync
         /// </value>
         public bool IsVisible {
             get {
-                // TODO Please change it to the correct Window property if this method is needed
-                return false;
+                return this.Visible;
             }
 
             private set
             {
+                this.Visible = value;
             }
         }
     }

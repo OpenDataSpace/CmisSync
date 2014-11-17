@@ -20,11 +20,11 @@ namespace CmisSync
 
         public string Address {
             get {
-                return this.addressEntry.Text;
+                return this.urlWidget.Url;
             }
 
             set {
-                this.addressEntry.Text = value;
+                this.urlWidget.Url = value;
             }
         }
 

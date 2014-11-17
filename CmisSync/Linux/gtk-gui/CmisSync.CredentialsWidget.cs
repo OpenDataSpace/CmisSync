@@ -5,9 +5,7 @@ namespace CmisSync
 	public partial class CredentialsWidget
 	{
 		private global::Gtk.VBox vbox1;
-		private global::Gtk.VBox vbox2;
-		private global::Gtk.Label addresslabel;
-		private global::Gtk.Entry addressEntry;
+		private global::CmisSync.Widgets.UrlWidget urlWidget;
 		private global::Gtk.HBox hbox3;
 		private global::Gtk.VBox vbox6;
 		private global::Gtk.Label userNameLabel;
@@ -27,34 +25,13 @@ namespace CmisSync
 			this.vbox1.Name = "vbox1";
 			this.vbox1.Spacing = 6;
 			// Container child vbox1.Gtk.Box+BoxChild
-			this.vbox2 = new global::Gtk.VBox ();
-			this.vbox2.Name = "vbox2";
-			this.vbox2.Spacing = 6;
-			// Container child vbox2.Gtk.Box+BoxChild
-			this.addresslabel = new global::Gtk.Label ();
-			this.addresslabel.Name = "addresslabel";
-			this.addresslabel.Xalign = 0F;
-			this.addresslabel.LabelProp = global::Mono.Unix.Catalog.GetString ("Address");
-			this.vbox2.Add (this.addresslabel);
-			global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.addresslabel]));
+			this.urlWidget = new global::CmisSync.Widgets.UrlWidget ();
+			this.urlWidget.Events = ((global::Gdk.EventMask)(256));
+			this.urlWidget.Name = "urlWidget";
+			this.vbox1.Add (this.urlWidget);
+			global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.urlWidget]));
 			w1.Position = 0;
-			w1.Fill = false;
-			// Container child vbox2.Gtk.Box+BoxChild
-			this.addressEntry = new global::Gtk.Entry ();
-			this.addressEntry.Sensitive = false;
-			this.addressEntry.CanFocus = true;
-			this.addressEntry.Name = "addressEntry";
-			this.addressEntry.IsEditable = false;
-			this.addressEntry.InvisibleChar = '•';
-			this.vbox2.Add (this.addressEntry);
-			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.addressEntry]));
-			w2.Position = 1;
-			w2.Expand = false;
-			w2.Fill = false;
-			this.vbox1.Add (this.vbox2);
-			global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.vbox2]));
-			w3.Position = 0;
-			w3.Expand = false;
+			w1.Expand = false;
 			// Container child vbox1.Gtk.Box+BoxChild
 			this.hbox3 = new global::Gtk.HBox ();
 			this.hbox3.Name = "hbox3";
@@ -69,9 +46,9 @@ namespace CmisSync
 			this.userNameLabel.Xalign = 0F;
 			this.userNameLabel.LabelProp = global::Mono.Unix.Catalog.GetString ("Username");
 			this.vbox6.Add (this.userNameLabel);
-			global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.vbox6 [this.userNameLabel]));
-			w4.Position = 0;
-			w4.Fill = false;
+			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox6 [this.userNameLabel]));
+			w2.Position = 0;
+			w2.Fill = false;
 			// Container child vbox6.Gtk.Box+BoxChild
 			this.usernameEntry = new global::Gtk.Entry ();
 			this.usernameEntry.Sensitive = false;
@@ -80,13 +57,13 @@ namespace CmisSync
 			this.usernameEntry.IsEditable = false;
 			this.usernameEntry.InvisibleChar = '•';
 			this.vbox6.Add (this.usernameEntry);
-			global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.vbox6 [this.usernameEntry]));
-			w5.Position = 1;
-			w5.Expand = false;
-			w5.Fill = false;
+			global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox6 [this.usernameEntry]));
+			w3.Position = 1;
+			w3.Expand = false;
+			w3.Fill = false;
 			this.hbox3.Add (this.vbox6);
-			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.vbox6]));
-			w6.Position = 0;
+			global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.vbox6]));
+			w4.Position = 0;
 			// Container child hbox3.Gtk.Box+BoxChild
 			this.vbox7 = new global::Gtk.VBox ();
 			this.vbox7.Name = "vbox7";
@@ -97,9 +74,9 @@ namespace CmisSync
 			this.passwordLabel.Xalign = 0F;
 			this.passwordLabel.LabelProp = global::Mono.Unix.Catalog.GetString ("Password");
 			this.vbox7.Add (this.passwordLabel);
-			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.vbox7 [this.passwordLabel]));
-			w7.Position = 0;
-			w7.Fill = false;
+			global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.vbox7 [this.passwordLabel]));
+			w5.Position = 0;
+			w5.Fill = false;
 			// Container child vbox7.Gtk.Box+BoxChild
 			this.passwordEntry = new global::Gtk.Entry ();
 			this.passwordEntry.CanFocus = true;
@@ -108,18 +85,18 @@ namespace CmisSync
 			this.passwordEntry.Visibility = false;
 			this.passwordEntry.InvisibleChar = '•';
 			this.vbox7.Add (this.passwordEntry);
-			global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.vbox7 [this.passwordEntry]));
+			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.vbox7 [this.passwordEntry]));
+			w6.Position = 1;
+			w6.Expand = false;
+			w6.Fill = false;
+			this.hbox3.Add (this.vbox7);
+			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.vbox7]));
+			w7.Position = 1;
+			this.vbox1.Add (this.hbox3);
+			global::Gtk.Box.BoxChild w8 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.hbox3]));
 			w8.Position = 1;
 			w8.Expand = false;
 			w8.Fill = false;
-			this.hbox3.Add (this.vbox7);
-			global::Gtk.Box.BoxChild w9 = ((global::Gtk.Box.BoxChild)(this.hbox3 [this.vbox7]));
-			w9.Position = 1;
-			this.vbox1.Add (this.hbox3);
-			global::Gtk.Box.BoxChild w10 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.hbox3]));
-			w10.Position = 1;
-			w10.Expand = false;
-			w10.Fill = false;
 			this.Add (this.vbox1);
 			if ((this.Child != null)) {
 				this.Child.ShowAll ();
