@@ -8,10 +8,7 @@ namespace CmisSync.Widgets
 		private global::Gtk.RadioButton noProxyButton;
 		private global::Gtk.RadioButton systemProxyButton;
 		private global::Gtk.RadioButton customProxyButton;
-		private global::Gtk.VBox vbox4;
-		private global::Gtk.CheckButton requireLoginButton;
-		private global::Gtk.VBox vbox5;
-		private global::CmisSync.Widgets.UrlWidget urlwidget2;
+		private global::CmisSync.Widgets.UrlWidget urlwidget3;
 
 		protected virtual void Build ()
 		{
@@ -57,44 +54,16 @@ namespace CmisSync.Widgets
 			w3.Position = 2;
 			w3.Expand = false;
 			// Container child vbox3.Gtk.Box+BoxChild
-			this.vbox4 = new global::Gtk.VBox ();
-			this.vbox4.Name = "vbox4";
-			this.vbox4.Spacing = 6;
-			// Container child vbox4.Gtk.Box+BoxChild
-			this.requireLoginButton = new global::Gtk.CheckButton ();
-			this.requireLoginButton.CanFocus = true;
-			this.requireLoginButton.Name = "requireLoginButton";
-			this.requireLoginButton.Label = global::Mono.Unix.Catalog.GetString ("Requires Login");
-			this.requireLoginButton.DrawIndicator = true;
-			this.requireLoginButton.UseUnderline = true;
-			this.vbox4.Add (this.requireLoginButton);
-			global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.vbox4 [this.requireLoginButton]));
-			w4.Position = 0;
+			this.urlwidget3 = new global::CmisSync.Widgets.UrlWidget ();
+			this.urlwidget3.Events = ((global::Gdk.EventMask)(256));
+			this.urlwidget3.Name = "urlwidget3";
+			this.urlwidget3.IsUrlEditable = false;
+			this.urlwidget3.ValidationActivated = false;
+			this.vbox3.Add (this.urlwidget3);
+			global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.vbox3 [this.urlwidget3]));
+			w4.PackType = ((global::Gtk.PackType)(1));
+			w4.Position = 4;
 			w4.Expand = false;
-			w4.Fill = false;
-			this.vbox3.Add (this.vbox4);
-			global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.vbox3 [this.vbox4]));
-			w5.PackType = ((global::Gtk.PackType)(1));
-			w5.Position = 3;
-			// Container child vbox3.Gtk.Box+BoxChild
-			this.vbox5 = new global::Gtk.VBox ();
-			this.vbox5.Name = "vbox5";
-			this.vbox5.Spacing = 6;
-			// Container child vbox5.Gtk.Box+BoxChild
-			this.urlwidget2 = new global::CmisSync.Widgets.UrlWidget ();
-			this.urlwidget2.Events = ((global::Gdk.EventMask)(256));
-			this.urlwidget2.Name = "urlwidget2";
-			this.urlwidget2.Title = "Proxy Server";
-			this.urlwidget2.IsUrlEditable = false;
-			this.urlwidget2.ValidationActivated = false;
-			this.vbox5.Add (this.urlwidget2);
-			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.vbox5 [this.urlwidget2]));
-			w6.Position = 0;
-			this.vbox3.Add (this.vbox5);
-			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(this.vbox3 [this.vbox5]));
-			w7.PackType = ((global::Gtk.PackType)(1));
-			w7.Position = 4;
-			w7.Expand = false;
 			this.Add (this.vbox3);
 			if ((this.Child != null)) {
 				this.Child.ShowAll ();
