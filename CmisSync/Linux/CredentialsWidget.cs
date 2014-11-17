@@ -54,14 +54,16 @@ namespace CmisSync
 
         protected void OnPasswordChanged(object sender, EventArgs e)
         {
-            if (this.Changed != null) {
+            var handler = this.Changed;
+            if (handler != null) {
                 this.Changed(this, e);
             }
         }
 
         protected void OnUrlWidgetChanged(object sender, EventArgs e)
         {
-            if (this.Changed != null) {
+            var handler = this.Changed;
+            if (handler != null) {
                 this.Changed(this, e);
             }
         }
