@@ -28,6 +28,8 @@ namespace CmisSync
 			this.urlWidget = new global::CmisSync.Widgets.UrlWidget ();
 			this.urlWidget.Events = ((global::Gdk.EventMask)(256));
 			this.urlWidget.Name = "urlWidget";
+			this.urlWidget.IsUrlEditable = false;
+			this.urlWidget.ValidationActivated = false;
 			this.vbox1.Add (this.urlWidget);
 			global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.urlWidget]));
 			w1.Position = 0;

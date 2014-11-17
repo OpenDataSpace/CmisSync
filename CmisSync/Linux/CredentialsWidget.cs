@@ -41,6 +41,8 @@ namespace CmisSync
         public CredentialsWidget()
         {
             this.Build();
+            this.urlWidget.ValidationActivated = false;
+            this.urlWidget.IsUrlEditable = false;
         }
     }
 }

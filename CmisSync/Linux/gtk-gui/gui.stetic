@@ -20,6 +20,7 @@
           <widget class="CmisSync.Widgets.UrlWidget" id="urlWidget">
             <property name="MemberName" />
             <property name="Events">ButtonPressMask</property>
+            <property name="IsUrlEditable">False</property>
             <property name="ValidationActivated">False</property>
           </widget>
           <packing>
