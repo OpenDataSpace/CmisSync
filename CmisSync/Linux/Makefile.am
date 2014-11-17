@@ -27,14 +27,21 @@ SOURCES =  \
 	CmisTree/CmisTreeStore.cs \
 	CmisTree/StatusCellRenderer.cs \
 	Controller.cs \
+	CredentialsWidget.cs \
 	Edit.cs \
+	gtk-gui/CmisSync.CredentialsWidget.cs \
+	gtk-gui/CmisSync.Widgets.ProxyWidget.cs \
+	gtk-gui/CmisSync.Widgets.UrlWidget.cs \
+	gtk-gui/generated.cs \
 	Notification/NotificationUtils.cs \
+	ProxyWidget.cs \
 	Setup.cs \
 	SetupWindow.cs \
 	Spinner.cs \
 	StatusIcon.cs \
 	UI.cs \
 	UIHelpers.cs \
+	UrlWidget.cs \
 	Utils.cs
 
 RESOURCES = $(RESOURCES_RESOURCES)

@@ -222,7 +222,7 @@ namespace CmisSync {
                     open_localfolder_item.Activated += OpenFolderDelegate(folder_name);
 
                     ImageMenuItem edit_folder_item = new CmisSyncMenuItem (
-                        CmisSync.Properties_Resources.EditTitle);
+                        CmisSync.Properties_Resources.Settings);
                     edit_folder_item.Activated += EditFolderDelegate(folder_name);
 
                     ImageMenuItem suspend_folder_item = new CmisSyncMenuItem(
@@ -247,9 +247,7 @@ namespace CmisSync {
 
                     submenu.Add(open_localfolder_item);
                     submenu.Add(suspend_folder_item);
-                    //  GUI workaround to remove ignore folder {{
-                    //submenu.Add(edit_folder_item);
-                    //  GUI workaround to remove ignore folder }}
+                    submenu.Add(edit_folder_item);
                     submenu.Add(new SeparatorMenuItem());
                     submenu.Add(remove_folder_from_sync_item);
 
@@ -268,6 +266,14 @@ namespace CmisSync {
             this.menu.Add(add_item);
 
             this.menu.Add (new SeparatorMenuItem ());
+
+/*            MenuItem settingsItem = new MenuItem(
+                Properties_Resources.Settings);
+            settingsItem.Activated += delegate {
+                Controller.SettingClicked();
+            };
+            this.menu.Add(settingsItem);
+            this.menu.Add(new SeparatorMenuItem());*/
 
             // Log Menu
             MenuItem log_item = new MenuItem(

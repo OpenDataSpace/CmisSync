@@ -107,6 +107,13 @@
     <Compile Include="CmisTree\CmisTreeStore.cs" />
     <Compile Include="CmisTree\StatusCellRenderer.cs" />
     <Compile Include="Notification\NotificationUtils.cs" />
+    <Compile Include="gtk-gui\generated.cs" />
+    <Compile Include="CredentialsWidget.cs" />
+    <Compile Include="gtk-gui\CmisSync.CredentialsWidget.cs" />
+    <Compile Include="UrlWidget.cs" />
+    <Compile Include="gtk-gui\CmisSync.Widgets.UrlWidget.cs" />
+    <Compile Include="ProxyWidget.cs" />
+    <Compile Include="gtk-gui\CmisSync.Widgets.ProxyWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -120,5 +127,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="gtk-gui\gui.stetic">
+      <LogicalName>gui.stetic</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
