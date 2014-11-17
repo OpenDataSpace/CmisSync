@@ -30,9 +30,11 @@ SOURCES =  \
 	CredentialsWidget.cs \
 	Edit.cs \
 	gtk-gui/CmisSync.CredentialsWidget.cs \
+	gtk-gui/CmisSync.Widgets.ProxyWidget.cs \
 	gtk-gui/CmisSync.Widgets.UrlWidget.cs \
 	gtk-gui/generated.cs \
 	Notification/NotificationUtils.cs \
+	ProxyWidget.cs \
 	Setup.cs \
 	SetupWindow.cs \
 	Spinner.cs \
