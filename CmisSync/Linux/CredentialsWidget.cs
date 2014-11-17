@@ -42,7 +42,7 @@ namespace CmisSync
         public CredentialsWidget()
         {
             this.Build();
-            this.urlWidget.Title = Properties_Resources.CmisWebAddress;
+            this.addressLabel.Text = Properties_Resources.CmisWebAddress;
             this.urlWidget.ValidationActivated = false;
             this.urlWidget.IsUrlEditable = false;
             this.urlWidget.Changed += (object sender, EventArgs e) => {

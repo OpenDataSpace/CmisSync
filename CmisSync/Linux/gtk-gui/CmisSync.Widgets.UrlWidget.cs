@@ -5,7 +5,6 @@ namespace CmisSync.Widgets
 	public partial class UrlWidget
 	{
 		private global::Gtk.VBox vbox1;
-		private global::Gtk.Label titleLabel;
 		private global::Gtk.Entry urlEntry;
 
 		protected virtual void Build ()
@@ -19,16 +18,6 @@ namespace CmisSync.Widgets
 			this.vbox1.Name = "vbox1";
 			this.vbox1.Spacing = 6;
 			// Container child vbox1.Gtk.Box+BoxChild
-			this.titleLabel = new global::Gtk.Label ();
-			this.titleLabel.Name = "titleLabel";
-			this.titleLabel.Xalign = 0F;
-			this.titleLabel.LabelProp = global::Mono.Unix.Catalog.GetString ("URL");
-			this.titleLabel.SingleLineMode = true;
-			this.vbox1.Add (this.titleLabel);
-			global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.titleLabel]));
-			w1.Position = 0;
-			w1.Expand = false;
-			// Container child vbox1.Gtk.Box+BoxChild
 			this.urlEntry = new global::Gtk.Entry ();
 			this.urlEntry.CanFocus = true;
 			this.urlEntry.Name = "urlEntry";
@@ -36,9 +25,9 @@ namespace CmisSync.Widgets
 			this.urlEntry.IsEditable = true;
 			this.urlEntry.InvisibleChar = '•';
 			this.vbox1.Add (this.urlEntry);
-			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.urlEntry]));
-			w2.Position = 1;
-			w2.Expand = false;
+			global::Gtk.Box.BoxChild w1 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.urlEntry]));
+			w1.Position = 0;
+			w1.Expand = false;
 			this.Add (this.vbox1);
 			if ((this.Child != null)) {
 				this.Child.ShowAll ();
