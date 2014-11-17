@@ -7,7 +7,6 @@ namespace CmisSync.Widgets
 		private global::Gtk.VBox vbox1;
 		private global::Gtk.Label titleLabel;
 		private global::Gtk.Entry urlEntry;
-		private global::Gtk.Label msgLabel;
 
 		protected virtual void Build ()
 		{
@@ -40,21 +39,12 @@ namespace CmisSync.Widgets
 			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.urlEntry]));
 			w2.Position = 1;
 			w2.Expand = false;
-			// Container child vbox1.Gtk.Box+BoxChild
-			this.msgLabel = new global::Gtk.Label ();
-			this.msgLabel.Name = "msgLabel";
-			this.msgLabel.Xalign = 0F;
-			this.msgLabel.Wrap = true;
-			this.msgLabel.Selectable = true;
-			this.vbox1.Add (this.msgLabel);
-			global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.msgLabel]));
-			w3.Position = 2;
 			this.Add (this.vbox1);
 			if ((this.Child != null)) {
 				this.Child.ShowAll ();
 			}
 			this.Hide ();
-			this.urlEntry.Changed += new global::System.EventHandler (this.ValidateUrl);
+			this.urlEntry.Changed += new global::System.EventHandler (this.UrlChanged);
 		}
 	}
 }

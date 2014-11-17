@@ -22,6 +22,7 @@
             <property name="Events">ButtonPressMask</property>
             <property name="IsUrlEditable">False</property>
             <property name="ValidationActivated">False</property>
+            <signal name="Changed" handler="OnUrlWidgetChanged" />
           </widget>
           <packing>
             <property name="Position">0</property>
@@ -93,6 +94,7 @@
                     <property name="IsEditable">True</property>
                     <property name="Visibility">False</property>
                     <property name="InvisibleChar">•</property>
+                    <signal name="Changed" handler="OnPasswordChanged" />
                   </widget>
                   <packing>
                     <property name="Position">1</property>
@@ -118,7 +120,7 @@
       </widget>
     </child>
   </widget>
-  <widget class="Gtk.Bin" id="CmisSync.Widgets.UrlWidget" design-size="251 169">
+  <widget class="Gtk.Bin" id="CmisSync.Widgets.UrlWidget" design-size="160 46">
     <property name="MemberName" />
     <property name="Visible">False</property>
     <child>
@@ -145,24 +147,12 @@
             <property name="Text" translatable="yes">https://</property>
             <property name="IsEditable">True</property>
             <property name="InvisibleChar">•</property>
-            <signal name="Changed" handler="ValidateUrl" />
+            <signal name="Changed" handler="UrlChanged" />
           </widget>
           <packing>
             <property name="Position">1</property>
             <property name="AutoSize">False</property>
             <property name="Expand">False</property>
-          </packing>
-        </child>
-        <child>
-          <widget class="Gtk.Label" id="msgLabel">
-            <property name="MemberName" />
-            <property name="Xalign">0</property>
-            <property name="Wrap">True</property>
-            <property name="Selectable">True</property>
-          </widget>
-          <packing>
-            <property name="Position">2</property>
-            <property name="AutoSize">False</property>
           </packing>
         </child>
       </widget>

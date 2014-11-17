@@ -104,6 +104,8 @@ namespace CmisSync
 				this.Child.ShowAll ();
 			}
 			this.Hide ();
+			this.urlWidget.Changed += new global::System.EventHandler (this.OnUrlWidgetChanged);
+			this.passwordEntry.Changed += new global::System.EventHandler (this.OnPasswordChanged);
 		}
 	}
 }

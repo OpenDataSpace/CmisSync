@@ -131,6 +131,7 @@ namespace CmisSync
             };
 
             Button finish_button = new Button(CmisSync.Properties_Resources.SaveChanges);
+            finish_button.Sensitive = false;
             finish_button.Clicked += delegate {
                 this.Ignores = NodeModelUtils.GetIgnoredFolder(root);
                 this.Controller.SaveFolder();
@@ -207,6 +208,7 @@ namespace CmisSync
             credentialsWidget.Password = this.Credentials.Password.ToString();
             credentialsWidget.Address = this.Credentials.Address.ToString();
             credentialsWidget.UserName = this.Credentials.UserName;
+            credentialsWidget.Changed += (object sender, EventArgs e) => finish_button.Sensitive = true;
             tab_view.AppendPage(credentialsWidget, new Label("Credentials"));
             this.Add(tab_view);
             this.AddButton(cancel_button);

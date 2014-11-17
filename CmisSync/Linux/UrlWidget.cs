@@ -48,7 +48,7 @@ namespace CmisSync.Widgets
 
             set {
                 this.urlEntry.Text = value;
-                this.ValidateUrl(this, null);
+                this.UrlChanged(this, null);
             }
         }
 
@@ -78,17 +78,24 @@ namespace CmisSync.Widgets
                 if (string.IsNullOrEmpty(this.Url)) {
                     this.isValidUrl = false;
                     this.urlEntry.ModifyText(Gtk.StateType.Normal, RED);
-                }
-
-                if (!this.UrlRegex.IsMatch(this.urlEntry.Text)) {
+                    this.urlEntry.TooltipText = CmisSync.Properties_Resources.EmptyURLNotAllowed;
+                } else if (!this.UrlRegex.IsMatch(this.urlEntry.Text)) {
                     this.isValidUrl = false;
                     this.urlEntry.ModifyText(Gtk.StateType.Normal, RED);
+                    this.urlEntry.TooltipText = CmisSync.Properties_Resources.InvalidURL;
                 } else {
                     this.isValidUrl = true;
                     this.urlEntry.ModifyText(Gtk.StateType.Normal);
                 }
             } else {
                 this.urlEntry.ModifyText(Gtk.StateType.Normal);
+            }
+        }
+
+        private void UrlChanged(object sender, EventArgs args) {
+            this.ValidateUrl(sender, args);
+            if (this.Changed != null) {
+                this.Changed(this, args);
             }
         }
     }
