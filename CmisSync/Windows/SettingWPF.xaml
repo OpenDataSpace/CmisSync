@@ -29,8 +29,14 @@
             </TabItem>
         </TabControl>
         <StackPanel Orientation="Horizontal" RenderTransformOrigin="0.5,0.5" FlowDirection="RightToLeft" Height="26" VerticalAlignment="Bottom">
-            <Button x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10,0,0,0" Padding="10,0,10,0"/>
-            <Button x:Name="FinishButton" Content="Finish" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10,0,0,0" Padding="10,0,10,0"/>
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="Margin" Value="10,0,0,0" />
+                    <Setter Property="Padding" Value="10,0,10,0" />
+                </Style>
+            </StackPanel.Resources>
+            <Button x:Name="CancelButton" Content="Cancel" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+            <Button x:Name="FinishButton" Content="Finish" HorizontalAlignment="Right" VerticalAlignment="Top"/>
         </StackPanel>
     </Grid>
 </UserControl>
