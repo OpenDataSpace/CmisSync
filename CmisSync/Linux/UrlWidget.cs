@@ -41,6 +41,16 @@ namespace CmisSync.Widgets
             this.ValidationActivated = urlValidation;
         }
 
+        public string Title {
+            get {
+                return this.titleLabel.Text;
+            }
+
+            set {
+                this.titleLabel.Text = value;
+            }
+        }
+
         public string Url {
             get {
                 return this.urlEntry.Text.Trim();

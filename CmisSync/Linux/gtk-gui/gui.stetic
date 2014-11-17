@@ -9,7 +9,7 @@
     <widget-library name="appindicator-sharp, Version=0.2.0.0, Culture=neutral, PublicKeyToken=bcae265d1c7ab4c2" />
     <widget-library name="../../../bin/DataSpaceSync.exe" internal="true" />
   </import>
-  <widget class="Gtk.Bin" id="CmisSync.CredentialsWidget" design-size="326 98">
+  <widget class="Gtk.Bin" id="CmisSync.CredentialsWidget" design-size="326 72">
     <property name="MemberName" />
     <property name="Visible">False</property>
     <child>
