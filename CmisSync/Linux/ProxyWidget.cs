@@ -115,12 +115,14 @@ namespace CmisSync.Widgets
 
         protected void OnUrlWidgetChanged(object sender, EventArgs e)
         {
-            try {
-                this.settings.Server = new Uri(this.urlWidget.Url);
-                this.IsValid = this.urlWidget.IsValidUrl;
-                this.OnChange(sender, e);
-            } catch (Exception) {
-                this.IsValid = false;
+            this.IsValid = this.urlWidget.IsValidUrl;
+            if (this.IsValid) {
+                try {
+                    this.settings.Server = new Uri(this.urlWidget.Url);
+                    this.OnChange(sender, e);
+                } catch (Exception) {
+                    this.IsValid = false;
+                }
             }
         }
     }

@@ -104,6 +104,7 @@ namespace CmisSync.Widgets
 			this.passwordEntry.CanFocus = true;
 			this.passwordEntry.Name = "passwordEntry";
 			this.passwordEntry.IsEditable = true;
+			this.passwordEntry.Visibility = false;
 			this.passwordEntry.InvisibleChar = '•';
 			this.table1.Add (this.passwordEntry);
 			global::Gtk.Table.TableChild w7 = ((global::Gtk.Table.TableChild)(this.table1 [this.passwordEntry]));
