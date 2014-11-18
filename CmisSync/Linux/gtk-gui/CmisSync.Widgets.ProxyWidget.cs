@@ -25,6 +25,7 @@ namespace CmisSync.Widgets
 			this.Name = "CmisSync.Widgets.ProxyWidget";
 			// Container child CmisSync.Widgets.ProxyWidget.Gtk.Container+ContainerChild
 			this.vbox3 = new global::Gtk.VBox ();
+			this.vbox3.Name = "vbox3";
 			this.vbox3.Spacing = 6;
 			// Container child vbox3.Gtk.Box+BoxChild
 			this.noProxyButton = new global::Gtk.RadioButton (global::Mono.Unix.Catalog.GetString ("No Proxy"));
@@ -150,9 +151,13 @@ namespace CmisSync.Widgets
 				this.Child.ShowAll ();
 			}
 			this.Hide ();
-			this.noProxyButton.Activated += new global::System.EventHandler (this.OnNoProxyButtonActivated);
-			this.systemProxyButton.Activated += new global::System.EventHandler (this.OnSystemProxyButtonActivated);
-			this.customProxyButton.Activated += new global::System.EventHandler (this.OnCustomProxyButtonActivated);
+			this.noProxyButton.Clicked += new global::System.EventHandler (this.OnNoProxyButtonActivated);
+			this.systemProxyButton.Clicked += new global::System.EventHandler (this.OnSystemProxyButtonActivated);
+			this.customProxyButton.Clicked += new global::System.EventHandler (this.OnCustomProxyButtonActivated);
+			this.urlWidget.Changed += new global::System.EventHandler (this.OnUrlWidgetChanged);
+			this.credentialsRequiredButton.Clicked += new global::System.EventHandler (this.OnCredentialsRequiredButtonClicked);
+			this.userEntry.Changed += new global::System.EventHandler (this.OnChange);
+			this.passwordEntry.Changed += new global::System.EventHandler (this.OnChange);
 		}
 	}
 }

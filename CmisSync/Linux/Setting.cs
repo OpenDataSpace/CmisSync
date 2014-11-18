@@ -18,20 +18,41 @@ namespace CmisSync
                 this.Refresh();
                 this.ShowAll();
             };
-            this.Controller.HideWindowEvent += () => this.Hide();
+            this.Controller.HideWindowEvent += () => {
+                this.Hide();
+            };
+            this.DeleteEvent += (o, args) => {
+                // Do not destroy the window, just hide it
+                args.RetVal = true;
+                this.Hide();
+            };
             this.label1.Text = Properties_Resources.SettingProxy;
             this.label2.Text = Properties_Resources.Features;
             this.cancelButton.Label = Properties_Resources.DiscardChanges;
             this.saveButton.Label = Properties_Resources.SaveChanges;
-            this.cancelButton.Activated += (object sender, EventArgs e) => this.Controller.HideWindow();
-            this.saveButton.Activated += (object sender, EventArgs e) => this.Controller.HideWindow();
+            this.cancelButton.Clicked += (object sender, EventArgs e) => this.Controller.HideWindow();
+            this.saveButton.Clicked += (object sender, EventArgs e) => {
+                var config = ConfigManager.CurrentConfig;
+                config.Proxy = this.proxyWidget.Settings;
+                config.Notifications = this.notificationToggleButton.Active;
+                config.Save();
+                this.Controller.HideWindow();
+            };
+            this.proxyWidget.Changed += (object sender, EventArgs e) => {
+                this.saveButton.Sensitive = this.proxyWidget.IsValid;
+            };
         }
 
         private void Refresh() {
-            this.saveButton.Sensitive = false;
             var config = ConfigManager.CurrentConfig;
             this.proxyWidget.Settings = config.Proxy;
             this.notificationToggleButton.Active = config.Notifications;
+            this.saveButton.Sensitive = false;
+        }
+
+        protected void OnNotificationToggleButtonToggled(object sender, EventArgs e)
+        {
+            this.saveButton.Sensitive = this.proxyWidget.IsValid;
         }
     }
 }

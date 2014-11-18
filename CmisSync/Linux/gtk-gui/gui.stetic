@@ -170,11 +170,12 @@
             <property name="MemberName" />
             <property name="CanFocus">True</property>
             <property name="Label" translatable="yes">No Proxy</property>
+            <property name="Active">True</property>
             <property name="DrawIndicator">True</property>
             <property name="HasLabel">True</property>
             <property name="UseUnderline">True</property>
-            <property name="Group">group1</property>
-            <signal name="Activated" handler="OnNoProxyButtonActivated" />
+            <property name="Group">proxySelection</property>
+            <signal name="Clicked" handler="OnNoProxyButtonActivated" />
           </widget>
           <packing>
             <property name="Position">0</property>
@@ -190,8 +191,8 @@
             <property name="DrawIndicator">True</property>
             <property name="HasLabel">True</property>
             <property name="UseUnderline">True</property>
-            <property name="Group">group1</property>
-            <signal name="Activated" handler="OnSystemProxyButtonActivated" />
+            <property name="Group">proxySelection</property>
+            <signal name="Clicked" handler="OnSystemProxyButtonActivated" />
           </widget>
           <packing>
             <property name="Position">1</property>
@@ -207,8 +208,8 @@
             <property name="DrawIndicator">True</property>
             <property name="HasLabel">True</property>
             <property name="UseUnderline">True</property>
-            <property name="Group">group1</property>
-            <signal name="Activated" handler="OnCustomProxyButtonActivated" />
+            <property name="Group">proxySelection</property>
+            <signal name="Clicked" handler="OnCustomProxyButtonActivated" />
           </widget>
           <packing>
             <property name="Position">2</property>
@@ -235,6 +236,7 @@
             <property name="Events">ButtonPressMask</property>
             <property name="IsUrlEditable">False</property>
             <property name="ValidationActivated">False</property>
+            <signal name="Changed" handler="OnUrlWidgetChanged" />
           </widget>
           <packing>
             <property name="Position">4</property>
@@ -252,6 +254,7 @@
             <property name="DrawIndicator">True</property>
             <property name="HasLabel">True</property>
             <property name="UseUnderline">True</property>
+            <signal name="Clicked" handler="OnCredentialsRequiredButtonClicked" />
           </widget>
           <packing>
             <property name="Position">5</property>
@@ -273,6 +276,7 @@
                 <property name="CanFocus">True</property>
                 <property name="IsEditable">True</property>
                 <property name="InvisibleChar">•</property>
+                <signal name="Changed" handler="OnChange" />
               </widget>
               <packing>
                 <property name="TopAttach">1</property>
@@ -314,6 +318,7 @@
                 <property name="CanFocus">True</property>
                 <property name="IsEditable">True</property>
                 <property name="InvisibleChar">•</property>
+                <signal name="Changed" handler="OnChange" />
               </widget>
               <packing>
                 <property name="TopAttach">1</property>
@@ -398,13 +403,16 @@
                     <property name="DrawIndicator">True</property>
                     <property name="HasLabel">True</property>
                     <property name="UseUnderline">True</property>
+                    <signal name="Toggled" handler="OnNotificationToggleButtonToggled" />
                   </widget>
                   <packing>
                     <property name="Position">0</property>
                     <property name="AutoSize">False</property>
                     <property name="Expand">False</property>
-                    <property name="Fill">False</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder />
                 </child>
               </widget>
               <packing>

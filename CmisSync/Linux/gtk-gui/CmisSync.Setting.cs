@@ -59,7 +59,6 @@ namespace CmisSync
 			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.notificationToggleButton]));
 			w2.Position = 0;
 			w2.Expand = false;
-			w2.Fill = false;
 			this.tabs.Add (this.vbox1);
 			global::Gtk.Notebook.NotebookChild w3 = ((global::Gtk.Notebook.NotebookChild)(this.tabs [this.vbox1]));
 			w3.Position = 1;
@@ -116,6 +115,7 @@ namespace CmisSync
 			this.DefaultWidth = 402;
 			this.DefaultHeight = 323;
 			this.Hide ();
+			this.notificationToggleButton.Toggled += new global::System.EventHandler (this.OnNotificationToggleButtonToggled);
 		}
 	}
 }
