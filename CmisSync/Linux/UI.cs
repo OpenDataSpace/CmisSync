@@ -45,6 +45,7 @@ namespace CmisSync
         public StatusIcon StatusIcon;
         public Setup Setup;
         public About About;
+        public Setting Setting;
 
         public static string AssetsPath =
             (null != Environment.GetEnvironmentVariable("CMISSYNC_ASSETS_DIR"))
@@ -57,7 +58,7 @@ namespace CmisSync
             this.Setup      = new Setup();
             this.About      = new About();
             this.StatusIcon = new StatusIcon();
-
+            this.Setting    = new Setting();
             Program.Controller.UIHasLoaded();
         }
 
