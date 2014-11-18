@@ -22,7 +22,7 @@ namespace CmisSync
 			// Widget CmisSync.Setting
 			this.Name = "CmisSync.Setting";
 			this.Title = global::Mono.Unix.Catalog.GetString ("Setting");
-			this.WindowPosition = ((global::Gtk.WindowPosition)(4));
+			this.WindowPosition = ((global::Gtk.WindowPosition)(1));
 			this.BorderWidth = ((uint)(3));
 			// Container child CmisSync.Setting.Gtk.Container+ContainerChild
 			this.vbox5 = new global::Gtk.VBox ();
