@@ -361,4 +361,13 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="Settings" xml:space="preserve">
     <value>Einstellungen</value>
   </data>
+  <data name="LoginCheck" xml:space="preserve">
+    <value>Versuche mich anzumelden</value>
+  </data>
+  <data name="LoginFailed" xml:space="preserve">
+    <value>Anmeldung fehlgeschlagen: {0}</value>
+  </data>
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>Erfolgreich angemeldet</value>
+  </data>
 </root>
