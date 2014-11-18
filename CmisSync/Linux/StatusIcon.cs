@@ -267,13 +267,13 @@ namespace CmisSync {
 
             this.menu.Add (new SeparatorMenuItem ());
 
-/*            MenuItem settingsItem = new MenuItem(
+            MenuItem settingsItem = new MenuItem(
                 Properties_Resources.Settings);
             settingsItem.Activated += delegate {
                 Controller.SettingClicked();
             };
             this.menu.Add(settingsItem);
-            this.menu.Add(new SeparatorMenuItem());*/
+            this.menu.Add(new SeparatorMenuItem());
 
             // Log Menu
             MenuItem log_item = new MenuItem(
