@@ -33,7 +33,7 @@ namespace CmisSync
             this.cancelButton.Clicked += (object sender, EventArgs e) => this.Controller.HideWindow();
             this.saveButton.Clicked += (object sender, EventArgs e) => {
                 var config = ConfigManager.CurrentConfig;
-                config.Proxy = this.proxyWidget.Settings;
+                config.Proxy = this.proxyWidget.ProxySettings;
                 config.Notifications = this.notificationToggleButton.Active;
                 config.Save();
                 this.Controller.HideWindow();
@@ -45,7 +45,7 @@ namespace CmisSync
 
         private void Refresh() {
             var config = ConfigManager.CurrentConfig;
-            this.proxyWidget.Settings = config.Proxy;
+            this.proxyWidget.ProxySettings = config.Proxy;
             this.notificationToggleButton.Active = config.Notifications;
             this.saveButton.Sensitive = false;
         }

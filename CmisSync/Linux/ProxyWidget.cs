@@ -17,7 +17,7 @@ namespace CmisSync.Widgets
             this.IsValid = true;
         }
 
-        public ProxySettings Settings {
+        public ProxySettings ProxySettings {
             get {
                 return this.settings;
             }
