@@ -321,9 +321,9 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
-            Thread.Sleep(15000);
+            Thread.Sleep(30000);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Queue.AddEvent(new StartNextSyncEvent());
 
             this.repo.Run();
 
