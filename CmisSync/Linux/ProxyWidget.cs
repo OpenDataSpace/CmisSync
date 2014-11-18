@@ -117,7 +117,7 @@ namespace CmisSync.Widgets
         {
             try {
                 this.settings.Server = new Uri(this.urlWidget.Url);
-                this.IsValid = true;
+                this.IsValid = this.urlWidget.IsValidUrl;
                 this.OnChange(sender, e);
             } catch (Exception) {
                 this.IsValid = false;
