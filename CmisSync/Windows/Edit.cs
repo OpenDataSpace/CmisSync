@@ -249,6 +249,7 @@ namespace CmisSync
             //tabItemSelection = editWPF.FindName("tabItemSelection") as TabItem;
             //  GUI workaround to remove ignore folder }}
             tabItemCredentials = editWPF.FindName("tabItemCredentials") as TabItem;
+            tabItemCredentials.Header = Properties_Resources.Credentials;
             addressLabel = editWPF.FindName("addressLabel") as TextBlock;
             addressBox = editWPF.FindName("addressBox") as TextBox;
             userLabel = editWPF.FindName("userLabel") as TextBlock;
