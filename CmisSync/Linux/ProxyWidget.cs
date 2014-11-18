@@ -34,7 +34,6 @@ namespace CmisSync.Widgets
 
         public bool IsValid { get; private set; }
 
-
         public ProxySelection Selection { get {
                 return this.settings.Selection;
             }

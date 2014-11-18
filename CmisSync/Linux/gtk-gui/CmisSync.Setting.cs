@@ -32,7 +32,7 @@ namespace CmisSync
 			this.tabs = new global::Gtk.Notebook ();
 			this.tabs.CanFocus = true;
 			this.tabs.Name = "tabs";
-			this.tabs.CurrentPage = 0;
+			this.tabs.CurrentPage = 1;
 			// Container child tabs.Gtk.Notebook+NotebookChild
 			this.proxyWidget = new global::CmisSync.Widgets.ProxyWidget ();
 			this.proxyWidget.Events = ((global::Gdk.EventMask)(256));
