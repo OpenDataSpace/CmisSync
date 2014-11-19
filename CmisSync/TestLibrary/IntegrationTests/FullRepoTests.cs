@@ -97,6 +97,7 @@ namespace TestLibrary.IntegrationTests
         private IFolder remoteRootDir;
         private ISession session;
         private CmisRepoMock repo;
+        private ActiveActivitiesManager transmissionManager;
 
         [TestFixtureSetUp]
         public void ClassInit()
@@ -143,7 +144,7 @@ namespace TestLibrary.IntegrationTests
 
             // Repo
             var activityListener = new Mock<IActivityListener>();
-            var transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new ActiveActivitiesManager();
             var activityAggregator = new ActivityListenerAggregator(activityListener.Object, transmissionManager);
             var queue = new SingleStepEventQueue(new SyncEventManager());
 
@@ -1454,6 +1455,36 @@ namespace TestLibrary.IntegrationTests
             folder.Move(source, target);
 
             Assert.Throws<CmisConstraintException>(() => anotherFolderInstance.Move(source, target));
+        }
+
+        [Test, Category("Slow")]
+        public void DoNotTransferDataIfLocalAndRemoteFilesAreEqual() {
+            this.repo.Initialize();
+            this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+
+            string content = "a";
+            string fileName = "file.txt";
+            var remoteFile = this.remoteRootDir.CreateDocument(fileName, content);
+            if (remoteFile.ContentStreamHash() == null) {
+                Assert.Ignore("Server does not support hash of content stream");
+            }
+
+            var file = new FileInfo(Path.Combine(this.localRootDir.FullName, fileName));
+            using (StreamWriter sw = file.CreateText()) {
+                sw.Write(content);
+            }
+
+            this.transmissionManager.ActiveTransmissions.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => {
+                this.repo.SingleStepQueue.SwallowExceptions = false;
+                Assert.Fail();
+            };
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles()[0].Length, Is.EqualTo(content.Length));
+            Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(content.Length));
         }
 
         [Ignore("Mantis issue 4285")]
