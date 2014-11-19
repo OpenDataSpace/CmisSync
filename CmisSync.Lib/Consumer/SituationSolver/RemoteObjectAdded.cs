@@ -231,13 +231,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         }
                     }
 
+                    file.Uuid = guid;
                     MappedObject mappedObject = new MappedObject(
                         file.Name,
                         remoteDoc.Id,
                         MappedObjectType.File,
                         remoteDoc.Parents[0].Id,
                         remoteDoc.ChangeToken,
-                        remoteDoc.ContentStreamLength ?? 0)
+                        remoteDoc.ContentStreamLength ?? file.Length)
                     {
                         Guid = guid,
                         LastLocalWriteTimeUtc = file.LastWriteTimeUtc,

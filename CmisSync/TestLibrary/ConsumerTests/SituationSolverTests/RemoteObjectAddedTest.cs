@@ -254,7 +254,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.Setup(f => f.FullName).Returns(this.path);
             fileInfo.Setup(f => f.Name).Returns(this.objectName);
             fileInfo.Setup(f => f.Directory).Returns(parentDir);
-            fileInfo.Setup(f => f.Uuid).Returns(Guid.NewGuid());
             fileInfo.Setup(f => f.Exists).Returns(true);
             byte[] content = Encoding.UTF8.GetBytes("content");
             fileInfo.SetupStream(content);
@@ -265,6 +264,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
+            fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
         }
     }
