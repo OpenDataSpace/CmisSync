@@ -370,4 +370,10 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="LoginSuccess" xml:space="preserve">
     <value>Erfolgreich angemeldet</value>
   </data>
+  <data name="CannotSync" xml:space="preserve">
+    <value>{0} kann nicht synchronisiert werden</value>
+  </data>
+  <data name="ProblemsWithFS" xml:space="preserve">
+    <value>Problem mit dem Dateisystem:{0}{1}</value>
+  </data>
 </root>
