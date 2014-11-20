@@ -1456,7 +1456,7 @@ namespace TestLibrary.IntegrationTests
 
             this.transmissionManager.ActiveTransmissions.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => {
                 this.repo.SingleStepQueue.SwallowExceptions = false;
-                Assert.Fail();
+                Assert.Fail("There should be no transmission, but a new transmission object is added");
             };
 
             this.repo.Queue.AddEvent(new StartNextSyncEvent());
