@@ -326,8 +326,8 @@ namespace CmisSync
                 repo.Initialize();
             } catch (ExtendedAttributeException xAttrException) {
                 this.ShowException(
-                    string.Format("{0} cannot be synced", repoInfo.DisplayName),
-                    string.Format("{0}{1}{2}", "Problems on file system:", Environment.NewLine, xAttrException.Message));
+                    string.Format(Properties_Resources.CannotSync, repoInfo.DisplayName),
+                    string.Format(Properties_Resources.ProblemWithFS, Environment.NewLine, xAttrException.Message));
 
             }
         }

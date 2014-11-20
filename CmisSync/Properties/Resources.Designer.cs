@@ -142,6 +142,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} cannot be synced.
+        /// </summary>
+        internal static string CannotSync {
+            get {
+                return ResourceManager.GetString("CannotSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Change the local path of this repository:.
         /// </summary>
         internal static string ChangeRepoPath {
@@ -710,6 +719,15 @@ namespace CmisSync {
         internal static string PermissionDenied {
             get {
                 return ResourceManager.GetString("PermissionDenied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Problems on file system:{0}{1}.
+        /// </summary>
+        internal static string ProblemWithFS {
+            get {
+                return ResourceManager.GetString("ProblemWithFS", resourceCulture);
             }
         }
         

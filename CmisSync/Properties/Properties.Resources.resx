@@ -459,4 +459,10 @@ This could lead to a lot of conflict files!</value>
   <data name="Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="CannotSync" xml:space="preserve">
+    <value>{0} cannot be synced</value>
+  </data>
+  <data name="ProblemWithFS" xml:space="preserve">
+    <value>Problems on file system:{0}{1}</value>
+  </data>
 </root>
