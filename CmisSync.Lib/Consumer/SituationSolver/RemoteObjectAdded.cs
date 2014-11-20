@@ -180,6 +180,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                         if (localFileHash.SequenceEqual(hash)) {
                             file.Uuid = guid;
+                            try {
+                                cacheFile.Delete();
+                            } catch(IOException) {
+                            }
                         } else {
                             IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
                             IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
