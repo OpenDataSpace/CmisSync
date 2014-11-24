@@ -120,8 +120,8 @@ namespace CmisSync
             Gdk.Color.Parse("red", ref fgcolor);
             Label version = new Label () {
                 Markup = string.Format (
-                    "<span font_size='small' fgcolor='#729fcf'>{0} ({1})</span>",
-                    String.Format(Properties_Resources.Version, Controller.RunningVersion), Controller.CreateTime.GetValueOrDefault().ToString("d")),
+                    "<span font_size='small' fgcolor='#729fcf'>{0}</span>",
+                    String.Format(Properties_Resources.Version, Controller.RunningVersion, Controller.CreateTime.GetValueOrDefault().ToString("d"))),
                 Xalign = 0
             };
 
