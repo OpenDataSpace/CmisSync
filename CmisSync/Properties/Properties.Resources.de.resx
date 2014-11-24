@@ -376,4 +376,7 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="ProblemsWithFS" xml:space="preserve">
     <value>Problem mit dem Dateisystem:{0}{1}</value>
   </data>
+  <data name="Version" xml:space="preserve">
+    <value>Version {0} ({1})</value>
+  </data>
 </root>
