@@ -23,6 +23,7 @@
 namespace CmisSync.Lib
 {
     using System;
+    using System.IO;
     using System.Reflection;
     using System.Runtime.InteropServices;
 
@@ -31,6 +32,9 @@ namespace CmisSync.Lib
     /// </summary>
     public static class Backend
     {
+        private static DateTime? linkerTimestamp = null;
+        private static object singletonLock = new Object();
+
         /// <summary>
         /// Gets the Version of CmisSync.Lib
         /// It is also used as the CmisSync version.
@@ -38,6 +42,35 @@ namespace CmisSync.Lib
         public static string Version {
             get {
                 return string.Empty + Assembly.GetExecutingAssembly().GetName().Version;
+            }
+        }
+
+        public static DateTime? RetrieveLinkerTimestamp {
+            get {
+                if (linkerTimestamp == null) {
+                    lock(singletonLock) {
+                        string filePath = Assembly.GetExecutingAssembly().Location;
+                        const int c_PeHeaderOffset = 60;
+                        const int c_LinkerTimestampOffset = 8;
+                        byte[] b = new byte[2048];
+                        try {
+                            using (Stream s = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
+                                s.Read(b, 0, 2048);
+                            }
+                        } catch (Exception) {
+                            return null;
+                        }
+
+                        int i = System.BitConverter.ToInt32(b, c_PeHeaderOffset);
+                        int secondsSince1970 = System.BitConverter.ToInt32(b, i + c_LinkerTimestampOffset);
+                        DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                        dt = dt.AddSeconds(secondsSince1970);
+                        dt = dt.ToLocalTime();
+                        linkerTimestamp = dt;
+                    }
+                }
+
+                return linkerTimestamp;
             }
         }
 

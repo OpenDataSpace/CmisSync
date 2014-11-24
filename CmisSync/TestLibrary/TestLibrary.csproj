@@ -205,6 +205,9 @@
     <Compile Include="UtilsTests\X509StoreTest.cs" />
     <Compile Include="EventsTests\PermissionDeniedEventCalculatesBlockingUntilTest.cs" />
     <Compile Include="AlgorithmsTests\TrajanSimpleCircleTests.cs" />
+    <Compile Include="AlgorithmsTests\TarjanSimpleLinearTests.cs" />
+    <Compile Include="AlgorithmsTests\StringTarjanNode.cs" />
+    <Compile Include="UtilsTests\BackendTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -191,11 +191,11 @@ namespace CmisSync.Lib
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);
-                Guid rootFolderGuid;
-                if (!Guid.TryParse(localRootFolder.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out rootFolderGuid)) {
+                Guid? rootFolderGuid = localRootFolder.Uuid;
+                if (rootFolderGuid == null) {
                     try {
                         rootFolderGuid = Guid.NewGuid();
-                        localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString(), false);
+                        localRootFolder.Uuid = rootFolderGuid;
                     } catch (ExtendedAttributeException ex)
                     {
                         Logger.Warn("Problem on setting Guid of the root path", ex);
@@ -205,7 +205,7 @@ namespace CmisSync.Lib
 
                 var rootFolder = new MappedObject("/", remoteRoot.Id, MappedObjectType.Folder, null, remoteRoot.ChangeToken) {
                     LastRemoteWriteTimeUtc = remoteRoot.LastModificationDate,
-                    Guid = rootFolderGuid
+                    Guid = (Guid)rootFolderGuid
                 };
 
                 Logger.Debug("Saving Root Folder to DataBase");

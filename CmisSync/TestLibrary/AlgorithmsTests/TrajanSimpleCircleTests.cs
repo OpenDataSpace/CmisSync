@@ -136,17 +136,5 @@ namespace TestLibrary.AlgorithmsTests
             Assert.That(large.Contains(d));
             Assert.That(small.Contains(e));
         }
-
-        public class StringTarjanNode : AbstractTarjanNode {
-            private string Name;
-            public StringTarjanNode(string name, params AbstractTarjanNode[] neighbors) : base(neighbors) {
-                this.Name = name;
-            }
-
-            public override string ToString()
-            {
-                return this.Name;
-            }
-        }
     }
 }
