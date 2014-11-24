@@ -15,6 +15,7 @@ SOURCES =  \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	ActiveActivitiesManagerTest.cs \
+	AlgorithmsTests/TrajanSimpleCircleTests.cs \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \

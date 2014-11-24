@@ -245,6 +245,9 @@
     <Compile Include="Consumer\SituationSolver\LocalObjectRenamedRemoteObjectMoved.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectRenamed.cs" />
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectRenamed.cs" />
+    <Compile Include="Algorithms\CyclicDependencies\ICycleDetector.cs" />
+    <Compile Include="Algorithms\Tarjan\Tarjan.cs" />
+    <Compile Include="Algorithms\Tarjan\ITarjanNode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -307,5 +310,8 @@
     <Folder Include="Cmis\UiUtils\" />
     <Folder Include="Producer\ContentChange\" />
     <Folder Include="Cmis\ConvenienceExtenders\" />
+    <Folder Include="Algorithms\" />
+    <Folder Include="Algorithms\CyclicDependencies\" />
+    <Folder Include="Algorithms\Tarjan\" />
   </ItemGroup>
 </Project>

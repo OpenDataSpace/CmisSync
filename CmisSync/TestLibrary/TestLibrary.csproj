@@ -204,6 +204,7 @@
     <Compile Include="IntegrationTests\NeedsLocalFileSystemFolder.cs" />
     <Compile Include="UtilsTests\X509StoreTest.cs" />
     <Compile Include="EventsTests\PermissionDeniedEventCalculatesBlockingUntilTest.cs" />
+    <Compile Include="AlgorithmsTests\TrajanSimpleCircleTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -252,5 +253,6 @@
     <Folder Include="QueueingTests\" />
     <Folder Include="FilterTests\" />
     <Folder Include="CmisTests\ConvenienceExtendersTests\" />
+    <Folder Include="AlgorithmsTests\" />
   </ItemGroup>
 </Project>
