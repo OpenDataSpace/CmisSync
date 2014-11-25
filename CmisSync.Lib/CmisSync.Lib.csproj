@@ -250,6 +250,7 @@
     <Compile Include="Storage\FileSystem\FSType.cs" />
     <Compile Include="Algorithms\CyclicDependencies\ICycleDetector.cs" />
     <Compile Include="Algorithms\Tarjan\Tarjan.cs" />
+    <Compile Include="Events\ConfigurationNeededEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

@@ -230,6 +230,10 @@ namespace CmisSync.Lib.Queueing
                         Logger.Error("Connection to repository failed: ", e);
                         this.Queue.AddEvent(new ExceptionEvent(e));
                     }
+                } catch (DotCMIS.Exceptions.CmisInvalidArgumentException e) {
+                    Logger.Warn(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
+                    this.Queue.AddEvent(new ConfigurationNeededEvent(e));
+                    this.isForbiddenUntil = DateTime.MaxValue;
                 } catch (CmisObjectNotFoundException e) {
                     Logger.Error("Failed to find cmis object: ", e);
                 } catch (CmisBaseException e) {

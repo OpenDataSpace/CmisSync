@@ -73,6 +73,7 @@ SOURCES =  \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
 	Events/ConfigChangedEvent.cs \
+	Events/ConfigurationNeededEvent.cs \
 	Events/ContentChangeEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/EncapsuledEvent.cs \

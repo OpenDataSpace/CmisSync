@@ -322,6 +322,19 @@ namespace CmisSync
                     this.SuccessfulLogin(repositoryInfo.DisplayName);
                     return false;
                 }));
+                repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ConfigurationNeededEvent>(
+                    1,
+                    delegate(ISyncEvent e) {
+                    this.ShowException("The configuration of " + repo.Name + " is broken", "Please reconfigure the connection");
+                    return true;
+                }));
+                repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ExceptionEvent>(
+                    0,
+                    delegate(ISyncEvent e) {
+                    var ex = (e as ExceptionEvent).Exception;
+                    this.ShowException("Exception on " + repo.Name, ex.Message);
+                    return false;
+                }));
                 this.repositories.Add(repo);
                 repo.Initialize();
             } catch (ExtendedAttributeException xAttrException) {
