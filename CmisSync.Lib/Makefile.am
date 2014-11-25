@@ -10,6 +10,7 @@ SOURCES =  \
 	Accumulator/RemoteObjectFetcher.cs \
 	Accumulator/RemoteObjectMovedOrRenamedAccumulator.cs \
 	ActivityListenerAggregator.cs \
+	Algorithms/CyclicDependencies/CycleDetector.cs \
 	Algorithms/CyclicDependencies/ICycleDetector.cs \
 	Algorithms/Tarjan/AbstractTarjanNode.cs \
 	Algorithms/Tarjan/Tarjan.cs \

@@ -15,6 +15,8 @@ SOURCES =  \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	ActiveActivitiesManagerTest.cs \
+	AlgorithmsTests/CyclicDependencies/NoCycleDetectionTests.cs \
+	AlgorithmsTests/CyclicDependencies/SimpleCycleDetectionTests.cs \
 	AlgorithmsTests/StringTarjanNode.cs \
 	AlgorithmsTests/TrajanSimpleCircleTests.cs \
 	AlgorithmsTests/TarjanSimpleLinearTests.cs \
