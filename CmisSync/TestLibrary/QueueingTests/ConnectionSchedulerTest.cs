@@ -49,6 +49,7 @@ namespace TestLibrary.QueueingTests
         private readonly string url = "https://demo.deutsche-wolke.de/";
         private readonly AuthenticationType authType = AuthenticationType.BASIC;
         private readonly string repoId = "repoId";
+        private readonly string displayName = "repoName";
 
         private Mock<ISyncEventQueue> queue;
         private Mock<IAuthenticationProvider> authProvider;
@@ -68,7 +69,8 @@ namespace TestLibrary.QueueingTests
                 ReadTimeout = this.readTimeout,
                 ObfuscatedPassword = new Password(this.password).ObfuscatedPassword,
                 Address = new Uri(this.url),
-                RepositoryId = this.repoId
+                RepositoryId = this.repoId,
+                DisplayName = this.displayName
             };
 
             this.session = new Mock<ISession>();
@@ -176,6 +178,24 @@ namespace TestLibrary.QueueingTests
             }
 
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void LoginFailsWithInvalidArgumentException() {
+            var argumentException = new CmisInvalidArgumentException();
+            var waitHandle = new AutoResetEvent(false);
+            this.sessionFactory.Setup(f => f.CreateSession(It.IsAny<IDictionary<string, string>>(), null, this.authProvider.Object, null))
+                .Callback<IDictionary<string, string>, object, object, object>(
+                    (d, x, y, z) => this.VerifyConnectionProperties(d)).Throws(argumentException);
+            this.queue.Setup(q => q.AddEvent(It.IsAny<ISyncEvent>())).Callback(() => waitHandle.Set());
+            using (var scheduler = new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object, this.interval)) {
+                scheduler.Start();
+                waitHandle.WaitOne();
+                this.queue.VerifyThatNoOtherEventIsAddedThan<ConfigurationNeededEvent>();
+                this.queue.Verify(q => q.AddEvent(It.Is<ConfigurationNeededEvent>(e => e.Exception == argumentException)));
+            }
+
+            this.session.VerifySet(s => s.DefaultContext = It.IsAny<IOperationContext>(), Times.Never());
         }
 
         [Test, Category("Fast")]
