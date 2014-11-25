@@ -59,6 +59,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\Tarjan\AbstractTarjanNode.cs" />
     <Compile Include="Backend.cs" />
     <Compile Include="Cmis\MimeType.cs" />
     <Compile Include="Defines.cs" />
@@ -247,6 +248,8 @@
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectRenamed.cs" />
     <Compile Include="Storage\FileSystem\DateTimeToFileConverter.cs" />
     <Compile Include="Storage\FileSystem\FSType.cs" />
+    <Compile Include="Algorithms\CyclicDependencies\ICycleDetector.cs" />
+    <Compile Include="Algorithms\Tarjan\Tarjan.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -309,5 +312,8 @@
     <Folder Include="Cmis\UiUtils\" />
     <Folder Include="Producer\ContentChange\" />
     <Folder Include="Cmis\ConvenienceExtenders\" />
+    <Folder Include="Algorithms\" />
+    <Folder Include="Algorithms\CyclicDependencies\" />
+    <Folder Include="Algorithms\Tarjan\" />
   </ItemGroup>
 </Project>

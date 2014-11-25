@@ -333,7 +333,7 @@ Please check the protocol part of the given URL. Maybe your server is not capabl
     <value>You are running the latest version.</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value>Version {0}</value>
+    <value>Version {0} ({1})</value>
   </data>
   <data name="Website" xml:space="preserve">
     <value>Website</value>

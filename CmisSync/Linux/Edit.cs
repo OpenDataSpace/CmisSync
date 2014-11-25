@@ -43,7 +43,7 @@ namespace CmisSync
         /// <summary>
         /// Synchronized folder name
         /// </summary>
-        public string Name { get; set; }
+        public string FolderName { get; set; }
 
         /// <summary>
         /// Ignore folder list
@@ -70,7 +70,7 @@ namespace CmisSync
         /// </summary>
         public Edit(EditType type, CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
         {
-            this.Name = name;
+            this.FolderName = name;
             this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = ignores;

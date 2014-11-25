@@ -129,7 +129,7 @@ namespace CmisSync {
             credits = aboutWPF.FindName("credits") as TextBlock;
 
             image.Source = UIHelpers.GetImageSource("about");
-            version.Content = String.Format(Properties_Resources.Version, Controller.RunningVersion);
+            version.Content = String.Format(Properties_Resources.Version, Controller.RunningVersion, Controller.CreateTime.GetValueOrDefault().ToString("d"));
             updates.Content = "";
             credits.Text = String.Format("Copyright © {0}–{1} {2}\n\n{3} {4}",
                     "2013",

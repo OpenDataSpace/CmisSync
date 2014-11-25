@@ -10,6 +10,9 @@ SOURCES =  \
 	Accumulator/RemoteObjectFetcher.cs \
 	Accumulator/RemoteObjectMovedOrRenamedAccumulator.cs \
 	ActivityListenerAggregator.cs \
+	Algorithms/CyclicDependencies/ICycleDetector.cs \
+	Algorithms/Tarjan/AbstractTarjanNode.cs \
+	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
