@@ -1,4 +1,21 @@
-
+//-----------------------------------------------------------------------
+// <copyright file="MockOfIRepository.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace TestLibrary.MockedServer
 {
@@ -19,18 +36,15 @@ namespace TestLibrary.MockedServer
         private static Dictionary<string, MockOfIRepository> repositories = new Dictionary<string, MockOfIRepository>();
 
         private MockedFolder rootFolder = new MockedFolder("/");
+
         public IFolder RootFolder {
             get {
                 return this.rootFolder.Object;
             }
         }
 
-        public void SetupName(string name) {
-            this.Setup(r => r.Name).Returns(name);
-        }
-
         public static MockOfIRepository GetRepository(string id) {
-            lock(repositories) {
+            lock (repositories) {
                 MockOfIRepository repo;
                 if (!repositories.TryGetValue(id, out repo)) {
                     repo = new MockOfIRepository(id);
@@ -39,6 +53,10 @@ namespace TestLibrary.MockedServer
 
                 return repo;
             }
+        }
+
+        public void SetupName(string name) {
+            this.Setup(r => r.Name).Returns(name);
         }
 
         public void Destroy() {
