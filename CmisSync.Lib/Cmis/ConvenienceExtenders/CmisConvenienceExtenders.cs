@@ -156,7 +156,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// Indicates if all children are ignored.
         /// </summary>
         /// <returns><c>true</c>, if all children are ignored, <c>false</c> otherwise.</returns>
-        /// <param name="folder">Remote cmis folder.</param>
+        /// <param name="obj">Remote cmis object.</param>
         public static bool AreAllChildrenIgnored(this ICmisObject obj) {
             foreach (var ignoredProperty in obj.Properties) {
                 if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
@@ -204,7 +204,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// </summary>
         /// <returns>The byte array.</returns>
         /// <param name="hex">Hex string without leading 0x.</param>
-         private static byte[] StringToByteArray(string hex) {
+        private static byte[] StringToByteArray(string hex) {
             if (hex.Length % 2 == 1) {
                 throw new ArgumentException("The binary key cannot have an odd number of digits");
             }
