@@ -8,8 +8,11 @@ namespace TestLibrary.AlgorithmsTests.CyclicDependenciesTests
     [TestFixture]
     public class SimpleCycleDetectionTests
     {
+        /// <summary>
+        /// A ⇄ B
+        /// </summary>
         [Test, Category("Fast")]
-        public void TestCase()
+        public void SimpleFileRename()
         {
         }
     }
