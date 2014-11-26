@@ -217,6 +217,8 @@
     <Compile Include="AlgorithmsTests\TarjanSimpleLinearTests.cs" />
     <Compile Include="AlgorithmsTests\StringTarjanNode.cs" />
     <Compile Include="UtilsTests\BackendTest.cs" />
+    <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
+    <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -267,5 +269,6 @@
     <Folder Include="CmisTests\ConvenienceExtendersTests\" />
     <Folder Include="MockedServer\" />
     <Folder Include="AlgorithmsTests\" />
+    <Folder Include="AlgorithmsTests\CyclicDependencies\" />
   </ItemGroup>
 </Project>

@@ -251,6 +251,7 @@
     <Compile Include="Algorithms\CyclicDependencies\ICycleDetector.cs" />
     <Compile Include="Algorithms\Tarjan\Tarjan.cs" />
     <Compile Include="Events\ConfigurationNeededEvent.cs" />
+    <Compile Include="Algorithms\CyclicDependencies\CycleDetector.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
