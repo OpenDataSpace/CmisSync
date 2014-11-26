@@ -36,8 +36,6 @@ namespace CmisSync.Lib.Consumer
     /// </summary>
     public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
-
         /// <summary>
         /// Analyse the specified actual event.
         /// </summary>

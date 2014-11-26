@@ -39,8 +39,6 @@ namespace CmisSync.Lib.Producer.Watcher
     /// </summary>
     public class WatcherConsumer : ReportingSyncEventHandler
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(WatcherConsumer));
-
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
 
         /// <summary>

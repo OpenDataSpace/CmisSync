@@ -34,8 +34,6 @@ namespace CmisSync.Lib.Consumer
     /// </summary>
     public class LocalSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalSituationDetection));
-
         /// <summary>
         /// Analyse the situation of the actual event in combination with the meta data storage.
         /// </summary>
