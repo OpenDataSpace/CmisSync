@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SetupController.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -127,6 +127,7 @@ namespace CmisSync
         public double ProgressBarPercentage { get; private set; }
 
         public Uri saved_address = null;
+        public string saved_binding = CmisRepoCredentials.BindingBrowser;
         public string saved_remote_path = String.Empty;
         public string saved_user = String.Empty;
         public string saved_password = String.Empty;
@@ -156,18 +157,6 @@ namespace CmisSync
             catch(Exception e) {
                 return new Tuple<CmisServer, Exception>(null, e);
             }
-        }
-
-        /// <summary>
-        /// Get the list of subfolders contained in a CMIS folder.
-        /// </summary>
-        static public string[] GetSubfolders(
-            string repositoryId,
-            string path,
-            string address,
-            string user,
-            string password) {
-            return CmisUtils.GetSubfolders(repositoryId, path, address, user, password);
         }
 
         /// <summary>
@@ -422,9 +411,10 @@ namespace CmisSync
         /// <summary>
         /// First step of remote folder addition wizard is complete, switch to second step
         /// </summary>
-        public void Add1PageCompleted(Uri address, string user, string password)
+        public void Add1PageCompleted(Uri address, string binding, string user, string password)
         {
             this.saved_address = address;
+            this.saved_binding = binding;
             this.saved_user = user;
             this.saved_password = password;
 
@@ -496,6 +486,7 @@ namespace CmisSync
             {
                 DisplayName = repoName,
                 Address = this.saved_address,
+                Binding = this.saved_binding,
                 User = this.saved_user,
                 ObfuscatedPassword = new Password(this.saved_password).ObfuscatedPassword,
                 RepositoryId = this.PreviousRepository,

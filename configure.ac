@@ -99,6 +99,12 @@ AC_ARG_WITH([test-repoid],
     TEST_REPOID=${withval})
 AC_SUBST(TEST_REPOID)
 
+TEST_BINDING="atompub"
+AC_ARG_WITH([test-binding],
+    AS_HELP_STRING([--with-test-binding=BINDING],[Specify CMIS Binding for testing]),
+    TEST_BINDING=${withval})
+AC_SUBST(TEST_BINDING)
+
 TEST_PROXY_USER=""
 AC_ARG_WITH([test-proxy-user],
     AS_HELP_STRING([--with-test-proxy-user=PATH],[Specify user for authetication required proxy for testing]),

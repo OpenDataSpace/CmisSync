@@ -193,6 +193,8 @@
     <Compile Include="TransmissionWidget.designer.cs">
       <DependentUpon>TransmissionWidget.cs</DependentUpon>
     </Compile>
+    <Compile Include="ClientBrand.cs" />
+    <Compile Include="UIHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />

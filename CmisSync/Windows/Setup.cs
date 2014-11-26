@@ -456,6 +456,12 @@ namespace CmisSync
                 Controller.PageCancelled();
             };
 
+            string binding = Controller.saved_binding;
+            if (binding == null)
+            {
+                binding = CmisRepoCredentials.BindingBrowser;
+            }
+
             continue_button.Click += delegate
             {
                 // Show wait cursor
@@ -469,7 +475,8 @@ namespace CmisSync
                 {
                     UserName = user_box.Text,
                     Password = password_box.Password,
-                    Address = new Uri(address_box.Text)
+                    Address = new Uri(address_box.Text),
+                    Binding = binding,
                 };
                 IAsyncResult ar = dlgt.BeginInvoke(credentials, null, null);
                 while (!ar.AsyncWaitHandle.WaitOne(100))
@@ -482,6 +489,7 @@ namespace CmisSync
                 Controller.repositories = cmisServer != null ? cmisServer.Repositories : null;
 
                 address_box.Text = cmisServer.Url.ToString();
+                binding = cmisServer.Binding;
 
                 // Hide wait cursor
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
@@ -499,7 +507,7 @@ namespace CmisSync
                     ControllerLoginRemoveAction();
                     // Continue to next step, which is choosing a particular folder.
                     Controller.Add1PageCompleted(
-                        new Uri(address_box.Text), user_box.Text, password_box.Password);
+                        new Uri(address_box.Text), binding, user_box.Text, password_box.Password);
                 }
             };
         }
@@ -548,6 +556,7 @@ namespace CmisSync
                     UserName = Controller.saved_user,
                     Password = Controller.saved_password,
                     Address = Controller.saved_address,
+                    Binding = Controller.saved_binding,
                     RepoId = repository.Key
                 };
                 AsyncNodeLoader asyncLoader = new AsyncNodeLoader(repo, cred, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);

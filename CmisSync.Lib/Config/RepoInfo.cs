@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RepoInfo.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -27,6 +27,8 @@ namespace CmisSync.Lib.Config
 
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
+
+    using DotCMIS;
 
     /// <summary>
     /// All the info for a particular CmisSync synchronized folder.
@@ -75,6 +77,24 @@ namespace CmisSync.Lib.Config
             set
             {
                 this.credentials.Address = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the binding type.
+        /// </summary>
+        /// <value>The binding type.</value>
+        [XmlElement("binding"), System.ComponentModel.DefaultValue(BindingType.AtomPub)]
+        public string Binding
+        {
+            get
+            {
+                return this.credentials.Binding;
+            }
+
+            set
+            {
+                this.credentials.Binding = value;
             }
         }
 
@@ -142,7 +162,18 @@ namespace CmisSync.Lib.Config
                 /// </summary>
                 /// <value>The repository identifier.</value>
         [XmlElement("repository")]
-        public string RepositoryId { get; set; }
+        public string RepositoryId
+        {
+            get
+            {
+                return this.credentials.RepoId;
+            }
+
+            set
+            {
+                this.credentials.RepoId = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the poll interval in milliseconds.
@@ -369,6 +400,17 @@ namespace CmisSync.Lib.Config
         public virtual void SetPassword(Password password)
         {
             this.credentials.Password = new Password { ObfuscatedPassword = password.ObfuscatedPassword };
+        }
+
+        /// <summary>
+        /// Gets the CmisRepoCredentials
+        /// </summary>
+        public CmisRepoCredentials Credentials
+        {
+            get
+            {
+                return this.credentials;
+            }
         }
 
         /// <summary>

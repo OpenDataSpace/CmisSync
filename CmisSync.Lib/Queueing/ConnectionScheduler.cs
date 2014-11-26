@@ -256,8 +256,14 @@ namespace CmisSync.Lib.Queueing
         private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo)
         {
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
+            if (repoInfo.Binding == DotCMIS.BindingType.AtomPub) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
+            } else if (repoInfo.Binding == DotCMIS.BindingType.Browser) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
+                cmisParameters[SessionParameter.BrowserUrl] = repoInfo.Address.ToString();
+            }
+
             cmisParameters[SessionParameter.User] = repoInfo.User;
             cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;

@@ -163,8 +163,7 @@ namespace CmisSync {
         {
             using (var a = new NSAutoreleasePool ())
             {
-                string about_image_path = Path.Combine (NSBundle.MainBundle.ResourcePath,
-                    "Pixmaps", "about.png");
+                string about_image_path = UIHelpers.GetImagePathname ("about");
 
                 this.about_image = new NSImage (about_image_path) {
                     Size = new SizeF (640, 260)
