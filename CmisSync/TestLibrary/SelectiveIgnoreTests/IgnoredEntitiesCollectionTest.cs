@@ -12,5 +12,6 @@ namespace TestLibrary.SelectiveIgnoreTests
     [TestFixture]
     public class IgnoredEntitiesCollectionTest
     {
+
     }
 }

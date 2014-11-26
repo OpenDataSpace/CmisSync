@@ -165,6 +165,7 @@ SOURCES =  \
 	Queueing/SyncScheduler.cs \
 	SelectiveIgnore/IgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IgnoredEntity.cs \
+	SelectiveIgnore/IgnoredState.cs \
 	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
 	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
 	SelectiveIgnore/IIgnoredEntity.cs \

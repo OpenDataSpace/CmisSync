@@ -26,5 +26,20 @@ namespace CmisSync.Lib.SelectiveIgnore
 
     public class IgnoredEntitiesCollection : IIgnoredEntitiesStorage
     {
+        public void Add(IIgnoredEntity ignore) {
+            throw new NotImplementedException();
+        }
+
+        public void Remove(IIgnoredEntity ignore) {
+            throw new NotImplementedException();
+        }
+
+        public IgnoredState IsIgnoredId(string objectId) {
+            throw new NotImplementedException();
+        }
+
+        public IgnoredState IsIgnoredPath(string localPath) {
+            throw new NotImplementedException();
+        }
     }
 }
