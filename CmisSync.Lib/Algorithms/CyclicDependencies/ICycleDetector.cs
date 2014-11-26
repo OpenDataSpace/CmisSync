@@ -9,6 +9,6 @@ namespace CmisSync.Lib.Algorithms.CyclicDependencies
 
     public interface ICycleDetector
     {
-        List<List<AbstractFolderEvent>> Detect();
+        List<List<AbstractFolderEvent>> Detect(CrawlEventCollection collection);
     }
 }
