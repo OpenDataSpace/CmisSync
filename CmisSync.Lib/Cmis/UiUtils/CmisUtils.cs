@@ -43,12 +43,12 @@ namespace CmisSync.Lib.Cmis.UiUtils
     public class CmisServer
     {
         /// <summary>
-        /// URL of the CMIS server.
+        /// Gets the URL of the CMIS server.
         /// </summary>
         public Uri Url { get; private set; }
 
         /// <summary>
-        /// Repositories contained in the CMIS server.
+        /// Gets Repositories contained in the CMIS server.
         /// </summary>
         public Dictionary<string, string> Repositories { get; private set; }
 

@@ -46,8 +46,8 @@ namespace CmisSync
         {
             Title = Properties_Resources.EditTitle;
             ResizeMode = ResizeMode.NoResize;
-            Height = 340;
-            Width = 640;
+            Height = 370;
+            Width = 660;
             Icon = UIHelpers.GetImageSource("app", "ico");
             ElementHost.EnableModelessKeyboardInterop(this);
 

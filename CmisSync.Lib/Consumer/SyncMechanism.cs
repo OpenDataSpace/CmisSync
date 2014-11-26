@@ -196,7 +196,6 @@ namespace CmisSync.Lib.Consumer
                 throw new NotImplementedException(string.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));
             }
 
-            Logger.Debug("Using Solver: " + solver.GetType());
             Stopwatch watch = Stopwatch.StartNew();
             this.Solve(solver, actualEvent);
             watch.Stop();

@@ -333,7 +333,7 @@ Please check the protocol part of the given URL. Maybe your server is not capabl
     <value>You are running the latest version.</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value>Version {0}</value>
+    <value>Version {0} ({1})</value>
   </data>
   <data name="Website" xml:space="preserve">
     <value>Website</value>
@@ -452,5 +452,17 @@ This could lead to a lot of conflict files!</value>
   </data>
   <data name="TransmissionTitleStatus" xml:space="preserve">
     <value>Status</value>
+  </data>
+  <data name="LoginFailedLockedUntil" xml:space="preserve">
+    <value>Account is locked until {0}</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="CannotSync" xml:space="preserve">
+    <value>{0} cannot be synced</value>
+  </data>
+  <data name="ProblemWithFS" xml:space="preserve">
+    <value>Problems on file system:{0}{1}</value>
   </data>
 </root>

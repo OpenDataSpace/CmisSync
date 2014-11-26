@@ -15,6 +15,11 @@ SOURCES =  \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	ActiveActivitiesManagerTest.cs \
+	AlgorithmsTests/CyclicDependencies/NoCycleDetectionTests.cs \
+	AlgorithmsTests/CyclicDependencies/SimpleCycleDetectionTests.cs \
+	AlgorithmsTests/StringTarjanNode.cs \
+	AlgorithmsTests/TrajanSimpleCircleTests.cs \
+	AlgorithmsTests/TarjanSimpleLinearTests.cs \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
@@ -49,7 +54,6 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/RemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
-	EventManagerInitializerTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/ExceptionEventTest.cs \
@@ -59,6 +63,7 @@ SOURCES =  \
 	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
+	EventsTests/PermissionDeniedEventCalculatesBlockingUntilTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
 	FileTransmissionTests/ChunkedDownloaderTest.cs \
@@ -145,9 +150,11 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
+	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
-	UtilsTests/ProcessDiagnosticsTest.cs
+	UtilsTests/ProcessDiagnosticsTest.cs \
+	UtilsTests/X509StoreTest.cs
 
 EXTRA_DIST = TestLibrary.csproj \
 	$(MOQ_PATH)

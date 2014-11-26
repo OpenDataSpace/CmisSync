@@ -83,7 +83,6 @@ namespace CmisSync.Lib.Accumulator {
                 return false;
             }
 
-            Logger.Debug("Fetching remote Object for " + e);
             string id;
             if(e is AbstractFolderEvent && (e as AbstractFolderEvent).Local == MetaDataChangeType.DELETED) {
                 id = this.FetchIdFromStorage(e);

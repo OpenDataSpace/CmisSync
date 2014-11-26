@@ -28,10 +28,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using DotCMIS.Client;
 
+    /// <summary>
+    /// Local object changed remote object moved situation solver.
+    /// </summary>
     public class LocalObjectChangedRemoteObjectMoved : AbstractEnhancedSolver
     {
         private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
-        private IFileSystemInfoFactory fsFactory;
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChangedRemoteObjectMoved"/> class.
+        /// </summary>
+        /// <param name="session">Cmis session.</param>
+        /// <param name="storage">Meta data storage.</param>
+        /// <param name="changeSolver">Local object changed and remote object changed situation solver.</param>
         public LocalObjectChangedRemoteObjectMoved(
             ISession session,
             IMetaDataStorage storage,

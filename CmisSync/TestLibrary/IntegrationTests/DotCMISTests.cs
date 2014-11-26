@@ -168,11 +168,18 @@ namespace TestLibrary.IntegrationTests
             string password,
             string repositoryId)
         {
+            string subFolderName = "subFolder";
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
-
+            try {
+                IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
+                if (dir != null) {
+                    dir.DeleteTree(true, null, true);
+                }
+            } catch (CmisObjectNotFoundException) {
+            }
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
-            IFolder subFolder = folder.CreateFolder("subFolder");
+            IFolder subFolder = folder.CreateFolder(subFolderName);
 
             IFolder subFolderInstanceCopy = (IFolder)session.GetObject(subFolder.Id);
             subFolder.DeleteTree(true, null, true);
@@ -653,31 +660,28 @@ namespace TestLibrary.IntegrationTests
             IFolder rootFolder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string folderName = "1";
             string newFolderName = "2";
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.Name, folderName);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
             try {
                 IFolder folder = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + folderName) as IFolder;
                 if (folder != null) {
-                    folder.Delete(true);
+                    folder.DeleteTree(true, null, true);
                 }
 
                 folder = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + newFolderName) as IFolder;
                 if (folder != null) {
-                    folder.Delete(true);
+                    folder.DeleteTree(true, null, true);
                 }
             }
             catch (CmisObjectNotFoundException) {
             }
 
-            IFolder newFolder = rootFolder.CreateFolder(properties);
+            IFolder newFolder = rootFolder.CreateFolder(folderName);
             string changeLogToken = session.RepositoryInfo.LatestChangeLogToken;
             string changeToken = newFolder.ChangeToken;
             newFolder.Rename(newFolderName, true);
 
             Assert.That(newFolder.ChangeToken, Is.Not.EqualTo(changeToken));
 
-            newFolder.Delete(true);
+            newFolder.DeleteTree(true, null, true);
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Category("Erratic"), Ignore("Doesn't happend anymore")]

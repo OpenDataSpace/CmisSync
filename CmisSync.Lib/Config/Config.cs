@@ -122,14 +122,14 @@ namespace CmisSync.Lib.Config
         private string fullpath;
         private string configPath;
         private Guid deviceId;
+        private bool notifications = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Config.Config"/> class.
         /// This constructor should only be called by the serializer.
         /// </summary>
         [Obsolete("This constructor should only be called by the serializer.", true)]
-        public Config()
-        {
+        public Config() {
         }
 
         private Config(string fullPath)
@@ -138,8 +138,6 @@ namespace CmisSync.Lib.Config
             this.configPath = Path.GetDirectoryName(this.fullpath);
         }
 
-        private bool notifications = true;
-
         /// <summary>
         /// Gets or sets a value indicating whether notifications are enabled or not.
         /// </summary>
@@ -147,13 +145,12 @@ namespace CmisSync.Lib.Config
         [XmlElement("notifications")]
         public bool Notifications
         {
-            get
-            {
-                return notifications;
+            get {
+                return this.notifications;
             }
-            set
-            {
-                notifications = value;
+
+            set {
+                this.notifications = value;
             }
         }
 
@@ -206,10 +203,8 @@ namespace CmisSync.Lib.Config
         [XmlElement("deviceId")]
         public Guid DeviceId
         {
-            get
-            {
-                if(this.deviceId.Equals(Guid.Empty))
-                {
+            get {
+                if (this.deviceId.Equals(Guid.Empty)) {
                     this.deviceId = Guid.NewGuid();
                     this.Save();
                 }
@@ -217,8 +212,7 @@ namespace CmisSync.Lib.Config
                 return this.deviceId;
             }
 
-            set
-            {
+            set {
                 this.deviceId = value;
             }
         }
@@ -284,48 +278,34 @@ namespace CmisSync.Lib.Config
             Config config;
 
             // Create configuration folder if it does not exist yet.
-            if (!Directory.Exists(configPath))
-            {
+            if (!Directory.Exists(configPath)) {
                 Directory.CreateDirectory(configPath);
             }
 
             // Create an empty XML configuration file if none is present yet.
-            if (!File.Exists(fullPath))
-            {
+            if (!File.Exists(fullPath)) {
                 Config conf = CreateInitialConfig(fullPath);
                 conf.Save();
             }
 
             // Load the XML configuration.
-            try
-            {
+            try {
                 config = Load(fullPath);
-            }
-            catch (TypeInitializationException)
-            {
+            } catch (TypeInitializationException) {
                 config = CreateInitialConfig(fullPath);
-            }
-            catch (FileNotFoundException)
-            {
+            } catch (FileNotFoundException) {
                 config = CreateInitialConfig(fullPath);
-            }
-            catch (XmlException)
-            {
+            } catch (XmlException) {
                 FileInfo file = new FileInfo(fullPath);
 
                 // If the XML configuration file exists but with file size zero, then recreate it.
-                if (file.Length == 0)
-                {
+                if (file.Length == 0) {
                     File.Delete(fullPath);
                     config = CreateInitialConfig(fullPath);
-                }
-                else
-                {
+                } else {
                     throw new XmlException(fullPath + " does not contain a valid config XML structure.");
                 }
-            }
-            finally
-            {
+            } finally {
                 config = Load(fullPath);
             }
 
@@ -346,23 +326,12 @@ namespace CmisSync.Lib.Config
             if (Backend.Platform == PlatformID.Unix ||
                 Backend.Platform == PlatformID.MacOSX)
             {
-                userName = Environment.UserName;
-                if (string.IsNullOrEmpty(userName))
-                {
-                    userName = string.Empty;
-                }
-                else
-                {
-                    userName = userName.TrimEnd(",".ToCharArray());
-                }
-            }
-            else
-            {
+                userName = string.IsNullOrEmpty(Environment.UserName) ? string.Empty : Environment.UserName.TrimEnd(",".ToCharArray());
+            } else {
                 userName = Environment.UserName;
             }
 
-            if (string.IsNullOrEmpty(userName))
-            {
+            if (string.IsNullOrEmpty(userName)) {
                 userName = "Unknown";
             }
 
@@ -477,10 +446,8 @@ namespace CmisSync.Lib.Config
         /// <param name="displayName">The name of the repoInfo Name.</param>
         public RepoInfo GetRepoInfo(string displayName)
         {
-            foreach (RepoInfo repo in this.Folders)
-            {
-                if (repo.DisplayName.Equals(displayName))
-                {
+            foreach (RepoInfo repo in this.Folders) {
+                if (repo.DisplayName.Equals(displayName)) {
                     return repo;
                 }
             }
@@ -496,12 +463,9 @@ namespace CmisSync.Lib.Config
         /// </returns>
         public string GetHomePath()
         {
-            if (Backend.Platform == PlatformID.Win32NT)
-            {
+            if (Backend.Platform == PlatformID.Win32NT) {
                 return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            }
-            else
-            {
+            } else {
                 return Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             }
         }
@@ -552,8 +516,7 @@ namespace CmisSync.Lib.Config
         public void Save()
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Config));
-            using (TextWriter textWriter = new StreamWriter(this.fullpath))
-            {
+            using (TextWriter textWriter = new StreamWriter(this.fullpath)) {
                 serializer.Serialize(textWriter, this);
             }
 

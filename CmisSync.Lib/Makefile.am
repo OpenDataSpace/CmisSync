@@ -10,6 +10,10 @@ SOURCES =  \
 	Accumulator/RemoteObjectFetcher.cs \
 	Accumulator/RemoteObjectMovedOrRenamedAccumulator.cs \
 	ActivityListenerAggregator.cs \
+	Algorithms/CyclicDependencies/CycleDetector.cs \
+	Algorithms/CyclicDependencies/ICycleDetector.cs \
+	Algorithms/Tarjan/AbstractTarjanNode.cs \
+	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
@@ -70,6 +74,7 @@ SOURCES =  \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
 	Events/ConfigChangedEvent.cs \
+	Events/ConfigurationNeededEvent.cs \
 	Events/ContentChangeEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/EncapsuledEvent.cs \

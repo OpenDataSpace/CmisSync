@@ -34,8 +34,6 @@ namespace CmisSync.Lib.Consumer
     /// </summary>
     public class LocalSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalSituationDetection));
-
         /// <summary>
         /// Analyse the situation of the actual event in combination with the meta data storage.
         /// </summary>
@@ -45,7 +43,6 @@ namespace CmisSync.Lib.Consumer
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
             SituationType type = this.DoAnalyse(storage, actualEvent);
-            Logger.Debug(string.Format("Local Situation is: {0}", type));
             return type;
         }
 

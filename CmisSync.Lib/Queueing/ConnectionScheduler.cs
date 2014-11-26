@@ -43,9 +43,11 @@ namespace CmisSync.Lib.Queueing
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionScheduler));
         private Task task;
+        private CancellationTokenSource cancelTaskSource;
+        private CancellationToken cancelToken;
         private object connectionLock = new object();
         private object repoInfoLock = new object();
-        private bool isForbidden = false;
+        private DateTime isForbiddenUntil = DateTime.MinValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.ConnectionScheduler"/> class.
@@ -121,9 +123,17 @@ namespace CmisSync.Lib.Queueing
         public void Dispose() {
             if (this.task != null) {
                 try {
+                    this.cancelTaskSource.Cancel();
+                    this.task.Wait(this.Interval);
                     this.task.Dispose();
-                } catch(InvalidOperationException) {
+                } catch (InvalidOperationException) {
                     // Disposing the login task before it is finished is not a problem
+                } catch (TaskCanceledException) {
+                    // It is fine if the task is canceled
+                } catch (AggregateException) {
+                    // It is also fine if the task is canceled
+                } finally {
+                    this.cancelTaskSource.Dispose();
                 }
             }
         }
@@ -134,12 +144,15 @@ namespace CmisSync.Lib.Queueing
         public virtual void Start() {
             lock(this.connectionLock) {
                 if (this.task == null) {
+                    this.cancelTaskSource = new CancellationTokenSource();
+                    this.cancelToken = this.cancelTaskSource.Token;
                     this.task = Task.Factory.StartNew(
                         () => {
-                        while (!this.Connect()) {
-                            Thread.Sleep(this.Interval);
+                        this.cancelToken.ThrowIfCancellationRequested();
+                        while (!this.cancelToken.IsCancellationRequested && !this.Connect()) {
+                            this.cancelToken.WaitHandle.WaitOne(this.Interval);
                         }
-                    });
+                    }, this.cancelTaskSource.Token);
                 }
             }
         }
@@ -156,14 +169,22 @@ namespace CmisSync.Lib.Queueing
                 if (changedConfig != null) {
                     lock(this.repoInfoLock) {
                         this.RepoInfo = changedConfig;
-                        this.isForbidden = false;
+                        this.isForbiddenUntil = DateTime.MinValue;
                         lock(this.connectionLock) {
                             if (this.task != null) {
                                 try {
+                                    this.cancelTaskSource.Cancel();
+                                    this.task.Wait(this.Interval);
                                     this.task.Dispose();
-                                    this.task = null;
-                                } catch(InvalidOperationException) {
+                                } catch (InvalidOperationException) {
                                     // Disposing the login task before it is finished is not a problem.
+                                } catch (TaskCanceledException) {
+                                    // It is also fine if the task is canceled
+                                } catch (AggregateException) {
+                                    // It is also fine if the task is canceled
+                                } finally {
+                                    this.cancelTaskSource.Dispose();
+                                    this.task = null;
                                 }
                             }
 
@@ -184,29 +205,35 @@ namespace CmisSync.Lib.Queueing
         {
             lock(this.repoInfoLock) {
                 try {
-                    if (this.isForbidden) {
+                    if (this.isForbiddenUntil > DateTime.UtcNow) {
                         return false;
                     }
 
                     // Create session.
                     var session = this.SessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.AuthProvider, null);
-
+                    this.cancelToken.ThrowIfCancellationRequested();
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
+                    this.cancelToken.ThrowIfCancellationRequested();
                     this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session));
                     return true;
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {
                     Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
-                    this.Queue.AddEvent(new PermissionDeniedEvent(e));
-                    this.isForbidden = true;
+                    var permissionDeniedEvent = new PermissionDeniedEvent(e);
+                    this.Queue.AddEvent(permissionDeniedEvent);
+                    this.isForbiddenUntil = permissionDeniedEvent.IsBlockedUntil ?? DateTime.MaxValue;
                 } catch (CmisRuntimeException e) {
                     if (e.Message == "Proxy Authentication Required") {
                         this.Queue.AddEvent(new ProxyAuthRequiredEvent(e));
                         Logger.Warn("Proxy Settings Problem", e);
-                        this.isForbidden = true;
+                        this.isForbiddenUntil = DateTime.MaxValue;
                     } else {
                         Logger.Error("Connection to repository failed: ", e);
                         this.Queue.AddEvent(new ExceptionEvent(e));
                     }
+                } catch (DotCMIS.Exceptions.CmisInvalidArgumentException e) {
+                    Logger.Warn(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
+                    this.Queue.AddEvent(new ConfigurationNeededEvent(e));
+                    this.isForbiddenUntil = DateTime.MaxValue;
                 } catch (CmisObjectNotFoundException e) {
                     Logger.Error("Failed to find cmis object: ", e);
                 } catch (CmisBaseException e) {

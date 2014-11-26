@@ -43,7 +43,7 @@ namespace CmisSync
         /// <summary>
         /// Synchronized folder name
         /// </summary>
-        public string Name { get; set; }
+        public string FolderName { get; set; }
 
         /// <summary>
         /// Ignore folder list
@@ -70,7 +70,7 @@ namespace CmisSync
         /// </summary>
         public Edit(EditType type, CmisRepoCredentials credentials, string name, string remotePath, List<string> ignores, string localPath)
         {
-            this.Name = name;
+            this.FolderName = name;
             this.Credentials = credentials;
             this.remotePath = remotePath;
             this.Ignores = ignores;
@@ -98,32 +98,9 @@ namespace CmisSync
         /// </summary>
         private void CreateEdit()
         {
-            CmisTreeStore cmisStore = new CmisTreeStore();
-            Gtk.TreeView treeView = new Gtk.TreeView(cmisStore);
-
-            RootFolder root = new RootFolder() {
-                Name = this.Name,
-                Id = this.Credentials.RepoId,
-                Address = this.Credentials.Address.ToString()
-            };
-            IgnoredFolderLoader.AddIgnoredFolderToRootNode(root, this.Ignores);
-            LocalFolderLoader.AddLocalFolderToRootNode(root, this.localPath);
-
-            AsyncNodeLoader asyncLoader = new AsyncNodeLoader(root, this.Credentials, PredefinedNodeLoader.LoadSubFolderDelegate, PredefinedNodeLoader.CheckSubFolderDelegate);
-            asyncLoader.UpdateNodeEvent += delegate {
-                cmisStore.UpdateCmisTree(root);
-            };
-            cmisStore.UpdateCmisTree(root);
-            asyncLoader.Load(root);
-
             this.Header = CmisSync.Properties_Resources.EditTitle;
 
             VBox layout_vertical   = new VBox(false, 12);
-
-            this.Controller.CloseWindowEvent += delegate
-            {
-                asyncLoader.Cancel();
-            };
 
             Button cancel_button = new Button(CmisSync.Properties_Resources.Cancel);
             cancel_button.Clicked += delegate {
@@ -131,77 +108,22 @@ namespace CmisSync
             };
 
             Button finish_button = new Button(CmisSync.Properties_Resources.SaveChanges);
+            finish_button.Sensitive = false;
             finish_button.Clicked += delegate {
-                this.Ignores = NodeModelUtils.GetIgnoredFolder(root);
                 this.Controller.SaveFolder();
                 this.Close();
             };
 
-            treeView.HeadersVisible = false;
-            treeView.Selection.Mode = SelectionMode.Single;
-
-            TreeViewColumn column = new TreeViewColumn();
-            column.Title = "Name";
-            CellRendererToggle renderToggle = new CellRendererToggle();
-            column.PackStart(renderToggle, false);
-            renderToggle.Activatable = true;
-            column.AddAttribute(renderToggle, "active", (int)CmisTreeStore.Column.ColumnSelected);
-            column.AddAttribute(renderToggle, "inconsistent", (int)CmisTreeStore.Column.ColumnSelectedThreeState);
-            column.AddAttribute(renderToggle, "radio", (int)CmisTreeStore.Column.ColumnRoot);
-            renderToggle.Toggled += delegate(object render, ToggledArgs args) {
-                TreeIter iterToggled;
-                if (!cmisStore.GetIterFromString(out iterToggled, args.Path))
-                {
-                    Console.WriteLine("Toggled GetIter Error " + args.Path);
-                    return;
-                }
-
-                Node node = cmisStore.GetValue(iterToggled, (int)CmisTreeStore.Column.ColumnNode) as Node;
-                if (node == null)
-                {
-                    Console.WriteLine("Toggled GetValue Error " + args.Path);
-                    return;
-                }
-
-                if (node.Parent == null)
-                {
-                    node.Selected = true;
-                }
-                else
-                {
-                    if (node.Selected == false)
-                    {
-                        node.Selected = true;
-                    }
-                    else
-                    {
-                        node.Selected = false;
-                    }
-                }
-
-                cmisStore.UpdateCmisTree(root);
-            };
-            CellRendererText renderText = new CellRendererText();
-            column.PackStart(renderText, false);
-            column.SetAttributes(renderText, "text", (int)CmisTreeStore.Column.ColumnName);
-            column.Expand = true;
-            treeView.AppendColumn(column);
-
-            treeView.AppendColumn("Status", new StatusCellRenderer(), "text", (int)CmisTreeStore.Column.ColumnStatus);
-
-            treeView.RowExpanded += delegate(object o, RowExpandedArgs args) {
-                Node node = cmisStore.GetValue(args.Iter, (int)CmisTreeStore.Column.ColumnNode) as Node;
-                asyncLoader.Load(node);
-            };
-
-            ScrolledWindow sw = new ScrolledWindow() {
-                ShadowType = Gtk.ShadowType.In
-            };
-            sw.Add(treeView);
-
             layout_vertical.PackStart(new Label(string.Empty), false, false, 0);
-            layout_vertical.PackStart(sw, true, true, 0);
-            this.Add(layout_vertical);
+            Notebook tab_view = new Notebook();
+            //tab_view.AppendPage(layout_vertical, new Label("Edit Folders"));
+            var credentialsWidget = new CredentialsWidget();
+            credentialsWidget.Password = this.Credentials.Password.ToString();
+            credentialsWidget.Address = this.Credentials.Address.ToString();
+            credentialsWidget.UserName = this.Credentials.UserName;
+            credentialsWidget.Changed += (object sender, EventArgs e) => finish_button.Sensitive = true;
+            tab_view.AppendPage(credentialsWidget, new Label(Properties_Resources.Credentials));
+            this.Add(tab_view);
             this.AddButton(cancel_button);
             this.AddButton(finish_button);
 
@@ -229,12 +151,12 @@ namespace CmisSync
         /// </value>
         public bool IsVisible {
             get {
-                // TODO Please change it to the correct Window property if this method is needed
-                return false;
+                return this.Visible;
             }
 
             private set
             {
+                this.Visible = value;
             }
         }
     }

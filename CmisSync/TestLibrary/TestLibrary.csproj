@@ -215,6 +215,14 @@
     <Compile Include="SelectiveIgnoreTests\IgnoredEntitiesCollectionTest.cs" />
     <Compile Include="IntegrationTests\UploadFileIT.cs" />
     <Compile Include="IntegrationTests\NeedsLocalFileSystemFolder.cs" />
+    <Compile Include="UtilsTests\X509StoreTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedEventCalculatesBlockingUntilTest.cs" />
+    <Compile Include="AlgorithmsTests\TrajanSimpleCircleTests.cs" />
+    <Compile Include="AlgorithmsTests\TarjanSimpleLinearTests.cs" />
+    <Compile Include="AlgorithmsTests\StringTarjanNode.cs" />
+    <Compile Include="UtilsTests\BackendTest.cs" />
+    <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
+    <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -265,5 +273,7 @@
     <Folder Include="CmisTests\ConvenienceExtendersTests\" />
     <Folder Include="SelectiveIgnoreTests\" />
     <Folder Include="MockedServer\" />
+    <Folder Include="AlgorithmsTests\" />
+    <Folder Include="AlgorithmsTests\CyclicDependencies\" />
   </ItemGroup>
 </Project>

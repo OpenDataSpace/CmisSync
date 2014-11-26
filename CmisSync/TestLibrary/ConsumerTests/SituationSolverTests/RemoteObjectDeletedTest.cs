@@ -85,6 +85,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.FullName).Returns(this.path);
             fileInfo.Setup(f => f.LastWriteTimeUtc).Returns(lastModified);
+            fileInfo.Setup(f => f.Exists).Returns(true);
+            fileInfo.Setup(f => f.Delete()).Callback(() => fileInfo.Setup(f1 => f1.Refresh()).Callback(() => fileInfo.Setup(f3 => f3.Exists).Returns(false)));
             var mappedObject = new MappedObject("a", "id", MappedObjectType.File, "parentId", "changeToken", 0) {
                 LastLocalWriteTimeUtc = lastModified
             };

@@ -215,7 +215,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             using (var stream = new MemoryStream()) {
                 cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(stream).Callback(() => fileInfo.Setup(f => f.Exists).Returns(true));
                 cacheFileInfo.Setup(f => f.MoveTo(this.path)).Throws(new IOException());
-
+                fileInfo.SetupStream(Encoding.UTF8.GetBytes("other content"));
                 this.fsFactory.AddIFileInfo(cacheFileInfo.Object);
                 this.fsFactory.Setup(f => f.CreateConflictFileInfo(fileInfo.Object)).Returns(conflictFileInfo);
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
@@ -254,7 +254,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             fileInfo.Setup(f => f.FullName).Returns(this.path);
             fileInfo.Setup(f => f.Name).Returns(this.objectName);
             fileInfo.Setup(f => f.Directory).Returns(parentDir);
-            fileInfo.Setup(f => f.Uuid).Returns(Guid.NewGuid());
             fileInfo.Setup(f => f.Exists).Returns(true);
             byte[] content = Encoding.UTF8.GetBytes("content");
             fileInfo.SetupStream(content);
@@ -265,7 +264,45 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
+            fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalAndRemoteFilesAreSavedAsEqualIfTheContentIsEqualAndNoContentStreamHashIsAvailable() {
+            var fileInfo = new Mock<IFileInfo>();
+            var cacheFileInfo = this.fsFactory.SetupDownloadCacheFile();
+            var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath());
+            fileInfo.SetupAllProperties();
+            fileInfo.Setup(f => f.FullName).Returns(this.path);
+            fileInfo.Setup(f => f.Name).Returns(this.objectName);
+            fileInfo.Setup(f => f.Directory).Returns(parentDir);
+            fileInfo.Setup(f => f.Exists).Returns(true);
+            byte[] content = Encoding.UTF8.GetBytes("content");
+            fileInfo.SetupStream(content);
+            byte[] expectedHash = SHA1Managed.Create().ComputeHash(content);
+            cacheFileInfo.SetupAllProperties();
+            cacheFileInfo.Setup(f => f.FullName).Returns(this.path + ".sync");
+            cacheFileInfo.Setup(f => f.Name).Returns(this.objectName + ".sync");
+            cacheFileInfo.Setup(f => f.Directory).Returns(parentDir);
+            cacheFileInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
+            cacheFileInfo.Setup(f => f.MoveTo(this.path)).Throws<IOException>();
+            using (var stream = new MemoryStream()) {
+                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(stream);
+                this.fsFactory.AddIFileInfo(cacheFileInfo.Object);
+
+                Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
+                remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+
+                this.underTest.Solve(fileInfo.Object, remoteObject.Object);
+
+                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
+                fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+                cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
+                cacheFileInfo.Verify(f => f.Delete(), Times.Once());
+                fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, this.creationDate, expectedHash, content.Length);
+            }
         }
     }
 }
