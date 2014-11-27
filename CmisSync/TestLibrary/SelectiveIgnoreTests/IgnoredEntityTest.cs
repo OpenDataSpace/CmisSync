@@ -59,7 +59,12 @@ namespace TestLibrary.SelectiveIgnoreTests
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void ConstructorFailsIfFolderIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new IgnoredEntity(null, Mock.Of<IPathMatcher>()));
+            Assert.Throws<ArgumentNullException>(() => new IgnoredEntity((IFolder)null, Mock.Of<IPathMatcher>()));
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void ConstructorFailsIfDocumentIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new IgnoredEntity((IDocument)null, Mock.Of<IPathMatcher>()));
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]

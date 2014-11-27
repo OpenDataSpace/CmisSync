@@ -43,5 +43,22 @@ namespace CmisSync.Lib.SelectiveIgnore
             this.ObjectId = folder.Id;
             this.LocalPath = matcher.CreateLocalPath(folder);
         }
+
+        public IgnoredEntity(IDocument doc, IPathMatcher matcher) {
+            if (doc == null) {
+                throw new ArgumentNullException("Given doc is null");
+            }
+
+            if (matcher == null) {
+                throw new ArgumentNullException("Given matcher is null");
+            }
+
+            if (!matcher.CanCreateLocalPath(doc)) {
+                throw new ArgumentException("Cannot create a local path for the given remote folder");
+            }
+
+            this.ObjectId = doc.Id;
+            this.LocalPath = matcher.CreateLocalPath(doc);
+        }
     }
 }

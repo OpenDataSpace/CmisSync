@@ -25,41 +25,60 @@ namespace CmisSync.Lib.SelectiveIgnore
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Queueing;
+
+    using DotCMIS.Client;
 
     public class IgnoreFlagChangeDetection : SyncEventHandler
     {
-        private ObservableCollection<IIgnoredEntity> ignores;
-        public IgnoreFlagChangeDetection(ObservableCollection<IIgnoredEntity> ignores)
+        private IIgnoredEntitiesStorage ignores;
+        private IPathMatcher matcher;
+        public IgnoreFlagChangeDetection(IIgnoredEntitiesStorage ignores, IPathMatcher matcher)
         {
             if (ignores == null) {
                 throw new ArgumentNullException("Given ignores are null");
             }
 
+            if (matcher == null) {
+                throw new ArgumentNullException("Given path matcher is null");
+            }
+
             this.ignores = ignores;
+            this.matcher = matcher;
         }
 
         public override bool Handle(ISyncEvent e)
         {
             if (e is ContentChangeEvent) {
                 var change = e as ContentChangeEvent;
-                if (this.IsIgnoredId(change.ObjectId) && change.CmisObject != null) {
-                    var obj = change.CmisObject;
-                    if (obj.AreAllChildrenIgnored()) {
-                        return false;
-                    } else {
-////                        this.ignore
+                if (change.Type == DotCMIS.Enums.ChangeType.Deleted) {
+                    if (this.ignores.IsIgnoredId(change.ObjectId) == IgnoredState.IGNORED) {
+                        this.ignores.Remove(change.ObjectId);
                     }
+
+                    return false;
                 }
-            }
 
-            return false;
-        }
+                switch (this.ignores.IsIgnoredId(change.ObjectId)) {
+                case IgnoredState.IGNORED:
+                    if (!change.CmisObject.AreAllChildrenIgnored()) {
+                        this.ignores.Remove(change.ObjectId);
+                    }
 
-        private bool IsIgnoredId(string objectId) {
-            foreach(var ignore in this.ignores) {
-                if (objectId == ignore.ObjectId) {
-                    return true;
+                    break;
+                case IgnoredState.INHERITED:
+                    goto case IgnoredState.NOT_IGNORED;
+                case IgnoredState.NOT_IGNORED:
+                    if (change.CmisObject.AreAllChildrenIgnored()) {
+                        if (change.CmisObject is IFolder) {
+                            this.ignores.Add(new IgnoredEntity(change.CmisObject as IFolder, this.matcher));
+                        } else if (change.CmisObject is IDocument) {
+                            this.ignores.Add(new IgnoredEntity(change.CmisObject as IDocument, this.matcher));
+                        }
+                    }
+
+                    break;
                 }
             }
 

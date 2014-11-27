@@ -44,8 +44,7 @@ namespace TestLibrary.SelectiveIgnoreTests
     {
         private readonly string ignoredObjectId = "ignoredObjectId";
         private readonly string ignoredPath = Path.Combine(Path.GetTempPath(), "IgnoredLocalPath");
-        private Mock<ISession> session;
-        private Mock<IMetaDataStorage> storage;
+        private Mock<IIgnoredEntitiesStorage> storage;
         private ObservableCollection<IIgnoredEntity> ignores;
         private SelectiveIgnoreFilter underTest;
 
@@ -54,17 +53,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             Assert.Throws<ArgumentNullException>(
                 () => new SelectiveIgnoreFilter(
                 null,
-                Mock.Of<ISession>(),
-                Mock.Of<IMetaDataStorage>()));
-        }
-
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
-        public void ConstructorFailsIfSessionIsNull() {
-            Assert.Throws<ArgumentNullException>(
-                () => new SelectiveIgnoreFilter(
-                new ObservableCollection<IIgnoredEntity>(),
-                null,
-                Mock.Of<IMetaDataStorage>()));
+                Mock.Of<IIgnoredEntitiesStorage>()));
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
@@ -72,7 +61,6 @@ namespace TestLibrary.SelectiveIgnoreTests
             Assert.Throws<ArgumentNullException>(
                 () => new SelectiveIgnoreFilter(
                 new ObservableCollection<IIgnoredEntity>(),
-                Mock.Of<ISession>(),
                 null));
         }
 
@@ -80,8 +68,7 @@ namespace TestLibrary.SelectiveIgnoreTests
         public void ConstructorTest() {
             new SelectiveIgnoreFilter(
                 new ObservableCollection<IIgnoredEntity>(),
-                Mock.Of<ISession>(),
-                Mock.Of<IMetaDataStorage>());
+                Mock.Of<IIgnoredEntitiesStorage>());
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
@@ -128,9 +115,8 @@ namespace TestLibrary.SelectiveIgnoreTests
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void FilterRemoteObjectCreatedEvents() {
             this.SetupMocks();
-            string objectId = "objectId";
-            var doc = Mock.Of<IDocument>(d => d.Parents[0].Id == this.ignoredObjectId);
-            this.session.Setup(s => s.GetObject(objectId)).Returns(doc);
+            var doc = Mock.Of<IDocument>();
+            this.storage.Setup(s => s.IsIgnored(doc)).Returns(IgnoredState.INHERITED);
             var fileEvent = new FileEvent(null, doc) { Remote = MetaDataChangeType.CREATED };
 
             Assert.That(this.underTest.Handle(fileEvent), Is.True);
@@ -139,8 +125,6 @@ namespace TestLibrary.SelectiveIgnoreTests
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void FilterRemoteObjectDeletedEvents() {
             this.SetupMocks();
-            string objectId = "objectId";
-            this.session.Setup(s => s.GetObject(objectId)).Throws<CmisObjectNotFoundException>();
             var fileEvent = new FileEvent(Mock.Of<IFileInfo>(f => f.FullName == Path.Combine(this.ignoredPath, "file.txt")), null) { Remote = MetaDataChangeType.DELETED };
 
             Assert.That(this.underTest.Handle(fileEvent), Is.True);
@@ -171,12 +155,14 @@ namespace TestLibrary.SelectiveIgnoreTests
         }
 
         private void SetupMocks() {
-            this.session = new Mock<ISession>();
-            this.storage = new Mock<IMetaDataStorage>();
+            this.storage = new Mock<IIgnoredEntitiesStorage>();
+            this.storage.Setup(s => s.IsIgnoredPath(this.ignoredPath)).Returns(IgnoredState.IGNORED);
+            this.storage.Setup(s => s.IsIgnoredPath(It.Is<string>(path => path.StartsWith(this.ignoredPath) && path != this.ignoredPath))).Returns(IgnoredState.INHERITED);
+            this.storage.Setup(s => s.IsIgnoredPath(It.Is<string>(path => !path.StartsWith(this.ignoredPath)))).Returns(IgnoredState.NOT_IGNORED);
             this.ignores = new ObservableCollection<IIgnoredEntity>();
             this.ignores.Add(Mock.Of<IIgnoredEntity>(i => i.LocalPath == this.ignoredPath && i.ObjectId == this.ignoredObjectId));
             this.ignores.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => Assert.Fail("Collection should not be changed");
-            this.underTest = new SelectiveIgnoreFilter(this.ignores, this.session.Object, this.storage.Object);
+            this.underTest = new SelectiveIgnoreFilter(this.ignores, this.storage.Object);
         }
     }
 }

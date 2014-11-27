@@ -16,14 +16,20 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.SelectiveIgnore
 {
     using System;
+
+    using DotCMIS.Client;
 
     public interface IIgnoredEntitiesStorage
     {
         void Add(IIgnoredEntity ignore);
         void Remove(IIgnoredEntity ignore);
+        void Remove(string objectId);
+        IgnoredState IsIgnored(IDocument doc);
+        IgnoredState IsIgnored(IFolder folder);
         IgnoredState IsIgnoredId(string objectId);
         IgnoredState IsIgnoredPath(string localPath);
     }

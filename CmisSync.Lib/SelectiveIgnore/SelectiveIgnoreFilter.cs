@@ -36,25 +36,17 @@ namespace CmisSync.Lib.SelectiveIgnore
     /// </summary>
     public class SelectiveIgnoreFilter : SyncEventHandler
     {
-        private ObservableCollection<IIgnoredEntity> ignores;
-        private ISession session;
-        private IMetaDataStorage storage;
+        private IIgnoredEntitiesStorage storage;
 
-        public SelectiveIgnoreFilter(ObservableCollection<IIgnoredEntity> ignores, ISession session, IMetaDataStorage storage) {
+        public SelectiveIgnoreFilter(ObservableCollection<IIgnoredEntity> ignores, IIgnoredEntitiesStorage storage) {
             if (ignores == null) {
                 throw new ArgumentNullException("The collection of ignored entities is null");
-            }
-
-            if (session == null) {
-                throw new ArgumentNullException("The given session is null");
             }
 
             if (storage == null) {
                 throw new ArgumentNullException("The given storage is null");
             }
 
-            this.ignores = ignores;
-            this.session = session;
             this.storage = storage;
         }
 
@@ -62,15 +54,14 @@ namespace CmisSync.Lib.SelectiveIgnore
         {
             if (e is IFilterableRemoteObjectEvent) {
                 var ev = e as IFilterableRemoteObjectEvent;
-                if (ev.RemoteObject is IFolder || ev.RemoteObject is IDocument) {
-                    string parentId = ev.RemoteObject is IFolder ? (ev.RemoteObject as IFolder).ParentId : (ev.RemoteObject as IDocument).Parents[0].Id;
-                    while (parentId != null) {
-                        if (this.IsObjectIdIgnored(parentId)) {
-                            return true;
-                        }
 
-                        var parent = this.session.GetObject(parentId);
-                        parentId = (parent as IFolder).ParentId;
+                if (ev.RemoteObject is IFolder) {
+                    if (this.storage.IsIgnored(ev.RemoteObject as IFolder) == IgnoredState.INHERITED) {
+                        return true;
+                    }
+                } else if (ev.RemoteObject is IDocument) {
+                    if (this.storage.IsIgnored(ev.RemoteObject as IDocument) == IgnoredState.INHERITED) {
+                        return true;
                     }
                 }
             }
@@ -78,10 +69,8 @@ namespace CmisSync.Lib.SelectiveIgnore
             if (e is IFilterableLocalPathEvent) {
                 var path = (e as IFilterableLocalPathEvent).LocalPath;
                 if (path != null) {
-                    foreach(var ignore in this.ignores) {
-                        if (path.StartsWith(ignore.LocalPath) && path != ignore.LocalPath) {
-                            return true;
-                        }
+                    if (this.storage.IsIgnoredPath(path) == IgnoredState.INHERITED) {
+                        return true;
                     }
                 }
             }
@@ -92,16 +81,6 @@ namespace CmisSync.Lib.SelectiveIgnore
                     (folderEvent.Local == MetaDataChangeType.CREATED || folderEvent.Local == MetaDataChangeType.DELETED))
                 {
 
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsObjectIdIgnored(string objectId) {
-            foreach(var ignore in this.ignores) {
-                if (ignore.ObjectId == objectId) {
-                    return true;
                 }
             }
 
