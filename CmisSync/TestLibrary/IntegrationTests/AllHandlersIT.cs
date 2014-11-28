@@ -32,6 +32,7 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.PathMatcher;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.ContentChange;
@@ -377,7 +378,8 @@ namespace TestLibrary.IntegrationTests
 
             var localFolder = new Mock<IDirectoryInfo>();
             var generator = new CrawlEventGenerator(storage, fsFactory);
-            var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator);
+            var ignoreStorage = new IgnoredEntitiesCollection();
+            var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator, ignoreStorage);
             var notifier = new CrawlEventNotifier(queue);
             var crawler = new DescendantsCrawler(queue, treeBuilder, generator, notifier, Mock.Of<IActivityListener>());
             manager.AddEventHandler(crawler);

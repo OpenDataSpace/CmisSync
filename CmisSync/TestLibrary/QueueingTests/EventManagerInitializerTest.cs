@@ -33,6 +33,7 @@ namespace TestLibrary.QueueingTests
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -62,28 +63,28 @@ namespace TestLibrary.QueueingTests
         [Test, Category("Fast")]
         public void ConstructorTakesQueueAndManagerAndStorage()
         {
-            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener, Mock.Of<IIgnoredEntitiesStorage>());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfQueueIsNull()
         {
-            new EventManagerInitializer(null, Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(null, Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener, Mock.Of<IIgnoredEntitiesStorage>());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfStorageIsNull()
         {
-            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), null, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), null, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener, Mock.Of<IIgnoredEntitiesStorage>());
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ConstructorThrowsExceptionIfRepoInfoIsNull()
         {
-            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener, Mock.Of<IIgnoredEntitiesStorage>());
         }
 
         [Test, Category("Fast")]
@@ -91,7 +92,7 @@ namespace TestLibrary.QueueingTests
         {
             var queue = new Mock<ISyncEventQueue>();
             var storage = new Mock<IMetaDataStorage>();
-            var handler = new EventManagerInitializer(queue.Object, storage.Object, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+                var handler = new EventManagerInitializer(queue.Object, storage.Object, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener, Mock.Of<IIgnoredEntitiesStorage>());
 
             var e = new Mock<ISyncEvent>();
             Assert.False(handler.Handle(e.Object));
@@ -280,7 +281,7 @@ namespace TestLibrary.QueueingTests
         private EventManagerInitializer CreateStrategyInitializer(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener)
         {
             this.queue.Setup(s => s.EventManager).Returns(manager);
-            return new EventManagerInitializer(this.queue.Object, storage, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, listener);
+            return new EventManagerInitializer(this.queue.Object, storage, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, listener, Mock.Of<IIgnoredEntitiesStorage>());
         }
 
         private void RunSuccessfulLoginEvent(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener, bool changeEventSupported = false, string id = "i", string token = "t")

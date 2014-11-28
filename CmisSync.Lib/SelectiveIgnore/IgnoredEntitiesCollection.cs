@@ -27,6 +27,7 @@ namespace CmisSync.Lib.SelectiveIgnore
     public class IgnoredEntitiesCollection : IIgnoredEntitiesStorage
     {
         private Dictionary<string, IIgnoredEntity> entries = new Dictionary<string, IIgnoredEntity>();
+
         public void Add(IIgnoredEntity ignore) {
             this.entries.Add(ignore.ObjectId, ignore);
         }
@@ -65,8 +66,8 @@ namespace CmisSync.Lib.SelectiveIgnore
             if (this.IsIgnoredId(folder.Id) == IgnoredState.IGNORED) {
                 return IgnoredState.IGNORED;
             } else {
-                if (folder.Parents != null) {
-                    if (this.IsIgnored(folder.Parents[0]) != IgnoredState.NOT_IGNORED) {
+                if (folder.FolderParent != null) {
+                    if (this.IsIgnored(folder.FolderParent) != IgnoredState.NOT_IGNORED) {
                         return IgnoredState.INHERITED;
                     }
                 }

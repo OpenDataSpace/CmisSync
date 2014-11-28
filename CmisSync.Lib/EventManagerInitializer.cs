@@ -30,6 +30,7 @@ namespace CmisSync.Lib
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -59,6 +60,7 @@ namespace CmisSync.Lib
         private RemoteObjectMovedOrRenamedAccumulator romaccumulator;
         private IFilterAggregator filter;
         private ActivityListenerAggregator activityListener;
+        private IIgnoredEntitiesStorage ignoredStorage;
   
         /// <summary>
         /// Initializes a new instance of the <see cref="EventManagerInitializer"/> class.
@@ -78,6 +80,7 @@ namespace CmisSync.Lib
             RepoInfo repoInfo,
             IFilterAggregator filter,
             ActivityListenerAggregator activityListener,
+            IIgnoredEntitiesStorage ignoredStorage,
             IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null) {
@@ -96,6 +99,10 @@ namespace CmisSync.Lib
                 throw new ArgumentNullException("Given activityListener is null");
             }
 
+            if (ignoredStorage == null) {
+                throw new ArgumentNullException("Given storage for ignored entries is null");
+            }
+
             if (fsFactory == null) {
                 this.fileSystemFactory = new FileSystemInfoFactory();
             } else {
@@ -105,6 +112,7 @@ namespace CmisSync.Lib
             this.filter = filter;
             this.repoInfo = repoInfo;
             this.storage = storage;
+            this.ignoredStorage = ignoredStorage;
             this.activityListener = activityListener;
         }
 
@@ -168,7 +176,7 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.crawler);
                 }
 
-                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener);
+                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener, this.ignoredStorage);
                 this.Queue.EventManager.AddEventHandler(this.crawler);
 
                 // Add remote object moved accumulator

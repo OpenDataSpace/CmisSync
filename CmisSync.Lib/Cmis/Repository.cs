@@ -36,6 +36,7 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -124,6 +125,8 @@ namespace CmisSync.Lib.Cmis
         private ReportingFilter reportingFilter;
 
         private FilterAggregator filters;
+
+        private IIgnoredEntitiesStorage ignoredStorage;
 
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
@@ -261,7 +264,9 @@ namespace CmisSync.Lib.Cmis
                 this.Status = status;
             };
 
-            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
+            this.ignoredStorage = new IgnoredEntitiesCollection();
+
+            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.ignoredStorage, this.fileSystemFactory));
 
             this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
 

@@ -108,9 +108,8 @@ namespace TestLibrary.SelectiveIgnoreTests
             var underTest = new IgnoredEntitiesCollection();
             var folder = new Mock<IFolder>();
             folder.Setup(f => f.Id).Returns(Guid.NewGuid().ToString());
-            var parents = new List<IFolder>();
-            parents.Add(Mock.Of<IFolder>(o => o.Id == this.objectId));
-            folder.Setup(f => f.Parents).Returns(parents);
+            var parent = Mock.Of<IFolder>(f => f.Id == this.objectId);
+            folder.Setup(f => f.FolderParent).Returns(parent);
             underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
 
             Assert.That(underTest.IsIgnored(folder.Object), Is.EqualTo(IgnoredState.INHERITED));

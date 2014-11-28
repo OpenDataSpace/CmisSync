@@ -223,6 +223,7 @@
     <Compile Include="UtilsTests\BackendTest.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
+    <Compile Include="IntegrationTests\SelectiveIgnoreTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

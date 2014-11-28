@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Producer.Crawler
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -58,7 +59,8 @@ namespace CmisSync.Lib.Producer.Crawler
             IDirectoryInfo localFolder,
             IMetaDataStorage storage,
             IFilterAggregator filter,
-            IActivityListener activityListener)
+            IActivityListener activityListener,
+            IIgnoredEntitiesStorage ignoredStorage)
             : base(queue)
         {
             if (remoteFolder == null) {
@@ -82,7 +84,7 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             this.activityListener = activityListener;
-            this.treebuilder = new DescendantsTreeBuilder(storage, remoteFolder, localFolder, filter);
+            this.treebuilder = new DescendantsTreeBuilder(storage, remoteFolder, localFolder, filter, ignoredStorage);
             this.eventGenerator = new CrawlEventGenerator(storage);
             this.notifier = new CrawlEventNotifier(queue);
         }
