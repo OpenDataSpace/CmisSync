@@ -47,8 +47,7 @@ namespace CmisSync.Lib.Storage.Database
         [CLSCompliant(false)]
         public PersistentCookieStorage(DBreezeEngine db)
         {
-            if(db == null)
-            {
+            if (db == null) {
                 throw new ArgumentNullException("Given db engine is null");
             }
 
@@ -66,24 +65,21 @@ namespace CmisSync.Lib.Storage.Database
             get
             {
                 CookieCollection cookies = new CookieCollection();
-                using(var tran = this.db.GetTransaction())
+                using (var tran = this.db.GetTransaction())
                 {
                     foreach (var row in tran.SelectForward<int, DbCustomSerializer<Cookie>>(CookieTable))
                     {
                         var value = row.Value;
-                        if(value == null)
-                        {
+                        if (value == null) {
                             continue;
                         }
 
                         var cookie = value.Get;
-                        if(cookie == null)
-                        {
+                        if (cookie == null) {
                             continue;
                         }
 
-                        if(!cookie.Expired)
-                        {
+                        if (!cookie.Expired) {
                             cookies.Add(cookie);
                         }
                     }
@@ -94,19 +90,15 @@ namespace CmisSync.Lib.Storage.Database
 
             set
             {
-                using(var tran = this.db.GetTransaction())
+                using (var tran = this.db.GetTransaction())
                 {
-                    if(value == null)
-                    {
+                    if (value == null) {
                         tran.RemoveAllKeys(CookieTable, false);
-                    }
-                    else
-                    {
+                    } else {
                         int i = 0;
                         foreach(Cookie cookie in value)
                         {
-                            if(!cookie.Expired)
-                            {
+                            if (!cookie.Expired) {
                                 tran.Insert<int, DbCustomSerializer<Cookie>>(CookieTable, i, cookie);
                             }
 

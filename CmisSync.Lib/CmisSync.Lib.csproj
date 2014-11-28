@@ -59,6 +59,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\Tarjan\AbstractTarjanNode.cs" />
     <Compile Include="Backend.cs" />
     <Compile Include="Cmis\MimeType.cs" />
     <Compile Include="Defines.cs" />
@@ -235,7 +236,20 @@
     <Compile Include="Producer\Crawler\CrawlEventNotifier.cs" />
     <Compile Include="Producer\Crawler\LocalEventGenerator.cs" />
     <Compile Include="Producer\Crawler\RemoteEventGenerator.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectRenamedOrMovedRemoteObjectDeleted.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectDeletedRemoteObjectRenamedOrMoved.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectDeletedRemoteObjectChanged.cs" />
     <Compile Include="Storage\FileSystem\RestoreModificationDateException.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectChanged.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectRenamedRemoteObjectChanged.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectMoved.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectRenamedRemoteObjectMoved.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectChangedRemoteObjectRenamed.cs" />
+    <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectRenamed.cs" />
+    <Compile Include="Algorithms\CyclicDependencies\ICycleDetector.cs" />
+    <Compile Include="Algorithms\Tarjan\Tarjan.cs" />
+    <Compile Include="Events\ConfigurationNeededEvent.cs" />
+    <Compile Include="Algorithms\CyclicDependencies\CycleDetector.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -298,5 +312,8 @@
     <Folder Include="Cmis\UiUtils\" />
     <Folder Include="Producer\ContentChange\" />
     <Folder Include="Cmis\ConvenienceExtenders\" />
+    <Folder Include="Algorithms\" />
+    <Folder Include="Algorithms\CyclicDependencies\" />
+    <Folder Include="Algorithms\Tarjan\" />
   </ItemGroup>
 </Project>

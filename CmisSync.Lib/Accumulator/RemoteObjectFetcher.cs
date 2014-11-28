@@ -128,10 +128,10 @@ namespace CmisSync.Lib.Accumulator {
                 (e as FolderEvent).RemoteFolder = remote as IFolder;
             }
         }
-        
+
         private string FetchIdFromStorage(ISyncEvent e) {
             IFileSystemInfo path = null;
-            if(e is FileEvent) {
+            if (e is FileEvent) {
                 path = (e as FileEvent).LocalFile;
             }
             else if (e is FolderEvent) {
@@ -140,7 +140,7 @@ namespace CmisSync.Lib.Accumulator {
 
             if (path != null) {
                 IMappedObject savedObject = this.storage.GetObjectByLocalPath(path);
-                if(savedObject != null) {
+                if (savedObject != null) {
                     return savedObject.RemoteObjectId;
                 }
             }

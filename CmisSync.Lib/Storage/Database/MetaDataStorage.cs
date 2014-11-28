@@ -173,7 +173,7 @@ namespace CmisSync.Lib.Storage.Database
                 MappedObject root = objects.Find(o => o.ParentId == null);
                 if (root == null) {
                     watch.Stop();
-                    Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
+                    // Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                     return null;
                 }
 
@@ -182,7 +182,7 @@ namespace CmisSync.Lib.Storage.Database
                         pathSegments.RemoveAt(0);
                     } else {
                         watch.Stop();
-                        Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
+                        // Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                         return null;
                     }
                 }
@@ -199,13 +199,13 @@ namespace CmisSync.Lib.Storage.Database
                         parent = child;
                     } else {
                         watch.Stop();
-                        Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
+                        // Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                         return null;
                     }
                 }
 
                 watch.Stop();
-                Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
+                // Logger.Debug(string.Format("Method GetObjectByLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                 return new MappedObject(parent);
             }
         }
@@ -363,7 +363,7 @@ namespace CmisSync.Lib.Storage.Database
                 }
 
                 watch.Stop();
-                Logger.Debug(string.Format("Method GetLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
+                // Logger.Debug(string.Format("Method GetLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                 return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(segments));
             }
         }
@@ -405,7 +405,7 @@ namespace CmisSync.Lib.Storage.Database
             }
 
             watch.Stop();
-            Logger.Debug(string.Format("Method GetChildren returned after {0} ms", watch.ElapsedMilliseconds));
+            // Logger.Debug(string.Format("Method GetChildren returned after {0} ms", watch.ElapsedMilliseconds));
             return results;
         }
 
@@ -545,19 +545,19 @@ namespace CmisSync.Lib.Storage.Database
 
                         if (data == null) {
                             watch.Stop();
-                            Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
+                            // Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
                             return null;
                         }
 
                         watch.Stop();
-                        Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
+                        // Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
                         return new MappedObject(data);
                     }
                 }
             }
 
             watch.Stop();
-            Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
+            // Logger.Debug(string.Format("Method GetObjectByGuid returned after {0} ms", watch.ElapsedMilliseconds));
             return null;
         }
 
@@ -595,7 +595,7 @@ namespace CmisSync.Lib.Storage.Database
             }
 
             watch.Stop();
-            Logger.Debug(string.Format("Method GetObjectTree returned after {0} ms", watch.ElapsedMilliseconds));
+            // Logger.Debug(string.Format("Method GetObjectTree returned after {0} ms", watch.ElapsedMilliseconds));
             return this.GetSubTree(objects, root);
         }
 

@@ -196,7 +196,7 @@ namespace CmisSync.Lib.Cmis
             this.RemoteUrl = repoInfo.Address;
 
             if (!this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath).IsExtendedAttributeAvailable()) {
-                throw new ArgumentException("Extended Attributes are not available on the local path: " + this.LocalPath);
+                throw new ExtendedAttributeException("Extended Attributes are not available on the local path: " + this.LocalPath);
             }
 
             this.Queue = queue;
@@ -305,11 +305,6 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         /// <value>The queue.</value>
         public IDisposableSyncEventQueue Queue { get; protected set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this Repo is stopped, to control for machine sleep/wake power management.
-        /// </summary>
-        public bool Stopped { get; set; }
 
         /// <summary>
         /// Gets the watcherproducer of the local filesystem for changes.

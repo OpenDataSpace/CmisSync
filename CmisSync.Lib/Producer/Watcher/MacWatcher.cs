@@ -160,7 +160,6 @@ namespace CmisSync.Lib.Producer.Watcher
         {
             foreach (MonoMac.CoreServices.FSEvent fsEvent in e.Events) {
                 bool isFile = (fsEvent.Flags & FSEventStreamEventFlags.ItemIsFile) != 0;
-                Console.WriteLine(fsEvent.Path + " " + (FileOrDirectoryExists(fsEvent.Path, isFile) ? "exists" : "") + " " + fsEvent.Flags.ToString());
                 if ((fsEvent.Flags & FSEventStreamEventFlags.ItemRemoved) != 0 && !FileOrDirectoryExists(fsEvent.Path, isFile)) {
                     this.Queue.AddEvent(new CmisSync.Lib.Events.FSEvent(WatcherChangeTypes.Deleted, fsEvent.Path, !isFile));
                     continue;

@@ -44,8 +44,8 @@ namespace CmisSync
     using System.Threading;
 
     using CmisSync.Lib;
-    using CmisSync.Lib.Config;
     using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
 
     using log4net;
     using log4net.Config;
@@ -89,6 +89,9 @@ namespace CmisSync
 
             bool firstRun = !File.Exists(ConfigManager.CurrentConfigFile);
 
+            // Disable SSLv3 to avoid POODLE Attack
+            ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol & ~SecurityProtocolType.Ssl3;
+
             ServicePointManager.CertificatePolicy = new CertPolicyHandler();
 
             // Migrate config.xml from past versions, if necessary.
@@ -121,14 +124,14 @@ namespace CmisSync
                     "designed to keep things simple and to stay out of your way." + n +
                     n +
                     "Version: " + CmisSync.Lib.Backend.Version + n +
-                    "Copyright (C) 2013 GRAU DATA AG" + n +
+                    "Copyright (C) 2014 GRAU DATA AG" + n +
                     "Copyright (C) 2010 Hylke Bons" + n +
                     "This program comes with ABSOLUTELY NO WARRANTY." + n +
                     n +
                     "This is free software, and you are welcome to redistribute it" + n +
                     "under certain conditions. Please read the GNU GPLv3 for details." + n +
                     n +
-                    "Usage: DataSpaceSync [start|stop|restart]");
+                    "Usage: dataspacesync [start|stop|restart]");
                     Environment.Exit(-1);
                 }
 

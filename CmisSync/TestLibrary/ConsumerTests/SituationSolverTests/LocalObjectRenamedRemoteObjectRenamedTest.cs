@@ -23,6 +23,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.IO;
 
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -47,21 +48,25 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private LocalObjectRenamedRemoteObjectRenamed underTest;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
-
+        private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
 
         [SetUp]
         public void SetUp() {
             this.newLocalName = string.Empty;
             this.newRemoteName = string.Empty;
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.InitializeMappedFolderOnStorage();
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object);
+            var transmissionManager = new ActiveActivitiesManager();
+            var fsFactory = Mock.Of<IFileSystemInfoFactory>();
+            this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, transmissionManager, fsFactory);
+            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 
         [Test]
         public void DefaultConstructor() {
-            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object);
+            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]

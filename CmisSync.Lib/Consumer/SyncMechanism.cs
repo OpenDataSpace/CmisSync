@@ -49,7 +49,6 @@ namespace CmisSync.Lib.Consumer
         private IMetaDataStorage storage;
         private ActivityListenerAggregator activityListener;
         private IFilterAggregator filters;
-        private bool isServerAbleToUpdateModificationDate;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncMechanism"/> class.
@@ -70,8 +69,7 @@ namespace CmisSync.Lib.Consumer
             IMetaDataStorage storage,
             ActivityListenerAggregator activityListener,
             IFilterAggregator filters,
-            ISolver[,] solver = null,
-            bool isServerAbleToUpdateModificationDate = false) : base(queue)
+            ISolver[,] solver = null) : base(queue)
         {
             if (session == null) {
                 throw new ArgumentNullException("Given session is null");
@@ -102,7 +100,6 @@ namespace CmisSync.Lib.Consumer
             this.LocalSituation = localSituation;
             this.RemoteSituation = remoteSituation;
             this.activityListener = activityListener;
-            this.isServerAbleToUpdateModificationDate = isServerAbleToUpdateModificationDate;
             this.filters = filters;
             this.Solver = solver == null ? this.CreateSolver() : solver;
         }
@@ -149,46 +146,41 @@ namespace CmisSync.Lib.Consumer
         {
             int dim = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[dim, dim];
+            var changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
+            var renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
+            var renameChangeSolver = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, changeChangeSolver);
+
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = new NothingToDoSolver();
-            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.MOVED, (int)SituationType.NOCHANGE] = new LocalObjectMoved(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
+            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.MOVED, (int)SituationType.NOCHANGE] = new LocalObjectMoved(this.session, this.storage);
+            solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed(this.session, this.storage);
             solver[(int)SituationType.REMOVED, (int)SituationType.NOCHANGE] = new LocalObjectDeleted(this.session, this.storage);
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager);
-            solver[(int)SituationType.ADDED, (int)SituationType.ADDED] = null;
-            solver[(int)SituationType.CHANGED, (int)SituationType.ADDED] = null;
-            solver[(int)SituationType.MOVED, (int)SituationType.ADDED] = null;
-            solver[(int)SituationType.RENAMED, (int)SituationType.ADDED] = null;
-            solver[(int)SituationType.REMOVED, (int)SituationType.ADDED] = null;
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.session, this.storage, this.activityListener.TransmissionManager);
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.Queue, this.activityListener.TransmissionManager);
-            solver[(int)SituationType.ADDED, (int)SituationType.CHANGED] = null;
-            solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = null;
-            solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = null;
-            solver[(int)SituationType.REMOVED, (int)SituationType.CHANGED] = null;
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = changeChangeSolver;
+            solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = new LocalObjectMovedRemoteObjectChanged(this.session, this.storage, renameChangeSolver, changeChangeSolver);
+            solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = renameChangeSolver;
+            solver[(int)SituationType.REMOVED, (int)SituationType.CHANGED] = new LocalObjectDeletedRemoteObjectChanged(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.MOVED] = new RemoteObjectMoved(this.session, this.storage);
-            solver[(int)SituationType.ADDED, (int)SituationType.MOVED] = null;
-            solver[(int)SituationType.CHANGED, (int)SituationType.MOVED] = null;
-            solver[(int)SituationType.MOVED, (int)SituationType.MOVED] = new LocalObjectMovedRemoteObjectMoved(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.RENAMED, (int)SituationType.MOVED] = null; //new LocalObjectRenamedRemoteObjectMoved(this.session, this.storage);
-            solver[(int)SituationType.REMOVED, (int)SituationType.MOVED] = null; //new LocalObjectDeletedRemoteObjectMoved(this.session, this.storage);
+            solver[(int)SituationType.CHANGED, (int)SituationType.MOVED] = new LocalObjectChangedRemoteObjectMoved(this.session, this.storage, changeChangeSolver);
+            solver[(int)SituationType.MOVED, (int)SituationType.MOVED] = new LocalObjectMovedRemoteObjectMoved(this.session, this.storage);
+            solver[(int)SituationType.RENAMED, (int)SituationType.MOVED] = new LocalObjectRenamedRemoteObjectMoved(this.session, this.storage, renameRenameSolver, changeChangeSolver);
+            solver[(int)SituationType.REMOVED, (int)SituationType.MOVED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.RENAMED] = new RemoteObjectRenamed(this.session, this.storage);
-            solver[(int)SituationType.ADDED, (int)SituationType.RENAMED] = null;
-            solver[(int)SituationType.CHANGED, (int)SituationType.RENAMED] = null;
-            solver[(int)SituationType.MOVED, (int)SituationType.RENAMED] = null; //new LocalObjectMovedRemoteObjectRenamed(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.RENAMED, (int)SituationType.RENAMED] = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, this.isServerAbleToUpdateModificationDate);
-            solver[(int)SituationType.REMOVED, (int)SituationType.RENAMED] = null;
+            solver[(int)SituationType.CHANGED, (int)SituationType.RENAMED] = new LocalObjectChangedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
+            solver[(int)SituationType.MOVED, (int)SituationType.RENAMED] = new LocalObjectMovedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver, renameRenameSolver);
+            solver[(int)SituationType.RENAMED, (int)SituationType.RENAMED] = renameRenameSolver;
+            solver[(int)SituationType.REMOVED, (int)SituationType.RENAMED] = new LocalObjectDeletedRemoteObjectRenamedOrMoved(this.session, this.storage);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.REMOVED] = new RemoteObjectDeleted(this.session, this.storage, this.filters);
-            solver[(int)SituationType.ADDED, (int)SituationType.REMOVED] = null;
-            solver[(int)SituationType.CHANGED, (int)SituationType.REMOVED] = null;
-            solver[(int)SituationType.MOVED, (int)SituationType.REMOVED] = null;
-            solver[(int)SituationType.RENAMED, (int)SituationType.REMOVED] = null;
+            solver[(int)SituationType.CHANGED, (int)SituationType.REMOVED] = new RemoteObjectDeleted(this.session, this.storage, this.filters);
+            solver[(int)SituationType.MOVED, (int)SituationType.REMOVED] = new LocalObjectRenamedOrMovedRemoteObjectDeleted(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.RENAMED, (int)SituationType.REMOVED] = new LocalObjectRenamedOrMovedRemoteObjectDeleted(this.session, this.storage, this.activityListener.TransmissionManager);
             solver[(int)SituationType.REMOVED, (int)SituationType.REMOVED] = new LocalObjectDeletedRemoteObjectDeleted(this.session, this.storage);
 
             return solver;
@@ -200,7 +192,7 @@ namespace CmisSync.Lib.Consumer
             SituationType remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
             ISolver solver = this.Solver[(int)localSituation, (int)remoteSituation];
 
-            if(solver == null) {
+            if (solver == null) {
                 throw new NotImplementedException(string.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));
             }
 

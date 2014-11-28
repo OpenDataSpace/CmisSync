@@ -45,7 +45,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new RemoteObjectRenamed(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>());
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            new RemoteObjectRenamed(session.Object, Mock.Of<IMetaDataStorage>());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -236,6 +238,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         private void SetUpMocks() {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.underTest = new RemoteObjectRenamed(this.session.Object, this.storage.Object);
         }

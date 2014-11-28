@@ -51,12 +51,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void SetUp() {
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.remoteRootFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.rootId, "/", "/", null);
             this.session.AddRemoteObject(this.remoteRootFolder.Object);
             this.localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
             this.mappedRootFolder = new MappedObject("/", this.rootId, MappedObjectType.Folder, null, "changeToken") { Guid = Guid.NewGuid() };
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(this.localRootFolder.Object)))).Returns(this.mappedRootFolder);
-            this.underTest = new LocalObjectMoved(this.session.Object, this.storage.Object, true);
+            this.underTest = new LocalObjectMoved(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -74,17 +75,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var localTargetFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target"));
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target", "folder"));
             localFolder.Setup(f => f.Parent).Returns(localTargetFolder.Object);
-            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
-            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
+            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
             this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
-            remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object)).Callback(() => { remoteFolder.Setup(r => r.ChangeToken).Returns("changeToken"); }).Returns(remoteFolder.Object);
+            remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object)).Callback(() => { remoteFolder.Setup(r => r.ChangeToken).Returns("new ChangeToken"); }).Returns(remoteFolder.Object);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
             remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "targetId", "changeToken", true);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "targetId", "new ChangeToken", true);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -96,19 +97,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var localSubFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "sub"));
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "folder"));
             localFolder.Setup(f => f.Parent).Returns(this.localRootFolder.Object);
-            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, "subId", "changeToken") { Guid = Guid.NewGuid() };
-            var mappedSubFolder = new MappedObject("sub", "subId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, "subId", "changetoken") { Guid = Guid.NewGuid() };
+            var mappedSubFolder = new MappedObject("sub", "subId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localSubFolder.Object)))).Returns(mappedSubFolder);
             this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
             remoteFolder.Setup(f => f.Move(subFolder.Object, this.remoteRootFolder.Object)).Callback(() => {
-                remoteFolder.Setup(r => r.ChangeToken).Returns("changeToken");
+                remoteFolder.Setup(r => r.ChangeToken).Returns("new ChangeToken");
             }).Returns(remoteFolder.Object);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(subFolder.Object, this.remoteRootFolder.Object), Times.Once());
             remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "rootId", "changeToken");
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "rootId", "new ChangeToken");
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -121,14 +122,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var localTargetFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target"));
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target", newFolderName));
             localFolder.Setup(f => f.Parent).Returns(localTargetFolder.Object);
-            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
-            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
+            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
             this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
             remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object)).Returns(remoteFolder.Object);
             remoteFolder.Setup(f => f.Rename(newFolderName, true)).Callback(() => {
                 remoteFolder.Setup(f => f.Name).Returns(newFolderName);
-                remoteFolder.Setup(f => f.ChangeToken).Returns("changeToken");
+                remoteFolder.Setup(f => f.ChangeToken).Returns("new ChangeToken");
             }).Returns(remoteFolder.Object);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
@@ -136,9 +137,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object), Times.Once());
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
             remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", newFolderName, "targetId", "changeToken");
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", newFolderName, "targetId", "new ChangeToken");
         }
-        
+
         [Test, Category("Fast"), Category("Solver")]
         public void PermissionDeniedLeadsToNoOperation()
         {
@@ -148,8 +149,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var localTargetFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target"));
             var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target", "folder"));
             localFolder.Setup(f => f.Parent).Returns(localTargetFolder.Object);
-            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
-            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changeToken") { Guid = Guid.NewGuid() };
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
+            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
             this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
             remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object)).Throws(new CmisPermissionDeniedException());
@@ -157,7 +158,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
-            storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            storage.VerifyThatNoObjectIsManipulated();
         }
     }
 }

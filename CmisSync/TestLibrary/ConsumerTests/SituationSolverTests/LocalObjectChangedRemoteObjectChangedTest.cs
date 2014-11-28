@@ -26,6 +26,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -47,16 +48,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private readonly string newChangeToken = "newChangeToken";
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private ActiveActivitiesManager manager;
         private LocalObjectChangedRemoteObjectChanged underTest;
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesSessionAndStorageAndDateSyncEnabled() {
-            new LocalObjectChangedRemoteObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), true);
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesSessionAndStorageAndDateSyncDisabled() {
-            new LocalObjectChangedRemoteObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), false);
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -198,8 +204,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         private void InitMocks(bool dateSyncEnabled = true) {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
-            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, dateSyncEnabled);
+            this.manager = new ActiveActivitiesManager();
+            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, this.manager);
         }
 
         private Mock<IDocument> CreateRemoteDocument(DateTime lastRemoteModification, long contentLength, byte[] contentHash) {

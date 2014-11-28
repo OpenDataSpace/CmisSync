@@ -157,6 +157,7 @@ namespace CmisSync {
                 if (IsNotificationTransmission(e.Notification)) {
                     LocalFolderClicked (Path.GetDirectoryName (e.Notification.InformativeText));
                 }
+
                 if (IsNotificationCredentials(e.Notification)) {
                     //RemoveNotificationCredentials(e.Notification.Title);
                     EditRepositoryCredentials(e.Notification.Title);
@@ -182,26 +183,28 @@ namespace CmisSync {
                         lock (transmissionLock) {
                             List<FileTransmissionEvent> transmissions = ActiveTransmissions();
                             NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
-                            List<NSUserNotification> finishedNotifications = new List<NSUserNotification> ();
+                            List<NSUserNotification> finishedNotifications = new List<NSUserNotification>();
                             foreach (NSUserNotification notification in notifications) {
                                 if (!IsNotificationTransmission(notification)) {
                                     continue;
                                 }
-                                FileTransmissionEvent transmission = transmissions.Find( (FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
+                                FileTransmissionEvent transmission = transmissions.Find((FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
                                 if (transmission == null) {
-                                    finishedNotifications.Add (notification);
+                                    finishedNotifications.Add(notification);
                                 } else {
-                                    if (transmissionFiles.ContainsKey (transmission.Path)) {
+                                    if (transmissionFiles.ContainsKey(transmission.Path)) {
                                         transmissions.Remove(transmission);
                                     } else {
-                                        notificationCenter.RemoveDeliveredNotification (notification);
+                                        notificationCenter.RemoveDeliveredNotification(notification);
                                     }
                                 }
                             }
-                            finishedNotifications.Sort (new ComparerNSUserNotification ());
-                            for (int i = 0; i<(notifications.Length - notificationKeep) && i<finishedNotifications.Count; ++i) {
+
+                            finishedNotifications.Sort(new ComparerNSUserNotification());
+                            for (int i = 0; i < (notifications.Length - notificationKeep) && i < finishedNotifications.Count; ++i) {
                                 notificationCenter.RemoveDeliveredNotification (finishedNotifications[i]);
                             }
+
                             foreach (FileTransmissionEvent transmission in transmissions) {
                                 if (transmission.Status.Aborted == true) {
                                     continue;
@@ -210,10 +213,11 @@ namespace CmisSync {
                                 if (transmission.Status.FailedException != null) {
                                     continue;
                                 }
-                                Console.WriteLine(startedTransmissions.Count);
+
                                 if(startedTransmissions.Contains(transmission.Path)) {
                                     continue;
                                 }
+
                                 startedTransmissions.Add(transmission.Path);
 
                                 NSUserNotification notification = new NSUserNotification();
@@ -227,7 +231,6 @@ namespace CmisSync {
                                 notificationCenter.DeliverNotification (notification);
 
                                 transmissionFiles.Add (transmission.Path, NSDate.Now);
-                                //UpdateFileStatus (transmission, null);
                                 transmission.TransmissionStatus += TransmissionReport;
                             }
                         }

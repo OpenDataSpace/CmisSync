@@ -23,19 +23,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
     using DotCMIS.Client;
-
-    using log4net;
 
     /// <summary>
     /// Local object renamed and also the remote object has been renamed.
     /// </summary>
     public class LocalObjectRenamedRemoteObjectRenamed : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -47,24 +47,29 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectRenamedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
+            if (changeSolver == null) {
+                throw new ArgumentNullException("Given solver for the situation of local and remote object changed is null");
+            }
+
+            this.changeChangeSolver = changeSolver;
         }
 
         /// <summary>
         /// Solve the specified situation by taking renaming the local or remote object to the name of the last changed object.
         /// </summary>
-        /// <param name="localFile">Local file.</param>
+        /// <param name="localFileSystemInfo">Local file system info.</param>
         /// <param name="remoteId">Remote object.</param>
         /// <param name="localContent">Hint if the local content has been changed.</param>
         /// <param name="remoteContent">Information if the remote content has been changed.</param>
         public override void Solve(
-            IFileSystemInfo localFile,
+            IFileSystemInfo localFileSystemInfo,
             IObjectId remoteId,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if (localFile is IDirectoryInfo) {
-                var localFolder = localFile as IDirectoryInfo;
+            if (localFileSystemInfo is IDirectoryInfo) {
+                var localFolder = localFileSystemInfo as IDirectoryInfo;
                 var remoteFolder = remoteId as IFolder;
                 var mappedObject = this.Storage.GetObjectByRemoteId(remoteFolder.Id);
                 if (localFolder.Name.Equals(remoteFolder.Name)) {
@@ -85,8 +90,23 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject.LastRemoteWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 mappedObject.LastChangeToken = remoteFolder.ChangeToken;
                 this.Storage.SaveMappedObject(mappedObject);
-            } else {
-                throw new NotImplementedException("File scenario is not implemented yet");
+            } else if (localFileSystemInfo is IFileInfo) {
+                var localFile = localFileSystemInfo as IFileInfo;
+                var remoteFile = remoteId as IDocument;
+                var mappedObject = this.Storage.GetObjectByRemoteId(remoteFile.Id);
+                if (localFile.Name.Equals(remoteFile.Name)) {
+                    mappedObject.Name = localFile.Name;
+                    this.Storage.SaveMappedObject(mappedObject);
+                    this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                } else {
+                    OperationsLogger.Warn(string.Format(
+                        "Synchronization Conflict: The local file {0} has been locally renamed from {1} to {2} and remotely to {3}. " +
+                        "Fix this conflict by renaming the remote file to {2} or the local file to {3}.",
+                        localFile.FullName,
+                        mappedObject.Name,
+                        localFile.Name,
+                        remoteFile.Name));
+                }
             }
         }
     }

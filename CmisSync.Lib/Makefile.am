@@ -10,6 +10,10 @@ SOURCES =  \
 	Accumulator/RemoteObjectFetcher.cs \
 	Accumulator/RemoteObjectMovedOrRenamedAccumulator.cs \
 	ActivityListenerAggregator.cs \
+	Algorithms/CyclicDependencies/CycleDetector.cs \
+	Algorithms/CyclicDependencies/ICycleDetector.cs \
+	Algorithms/Tarjan/AbstractTarjanNode.cs \
+	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
@@ -42,11 +46,20 @@ SOURCES =  \
 	Consumer/SituationSolver/LocalObjectAdded.cs \
 	Consumer/SituationSolver/LocalObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectChangedRemoteObjectChanged.cs \
+	Consumer/SituationSolver/LocalObjectChangedRemoteObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectChangedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectDeleted.cs \
+	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectDeleted.cs \
+	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectRenamedOrMoved.cs \
 	Consumer/SituationSolver/LocalObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectMovedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectMovedRemoteObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectMovedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectRenamed.cs \
+	Consumer/SituationSolver/LocalObjectRenamedOrMovedRemoteObjectDeleted.cs \
+	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectChanged.cs \
+	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/NothingToDoSolver.cs \
 	Consumer/SituationSolver/RemoteObjectAdded.cs \
@@ -61,6 +74,7 @@ SOURCES =  \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
 	Events/ConfigChangedEvent.cs \
+	Events/ConfigurationNeededEvent.cs \
 	Events/ContentChangeEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/EncapsuledEvent.cs \

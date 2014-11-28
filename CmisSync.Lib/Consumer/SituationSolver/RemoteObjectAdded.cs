@@ -21,8 +21,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -38,10 +40,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// </summary>
     public class RemoteObjectAdded : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
         private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteObjectAdded));
 
-        private ISyncEventQueue queue;
         private IFileSystemInfoFactory fsFactory;
         private ActiveActivitiesManager manager;
 
@@ -50,25 +50,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="queue">Queue to report new transmissions to.</param>
         /// <param name="transmissonManager">Transmisson manager.</param>
         /// <param name="fsFactory">File system factory.</param>
         public RemoteObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ISyncEventQueue queue,
             ActiveActivitiesManager transmissonManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
-            if (queue == null) {
-                throw new ArgumentNullException("Given queue is null");
-            }
-
             if (transmissonManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
             this.fsFactory = fsFactory ?? new FileSystemInfoFactory();
-            this.queue = queue;
             this.manager = transmissonManager;
         }
 
@@ -122,6 +115,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
                 Guid guid = Guid.NewGuid();
+                byte[] localFileHash = null;
+                DateTime? lastLocalFileModificationDate = null;
                 var file = localFile as IFileInfo;
                 if (!(remoteId is IDocument)) {
                     throw new ArgumentException("remoteId has to be a prefetched Document");
@@ -135,7 +130,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         }
                     }
 
-                    Logger.Debug(string.Format("This file {0} conflicts with remote file => conflict file will be produced after download", file.FullName));
+                    lastLocalFileModificationDate = file.LastWriteTimeUtc;
+                    if (this.MergeExistingFileWithRemoteFile(file, remoteId as IDocument, guid, out localFileHash)) {
+                        return;
+                    }
+
+                    Logger.Debug(string.Format("This file {0} conflicts with remote file => conflict file will could be produced after download", file.FullName));
                 }
 
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
@@ -158,16 +158,47 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     hash = hashAlg.Hash;
                 }
 
-                cacheFile.Uuid = guid;
+                try {
+                    cacheFile.Uuid = guid;
+                } catch(RestoreModificationDateException e) {
+                    Logger.Debug("Could not retore the last modification date of " + cacheFile.FullName, e);
+                }
+
                 try {
                     cacheFile.MoveTo(file.FullName);
                 } catch (IOException e) {
                     file.Refresh();
                     if (file.Exists) {
-                        IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
-                        IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
-                        targetFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, guid.ToString(), true);
-                        conflictFile.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                        if (localFileHash == null ||
+                            lastLocalFileModificationDate == null ||
+                            !lastLocalFileModificationDate.Equals(file.LastWriteTimeUtc)) {
+                            lastLocalFileModificationDate = file.LastWriteTimeUtc;
+                            using (var f = file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                                localFileHash = SHA1Managed.Create().ComputeHash(f);
+                            }
+                        }
+
+                        if (localFileHash.SequenceEqual(hash)) {
+                            file.Uuid = guid;
+                            try {
+                                cacheFile.Delete();
+                            } catch(IOException) {
+                            }
+                        } else {
+                            IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
+                            IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
+                            try {
+                                targetFile.Uuid = guid;
+                            } catch (RestoreModificationDateException restoreException) {
+                                Logger.Debug("Could not retore the last modification date of " + targetFile.FullName, restoreException);
+                            }
+
+                            try {
+                                conflictFile.Uuid = null;
+                            } catch(RestoreModificationDateException restoreException) {
+                                Logger.Debug("Could not retore the last modification date of " + conflictFile.FullName, restoreException);
+                            }
+                        }
                     } else {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = e });
                         throw;
@@ -201,6 +232,48 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 OperationsLogger.Info(string.Format("New local file {0} created and mapped to remote file {1}", file.FullName, remoteId.Id));
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
+        }
+
+        private bool MergeExistingFileWithRemoteFile(IFileInfo file, IDocument remoteDoc, Guid guid, out byte[] localHash) {
+            byte[] remoteHash = remoteDoc.ContentStreamHash();
+            localHash = null;
+            if (file.Length.Equals(remoteDoc.ContentStreamLength)) {
+                using (var f = file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                    localHash = SHA1Managed.Create().ComputeHash(f);
+                }
+
+                if (remoteHash != null) {
+                    if (localHash != null && localHash.SequenceEqual(remoteHash)) {
+                        if (remoteDoc.LastModificationDate != null) {
+                            try {
+                                file.LastWriteTimeUtc = (DateTime)remoteDoc.LastModificationDate;
+                            } catch(IOException e) {
+                                Logger.Debug("Cannot set last modification date", e);
+                            }
+                        }
+
+                        file.Uuid = guid;
+                        MappedObject mappedObject = new MappedObject(
+                            file.Name,
+                            remoteDoc.Id,
+                            MappedObjectType.File,
+                            remoteDoc.Parents[0].Id,
+                            remoteDoc.ChangeToken,
+                            remoteDoc.ContentStreamLength ?? file.Length)
+                        {
+                            Guid = guid,
+                            LastLocalWriteTimeUtc = file.LastWriteTimeUtc,
+                            LastRemoteWriteTimeUtc = remoteDoc.LastModificationDate,
+                            LastChecksum = localHash,
+                            ChecksumAlgorithmName = "SHA-1"
+                        };
+                        this.Storage.SaveMappedObject(mappedObject);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

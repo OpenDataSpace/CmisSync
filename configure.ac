@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [2.0.0])
+m4_define([cmissync_version], [2.0.1])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
@@ -154,14 +154,19 @@ if test "$OSNAME" = "Linux" ; then
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
 
-
     AC_SUBST(BUILD_DEFINES,"${BUILD_DEFINES}")
     GUISUBDIRS=CmisSync
     enable_gtkui=yes
 	cocoa=false
 	macos=false
     OSOK=yes
-    PACKAGE_TARGET=debian-package
+
+    # On Debian and xUbuntu, build debian packages, otherwise rpms. Don't know a better syntax for this
+    if test `command -v lsb_release >/dev/null 2>&1 && lsb_release -i | grep -E "(ebian|buntu)" > /dev/null; echo "$?"` == "0"; then
+        PACKAGE_TARGET=debian-package
+    else
+	PACKAGE_TARGET=rpm-package
+    fi
 fi
 
 if test "$OSNAME" = "Darwin" ; then

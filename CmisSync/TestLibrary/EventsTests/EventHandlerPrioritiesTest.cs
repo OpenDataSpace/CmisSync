@@ -22,10 +22,10 @@ namespace TestLibrary.EventsTests
     using System.IO;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Queueing;
 
     using log4net;
     using log4net.Config;

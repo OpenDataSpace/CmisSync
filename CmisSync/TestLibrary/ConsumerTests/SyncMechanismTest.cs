@@ -56,6 +56,7 @@ namespace TestLibrary.ConsumerTests
         public void SetUp()
         {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.queue = new Mock<ISyncEventQueue>();
             this.storage = new Mock<IMetaDataStorage>();
             this.activityListener = new Mock<IActivityListener>();
@@ -159,9 +160,10 @@ namespace TestLibrary.ConsumerTests
         [Test, Category("Fast"), Category("IT")]
         public void RemoteFolderAddedSituation()
         {
-            var remoteFolder = Mock.Of<IFolder>(f =>
-                                                f.Id == "remoteId" &&
-                                                f.Name == "name");
+            var remoteFolder = Mock.Of<IFolder>(
+                f =>
+                f.Id == "remoteId" &&
+                f.Name == "name");
             var remoteFolderAddedSolver = new Mock<ISolver>();
             var localDetection = new LocalSituationDetection();
             var remoteDetection = new RemoteSituationDetection();

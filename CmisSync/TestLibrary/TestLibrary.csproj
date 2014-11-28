@@ -189,7 +189,27 @@
     <Compile Include="IntegrationTests\RepositoryUtilsTests.cs" />
     <Compile Include="QueueingTests\ConnectionSchedulerTest.cs" />
     <Compile Include="ProducerTests\CrawlerTests\LocalEventGeneratorTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\CrawlEventNotifierTest.cs" />
+    <Compile Include="ProducerTests\CrawlerTests\CrawlEventGeneratorTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectDeletedRemoteObjectRenamedOrMovedTest.cs" />
     <Compile Include="StorageTests\FileSystemTests\LongFileAndPathNameSupportTest.cs" />
+    <Compile Include="UtilsTests\ProcessDiagnosticsTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectMovedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectRenamedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectChangedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectChangedTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectMovedRemoteObjectRenamedTest.cs" />
+    <Compile Include="IntegrationTests\UploadFileIT.cs" />
+    <Compile Include="IntegrationTests\NeedsLocalFileSystemFolder.cs" />
+    <Compile Include="UtilsTests\X509StoreTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedEventCalculatesBlockingUntilTest.cs" />
+    <Compile Include="AlgorithmsTests\TrajanSimpleCircleTests.cs" />
+    <Compile Include="AlgorithmsTests\TarjanSimpleLinearTests.cs" />
+    <Compile Include="AlgorithmsTests\StringTarjanNode.cs" />
+    <Compile Include="UtilsTests\BackendTest.cs" />
+    <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
+    <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -238,5 +258,7 @@
     <Folder Include="QueueingTests\" />
     <Folder Include="FilterTests\" />
     <Folder Include="CmisTests\ConvenienceExtendersTests\" />
+    <Folder Include="AlgorithmsTests\" />
+    <Folder Include="AlgorithmsTests\CyclicDependencies\" />
   </ItemGroup>
 </Project>

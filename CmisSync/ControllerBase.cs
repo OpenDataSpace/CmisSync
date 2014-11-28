@@ -49,6 +49,7 @@ namespace CmisSync
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using log4net;
 
@@ -85,6 +86,11 @@ namespace CmisSync
         /// List of the CmisSync synchronized folders.
         /// </summary>
         private List<Repository> repositories = new List<Repository>();
+
+        /// <summary>
+        /// A list of repositories sent to suspend because of a sleep event.
+        /// </summary>
+        private List<Repository> sleepingRepositories = new List<Repository>();
 
         /// <summary>
         /// Dictionary of the edit folder diaglogs
@@ -259,54 +265,82 @@ namespace CmisSync
         /// <param name="folderPath">Synchronized folder path</param>
         private void AddRepository(RepoInfo repositoryInfo)
         {
-            Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
+            try {
+                Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
 
-            repo.SyncStatusChanged += delegate(SyncStatus status)
-            {
-                this.UpdateState();
-            };
-
-            repo.Queue.EventManager.AddEventHandler(
-                new GenericSyncEventHandler<FileTransmissionEvent>(
-                50,
-                delegate(ISyncEvent e) {
-                FileTransmissionEvent transEvent = e as FileTransmissionEvent;
-                transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args)
+                repo.SyncStatusChanged += delegate(SyncStatus status)
                 {
-                    if (args.Aborted == true && args.FailedException != null)
-                    {
-                        this.ShowException(
-                            string.Format(Properties_Resources.TransmissionFailedOnRepo, repo.Name),
-                            string.Format("{0}{1}{2}", transEvent.Path, Environment.NewLine, args.FailedException.Message));
-                    }
+                    this.UpdateState();
                 };
-                return false;
-            }));
-            repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
-            repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
-            repo.Queue.EventManager.AddEventHandler(
-                new GenericSyncEventHandler<ProxyAuthRequiredEvent>(
-                0,
-                delegate(ISyncEvent e) {
-                this.ProxyAuthReqired(repositoryInfo.DisplayName);
-                return true;
-            }));
-            repo.Queue.EventManager.AddEventHandler(
-                new GenericSyncEventHandler<PermissionDeniedEvent>(
-                0,
-                delegate(ISyncEvent e) {
-                this.ShowChangePassword(repositoryInfo.DisplayName);
-                return true;
-            }));
-            repo.Queue.EventManager.AddEventHandler(
-                new GenericSyncEventHandler<SuccessfulLoginEvent>(
-                0,
-                delegate(ISyncEvent e) {
-                this.SuccessfulLogin(repositoryInfo.DisplayName);
-                return false;
-            }));
-            this.repositories.Add(repo);
-            repo.Initialize();
+
+                repo.Queue.EventManager.AddEventHandler(
+                    new GenericSyncEventHandler<FileTransmissionEvent>(
+                    50,
+                    delegate(ISyncEvent e) {
+                    FileTransmissionEvent transEvent = e as FileTransmissionEvent;
+                    transEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args)
+                    {
+                        if (args.Aborted == true && args.FailedException != null)
+                        {
+                            this.ShowException(
+                                string.Format(Properties_Resources.TransmissionFailedOnRepo, repo.Name),
+                                string.Format("{0}{1}{2}", transEvent.Path, Environment.NewLine, args.FailedException.Message));
+                        }
+                    };
+                    return false;
+                }));
+                repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<PermissionDeniedEvent, SuccessfulLoginEvent>());
+                repo.Queue.EventManager.AddEventHandler(new GenericHandleDublicatedEventsFilter<ProxyAuthRequiredEvent, SuccessfulLoginEvent>());
+                repo.Queue.EventManager.AddEventHandler(
+                    new GenericSyncEventHandler<ProxyAuthRequiredEvent>(
+                    0,
+                    delegate(ISyncEvent e) {
+                    this.ProxyAuthReqired(repositoryInfo.DisplayName);
+                    return true;
+                }));
+                repo.Queue.EventManager.AddEventHandler(
+                    new GenericSyncEventHandler<PermissionDeniedEvent>(
+                    0,
+                    delegate(ISyncEvent e) {
+                    var permissionDeniedEvent = e as PermissionDeniedEvent;
+                    if (permissionDeniedEvent.IsBlockedUntil == null) {
+                        this.ShowChangePassword(repositoryInfo.DisplayName);
+                    } else {
+                        this.ShowException(
+                            string.Format(Properties_Resources.LoginFailed, repo.Name),
+                            string.Format(Properties_Resources.LoginFailedLockedUntil, permissionDeniedEvent.IsBlockedUntil));
+                    }
+
+                    return true;
+                }));
+                repo.Queue.EventManager.AddEventHandler(
+                    new GenericSyncEventHandler<SuccessfulLoginEvent>(
+                    0,
+                    delegate(ISyncEvent e) {
+                    this.SuccessfulLogin(repositoryInfo.DisplayName);
+                    return false;
+                }));
+                repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ConfigurationNeededEvent>(
+                    1,
+                    delegate(ISyncEvent e) {
+                    this.ShowException("The configuration of " + repo.Name + " is broken", "Please reconfigure the connection");
+                    return true;
+                }));
+                repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ExceptionEvent>(
+                    0,
+                    delegate(ISyncEvent e) {
+                    var ex = (e as ExceptionEvent).Exception;
+                    this.ShowException("Exception on " + repo.Name, ex.Message);
+                    return false;
+                }));
+                this.repositories.Add(repo);
+                repo.Initialize();
+            } catch (ExtendedAttributeException xAttrException) {
+                this.ShowException(
+                    string.Format(Properties_Resources.CannotSync, repoInfo.DisplayName),
+                    string.Format(Properties_Resources.ProblemWithFS, Environment.NewLine, xAttrException.Message));
+
+            }
         }
 
         public void RemoveRepositoryFromSync(string reponame)
@@ -402,7 +436,7 @@ namespace CmisSync
                     }
                 };
 
-                edit.Controller.CloseWindowEvent += delegate
+                edit.Controller.CleanWindowEvent += delegate
                 {
                     lock (this.repo_lock)
                     {
@@ -466,11 +500,16 @@ namespace CmisSync
         {
             lock (this.repo_lock)
             {
-                foreach (Repository repo in this.repositories) {
-                    repo.Stopped = true;
+                foreach (var repo in this.Repositories) {
+                    if (repo.Status != SyncStatus.Suspend)
+                    {
+                        repo.Suspend();
+                        this.sleepingRepositories.Add(repo);
+                    }
                 }
 
                 Logger.Debug("Start to stop all active file transmissions");
+                int wait = 0;
                 do {
                     List<FileTransmissionEvent> activeList = this.transmissionManager.ActiveTransmissionsAsList();
                     foreach (FileTransmissionEvent transmissionEvent in activeList) {
@@ -485,21 +524,26 @@ namespace CmisSync
 
                     if (activeList.Count > 0) {
                         Thread.Sleep(100);
+                        wait++;
                     } else {
                         break;
                     }
-                } while (true);
+                } while (wait < 100);
+                Logger.Debug("Start to abort all open HttpWebRequests");
+                this.transmissionManager.AbortAllRequests();
                 Logger.Debug("Finish to stop all active file transmissions");
             }
         }
 
-        public void StartAll()
-        {
+        public void StartAll() {
             lock (this.repo_lock)
             {
-                foreach (Repository repo in this.repositories) {
-                    repo.Stopped = false;
+                foreach (var repo in this.sleepingRepositories)
+                {
+                    repo.Resume();
                 }
+
+                this.sleepingRepositories.Clear();
             }
         }
 

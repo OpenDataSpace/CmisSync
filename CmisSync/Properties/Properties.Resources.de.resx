@@ -355,4 +355,28 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="TransmissionFailedOnRepo" xml:space="preserve">
     <value>[{0}] Übertragung fehlgeschlagen:</value>
   </data>
+  <data name="LoginFailedLockedUntil" xml:space="preserve">
+    <value>Die Anmeldung wird bis {0} blockiert</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="LoginCheck" xml:space="preserve">
+    <value>Versuche mich anzumelden</value>
+  </data>
+  <data name="LoginFailed" xml:space="preserve">
+    <value>Anmeldung fehlgeschlagen: {0}</value>
+  </data>
+  <data name="LoginSuccess" xml:space="preserve">
+    <value>Erfolgreich angemeldet</value>
+  </data>
+  <data name="CannotSync" xml:space="preserve">
+    <value>{0} kann nicht synchronisiert werden</value>
+  </data>
+  <data name="ProblemsWithFS" xml:space="preserve">
+    <value>Problem mit dem Dateisystem:{0}{1}</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Version {0} ({1})</value>
+  </data>
 </root>

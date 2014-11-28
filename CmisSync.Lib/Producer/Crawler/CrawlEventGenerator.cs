@@ -72,21 +72,37 @@ namespace CmisSync.Lib.Producer.Crawler
             storedObjectsForLocal.Remove(rootNode);
             storedObjectsForRemote.Remove(rootNode);
 
-            createdEvents.removedLocalObjects = this.TransformToFileSystemInfoDict(storedObjectsForLocal);
-            createdEvents.removedRemoteObjects = this.TransformToFileSystemInfoDict(storedObjectsForRemote);
+            this.AddDeletedObjectsToMergableEvents(storedObjectsForLocal, eventMap, true);
+            this.AddDeletedObjectsToMergableEvents(storedObjectsForRemote, eventMap, false);
 
             return createdEvents;
         }
 
-        private Dictionary<string, IFileSystemInfo> TransformToFileSystemInfoDict(List<IMappedObject> storedObjectList) {
-            Dictionary<string, IFileSystemInfo> ret = new Dictionary<string, IFileSystemInfo>();
-            foreach (var localDeleted in storedObjectList) {
-                string path = this.storage.GetLocalPath(localDeleted);
-                IFileSystemInfo info = localDeleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
-                ret.Add(localDeleted.RemoteObjectId, info);
+        private void AddDeletedObjectsToMergableEvents(
+            List<IMappedObject> storedObjectList,
+            Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
+            bool areLocalEvents) {
+            foreach (var deleted in storedObjectList) {
+                string path = this.storage.GetLocalPath(deleted);
+                IFileSystemInfo info = deleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
+                var newEvent = FileOrFolderEventFactory.CreateEvent(
+                    null,
+                    info,
+                    areLocalEvents ? MetaDataChangeType.NONE : MetaDataChangeType.DELETED,
+                    areLocalEvents ? MetaDataChangeType.DELETED : MetaDataChangeType.NONE,
+                    areLocalEvents ? this.storage.GetRemotePath(deleted) : null,
+                    areLocalEvents ? null : info,
+                    src: this);
+                if (!eventMap.ContainsKey(deleted.RemoteObjectId)) {
+                    eventMap[deleted.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(
+                        areLocalEvents ? newEvent : null,
+                        areLocalEvents ? null : newEvent);
+                } else {
+                    eventMap[deleted.RemoteObjectId] = new Tuple<AbstractFolderEvent, AbstractFolderEvent>(
+                        areLocalEvents ? newEvent : eventMap[deleted.RemoteObjectId].Item1,
+                        areLocalEvents ? eventMap[deleted.RemoteObjectId].Item2 : newEvent);
+                }
             }
-
-            return ret;
         }
     }
 }
