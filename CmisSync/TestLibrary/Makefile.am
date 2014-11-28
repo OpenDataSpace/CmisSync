@@ -88,6 +88,7 @@ SOURCES =  \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
+	IntegrationTests/SelectiveIgnoreTests.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
 	IntegrationTests/UploadFileIT.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
