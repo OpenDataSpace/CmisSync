@@ -74,7 +74,7 @@ namespace CmisSync
 
         protected void OnNotificationToggleButtonToggled(object sender, EventArgs e)
         {
-            Logger.Debug("Notification Settings toggled to " + this.notificationToggleButton.Active ? "true" : "false");
+            Logger.Debug("Notification Settings toggled to " + (this.notificationToggleButton.Active ? "true" : "false"));
             this.saveButton.Sensitive = this.proxyWidget.IsValid;
         }
     }
