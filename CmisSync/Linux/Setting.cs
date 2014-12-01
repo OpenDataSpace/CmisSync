@@ -23,8 +23,12 @@ namespace CmisSync
 {
     using System;
 
+    using log4net;
+
     public partial class Setting : Gtk.Window
     {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(Setting));
+
         private SettingController Controller = new SettingController();
         public Setting() : 
                 base(Gtk.WindowType.Toplevel)
@@ -70,6 +74,7 @@ namespace CmisSync
 
         protected void OnNotificationToggleButtonToggled(object sender, EventArgs e)
         {
+            Logger.Debug("Notification Settings toggled to " + this.notificationToggleButton.Active ? "true" : "false");
             this.saveButton.Sensitive = this.proxyWidget.IsValid;
         }
     }
