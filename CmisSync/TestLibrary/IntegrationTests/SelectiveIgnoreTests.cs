@@ -198,6 +198,8 @@ namespace TestLibrary.IntegrationTests
             this.repo.Initialize();
             this.repo.Run();
 
+            var folder = this.session.GetObject(ignoredFolder.Id) as IFolder;
+            Assert.That(folder.AreAllChildrenIgnored(), Is.True);
             Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories(), Is.Empty);
         }
 
