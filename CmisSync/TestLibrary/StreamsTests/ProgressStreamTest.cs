@@ -319,7 +319,6 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(AbortException))]
         public void AbortReadIfTransmissionEventIsAborting()
         {
             byte[] content = new byte[1024];
@@ -328,12 +327,11 @@ namespace TestLibrary.StreamsTests
             using (var progressStream = new ProgressStream(stream, transmission))
             {
                 transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
-                progressStream.ReadByte();
+                Assert.Throws<AbortException>(() => progressStream.ReadByte());
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(AbortException))]
         public void AbortWriteIfTransmissionEventIsAborting()
         {
             var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
@@ -341,7 +339,7 @@ namespace TestLibrary.StreamsTests
             using (var progressStream = new ProgressStream(stream, transmission))
             {
                 transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
-                progressStream.WriteByte(new byte());
+                Assert.Throws<AbortException>(() => progressStream.WriteByte(new byte()));
             }
         }
     }
