@@ -53,8 +53,7 @@ namespace CmisSync.Lib.Streams
         /// </param>
         public NonClosingHashStream(Stream stream, HashAlgorithm hashAlg, CryptoStreamMode mode) : base(stream)
         {
-            if (hashAlg == null)
-            {
+            if (hashAlg == null) {
                 throw new ArgumentNullException("Given hash algorithm must not be null");
             }
 
@@ -70,8 +69,7 @@ namespace CmisSync.Lib.Streams
         /// <value>
         /// The cipher mode.
         /// </value>
-        public CryptoStreamMode CipherMode
-        {
+        public CryptoStreamMode CipherMode {
             get { return this.mode; }
         }
 
@@ -88,11 +86,11 @@ namespace CmisSync.Lib.Streams
         /// <param name='count'>
         /// Count.
         /// </param>
+        /// <returns>Count of read bytes</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             int result = base.Read(buffer, offset, count);
-            if (this.mode == CryptoStreamMode.Read)
-            {
+            if (this.mode == CryptoStreamMode.Read) {
                 this.hashAlg.TransformBlock(buffer, offset, result, buffer, offset);
             }
 
@@ -104,18 +102,17 @@ namespace CmisSync.Lib.Streams
         /// If mode is set to Write, the given HashAlgorithm is transformed by passing the input of the write operation.
         /// </summary>
         /// <param name='buffer'>
-        /// Buffer.
+        /// Given Buffer.
         /// </param>
         /// <param name='offset'>
-        /// Offset.
+        /// Given Offset.
         /// </param>
         /// <param name='count'>
-        /// Count.
+        /// Count of bytes.
         /// </param>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (this.mode == CryptoStreamMode.Write)
-            {
+            if (this.mode == CryptoStreamMode.Write) {
                 this.hashAlg.TransformBlock(buffer, offset, count, buffer, offset);
             }
 
