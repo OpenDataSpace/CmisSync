@@ -208,10 +208,28 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var transmissionManager = new ActiveActivitiesManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
             var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.Name).Returns("dir");
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
             this.session.Setup(s => s.CreateFolder(It.IsAny<IDictionary<string, object>>(), It.IsAny<IObjectId>())).Throws(new CmisConstraintException("Conflict"));
             Assert.Throws<CmisConstraintException>(() => solver.Solve(dirInfo.Object, null));
+
+            this.storage.VerifyThatNoObjectIsManipulated();
+            this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == this.parentId)), Times.Once());
+            dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFolderAddingFailsBecauseUtf8Character() {
+            var transmissionManager = new ActiveActivitiesManager();
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.Name).Returns(@"ä".Normalize(System.Text.NormalizationForm.FormD));
+            var parentDirInfo = this.SetupParentFolder(parentId);
+            dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
+            this.session.Setup(s => s.CreateFolder(It.IsAny<IDictionary<string, object>>(), It.IsAny<IObjectId>())).Throws(new CmisConstraintException("Conflict"));
+            solver.Solve(dirInfo.Object, null);
 
             this.storage.VerifyThatNoObjectIsManipulated();
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == this.parentId)), Times.Once());

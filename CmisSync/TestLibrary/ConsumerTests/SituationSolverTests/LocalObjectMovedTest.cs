@@ -160,5 +160,30 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
             storage.VerifyThatNoObjectIsManipulated();
         }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void Utf8CharacterLeadsToNoSavings()
+        {
+            string newFolderName = @"ä".Normalize(System.Text.NormalizationForm.FormD);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("folderId", "folder", "/folder", this.rootId);
+            var targetFolder = MockOfIFolderUtil.CreateRemoteFolderMock("targetId", "target", "/target", this.rootId);
+            this.session.AddRemoteObjects(remoteFolder.Object, targetFolder.Object);
+            var localTargetFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target"));
+            var localFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.Combine(Path.GetTempPath(), "target", newFolderName));
+            localFolder.Setup(f => f.Parent).Returns(localTargetFolder.Object);
+            var mappedFolder = new MappedObject("folder", "folderId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
+            var mappedTargetFolder = new MappedObject("target", "targetId", MappedObjectType.Folder, this.rootId, "changetoken") { Guid = Guid.NewGuid() };
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(localTargetFolder.Object)))).Returns(mappedTargetFolder);
+            this.storage.Setup(s => s.GetObjectByRemoteId("folderId")).Returns(mappedFolder);
+            remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object)).Returns(remoteFolder.Object);
+            remoteFolder.Setup(f => f.Rename(newFolderName, true)).Throws<CmisConstraintException>();
+
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
+
+            remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object), Times.Once());
+            remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
+            remoteFolder.Verify(f => f.UpdateProperties(It.IsAny<System.Collections.Generic.IDictionary<string,object>>()), Times.Never());
+            this.storage.VerifyThatNoObjectIsManipulated();
+        }
     }
 }

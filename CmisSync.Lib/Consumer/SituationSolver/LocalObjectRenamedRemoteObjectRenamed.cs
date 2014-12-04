@@ -29,6 +29,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     /// <summary>
     /// Local object renamed and also the remote object has been renamed.
@@ -76,7 +77,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     mappedObject.Name = localFolder.Name;
                 } else if (localFolder.LastWriteTimeUtc.CompareTo((DateTime)remoteFolder.LastModificationDate) > 0) {
                     string oldName = remoteFolder.Name;
-                    remoteFolder.Rename(localFolder.Name, true);
+                    try {
+                        remoteFolder.Rename(localFolder.Name, true);
+                    } catch (CmisConstraintException) {
+                        if (!Utils.IsValidISO885915(localFolder.Name)) {
+                            OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name));
+                            return;
+                        }
+
+                        throw;
+                    }
                     mappedObject.Name = remoteFolder.Name;
                     OperationsLogger.Info(string.Format("Renamed remote folder {0} with id {2} to {1}", oldName, remoteFolder.Id, remoteFolder.Name));
                 } else {
