@@ -29,6 +29,7 @@ SOURCES =  \
 	ConfigTests/ConfigurationTest.cs \
 	ConfigTests/CredentialsTest.cs \
 	ConfigTests/RepoInfoTests.cs \
+	ConfigTests/DefaultSettingsTests.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	StorageTests/FileSystemTests/DateTimeConverterTest.cs \
