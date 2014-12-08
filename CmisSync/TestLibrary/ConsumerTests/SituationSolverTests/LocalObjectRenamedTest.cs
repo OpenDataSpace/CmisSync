@@ -248,5 +248,31 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, oldModificationDate, contentSize: content.Length);
             }
         }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConflictOnUtf8CharacterLeadsToNoSavings()
+        {
+            var remoteFolder = new Mock<IFolder>();
+            remoteFolder.Setup(f => f.Name).Returns(this.oldName);
+            remoteFolder.Setup(f => f.Id).Returns(this.id);
+            remoteFolder.Setup(f => f.Rename(@"ä".Normalize(NormalizationForm.FormD), true)).Throws<CmisConstraintException>();
+            var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+            localFolder.Setup(f => f.Name).Returns(@"ä".Normalize(NormalizationForm.FormD));
+            var mappedFolder = new Mock<IMappedObject>();
+            mappedFolder.SetupAllProperties();
+            mappedFolder.SetupProperty(f => f.Guid, Guid.NewGuid());
+            mappedFolder.SetupProperty(f => f.Name, this.oldName);
+            mappedFolder.SetupProperty(f => f.RemoteObjectId, this.id);
+            mappedFolder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
+
+            this.storage.AddMappedFolder(mappedFolder.Object);
+
+            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
+
+            remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == @"ä".Normalize(NormalizationForm.FormD)), It.Is<bool>(b => b == true)), Times.Once());
+
+            this.storage.VerifyThatNoObjectIsManipulated();
+        }
     }
 }

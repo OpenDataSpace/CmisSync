@@ -56,6 +56,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             // Rename object
             try {
                 (remoteId as ICmisObject).Rename(localFileSystemInfo.Name, true);
+            } catch (CmisConstraintException) {
+                if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
+                    OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFileSystemInfo.Name));
+                    return;
+                }
+
+                throw;
             } catch (CmisPermissionDeniedException) {
                 OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFileSystemInfo.Name));
                 return;

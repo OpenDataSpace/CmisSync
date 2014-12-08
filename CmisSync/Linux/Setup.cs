@@ -530,8 +530,9 @@ namespace CmisSync {
             }
             Label localfolder_label = new Label() {
                 Xalign = 0,
-                       UseMarkup = true,
-                       Markup = "<b>" + Properties_Resources.EnterLocalFolderName + "</b>"
+                UseMarkup = true,
+                Markup = "<b>" + Properties_Resources.EnterLocalFolderName + "</b>",
+                LineWrap = true
             };
 
             Entry localfolder_entry = new Entry() {
@@ -541,8 +542,9 @@ namespace CmisSync {
 
             Label localrepopath_label = new Label() {
                 Xalign = 0,
-                       UseMarkup = true,
-                       Markup = "<b>" + Properties_Resources.ChangeRepoPath + "</b>"
+                UseMarkup = true,
+                Markup = "<b>" + Properties_Resources.ChangeRepoPath + "</b>",
+                LineWrap = true
             };
 
             Entry localrepopath_entry = new Entry() {
@@ -558,7 +560,8 @@ namespace CmisSync {
             Label localfolder_error_label = new Label() {
                 Xalign = 0,
                        UseMarkup = true,
-                       Markup = ""
+                Markup = "",
+                LineWrap = true
             };
 
             Button cancel_button = new Button(cancelText);

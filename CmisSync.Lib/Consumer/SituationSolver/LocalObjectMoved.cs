@@ -80,7 +80,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 if (localFile.Name != remoteObject.Name) {
-                    remoteObject.Rename(localFile.Name, true);
+                    try {
+                        remoteObject.Rename(localFile.Name, true);
+                    } catch (CmisConstraintException) {
+                        if (!Utils.IsValidISO885915(localFile.Name)) {
+                            OperationsLogger.Warn(string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFile.Name));
+                            return;
+                        }
+
+                        throw;
+                    }
                 }
             } catch (CmisPermissionDeniedException) {
                 OperationsLogger.Info(string.Format("Moving remote object failed {0}: Permission Denied", localFile.FullName));
