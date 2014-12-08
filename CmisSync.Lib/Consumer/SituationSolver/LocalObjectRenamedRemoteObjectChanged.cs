@@ -36,7 +36,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectRenamedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
+            ISyncEventQueue queue,
+            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage, queue) {
+            if (this.Queue == null) {
+                throw new ArgumentNullException("Given queue is null");
+            }
+
             if (changeSolver == null) {
                 throw new ArgumentNullException("Given situation solver for local and remote changes is null");
             }
@@ -56,8 +61,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             // Rename object
             try {
                 (remoteId as ICmisObject).Rename(localFileSystemInfo.Name, true);
-            } catch (CmisConstraintException) {
+            } catch (CmisConstraintException e) {
                 if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
+                    this.Queue.AddEvent(new InteractionNeededEvent(e) {
+                        Title = string.Format("Server denied renaming of {0}", oldName),
+                        Description = string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFileSystemInfo.Name)
+                    });
                     OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFileSystemInfo.Name));
                     return;
                 }

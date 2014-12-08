@@ -12,8 +12,6 @@
     <AssemblyName>TestLibrary</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <UseMSBuildEngine>False</UseMSBuildEngine>
-    <ReleaseVersion>
-    </ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -213,6 +211,7 @@
     <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectMovedTest.cs" />
+    <Compile Include="EventsTests\InteractionNeededInitializationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

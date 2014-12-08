@@ -25,6 +25,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.Text;
 
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -50,22 +52,32 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         private Mock<IMetaDataStorage> storage;
         private Mock<ISession> session;
+        private Mock<ISyncEventQueue> queue;
         private LocalObjectRenamed underTest;
 
         [SetUp]
         public void SetUp() {
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
+            this.queue = new Mock<ISyncEventQueue>();
             this.session.SetupTypeSystem();
-            this.underTest = new LocalObjectRenamed(this.session.Object, this.storage.Object);
+            this.underTest = new LocalObjectRenamed(this.session.Object, this.storage.Object, this.queue.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectRenamed(this.session.Object, this.storage.Object);
+            new LocalObjectRenamed(this.session.Object, this.storage.Object, this.queue.Object);
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
-        
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorFailsIfQueueIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamed(this.session.Object, this.storage.Object, null));
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         public void PermissionDeniedLeadsToNoOperation()
         {
@@ -88,6 +100,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             this.storage.Verify(f => f.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -120,6 +133,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, this.newModificationDate);
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -161,6 +175,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, this.modificationDate.AddMinutes(1), contentSize: content.Length);
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
             }
         }
 
@@ -204,6 +219,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, oldModificationDate, contentSize: 0);
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
             }
         }
 
@@ -246,6 +262,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, oldModificationDate, contentSize: content.Length);
+                this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
             }
         }
 
@@ -273,6 +290,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == @"ä".Normalize(NormalizationForm.FormD)), It.Is<bool>(b => b == true)), Times.Once());
 
             this.storage.VerifyThatNoObjectIsManipulated();
+            this.queue.Verify(q => q.AddEvent(It.IsAny<InteractionNeededEvent>()));
+            this.queue.VerifyThatNoOtherEventIsAddedThan<InteractionNeededEvent>();
         }
     }
 }

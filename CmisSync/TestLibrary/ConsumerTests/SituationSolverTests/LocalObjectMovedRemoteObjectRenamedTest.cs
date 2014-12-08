@@ -59,6 +59,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private ActiveActivitiesManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private Mock<ISyncEventQueue> queue;
         private Mock<IFileSystemInfoFactory> fsFactory;
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
         private Mock<LocalObjectRenamedRemoteObjectRenamed> renameSolver;
@@ -172,6 +173,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
+            this.queue = new Mock<ISyncEventQueue>();
             var newParentObj = new MappedObject(
                 this.newParentName,
                 this.newParentId,
@@ -191,6 +193,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectRenamed>(
                 this.session.Object,
                 this.storage.Object,
+                this.queue.Object,
                 this.changeSolver.Object);
             this.session.AddRemoteObjects(Mock.Of<IFolder>(o => o.Id == this.oldParentId), Mock.Of<IFolder>(o => o.Id == this.newParentId));
             this.underTest = new LocalObjectMovedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object, this.renameSolver.Object);

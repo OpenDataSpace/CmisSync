@@ -23,6 +23,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.IO;
 
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -42,6 +44,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private readonly string rootId = "rootId";
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private Mock<ISyncEventQueue> queue;
         private Mock<IFolder> remoteRootFolder;
         private Mock<IDirectoryInfo> localRootFolder;
         private MappedObject mappedRootFolder;
@@ -51,19 +54,26 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void SetUp() {
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
+            this.queue = new Mock<ISyncEventQueue>();
             this.session.SetupTypeSystem();
             this.remoteRootFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.rootId, "/", "/", null);
             this.session.AddRemoteObject(this.remoteRootFolder.Object);
             this.localRootFolder = MockOfIFileSystemInfoFactoryUtil.CreateLocalFolder(Path.GetTempPath());
             this.mappedRootFolder = new MappedObject("/", this.rootId, MappedObjectType.Folder, null, "changeToken") { Guid = Guid.NewGuid() };
             this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.Equals(this.localRootFolder.Object)))).Returns(this.mappedRootFolder);
-            this.underTest = new LocalObjectMoved(this.session.Object, this.storage.Object);
+            this.underTest = new LocalObjectMoved(this.session.Object, this.storage.Object, this.queue.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest()
         {
-            new LocalObjectMoved(this.session.Object, this.storage.Object);
+            new LocalObjectMoved(this.session.Object, this.storage.Object, this.queue.Object);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorFailsIfQueueIsNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectMoved(this.session.Object, this.storage.Object, null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -86,6 +96,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
             remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "targetId", "new ChangeToken", true);
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -110,6 +121,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Move(subFolder.Object, this.remoteRootFolder.Object), Times.Once());
             remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", "folder", "rootId", "new ChangeToken");
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -138,6 +150,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
             remoteFolder.VerifyUpdateLastModificationDate(localFolder.Object.LastWriteTimeUtc);
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "folderId", newFolderName, "targetId", "new ChangeToken");
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -159,6 +172,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
             storage.VerifyThatNoObjectIsManipulated();
+            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -184,6 +198,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
             remoteFolder.Verify(f => f.UpdateProperties(It.IsAny<System.Collections.Generic.IDictionary<string,object>>()), Times.Never());
             this.storage.VerifyThatNoObjectIsManipulated();
+            this.queue.Verify(q => q.AddEvent(It.IsAny<InteractionNeededEvent>()), Times.Once);
+            this.queue.VerifyThatNoOtherEventIsAddedThan<InteractionNeededEvent>();
         }
     }
 }

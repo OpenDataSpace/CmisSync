@@ -49,6 +49,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorThrowsNoExceptionIfQueueIsNull() {
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>(), null);
+            Assert.That(underTest.GetQueue(), Is.Null);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void ConstructorSetsPropertiesCorrectly() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
@@ -78,6 +86,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Assert.That(underTest.GetModification(), Is.False);
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorSetsQueueIfGiven() {
+            var session = new Mock<ISession>();
+            var queue = new Mock<ISyncEventQueue>();
+            session.SetupTypeSystem(false);
+            var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>(), queue.Object);
+            Assert.That(underTest.GetQueue(), Is.EqualTo(queue.Object));
+        }
+
         [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void UploadFileClosesTransmissionOnIOException() {
             var session = new Mock<ISession>();
@@ -97,7 +114,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private class SolverClass : AbstractEnhancedSolver {
             public SolverClass(
                 ISession session,
-                IMetaDataStorage storage) : base(session, storage) {
+                IMetaDataStorage storage, ISyncEventQueue queue = null) : base(session, storage, queue) {
             }
 
             public ISession GetSession() {
@@ -106,6 +123,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             public IMetaDataStorage GetStorage() {
                 return this.Storage;
+            }
+
+            public ISyncEventQueue GetQueue() {
+                return this.Queue;
             }
 
             public bool GetModification() {

@@ -54,7 +54,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="serverCanModifyCreationAndModificationDate">Enables the last modification date sync.</param>
         public AbstractEnhancedSolver(
             ISession session,
-            IMetaDataStorage storage)
+            IMetaDataStorage storage,
+            ISyncEventQueue queue = null)
         {
             this.Storage = storage;
             if (session == null) {
@@ -67,6 +68,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.Session = session;
             this.Storage = storage;
+            this.Queue = queue;
             this.ServerCanModifyDateTimes = this.Session.IsServerAbleToUpdateModificationDate();
         }
 
@@ -87,6 +89,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
         protected bool ServerCanModifyDateTimes { get; private set; }
+
+        /// <summary>
+        /// Gets the queue.
+        /// </summary>
+        /// <value>The queue.</value>
+        protected ISyncEventQueue Queue { get; private set; }
 
         /// <summary>
         /// Solve the specified situation by using localFile and remote object.

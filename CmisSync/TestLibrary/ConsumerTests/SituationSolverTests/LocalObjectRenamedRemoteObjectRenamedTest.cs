@@ -48,6 +48,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private LocalObjectRenamedRemoteObjectRenamed underTest;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private Mock<ISyncEventQueue> queue;
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
 
         [SetUp]
@@ -57,16 +58,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
+            this.queue = new Mock<ISyncEventQueue>();
             this.InitializeMappedFolderOnStorage();
             var transmissionManager = new ActiveActivitiesManager();
             var fsFactory = Mock.Of<IFileSystemInfoFactory>();
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, transmissionManager, fsFactory);
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
+            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.queue.Object, this.changeSolver.Object);
         }
 
-        [Test]
+        [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructor() {
-            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
+            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.queue.Object, this.changeSolver.Object);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorFailsIfQueueIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, null, this.changeSolver.Object));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -113,7 +120,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             localFolder.Verify(f => f.MoveTo(Path.Combine(this.fullNamePrefix, this.newRemoteName)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newRemoteName, null, this.newChangeToken, true, null);
-
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -131,6 +137,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             localFolder.Verify(f => f.MoveTo(Path.Combine(this.fullNamePrefix, this.newRemoteName)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newRemoteName, null, this.newChangeToken, true, null);
+        }
+
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        public void RemoteAndLocalFileAreRenamedToDifferentFilenames() {
+            Assert.Fail("TODO");
         }
 
         private Mock<IFolder> CreateRemoteFolder(string name, DateTime? modificationDate = null) {

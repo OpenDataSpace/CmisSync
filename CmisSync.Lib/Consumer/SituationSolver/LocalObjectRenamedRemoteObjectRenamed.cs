@@ -48,7 +48,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectRenamedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
+            ISyncEventQueue queue,
+            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage, queue) {
+            if (this.Queue == null) {
+                throw new ArgumentNullException("Given queue is null");
+            }
+
             if (changeSolver == null) {
                 throw new ArgumentNullException("Given solver for the situation of local and remote object changed is null");
             }
@@ -79,8 +84,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     string oldName = remoteFolder.Name;
                     try {
                         remoteFolder.Rename(localFolder.Name, true);
-                    } catch (CmisConstraintException) {
+                    } catch (CmisConstraintException e) {
                         if (!Utils.IsValidISO885915(localFolder.Name)) {
+                            this.Queue.AddEvent(new InteractionNeededEvent(e) {
+                                Title = string.Format("Server denied renaming of {0}", oldName),
+                                Description = string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name)
+                            });
                             OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name));
                             return;
                         }
@@ -109,13 +118,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     this.Storage.SaveMappedObject(mappedObject);
                     this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
                 } else {
-                    OperationsLogger.Warn(string.Format(
-                        "Synchronization Conflict: The local file {0} has been locally renamed from {1} to {2} and remotely to {3}. " +
+                    string desc = string.Format(
+                        "The local file {0} has been locally renamed from {1} to {2} and remotely to {3}. " +
                         "Fix this conflict by renaming the remote file to {2} or the local file to {3}.",
                         localFile.FullName,
                         mappedObject.Name,
                         localFile.Name,
-                        remoteFile.Name));
+                        remoteFile.Name);
+                    this.Queue.AddEvent(new InteractionNeededEvent(string.Empty) {
+                        Title = "Synchronization Conflict",
+                        Description = desc
+                    });
+                    OperationsLogger.Warn("Synchronization Conflict: " + desc);
                 }
             }
         }

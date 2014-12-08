@@ -21,6 +21,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private Mock<ISyncEventQueue> queue;
         private ActiveActivitiesManager transmissionManager;
         private Mock<LocalObjectRenamedRemoteObjectRenamed> renameSolver;
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
@@ -31,34 +32,30 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
+            this.queue = new Mock<ISyncEventQueue>();
             this.transmissionManager = new ActiveActivitiesManager();
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, this.transmissionManager, Mock.Of<IFileSystemInfoFactory>());
-            this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectRenamed>(this.session.Object, this.storage.Object, this.changeSolver.Object);
+            this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectRenamed>(this.session.Object, this.storage.Object, this.queue.Object, this.changeSolver.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructor() {
-            new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), this.renameSolver.Object, this.changeSolver.Object);
+            new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), this.queue.Object, this.renameSolver.Object, this.changeSolver.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorFailsIfNoStorageIsPassed() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(this.session.Object, null, this.renameSolver.Object, this.changeSolver.Object));
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorFailsIfNoSessionIsPassed() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(null, Mock.Of<IMetaDataStorage>(), this.renameSolver.Object, this.changeSolver.Object));
+        public void ConstructorFailsIfNoQueueIsPassed() {
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), null, this.renameSolver.Object, this.changeSolver.Object));
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfNoRenameSolverIsPassed() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), null, this.changeSolver.Object));
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), this.queue.Object, null, this.changeSolver.Object));
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfNoChangeSolverIsPassed() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), this.renameSolver.Object, null));
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectMoved(this.session.Object, Mock.Of<IMetaDataStorage>(), this.queue.Object, this.renameSolver.Object, null));
         }
     }
 }

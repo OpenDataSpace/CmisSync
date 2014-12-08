@@ -96,6 +96,7 @@ SOURCES =  \
 	Events/IFilterableRemotePathEvent.cs \
 	Events/IFSEvent.cs \
 	Events/IFSMovedEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
 	Events/PermissionDeniedEvent.cs \

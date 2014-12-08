@@ -43,6 +43,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private ActiveActivitiesManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
+        private Mock<ISyncEventQueue> queue;
         private Mock<IFileSystemInfoFactory> fsFactory;
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
         private LocalObjectRenamedRemoteObjectChanged underTest;
@@ -51,7 +52,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void ConstructorThrowsExceptionIfSolverIsNull() {
             Mock<ISession> session = new Mock<ISession>();
             session.SetupTypeSystem();
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null));
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), this.queue.Object, null));
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConstructorThrowsExceptionIfQueueIsNull() {
+            Mock<ISession> session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, this.changeSolver.Object));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -100,13 +108,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
+            this.queue = new Mock<ISyncEventQueue>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
                 this.manager,
                 this.fsFactory.Object);
-            this.underTest = new LocalObjectRenamedRemoteObjectChanged(this.session.Object, this.storage.Object, this.changeSolver.Object);
+            this.underTest = new LocalObjectRenamedRemoteObjectChanged(this.session.Object, this.storage.Object, this.queue.Object, this.changeSolver.Object);
         }
     }
 }
