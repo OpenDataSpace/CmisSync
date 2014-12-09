@@ -83,6 +83,7 @@
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
     <Compile Include="IntegrationTests\AllHandlersIT.cs" />
+    <Compile Include="IntegrationTests\ClientBrandTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
@@ -250,7 +251,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup />
   <ItemGroup>
     <Folder Include="CmisTests\" />
     <Folder Include="CmisTests\UiUtilsTests\" />

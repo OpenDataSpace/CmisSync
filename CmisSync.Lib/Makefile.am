@@ -15,6 +15,7 @@ SOURCES =  \
 	Algorithms/Tarjan/AbstractTarjanNode.cs \
 	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
+	ClientBrandBase.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
@@ -28,6 +29,7 @@ SOURCES =  \
 	Cmis/UiUtils/CmisPermissionDeniedException.cs \
 	Cmis/UiUtils/CmisServerNotFoundException.cs \
 	Cmis/UiUtils/CmisUtils.cs \
+	Config/Brand.cs \
 	Config/Config.cs \
 	Config/ConfigManager.cs \
 	Config/ConfigMigration.cs \

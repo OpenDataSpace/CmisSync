@@ -26,6 +26,7 @@ SOURCES =  \
 	AppDelegate.cs \
 	Badger.cs \
 	CertPolicyWindow.cs \
+	ClientBrand.cs \
 	CmisTree/CmisOutline.cs \
 	CmisTree/CmisOutline.designer.cs \
 	CmisTree/CmisOutlineController.cs \
@@ -77,7 +78,8 @@ SOURCES =  \
 	TransmissionWidget.designer.cs \
 	TransmissionWidgetController.cs \
 	TextFieldDelegate.cs \
-	UI.cs
+	UI.cs \
+	UIHelpers.cs
 
 RESOURCES = $(RESOURCES_RESOURCES)
 

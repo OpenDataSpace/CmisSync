@@ -101,7 +101,7 @@ namespace CmisSync
         {
             base.AwakeFromNib ();
 
-            this.SideSplashView.Image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "side-splash.png")) {
+            this.SideSplashView.Image = new NSImage (UIHelpers.GetImagePathname ("side-splash")) {
                 Size = new SizeF (150, 482)
             };
         }
