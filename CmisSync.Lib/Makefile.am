@@ -3,7 +3,7 @@ TARGET = library
 
 ASSEMBLY_INFO_SOURCE = Defines.cs
 
-LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
+LIBS = $(LOG4NET_LIBS) $(CONFIGLIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
 
 SOURCES =  \
 	Accumulator/LocalObjectFetcher.cs \
@@ -35,10 +35,12 @@ SOURCES =  \
 	Config/ConfigMigration.cs \
 	Config/Credentials.cs \
 	Config/Crypto.cs \
+	Config/DefaultEntries.cs \
 	Config/Feature.cs \
 	Config/ProxySettings.cs \
 	Config/RepoInfo.cs \
 	Config/XmlUri.cs \
+	Consumer/InteractionNeededException.cs \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
@@ -98,6 +100,7 @@ SOURCES =  \
 	Events/IFilterableRemotePathEvent.cs \
 	Events/IFSEvent.cs \
 	Events/IFSMovedEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
 	Events/PermissionDeniedEvent.cs \

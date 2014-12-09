@@ -29,6 +29,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     /// <summary>
     /// Local object renamed and also the remote object has been renamed.
@@ -76,7 +77,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     mappedObject.Name = localFolder.Name;
                 } else if (localFolder.LastWriteTimeUtc.CompareTo((DateTime)remoteFolder.LastModificationDate) > 0) {
                     string oldName = remoteFolder.Name;
-                    remoteFolder.Rename(localFolder.Name, true);
+                    try {
+                        remoteFolder.Rename(localFolder.Name, true);
+                    } catch (CmisConstraintException e) {
+                        if (!Utils.IsValidISO885915(localFolder.Name)) {
+                            OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name));
+                            throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
+                                Title = string.Format("Server denied renaming of {0}", oldName),
+                                Description = string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name)
+                            };
+                        }
+
+                        throw;
+                    }
                     mappedObject.Name = remoteFolder.Name;
                     OperationsLogger.Info(string.Format("Renamed remote folder {0} with id {2} to {1}", oldName, remoteFolder.Id, remoteFolder.Name));
                 } else {
@@ -99,13 +112,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     this.Storage.SaveMappedObject(mappedObject);
                     this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
                 } else {
-                    OperationsLogger.Warn(string.Format(
-                        "Synchronization Conflict: The local file {0} has been locally renamed from {1} to {2} and remotely to {3}. " +
+                    string desc = string.Format(
+                        "The local file {0} has been locally renamed from {1} to {2} and remotely to {3}. " +
                         "Fix this conflict by renaming the remote file to {2} or the local file to {3}.",
                         localFile.FullName,
                         mappedObject.Name,
                         localFile.Name,
-                        remoteFile.Name));
+                        remoteFile.Name);
+                    OperationsLogger.Warn("Synchronization Conflict: " + desc);
+                    throw new InteractionNeededException("Synchronization Conflict") {
+                        Title = "Synchronization Conflict",
+                        Description = desc
+                    };
                 }
             }
         }

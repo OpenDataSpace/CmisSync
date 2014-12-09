@@ -179,7 +179,6 @@ namespace TestLibrary.IntegrationTests
                 }
             } catch (CmisObjectNotFoundException) {
             }
-
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             IFolder subFolder = folder.CreateFolder(subFolderName);

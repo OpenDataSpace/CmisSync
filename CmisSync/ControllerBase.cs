@@ -478,6 +478,13 @@ namespace CmisSync
                     this.ShowException("The configuration of " + repo.Name + " is broken", "Please reconfigure the connection");
                     return true;
                 }));
+                repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<InteractionNeededEvent>(
+                    1,
+                    delegate(ISyncEvent e) {
+                    var interactionEvent = e as InteractionNeededEvent;
+                    this.ShowException(interactionEvent.Title, interactionEvent.Description);
+                    return true;
+                }));
                 repo.Queue.EventManager.AddEventHandler(new GenericSyncEventHandler<ExceptionEvent>(
                     0,
                     delegate(ISyncEvent e) {

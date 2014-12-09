@@ -29,6 +29,7 @@ SOURCES =  \
 	ConfigTests/ConfigurationTest.cs \
 	ConfigTests/CredentialsTest.cs \
 	ConfigTests/RepoInfoTests.cs \
+	ConfigTests/DefaultSettingsTests.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	StorageTests/FileSystemTests/DateTimeConverterTest.cs \
@@ -47,6 +48,7 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \
@@ -65,6 +67,7 @@ SOURCES =  \
 	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
+	EventsTests/InteractionNeededInitializationTest.cs \
 	EventsTests/PermissionDeniedEventCalculatesBlockingUntilTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \

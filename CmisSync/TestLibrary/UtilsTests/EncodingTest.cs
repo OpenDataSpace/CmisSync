@@ -66,6 +66,7 @@ namespace TestLibrary.UtilsTests
         public void IsStringNormalizedInFormD()
         {
             Assert.That(@"ä".IsNormalized(NormalizationForm.FormD));
+            Assert.That(Utils.IsValidISO885915(@"ä"), Is.False);
         }
     }
 }

@@ -427,7 +427,6 @@ namespace CmisSync
         public void BackToPage1()
         {
             this.PreviousAddress = this.saved_address;
-            this.PreviousPath = this.saved_user;
             this.ChangePageEvent(PageType.Add1);
         }
 
