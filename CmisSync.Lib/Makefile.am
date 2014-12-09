@@ -38,6 +38,7 @@ SOURCES =  \
 	Config/ProxySettings.cs \
 	Config/RepoInfo.cs \
 	Config/XmlUri.cs \
+	Consumer/InteractionNeededException.cs \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
@@ -97,6 +98,7 @@ SOURCES =  \
 	Events/IFilterableRemotePathEvent.cs \
 	Events/IFSEvent.cs \
 	Events/IFSMovedEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
 	Events/PermissionDeniedEvent.cs \

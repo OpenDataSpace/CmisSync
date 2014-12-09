@@ -218,6 +218,8 @@
     <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
     <Compile Include="ConfigTests\DefaultSettingsTests.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectMovedTest.cs" />
+    <Compile Include="EventsTests\InteractionNeededInitializationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
