@@ -179,15 +179,7 @@ namespace CmisSync.Lib
                     return false;
                 }
 
-                byte[] buffer = new byte[8 * 1024];
-                do {
-                    int len = contentStream.Stream.Read(buffer, 0, buffer.Length);
-                    if (len <= 0) {
-                        break;
-                    }
-
-                    output.Write(buffer, 0, len);
-                } while (true);
+                contentStream.Stream.CopyTo(output);
                 return true;
             } catch (Exception e) {
                 Logger.Debug(e.Message);
