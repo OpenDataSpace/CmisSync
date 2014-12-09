@@ -182,6 +182,7 @@ namespace CmisSync
             ServerCredentials cred = new ServerCredentials()
             {
                 Address = Credentials.Address,
+                Binding = Credentials.Binding,
                 UserName = Credentials.UserName,
                 Password = passwordBox.Password
             };

@@ -268,7 +268,8 @@ namespace CmisSync {
                 ServerCredentials credentials = new ServerCredentials() {
                     UserName = user_entry.Text,
                     Password = password_entry.Text,
-                    Address = new Uri(address_entry.Text)
+                    Address = new Uri(address_entry.Text),
+                    Binding = this.controller.saved_binding ?? ServerCredentials.BindingBrowser
                 };
                 IAsyncResult ar = dlgt.BeginInvoke(credentials, null, null);
                 while (!ar.AsyncWaitHandle.WaitOne(100)) {
@@ -297,14 +298,14 @@ namespace CmisSync {
                 } else {
                     // Continue to folder selection
                     this.controller.Add1PageCompleted(
-                        new Uri(address_entry.Text), user_entry.Text, password_entry.Text);
+                        new Uri(address_entry.Text), cmisServer.Binding, user_entry.Text, password_entry.Text);
                 }
             };
 
             this.controller.UpdateAddProjectButtonEvent += delegate(bool button_enabled) {
                 Application.Invoke(delegate {
                     continue_button.Sensitive = button_enabled;
-                    if(button_enabled) {
+                    if (button_enabled) {
                         continue_button.SetFlag(Gtk.WidgetFlags.CanFocus);
                         continue_button.SetFlag(Gtk.WidgetFlags.CanDefault);
                         continue_button.GrabDefault();
