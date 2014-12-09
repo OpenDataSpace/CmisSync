@@ -3,6 +3,7 @@ namespace CmisSync.Lib.Consumer
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.Serialization;
 
     using CmisSync.Lib.Storage.FileSystem;
 
@@ -11,17 +12,18 @@ namespace CmisSync.Lib.Consumer
     /// <summary>
     /// Interaction needed exception. This exception should be thrown if a user must be informed about a needed interaction to solve a problem/conflict.
     /// </summary>
+    [Serializable]
     public class InteractionNeededException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.InteractionNeededException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
         /// </summary>
         public InteractionNeededException() : base() {
             this.InitParams();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.InteractionNeededException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
         /// </summary>
         /// <param name="msg">Exception message.</param>
         public InteractionNeededException(string msg) : base(msg) {
@@ -29,12 +31,20 @@ namespace CmisSync.Lib.Consumer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.InteractionNeededException"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
         /// </summary>
         /// <param name="msg">Exception message.</param>
         /// <param name="inner">Inner exception.</param>
         public InteractionNeededException(string msg, Exception inner) : base(msg, inner) {
             this.InitParams();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.InteractionNeededException"/> class.
+        /// </summary>
+        /// <param name="info">Serialization info.</param>
+        /// <param name="context">Streaming context.</param>
+        protected InteractionNeededException(SerializationInfo info, StreamingContext context) : base(info, context) {
         }
 
         /// <summary>
