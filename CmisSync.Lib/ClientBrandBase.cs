@@ -59,21 +59,17 @@ namespace CmisSync.Lib
         private IRepository GetRepo(ServerCredentials credentials)
         {
             Dictionary<string, string> parameters = CmisUtils.GetCmisParameters(credentials);
-            try
-            {
+            try {
                 ISessionFactory factory = SessionFactory.NewInstance();
                 IList<IRepository> repos = factory.GetRepositories(parameters);
-                foreach (IRepository repo in repos)
-                {
-                    if (repo.Name == GetRepoName())
-                    {
+                foreach (IRepository repo in repos) {
+                    if (repo.Name == GetRepoName()) {
                         return repo;
                     }
                 }
+
                 return null;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return null;
             }
@@ -87,26 +83,21 @@ namespace CmisSync.Lib
         public bool TestServer(ServerCredentials credentials)
         {
             IRepository repo = GetRepo(credentials);
-            if (repo == null)
-            {
+            if (repo == null) {
                 return false;
             }
 
-            try
-            {
+            try {
                 ISession session = repo.CreateSession();
-                foreach (string path in GetPathList())
-                {
+                foreach (string path in GetPathList()) {
                     IDocument doc = session.GetObjectByPath(path) as IDocument;
-                    if (doc == null)
-                    {
+                    if (doc == null) {
                         return false;
                     }
                 }
+
                 return true;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return false;
             }
@@ -119,24 +110,19 @@ namespace CmisSync.Lib
         /// <returns>Whether the CMIS server is setup</returns>
         public bool SetupServer(ServerCredentials credentials)
         {
-            if (!TestServer(credentials))
-            {
+            if (!TestServer(credentials)) {
                 return false;
             }
 
             IRepository repo = GetRepo(credentials);
-            if (repo == null)
-            {
+            if (repo == null) {
                 return false;
             }
 
-            try
-            {
+            try {
                 Session = repo.CreateSession();
                 return true;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return false;
             }
@@ -152,23 +138,19 @@ namespace CmisSync.Lib
         {
             date = DateTime.Now;
 
-            if (Session == null)
-            {
+            if (Session == null) {
                 return false;
             }
 
-            try
-            {
+            try {
                 IDocument doc = Session.GetObjectByPath(pathname) as IDocument;
-                if (doc == null || doc.LastModificationDate == null)
-                {
+                if (doc == null || doc.LastModificationDate == null) {
                     return false;
                 }
+
                 date = doc.LastModificationDate.GetValueOrDefault();
                 return true;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return false;
             }
@@ -182,41 +164,35 @@ namespace CmisSync.Lib
         /// <returns>Whether to get the content for the client brand file</returns>
         public bool GetFile(string pathname, Stream output)
         {
-            if (Session == null)
-            {
+            if (Session == null) {
                 return false;
             }
 
-            try
-            {
+            try {
                 IDocument doc = Session.GetObjectByPath(pathname) as IDocument;
-                if (doc == null)
-                {
+                if (doc == null) {
                     return false;
                 }
+
                 DotCMIS.Data.IContentStream contentStream = doc.GetContentStream();
-                if (contentStream == null)
-                {
+                if (contentStream == null) {
                     return false;
                 }
+
                 byte[] buffer = new byte[8 * 1024];
-                do
-                {
+                do {
                     int len = contentStream.Stream.Read(buffer, 0, buffer.Length);
-                    if (len <= 0)
-                    {
+                    if (len <= 0) {
                         break;
                     }
+
                     output.Write(buffer, 0, len);
                 } while (true);
                 return true;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return false;
             }
         }
-
     }
 }
