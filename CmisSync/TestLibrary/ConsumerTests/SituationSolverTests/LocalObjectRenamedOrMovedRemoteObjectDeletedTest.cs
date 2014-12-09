@@ -57,7 +57,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.session.Object,
                 this.storage.Object,
                 this.manager.Object,
-                Mock.Of<ISyncEventQueue>(),
                 this.secondSolver.Object);
         }
 
@@ -66,8 +65,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
-                Mock.Of<ActiveActivitiesManager>(),
-                Mock.Of<ISyncEventQueue>());
+                Mock.Of<ActiveActivitiesManager>());
         }
 
         [Test, Category("Fast")]
@@ -75,8 +73,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
-                Mock.Of<ActiveActivitiesManager>(),
-                Mock.Of<ISyncEventQueue>());
+                Mock.Of<ActiveActivitiesManager>());
         }
 
         [Test, Category("Fast")]

@@ -48,12 +48,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectRenamedRemoteObjectRenamed(
             ISession session,
             IMetaDataStorage storage,
-            ISyncEventQueue queue,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage, queue) {
-            if (this.Queue == null) {
-                throw new ArgumentNullException("Given queue is null");
-            }
-
+            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
             if (changeSolver == null) {
                 throw new ArgumentNullException("Given solver for the situation of local and remote object changed is null");
             }
@@ -86,12 +81,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         remoteFolder.Rename(localFolder.Name, true);
                     } catch (CmisConstraintException e) {
                         if (!Utils.IsValidISO885915(localFolder.Name)) {
-                            this.Queue.AddEvent(new InteractionNeededEvent(e) {
+                            OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name));
+                            throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
                                 Title = string.Format("Server denied renaming of {0}", oldName),
                                 Description = string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name)
-                            });
-                            OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name));
-                            return;
+                            };
                         }
 
                         throw;
@@ -125,11 +119,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         mappedObject.Name,
                         localFile.Name,
                         remoteFile.Name);
-                    this.Queue.AddEvent(new InteractionNeededEvent(string.Empty) {
+                    OperationsLogger.Warn("Synchronization Conflict: " + desc);
+                    throw new InteractionNeededException("Synchronization Conflict") {
                         Title = "Synchronization Conflict",
                         Description = desc
-                    });
-                    OperationsLogger.Warn("Synchronization Conflict: " + desc);
+                    };
                 }
             }
         }

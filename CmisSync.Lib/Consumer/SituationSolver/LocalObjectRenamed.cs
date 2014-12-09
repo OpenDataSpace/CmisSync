@@ -46,11 +46,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectRenamed(
             ISession session,
-            IMetaDataStorage storage,
-            ISyncEventQueue queue) : base(session, storage, queue) {
-            if (this.Queue == null) {
-                throw new ArgumentNullException("Given queue is null");
-            }
+            IMetaDataStorage storage) : base(session, storage) {
         }
 
         /// <summary>
@@ -79,12 +75,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     (remoteId as ICmisObject).Rename(localFile.Name, true);
                 } catch (CmisConstraintException e) {
                     if (!Utils.IsValidISO885915(localFile.Name)) {
-                        this.Queue.AddEvent(new InteractionNeededEvent(e){
+                        OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName));
+                        throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
                             Title = string.Format("Server denied renaming of {0}", oldName),
                             Description = string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName)
-                        });
-                        OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName));
-                        return;
+                        };
                     } else {
                         OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}", oldName, localFile.Name, localFile.FullName), e);
                     }

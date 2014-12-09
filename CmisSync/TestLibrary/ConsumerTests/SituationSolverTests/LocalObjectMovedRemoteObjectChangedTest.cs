@@ -22,6 +22,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -51,7 +52,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private ActiveActivitiesManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
-        private Mock<ISyncEventQueue> queue;
         private Mock<IFileSystemInfoFactory> fsFactory;
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
         private Mock<LocalObjectRenamedRemoteObjectChanged> renameSolver;
@@ -62,20 +62,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void ConstructorThrowsExceptionIfRenameSolverIsNull() {
             this.SetUpMocks();
             Assert.Throws<ArgumentNullException>(() => new LocalObjectMovedRemoteObjectChanged(this.session.Object, this.storage.Object, null, this.changeSolver.Object));
-            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorThrowsExceptionIfChangeSolverIsNull() {
             this.SetUpMocks();
             Assert.Throws<ArgumentNullException>(() => new LocalObjectMovedRemoteObjectChanged(this.session.Object, this.storage.Object, this.renameSolver.Object, null));
-            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesSolver() {
             this.SetUpMocks();
-            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -100,7 +97,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Mock.Get(doc).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
             this.changeSolver.Verify(s => s.Solve(file, doc, ContentChangeType.CHANGED, ContentChangeType.CHANGED), Times.Once());
             this.renameSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
-            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -126,7 +122,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Mock.Get(doc).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
             this.renameSolver.Verify(s => s.Solve(file, doc, ContentChangeType.CHANGED, ContentChangeType.CHANGED), Times.Once());
             this.changeSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
-            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -150,7 +145,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Mock.Get(folder).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
             this.changeSolver.Verify(s => s.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
             this.renameSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
-            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -175,7 +169,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Mock.Get(folder).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
             this.renameSolver.Verify(s => s.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
             this.changeSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
-            this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Never);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -196,13 +189,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Mock.Get(folder).Setup(d => d.Rename(newDirName, It.IsAny<bool>())).Throws(new CmisConstraintException());
             var obj = new MappedObject(oldDirName, this.remoteObjectId, MappedObjectType.Folder, this.oldParentsId, this.changeToken) { Guid = Guid.NewGuid() };
             this.storage.AddMappedFolder(obj);
-            this.underTest.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE);
+
+            Assert.Throws<InteractionNeededException>(() => this.underTest.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE));
+
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, oldDirName, this.newParentsId, this.changeToken);
             Mock.Get(folder).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
             this.renameSolver.Verify(s => s.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
             this.changeSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
-            this.queue.Verify(q => q.AddEvent(It.IsAny<InteractionNeededEvent>()), Times.Once);
-            this.queue.VerifyThatNoOtherEventIsAddedThan<InteractionNeededEvent>();
         }
 
         private void SetUpMocks() {
@@ -210,7 +203,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
-            this.queue = new Mock<ISyncEventQueue>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
@@ -225,7 +217,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
-                this.queue.Object,
                 changeSolverForRenameSolver.Object) { CallBase = true };
             this.underTest = new LocalObjectMovedRemoteObjectChanged(this.session.Object, this.storage.Object, this.renameSolver.Object, this.changeSolver.Object);
             var srcRemoteParent = Mock.Of<ICmisObject>(

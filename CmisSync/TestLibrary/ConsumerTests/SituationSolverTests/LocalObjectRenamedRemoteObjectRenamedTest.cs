@@ -48,7 +48,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private LocalObjectRenamedRemoteObjectRenamed underTest;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
-        private Mock<ISyncEventQueue> queue;
         private Mock<LocalObjectChangedRemoteObjectChanged> changeSolver;
 
         [SetUp]
@@ -58,22 +57,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
-            this.queue = new Mock<ISyncEventQueue>();
             this.InitializeMappedFolderOnStorage();
             var transmissionManager = new ActiveActivitiesManager();
             var fsFactory = Mock.Of<IFileSystemInfoFactory>();
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, transmissionManager, fsFactory);
-            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.queue.Object, this.changeSolver.Object);
+            this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructor() {
-            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.queue.Object, this.changeSolver.Object);
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorFailsIfQueueIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, null, this.changeSolver.Object));
+            new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]

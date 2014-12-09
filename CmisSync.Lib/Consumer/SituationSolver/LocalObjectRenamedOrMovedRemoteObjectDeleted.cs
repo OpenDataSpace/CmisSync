@@ -40,9 +40,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ISession session,
             IMetaDataStorage storage,
             ActiveActivitiesManager manager,
-            ISyncEventQueue queue,
-            ISolver secondSolver = null) : base(session, storage, queue) {
-            this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, manager, this.Queue);
+            ISolver secondSolver = null) : base(session, storage) {
+            this.secondSolver = secondSolver ?? new LocalObjectAdded(session, storage, manager);
         }
 
         public override void Solve(

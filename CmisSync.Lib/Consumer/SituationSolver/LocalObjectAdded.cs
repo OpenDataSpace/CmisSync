@@ -64,14 +64,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager manager,
-            ISyncEventQueue queue) : base(session, storage, queue) {
+            ActiveActivitiesManager manager) : base(session, storage) {
             if (manager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
-            }
-
-            if (this.Queue == null) {
-                throw new ArgumentNullException("Given queue is null");
             }
 
             this.transmissionManager = manager;
@@ -100,12 +95,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
             } catch (CmisConstraintException e) {
                 if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
-                    this.Queue.AddEvent(new InteractionNeededEvent(e) {
+                    OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.Name), e);
+                    throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFileSystemInfo.Name), e) {
                         Title = string.Format("Server denied creation of {0}", localFileSystemInfo.Name),
                         Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.FullName)
-                    });
-                    OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.Name), e);
-                    return;
+                    };
                 }
 
                 throw;

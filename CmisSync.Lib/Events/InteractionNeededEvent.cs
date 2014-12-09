@@ -4,6 +4,7 @@ namespace CmisSync.Lib.Events
     using System;
     using System.Collections.Generic;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Exceptions;
@@ -20,21 +21,20 @@ namespace CmisSync.Lib.Events
 
         public List<IFileSystemInfo> AffectedFiles { get; private set; }
 
-        public InteractionNeededEvent(Exception e) : base(e)
+        public InteractionNeededEvent(InteractionNeededException e) : base(e)
         {
-            this.AffectedFiles = new List<IFileSystemInfo>();
-            this.Actions = new Dictionary<string, Action>();
-            this.Title = e.GetType().Name;
-            this.Description = e.Message;
-            if (e is CmisBaseException) {
-                this.Details = (e as CmisBaseException).ErrorContent;
-            } else {
-                this.Details = e.StackTrace ?? string.Empty;
+            if (e == null) {
+                throw new ArgumentNullException("Given Exception is null");
             }
+
+            this.AffectedFiles = new List<IFileSystemInfo>(e.AffectedFiles);
+            this.Actions = new Dictionary<string, Action>(e.Actions);
+            this.Title = e.Title;
+            this.Description = e.Description;
+            this.Details = e.Details;
         }
 
-        public InteractionNeededEvent(string msg) : this(new Exception(msg))
-        {
+        public InteractionNeededEvent(string msg) : this(new InteractionNeededException(msg)) {
         }
     }
 }

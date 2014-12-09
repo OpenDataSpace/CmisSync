@@ -3,6 +3,7 @@ namespace TestLibrary.EventsTests
 {
     using System;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Events;
 
     using DotCMIS.Exceptions;
@@ -16,7 +17,7 @@ namespace TestLibrary.EventsTests
     {
         [Test, Category("Fast")]
         public void InitializeWithException() {
-            var ex = new Exception();
+            var ex = new InteractionNeededException();
             var underTest = new InteractionNeededEvent(ex);
             Assert.That(underTest.Exception, Is.EqualTo(ex));
             Assert.That(underTest.Actions, Is.Empty);
@@ -28,7 +29,7 @@ namespace TestLibrary.EventsTests
 
         [Test, Category("Fast")]
         public void InitializeWithoutExceptionFails() {
-            Assert.Throws<ArgumentNullException>(() => new InteractionNeededEvent((Exception)null));
+            Assert.Throws<ArgumentNullException>(() => new InteractionNeededEvent((InteractionNeededException)null));
         }
 
         [Test, Category("Fast")]
@@ -44,8 +45,8 @@ namespace TestLibrary.EventsTests
             string errorContent = "error content";
             string message = "message";
             var ex = new CmisBaseException(message, errorContent);
-
-            var underTest = new InteractionNeededEvent(ex);
+            var exception = new InteractionNeededException(message, ex);
+            var underTest = new InteractionNeededEvent(exception);
 
             Assert.That(underTest.Description, Is.EqualTo(message));
             Assert.That(underTest.Details, Is.EqualTo(errorContent));
@@ -66,9 +67,9 @@ namespace TestLibrary.EventsTests
         public void InitializeActions() {
             int called = 0;
             var action = new Action(delegate(){called++;});
-
-            var underTest = new InteractionNeededEvent(new Exception());
-            underTest.Actions.Add("invoke", action);
+            var ex = new InteractionNeededException();
+            ex.Actions.Add("invoke", action);
+            var underTest = new InteractionNeededEvent(ex);
             underTest.Actions["invoke"]();
 
             Assert.That(underTest.Actions.Count, Is.EqualTo(1));

@@ -251,6 +251,7 @@
     <Compile Include="Events\ConfigurationNeededEvent.cs" />
     <Compile Include="Algorithms\CyclicDependencies\CycleDetector.cs" />
     <Compile Include="Events\InteractionNeededEvent.cs" />
+    <Compile Include="Consumer\InteractionNeededException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
