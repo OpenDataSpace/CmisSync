@@ -47,8 +47,8 @@ namespace CmisSync
     using CmisSync.Lib.Cmis;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.FileSystem;
 
     using log4net;
@@ -231,11 +231,11 @@ namespace CmisSync
                 {
                     lock (brand_lock)
                     {
-                        if (CheckBrand(firstCheckBrand))
-                        {
+                        if (CheckBrand(firstCheckBrand)) {
                             firstCheckBrand = false;
                             return;
                         }
+
                         SetupBrand();
                     }
                 }).Start();
@@ -249,57 +249,49 @@ namespace CmisSync
         private bool CheckBrand(bool checkFiles)
         {
             Config config = ConfigManager.CurrentConfig;
-            if (config.Brand == null || config.Brand.Server == null)
-            {
+            if (config.Brand == null || config.Brand.Server == null) {
                 return false;
             }
 
             ClientBrand clientBrand = new ClientBrand();
-            foreach (string path in clientBrand.GetPathList())
-            {
-                if (!File.Exists(Path.Combine(config.GetConfigPath(), BrandConfigFolder, path.Substring(1))))
-                {
+            foreach (string path in clientBrand.GetPathList()) {
+                if (!File.Exists(Path.Combine(config.GetConfigPath(), this.BrandConfigFolder, path.Substring(1)))) {
                     return false;
                 }
             }
 
             List<RepoInfo> folders;
-            lock (repo_lock)
-            {
+            lock (this.repo_lock) {
                 folders = config.Folders.ToList();
             }
 
             foreach (RepoInfo folder in folders)
             {
-                if (folder.Address.ToString() != config.Brand.Server.ToString())
-                {
+                if (folder.Address.ToString() != config.Brand.Server.ToString()) {
                     continue;
                 }
-                if (!checkFiles)
-                {
+
+                if (!checkFiles) {
                     return true;
                 }
 
-                if (clientBrand.SetupServer(folder.Credentials))
-                {
+                if (clientBrand.SetupServer(folder.Credentials)) {
                     bool success = true;
-                    foreach (string path in clientBrand.GetPathList())
-                    {
+                    foreach (string path in clientBrand.GetPathList()) {
                         DateTime date;
-                        if (!clientBrand.GetFileDateTime(path, out date))
-                        {
+                        if (!clientBrand.GetFileDateTime(path, out date)) {
                             success = false;
                             break;
                         }
-                        BrandFile file = config.Brand.Files.Find((BrandFile current) => { return (current.Path == path); });
-                        if (file == null || file.Date != date)
-                        {
+
+                        BrandFile file = config.Brand.Files.Find((BrandFile current) => { return current.Path == path; });
+                        if (file == null || file.Date != date) {
                             success = false;
                             break;
                         }
                     }
-                    if (success)
-                    {
+
+                    if (success) {
                         return true;
                     }
                 }
@@ -313,8 +305,7 @@ namespace CmisSync
             Config config = ConfigManager.CurrentConfig;
 
             List<RepoInfo> folders;
-            lock (repo_lock)
-            {
+            lock (this.repo_lock) {
                 folders = config.Folders.ToList();
             }
 
@@ -328,52 +319,48 @@ namespace CmisSync
                     foreach (string path in clientBrand.GetPathList())
                     {
                         DateTime date;
-                        if (!clientBrand.GetFileDateTime(path, out date))
-                        {
+                        if (!clientBrand.GetFileDateTime(path, out date)) {
                             success = false;
                             break;
                         }
-                        string pathname = Path.Combine(config.GetConfigPath(), BrandConfigFolder, path.Substring(1));
+
+                        string pathname = Path.Combine(config.GetConfigPath(), this.BrandConfigFolder, path.Substring(1));
                         Directory.CreateDirectory(Path.GetDirectoryName(pathname));
-                        try
-                        {
+                        try {
                             using (FileStream output = File.OpenWrite(pathname))
                             {
-                                if (!clientBrand.GetFile(path, output))
-                                {
+                                if (!clientBrand.GetFile(path, output)) {
                                     success = false;
                                     break;
                                 }
                             }
-                        }
-                        catch (Exception e)
-                        {
+                        } catch (Exception e) {
                             Logger.Error(string.Format("Fail to update the cilent brand file {0}: {1}", pathname, e));
                             success = false;
                             break;
                         }
+
                         BrandFile file = new BrandFile();
                         file.Date = date;
                         file.Path = path;
                         files.Add(file);
                     }
-                    if (success)
-                    {
+
+                    if (success) {
                         config.Brand = new Brand();
                         config.Brand.Server = folder.Address;
                         config.Brand.Files = files;
-                        lock (repo_lock)
-                        {
+                        lock (this.repo_lock) {
                             config.Save();
                         }
+
                         return;
                     }
                 }
             }
 
             config.Brand = null;
-            lock (repo_lock)
-            {
+            lock (this.repo_lock) {
                 config.Save();
             }
         }
@@ -496,9 +483,8 @@ namespace CmisSync
                 repo.Initialize();
             } catch (ExtendedAttributeException xAttrException) {
                 this.ShowException(
-                    string.Format(Properties_Resources.CannotSync, repoInfo.DisplayName),
+                    string.Format(Properties_Resources.CannotSync, this.repoInfo.DisplayName),
                     string.Format(Properties_Resources.ProblemWithFS, Environment.NewLine, xAttrException.Message));
-
             }
         }
 
