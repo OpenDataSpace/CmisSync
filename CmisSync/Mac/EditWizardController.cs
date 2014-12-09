@@ -272,6 +272,7 @@ namespace CmisSync
 //            this.LoginStatusProgress.StartAnimation(this);
             ServerCredentials cred = new ServerCredentials() {
                 Address = Credentials.Address,
+                Binding = Credentials.Binding,
                 UserName = Credentials.UserName,
                 Password = PasswordText.StringValue
             };
