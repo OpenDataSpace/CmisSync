@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -60,7 +60,9 @@
   <ItemGroup>
     <Compile Include="Algorithms\Tarjan\AbstractTarjanNode.cs" />
     <Compile Include="Backend.cs" />
+    <Compile Include="ClientBrandBase.cs" />
     <Compile Include="Cmis\MimeType.cs" />
+    <Compile Include="Config\Brand.cs" />
     <Compile Include="Defines.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="ActivityListenerAggregator.cs" />

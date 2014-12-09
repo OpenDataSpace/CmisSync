@@ -414,9 +414,9 @@ namespace CmisSync
         public void Add1PageCompleted(Uri address, string binding, string user, string password)
         {
             this.saved_address = address;
+            this.saved_binding = binding;
             this.saved_user = user;
             this.saved_password = password;
-            this.saved_binding = binding;
 
             this.ChangePageEvent(PageType.Add2);
         }

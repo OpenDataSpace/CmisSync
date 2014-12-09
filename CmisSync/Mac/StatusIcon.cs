@@ -391,32 +391,32 @@ namespace CmisSync {
         private void CreateAnimationFrames ()
         {
             this.animation_frames = new NSImage [] {
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-i.png")),
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-ii.png")),
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-iii.png")),
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-iiii.png")),
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-iiiii.png"))
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-i")),
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-ii")),
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iii")),
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iiii")),
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iiiii"))
             };
 
             this.animation_frames_active = new NSImage [] {
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-i-active.png")),
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-ii-active.png")),
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-iii-active.png")),
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-iiii-active.png")),
-                new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-iiiii-active.png"))
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-i-active")),
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-ii-active")),
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iii-active")),
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iiii-active")),
+                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iiiii-active"))
             };
             
             this.error_image = new NSImage (
-                Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-error.png"));
+                UIHelpers.GetImagePathname ("process-syncing-error"));
 
             this.error_image_active = new NSImage (
-                Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-error-active.png"));
+                UIHelpers.GetImagePathname ("process-syncing-error-active"));
 
-            this.folder_image       = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "cmissync-folder.icns"));
-            this.caution_image      = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-error.png"));
-            this.cmissync_image     = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "cmissync-app.icns"));
-            this.pause_image        = new NSImage(Path.Combine(NSBundle.MainBundle.ResourcePath, "Pixmaps", "media_playback_pause.png"));
-            this.resume_image       = new NSImage(Path.Combine(NSBundle.MainBundle.ResourcePath, "Pixmaps", "media_playback_start.png"));
+            this.folder_image       = new NSImage (UIHelpers.GetImagePathname ("cmissync-folder", "icns"));
+            this.cmissync_image     = new NSImage (UIHelpers.GetImagePathname ("cmissync-app", "icns"));
+            this.caution_image      = new NSImage (UIHelpers.GetImagePathname ("process-syncing-error"));
+            this.pause_image        = new NSImage (UIHelpers.GetImagePathname ("media_playback_pause"));
+            this.resume_image       = new NSImage (UIHelpers.GetImagePathname ("media_playback_start"));
         }
     }
     
@@ -502,15 +502,15 @@ namespace CmisSync {
             Title = TransmissionStatus (transmission.Status);
             switch (transmission.Type) {
             case FileTransmissionType.DOWNLOAD_NEW_FILE:
-                Image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "Downloading.png"));
+                Image = new NSImage (UIHelpers.GetImagePathname ("Downloading"));
                 break;
             case FileTransmissionType.UPLOAD_NEW_FILE:
-                Image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "Uploading.png"));
+                Image = new NSImage (UIHelpers.GetImagePathname ("Uploading"));
                 break;
             case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
                 goto case FileTransmissionType.UPLOAD_MODIFIED_FILE;
             case FileTransmissionType.UPLOAD_MODIFIED_FILE:
-                Image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "Updating.png"));
+                Image = new NSImage (UIHelpers.GetImagePathname ("Updating"));
                 break;
             }
             transmissionEvent.TransmissionStatus += TransmissionEvent;

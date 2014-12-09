@@ -120,6 +120,7 @@
     </Compile>
     <Compile Include="CertPolicyWindow.cs" />
     <Compile Include="CircularProgressBar.xaml.cs" />
+    <Compile Include="ClientBrand.cs" />
     <Compile Include="Edit.cs" />
     <Compile Include="EditWPF.xaml.cs">
       <DependentUpon>EditWPF.xaml</DependentUpon>

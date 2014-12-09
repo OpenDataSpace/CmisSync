@@ -37,6 +37,8 @@ using System.IO;
 
 using Gtk;
 
+using CmisSync.Lib.Config;
+
 namespace CmisSync {
 
     public static class UIHelpers {
@@ -64,8 +66,19 @@ namespace CmisSync {
         [CLSCompliant(false)]
         public static Image GetImage (string name)
         {
-            string image_path = Path.Combine (UI.AssetsPath, "pixmaps", name);
-            return new Image (image_path);
+            return new Image (GetImagePath (name));
+        }
+
+        [CLSCompliant(false)]
+        public static string GetImagePath (string name)
+        {
+            string brandFolder = Path.Combine (ConfigManager.CurrentConfig.GetConfigPath(), Program.Controller.BrandConfigFolder);
+            string image_path = FindImagePathname (brandFolder, name);
+            if (!string.IsNullOrEmpty (image_path)) {
+                return image_path;
+            }
+            image_path = Path.Combine (UI.AssetsPath, "pixmaps", name);
+            return image_path;
         }
 
 
@@ -78,6 +91,23 @@ namespace CmisSync {
                 (int) Math.Truncate (color.Red   / 256.00),
                 (int) Math.Truncate (color.Green / 256.00),
                 (int) Math.Truncate (color.Blue  / 256.00));
+        }
+
+        [CLSCompliant(false)]
+        private static string FindImagePathname (string folder, string filename)
+        {
+            ClientBrand brand = new ClientBrand();
+            foreach (string path in brand.GetPathList()) {
+                if (Path.GetFileName(path) == filename) {
+                    string pathname = Path.Combine (folder, path.Substring (1));
+                    if (File.Exists(pathname)) {
+                        return pathname;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

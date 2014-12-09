@@ -47,6 +47,7 @@
     </Reference>
     <Reference Include="log4net">
       <HintPath>packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Package>log4net</Package>
     </Reference>
   </ItemGroup>
   <ProjectExtensions>
@@ -119,6 +120,7 @@
     </Compile>
     <Compile Include="Setting.cs" />
     <Compile Include="gtk-gui\CmisSync.Setting.cs" />
+    <Compile Include="ClientBrand.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
