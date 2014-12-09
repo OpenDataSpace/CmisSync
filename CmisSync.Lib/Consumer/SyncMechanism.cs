@@ -130,6 +130,8 @@ namespace CmisSync.Lib.Consumer
                     Logger.Debug(string.Format("RetryException[{0}] thrown for event {1} => enqueue event", retry.Message, folderEvent.ToString()));
                     folderEvent.RetryCount++;
                     this.Queue.AddEvent(folderEvent);
+                } catch (InteractionNeededException interaction) {
+                    this.Queue.AddEvent(new InteractionNeededEvent(interaction));
                 } catch (Exception ex) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing", ex);
                     this.Queue.AddEvent(new StartNextSyncEvent(true));

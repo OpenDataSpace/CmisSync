@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [2.0.1])
+m4_define([cmissync_version], [2.0.2])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
@@ -31,6 +31,7 @@ PKG_CHECK_EXISTS([mono >= 3.2],
 [SHAMROCK_FIND_MONO_4_0_COMPILER
 SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
     System
+    System.Configuration
     System.Security
     System.Windows.Forms
     Mono.Posix
@@ -150,7 +151,7 @@ if test "$OSNAME" = "Linux" ; then
             [BUILD_DEFINES="$BUILD_DEFINES -define:HAVE_APP_INDICATOR"]
 	fi
 
-    AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
+    AC_SUBST(CONFIGLIBS,[-r:System.Configuration.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
 
@@ -175,7 +176,7 @@ if test "$OSNAME" = "Darwin" ; then
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
 
-    AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
+    AC_SUBST(CONFIGLIBS,[-r:System.Configuration.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
     AC_SUBST(DRAWING, [-r:System.Drawing.dll])
