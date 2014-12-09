@@ -22,7 +22,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -178,7 +181,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Setup(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object)).Returns(remoteFolder.Object);
             remoteFolder.Setup(f => f.Rename(newFolderName, true)).Throws<CmisConstraintException>();
 
-            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
+            Assert.Throws<InteractionNeededException>(() => this.underTest.Solve(localFolder.Object, remoteFolder.Object));
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object), Times.Once());
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());

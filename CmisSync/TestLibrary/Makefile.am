@@ -65,6 +65,7 @@ SOURCES =  \
 	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
+	EventsTests/InteractionNeededInitializationTest.cs \
 	EventsTests/PermissionDeniedEventCalculatesBlockingUntilTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \

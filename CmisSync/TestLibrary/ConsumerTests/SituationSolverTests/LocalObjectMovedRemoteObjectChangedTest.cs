@@ -22,6 +22,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -30,6 +31,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -116,7 +118,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var obj = new MappedObject(oldFileName, this.remoteObjectId, MappedObjectType.File, this.oldParentsId, this.changeToken, fileLength) { Guid = Guid.NewGuid() };
             this.storage.AddMappedFile(obj);
             this.underTest.Solve(file, doc, ContentChangeType.CHANGED, ContentChangeType.CHANGED);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, oldFileName, this.newParentsId, this.changeToken, contentSize: fileLength);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, newFileName, this.newParentsId, this.changeToken, Times.Exactly(2), contentSize: fileLength);
             Mock.Get(doc).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
             this.renameSolver.Verify(s => s.Solve(file, doc, ContentChangeType.CHANGED, ContentChangeType.CHANGED), Times.Once());
             this.changeSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
@@ -163,6 +165,33 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var obj = new MappedObject(oldDirName, this.remoteObjectId, MappedObjectType.Folder, this.oldParentsId, this.changeToken) { Guid = Guid.NewGuid() };
             this.storage.AddMappedFolder(obj);
             this.underTest.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, newDirName, this.newParentsId, this.changeToken, Times.Exactly(2));
+            Mock.Get(folder).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
+            this.renameSolver.Verify(s => s.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.changeSolver.Verify(s => s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()), Times.Never);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFolderMovedAndRenameFailsDueToServerDoesNotSupportUtf8() {
+            this.SetUpMocks();
+            string oldDirName = "oldName";
+            string newDirName = @"ä".Normalize(System.Text.NormalizationForm.FormD);
+            var dir = Mock.Of<IDirectoryInfo>(
+                d =>
+                d.FullName == Path.Combine(Path.GetTempPath(), this.newParentsName, newDirName) &&
+                d.Name == newDirName &&
+                d.Parent.Uuid == this.parentUuid);
+            var folder = Mock.Of<IFolder>(
+                f =>
+                f.Id == this.remoteObjectId &&
+                f.ParentId == this.oldParentsId);
+            Mock.Get(folder).Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns(folder);
+            Mock.Get(folder).Setup(d => d.Rename(newDirName, It.IsAny<bool>())).Throws(new CmisConstraintException());
+            var obj = new MappedObject(oldDirName, this.remoteObjectId, MappedObjectType.Folder, this.oldParentsId, this.changeToken) { Guid = Guid.NewGuid() };
+            this.storage.AddMappedFolder(obj);
+
+            Assert.Throws<InteractionNeededException>(() => this.underTest.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE));
+
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, oldDirName, this.newParentsId, this.changeToken);
             Mock.Get(folder).Verify(d => d.Move(It.Is<IObjectId>(o => o.Id == this.oldParentsId), It.Is<IObjectId>(o => o.Id == this.newParentsId)));
             this.renameSolver.Verify(s => s.Solve(dir, folder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
@@ -180,10 +209,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 this.storage.Object,
                 this.manager,
                 this.fsFactory.Object);
+            var changeSolverForRenameSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
+                this.session.Object,
+                this.storage.Object,
+                this.manager,
+                this.fsFactory.Object);
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
-                this.changeSolver.Object);
+                changeSolverForRenameSolver.Object) { CallBase = true };
             this.underTest = new LocalObjectMovedRemoteObjectChanged(this.session.Object, this.storage.Object, this.renameSolver.Object, this.changeSolver.Object);
             var srcRemoteParent = Mock.Of<ICmisObject>(
                 o =>

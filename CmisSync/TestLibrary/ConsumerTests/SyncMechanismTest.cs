@@ -257,6 +257,34 @@ namespace TestLibrary.ConsumerTests
             Assert.That(folderEvent.RetryCount, Is.EqualTo(1));
         }
 
+        [Test, Category("Fast")]
+        public void AddingInteractionNeededEventToQueueOnInteractionNeededException()
+        {
+            var localDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            var remoteDetection = new Mock<ISituationDetection<AbstractFolderEvent>>();
+            int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;
+            ISolver[,] solver = new ISolver[numberOfSolver, numberOfSolver];
+            var interactionNeededProducer = new Mock<ISolver>();
+            var exception = new InteractionNeededException("reason");
+            interactionNeededProducer.Setup(
+                r =>
+                r.Solve(
+                It.IsAny<IFileSystemInfo>(),
+                It.IsAny<IObjectId>(),
+                It.IsAny<ContentChangeType>(),
+                It.IsAny<ContentChangeType>())).Throws(exception);
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = interactionNeededProducer.Object;
+            var mechanism = this.CreateMechanism(localDetection.Object, remoteDetection.Object, solver);
+            localDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
+            remoteDetection.Setup(d => d.Analyse(this.storage.Object, It.IsAny<AbstractFolderEvent>())).Returns(SituationType.NOCHANGE);
+            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(), Mock.Of<IFolder>()) { Local = MetaDataChangeType.NONE, Remote = MetaDataChangeType.NONE };
+
+            Assert.That(mechanism.Handle(folderEvent), Is.True);
+
+            this.queue.Verify(q => q.AddEvent(It.Is<InteractionNeededEvent>(e => e.Exception == exception)), Times.Once());
+            this.queue.VerifyThatNoOtherEventIsAddedThan<InteractionNeededEvent>();
+        }
+
         private void TriggerNonExistingSolver() {
             var detection = new Mock<ISituationDetection<AbstractFolderEvent>>();
             int numberOfSolver = Enum.GetNames(typeof(SituationType)).Length;

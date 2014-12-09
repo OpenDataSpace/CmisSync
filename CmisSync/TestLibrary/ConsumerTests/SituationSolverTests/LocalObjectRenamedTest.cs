@@ -24,7 +24,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.Security.Cryptography;
     using System.Text;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -65,7 +68,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         {
             new LocalObjectRenamed(this.session.Object, this.storage.Object);
         }
-        
+
         [Test, Category("Fast"), Category("Solver")]
         public void PermissionDeniedLeadsToNoOperation()
         {
@@ -268,7 +271,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.storage.AddMappedFolder(mappedFolder.Object);
 
-            this.underTest.Solve(localFolder.Object, remoteFolder.Object);
+            Assert.Throws<InteractionNeededException>(() => this.underTest.Solve(localFolder.Object, remoteFolder.Object));
 
             remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == @"ä".Normalize(NormalizationForm.FormD)), It.Is<bool>(b => b == true)), Times.Once());
 

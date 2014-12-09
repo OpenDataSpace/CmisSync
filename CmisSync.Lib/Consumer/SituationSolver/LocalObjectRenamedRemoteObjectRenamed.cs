@@ -79,10 +79,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     string oldName = remoteFolder.Name;
                     try {
                         remoteFolder.Rename(localFolder.Name, true);
-                    } catch (CmisConstraintException) {
+                    } catch (CmisConstraintException e) {
                         if (!Utils.IsValidISO885915(localFolder.Name)) {
                             OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name));
-                            return;
+                            throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
+                                Title = string.Format("Server denied renaming of {0}", oldName),
+                                Description = string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFolder.Name)
+                            };
                         }
 
                         throw;
@@ -109,13 +112,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     this.Storage.SaveMappedObject(mappedObject);
                     this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
                 } else {
-                    OperationsLogger.Warn(string.Format(
-                        "Synchronization Conflict: The local file {0} has been locally renamed from {1} to {2} and remotely to {3}. " +
+                    string desc = string.Format(
+                        "The local file {0} has been locally renamed from {1} to {2} and remotely to {3}. " +
                         "Fix this conflict by renaming the remote file to {2} or the local file to {3}.",
                         localFile.FullName,
                         mappedObject.Name,
                         localFile.Name,
-                        remoteFile.Name));
+                        remoteFile.Name);
+                    OperationsLogger.Warn("Synchronization Conflict: " + desc);
+                    throw new InteractionNeededException("Synchronization Conflict") {
+                        Title = "Synchronization Conflict",
+                        Description = desc
+                    };
                 }
             }
         }

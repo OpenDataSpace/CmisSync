@@ -96,7 +96,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             } catch (CmisConstraintException e) {
                 if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
                     OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.Name), e);
-                    return;
+                    throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFileSystemInfo.Name), e) {
+                        Title = string.Format("Server denied creation of {0}", localFileSystemInfo.Name),
+                        Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.FullName)
+                    };
                 }
 
                 throw;

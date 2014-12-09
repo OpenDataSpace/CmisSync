@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -75,7 +76,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 } catch (CmisConstraintException e) {
                     if (!Utils.IsValidISO885915(localFile.Name)) {
                         OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName));
-                        return;
+                        throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
+                            Title = string.Format("Server denied renaming of {0}", oldName),
+                            Description = string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName)
+                        };
                     } else {
                         OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}", oldName, localFile.Name, localFile.FullName), e);
                     }

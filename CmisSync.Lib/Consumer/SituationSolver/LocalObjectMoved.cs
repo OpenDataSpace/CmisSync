@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -44,8 +45,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectMoved(
             ISession session,
-            IMetaDataStorage storage) : base(session, storage)
-        {
+            IMetaDataStorage storage) : base(session, storage) {
         }
 
         /// <summary>
@@ -82,10 +82,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 if (localFile.Name != remoteObject.Name) {
                     try {
                         remoteObject.Rename(localFile.Name, true);
-                    } catch (CmisConstraintException) {
+                    } catch (CmisConstraintException e) {
                         if (!Utils.IsValidISO885915(localFile.Name)) {
                             OperationsLogger.Warn(string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFile.Name));
-                            return;
+                            throw new InteractionNeededException(string.Format("Server denied renaming of {0}", remoteObject.Name), e) {
+                                Title = string.Format("Server denied renaming of {0}", remoteObject.Name),
+                                Description = string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFile.Name)
+                            };
                         }
 
                         throw;

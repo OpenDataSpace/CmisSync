@@ -87,10 +87,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     (remoteId as ICmisObject).Rename(localFileSystemInfo.Name, true);
                     OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteId.Id, oldName, localFileSystemInfo.Name));
                     savedObject.Name = (remoteId as ICmisObject).Name;
-                } catch (CmisConstraintException) {
+                } catch (CmisConstraintException e) {
                     if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
                         OperationsLogger.Warn(string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFileSystemInfo.Name));
-                        return;
+                        throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
+                            Title = string.Format("Server denied renaming of {0}", oldName),
+                            Description = string.Format("Server denied to rename {0} to {1}, perhaps because it contains UTF-8 characters", oldName, localFileSystemInfo.Name)
+                        };
                     }
 
                     throw;

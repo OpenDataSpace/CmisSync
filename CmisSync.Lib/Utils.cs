@@ -79,30 +79,23 @@ namespace CmisSync.Lib
                     return false;
                 }
 
-                foreach (System.Security.AccessControl.FileSystemAccessRule rule in accessRules)
-                {
+                foreach (System.Security.AccessControl.FileSystemAccessRule rule in accessRules) {
                     if ((System.Security.AccessControl.FileSystemRights.Write & rule.FileSystemRights)
                             != System.Security.AccessControl.FileSystemRights.Write) {
                         continue;
                     }
 
-                    if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Allow)
-                    {
+                    if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Allow) {
                         writeAllow = true;
-                    }
-                    else if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Deny)
-                    {
+                    } else if (rule.AccessControlType == System.Security.AccessControl.AccessControlType.Deny) {
                         writeDeny = true;
                     }
                 }
-            }
-            catch (System.PlatformNotSupportedException)
-            {
+            } catch (System.PlatformNotSupportedException) {
 #if __MonoCS__
                 writeAllow = (0 == Syscall.access(path, AccessModes.W_OK));
 #endif
-            }
-            catch(System.UnauthorizedAccessException) {
+            } catch(System.UnauthorizedAccessException) {
                 var permission = new FileIOPermission(FileIOPermissionAccess.Write, path);
                 var permissionSet = new PermissionSet(PermissionState.None);
                 permissionSet.AddPermission(permission);
@@ -205,7 +198,7 @@ namespace CmisSync.Lib
             foreach(var wildcard in ignoreWildcards)
             {
                 var regex = IgnoreLineToRegex(wildcard);
-                if(regex.IsMatch(filename))
+                if (regex.IsMatch(filename))
                 {
                     Logger.Debug(string.Format("Unworth syncing: \"{0}\" because it matches \"{1}\"", filename, wildcard));
                     return false;
@@ -249,10 +242,8 @@ namespace CmisSync.Lib
                 return ret;
             }
 
-            foreach(string wildcard in ignoreWildcards)
-            {
-                if(Utils.IgnoreLineToRegex(wildcard).IsMatch(name))
-                {
+            foreach (string wildcard in ignoreWildcards) {
+                if (Utils.IgnoreLineToRegex(wildcard).IsMatch(name)) {
                     Logger.Debug(string.Format("The given folder name \"{0}\" matches the wildcard \"{1}\"", name, wildcard));
                     return true;
                 }
@@ -353,7 +344,7 @@ namespace CmisSync.Lib
         public static bool IsSymlink(string path)
         {
             FileInfo fileinfo = new FileInfo(path);
-            if(fileinfo.Exists) {
+            if (fileinfo.Exists) {
                 return IsSymlink(fileinfo);
             }
 
@@ -428,12 +419,9 @@ namespace CmisSync.Lib
         /// <returns><c>true</c> if is repo name hidden the specified name hiddenRepos; otherwise, <c>false</c>.</returns>
         /// <param name="name">repo name.</param>
         /// <param name="hiddenRepos">Hidden repos.</param>
-        public static bool IsRepoNameHidden(string name, List<string> hiddenRepos)
-        {
-            foreach(string wildcard in hiddenRepos)
-            {
-                if(Utils.IgnoreLineToRegex(wildcard).IsMatch(name))
-                {
+        public static bool IsRepoNameHidden(string name, List<string> hiddenRepos) {
+            foreach (string wildcard in hiddenRepos) {
+                if (Utils.IgnoreLineToRegex(wildcard).IsMatch(name)) {
                     Logger.Debug(string.Format("The given repo name \"{0}\" is hidden, because it matches the wildcard \"{1}\"", name, wildcard));
                     return true;
                 }
