@@ -29,12 +29,12 @@ namespace CmisSync
         public override List<string> GetPathList()
         {
             List<string> pathList = new List<string>();
-            pathList.Add("/DataSpaceSync/common/about.png");
-            pathList.Add("/DataSpaceSync/common/about@2x.png");
-            pathList.Add("/DataSpaceSync/common/side-splash.png");
-            pathList.Add("/DataSpaceSync/common/side-splash@2x.png");
-            pathList.Add("/DataSpaceSync/linux/folder-16.png");
-            pathList.Add("/DataSpaceSync/linux/folder-22.png");
+            pathList.Add("/branding/DataSpaceSync/common/about.png");
+            pathList.Add("/branding/DataSpaceSync/common/about@2x.png");
+            pathList.Add("/branding/DataSpaceSync/common/side-splash.png");
+            pathList.Add("/branding/DataSpaceSync/common/side-splash@2x.png");
+            pathList.Add("/branding/DataSpaceSync/linux/folder-16.png");
+            pathList.Add("/branding/DataSpaceSync/linux/folder-22.png");
             return pathList;
         }
     }
