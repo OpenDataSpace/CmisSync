@@ -375,8 +375,9 @@ namespace TestLibrary.IntegrationTests
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();
-
+            remoteFolder.Setup(r => r.Path).Returns(this.remoteRoot);
             var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.Setup(f => f.FullName).Returns(this.localRoot);
             var generator = new CrawlEventGenerator(storage, fsFactory);
             var ignoreStorage = new IgnoredEntitiesCollection();
             var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator, ignoreStorage);
