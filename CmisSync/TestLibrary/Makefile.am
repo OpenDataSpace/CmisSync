@@ -15,6 +15,11 @@ SOURCES =  \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	ActiveActivitiesManagerTest.cs \
+	AlgorithmsTests/CyclicDependencies/NoCycleDetectionTests.cs \
+	AlgorithmsTests/CyclicDependencies/SimpleCycleDetectionTests.cs \
+	AlgorithmsTests/StringTarjanNode.cs \
+	AlgorithmsTests/TrajanSimpleCircleTests.cs \
+	AlgorithmsTests/TarjanSimpleLinearTests.cs \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
@@ -24,6 +29,7 @@ SOURCES =  \
 	ConfigTests/ConfigurationTest.cs \
 	ConfigTests/CredentialsTest.cs \
 	ConfigTests/RepoInfoTests.cs \
+	ConfigTests/DefaultSettingsTests.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	StorageTests/FileSystemTests/DateTimeConverterTest.cs \
@@ -42,6 +48,7 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/LocalObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectChangedTest.cs \
+	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedRemoteObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectRenamedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectAddedTest.cs \
@@ -60,6 +67,8 @@ SOURCES =  \
 	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
+	EventsTests/InteractionNeededInitializationTest.cs \
+	EventsTests/PermissionDeniedEventCalculatesBlockingUntilTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
 	FileTransmissionTests/ChunkedDownloaderTest.cs \
@@ -115,8 +124,8 @@ SOURCES =  \
 	QueueingTests/SyncEventQueueTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/FileTransmissionObjectsTest.cs \
-	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
+	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
 	StorageTests/DataBaseTests/FileTransmissionStorageTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
@@ -142,9 +151,11 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
+	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
-	UtilsTests/ProcessDiagnosticsTest.cs
+	UtilsTests/ProcessDiagnosticsTest.cs \
+	UtilsTests/X509StoreTest.cs
 
 EXTRA_DIST = TestLibrary.csproj \
 	$(MOQ_PATH)

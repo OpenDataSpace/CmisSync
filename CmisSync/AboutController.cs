@@ -108,6 +108,12 @@ namespace CmisSync
             }
         }
 
+        public DateTime? CreateTime {
+            get {
+                return Backend.RetrieveLinkerTimestamp;
+            }
+        }
+
         /// <summary>
         /// Closing the dialog.
         /// </summary>

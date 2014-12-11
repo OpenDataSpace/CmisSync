@@ -3,14 +3,19 @@ TARGET = library
 
 ASSEMBLY_INFO_SOURCE = Defines.cs
 
-LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
+LIBS = $(LOG4NET_LIBS) $(CONFIGLIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
 
 SOURCES =  \
 	Accumulator/LocalObjectFetcher.cs \
 	Accumulator/RemoteObjectFetcher.cs \
 	Accumulator/RemoteObjectMovedOrRenamedAccumulator.cs \
 	ActivityListenerAggregator.cs \
+	Algorithms/CyclicDependencies/CycleDetector.cs \
+	Algorithms/CyclicDependencies/ICycleDetector.cs \
+	Algorithms/Tarjan/AbstractTarjanNode.cs \
+	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
+	ClientBrandBase.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
@@ -24,15 +29,18 @@ SOURCES =  \
 	Cmis/UiUtils/CmisPermissionDeniedException.cs \
 	Cmis/UiUtils/CmisServerNotFoundException.cs \
 	Cmis/UiUtils/CmisUtils.cs \
+	Config/Brand.cs \
 	Config/Config.cs \
 	Config/ConfigManager.cs \
 	Config/ConfigMigration.cs \
 	Config/Credentials.cs \
 	Config/Crypto.cs \
+	Config/DefaultEntries.cs \
 	Config/Feature.cs \
 	Config/ProxySettings.cs \
 	Config/RepoInfo.cs \
 	Config/XmlUri.cs \
+	Consumer/InteractionNeededException.cs \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
@@ -70,6 +78,7 @@ SOURCES =  \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
 	Events/ConfigChangedEvent.cs \
+	Events/ConfigurationNeededEvent.cs \
 	Events/ContentChangeEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/EncapsuledEvent.cs \
@@ -91,6 +100,7 @@ SOURCES =  \
 	Events/IFilterableRemotePathEvent.cs \
 	Events/IFSEvent.cs \
 	Events/IFSMovedEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
 	Events/PermissionDeniedEvent.cs \

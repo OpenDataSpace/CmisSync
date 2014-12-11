@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [2.0.0])
+m4_define([cmissync_version], [2.0.2])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
@@ -31,6 +31,7 @@ PKG_CHECK_EXISTS([mono >= 3.2],
 [SHAMROCK_FIND_MONO_4_0_COMPILER
 SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
     System
+    System.Configuration
     System.Security
     System.Windows.Forms
     Mono.Posix
@@ -99,6 +100,12 @@ AC_ARG_WITH([test-repoid],
     TEST_REPOID=${withval})
 AC_SUBST(TEST_REPOID)
 
+TEST_BINDING="atompub"
+AC_ARG_WITH([test-binding],
+    AS_HELP_STRING([--with-test-binding=BINDING],[Specify CMIS Binding for testing]),
+    TEST_BINDING=${withval})
+AC_SUBST(TEST_BINDING)
+
 TEST_PROXY_USER=""
 AC_ARG_WITH([test-proxy-user],
     AS_HELP_STRING([--with-test-proxy-user=PATH],[Specify user for authetication required proxy for testing]),
@@ -150,10 +157,9 @@ if test "$OSNAME" = "Linux" ; then
             [BUILD_DEFINES="$BUILD_DEFINES -define:HAVE_APP_INDICATOR"]
 	fi
 
-    AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
+    AC_SUBST(CONFIGLIBS,[-r:System.Configuration.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
-
 
     AC_SUBST(BUILD_DEFINES,"${BUILD_DEFINES}")
     GUISUBDIRS=CmisSync
@@ -161,7 +167,13 @@ if test "$OSNAME" = "Linux" ; then
 	cocoa=false
 	macos=false
     OSOK=yes
-    PACKAGE_TARGET=debian-package
+
+    # On Debian and xUbuntu, build debian packages, otherwise rpms. Don't know a better syntax for this
+    if test `command -v lsb_release >/dev/null 2>&1 && lsb_release -i | grep -E "(ebian|buntu)" > /dev/null; echo "$?"` == "0"; then
+        PACKAGE_TARGET=debian-package
+    else
+	PACKAGE_TARGET=rpm-package
+    fi
 fi
 
 if test "$OSNAME" = "Darwin" ; then
@@ -170,7 +182,7 @@ if test "$OSNAME" = "Darwin" ; then
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
 
-    AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
+    AC_SUBST(CONFIGLIBS,[-r:System.Configuration.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
     AC_SUBST(DRAWING, [-r:System.Drawing.dll])

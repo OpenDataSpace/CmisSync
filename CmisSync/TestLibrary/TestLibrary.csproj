@@ -54,9 +54,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="XamMac">
       <HintPath>\Library\Frameworks\Xamarin.Mac.framework\Versions\Current\lib\mono\XamMac.dll</HintPath>
@@ -85,6 +83,7 @@
     <Compile Include="EventsTests\GenericSyncEventHandlerTest.cs" />
     <Compile Include="EventsTests\StartNextSyncEventTest.cs" />
     <Compile Include="IntegrationTests\AllHandlersIT.cs" />
+    <Compile Include="IntegrationTests\ClientBrandTests.cs" />
     <Compile Include="IntegrationTests\ContentChangeIT.cs" />
     <Compile Include="IntegrationTests\DotCMISTests.cs" />
     <Compile Include="IntegrationTests\HttpProxyConnectionTests.cs" />
@@ -213,6 +212,17 @@
     <Compile Include="StorageTests\FileSystemTests\DateTimeConverterTest.cs" />
     <Compile Include="IntegrationTests\UploadFileIT.cs" />
     <Compile Include="IntegrationTests\NeedsLocalFileSystemFolder.cs" />
+    <Compile Include="UtilsTests\X509StoreTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedEventCalculatesBlockingUntilTest.cs" />
+    <Compile Include="AlgorithmsTests\TrajanSimpleCircleTests.cs" />
+    <Compile Include="AlgorithmsTests\TarjanSimpleLinearTests.cs" />
+    <Compile Include="AlgorithmsTests\StringTarjanNode.cs" />
+    <Compile Include="UtilsTests\BackendTest.cs" />
+    <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
+    <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
+    <Compile Include="ConfigTests\DefaultSettingsTests.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectMovedTest.cs" />
+    <Compile Include="EventsTests\InteractionNeededInitializationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -243,6 +253,25 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="CmisTests\" />
+    <Folder Include="CmisTests\UiUtilsTests\" />
+    <Folder Include="AccumulatorTests\" />
+    <Folder Include="ConfigTests\" />
+    <Folder Include="ConsumerTests\" />
+    <Folder Include="StorageTests\DataBaseTests\" />
+    <Folder Include="StorageTests\FileSystemTests\" />
+    <Folder Include="StorageTests\DataBaseTests\EntitiesTests\" />
+    <Folder Include="PathMatcherTests\" />
+    <Folder Include="ProducerTests\" />
+    <Folder Include="ProducerTests\CrawlerTests\" />
+    <Folder Include="ProducerTests\WatcherTests\" />
+    <Folder Include="ProducerTests\ContentChangeTests\" />
+    <Folder Include="QueueingTests\" />
+    <Folder Include="FilterTests\" />
+    <Folder Include="CmisTests\ConvenienceExtendersTests\" />
+    <Folder Include="MockedServer\" />
+    <Folder Include="AlgorithmsTests\" />
+    <Folder Include="AlgorithmsTests\CyclicDependencies\" />
+  </ItemGroup>
 </Project>

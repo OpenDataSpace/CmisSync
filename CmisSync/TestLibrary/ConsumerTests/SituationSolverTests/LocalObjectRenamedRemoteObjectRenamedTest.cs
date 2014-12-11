@@ -64,7 +64,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 
-        [Test]
+        [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructor() {
             new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
@@ -113,7 +113,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             localFolder.Verify(f => f.MoveTo(Path.Combine(this.fullNamePrefix, this.newRemoteName)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newRemoteName, null, this.newChangeToken, true, null);
-
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -131,6 +130,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             localFolder.Verify(f => f.MoveTo(Path.Combine(this.fullNamePrefix, this.newRemoteName)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newRemoteName, null, this.newChangeToken, true, null);
+        }
+
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        public void RemoteAndLocalFileAreRenamedToDifferentFilenames() {
+            Assert.Fail("TODO");
         }
 
         private Mock<IFolder> CreateRemoteFolder(string name, DateTime? modificationDate = null) {

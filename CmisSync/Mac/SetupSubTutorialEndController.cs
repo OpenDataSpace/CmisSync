@@ -65,7 +65,7 @@ namespace CmisSync
             this.FinishButton.Title = Properties_Resources.Finish;
 //            this.FinishButton.KeyEquivalent = "\r";
 
-            NSImage image = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "tutorial-slide-" + Controller.TutorialCurrentPage + ".png")) {
+            NSImage image = new NSImage (UIHelpers.GetImagePathname ("tutorial-slide-" + Controller.TutorialCurrentPage)) {
                 Size = new SizeF (350, 200)
             };
             TutorialView.Image = image;

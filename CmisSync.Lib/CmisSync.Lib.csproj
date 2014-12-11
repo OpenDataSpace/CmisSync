@@ -38,11 +38,9 @@
       <HintPath>..\packages\DBreeze.1.61.1\lib\net45\DBreeze.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Security" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
-    <Reference Include="Mono.Data.Sqlite" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="XamMac">
@@ -57,10 +55,14 @@
     </Reference>
     <Reference Include="System.Net" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\Tarjan\AbstractTarjanNode.cs" />
     <Compile Include="Backend.cs" />
+    <Compile Include="ClientBrandBase.cs" />
     <Compile Include="Cmis\MimeType.cs" />
+    <Compile Include="Config\Brand.cs" />
     <Compile Include="Defines.cs" />
     <Compile Include="Storage\Database\Entities\FileTransmissionObject.cs" />
     <Compile Include="Storage\Database\Entities\IFileTransmissionObject.cs" />
@@ -251,6 +253,13 @@
     <Compile Include="Consumer\SituationSolver\LocalObjectMovedRemoteObjectRenamed.cs" />
     <Compile Include="Storage\FileSystem\DateTimeToFileConverter.cs" />
     <Compile Include="Storage\FileSystem\FSType.cs" />
+    <Compile Include="Algorithms\CyclicDependencies\ICycleDetector.cs" />
+    <Compile Include="Algorithms\Tarjan\Tarjan.cs" />
+    <Compile Include="Events\ConfigurationNeededEvent.cs" />
+    <Compile Include="Algorithms\CyclicDependencies\CycleDetector.cs" />
+    <Compile Include="Config\DefaultEntries.cs" />
+    <Compile Include="Events\InteractionNeededEvent.cs" />
+    <Compile Include="Consumer\InteractionNeededException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -304,5 +313,17 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Config\" />
+    <Folder Include="Storage\FileSystem\" />
+    <Folder Include="Storage\Database\" />
+    <Folder Include="Storage\Database\Entities\" />
+    <Folder Include="Cmis\Authentication\" />
+    <Folder Include="Cmis\UiUtils\" />
+    <Folder Include="Producer\ContentChange\" />
+    <Folder Include="Cmis\ConvenienceExtenders\" />
+    <Folder Include="Algorithms\" />
+    <Folder Include="Algorithms\CyclicDependencies\" />
+    <Folder Include="Algorithms\Tarjan\" />
+  </ItemGroup>
 </Project>

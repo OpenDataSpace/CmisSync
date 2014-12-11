@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="UIHelpers.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -43,6 +43,8 @@ using System.Windows.Media.Imaging;
 
 using Drawing = System.Drawing;
 
+using CmisSync.Lib.Config;
+
 namespace CmisSync {
 
     /// <summary>
@@ -58,6 +60,26 @@ namespace CmisSync {
             return GetImageSource (name, "png");
         }
 
+        private static string FindImagePathname(string folder, string filename)
+        {
+            ClientBrand brand = new ClientBrand();
+            foreach (string path in brand.GetPathList())
+            {
+                if (Path.GetFileName(path) == filename)
+                {
+                    string pathname = Path.Combine(folder, path.Substring(1));
+                    if (File.Exists(pathname))
+                    {
+                        return pathname;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+            return null;
+        }
 
         /// <summary>
         /// Get the image frame associated with given identifier and file type.
@@ -65,8 +87,26 @@ namespace CmisSync {
         /// <param name="type">Filename extension, for instance "png" or "ico".</param>
         public static BitmapFrame GetImageSource(string name, string type)
         {
+            string filename = name + "." + type;
+
+            string brandFolder = Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), Program.Controller.BrandConfigFolder);
+            string pathname = FindImagePathname(brandFolder, filename);
+            if (!string.IsNullOrEmpty(pathname))
+            {
+                try
+                {
+                    using (FileStream stream = File.Open(pathname, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        return BitmapFrame.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                    }
+                }
+                catch (Exception e)
+                {
+                }
+            }
+
             Assembly assembly = Assembly.GetExecutingAssembly();
-            Stream image_stream = assembly.GetManifestResourceStream("CmisSync.Pixmaps." + name + "." + type);
+            Stream image_stream = assembly.GetManifestResourceStream("CmisSync.Pixmaps." + filename);
             return BitmapFrame.Create(image_stream);
         }
         
@@ -75,9 +115,27 @@ namespace CmisSync {
         /// Get the image associated with given identifier.
         /// </summary>
         public static Drawing.Bitmap GetBitmap (string name)
-        {                                          
-            Assembly assembly   = Assembly.GetExecutingAssembly ();
-            Stream image_stream = assembly.GetManifestResourceStream ("CmisSync.Pixmaps." + name + ".png");
+        {
+            string filename = name + ".png";
+
+            string brandFolder = Path.Combine(ConfigManager.CurrentConfig.GetConfigPath(), Program.Controller.BrandConfigFolder);
+            string pathname = FindImagePathname(brandFolder, filename);
+            if (!string.IsNullOrEmpty(pathname))
+            {
+                try
+                {
+                    using (FileStream stream = File.Open(pathname, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        return (Drawing.Bitmap)Drawing.Bitmap.FromStream(stream);
+                    }
+                }
+                catch (Exception e)
+                {
+                }
+            }
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Stream image_stream = assembly.GetManifestResourceStream ("CmisSync.Pixmaps." + filename);
             return (Drawing.Bitmap) Drawing.Bitmap.FromStream (image_stream);
         }
 

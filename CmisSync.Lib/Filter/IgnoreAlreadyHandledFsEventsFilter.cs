@@ -52,16 +52,6 @@ namespace CmisSync.Lib.Filter
         }
 
         /// <summary>
-        /// Filter priority
-        /// </summary>
-        /// <value>The default filter priority.</value>
-        public override int Priority {
-            get {
-                return EventHandlerPriorities.GetPriority(typeof(IgnoreAlreadyHandledFsEventsFilter));
-            }
-        }
-
-        /// <summary>
         /// Filters FSEvents if they signalize an add and are handled already.
         /// This occurs if the syncer creates a local object on file system.
         /// </summary>

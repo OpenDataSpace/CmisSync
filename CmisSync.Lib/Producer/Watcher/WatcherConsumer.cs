@@ -20,7 +20,6 @@ namespace CmisSync.Lib.Producer.Watcher
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.Common;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
@@ -39,8 +38,6 @@ namespace CmisSync.Lib.Producer.Watcher
     /// </summary>
     public class WatcherConsumer : ReportingSyncEventHandler
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(WatcherConsumer));
-
         private IFileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
 
         /// <summary>
@@ -68,8 +65,6 @@ namespace CmisSync.Lib.Producer.Watcher
             if (fsevent == null) {
                 return false;
             }
-
-            Logger.Debug("Handling FSEvent: " + e);
 
             if (fsevent.IsDirectory) {
                 this.HandleFolderEvents(fsevent);
@@ -109,7 +104,6 @@ namespace CmisSync.Lib.Producer.Watcher
                 }
             }
 
-            Logger.Debug("Adding Event: " + folderEvent);
             Queue.AddEvent(folderEvent);
         }
 
@@ -130,7 +124,6 @@ namespace CmisSync.Lib.Producer.Watcher
                     newfile,
                     null,
                     null);
-                Logger.Debug("Adding Event: " + newEvent);
                 Queue.AddEvent(newEvent);
             } else {
                 var file = this.fsFactory.CreateFileInfo(e.LocalPath);
@@ -148,8 +141,6 @@ namespace CmisSync.Lib.Producer.Watcher
                     newEvent.LocalContent = ContentChangeType.DELETED;
                     break;
                 }
-
-                Logger.Debug("Adding Event: " + newEvent);
 
                 Queue.AddEvent(newEvent);
             }

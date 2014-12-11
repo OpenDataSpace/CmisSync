@@ -31,14 +31,16 @@
 //
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see (http://www.gnu.org/licenses/).
-namespace CmisSync 
+
+namespace CmisSync
 {
     using System;
+    using System.Globalization;
     using Gtk;
     using Mono.Unix;
-    
+
     [CLSCompliant(false)]
-    public class About : Window 
+    public class About : Window
     {
         public AboutController Controller = new AboutController ();
 
@@ -60,7 +62,7 @@ namespace CmisSync
             Title          = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName);
             AppPaintable   = true;
 
-            string image_path = System.IO.Path.Combine(UI.AssetsPath, "pixmaps", "about.png");
+            string image_path = UIHelpers.GetImagePath ("about.png");
 
             Realize ();
             Gdk.Pixbuf buf = new Gdk.Pixbuf (image_path);
@@ -117,9 +119,10 @@ namespace CmisSync
             Gdk.Color fgcolor = new Gdk.Color();
             Gdk.Color.Parse("red", ref fgcolor);
             Label version = new Label () {
-                Markup = string.Format ("<span font_size='small' fgcolor='#729fcf'>{0}</span>",
-                        String.Format(Properties_Resources.Version, Controller.RunningVersion)),
-                       Xalign = 0
+                Markup = string.Format (
+                    "<span font_size='small' fgcolor='#729fcf'>{0}</span>",
+                    String.Format(Properties_Resources.Version, Controller.RunningVersion, Controller.CreateTime.GetValueOrDefault().ToString("d"))),
+                Xalign = 0
             };
 
             this.updates = new Label () {

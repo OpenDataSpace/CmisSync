@@ -36,8 +36,6 @@ namespace CmisSync.Lib.Consumer
     /// </summary>
     public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
-
         /// <summary>
         /// Analyse the specified actual event.
         /// </summary>
@@ -51,13 +49,12 @@ namespace CmisSync.Lib.Consumer
             }
 
             SituationType type = this.DoAnalyse(storage, actualEvent);
-            Logger.Debug(string.Format("Remote Situation is: {0}", type));
             return type;
         }
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            switch (actualEvent.Remote) 
+            switch (actualEvent.Remote)
             {
             case MetaDataChangeType.CREATED:
                 if (this.IsChangeEventAHintForMove(storage, actualEvent)) {

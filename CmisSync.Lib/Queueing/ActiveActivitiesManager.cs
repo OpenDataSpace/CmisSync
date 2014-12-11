@@ -96,6 +96,14 @@ namespace CmisSync.Lib.Queueing
         }
 
         /// <summary>
+        /// Aborts all open HTTP requests.
+        /// </summary>
+        public void AbortAllRequests()
+        {
+            DotCMIS.Binding.HttpWebRequestResource.AbortAll();
+        }
+
+        /// <summary>
         /// If a transmission is reported as finished/aborted/failed, the transmission is removed from the collection
         /// </summary>
         /// <param name='sender'>

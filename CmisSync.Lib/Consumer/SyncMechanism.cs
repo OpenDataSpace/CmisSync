@@ -139,6 +139,8 @@ namespace CmisSync.Lib.Consumer
                     Logger.Debug(string.Format("RetryException[{0}] thrown for event {1} => enqueue event", retry.Message, folderEvent.ToString()));
                     folderEvent.RetryCount++;
                     this.Queue.AddEvent(folderEvent);
+                } catch (InteractionNeededException interaction) {
+                    this.Queue.AddEvent(new InteractionNeededEvent(interaction));
                 } catch (Exception ex) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing", ex);
                     this.Queue.AddEvent(new StartNextSyncEvent(true));
@@ -205,7 +207,6 @@ namespace CmisSync.Lib.Consumer
                 throw new NotImplementedException(string.Format("Solver for LocalSituation: {0}, and RemoteSituation {1} not implemented", localSituation, remoteSituation));
             }
 
-            Logger.Debug("Using Solver: " + solver.GetType());
             Stopwatch watch = Stopwatch.StartNew();
             this.Solve(solver, actualEvent);
             watch.Stop();

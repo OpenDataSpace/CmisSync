@@ -139,7 +139,8 @@ namespace CmisSync
             ServerCredentials credentials = new ServerCredentials() {
                 UserName = UserText.StringValue,
                 Password = PasswordText.StringValue,
-                Address = new Uri(AddressText.StringValue)
+                Address = new Uri(AddressText.StringValue),
+                Binding = (Controller.saved_binding == null) ? ServerCredentials.BindingBrowser : Controller.saved_binding
             };
             WarnText.StringValue = String.Empty;
             AddressText.Enabled = false;
@@ -173,7 +174,7 @@ namespace CmisSync
                     else
                     {
                         RemoveEvent();
-                        Controller.Add1PageCompleted(cmisServer.Url, credentials.UserName, credentials.Password.ToString());
+                        Controller.Add1PageCompleted(cmisServer.Url, cmisServer.Binding, credentials.UserName, credentials.Password.ToString());
                     }
                     LoginProgress.StopAnimation(this);
                 });

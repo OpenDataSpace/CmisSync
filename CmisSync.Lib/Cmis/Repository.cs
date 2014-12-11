@@ -198,7 +198,7 @@ namespace CmisSync.Lib.Cmis
             this.RemoteUrl = repoInfo.Address;
 
             if (!this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath).IsExtendedAttributeAvailable()) {
-                throw new ArgumentException("Extended Attributes are not available on the local path: " + this.LocalPath);
+                throw new ExtendedAttributeException("Extended Attributes are not available on the local path: " + this.LocalPath);
             }
 
             this.Queue = queue;

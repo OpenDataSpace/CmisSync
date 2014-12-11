@@ -11,7 +11,19 @@ system_theme_icons = \
 	apps,dataspacesync-app-24.png \
 	apps,dataspacesync-app-32.png \
 	apps,dataspacesync-app-48.png \
-	apps,dataspacesync-app-256.png
+	apps,dataspacesync-app-256.png \
+        status,dataspacesync-process-syncing-i-24.png \
+        status,dataspacesync-process-syncing-ii-24.png \
+        status,dataspacesync-process-syncing-iii-24.png \
+        status,dataspacesync-process-syncing-iiii-24.png \
+        status,dataspacesync-process-syncing-iiiii-24.png \
+        status,dataspacesync-process-syncing-error-24.png \
+        status,dataspacesync-process-syncing-i-48.png \
+        status,dataspacesync-process-syncing-ii-48.png \
+        status,dataspacesync-process-syncing-iii-48.png \
+        status,dataspacesync-process-syncing-iiii-48.png \
+        status,dataspacesync-process-syncing-iiiii-48.png \
+        status,dataspacesync-process-syncing-error-48.png
 
 app_theme_icons = \
 	places,dataspacesync-folder-16.png \
@@ -20,12 +32,6 @@ app_theme_icons = \
 	places,dataspacesync-folder-32.png \
 	places,dataspacesync-folder-48.png \
 	places,dataspacesync-folder-256.png \
-	status,dataspacesync-process-syncing-i-24.png \
-	status,dataspacesync-process-syncing-ii-24.png \
-	status,dataspacesync-process-syncing-iii-24.png \
-	status,dataspacesync-process-syncing-iiii-24.png \
-	status,dataspacesync-process-syncing-iiiii-24.png \
-	status,dataspacesync-process-syncing-error-24.png \
 	status,dataspacesync-start-16.png \
 	status,dataspacesync-pause-16.png \
 	status,dataspacesync-downloading-16.png \

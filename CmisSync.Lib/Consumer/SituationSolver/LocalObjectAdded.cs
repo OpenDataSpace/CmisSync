@@ -93,6 +93,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ICmisObject addedObject;
             try {
                 addedObject = this.AddCmisObject(localFileSystemInfo, parentId, this.Session);
+            } catch (CmisConstraintException e) {
+                if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
+                    OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.Name), e);
+                    throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFileSystemInfo.Name), e) {
+                        Title = string.Format("Server denied creation of {0}", localFileSystemInfo.Name),
+                        Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.FullName)
+                    };
+                }
+
+                throw;
             } catch (CmisPermissionDeniedException e) {
                 OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
                 return;

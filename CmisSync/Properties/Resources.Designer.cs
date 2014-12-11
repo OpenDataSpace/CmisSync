@@ -124,6 +124,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Binding Type.
+        /// </summary>
+        internal static string BindingType {
+            get {
+                return ResourceManager.GetString("BindingType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Browse remote folder.
         /// </summary>
         internal static string BrowseRemoteFolder {
@@ -138,6 +147,15 @@ namespace CmisSync {
         internal static string Cancel {
             get {
                 return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} cannot be synced.
+        /// </summary>
+        internal static string CannotSync {
+            get {
+                return ResourceManager.GetString("CannotSync", resourceCulture);
             }
         }
         
@@ -489,6 +507,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Account is locked until {0}.
+        /// </summary>
+        internal static string LoginFailedLockedUntil {
+            get {
+                return ResourceManager.GetString("LoginFailedLockedUntil", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to login successful.
         /// </summary>
         internal static string LoginSuccess {
@@ -705,6 +732,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Problems on file system:{0}{1}.
+        /// </summary>
+        internal static string ProblemWithFS {
+            get {
+                return ResourceManager.GetString("ProblemWithFS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your documents are now being synchronized.
         /// </summary>
         internal static string Ready {
@@ -810,6 +846,15 @@ namespace CmisSync {
         internal static string SettingProxy {
             get {
                 return ResourceManager.GetString("SettingProxy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        internal static string Settings {
+            get {
+                return ResourceManager.GetString("Settings", resourceCulture);
             }
         }
         
@@ -961,7 +1006,7 @@ namespace CmisSync {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Version {0}.
+        ///   Looks up a localized string similar to Version {0} ({1}).
         /// </summary>
         internal static string Version {
             get {

@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/OpenDataSpace/CmisSync
 
 Package: dataspacesync
 Architecture: any
-Depends: ${misc:Depends}, dataspacesync-common (= ${binary:Version})
+Depends: ${misc:Depends}, dataspacesync-common (= ${binary:Version}), libappindicator1
 Description: DataSpace Sync Client
  DataSpace Sync allows you to keep in sync with your DataSpace (CMIS) repository. See: https://graudata.com
 

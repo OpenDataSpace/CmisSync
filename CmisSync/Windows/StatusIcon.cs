@@ -350,7 +350,7 @@ namespace CmisSync
                     // Sub-item: edit ignore folder.
                     ToolStripMenuItem editFolderItem = new ToolStripMenuItem()
                     {
-                        Text = CmisSync.Properties_Resources.EditTitle
+                        Text = CmisSync.Properties_Resources.Settings
                     };
                     editFolderItem.Click += EditFolderDelegate(folderName);
 
@@ -406,7 +406,7 @@ namespace CmisSync
             // Create the menu item that lets the user view setting.
             ToolStripMenuItem setting_item = new ToolStripMenuItem()
             {
-                Text = CmisSync.Properties_Resources.EditTitle
+                Text = CmisSync.Properties_Resources.Settings
             };
             setting_item.Click += delegate
             {

@@ -5,8 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CmisSync"
              mc:Ignorable="d" Height="400" Width="620">
-    <Grid HorizontalAlignment="Right" Width="440" Margin="0,30,15,50">
-        <TabControl x:Name="tab" HorizontalAlignment="Left" Height="320" Margin="0,0,0,0" VerticalAlignment="Top" Width="440">
+    <Grid HorizontalAlignment="Left" Width="445" Margin="165,30,0,30">
+        <TabControl x:Name="tab" Margin="0,0,0,10">
             <!--  GUI workaround to remove ignore folder
             <TabItem x:Name="tabItemSelection" Header="AddingFolder">
                 <Grid/>
@@ -25,9 +25,15 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Grid HorizontalAlignment="Left" Height="50" Margin="156,320,-16,-50" Width="300">
-            <Button x:Name="finishButton" Content="SaveChanges" HorizontalAlignment="Left" Margin="80,19,0,0" VerticalAlignment="Top" Width="100"/>
-            <Button x:Name="cancelButton" Content="DiscardChanges" HorizontalAlignment="Left" Margin="190,19,0,0" VerticalAlignment="Top" Width="100"/>
-        </Grid>
+        <StackPanel Orientation="Horizontal" RenderTransformOrigin="0.5,0.5" FlowDirection="RightToLeft" Margin="0,0,-10,-31" VerticalAlignment="Bottom" Height="31">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="Margin" Value="10,0,0,0" />
+                    <Setter Property="Padding" Value="10,0,10,0" />
+                </Style>
+            </StackPanel.Resources>
+            <Button x:Name="finishButton" Content="SaveChanges" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <Button x:Name="cancelButton" Content="DiscardChanges" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        </StackPanel>
     </Grid>
 </UserControl>

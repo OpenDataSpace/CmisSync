@@ -97,6 +97,7 @@ namespace TestLibrary.IntegrationTests
         private IFolder remoteRootDir;
         private ISession session;
         private CmisRepoMock repo;
+        private ActiveActivitiesManager transmissionManager;
 
         [TestFixtureSetUp]
         public void ClassInit()
@@ -132,7 +133,8 @@ namespace TestLibrary.IntegrationTests
                 RemotePath = config[2].ToString() + "/" + this.subfolder,
                 Address = new XmlUri(new Uri(config[3].ToString())),
                 User = config[4].ToString(),
-                RepositoryId = config[6].ToString()
+                RepositoryId = config[6].ToString(),
+                Binding = config[7].ToString()
             };
             this.repoInfo.RemotePath = this.repoInfo.RemotePath.Replace("//", "/");
             this.repoInfo.SetPassword(config[5].ToString());
@@ -143,7 +145,7 @@ namespace TestLibrary.IntegrationTests
 
             // Repo
             var activityListener = new Mock<IActivityListener>();
-            var transmissionManager = new ActiveActivitiesManager();
+            this.transmissionManager = new ActiveActivitiesManager();
             var activityAggregator = new ActivityListenerAggregator(activityListener.Object, transmissionManager);
             var queue = new SingleStepEventQueue(new SyncEventManager());
 
@@ -151,8 +153,14 @@ namespace TestLibrary.IntegrationTests
 
             // Session
             var cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+            if (this.repoInfo.Binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
+            } else if (this.repoInfo.Binding.Equals(BindingType.Browser, StringComparison.OrdinalIgnoreCase)) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
+                cmisParameters[SessionParameter.BrowserUrl] = this.repoInfo.Address.ToString();
+            }
+
             cmisParameters[SessionParameter.User] = this.repoInfo.User;
             cmisParameters[SessionParameter.Password] = this.repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
@@ -321,9 +329,9 @@ namespace TestLibrary.IntegrationTests
             this.repo.Run();
 
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
-            Thread.Sleep(15000);
+            Thread.Sleep(30000);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.repo.Queue.AddEvent(new StartNextSyncEvent());
 
             this.repo.Run();
 
@@ -1444,7 +1452,6 @@ namespace TestLibrary.IntegrationTests
             Assert.That((remoteB as IFolder).GetChildren().Count(), Is.EqualTo(0));
         }
 
-        [Ignore("Not yet correct on the server side")]
         [Test, Category("Slow")]
         public void ExecutingTheSameFolderMoveTwiceThrowsCmisException() {
             var source = this.remoteRootDir.CreateFolder("source");
@@ -1454,7 +1461,51 @@ namespace TestLibrary.IntegrationTests
 
             folder.Move(source, target);
 
-            Assert.Throws<CmisInvalidArgumentException>(() => anotherFolderInstance.Move(source, target));
+            Assert.Throws<CmisConstraintException>(() => anotherFolderInstance.Move(source, target));
+        }
+
+        [Test, Category("Slow")]
+        public void DoNotTransferDataIfLocalAndRemoteFilesAreEqual() {
+            this.repo.Initialize();
+            this.repo.Run();
+            this.repo.SingleStepQueue.SwallowExceptions = true;
+
+            string content = "a";
+            string fileName = "file.txt";
+            var remoteFile = this.remoteRootDir.CreateDocument(fileName, content);
+            if (remoteFile.ContentStreamHash() == null) {
+                Assert.Ignore("Server does not support hash of content stream");
+            }
+
+            var file = new FileInfo(Path.Combine(this.localRootDir.FullName, fileName));
+            using (StreamWriter sw = file.CreateText()) {
+                sw.Write(content);
+            }
+
+            this.transmissionManager.ActiveTransmissions.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => {
+                this.repo.SingleStepQueue.SwallowExceptions = false;
+                Assert.Fail("There should be no transmission, but a new transmission object is added");
+            };
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetFiles()[0].Length, Is.EqualTo(content.Length));
+            Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(content.Length));
+        }
+
+        [Ignore("Mantis issue 4285")]
+        [Test, Category("Slow")]
+        public void ExecutingTheSameFolderMoveToDifferentTargetsThrowsCmisException() {
+            var source = this.remoteRootDir.CreateFolder("source");
+            var target1 = this.remoteRootDir.CreateFolder("target1");
+            var target2 = this.remoteRootDir.CreateFolder("target2");
+            var folder = source.CreateFolder("folder");
+            var anotherFolderInstance = this.session.GetObject(folder) as IFolder;
+
+            folder.Move(source, target1);
+
+            Assert.Throws<CmisConstraintException>(() => anotherFolderInstance.Move(source, target2));
         }
 
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
@@ -1485,7 +1536,7 @@ namespace TestLibrary.IntegrationTests
             }
 
             public override void Start() {
-                if (!base.Connect()) {
+                if (!this.Connect()) {
                     Assert.Fail("Connection failed");
                 }
             }

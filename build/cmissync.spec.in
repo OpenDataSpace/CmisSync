@@ -17,6 +17,7 @@ BuildRequires: notify-sharp-devel libappindicator-sharp-devel
 BuildRequires: libtool intltool desktop-file-utils
 
 Requires: %{name}-common = %{version}-%{release}
+Requires: libappindicator
 
 %description
 DataSpace Sync allows you to keep in sync with your CMIS repository.
@@ -48,12 +49,6 @@ More information is available at http://graudata.com/ .
 %prep
 %setup -c -q
 
-%build
-cd .%{_libdir}/dataspace-sync
-rm -f Moq.dll nunit.framework.dll TestLibrary.*
-mkbundle --static -o DataSpaceSync DataSpaceSync.exe --deps CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtonsoft.Json.dll --machine-config /etc/mono/4.5/machine.config -z
-mkbundle --static -o DataSpaceSync.Console DataSpaceSync.Console.exe --deps CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtonsoft.Json.dll --machine-config /etc/mono/4.5/machine.config -z
-
 %install
 rm -rf %{buildroot}
 mkdir -p %{buildroot}
@@ -66,6 +61,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_libdir}/dataspace-sync/DataSpaceSync
 %{_libdir}/dataspace-sync/DataSpaceSync.Console
+%{_libdir}/dataspace-sync/lib/*.so
 
 %files common
 %defattr(-,root,root,-)
