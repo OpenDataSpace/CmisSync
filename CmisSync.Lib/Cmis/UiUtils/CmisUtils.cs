@@ -212,6 +212,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
 
             cmisParameters[SessionParameter.User] = credentials.UserName;
             cmisParameters[SessionParameter.Password] = credentials.Password.ToString();
+            cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             return cmisParameters;
         }
 
