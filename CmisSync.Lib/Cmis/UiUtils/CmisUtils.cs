@@ -185,6 +185,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
             cmisParameters[SessionParameter.AtomPubUrl] = credentials.Address.ToString();
             cmisParameters[SessionParameter.User] = credentials.UserName;
             cmisParameters[SessionParameter.Password] = credentials.Password.ToString();
+            cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
 
             IList<IRepository> repositories;
             try
@@ -249,6 +250,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
             cmisParameters[SessionParameter.User] = user;
             cmisParameters[SessionParameter.Password] = password;
             cmisParameters[SessionParameter.RepositoryId] = repositoryId;
+            cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             SessionFactory factory = SessionFactory.NewInstance();
             ISession session = factory.CreateSession(cmisParameters);
 
@@ -318,6 +320,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
             cmisParameters[SessionParameter.User] = credentials.UserName;
             cmisParameters[SessionParameter.Password] = credentials.Password.ToString();
             cmisParameters[SessionParameter.RepositoryId] = credentials.RepoId;
+            cmisParameters[SessionParameter.UserAgent] = Utils.CreateUserAgent();
             SessionFactory factory = SessionFactory.NewInstance();
             ISession session = factory.CreateSession(cmisParameters);
 
