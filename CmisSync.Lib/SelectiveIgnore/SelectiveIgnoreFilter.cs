@@ -38,11 +38,7 @@ namespace CmisSync.Lib.SelectiveIgnore
     {
         private IIgnoredEntitiesStorage storage;
 
-        public SelectiveIgnoreFilter(ObservableCollection<IIgnoredEntity> ignores, IIgnoredEntitiesStorage storage) {
-            if (ignores == null) {
-                throw new ArgumentNullException("The collection of ignored entities is null");
-            }
-
+        public SelectiveIgnoreFilter(IIgnoredEntitiesStorage storage) {
             if (storage == null) {
                 throw new ArgumentNullException("The given storage is null");
             }
@@ -58,6 +54,13 @@ namespace CmisSync.Lib.SelectiveIgnore
                 if (ev.RemoteObject is IFolder) {
                     if (this.storage.IsIgnored(ev.RemoteObject as IFolder) == IgnoredState.INHERITED) {
                         return true;
+                    } else if (e is FolderEvent) {
+                        var folderEvent = e as FolderEvent;
+                        if (this.storage.IsIgnored((e as FolderEvent).RemoteFolder as IFolder) == IgnoredState.IGNORED) {
+                            if (folderEvent.Remote == MetaDataChangeType.CREATED || folderEvent.Remote == MetaDataChangeType.DELETED) {
+                                return true;
+                            }
+                        }
                     }
                 } else if (ev.RemoteObject is IDocument) {
                     if (this.storage.IsIgnored(ev.RemoteObject as IDocument) == IgnoredState.INHERITED) {
@@ -71,16 +74,12 @@ namespace CmisSync.Lib.SelectiveIgnore
                 if (path != null) {
                     if (this.storage.IsIgnoredPath(path) == IgnoredState.INHERITED) {
                         return true;
+                    } else if (this.storage.IsIgnoredPath(path) == IgnoredState.IGNORED) {
+                        var folderEvent = e as FolderEvent;
+                        if (folderEvent != null && folderEvent.Local == MetaDataChangeType.CREATED || folderEvent.Local == MetaDataChangeType.DELETED) {
+                            return true;
+                        }
                     }
-                }
-            }
-
-            if (e is FolderEvent) {
-                var folderEvent = e as FolderEvent;
-                if (folderEvent.LocalFolder != null &&
-                    (folderEvent.Local == MetaDataChangeType.CREATED || folderEvent.Local == MetaDataChangeType.DELETED))
-                {
-
                 }
             }
 

@@ -49,25 +49,15 @@ namespace TestLibrary.SelectiveIgnoreTests
         private SelectiveIgnoreFilter underTest;
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
-        public void ConstructorFailsIfCollectionIsNull() {
-            Assert.Throws<ArgumentNullException>(
-                () => new SelectiveIgnoreFilter(
-                null,
-                Mock.Of<IIgnoredEntitiesStorage>()));
-        }
-
-        [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void ConstructorFailsIfStorageIsNull() {
             Assert.Throws<ArgumentNullException>(
                 () => new SelectiveIgnoreFilter(
-                new ObservableCollection<IIgnoredEntity>(),
                 null));
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void ConstructorTest() {
             new SelectiveIgnoreFilter(
-                new ObservableCollection<IIgnoredEntity>(),
                 Mock.Of<IIgnoredEntitiesStorage>());
         }
 
@@ -159,10 +149,7 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.storage.Setup(s => s.IsIgnoredPath(this.ignoredPath)).Returns(IgnoredState.IGNORED);
             this.storage.Setup(s => s.IsIgnoredPath(It.Is<string>(path => path.StartsWith(this.ignoredPath) && path != this.ignoredPath))).Returns(IgnoredState.INHERITED);
             this.storage.Setup(s => s.IsIgnoredPath(It.Is<string>(path => !path.StartsWith(this.ignoredPath)))).Returns(IgnoredState.NOT_IGNORED);
-            this.ignores = new ObservableCollection<IIgnoredEntity>();
-            this.ignores.Add(Mock.Of<IIgnoredEntity>(i => i.LocalPath == this.ignoredPath && i.ObjectId == this.ignoredObjectId));
-            this.ignores.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => Assert.Fail("Collection should not be changed");
-            this.underTest = new SelectiveIgnoreFilter(this.ignores, this.storage.Object);
+            this.underTest = new SelectiveIgnoreFilter(this.storage.Object);
         }
     }
 }
