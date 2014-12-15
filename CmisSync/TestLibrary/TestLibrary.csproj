@@ -226,6 +226,8 @@
     <Compile Include="ConfigTests\DefaultSettingsTests.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectMovedTest.cs" />
     <Compile Include="EventsTests\InteractionNeededInitializationTest.cs" />
+    <Compile Include="TestUtils\FolderTree.cs" />
+    <Compile Include="TestUtils\FolderTreeTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
