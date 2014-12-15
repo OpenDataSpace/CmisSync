@@ -49,6 +49,19 @@ namespace TestLibrary.TestUtils
             folder.Setup(f => f.GetDescendants(It.Is<int>(d => d != -1))).Throws(new ArgumentOutOfRangeException("Get Descendants should not be limited"));
         }
 
+        /// <summary>
+        /// Setup the children of a folder.
+        /// </summary>
+        /// <param name="folder">Folder containing the children.</param>
+        /// <param name="children">The children of the folder.</param>
+        public static void SetupChildren(this Mock<IFolder> folder, params ICmisObject[] children) {
+            var list = new Mock<IItemEnumerable<ICmisObject>>();
+            var internalList = new List<ICmisObject>(children);
+            list.Setup(l => l.TotalNumItems).Returns(children.LongLength);
+            list.Setup(l => l.GetEnumerator()).Returns(internalList.GetEnumerator());
+            folder.Setup(f => f.GetChildren()).Returns(list.Object);
+        }
+
         public static void SetupLastModificationDate(this Mock<IFolder> folder, DateTime? modificationDate) {
             folder.Setup(f => f.LastModificationDate).Returns(modificationDate);
             folder.Setup(f => f.UpdateProperties(It.IsAny<IDictionary<string, object>>(), true)).Callback<IDictionary<string, object>, bool>((d, b) => {
