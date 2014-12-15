@@ -20,11 +20,8 @@
 namespace TestLibrary.IntegrationTests
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Net;
-    using System.Text;
     using System.Threading;
 
     using CmisSync.Lib;
@@ -32,14 +29,8 @@ namespace TestLibrary.IntegrationTests
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Config;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
-    using CmisSync.Lib.Storage.FileSystem;
 
-    using DotCMIS;
-    using DotCMIS.Binding;
     using DotCMIS.Client;
-    using DotCMIS.Client.Impl;
-    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -88,9 +79,14 @@ namespace TestLibrary.IntegrationTests
             var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
             var subFolder = ignoredFolder.CreateFolder("sub");
 
+            string remoteTree = @"
+ignored
+└── sub";
+            string localTree = remoteTree;
+            Assert.That(new FolderTree(remoteTree), Is.EqualTo(new FolderTree(ignoredFolder)));
             this.repo.Initialize();
             this.repo.Run();
-
+            Assert.That(new FolderTree(localTree), Is.EqualTo(new FolderTree(this.localRootDir.GetDirectories()[0])));
             Thread.Sleep(3000);
             this.repo.Queue.AddEvent(new StartNextSyncEvent());
             this.repo.Run();
@@ -99,13 +95,17 @@ namespace TestLibrary.IntegrationTests
             ignoredFolder.IgnoreAllChildren();
             subFolder.Refresh();
             subFolder.CreateFolder("bla");
-
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            remoteTree = @"
+ignored
+└── sub
+    └── bla";
+            Assert.That(new FolderTree(remoteTree), Is.EqualTo(new FolderTree(ignoredFolder)));
+            Assert.That(new FolderTree(localTree), Is.EqualTo(new FolderTree(this.localRootDir.GetDirectories()[0])));
+            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
             this.repo.Run();
 
-            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("ignored"));
-            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("sub"));
-            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].GetDirectories(), Is.Empty);
+            Assert.That(new FolderTree(remoteTree), Is.EqualTo(new FolderTree(ignoredFolder)));
+            Assert.That(new FolderTree(localTree), Is.EqualTo(new FolderTree(this.localRootDir.GetDirectories()[0])));
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]

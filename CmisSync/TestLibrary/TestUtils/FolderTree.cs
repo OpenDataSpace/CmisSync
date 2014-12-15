@@ -79,6 +79,15 @@ namespace TestLibrary.TestUtils
             this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
         }
 
+        public FolderTree(DirectoryInfo dir, string name = null) {
+            this.Name = name ?? dir.Name;
+            foreach (var child in dir.GetDirectories()) {
+                this.Children.Add(new FolderTree(child));
+            }
+
+            this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
+        }
+
         public override string ToString()
         {
             var tree = new StringBuilder();
