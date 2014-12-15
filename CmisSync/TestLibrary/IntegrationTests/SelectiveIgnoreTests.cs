@@ -180,12 +180,14 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void IgnoreRemoteFolder() {
-            var folder = this.remoteRootDir.CreateFolder("ignored") ;
+            var folder = this.remoteRootDir.CreateFolder("ignored");
 
             folder.IgnoreAllChildren();
+
             var context = OperationContextFactory.CreateContext(this.session, false, true);
             var underTest = this.session.GetObject(folder.Id, context) as IFolder;
 
+            Assert.That(folder.AreAllChildrenIgnored(), Is.True);
             Assert.That(underTest.AreAllChildrenIgnored(), Is.True);
         }
 
@@ -200,7 +202,77 @@ namespace TestLibrary.IntegrationTests
 
             var folder = this.session.GetObject(ignoredFolder.Id) as IFolder;
             Assert.That(folder.AreAllChildrenIgnored(), Is.True);
-            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories(), Is.Empty);
+            Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void RemoteFolderIsSyncedAndChangedToIgnored() {
+            var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
+            var subFolder = ignoredFolder.CreateFolder("sub");
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            Thread.Sleep(3000);
+            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            ignoredFolder.Refresh();
+            ignoredFolder.IgnoreAllChildren();
+            subFolder.Refresh();
+            subFolder.CreateFolder("bla");
+
+            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("ignored"));
+            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].Name, Is.EqualTo("sub"));
+            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories()[0].GetDirectories(), Is.Empty);
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void IgnoreMultipleDeviceIds() {
+            var folder = this.remoteRootDir.CreateFolder("folder");
+            var anotherUuid = Guid.NewGuid();
+            folder.IgnoreAllChildren(anotherUuid.ToString());
+
+            Assert.That(folder.AreAllChildrenIgnored(), Is.False);
+
+            folder.IgnoreAllChildren();
+
+            Assert.That(folder.AreAllChildrenIgnored(), Is.True);
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void StopIgnoringFolderForThisDeviceId() {
+            var folder = this.remoteRootDir.CreateFolder("folder");
+            var anotherId = Guid.NewGuid().ToString().ToLower();
+            var ownId = ConfigManager.CurrentConfig.DeviceId.ToString().ToLower();
+            folder.IgnoreAllChildren(anotherId);
+            Assert.That(folder.AreAllChildrenIgnored(), Is.False);
+            folder.IgnoreAllChildren(ownId);
+            Assert.That(folder.AreAllChildrenIgnored(), Is.True);
+            folder.RemoveSyncIgnore(ownId);
+            Assert.That(folder.AreAllChildrenIgnored(), Is.False);
+            Assert.That(folder.IgnoredDevices().Contains(anotherId));
+            Assert.That(folder.IgnoredDevices().Count, Is.EqualTo(1));
+            folder.RemoveAllSyncIgnores();
+            Assert.That(folder.AreAllChildrenIgnored(), Is.False);
+            Assert.That(folder.IgnoredDevices(), Is.Empty);
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void RemoveMultipleDeviceIds() {
+            var folder = this.remoteRootDir.CreateFolder("folder");
+            for (int i = 1; i <= 10; i++) {
+                folder.IgnoreAllChildren(Guid.NewGuid().ToString().ToLower());
+                Assert.That(folder.IgnoredDevices().Count, Is.EqualTo(i));
+            }
+
+            for (int i = 9; i >= 0; i--) {
+                folder.RemoveSyncIgnore(folder.IgnoredDevices().First());
+                Assert.That(folder.IgnoredDevices().Count, Is.EqualTo(i));
+            }
         }
 
         private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
