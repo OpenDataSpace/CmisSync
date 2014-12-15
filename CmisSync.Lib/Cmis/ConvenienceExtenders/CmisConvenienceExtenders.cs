@@ -141,15 +141,111 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// Sets a flag to ignores all children of this folder.
         /// </summary>
         /// <param name="folder">Folder which children should be ignored.</param>
-        public static void IgnoreAllChildren(this IFolder folder) {
+        public static void IgnoreAllChildren(this IFolder folder, string deviceId = "*") {
+            if (deviceId == null) {
+                throw new ArgumentException("Given deviceId is null or empty");
+            }
+
             Dictionary<string, object> properties = new Dictionary<string, object>();
-            IList<string> devices = new List<string>();
-            devices.Add("*");
+            IList<string> devices = folder.IgnoredDevices();
+            if (!devices.Contains(deviceId.ToLower())) {
+                devices.Add(deviceId.ToLower());
+            }
+
             properties.Add("gds:ignoreDeviceIds", devices);
-            IList<string> ids = new List<string>();
-            ids.Add("gds:sync");
-            properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
+            IList<string> ids = folder.SecondaryObjectTypeIds();
+            if (!ids.Contains("gds:sync")) {
+                ids.Add("gds:sync");
+                properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
+            }
+
             folder.UpdateProperties(properties, true);
+        }
+
+        public static void RemoveSyncIgnore(this ICmisObject obj, params Guid[] deviceIds) {
+            string[] ids = new string[deviceIds.Length];
+            for (int i = 0; i < deviceIds.Length; i++) {
+                ids[i] = deviceIds[i].ToString().ToLower();
+            }
+        }
+
+        public static void RemoveSyncIgnore(this ICmisObject obj, params string[] deviceIds) {
+            var ids = obj.SecondaryObjectTypeIds();
+            if (ids.Contains("gds:sync")) {
+                var devices = obj.IgnoredDevices();
+                if (deviceIds == null || deviceIds.Length == 0) {
+                    if (devices.Remove("*") ||
+                        devices.Remove(Config.ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
+                        if (devices.Count > 0) {
+                            Dictionary<string, object> properties = new Dictionary<string, object>();
+                            properties.Add("gds:ignoreDeviceIds", devices);
+                            obj.UpdateProperties(properties, true);
+                        } else {
+                            obj.RemoveAllSyncIgnores();
+                        }
+                    }
+                } else {
+                    bool changed = false;
+                    foreach (var removeId in deviceIds) {
+                        if (devices.Remove(removeId)) {
+                            changed = true;
+                        }
+                    }
+
+                    if (changed) {
+                        if (devices.Count > 0) {
+                            Dictionary<string, object> properties = new Dictionary<string, object>();
+                            properties.Add("gds:ignoreDeviceIds", devices);
+                            obj.UpdateProperties(properties, true);
+                        } else {
+                            obj.RemoveAllSyncIgnores();
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void RemoveAllSyncIgnores(this ICmisObject obj) {
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            var ids = obj.SecondaryObjectTypeIds();
+            if (ids.Remove("gds:sync")) {
+                properties.Add(PropertyIds.SecondaryObjectTypeIds, ids);
+                obj.UpdateProperties(properties, true);
+            }
+        }
+
+        /// <summary>
+        /// Lists all Ignored devices.
+        /// </summary>
+        /// <returns>The devices.</returns>
+        /// <param name="obj">Cmis object.</param>
+        public static IList<string> IgnoredDevices(this ICmisObject obj) {
+            IList<string> result = new List<string>();
+            foreach (var ignoredProperty in obj.Properties) {
+                if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
+                    foreach (var device in ignoredProperty.Values) {
+                        result.Add((device as string).ToLower());
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Secondary object type identifiers.
+        /// </summary>
+        /// <returns>The object type identifiers.</returns>
+        /// <param name="obj">Cmis object.</param>
+        public static IList<string> SecondaryObjectTypeIds(this ICmisObject obj) {
+            IList<string> ids = new List<string>();
+            if (obj.SecondaryTypes != null) {
+                foreach (var secondaryType in obj.SecondaryTypes) {
+                    ids.Add(secondaryType.Id);
+                }
+            }
+
+            return ids;
         }
 
         /// <summary>
@@ -158,17 +254,12 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// <returns><c>true</c>, if all children are ignored, <c>false</c> otherwise.</returns>
         /// <param name="obj">Remote cmis object.</param>
         public static bool AreAllChildrenIgnored(this ICmisObject obj) {
-            foreach (var ignoredProperty in obj.Properties) {
-                if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
-                    if ((ignoredProperty.FirstValue as string).Contains("*")) {
-                        return true;
-                    } else if ((ignoredProperty.FirstValue as string).ToLower().Contains(Config.ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
-                        return true;
-                    }
-                }
+            IList<string> devices = obj.IgnoredDevices();
+            if (devices.Contains("*") || devices.Contains(Config.ConfigManager.CurrentConfig.DeviceId.ToString().ToLower())) {
+                return true;
+            } else {
+                return false;
             }
-
-            return false;
         }
 
         /// <summary>
