@@ -83,6 +83,7 @@ SOURCES =  \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
+	IntegrationTests/BaseFullRepoTest.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
@@ -91,8 +92,9 @@ SOURCES =  \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
-	IntegrationTests/SelectiveIgnoreTests.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
+	IntegrationTests/SelectiveIgnoreTests.cs \
+	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfIRepository.cs \

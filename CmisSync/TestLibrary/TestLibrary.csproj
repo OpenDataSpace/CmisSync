@@ -228,6 +228,8 @@
     <Compile Include="EventsTests\InteractionNeededInitializationTest.cs" />
     <Compile Include="TestUtils\FolderTree.cs" />
     <Compile Include="TestUtils\FolderTreeTest.cs" />
+    <Compile Include="IntegrationTests\BaseFullRepoTest.cs" />
+    <Compile Include="IntegrationTests\TestNameAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
