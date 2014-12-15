@@ -17,24 +17,23 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-
 namespace TestLibrary.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Net;
     using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Text;
+
+    using CmisSync.Lib;
+    using CmisSync.Lib.Cmis.UiUtils;
+    using CmisSync.Lib.Config;
 
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
     using DotCMIS.Data.Impl;
-
-    using CmisSync.Lib;
-    using CmisSync.Lib.Config;
-    using CmisSync.Lib.Cmis.UiUtils;
 
     using NUnit.Framework;
 
@@ -130,13 +129,13 @@ namespace TestLibrary.IntegrationTests
 
         internal class ClientBrand : ClientBrandBase
         {
-            private string RepoName;
-            private IRepository Repository;
-            private ISession Session;
-            private IFolder Folder;
+            private string repoName;
+            private IRepository repository;
+            private ISession session;
+            private IFolder folder;
 
-            private List<string> NameList = new List<string>() { "TestFile0", "TestFile1" };
-            private List<string> PathList = new List<string>();
+            private List<string> nameList = new List<string>() { "TestFile0", "TestFile1" };
+            private List<string> pathList = new List<string>();
 
             public ClientBrand(ServerCredentials credentials, string repositoryId, string remoteFolderPath)
             {
@@ -145,38 +144,46 @@ namespace TestLibrary.IntegrationTests
                 IList<IRepository> repos = factory.GetRepositories(parameters);
                 foreach (IRepository repo in repos) {
                     if (repo.Id == repositoryId) {
-                        Repository = repo;
-                        RepoName = repo.Name;
+                        this.repository = repo;
+                        this.repoName = repo.Name;
                     }
                 }
 
-                if (Repository == null) {
+                if (this.repository == null) {
                     throw new ArgumentException("No such repository for " + repositoryId);
                 }
 
-                Session = Repository.CreateSession();
-                Folder = Session.GetObjectByPath(remoteFolderPath) as IFolder;
-                if (Folder == null) {
+                this.session = this.repository.CreateSession();
+                this.folder = this.session.GetObjectByPath(remoteFolderPath) as IFolder;
+                if (this.folder == null) {
                     throw new ArgumentException("No such folder for " + remoteFolderPath);
                 }
 
-                foreach (string name in NameList) {
-                    PathList.Add((remoteFolderPath + "/" + name).Replace("//","/"));
+                foreach (string name in this.nameList) {
+                    this.pathList.Add((remoteFolderPath + "/" + name).Replace("//", "/"));
                 }
 
-                DeleteFiles();
-                CreateFiles();
+                this.DeleteFiles();
+                this.CreateFiles();
             }
 
             ~ClientBrand() {
-                DeleteFiles();
+                this.DeleteFiles();
+            }
+
+            public override List<string> GetPathList() {
+                return new List<string>(this.pathList);
+            }
+
+            public override string GetRepoName() {
+                return this.repoName;
             }
 
             private void DeleteFiles()
             {
-                foreach (string path in PathList) {
+                foreach (string path in this.pathList) {
                     try {
-                        IDocument doc = Session.GetObjectByPath(path) as IDocument;
+                        IDocument doc = this.session.GetObjectByPath(path) as IDocument;
                         doc.DeleteAllVersions();
                     } catch (Exception) {
                     }
@@ -184,7 +191,7 @@ namespace TestLibrary.IntegrationTests
             }
 
             private void CreateFiles() {
-                foreach (string path in PathList) {
+                foreach (string path in this.pathList) {
                     try {
                         string filename = Path.GetFileName(path);
                         Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -196,18 +203,10 @@ namespace TestLibrary.IntegrationTests
                         contentStream.Length = path.Length;
                         contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(path));
 
-                        Folder.CreateDocument(properties, contentStream, null);
+                        this.folder.CreateDocument(properties, contentStream, null);
                     } catch (Exception) {
                     }
                 }
-            }
-
-            public override List<string> GetPathList() {
-                return new List<string>(PathList);
-            }
-
-            public override string GetRepoName() {
-                return RepoName;
             }
         }
     }

@@ -127,6 +127,7 @@ namespace TestLibrary.IntegrationTests
                 }
             } catch (Exception) {
             }
+
             string content = "test";
             doc = folder.CreateDocument(filename, content);
             Assert.That(doc.ContentStreamLength == content.Length, "returned document should have got content");
@@ -179,6 +180,7 @@ namespace TestLibrary.IntegrationTests
                 }
             } catch (CmisObjectNotFoundException) {
             }
+
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             IFolder subFolder = folder.CreateFolder(subFolderName);
@@ -358,6 +360,7 @@ namespace TestLibrary.IntegrationTests
                         }
                     }
                 }
+
                 byte[] remoteHash = requestedDoc.ContentStreamHash();
                 if (remoteHash != null) {
                     Assert.That(remoteHash, Is.EqualTo(SHA1.Create().ComputeHash(new byte[1])));
@@ -496,6 +499,7 @@ namespace TestLibrary.IntegrationTests
             if (!session.IsServerAbleToUpdateModificationDate()) {
                 Assert.Ignore("Server is not able to sync modification dates");
             }
+
             string filename = "name";
             IDocument doc;
             try {
@@ -770,6 +774,7 @@ namespace TestLibrary.IntegrationTests
                 cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
                 cmisParameters[SessionParameter.BrowserUrl] = url;
             }
+
             cmisParameters[SessionParameter.User] = user;
             cmisParameters[SessionParameter.Password] = password.ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoId;

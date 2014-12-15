@@ -405,10 +405,10 @@ namespace TestLibrary.IntegrationTests
         public void ManyRemoteFilesCreated()
         {
             int fileNumber = 100;
-            string content = new string ('A', 1024 * 1024);
+            string content = new string('A', 1024 * 1024);
             for (int i = 0; i < fileNumber; ++i) {
                 string fileName = "file" + i.ToString();
-                this.remoteRootDir.CreateDocument (fileName, content);
+                this.remoteRootDir.CreateDocument(fileName, content);
             }
 
             this.repo.Initialize();
