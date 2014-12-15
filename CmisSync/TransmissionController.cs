@@ -20,6 +20,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 using CmisSync.Lib.Events;
 using CmisSync.Lib.Config;
@@ -79,10 +80,15 @@ namespace CmisSync
             Path = FullPath;
             foreach (RepoInfo folder in ConfigManager.CurrentConfig.Folders)
             {
-                if (FullPath.StartsWith(folder.LocalPath))
+                string localFolder = folder.LocalPath;
+                if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString()))
+                {
+                    localFolder = localFolder + System.IO.Path.DirectorySeparatorChar;
+                }
+                if (FullPath.StartsWith(localFolder))
                 {
                     Repo = folder.DisplayName;
-                    Path = FullPath.Substring(folder.LocalPath.Length);
+                    Path = FullPath.Substring(localFolder.Length);
                 }
             }
             Type = transmission.Type;
