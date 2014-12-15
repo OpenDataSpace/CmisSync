@@ -32,8 +32,7 @@ namespace TestLibrary.TestUtils
 │       └── G
 ├── B
 └── C
-    └── D
-";
+    └── D";
 
         [Test, Category("Fast")]
         public void ConstructFolderTreeByString()
@@ -126,15 +125,15 @@ namespace TestLibrary.TestUtils
 
         [Test, Category("Fast")]
         public void EqualTrees() {
-            string tree =
-                ".\n" +
-                    "├── A\n" +
-                    "│   └── E\n" +
-                    "│       ├── F\n" +
-                    "│       └── G\n" +
-                    "├── B\n" +
-                    "└── C\n" +
-                    "    └── D\n";
+            string tree = @"
+.
+├── A
+│   └── E
+│       ├── F
+│       └── G
+├── B
+└── C
+    └── D";
             var underTest = new FolderTree(tree);
 
             Assert.That(underTest, Is.EqualTo(new FolderTree(tree)));
@@ -142,15 +141,15 @@ namespace TestLibrary.TestUtils
 
         [Test, Category("Fast")]
         public void NotEqualTrees() {
-            string differentTree =
-                ".\n" +
-                    "├── A\n" +
-                    "│   └── K\n" +
-                    "│       ├── F\n" +
-                    "│       └── G\n" +
-                    "├── B\n" +
-                    "└── C\n" +
-                    "    └── D\n";
+            string differentTree =@"
+.
+├── A
+│   └── K
+│       ├── F
+│       └── G
+├── B
+└── C
+    └── D";
             var underTest = new FolderTree(this.tree);
 
             Assert.That(underTest, Is.Not.EqualTo(new FolderTree(differentTree)));
