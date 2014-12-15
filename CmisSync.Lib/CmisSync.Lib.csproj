@@ -264,6 +264,7 @@
     <Compile Include="Config\DefaultEntries.cs" />
     <Compile Include="Events\InteractionNeededEvent.cs" />
     <Compile Include="Consumer\InteractionNeededException.cs" />
+    <Compile Include="SelectiveIgnore\CmisSelectiveIgnoreCapability.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

@@ -168,6 +168,7 @@ SOURCES =  \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
 	SelectiveIgnore/IgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IgnoredEntity.cs \
 	SelectiveIgnore/IgnoredState.cs \
