@@ -159,5 +159,39 @@ namespace TestLibrary.IntegrationTests
                 }
             }
         }
+
+        protected class CmisRepoMock : CmisSync.Lib.Cmis.Repository
+        {
+            public SingleStepEventQueue SingleStepQueue;
+
+            public CmisRepoMock(RepoInfo repoInfo, ActivityListenerAggregator activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
+            {
+                this.SingleStepQueue = queue;
+            }
+
+            public void Run()
+            {
+                this.SingleStepQueue.Run();
+                Thread.Sleep(500);
+                this.SingleStepQueue.Run();
+            }
+
+            public override void Initialize() {
+                ConnectionScheduler original = this.connectionScheduler;
+                this.connectionScheduler = new BlockingSingleConnectionScheduler(original);
+                original.Dispose();
+                base.Initialize();
+                this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
+                this.Scheduler.Stop();
+            }
+        }
+
+        protected void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
+            if (msg != null) {
+                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
+            } else {
+                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds);
+            }
+        }
     }
 }
