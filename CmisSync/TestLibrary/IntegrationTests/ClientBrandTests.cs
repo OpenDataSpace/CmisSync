@@ -81,25 +81,16 @@ namespace TestLibrary.IntegrationTests
             string repositoryId,
             string binding)
         {
-            ServerCredentials credentials = new ServerCredentials()
-            {
+            ServerCredentials credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 Binding = binding,
                 UserName = user,
                 Password = password
             };
 
-            ClientBrand brand = null;
-            try
-            {
-                brand = new ClientBrand(credentials, repositoryId, remoteFolderPath);
-            }
-            catch (Exception e)
-            {
-                Assert.Fail(e.Message);
-            }
+            var underTest = new ClientBrand(credentials, repositoryId, remoteFolderPath);
 
-            Assert.True(brand.TestServer(credentials));
+            Assert.That(underTest.TestServer(credentials), Is.True);
         }
 
         /// <summary>
@@ -116,34 +107,24 @@ namespace TestLibrary.IntegrationTests
             string repositoryId,
             string binding)
         {
-            ServerCredentials credentials = new ServerCredentials()
-            {
+            ServerCredentials credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 Binding = binding,
                 UserName = user,
                 Password = password
             };
 
-            ClientBrand brand = null;
-            try
-            {
-                brand = new ClientBrand(credentials, repositoryId, remoteFolderPath);
-            }
-            catch (Exception e)
-            {
-                Assert.Fail(e.Message);
-            }
+            var underTest = new ClientBrand(credentials, repositoryId, remoteFolderPath);
 
-            Assert.True(brand.SetupServer(credentials));
+            Assert.That(underTest.SetupServer(credentials), Is.True);
 
-            foreach (string path in brand.GetPathList())
-            {
+            foreach (string path in underTest.GetPathList()) {
                 DateTime date;
-                Assert.IsTrue(brand.GetFileDateTime(path, out date));
-                MemoryStream stream = new MemoryStream(path.Length * 2);
-                Assert.IsTrue(brand.GetFile(path, stream));
-                Assert.AreEqual(path.Length, stream.Length);
-                Assert.AreEqual(Encoding.UTF8.GetBytes(path), stream.ToArray());
+                Assert.That(underTest.GetFileDateTime(path, out date), Is.True);
+                using (var stream = new MemoryStream()) {
+                    Assert.That(underTest.GetFile(path, stream), Is.True);
+                    Assert.That(stream.Length, Is.GreaterThan(0));
+                }
             }
         }
 
@@ -162,27 +143,24 @@ namespace TestLibrary.IntegrationTests
                 Dictionary<string, string> parameters = CmisUtils.GetCmisParameters(credentials);
                 ISessionFactory factory = SessionFactory.NewInstance();
                 IList<IRepository> repos = factory.GetRepositories(parameters);
-                foreach (IRepository repo in repos)
-                {
-                    if (repo.Id == repositoryId)
-                    {
+                foreach (IRepository repo in repos) {
+                    if (repo.Id == repositoryId) {
                         Repository = repo;
                         RepoName = repo.Name;
                     }
                 }
-                if (Repository == null)
-                {
+
+                if (Repository == null) {
                     throw new ArgumentException("No such repository for " + repositoryId);
                 }
+
                 Session = Repository.CreateSession();
                 Folder = Session.GetObjectByPath(remoteFolderPath) as IFolder;
-                if (Folder == null)
-                {
+                if (Folder == null) {
                     throw new ArgumentException("No such folder for " + remoteFolderPath);
                 }
 
-                foreach (string name in NameList)
-                {
+                foreach (string name in NameList) {
                     PathList.Add((remoteFolderPath + "/" + name).Replace("//","/"));
                 }
 
@@ -190,32 +168,24 @@ namespace TestLibrary.IntegrationTests
                 CreateFiles();
             }
 
-            ~ClientBrand()
-            {
+            ~ClientBrand() {
                 DeleteFiles();
             }
 
             private void DeleteFiles()
             {
-                foreach (string path in PathList)
-                {
-                    try
-                    {
+                foreach (string path in PathList) {
+                    try {
                         IDocument doc = Session.GetObjectByPath(path) as IDocument;
                         doc.DeleteAllVersions();
-                    }
-                    catch (Exception)
-                    {
+                    } catch (Exception) {
                     }
                 }
             }
 
-            private void CreateFiles()
-            {
-                foreach (string path in PathList)
-                {
-                    try
-                    {
+            private void CreateFiles() {
+                foreach (string path in PathList) {
+                    try {
                         string filename = Path.GetFileName(path);
                         Dictionary<string, object> properties = new Dictionary<string, object>();
                         properties.Add(PropertyIds.Name, filename);
@@ -227,20 +197,16 @@ namespace TestLibrary.IntegrationTests
                         contentStream.Stream = new MemoryStream(Encoding.UTF8.GetBytes(path));
 
                         Folder.CreateDocument(properties, contentStream, null);
-                    }
-                    catch (Exception)
-                    {
+                    } catch (Exception) {
                     }
                 }
             }
 
-            public override List<string> GetPathList()
-            {
+            public override List<string> GetPathList() {
                 return new List<string>(PathList);
             }
 
-            public override string GetRepoName()
-            {
+            public override string GetRepoName() {
                 return RepoName;
             }
         }
