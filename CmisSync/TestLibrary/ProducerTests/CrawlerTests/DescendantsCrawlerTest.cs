@@ -143,7 +143,9 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         [Test, Category("Fast")]
         public void ConstructorWorksWithoutFsInfoFactory()
         {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>());
+            var localFolder = Mock.Of<IDirectoryInfo>(p => p.FullName == this.localRootPath);
+            var remoteFolder = Mock.Of<IFolder>(p => p.Path == this.remoteRootPath);
+            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), remoteFolder, localFolder, Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>());
         }
 
         [Test, Category("Fast")]
