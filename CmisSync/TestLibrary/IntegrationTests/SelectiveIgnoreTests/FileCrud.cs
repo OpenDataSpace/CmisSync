@@ -21,6 +21,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 {
     using System;
     using System.IO;
+    using System.Threading;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
@@ -41,12 +42,12 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("ignored");
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             folder.Refresh();
             folder.IgnoreAllChildren();
 
+            Thread.Sleep(3000);
             this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
             this.repo.Run();
 
@@ -61,7 +62,70 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             this.repo.Run();
 
             folder.Refresh();
-            Assert.Throws<CmisObjectNotFoundException>(() => this.session.GetObjectByPath(folder.Path + "/file.txt"));
+            Assert.Throws<CmisObjectNotFoundException>(() => this.session.GetObjectByPath(folder.Path + "/file.txt"), "The file shouldn't exist on the server, but it does");
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void LocalFileIsChangedInIgnoredFolder() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            var folder = this.remoteRootDir.CreateFolder("ignored");
+            var file = folder.CreateDocument("file.txt", "content");
+
+            var oldRemoteLength = file.ContentStreamLength;
+
+            this.InitializeAndRunRepo();
+
+            folder.Refresh();
+            folder.IgnoreAllChildren();
+
+            Thread.Sleep(3000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            var localFolder = this.localRootDir.GetDirectories()[0].FullName;
+            var fileInfo = new FileInfo(Path.Combine(localFolder, "file.txt"));
+            using (StreamWriter sw = fileInfo.CreateText()) {
+                sw.WriteLine("content");
+                sw.WriteLine("content");
+            }
+
+            this.WaitUntilQueueIsNotEmpty();
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            folder.Refresh();
+            file.Refresh();
+            Assert.That(file.ContentStreamLength, Is.EqualTo(oldRemoteLength));
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void LocalFileIsDeletedInIgnoredFolder() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            var folder = this.remoteRootDir.CreateFolder("ignored");
+            var file = folder.CreateDocument("file.txt", "content");
+
+            var oldRemoteLength = file.ContentStreamLength;
+
+            this.InitializeAndRunRepo();
+
+            Thread.Sleep(3000);
+            folder.Refresh();
+            folder.IgnoreAllChildren();
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            var localFolder = this.localRootDir.GetDirectories()[0].FullName;
+            var fileInfo = new FileInfo(Path.Combine(localFolder, "file.txt"));
+            fileInfo.Delete();
+
+            this.WaitUntilQueueIsNotEmpty();
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            folder.Refresh();
+            file.Refresh();
+            Assert.That(file.ContentStreamLength, Is.EqualTo(oldRemoteLength));
         }
     }
 }
