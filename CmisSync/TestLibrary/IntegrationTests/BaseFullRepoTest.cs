@@ -215,5 +215,11 @@ namespace TestLibrary.IntegrationTests
                 Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds);
             }
         }
+
+        protected void InitializeAndRunRepo(bool swallowExceptions = false) {
+            this.repo.Initialize();
+            this.repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
+            this.repo.Run();
+        }
     }
 }

@@ -74,8 +74,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             ignoredFolder.IgnoreAllChildren();
             ignoredFolder.CreateFolder("sub");
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             var folder = this.session.GetObject(ignoredFolder.Id) as IFolder;
             Assert.That(folder.AreAllChildrenIgnored(), Is.True);
@@ -93,8 +92,7 @@ ignored
 └── sub";
             string localTree = remoteTree;
             Assert.That(new FolderTree(remoteTree), Is.EqualTo(new FolderTree(ignoredFolder)));
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
             Assert.That(new FolderTree(localTree), Is.EqualTo(new FolderTree(this.localRootDir.GetDirectories()[0])));
             Thread.Sleep(3000);
             this.repo.Queue.AddEvent(new StartNextSyncEvent());
@@ -124,8 +122,7 @@ ignored
             var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
             ignoredFolder.IgnoreAllChildren();
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
 
@@ -149,8 +146,7 @@ ignored
             string folderName = "ignored";
             string newFolderName = "newName";
             var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             ignoredFolder.Refresh();
             ignoredFolder.IgnoreAllChildren();
@@ -211,8 +207,7 @@ ignored
     └── B";
             Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(tree)));
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(tree)));
 
