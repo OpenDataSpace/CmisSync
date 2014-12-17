@@ -30,11 +30,11 @@ namespace CmisSync.Lib.SelectiveIgnore
 
     using DotCMIS.Client;
 
-    public class IgnoreFlagChangeDetection : SyncEventHandler
+    public class IgnoreFlagChangeDetection : ReportingSyncEventHandler
     {
         private IIgnoredEntitiesStorage ignores;
         private IPathMatcher matcher;
-        public IgnoreFlagChangeDetection(IIgnoredEntitiesStorage ignores, IPathMatcher matcher)
+        public IgnoreFlagChangeDetection(IIgnoredEntitiesStorage ignores, IPathMatcher matcher, ISyncEventQueue queue) : base(queue)
         {
             if (ignores == null) {
                 throw new ArgumentNullException("Given ignores are null");
@@ -55,6 +55,7 @@ namespace CmisSync.Lib.SelectiveIgnore
                 if (change.Type == DotCMIS.Enums.ChangeType.Deleted) {
                     if (this.ignores.IsIgnoredId(change.ObjectId) == IgnoredState.IGNORED) {
                         this.ignores.Remove(change.ObjectId);
+                        this.Queue.AddEvent(new StartNextSyncEvent(true));
                     }
 
                     return false;
@@ -64,6 +65,7 @@ namespace CmisSync.Lib.SelectiveIgnore
                 case IgnoredState.IGNORED:
                     if (!change.CmisObject.AreAllChildrenIgnored()) {
                         this.ignores.Remove(change.ObjectId);
+                        this.Queue.AddEvent(new StartNextSyncEvent(true));
                     }
 
                     break;

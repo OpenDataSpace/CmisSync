@@ -233,6 +233,7 @@
     <Compile Include="IntegrationTests\SelectiveIgnoreTests\RenameIT.cs" />
     <Compile Include="IntegrationTests\SelectiveIgnoreTests\MoveIT.cs" />
     <Compile Include="IntegrationTests\SelectiveIgnoreTests\FileCrud.cs" />
+    <Compile Include="SelectiveIgnoreTests\IgnoreFlagChangeDetectionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

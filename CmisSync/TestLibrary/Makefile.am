@@ -12,14 +12,15 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 
 SOURCES =  \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
+	/SelectiveIgnoreTests/IgnoreFlagChangeDetectionTest.cs \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	ActiveActivitiesManagerTest.cs \
 	AlgorithmsTests/CyclicDependencies/NoCycleDetectionTests.cs \
 	AlgorithmsTests/CyclicDependencies/SimpleCycleDetectionTests.cs \
 	AlgorithmsTests/StringTarjanNode.cs \
-	AlgorithmsTests/TrajanSimpleCircleTests.cs \
 	AlgorithmsTests/TarjanSimpleLinearTests.cs \
+	AlgorithmsTests/TrajanSimpleCircleTests.cs \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
@@ -28,8 +29,8 @@ SOURCES =  \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
 	ConfigTests/ConfigurationTest.cs \
 	ConfigTests/CredentialsTest.cs \
-	ConfigTests/RepoInfoTests.cs \
 	ConfigTests/DefaultSettingsTests.cs \
+	ConfigTests/RepoInfoTests.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	ConsumerTests/SituationSolverTests/AbstractEnhancedSolverTest.cs \
@@ -147,6 +148,7 @@ SOURCES =  \
 	StreamsTests/NonClosingHashStreamTest.cs \
 	StreamsTests/OffsetStreamTest.cs \
 	StreamsTests/ProgressStreamTest.cs \
+	TestUtils/FolderTree.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIDocumentUtil.cs \
@@ -159,7 +161,6 @@ SOURCES =  \
 	TestUtils/ObservableHandlerTest.cs \
 	TestUtils/SingleStepEventQueue.cs \
 	TestUtils/SingleStepEventQueueTest.cs \
-	TestUtils/FolderTree.cs \
 	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \

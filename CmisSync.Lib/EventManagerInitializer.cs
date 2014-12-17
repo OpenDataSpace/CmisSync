@@ -188,7 +188,7 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.AddEventHandler(this.selectiveIgnoreFilter);
 
                     // Detection if any ignored object has changed its state
-                    this.ignoreChangeDetector = new IgnoreFlagChangeDetection(this.ignoredStorage, new PathMatcher.PathMatcher(this.repoInfo.LocalPath, this.repoInfo.RemotePath));
+                    this.ignoreChangeDetector = new IgnoreFlagChangeDetection(this.ignoredStorage, new PathMatcher.PathMatcher(this.repoInfo.LocalPath, this.repoInfo.RemotePath), this.Queue);
                     this.Queue.EventManager.AddEventHandler(this.ignoreChangeDetector);
                 }
 
