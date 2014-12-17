@@ -85,6 +85,7 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
             newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
             newRemoteObject.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns((IObjectId old, IObjectId current) => CreateRemoteFolderMock(id, name, path, current.Id, changetoken).Object);
+            newRemoteObject.Setup(d => d.Properties).Returns(new List<IProperty>());
             return newRemoteObject;
         }
 
