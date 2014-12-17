@@ -221,10 +221,12 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// <param name="obj">Cmis object.</param>
         public static IList<string> IgnoredDevices(this ICmisObject obj) {
             IList<string> result = new List<string>();
-            foreach (var ignoredProperty in obj.Properties) {
-                if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
-                    foreach (var device in ignoredProperty.Values) {
-                        result.Add((device as string).ToLower());
+            if (obj.Properties != null) {
+                foreach (var ignoredProperty in obj.Properties) {
+                    if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
+                        foreach (var device in ignoredProperty.Values) {
+                            result.Add((device as string).ToLower());
+                        }
                     }
                 }
             }
