@@ -38,11 +38,17 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
     public class FileTransmissionObjectsTest
     {
         private string LocalPath = null;
+        private long LocalSize = 1000;
 
         [SetUp]
         public void SetUp()
         {
             LocalPath = Path.GetTempFileName();
+            using (FileStream stream = File.OpenWrite(LocalPath))
+            {
+                byte[] content = new byte[LocalSize];
+                stream.Write(content, 0, (int)LocalSize);
+            }
         }
 
         [TearDown]
@@ -63,13 +69,14 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             remoteFile.Setup(m => m.ChangeToken).Returns("ChangeToken");
             remoteFile.Setup(m => m.LastModificationDate).Returns(File.GetLastWriteTimeUtc(LocalPath));
             var obj = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object);
-            Assert.AreEqual(LocalPath, obj.LocalPath);
             Assert.AreEqual(FileTransmissionType.UPLOAD_NEW_FILE, obj.Type);
-            Assert.AreEqual("RemoteId", obj.RemoteObjectId);
-            Assert.AreEqual("ChangeToken", obj.LastChangeToken);
+            Assert.AreEqual(LocalPath, obj.LocalPath);
+            Assert.AreEqual(LocalSize, obj.LastContentSize);
             Assert.AreEqual(null, obj.LastChecksum);
             Assert.AreEqual(null, obj.ChecksumAlgorithmName);
             Assert.AreEqual(File.GetLastWriteTimeUtc(LocalPath), obj.LastLocalWriteTimeUtc);
+            Assert.AreEqual("RemoteId", obj.RemoteObjectId);
+            Assert.AreEqual("ChangeToken", obj.LastChangeToken);
             Assert.AreEqual(File.GetLastWriteTimeUtc(LocalPath), obj.LastRemoteWriteTimeUtc);
             var obj2 = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object);
             Assert.IsTrue(obj.Equals(obj2));

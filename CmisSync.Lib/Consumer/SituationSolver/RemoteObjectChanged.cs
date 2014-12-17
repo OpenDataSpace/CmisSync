@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RemoteObjectChanged.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -55,8 +55,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public RemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
+            IFileTransmissionStorage transmissionStorage,
             ActiveActivitiesManager transmissonManager,
-            IFileSystemInfoFactory fsFactory = null) : base(session, storage)
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage)
         {
             if (transmissonManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");

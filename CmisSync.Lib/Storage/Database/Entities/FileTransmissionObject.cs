@@ -73,13 +73,15 @@ namespace CmisSync.Lib.Storage.Database.Entities
                 throw new ArgumentException("empty string", "remoteFile.Paths[0]");
             }
 
-            if (!File.Exists(localPath))
+            FileInfo file = new FileInfo(localPath);
+            if (!file.Exists)
             {
                 throw new ArgumentException(string.Format("'{0} file does not exist", localPath), "localPath");
             }
 
             Type = type;
             LocalPath = localPath;
+            LastContentSize = file.Length;
             LastLocalWriteTimeUtc = File.GetLastWriteTimeUtc(localPath);
             RemoteObjectId = remoteFile.Id;
             LastChangeToken = remoteFile.ChangeToken;
@@ -130,6 +132,8 @@ namespace CmisSync.Lib.Storage.Database.Entities
         public FileTransmissionType Type { get; set; }
 
         public string LocalPath { get; set; }
+
+        public long LastContentSize { get; set; }
 
         public byte[] LastChecksum { get; set; }
 

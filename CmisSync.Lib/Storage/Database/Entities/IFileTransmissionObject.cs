@@ -43,6 +43,11 @@ namespace CmisSync.Lib.Storage.Database.Entities
         string LocalPath { get; }
 
         /// <summary>
+        /// Gets or sets the last size of the file
+        /// </summary>
+        long LastContentSize { get; set; }
+
+        /// <summary>
         /// Gets or sets the last file content checksum for local file
         /// </summary>
         /// <value>The last file content checksum for local file</value>

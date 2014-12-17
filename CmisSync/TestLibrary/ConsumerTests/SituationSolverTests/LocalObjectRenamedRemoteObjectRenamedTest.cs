@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectRenamedRemoteObjectRenamedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -60,7 +60,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.InitializeMappedFolderOnStorage();
             var transmissionManager = new ActiveActivitiesManager();
             var fsFactory = Mock.Of<IFileSystemInfoFactory>();
-            this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, transmissionManager, fsFactory);
+            this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(this.session.Object, this.storage.Object, null, transmissionManager, fsFactory);
             this.underTest = new LocalObjectRenamedRemoteObjectRenamed(this.session.Object, this.storage.Object, this.changeSolver.Object);
         }
 

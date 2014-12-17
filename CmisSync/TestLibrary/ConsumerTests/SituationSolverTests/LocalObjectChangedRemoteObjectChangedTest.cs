@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedRemoteObjectChangedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -55,14 +55,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void ConstructorTakesSessionAndStorageAndDateSyncEnabled() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
-            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesSessionAndStorageAndDateSyncDisabled() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
-            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
+            new LocalObjectChangedRemoteObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -207,7 +207,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.manager = new ActiveActivitiesManager();
-            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, this.manager);
+            this.underTest = new LocalObjectChangedRemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager);
         }
 
         private Mock<IDocument> CreateRemoteDocument(DateTime lastRemoteModification, long contentLength, byte[] contentHash) {

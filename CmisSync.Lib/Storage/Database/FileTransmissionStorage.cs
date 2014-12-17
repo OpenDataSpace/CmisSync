@@ -131,6 +131,11 @@ namespace CmisSync.Lib.Storage.Database
 
         public void ClearObjectList()
         {
+            using (var tran = Engine.GetTransaction())
+            {
+                tran.RemoveAllKeys(FileTransmissionObjectsTable, true);
+                tran.Commit();
+            }
         }
     }
 }

@@ -51,10 +51,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta Data Storage.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">Enables the last modification date sync.</param>
+        /// <param name="transmissionStorage">File Transmission Storage.</param>
         public AbstractEnhancedSolver(
             ISession session,
-            IMetaDataStorage storage)
+            IMetaDataStorage storage,
+            IFileTransmissionStorage transmissionStorage = null)
         {
             this.Storage = storage;
             if (session == null) {
@@ -67,6 +68,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.Session = session;
             this.Storage = storage;
+            this.TransmissionStorage = transmissionStorage;
             this.ServerCanModifyDateTimes = this.Session.IsServerAbleToUpdateModificationDate();
         }
 
@@ -81,6 +83,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <value>The storage.</value>
         protected IMetaDataStorage Storage { get; private set; }
+
+        private IFileTransmissionStorage TransmissionStorage { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this cmis server can modify date times.
@@ -131,18 +135,22 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         }
 
         protected static byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent) {
-            try {
-                using (SHA1 hashAlg = new SHA1Managed()) {
-                    using (var filestream = target.Open(FileMode.Create, FileAccess.Write, FileShare.None))
-                    using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
+            using (SHA1 hashAlg = new SHA1Managed()) {
+                using (var filestream = target.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+                using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
+                    try {
                         download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
                         return hashAlg.Hash;
                     }
+                    catch (FileTransmission.AbortException ex) {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        throw;
+                    }
+                    catch (Exception ex) {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        throw;
+                    }
                 }
-            }
-            catch (Exception ex) {
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                throw;
             }
         }
 

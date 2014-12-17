@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectMovedRemoteObjectChangedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -207,11 +207,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.changeSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
+                null,
                 this.manager,
                 this.fsFactory.Object);
             var changeSolverForRenameSolver = new Mock<LocalObjectChangedRemoteObjectChanged>(
                 this.session.Object,
                 this.storage.Object,
+                null,
                 this.manager,
                 this.fsFactory.Object);
             this.renameSolver = new Mock<LocalObjectRenamedRemoteObjectChanged>(

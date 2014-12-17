@@ -209,6 +209,26 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast"), Category("FileTransmissionStorage")]
+        public void ClearObjectList()
+        {
+            var storage = new FileTransmissionStorage(Engine);
+
+            for (int i = 1; i <= 10; ++i)
+            {
+                RemoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
+                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, TempFile, RemoteFile.Object);
+                Assert.DoesNotThrow(() => storage.SaveObject(obj));
+                Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
+                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+            }
+
+            storage.ClearObjectList();
+
+            Assert.That(storage.GetObjectList().Count, Is.EqualTo(0));
+        }
+
+
+        [Test, Category("Fast"), Category("FileTransmissionStorage")]
         public void GetObjectListOnPersistedStorage()
         {
             var conf = new DBreezeConfiguration
