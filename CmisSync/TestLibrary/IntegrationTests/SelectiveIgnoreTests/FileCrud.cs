@@ -47,7 +47,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.Refresh();
             folder.IgnoreAllChildren();
 
-            Thread.Sleep(3000);
+            Thread.Sleep(5000);
             this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
             this.repo.Run();
 
@@ -78,7 +78,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.Refresh();
             folder.IgnoreAllChildren();
 
-            Thread.Sleep(3000);
+            Thread.Sleep(5000);
             this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
             this.repo.Run();
 
@@ -99,6 +99,34 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void LocalFileIsRenamedInIgnoredFolder() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            var folder = this.remoteRootDir.CreateFolder("ignored");
+            var oldName = "file.txt";
+            var file = folder.CreateDocument(oldName, "content");
+
+            this.InitializeAndRunRepo();
+
+            folder.Refresh();
+            folder.IgnoreAllChildren();
+
+            Thread.Sleep(5000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            var localFolder = this.localRootDir.GetDirectories()[0].FullName;
+            new FileInfo(Path.Combine(localFolder, oldName)).MoveTo(Path.Combine(localFolder, "anotherName.txt"));
+
+            this.WaitUntilQueueIsNotEmpty();
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            folder.Refresh();
+            file.Refresh();
+            Assert.That(file.Name, Is.EqualTo(oldName));
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void LocalFileIsDeletedInIgnoredFolder() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("ignored");
@@ -108,7 +136,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
             this.InitializeAndRunRepo();
 
-            Thread.Sleep(3000);
+            Thread.Sleep(5000);
             folder.Refresh();
             folder.IgnoreAllChildren();
 

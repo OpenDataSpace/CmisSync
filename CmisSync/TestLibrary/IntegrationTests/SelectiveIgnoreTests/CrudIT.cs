@@ -141,26 +141,6 @@ ignored
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void RenameRemoteIgnoredFolderRenamesAlsoLocalFolder() {
-            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
-            string folderName = "ignored";
-            string newFolderName = "newName";
-            var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
-            this.InitializeAndRunRepo();
-
-            ignoredFolder.Refresh();
-            ignoredFolder.IgnoreAllChildren();
-
-            ignoredFolder.Rename(newFolderName);
-
-            Thread.Sleep(3000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
-            this.repo.Run();
-
-            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
-        }
-
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void IgnoreMultipleDeviceIds() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("folder");
@@ -191,40 +171,6 @@ ignored
             folder.RemoveAllSyncIgnores();
             Assert.That(folder.AreAllChildrenIgnored(), Is.False);
             Assert.That(folder.IgnoredDevices(), Is.Empty);
-        }
-
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void MoveRemoteFolderTreeInsideIgnoredFolder() {
-            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
-            var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
-            var anotherFolderTree = this.remoteRootDir.CreateFolder("A");
-            anotherFolderTree.CreateFolder("B");
-
-            string tree = @"
-.
-├── ignored
-└── A
-    └── B";
-            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(tree)));
-
-            this.InitializeAndRunRepo();
-
-            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(tree)));
-
-            ignoredFolder.Refresh();
-            ignoredFolder.IgnoreAllChildren();
-
-            anotherFolderTree.Refresh();
-            anotherFolderTree.Move(this.remoteRootDir, ignoredFolder);
-
-            Thread.Sleep(3000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
-            this.repo.Run();
-
-            string localTree = @"
-.
-└── ignored";
-            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]

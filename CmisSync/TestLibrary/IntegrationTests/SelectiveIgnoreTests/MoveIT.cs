@@ -20,12 +20,50 @@
 namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 {
     using System;
+    using System.Threading;
+
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
+    using CmisSync.Lib.Events;
 
     using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture, Timeout(900000), TestName("MoveIT")]
     public class MoveIT : BaseFullRepoTest
     {
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void MoveRemoteFolderTreeInsideIgnoredFolder() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
+            var anotherFolderTree = this.remoteRootDir.CreateFolder("A");
+            anotherFolderTree.CreateFolder("B");
 
+            string tree = @"
+.
+├── ignored
+└── A
+    └── B";
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(tree)));
+
+            this.InitializeAndRunRepo();
+
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(tree)));
+
+            ignoredFolder.Refresh();
+            ignoredFolder.IgnoreAllChildren();
+
+            anotherFolderTree.Refresh();
+            anotherFolderTree.Move(this.remoteRootDir, ignoredFolder);
+
+            Thread.Sleep(3000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            string localTree = @"
+.
+└── ignored";
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
+        }
     }
 }

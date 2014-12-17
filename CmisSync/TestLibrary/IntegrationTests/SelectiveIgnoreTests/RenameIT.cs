@@ -20,12 +20,37 @@
 namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 {
     using System;
+    using System.Linq;
+    using System.Threading;
+
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
+    using CmisSync.Lib.Events;
 
     using NUnit.Framework;
+
+    using TestLibrary.TestUtils;
 
     [TestFixture, Timeout(900000), TestName("RenameIT")]
     public class RenameIT : BaseFullRepoTest
     {
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void RenameRemoteIgnoredFolderRenamesAlsoLocalFolder() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            string folderName = "ignored";
+            string newFolderName = "newName";
+            var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
+            this.InitializeAndRunRepo();
 
+            ignoredFolder.Refresh();
+            ignoredFolder.IgnoreAllChildren();
+
+            ignoredFolder.Rename(newFolderName);
+
+            Thread.Sleep(3000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
+        }
     }
 }
