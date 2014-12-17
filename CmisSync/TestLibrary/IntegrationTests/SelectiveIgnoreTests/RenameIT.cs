@@ -23,7 +23,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
     using NUnit.Framework;
 
-    [TestFixture, Timeout(900000), TestName("SelectiveIgnore")]
+    [TestFixture, Timeout(900000), TestName("RenameIT")]
     public class RenameIT : BaseFullRepoTest
     {
 
