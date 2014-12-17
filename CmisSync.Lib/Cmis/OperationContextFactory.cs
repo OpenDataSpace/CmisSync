@@ -95,7 +95,6 @@ namespace CmisSync.Lib.Cmis
 
         private static HashSet<string> CreateFilter(params string[] additionalElements) {
             HashSet<string> filter = new HashSet<string>();
-            filter.Add("*");
             filter.Add("cmis:objectId");
             filter.Add("cmis:name");
             filter.Add("cmis:contentStreamFileName");
@@ -104,7 +103,8 @@ namespace CmisSync.Lib.Cmis
             filter.Add("cmis:changeToken");
             filter.Add("cmis:parentId");
             filter.Add("cmis:contentStreamHash");
-            filter.Add("gds:ignoreDeviceIds");
+            filter.Add("cmis:secondaryObjectTypeIds");
+            filter.Add("gds:sync.gds:ignoreDeviceIds");
             if (additionalElements != null) {
                 foreach (var entry in additionalElements) {
                     filter.Add(entry);
