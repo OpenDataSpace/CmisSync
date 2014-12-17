@@ -152,7 +152,11 @@ namespace TestLibrary.IntegrationTests
             this.repo.Dispose();
         }
 
-        protected void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
+        protected void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue = null, int timeout = 10000) {
+            if (queue == null) {
+                queue = this.repo.SingleStepQueue;
+            }
+
             int waited = 0;
             while (queue.Queue.IsEmpty)
             {
