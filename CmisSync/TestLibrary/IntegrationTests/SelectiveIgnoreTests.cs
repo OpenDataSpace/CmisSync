@@ -55,7 +55,7 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void IgnoreRemoteFolder() {
-            this.EnsureSelectiveIgnoreSupport();
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("ignored");
 
             folder.IgnoreAllChildren();
@@ -69,7 +69,7 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void RemoteIgnoredFolderIsNotSynced() {
-            this.EnsureSelectiveIgnoreSupport();
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
             ignoredFolder.IgnoreAllChildren();
             ignoredFolder.CreateFolder("sub");
@@ -82,9 +82,9 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test, Category("Slow"), Category("SelectiveIgnore"), Timeout(60000)]
         public void RemoteFolderIsSyncedAndChangedToIgnored() {
-            this.EnsureSelectiveIgnoreSupport();
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
             var subFolder = ignoredFolder.CreateFolder("sub");
 
@@ -118,8 +118,55 @@ ignored
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void DeleteLocalFolderAfterRemoteIgnore() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            string folderName = "ignored";
+            var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
+            ignoredFolder.IgnoreAllChildren();
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
+
+            var localFolder = this.localRootDir.CreateSubdirectory(folderName);
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+
+            localFolder.Delete();
+
+            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+
+            ignoredFolder.Refresh();
+            Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).Name, Is.EqualTo("ignored"));
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void RenameRemoteIgnoredFolderRenamesAlsoLocalFolder() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            string folderName = "ignored";
+            string newFolderName = "newName";
+            var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
+            this.repo.Initialize();
+            this.repo.Run();
+
+            ignoredFolder.Refresh();
+            ignoredFolder.IgnoreAllChildren();
+
+            ignoredFolder.Rename(newFolderName);
+
+            Thread.Sleep(3000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void IgnoreMultipleDeviceIds() {
-            this.EnsureSelectiveIgnoreSupport();
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("folder");
             var anotherUuid = Guid.NewGuid();
             folder.IgnoreAllChildren(anotherUuid.ToString());
@@ -133,7 +180,7 @@ ignored
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void StopIgnoringFolderForThisDeviceId() {
-            this.EnsureSelectiveIgnoreSupport();
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("folder");
             var anotherId = Guid.NewGuid().ToString().ToLower();
             var ownId = ConfigManager.CurrentConfig.DeviceId.ToString().ToLower();
@@ -151,8 +198,43 @@ ignored
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void MoveRemoteFolderTreeInsideIgnoredFolder() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
+            var anotherFolderTree = this.remoteRootDir.CreateFolder("A");
+            anotherFolderTree.CreateFolder("B");
+
+            string tree = @"
+.
+├── ignored
+└── A
+    └── B";
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(tree)));
+
+            this.repo.Initialize();
+            this.repo.Run();
+
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(tree)));
+
+            ignoredFolder.Refresh();
+            ignoredFolder.IgnoreAllChildren();
+
+            anotherFolderTree.Refresh();
+            anotherFolderTree.Move(this.remoteRootDir, ignoredFolder);
+
+            Thread.Sleep(3000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.repo.Run();
+
+            string localTree = @"
+.
+└── ignored";
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void RemoveMultipleDeviceIds() {
-            this.EnsureSelectiveIgnoreSupport();
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var folder = this.remoteRootDir.CreateFolder("folder");
             for (int i = 1; i <= 10; i++) {
                 folder.IgnoreAllChildren(Guid.NewGuid().ToString().ToLower());
@@ -162,12 +244,6 @@ ignored
             for (int i = 9; i >= 0; i--) {
                 folder.RemoveSyncIgnore(folder.IgnoredDevices().First());
                 Assert.That(folder.IgnoredDevices().Count, Is.EqualTo(i));
-            }
-        }
-
-        private void EnsureSelectiveIgnoreSupport() {
-            if (!this.session.SupportsSelectiveIgnore()) {
-                Assert.Ignore("Selective Ignore is not available on server");
             }
         }
     }
