@@ -63,6 +63,7 @@ namespace CmisSync.Lib
         private IIgnoredEntitiesStorage ignoredStorage;
         private SelectiveIgnoreEventTransformer transformer;
         private SelectiveIgnoreFilter selectiveIgnoreFilter;
+        private IgnoreFlagChangeDetection ignoreChangeDetector;
   
         /// <summary>
         /// Initializes a new instance of the <see cref="EventManagerInitializer"/> class.
@@ -156,6 +157,10 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.transformer);
                 }
 
+                if (this.ignoreChangeDetector != null) {
+                    this.Queue.EventManager.RemoveEventHandler(this.ignoreChangeDetector);
+                }
+
                 if (this.AreChangeEventsSupported(session))
                 {
                     Logger.Info("Session supports content changes");
@@ -181,6 +186,10 @@ namespace CmisSync.Lib
                     // Filters events of ignored folders
                     this.selectiveIgnoreFilter = new SelectiveIgnoreFilter(this.ignoredStorage);
                     this.Queue.EventManager.AddEventHandler(this.selectiveIgnoreFilter);
+
+                    // Detection if any ignored object has changed its state
+                    this.ignoreChangeDetector = new IgnoreFlagChangeDetection(this.ignoredStorage, new PathMatcher.PathMatcher(this.repoInfo.LocalPath, this.repoInfo.RemotePath));
+                    this.Queue.EventManager.AddEventHandler(this.ignoreChangeDetector);
                 }
 
                 // Add remote object fetcher
