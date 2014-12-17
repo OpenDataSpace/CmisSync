@@ -29,19 +29,19 @@ namespace CmisSync.Lib.SelectiveIgnore
     public class SelectiveIgnoreEventTransformer : SyncEventHandler
     {
         private ISyncEventQueue queue;
-        private ObservableCollection<IIgnoredEntity> ignores;
+        private IIgnoredEntitiesStorage ignores;
 
-        public SelectiveIgnoreEventTransformer(ObservableCollection<IIgnoredEntity> ignores, ISyncEventQueue queue) {
+        public SelectiveIgnoreEventTransformer(IIgnoredEntitiesStorage ignores, ISyncEventQueue queue) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is empty");
             }
 
             if (ignores == null) {
-                throw new ArgumentNullException("Given ignore collection is null");
+                throw new ArgumentNullException("Given queue is empty");
             }
 
-            this.queue = queue;
             this.ignores = ignores;
+            this.queue = queue;
         }
 
         public override bool Handle(ISyncEvent e)
@@ -56,17 +56,12 @@ namespace CmisSync.Lib.SelectiveIgnore
                     return true;
                 }
             }
+
             return false;
         }
 
         private bool IsInsideIgnoredPath(string path) {
-            foreach(var ignore in this.ignores) {
-                if (path.StartsWith(ignore.LocalPath) && !path.TrimEnd(Path.DirectorySeparatorChar).Equals(ignore.LocalPath.TrimEnd(Path.DirectorySeparatorChar))) {
-                    return true;
-                }
-            }
-
-            return false;
+            return this.ignores.IsIgnoredPath(path) == IgnoredState.INHERITED;
         }
     }
 }

@@ -43,11 +43,11 @@ namespace TestLibrary.SelectiveIgnoreTests
         private readonly string ignoredLocalPath = Path.Combine(Path.GetTempPath(), "ignoredlocalpath");
         private Mock<ISyncEventQueue> queue;
         private SelectiveIgnoreEventTransformer underTest;
-        private ObservableCollection<IIgnoredEntity> ignores;
+        private Mock<IIgnoredEntitiesStorage> ignores;
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void ContructorFailsIfQueueIsNull() {
-            var ignores = new ObservableCollection<IIgnoredEntity>();
+            var ignores = Mock.Of<IIgnoredEntitiesStorage>();
             Assert.Throws<ArgumentNullException>(() => new SelectiveIgnoreEventTransformer(ignores, null));
         }
 
@@ -58,7 +58,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void ContructorTakesIgnoresAndQueue() {
-            var ignores = new ObservableCollection<IIgnoredEntity>();
+            var ignores = Mock.Of<IIgnoredEntitiesStorage>();
             new SelectiveIgnoreEventTransformer(ignores, Mock.Of<ISyncEventQueue>());
         }
 
@@ -133,11 +133,12 @@ namespace TestLibrary.SelectiveIgnoreTests
 
         private void SetupMocks() {
             this.queue = new Mock<ISyncEventQueue>();
-            this.ignores = new ObservableCollection<IIgnoredEntity>();
-            var ignoredEntity = Mock.Of<IIgnoredEntity>(i => i.LocalPath == this.ignoredLocalPath && i.ObjectId == this.ignoredFolderId);
-            this.ignores.Add(ignoredEntity);
-            this.ignores.CollectionChanged += (object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => Assert.Fail();
-            this.underTest = new SelectiveIgnoreEventTransformer(this.ignores, this.queue.Object);
+            this.ignores = new Mock<IIgnoredEntitiesStorage>();
+            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => !s.Contains(this.ignoredLocalPath)))).Returns(IgnoredState.NOT_IGNORED);
+            this.ignores.Setup(i => i.IsIgnoredPath(this.ignoredLocalPath)).Returns(IgnoredState.IGNORED);
+            this.ignores.Setup(i => i.IsIgnoredPath(It.Is<string>(s => s.StartsWith(this.ignoredLocalPath) && s != this.ignoredLocalPath))).Returns(IgnoredState.INHERITED);
+            this.ignores.Setup(i => i.IsIgnoredId(this.ignoredFolderId)).Returns(IgnoredState.IGNORED);
+            this.underTest = new SelectiveIgnoreEventTransformer(this.ignores.Object, this.queue.Object);
         }
     }
 }

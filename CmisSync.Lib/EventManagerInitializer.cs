@@ -61,6 +61,8 @@ namespace CmisSync.Lib
         private IFilterAggregator filter;
         private ActivityListenerAggregator activityListener;
         private IIgnoredEntitiesStorage ignoredStorage;
+        private SelectiveIgnoreEventTransformer transformer;
+        private SelectiveIgnoreFilter selectiveIgnoreFilter;
   
         /// <summary>
         /// Initializes a new instance of the <see cref="EventManagerInitializer"/> class.
@@ -146,6 +148,14 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.alreadyHandledFilter);
                 }
 
+                if (this.selectiveIgnoreFilter != null) {
+                    this.Queue.EventManager.RemoveEventHandler(this.selectiveIgnoreFilter);
+                }
+
+                if (this.transformer != null) {
+                    this.Queue.EventManager.RemoveEventHandler(this.transformer);
+                }
+
                 if (this.AreChangeEventsSupported(session))
                 {
                     Logger.Info("Session supports content changes");
@@ -161,6 +171,16 @@ namespace CmisSync.Lib
                     // Add Filter of already handled change events
                     this.alreadyHandledFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(this.storage, session);
                     this.Queue.EventManager.AddEventHandler(this.alreadyHandledFilter);
+                }
+
+                if (session.SupportsSelectiveIgnore()) {
+                    // Transforms events of ignored folders
+                    this.transformer = new SelectiveIgnoreEventTransformer(this.ignoredStorage, this.Queue);
+                    this.Queue.EventManager.AddEventHandler(this.transformer);
+
+                    // Filters events of ignored folders
+                    this.selectiveIgnoreFilter = new SelectiveIgnoreFilter(this.ignoredStorage);
+                    this.Queue.EventManager.AddEventHandler(this.selectiveIgnoreFilter);
                 }
 
                 // Add remote object fetcher
