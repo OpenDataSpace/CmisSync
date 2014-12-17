@@ -93,7 +93,10 @@ SOURCES =  \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
-	IntegrationTests/SelectiveIgnoreTests.cs \
+	IntegrationTests/SelectiveIgnoreTests/CrudIT.cs \
+	IntegrationTests/SelectiveIgnoreTests/FileCrud.cs \
+	IntegrationTests/SelectiveIgnoreTests/MoveIT.cs \
+	IntegrationTests/SelectiveIgnoreTests/RenameIT.cs \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	MockedServer/MockOfIAclCapabilities.cs \

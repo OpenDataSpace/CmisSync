@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SelectiveIgnoreTests.cs" company="GRAU DATA AG">
+// <copyright file="CrudIT.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,7 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
+namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 {
     using System;
     using System.IO;
@@ -46,7 +46,7 @@ namespace TestLibrary.IntegrationTests
 
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000), TestName("SelectiveIgnore")]
-    public class SelectiveIgnoreTests : BaseFullRepoTest
+    public class CrudIT : BaseFullRepoTest
     {
         [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void SelectiveIgnoreSupportTest() {

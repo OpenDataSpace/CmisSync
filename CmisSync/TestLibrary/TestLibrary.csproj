@@ -222,7 +222,6 @@
     <Compile Include="UtilsTests\BackendTest.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\SimpleCycleDetectionTests.cs" />
     <Compile Include="AlgorithmsTests\CyclicDependencies\NoCycleDetectionTests.cs" />
-    <Compile Include="IntegrationTests\SelectiveIgnoreTests.cs" />
     <Compile Include="ConfigTests\DefaultSettingsTests.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectRenamedRemoteObjectMovedTest.cs" />
     <Compile Include="EventsTests\InteractionNeededInitializationTest.cs" />
@@ -230,6 +229,10 @@
     <Compile Include="TestUtils\FolderTreeTest.cs" />
     <Compile Include="IntegrationTests\BaseFullRepoTest.cs" />
     <Compile Include="IntegrationTests\TestNameAttribute.cs" />
+    <Compile Include="IntegrationTests\SelectiveIgnoreTests\CrudIT.cs" />
+    <Compile Include="IntegrationTests\SelectiveIgnoreTests\RenameIT.cs" />
+    <Compile Include="IntegrationTests\SelectiveIgnoreTests\MoveIT.cs" />
+    <Compile Include="IntegrationTests\SelectiveIgnoreTests\FileCrud.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -281,5 +284,6 @@
     <Folder Include="MockedServer\" />
     <Folder Include="AlgorithmsTests\" />
     <Folder Include="AlgorithmsTests\CyclicDependencies\" />
+    <Folder Include="IntegrationTests\SelectiveIgnoreTests\" />
   </ItemGroup>
 </Project>
