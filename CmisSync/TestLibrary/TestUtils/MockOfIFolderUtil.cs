@@ -75,6 +75,21 @@ namespace TestLibrary.TestUtils
             folder.Setup(f => f.ChangeToken).Returns(changeToken);
         }
 
+        public static void SetupIgnore(this Mock<IFolder> folder, params string[] devices) {
+            IList<IProperty> props = new List<IProperty>();
+            if (folder.Object.Properties != null) {
+                foreach (var prop in folder.Object.Properties) {
+                    if (prop.Id != "gds:ignoreDeviceIds") {
+                        props.Add(prop);
+                    }
+                }
+            }
+
+            props.Add(Mock.Of<IProperty>(p => p.Id == "gds:ignoreDeviceIds" && p.Values == new List<object>(devices)));
+
+            folder.Setup(f => f.Properties).Returns(props);
+        }
+
         public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken") {
             var newRemoteObject = new Mock<IFolder>();
             newRemoteObject.Setup(d => d.Id).Returns(id);
