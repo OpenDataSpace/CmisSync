@@ -224,8 +224,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             if (obj.Properties != null) {
                 foreach (var ignoredProperty in obj.Properties) {
                     if (ignoredProperty.Id.Equals("gds:ignoreDeviceIds")) {
-                        foreach (var device in ignoredProperty.Values) {
-                            result.Add((device as string).ToLower());
+                        if (ignoredProperty.Values != null) {
+                            foreach (var device in ignoredProperty.Values) {
+                                result.Add((device as string).ToLower());
+                            }
                         }
                     }
                 }
