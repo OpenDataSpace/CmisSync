@@ -20,6 +20,7 @@
 namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 {
     using System;
+    using System.IO;
     using System.Linq;
     using System.Threading;
 
@@ -44,6 +45,10 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             ignoredFolder.Refresh();
             ignoredFolder.IgnoreAllChildren();
 
+            Thread.Sleep(3000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
             ignoredFolder.Rename(newFolderName);
 
             Thread.Sleep(3000);
@@ -51,6 +56,32 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
+        }
+
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        public void RenameLocalIgnoredFolderRenamesAlsoRemoteFolder() {
+            this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            string folderName = "ignored";
+            string newFolderName = "newName";
+            var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
+            this.InitializeAndRunRepo();
+
+            ignoredFolder.Refresh();
+            ignoredFolder.IgnoreAllChildren();
+
+            Thread.Sleep(3000);
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            var localFolder = this.localRootDir.GetDirectories().First();
+            localFolder.MoveTo(Path.Combine(this.localRootDir.FullName, newFolderName));
+            this.WaitUntilQueueIsNotEmpty();
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.repo.Run();
+
+            Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
+            ignoredFolder.Refresh();
+            Assert.That(ignoredFolder.Name, Is.EqualTo(newFolderName));
         }
     }
 }
