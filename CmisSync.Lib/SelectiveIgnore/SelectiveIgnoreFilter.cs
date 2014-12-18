@@ -76,8 +76,10 @@ namespace CmisSync.Lib.SelectiveIgnore
                         return true;
                     } else if (this.storage.IsIgnoredPath(path) == IgnoredState.IGNORED) {
                         var folderEvent = e as FolderEvent;
-                        if (folderEvent != null && folderEvent.Local == MetaDataChangeType.CREATED || folderEvent.Local == MetaDataChangeType.DELETED) {
-                            return true;
+                        if (folderEvent != null) {
+                            if (folderEvent.Local == MetaDataChangeType.CREATED || folderEvent.Local == MetaDataChangeType.DELETED) {
+                                return true;
+                            }
                         }
                     }
                 }
