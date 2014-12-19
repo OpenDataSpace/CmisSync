@@ -48,7 +48,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.IgnoreAllChildren();
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var localFolder = this.localRootDir.GetDirectories()[0].FullName;
@@ -58,7 +58,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             }
 
             this.WaitUntilQueueIsNotEmpty();
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             folder.Refresh();
@@ -79,7 +79,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.IgnoreAllChildren();
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var localFolder = this.localRootDir.GetDirectories()[0].FullName;
@@ -90,7 +90,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             }
 
             this.WaitUntilQueueIsNotEmpty();
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             folder.Refresh();
@@ -111,14 +111,14 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.IgnoreAllChildren();
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var localFolder = this.localRootDir.GetDirectories()[0].FullName;
             new FileInfo(Path.Combine(localFolder, oldName)).MoveTo(Path.Combine(localFolder, "anotherName.txt"));
 
             this.WaitUntilQueueIsNotEmpty();
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             folder.Refresh();
@@ -140,7 +140,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.Refresh();
             folder.IgnoreAllChildren();
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var localFolder = this.localRootDir.GetDirectories()[0].FullName;
@@ -148,7 +148,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             fileInfo.Delete();
 
             this.WaitUntilQueueIsNotEmpty();
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             folder.Refresh();

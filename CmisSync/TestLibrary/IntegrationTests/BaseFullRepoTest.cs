@@ -64,6 +64,8 @@ namespace TestLibrary.IntegrationTests
         private static dynamic config;
         private string subfolder;
 
+        protected bool ContentChangesActive { get; set; }
+
         [TestFixtureSetUp]
         public void ClassInit()
         {
@@ -88,6 +90,7 @@ namespace TestLibrary.IntegrationTests
         [SetUp]
         public void Init()
         {
+            this.ContentChangesActive = true;
             string testName = this.GetType().Name;
             object[] attributes = this.GetType().GetCustomAttributes(true);
             foreach (var attr in attributes) {
@@ -220,6 +223,14 @@ namespace TestLibrary.IntegrationTests
             this.repo.Initialize();
             this.repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
             this.repo.Run();
+        }
+
+        protected void AddStartNextSyncEvent(bool forceCrawl = false) {
+            if (!this.ContentChangesActive) {
+                forceCrawl = true;
+            }
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(forceCrawl));
         }
     }
 }

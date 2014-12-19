@@ -95,7 +95,7 @@ ignored
             this.InitializeAndRunRepo();
             Assert.That(new FolderTree(localTree), Is.EqualTo(new FolderTree(this.localRootDir.GetDirectories()[0])));
             Thread.Sleep(3000);
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             ignoredFolder.Refresh();
@@ -108,7 +108,7 @@ ignored
     └── bla";
             Assert.That(new FolderTree(remoteTree), Is.EqualTo(new FolderTree(ignoredFolder)));
             Assert.That(new FolderTree(localTree), Is.EqualTo(new FolderTree(this.localRootDir.GetDirectories()[0])));
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(true);
             this.repo.Run();
 
             Assert.That(new FolderTree(remoteTree), Is.EqualTo(new FolderTree(ignoredFolder)));
@@ -129,12 +129,12 @@ ignored
             var localFolder = this.localRootDir.CreateSubdirectory(folderName);
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
 
             localFolder.Delete();
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
 
             ignoredFolder.Refresh();
             Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).Name, Is.EqualTo("ignored"));

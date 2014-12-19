@@ -56,7 +56,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             anotherFolderTree.Move(this.remoteRootDir, ignoredFolder);
 
             Thread.Sleep(3000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             string localTree = @"
@@ -85,7 +85,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             ignoredFolder.IgnoreAllChildren();
 
             Thread.Sleep(3000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var localDirs = this.localRootDir.GetDirectories();
@@ -93,7 +93,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             var localIgnored = localDirs[0].Name == "ignored" ? localDirs[0] : localDirs[1];
             localA.MoveTo(Path.Combine(localIgnored.FullName, localA.Name));
             this.WaitUntilQueueIsNotEmpty();
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             string localTree = @"
