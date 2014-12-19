@@ -128,8 +128,7 @@ namespace CmisSync.Lib
         /// <returns>
         /// true if handled.
         /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is SuccessfulLoginEvent) {
                 var successfulLoginEvent = e as SuccessfulLoginEvent;
                 var session = successfulLoginEvent.Session;
@@ -161,8 +160,7 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.ignoreChangeDetector);
                 }
 
-                if (this.AreChangeEventsSupported(session))
-                {
+                if (this.AreChangeEventsSupported(session)) {
                     Logger.Info("Session supports content changes");
 
                     // Add Accumulator
@@ -233,8 +231,7 @@ namespace CmisSync.Lib
                     try {
                         rootFolderGuid = Guid.NewGuid();
                         localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString(), false);
-                    } catch (ExtendedAttributeException ex)
-                    {
+                    } catch (ExtendedAttributeException ex) {
                         Logger.Warn("Problem on setting Guid of the root path", ex);
                         rootFolderGuid = Guid.Empty;
                     }
@@ -265,17 +262,13 @@ namespace CmisSync.Lib
         /// <returns>
         /// <c>true</c> if this feature is available, otherwise <c>false</c>
         /// </returns>
-        private bool AreChangeEventsSupported(ISession session)
-        {
-            try
-            {
+        private bool AreChangeEventsSupported(ISession session) {
+            try {
                 return (session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
                         session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
                     (this.repoInfo.SupportedFeatures == null ||
                     this.repoInfo.SupportedFeatures.GetContentChangesSupport != false);
-            }
-            catch(NullReferenceException)
-            {
+            } catch (NullReferenceException) {
                 return false;
             }
         }
