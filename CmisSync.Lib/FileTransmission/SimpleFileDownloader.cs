@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SimpleFileDownloader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -50,13 +50,28 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
         public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
         {
-            long? fileLength = remoteDocument.ContentStreamLength;
-            DotCMIS.Data.IContentStream contentStream = remoteDocument.GetContentStream();
+            {
+                byte[] buffer = new byte[8 * 1024];
+                int len;
+                while ((len = localFileStream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    hashAlg.TransformBlock(buffer, 0, len, buffer, 0);
+                }
+            }
 
-            // Skip downloading empty content, just go on with an empty file
-            if (null == fileLength || fileLength == 0 || contentStream == null) {
+            long offset = localFileStream.Position;
+            long? fileLength = remoteDocument.ContentStreamLength;
+            if (fileLength <= offset) {
                 hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                 return;
+            }
+
+            DotCMIS.Data.IContentStream contentStream = null;
+            if (offset > 0) {
+                long remainingBytes = (long)fileLength - offset;
+                contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, remainingBytes);
+            } else {
+                contentStream = remoteDocument.GetContentStream();
             }
 
             using (ProgressStream progressStream = new ProgressStream(localFileStream, status))

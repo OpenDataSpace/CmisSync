@@ -52,6 +52,14 @@ namespace CmisSync.Lib.Storage.Database
         void SaveObject(IFileTransmissionObject obj);
 
         /// <summary>
+        /// Get the saved <c>IFileTransmissionObject</c> that has the <c>IFileTransmissionObject.RemoteObjectId</c> with <paramref name="remoteObjectId"/>
+        /// </summary>
+        /// <param name="remoteObjectId">
+        /// <c>IFileTransmissionObject.RemoteObjectId</c> value
+        /// </param>
+        IFileTransmissionObject GetObjectByRemoteObjectId(string remoteObjectId);
+
+        /// <summary>
         /// Remove any saved <c>IFileTransmissionObject</c> that has the <c>IFileTransmissionObject.RemoteObjectId</c> with <paramref name="remoteObjectId"/>
         /// </summary>
         /// <param name="remoteObjectId">

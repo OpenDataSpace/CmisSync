@@ -134,15 +134,85 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             return hash;
         }
 
-        protected static byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent) {
+        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, FileTransmissionEvent transmissionEvent)
+        {
+            if (TransmissionStorage == null) {
+                return;
+            }
+
+            TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+
+            IFileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, target, remoteDocument);
+            obj.ChecksumAlgorithmName = "SHA-1";
+            obj.LastChecksum = hash;
+
+            TransmissionStorage.SaveObject(obj);
+        }
+
+        private void LoadCacheFile(IFileInfo target, IDocument remoteDocument, IFileSystemInfoFactory fsFactory) {
+            if (TransmissionStorage == null) {
+                return;
+            }
+
+            IFileTransmissionObject obj = TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
+            if (obj == null) {
+                return;
+            }
+
+            IFileInfo localFile = fsFactory.CreateFileInfo(obj.LocalPath);
+            if (!localFile.Exists) {
+                TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
+                return;
+            }
+
+            if (obj.LastChangeToken != remoteDocument.ChangeToken || localFile.Length != obj.LastContentSize) {
+                localFile.Delete();
+                TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
+                return;
+            }
+
+            try {
+                byte[] localHash;
+                using (var f = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
+                    localHash = SHA1Managed.Create().ComputeHash(f);
+                }
+                if (!localHash.SequenceEqual(obj.LastChecksum)) {
+                    localFile.Delete();
+                    TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
+                    return;
+                }
+
+                if (target.FullName != obj.LocalPath) {
+                    if (target.Exists) {
+                        Guid? uuid = target.Uuid;
+                        if (uuid != null) {
+                            localFile.Uuid = uuid;
+                        }
+                        target.Delete();
+                    }
+                    localFile.MoveTo(target.FullName);
+                }
+                return;
+            }
+            catch (Exception ex) {
+                localFile.Delete();
+                TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
+                return;
+            }
+        }
+
+        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent, IFileSystemInfoFactory fsFactory) {
+            LoadCacheFile(target, remoteDocument, fsFactory);
+
             using (SHA1 hashAlg = new SHA1Managed()) {
-                using (var filestream = target.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+                using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                     try {
                         download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
                         return hashAlg.Hash;
                     }
                     catch (FileTransmission.AbortException ex) {
+                        SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
                     }
@@ -154,14 +224,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
         }
 
-        protected static byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager, ILog logger) {
+        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager, ILog logger) {
             // Download changes
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
             var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
-            hash = DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent);
+            hash = DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
 
             try {

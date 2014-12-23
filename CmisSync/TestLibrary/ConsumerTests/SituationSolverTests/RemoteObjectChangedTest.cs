@@ -232,7 +232,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -295,7 +295,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
 
                 this.SetupContentWithCallBack(remoteObject, newContent, fileName).Callback(
                     () =>
@@ -365,7 +365,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -427,7 +427,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(

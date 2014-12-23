@@ -23,6 +23,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database.Entities;
 
     using DBreeze;
@@ -38,7 +39,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
     {
         private DBreezeEngine engine = null;
         private string path = null;
-        private string file = null;
+        private Mock<IFileInfo> file = null;
 
         [TestFixtureSetUp]
         public void InitCustomSerializator()
@@ -53,7 +54,13 @@ namespace TestLibrary.StorageTests.DataBaseTests
         {
             this.path = Path.Combine(Path.GetTempPath(), "DBreeze");
             this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
-            this.file = Path.GetTempFileName();
+            this.file = new Mock<IFileInfo>();
+            this.file.SetupAllProperties();
+            this.file.Setup(f => f.Length).Returns(1024);
+            this.file.Setup(f => f.Name).Returns("FileTransmissionObjectsTest.file");
+            this.file.Setup(f => f.FullName).Returns(Path.Combine(Path.GetTempPath(), this.file.Object.Name));
+            this.file.Setup(f => f.Exists).Returns(true);
+            this.file.Object.LastWriteTimeUtc = DateTime.UtcNow;
         }
 
         [TearDown]
@@ -63,10 +70,6 @@ namespace TestLibrary.StorageTests.DataBaseTests
             if (Directory.Exists(this.path))
             {
                 Directory.Delete(this.path, true);
-            }
-            if (File.Exists(this.file))
-            {
-                File.Delete(this.file);
             }
         }
 
@@ -139,7 +142,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
                 var remoteFile = new Mock<DotCMIS.Client.IDocument>();
                 remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
                 remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
-                var data = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, this.file, remoteFile.Object);
+                var data = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, this.file.Object, remoteFile.Object);
                 tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>("objects", key, data);
                 Assert.That((tran.Select<string, DbCustomSerializer<FileTransmissionObject>>("objects", key).Value.Get as FileTransmissionObject).Equals(data));
             }

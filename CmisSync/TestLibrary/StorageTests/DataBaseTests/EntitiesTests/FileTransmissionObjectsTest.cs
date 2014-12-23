@@ -26,6 +26,7 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.PathMatcher;
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database.Entities;
 
     using DotCMIS.Client;
@@ -37,27 +38,23 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
     [TestFixture]
     public class FileTransmissionObjectsTest
     {
-        private string LocalPath = null;
-        private long LocalSize = 1000;
+        private Mock<IFileInfo> LocalFile;
 
         [SetUp]
         public void SetUp()
         {
-            LocalPath = Path.GetTempFileName();
-            using (FileStream stream = File.OpenWrite(LocalPath))
-            {
-                byte[] content = new byte[LocalSize];
-                stream.Write(content, 0, (int)LocalSize);
-            }
+            LocalFile = new Mock<IFileInfo>();
+            LocalFile.SetupAllProperties();
+            LocalFile.Setup(f => f.Length).Returns(1024);
+            LocalFile.Setup(f => f.Name).Returns("FileTransmissionObjectsTest.file");
+            LocalFile.Setup(f => f.FullName).Returns(Path.Combine(Path.GetTempPath(), LocalFile.Object.Name));
+            LocalFile.Setup(f => f.Exists).Returns(true);
+            LocalFile.Object.LastWriteTimeUtc = DateTime.UtcNow;
         }
 
         [TearDown]
         public void TearDown()
         {
-            if (File.Exists(LocalPath))
-            {
-                File.Delete(LocalPath);
-            }
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
@@ -67,18 +64,18 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
             remoteFile.Setup(m => m.Id).Returns("RemoteId");
             remoteFile.Setup(m => m.ChangeToken).Returns("ChangeToken");
-            remoteFile.Setup(m => m.LastModificationDate).Returns(File.GetLastWriteTimeUtc(LocalPath));
-            var obj = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object);
+            remoteFile.Setup(m => m.LastModificationDate).Returns(LocalFile.Object.LastWriteTimeUtc);
+            var obj = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object);
             Assert.AreEqual(FileTransmissionType.UPLOAD_NEW_FILE, obj.Type);
-            Assert.AreEqual(LocalPath, obj.LocalPath);
-            Assert.AreEqual(LocalSize, obj.LastContentSize);
+            Assert.AreEqual(LocalFile.Object.FullName, obj.LocalPath);
+            Assert.AreEqual(LocalFile.Object.Length, obj.LastContentSize);
             Assert.AreEqual(null, obj.LastChecksum);
             Assert.AreEqual(null, obj.ChecksumAlgorithmName);
-            Assert.AreEqual(File.GetLastWriteTimeUtc(LocalPath), obj.LastLocalWriteTimeUtc);
+            Assert.AreEqual(LocalFile.Object.LastWriteTimeUtc, obj.LastLocalWriteTimeUtc);
             Assert.AreEqual("RemoteId", obj.RemoteObjectId);
             Assert.AreEqual("ChangeToken", obj.LastChangeToken);
-            Assert.AreEqual(File.GetLastWriteTimeUtc(LocalPath), obj.LastRemoteWriteTimeUtc);
-            var obj2 = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object);
+            Assert.AreEqual(LocalFile.Object.LastWriteTimeUtc, obj.LastRemoteWriteTimeUtc);
+            var obj2 = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object);
             Assert.IsTrue(obj.Equals(obj2));
 
             obj.ChecksumAlgorithmName = "SHA1";
@@ -103,60 +100,29 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
-        public void ConstructorThrowsExceptionIfLocalPathIsInvalid()
+        public void ConstructorThrowsExceptionIfLocalFileIsInvalid()
         {
-            //Local path is null
+            //Local file is null
             Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, null, Mock.Of<IDocument>()));
 
-            //Local path is empty
-            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, string.Empty, Mock.Of<IDocument>()));
+            //Local file does not exist
+            LocalFile.Setup(f => f.Exists).Returns(false);
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, Mock.Of<IDocument>()));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionObjects")]
         public void ConstructorThrowsExceptionIfRemoteFileIsInvalid()
         {
             //Remote file is null
-            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, null));
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, null));
 
             //RemoteObjectId for remote file is null
             var remoteFile = new Mock<IDocument>();
-            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object));
+            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object));
 
             //RemoteObjectId for remote file is empty
             remoteFile.Setup(m => m.Id).Returns(string.Empty);
-            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object));
-
-            //Paths for remote file is null
-            remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
-            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object));
-
-            //Paths for remote file is zero size
-            remoteFile.Setup(m => m.Paths).Returns(new List<string>());
-            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object));
-
-            //Paths[0] for remote file is null
-            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { null });
-            Assert.Throws<ArgumentNullException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object));
-
-            //Paths[0] for remote file is empty
-            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { string.Empty });
-            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalPath, remoteFile.Object));
-        }
-
-        [Test, Category("Fast"), Category("FileTransmissionObjects")]
-        public void ConstructorThrowsExceptionIfLocalPathIsNotFile()
-        {
-            var remoteFile = new Mock<IDocument>();
-            remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
-            remoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
-
-            //Local path does not exist
-            string localPath = LocalPath + ".NoExist";
-            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, localPath, remoteFile.Object));
-
-            //Local path is a directory
-            localPath = Path.GetDirectoryName(LocalPath);
-            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, localPath, remoteFile.Object));
+            Assert.Throws<ArgumentException>(() => new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object));
         }
     }
 }

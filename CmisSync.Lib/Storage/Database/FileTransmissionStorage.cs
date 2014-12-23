@@ -111,6 +111,19 @@ namespace CmisSync.Lib.Storage.Database
             }
         }
 
+        public IFileTransmissionObject GetObjectByRemoteObjectId(string remoteObjectId)
+        {
+            using (var tran = Engine.GetTransaction())
+            {
+                DbCustomSerializer<FileTransmissionObject> value = tran.Select<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, remoteObjectId).Value;
+                if (value == null)
+                {
+                    return null;
+                }
+                return value.Get;
+            }
+        }
+
         public void RemoveObjectByRemoteObjectId(string remoteObjectId)
         {
             if (remoteObjectId == null)

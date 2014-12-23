@@ -26,6 +26,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     using DotCMIS.Client;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Storage.FileSystem;
 
     /// <summary>
     /// Implementation of <c>IFileTransmissionObject</c>
@@ -33,15 +34,15 @@ namespace CmisSync.Lib.Storage.Database.Entities
     [Serializable]
     public class FileTransmissionObject : IFileTransmissionObject
     {
-        public FileTransmissionObject(FileTransmissionType type, string localPath, IDocument remoteFile)
+        public FileTransmissionObject(FileTransmissionType type, IFileInfo localFile, IDocument remoteFile)
         {
-            if (localPath == null)
+            if (localFile == null)
             {
-                throw new ArgumentNullException("localPath");
+                throw new ArgumentNullException("localFile");
             }
-            if (string.IsNullOrEmpty(localPath))
+            if (!localFile.Exists)
             {
-                throw new ArgumentException("empty string", "localPath");
+                throw new ArgumentException(string.Format("'{0} file does not exist", localFile.FullName), "localFile");
             }
 
             if (remoteFile == null)
@@ -56,33 +57,11 @@ namespace CmisSync.Lib.Storage.Database.Entities
             {
                 throw new ArgumentException("empty string", "remoteFile.Id");
             }
-            if (remoteFile.Paths == null)
-            {
-                throw new ArgumentNullException("remoteFile.Paths");
-            }
-            if (remoteFile.Paths.Count == 0)
-            {
-                throw new ArgumentException("zero size", "remoteFile.Paths");
-            }
-            if (remoteFile.Paths[0] == null)
-            {
-                throw new ArgumentNullException("remoteFile.Paths[0]");
-            }
-            if (string.IsNullOrEmpty(remoteFile.Paths[0]))
-            {
-                throw new ArgumentException("empty string", "remoteFile.Paths[0]");
-            }
-
-            FileInfo file = new FileInfo(localPath);
-            if (!file.Exists)
-            {
-                throw new ArgumentException(string.Format("'{0} file does not exist", localPath), "localPath");
-            }
 
             Type = type;
-            LocalPath = localPath;
-            LastContentSize = file.Length;
-            LastLocalWriteTimeUtc = File.GetLastWriteTimeUtc(localPath);
+            LocalPath = localFile.FullName;
+            LastContentSize = localFile.Length;
+            LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
             RemoteObjectId = remoteFile.Id;
             LastChangeToken = remoteFile.ChangeToken;
             LastRemoteWriteTimeUtc = remoteFile.LastModificationDate;

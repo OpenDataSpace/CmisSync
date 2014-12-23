@@ -24,6 +24,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
 
@@ -38,7 +39,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
     {
         private DBreezeEngine Engine;
         private string DBreezePath = null;
-        private string TempFile = null;
+        private Mock<IFileInfo> LocalFile;
         private Mock<DotCMIS.Client.IDocument> RemoteFile;
 
         [SetUp]
@@ -48,10 +49,16 @@ namespace TestLibrary.StorageTests.DataBaseTests
 
             DBreezePath = Path.Combine(Path.GetTempPath(), "FileTransmissionStorageTest-DBreeze");
 
-            TempFile = Path.GetTempFileName();
+            LocalFile = new Mock<IFileInfo>();
+            LocalFile.SetupAllProperties();
+            LocalFile.Setup(f => f.Length).Returns(1024);
+            LocalFile.Setup(f => f.Name).Returns("FileTransmissionStorageTest.file");
+            LocalFile.Setup(f => f.FullName).Returns(Path.Combine(Path.GetTempPath(), LocalFile.Object.Name));
+            LocalFile.Setup(f => f.Exists).Returns(true);
+            LocalFile.Object.LastWriteTimeUtc = DateTime.UtcNow;
 
             RemoteFile = new Mock<DotCMIS.Client.IDocument>();
-            RemoteFile.Setup(m => m.LastModificationDate).Returns(File.GetLastWriteTimeUtc(TempFile));
+            RemoteFile.Setup(m => m.LastModificationDate).Returns(LocalFile.Object.LastWriteTimeUtc);
             RemoteFile.Setup(m => m.Paths).Returns(new List<string>() { "/RemoteFile" });
             RemoteFile.Setup(m => m.ChangeToken).Returns("ChangeToken");
         }
@@ -63,10 +70,6 @@ namespace TestLibrary.StorageTests.DataBaseTests
             if (Directory.Exists(DBreezePath))
             {
                 Directory.Delete(DBreezePath, true);
-            }
-            if (File.Exists(TempFile))
-            {
-                File.Delete(TempFile);
             }
         }
 
@@ -122,6 +125,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
             //  argument should be FileTransmissionObject 
             obj.Setup(m => m.RemoteObjectId).Returns("RemoteObjectId");
             Assert.Throws<ArgumentException>(() => storage.SaveObject(obj.Object));
+            Assert.That(storage.GetObjectList().Count, Is.EqualTo(0));
         }
 
         [Test, Category("Fast"), Category("FileTransmissionStorage")]
@@ -132,15 +136,17 @@ namespace TestLibrary.StorageTests.DataBaseTests
             for (int i = 1; i <= 10; ++i)
             {
                 RemoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
-                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, TempFile, RemoteFile.Object);
+                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, RemoteFile.Object);
                 Assert.DoesNotThrow(() => storage.SaveObject(obj));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
-                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == LocalFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+                Assert.That(storage.GetObjectByRemoteObjectId("RemoteObjectId" + i.ToString()), Is.Not.Null);
             }
 
             for (int i = 1; i <= 10; ++i)
             {
-                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == LocalFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+                Assert.That(storage.GetObjectByRemoteObjectId("RemoteObjectId" + i.ToString()), Is.Not.Null);
             }
         }
 
@@ -148,14 +154,15 @@ namespace TestLibrary.StorageTests.DataBaseTests
         public void SaveObjectBehaviorOverride()
         {
             var storage = new FileTransmissionStorage(Engine);
+            RemoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
 
             for (int i = 1; i <= 10; ++i)
             {
-                RemoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
-                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, TempFile, RemoteFile.Object);
+                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, RemoteFile.Object);
                 Assert.DoesNotThrow(() => storage.SaveObject(obj));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(1));
-                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId"), Is.Not.Null);
+                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == LocalFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId"), Is.Not.Null);
+                Assert.That(storage.GetObjectByRemoteObjectId("RemoteObjectId"), Is.Not.Null);
             }
         }
 
@@ -177,17 +184,17 @@ namespace TestLibrary.StorageTests.DataBaseTests
             for (int i = 1; i <= 10; ++i)
             {
                 RemoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
-                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, TempFile, RemoteFile.Object);
+                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, RemoteFile.Object);
                 Assert.DoesNotThrow(() => storage.SaveObject(obj));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
-                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == LocalFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
             }
 
             for (int i = 1; i <= 10; ++i)
             {
                 Assert.DoesNotThrow(() => storage.RemoveObjectByRemoteObjectId("RemoteObjectId" + i.ToString()));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(10 - i));
-                Assert.Throws<InvalidOperationException>(() => storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()));
+                Assert.Throws<InvalidOperationException>(() => storage.GetObjectList().First(foo => foo.LocalPath == LocalFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()));
             }
         }
 
@@ -197,7 +204,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
             var storage = new FileTransmissionStorage(Engine);
 
             RemoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
-            var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, TempFile, RemoteFile.Object);
+            var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, RemoteFile.Object);
             Assert.DoesNotThrow(() => storage.SaveObject(obj));
             Assert.That(storage.GetObjectList().Count, Is.EqualTo(1));
 
@@ -216,10 +223,10 @@ namespace TestLibrary.StorageTests.DataBaseTests
             for (int i = 1; i <= 10; ++i)
             {
                 RemoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
-                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, TempFile, RemoteFile.Object);
+                var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, RemoteFile.Object);
                 Assert.DoesNotThrow(() => storage.SaveObject(obj));
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
-                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+                Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == LocalFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
             }
 
             storage.ClearObjectList();
@@ -243,10 +250,10 @@ namespace TestLibrary.StorageTests.DataBaseTests
                 for (int i = 1; i <= 10; ++i)
                 {
                     RemoteFile.Setup(m => m.Id).Returns("RemoteObjectId" + i.ToString());
-                    var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, TempFile, RemoteFile.Object);
+                    var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, RemoteFile.Object);
                     Assert.DoesNotThrow(() => storage.SaveObject(obj));
                     Assert.That(storage.GetObjectList().Count, Is.EqualTo(i));
-                    Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+                    Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == LocalFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
                 }
             }
 
@@ -255,7 +262,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
                 var storage = new FileTransmissionStorage(engine);
                 for (int i = 1; i <= 10; ++i)
                 {
-                    Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == TempFile && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
+                    Assert.That(storage.GetObjectList().First(foo => foo.LocalPath == LocalFile.Object.FullName && foo.RemoteObjectId == "RemoteObjectId" + i.ToString()), Is.Not.Null);
                 }
                 Assert.That(storage.GetObjectList().Count, Is.EqualTo(10));
             }
