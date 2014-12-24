@@ -51,6 +51,7 @@ namespace CmisSync.Lib.FileTransmission
         public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
         {
             {
+                localFileStream.Seek(0, SeekOrigin.Begin);
                 byte[] buffer = new byte[8 * 1024];
                 int len;
                 while ((len = localFileStream.Read(buffer, 0, buffer.Length)) > 0)
@@ -74,8 +75,8 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream = remoteDocument.GetContentStream();
             }
 
-            using (ProgressStream progressStream = new ProgressStream(localFileStream, status))
-            using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
+            using (CryptoStream hashstream = new CryptoStream(localFileStream, hashAlg, CryptoStreamMode.Write))
+            using (ProgressStream progressStream = new ProgressStream(hashstream, status))
             using (Stream remoteStream = contentStream.Stream) {
                 status.ReportProgress(new TransmissionProgressEventArgs {
                     Length = remoteDocument.ContentStreamLength,
@@ -91,8 +92,8 @@ namespace CmisSync.Lib.FileTransmission
                             throw new ObjectDisposedException(status.Path);
                         }
 
-                        hashstream.Write(buffer, 0, len);
-                        hashstream.Flush();
+                        progressStream.Write(buffer, 0, len);
+                        progressStream.Flush();
                     }
                 }
             }

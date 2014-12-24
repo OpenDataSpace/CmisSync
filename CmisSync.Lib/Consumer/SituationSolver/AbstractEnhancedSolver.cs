@@ -140,8 +140,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 return;
             }
 
-            TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
-
             IFileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, target, remoteDocument);
             obj.ChecksumAlgorithmName = "SHA-1";
             obj.LastChecksum = hash;
@@ -149,26 +147,24 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             TransmissionStorage.SaveObject(obj);
         }
 
-        private void LoadCacheFile(IFileInfo target, IDocument remoteDocument, IFileSystemInfoFactory fsFactory) {
+        private bool LoadCacheFile(IFileInfo target, IDocument remoteDocument, IFileSystemInfoFactory fsFactory) {
             if (TransmissionStorage == null) {
-                return;
+                return false;
             }
 
             IFileTransmissionObject obj = TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
             if (obj == null) {
-                return;
+                return false;
             }
 
             IFileInfo localFile = fsFactory.CreateFileInfo(obj.LocalPath);
             if (!localFile.Exists) {
-                TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
-                return;
+                return false;
             }
 
             if (obj.LastChangeToken != remoteDocument.ChangeToken || localFile.Length != obj.LastContentSize) {
                 localFile.Delete();
-                TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
-                return;
+                return false;
             }
 
             try {
@@ -178,8 +174,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
                 if (!localHash.SequenceEqual(obj.LastChecksum)) {
                     localFile.Delete();
-                    TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
-                    return;
+                    return false;
                 }
 
                 if (target.FullName != obj.LocalPath) {
@@ -192,23 +187,29 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     }
                     localFile.MoveTo(target.FullName);
                 }
-                return;
+                return true;
             }
             catch (Exception ex) {
                 localFile.Delete();
-                TransmissionStorage.RemoveObjectByRemoteObjectId(obj.RemoteObjectId);
-                return;
+                return false;
             }
         }
 
         protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent, IFileSystemInfoFactory fsFactory) {
-            LoadCacheFile(target, remoteDocument, fsFactory);
+            if (!LoadCacheFile(target, remoteDocument, fsFactory)) {
+                if (target.Exists) {
+                    target.Delete();
+                }
+            }
 
             using (SHA1 hashAlg = new SHA1Managed()) {
                 using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
                 using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                     try {
                         download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        if (TransmissionStorage != null) {
+                            TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+                        }
                         return hashAlg.Hash;
                     }
                     catch (FileTransmission.AbortException ex) {
