@@ -158,6 +158,8 @@ namespace CmisSync.Lib.Cmis
 
         private IFileSystemInfoFactory fileSystemFactory;
 
+        private ActivityListenerAggregator activityListener;
+
         static Repository()
         {
             DBreezeInitializerSingleton.Init();
@@ -190,6 +192,7 @@ namespace CmisSync.Lib.Cmis
             }
 
             this.fileSystemFactory = new FileSystemInfoFactory();
+            this.activityListener = activityListener;
 
             // Initialize local variables
             this.RepoInfo = repoInfo;
@@ -377,6 +380,26 @@ namespace CmisSync.Lib.Cmis
             {
                 if (disposing)
                 {
+                    bool transmissionRun = false;
+                    do
+                    {
+                        transmissionRun = false;
+                        List<FileTransmissionEvent> transmissionEvents = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
+                        foreach (FileTransmissionEvent transmissionEvent in transmissionEvents)
+                        {
+                            string localFolder = this.RepoInfo.LocalPath;
+                            if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString()))
+                            {
+                                localFolder = localFolder + System.IO.Path.DirectorySeparatorChar;
+                            }
+                            if (transmissionEvent.Path.StartsWith(localFolder))
+                            {
+                                transmissionRun = true;
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
+                            }
+                        }
+                    } while (transmissionRun);
+
                     this.connectionScheduler.Dispose();
                     this.Scheduler.Dispose();
                     this.WatcherProducer.Dispose();
