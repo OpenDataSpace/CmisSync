@@ -64,10 +64,16 @@ namespace TestLibrary.TestUtils
             foreach (var child in folder.GetChildren()) {
                 if (child is IFolder) {
                     this.Children.Add(new FolderTree(child as IFolder));
+                } else if (child is IDocument) {
+                    this.Children.Add(new FolderTree(child as IDocument));
                 }
             }
 
             this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
+        }
+
+        private FolderTree(IDocument doc) {
+            this.Name = doc.Name;
         }
 
         public FolderTree(IDirectoryInfo dir, string name = null) {
@@ -79,13 +85,25 @@ namespace TestLibrary.TestUtils
             this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
         }
 
+        private FolderTree(IFileInfo file) {
+            this.Name = file.Name;
+        }
+
         public FolderTree(DirectoryInfo dir, string name = null) {
             this.Name = name ?? dir.Name;
-            foreach (var child in dir.GetDirectories()) {
-                this.Children.Add(new FolderTree(child));
+            foreach (var child in dir.GetFileSystemInfos()) {
+                if (child is FileInfo) {
+                    this.Children.Add(new FolderTree(child as FileInfo));
+                } else if (child is DirectoryInfo) {
+                    this.Children.Add(new FolderTree(child as DirectoryInfo));
+                }
             }
 
             this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
+        }
+
+        private FolderTree(FileInfo file) {
+            this.Name = file.Name;
         }
 
         public override string ToString()
