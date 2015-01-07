@@ -97,7 +97,7 @@ namespace TestLibrary.IntegrationTests
 
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(true, null, true);
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(0));
@@ -143,7 +143,7 @@ namespace TestLibrary.IntegrationTests
             remoteFolder.Refresh();
             remoteFolder.Rename("Dog", true);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
 
@@ -162,7 +162,7 @@ namespace TestLibrary.IntegrationTests
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
             Thread.Sleep(5000);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
 
             this.repo.Run();
 
@@ -183,7 +183,7 @@ namespace TestLibrary.IntegrationTests
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
             Thread.Sleep(30000);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
 
             this.repo.Run();
 
@@ -404,7 +404,7 @@ namespace TestLibrary.IntegrationTests
             doc.Refresh();
             doc.DeleteContentStream(true);
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
 
             var children = this.localRootDir.GetFiles();
@@ -429,7 +429,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(5000);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
 
             this.repo.Run();
 
@@ -446,10 +446,10 @@ namespace TestLibrary.IntegrationTests
             var doc = this.remoteRootDir.CreateDocument(fileName, content);
 
             this.InitializeAndRunRepo();
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
             Thread.Sleep(5000);
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             content += content;
@@ -458,7 +458,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(5000);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
 
             this.repo.Run();
 
@@ -480,7 +480,7 @@ namespace TestLibrary.IntegrationTests
             doc.Refresh();
             doc.SetContent(content);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
 
             this.repo.Run();
 
@@ -559,7 +559,7 @@ namespace TestLibrary.IntegrationTests
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
@@ -583,7 +583,7 @@ namespace TestLibrary.IntegrationTests
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(localName));
@@ -594,7 +594,7 @@ namespace TestLibrary.IntegrationTests
             this.remoteRootDir.GetChildren().First().Rename(localName);
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             // Conflict is solved
@@ -604,7 +604,7 @@ namespace TestLibrary.IntegrationTests
             this.remoteRootDir.GetChildren().First().Rename(remoteName);
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.SingleStepQueue.SwallowExceptions = false;
             this.repo.Run();
 
@@ -625,7 +625,7 @@ namespace TestLibrary.IntegrationTests
             folder.Move(source, target);
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var localSource = this.localRootDir.GetDirectories(oldParentName).First();
@@ -758,7 +758,7 @@ namespace TestLibrary.IntegrationTests
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
 
             document = this.remoteRootDir.GetChildren().First() as IDocument;
@@ -783,7 +783,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             document.Refresh();
@@ -792,7 +792,7 @@ namespace TestLibrary.IntegrationTests
             document.Rename(newFileName);
 
             Thread.Sleep(5000);
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             document = this.remoteRootDir.GetChildren().First() as IDocument;
@@ -826,7 +826,7 @@ namespace TestLibrary.IntegrationTests
             folder.Rename(newFolderName);
             this.localRootDir.GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newFolderName));
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
@@ -847,10 +847,10 @@ namespace TestLibrary.IntegrationTests
             this.InitializeAndRunRepo();
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var children = this.remoteRootDir.GetChildren();
@@ -862,7 +862,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "ContentStream not set correctly");
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             doc.Refresh();
@@ -884,7 +884,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(5000);
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
@@ -914,7 +914,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(5000);
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
@@ -951,7 +951,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(5000);
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
@@ -990,7 +990,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(500);
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(fileNames.Count));
@@ -1028,7 +1028,7 @@ namespace TestLibrary.IntegrationTests
             Thread.Sleep(500);
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
@@ -1052,7 +1052,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(500);
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             this.remoteRootDir.Refresh();
@@ -1081,7 +1081,7 @@ namespace TestLibrary.IntegrationTests
             }
 
             Thread.Sleep(500);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             this.remoteRootDir.Refresh();
@@ -1108,7 +1108,7 @@ namespace TestLibrary.IntegrationTests
             folder.Rename(newFolderName);
             Thread.Sleep(5000);
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             folder.Refresh();
@@ -1148,7 +1148,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             this.localRootDir.GetFiles().First().Delete();
@@ -1178,7 +1178,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             doc.Refresh();
@@ -1232,7 +1232,7 @@ namespace TestLibrary.IntegrationTests
             new DirectoryInfo(fullName1 + "_renamed").MoveTo(fullName2);
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
 
@@ -1265,7 +1265,8 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void DoNotTransferDataIfLocalAndRemoteFilesAreEqual() {
+        public void DoNotTransferDataIfLocalAndRemoteFilesAreEqual([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
@@ -1286,7 +1287,7 @@ namespace TestLibrary.IntegrationTests
                 Assert.Fail("There should be no transmission, but a new transmission object is added");
             };
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles()[0].Length, Is.EqualTo(content.Length));

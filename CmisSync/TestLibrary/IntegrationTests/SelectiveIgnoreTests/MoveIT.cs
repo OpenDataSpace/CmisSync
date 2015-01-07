@@ -34,7 +34,8 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
     public class MoveIT : BaseFullRepoTest
     {
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void MoveRemoteFolderTreeInsideIgnoredFolder() {
+        public void MoveRemoteFolderTreeInsideIgnoredFolder([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
             var anotherFolderTree = this.remoteRootDir.CreateFolder("A");
@@ -66,7 +67,8 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void MoveLocalFolderTreeInsideIgnoredFolder() {
+        public void MoveLocalFolderTreeInsideIgnoredFolder([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
             var anotherFolderTree = this.remoteRootDir.CreateFolder("A");

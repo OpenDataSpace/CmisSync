@@ -82,7 +82,8 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore"), Timeout(60000)]
-        public void RemoteFolderIsSyncedAndChangedToIgnored() {
+        public void RemoteFolderIsSyncedAndChangedToIgnored([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
             var subFolder = ignoredFolder.CreateFolder("sub");
@@ -116,7 +117,8 @@ ignored
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void DeleteLocalFolderAfterRemoteIgnore() {
+        public void DeleteLocalFolderAfterRemoteIgnore([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             string folderName = "ignored";
             var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);

@@ -90,7 +90,6 @@ namespace TestLibrary.IntegrationTests
         [SetUp]
         public void Init()
         {
-            this.ContentChangesActive = true;
             string testName = this.GetType().Name;
             object[] attributes = this.GetType().GetCustomAttributes(true);
             foreach (var attr in attributes) {

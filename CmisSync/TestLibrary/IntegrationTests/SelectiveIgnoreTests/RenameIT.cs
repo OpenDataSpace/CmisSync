@@ -35,7 +35,8 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
     public class RenameIT : BaseFullRepoTest
     {
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void RenameRemoteIgnoredFolderRenamesAlsoLocalFolder() {
+        public void RenameRemoteIgnoredFolderRenamesAlsoLocalFolder([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             string folderName = "ignored";
             string newFolderName = "newName";
@@ -59,8 +60,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void RenameLocalIgnoredFolderRenamesAlsoRemoteFolder() {
+        public void RenameLocalIgnoredFolderRenamesAlsoRemoteFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            this.ContentChangesActive = contentChanges;
             string folderName = "ignored";
             string newFolderName = "newName";
             var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
@@ -85,7 +87,8 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore"), Ignore("TODO")]
-        public void RenameLocalFolderToIgnoredRemoteFolderName() {
+        public void RenameLocalFolderToIgnoredRemoteFolderName([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             string folderName = "ignored";
             var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);

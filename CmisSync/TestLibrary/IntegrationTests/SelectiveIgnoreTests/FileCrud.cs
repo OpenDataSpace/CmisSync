@@ -38,8 +38,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
     public class FileCrud : BaseFullRepoTest
     {
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void LocalFileIsCreatedInIgnoredFolder() {
+        public void LocalFileIsCreatedInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            this.ContentChangesActive = contentChanges;
             var folder = this.remoteRootDir.CreateFolder("ignored");
 
             this.InitializeAndRunRepo();
@@ -66,8 +67,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void LocalFileIsChangedInIgnoredFolder() {
+        public void LocalFileIsChangedInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            this.ContentChangesActive = contentChanges;
             var folder = this.remoteRootDir.CreateFolder("ignored");
             var file = folder.CreateDocument("file.txt", "content");
 
@@ -99,8 +101,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void LocalFileIsRenamedInIgnoredFolder() {
+        public void LocalFileIsRenamedInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            this.ContentChangesActive = contentChanges;
             var folder = this.remoteRootDir.CreateFolder("ignored");
             var oldName = "file.txt";
             var file = folder.CreateDocument(oldName, "content");
@@ -127,8 +130,9 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void LocalFileIsDeletedInIgnoredFolder() {
+        public void LocalFileIsDeletedInIgnoredFolder([Values(true, false)]bool contentChanges) {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
+            this.ContentChangesActive = contentChanges;
             var folder = this.remoteRootDir.CreateFolder("ignored");
             var file = folder.CreateDocument("file.txt", "content");
 
