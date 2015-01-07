@@ -186,6 +186,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         target.Delete();
                     }
                     localFile.MoveTo(target.FullName);
+                    target.Refresh();
                 }
                 return true;
             }
@@ -213,6 +214,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         return hashAlg.Hash;
                     }
                     catch (FileTransmission.AbortException ex) {
+                        target.Refresh();
                         SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
