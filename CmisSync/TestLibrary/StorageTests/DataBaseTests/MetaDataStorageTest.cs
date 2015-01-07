@@ -411,6 +411,22 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
+        public void GetRemotePathWithCorrectSlashes()
+        {
+            var matcher = new Mock<IPathMatcher>();
+            matcher.Setup(m => m.RemoteTargetRootPath).Returns("/");
+            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            var remoteRootFolder = new MappedObject("/", "rootId", MappedObjectType.Folder, null, null);
+            var remoteFolder = new MappedObject("remoteFolder", "remoteId", MappedObjectType.Folder, "rootId", null);
+            storage.SaveMappedObject(remoteRootFolder);
+            storage.SaveMappedObject(remoteFolder);
+
+            string remotePath = storage.GetRemotePath(remoteFolder);
+
+            Assert.That(remotePath, Is.EqualTo("/remoteFolder"));
+        }
+
+        [Test, Category("Fast")]
         public void FindRootFolder()
         {
             string id = "id";

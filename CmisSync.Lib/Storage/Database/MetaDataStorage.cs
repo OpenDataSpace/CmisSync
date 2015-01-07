@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Storage.Database
     using System.Diagnostics;
     using System.IO;
     using System.Text;
+    using System.Text.RegularExpressions;
 
     using CmisSync.Lib.PathMatcher;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -46,6 +47,8 @@ namespace CmisSync.Lib.Storage.Database
         private static readonly string ChangeLogTokenKey = "ChangeLogToken";
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(MetaDataStorage));
+
+        private readonly Regex slashRegex = new Regex(@"[/]{2,}", RegexOptions.None);
 
         /// <summary>
         /// The db engine.
@@ -326,14 +329,14 @@ namespace CmisSync.Lib.Storage.Database
             using(var tran = this.engine.GetTransaction())
             {
                 string[] segments = this.GetRelativePathSegments(tran, id);
-                string path = this.matcher.RemoteTargetRootPath;
-                foreach(var name in segments) {
-                    path += name.StartsWith("/") ? name : "/" + name;
+                StringBuilder pathBuilder = new StringBuilder(this.matcher.RemoteTargetRootPath);
+                foreach (var name in segments) {
+                    pathBuilder.Append("/").Append(name);
                 }
 
                 watch.Stop();
                 Logger.Debug(string.Format("Method GetRemotePath returned after {0} ms", watch.ElapsedMilliseconds));
-                return path.Replace("//", "/");
+                return this.slashRegex.Replace(pathBuilder.ToString(), @"/");
             }
         }
 
@@ -353,12 +356,9 @@ namespace CmisSync.Lib.Storage.Database
             using(var tran = this.engine.GetTransaction())
             {
                 string[] segments = this.GetRelativePathSegments(tran, id);
-                if(segments.Length > 0 && segments[0].Equals("/")) {
+                if (segments.Length > 0 && segments[0].Equals("/")) {
                     string[] temp = new string[segments.Length - 1];
-                    for (int i = 1; i < segments.Length; i++) {
-                        temp[i - 1] = segments[i];
-                    }
-
+                    Array.Copy(segments, 1, temp, 0, segments.Length - 1);
                     segments = temp;
                 }
 
@@ -590,7 +590,7 @@ namespace CmisSync.Lib.Storage.Database
                 }
             }
 
-            if(root == null) {
+            if (root == null) {
                 return null;
             }
 
