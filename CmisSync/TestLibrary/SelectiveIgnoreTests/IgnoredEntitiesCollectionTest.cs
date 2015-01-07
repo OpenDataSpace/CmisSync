@@ -125,6 +125,16 @@ namespace TestLibrary.SelectiveIgnoreTests
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void UpdateOfIgnoredDocument() {
+            var underTest = new IgnoredEntitiesCollection();
+            var oldEntry = Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == "old path");
+            var newEntry = Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath);
+            underTest.Add(oldEntry);
+            underTest.Add(newEntry);
+            Assert.That(underTest.IsIgnored(Mock.Of<IDocument>(f => f.Id == this.objectId)), Is.EqualTo(IgnoredState.IGNORED));
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void IgnoreCheckOfSubDocument() {
             var underTest = new IgnoredEntitiesCollection();
             var doc = new Mock<IDocument>();

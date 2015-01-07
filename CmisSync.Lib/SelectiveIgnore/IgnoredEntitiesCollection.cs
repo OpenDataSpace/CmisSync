@@ -29,7 +29,7 @@ namespace CmisSync.Lib.SelectiveIgnore
         private Dictionary<string, IIgnoredEntity> entries = new Dictionary<string, IIgnoredEntity>();
 
         public void Add(IIgnoredEntity ignore) {
-            this.entries.Add(ignore.ObjectId, ignore);
+            this.entries[ignore.ObjectId] = ignore;
         }
 
         public void Remove(IIgnoredEntity ignore) {
