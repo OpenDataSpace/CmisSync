@@ -160,6 +160,10 @@ namespace CmisSync.Lib.Producer.Crawler
                             if (folder.AreAllChildrenIgnored()) {
                                 ignoredStorage.Add(new IgnoredEntity(folder, matcher));
                                 Logger.Info(string.Format("Folder {0} with Id {1} is ignored", folder.Name, folder.Id));
+                                children.Add(new ObjectTree<IFileableCmisObject> {
+                                    Item = child.Item,
+                                    Children = new List<IObjectTree<IFileableCmisObject>>()
+                                });
                             } else {
                                 ignoredStorage.Remove(folder.Id);
                                 children.Add(GetRemoteDirectoryTree(folder, child.Children, filter, ignoredStorage, matcher));
