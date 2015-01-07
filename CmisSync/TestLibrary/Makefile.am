@@ -63,6 +63,7 @@ SOURCES =  \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileOrFolderEventFactoryTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
+	EventsTests/FolderEventTest.cs \
 	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \

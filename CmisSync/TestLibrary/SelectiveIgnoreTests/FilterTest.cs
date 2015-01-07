@@ -129,9 +129,9 @@ namespace TestLibrary.SelectiveIgnoreTests
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
-        public void DoNotFilterIgnoredLocalFolderEvent() {
+        public void DoNotFilterIgnoredLocalFolderChangedEvent() {
             this.SetupMocks();
-            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), null) {Local = MetaDataChangeType.CREATED };
+            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), null) {Local = MetaDataChangeType.CHANGED };
 
             Assert.That(this.underTest.Handle(folderEvent), Is.False);
         }

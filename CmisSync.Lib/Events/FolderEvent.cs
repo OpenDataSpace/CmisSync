@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Folder event. Should be added to the Queue if anything on a folder could have been changed.
     /// </summary>
-    public class FolderEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent
+    public class FolderEvent : AbstractFolderEvent, IFilterableNameEvent, IFilterableRemotePathEvent, IFilterableRemoteObjectEvent, IFilterableLocalPathEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.FolderEvent"/> class.
@@ -39,8 +39,7 @@ namespace CmisSync.Lib.Events
         /// <param name="src">Event creator.</param>
         public FolderEvent(IDirectoryInfo localFolder = null, IFolder remoteFolder = null, object src = null)
         {
-            if(localFolder == null && remoteFolder == null)
-            {
+            if (localFolder == null && remoteFolder == null) {
                 throw new ArgumentNullException("One of the given folders must not be null");
             }
 
@@ -104,6 +103,16 @@ namespace CmisSync.Lib.Events
         public bool IsDirectory {
             get {
                 return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets the local path.
+        /// </summary>
+        /// <value>The local path.</value>
+        public string LocalPath {
+            get {
+                return this.LocalFolder != null ? this.LocalFolder.FullName : null;
             }
         }
 
