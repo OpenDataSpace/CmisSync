@@ -379,7 +379,7 @@ namespace TestLibrary.IntegrationTests
             var localFolder = new Mock<IDirectoryInfo>();
             localFolder.Setup(f => f.FullName).Returns(this.localRoot);
             var generator = new CrawlEventGenerator(storage, fsFactory);
-            var ignoreStorage = new IgnoredEntitiesCollection();
+            var ignoreStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), storage);
             var treeBuilder = new DescendantsTreeBuilder(storage, remoteFolder.Object, localFolder.Object, filterAggregator, ignoreStorage);
             var notifier = new CrawlEventNotifier(queue);
             var crawler = new DescendantsCrawler(queue, treeBuilder, generator, notifier, Mock.Of<IActivityListener>());

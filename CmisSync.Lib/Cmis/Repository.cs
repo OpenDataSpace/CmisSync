@@ -264,7 +264,7 @@ namespace CmisSync.Lib.Cmis
                 this.Status = status;
             };
 
-            this.ignoredStorage = new IgnoredEntitiesCollection();
+            this.ignoredStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), this.storage);
 
             this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.ignoredStorage, this.fileSystemFactory));
 

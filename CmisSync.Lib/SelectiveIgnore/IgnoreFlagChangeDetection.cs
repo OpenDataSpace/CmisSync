@@ -74,7 +74,7 @@ namespace CmisSync.Lib.SelectiveIgnore
                 case IgnoredState.NOT_IGNORED:
                     if (change.CmisObject.AreAllChildrenIgnored()) {
                         if (change.CmisObject is IFolder) {
-                            this.ignores.Add(new IgnoredEntity(change.CmisObject as IFolder, this.matcher));
+                            this.ignores.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(new IgnoredEntity(change.CmisObject as IFolder, this.matcher));
                         } else if (change.CmisObject is IDocument) {
                             this.ignores.Add(new IgnoredEntity(change.CmisObject as IDocument, this.matcher));
                         }

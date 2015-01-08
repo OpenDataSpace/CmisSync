@@ -265,6 +265,8 @@
     <Compile Include="Consumer\InteractionNeededException.cs" />
     <Compile Include="SelectiveIgnore\CmisSelectiveIgnoreCapability.cs" />
     <Compile Include="SelectiveIgnore\IIgnoredEntitiesCollection.cs" />
+    <Compile Include="SelectiveIgnore\IIgnoredEntitiesStorage.cs" />
+    <Compile Include="SelectiveIgnore\IgnoredEntitiesStorage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

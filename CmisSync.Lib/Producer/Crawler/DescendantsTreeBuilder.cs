@@ -158,7 +158,7 @@ namespace CmisSync.Lib.Producer.Crawler
                         var folder = child.Item as IFolder;
                         if (!filter.FolderNamesFilter.CheckFolderName(folder.Name, out reason) && !filter.InvalidFolderNamesFilter.CheckFolderName(folder.Name, out reason)) {
                             if (folder.AreAllChildrenIgnored()) {
-                                ignoredStorage.Add(new IgnoredEntity(folder, matcher));
+                                ignoredStorage.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(new IgnoredEntity(folder, matcher));
                                 Logger.Info(string.Format("Folder {0} with Id {1} is ignored", folder.Name, folder.Id));
                                 children.Add(new ObjectTree<IFileableCmisObject> {
                                     Item = child.Item,

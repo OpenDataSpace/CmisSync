@@ -89,7 +89,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(createdEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.Add(It.Is<IIgnoredEntity>(e => e.LocalPath == this.localPath && e.ObjectId == this.folderId)));
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.Is<IIgnoredEntity>(e => e.LocalPath == this.localPath && e.ObjectId == this.folderId)));
             this.queue.VerifyThatNoEventIsAdded();
         }
 
@@ -103,7 +103,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(createdEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.Add(It.IsAny<IIgnoredEntity>()), Times.Never());
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<IIgnoredEntity>()), Times.Never());
             this.queue.VerifyThatNoEventIsAdded();
         }
 
@@ -120,7 +120,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(changeEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.Add(It.Is<IIgnoredEntity>(e => e.LocalPath == this.localPath && e.ObjectId == this.folderId)));
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.Is<IIgnoredEntity>(e => e.LocalPath == this.localPath && e.ObjectId == this.folderId)));
             this.queue.VerifyThatNoEventIsAdded();
         }
 
@@ -134,7 +134,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(changeEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.Add(It.IsAny<IIgnoredEntity>()), Times.Never());
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<IIgnoredEntity>()), Times.Never());
             this.queue.VerifyThatNoEventIsAdded();
         }
 
@@ -149,7 +149,7 @@ namespace TestLibrary.SelectiveIgnoreTests
 
             Assert.That(this.underTest.Handle(changeEvent), Is.False);
 
-            this.ignoreStorage.Verify(s => s.Add(It.IsAny<IIgnoredEntity>()), Times.Never());
+            this.ignoreStorage.Verify(s => s.AddOrUpdateEntryAndDeleteAllChildrenFromStorage(It.IsAny<IIgnoredEntity>()), Times.Never());
             this.ignoreStorage.Verify(s => s.Remove(this.folderId));
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
             this.queue.VerifyThatNoOtherEventIsAddedThan<StartNextSyncEvent>();

@@ -53,6 +53,13 @@ namespace CmisSync.Lib.SelectiveIgnore
 
                 if (ev.RemoteObject is IFolder) {
                     if (this.storage.IsIgnored(ev.RemoteObject as IFolder) == IgnoredState.INHERITED) {
+                        if (e is IFilterableLocalPathEvent) {
+                            var filterablePathEvent = e as IFilterableLocalPathEvent;
+                            if (filterablePathEvent.LocalPath != null && this.storage.IsIgnoredPath(filterablePathEvent.LocalPath) == IgnoredState.NOT_IGNORED) {
+                                return false;
+                            }
+                        }
+
                         return true;
                     } else if (e is FolderEvent) {
                         var folderEvent = e as FolderEvent;

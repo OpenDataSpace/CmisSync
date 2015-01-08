@@ -235,6 +235,7 @@
     <Compile Include="IntegrationTests\SelectiveIgnoreTests\FileCrud.cs" />
     <Compile Include="SelectiveIgnoreTests\IgnoreFlagChangeDetectionTest.cs" />
     <Compile Include="EventsTests\FolderEventTest.cs" />
+    <Compile Include="SelectiveIgnoreTests\IgnoredEntitiesStorageTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

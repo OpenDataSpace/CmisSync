@@ -12,7 +12,6 @@ LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(MONOMAC_LIBS) 
 
 SOURCES =  \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
-	/SelectiveIgnoreTests/IgnoreFlagChangeDetectionTest.cs \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
 	ActiveActivitiesManagerTest.cs \
@@ -131,7 +130,9 @@ SOURCES =  \
 	QueueingTests/SyncEventQueueTest.cs \
 	SelectiveIgnoreTests/EventTransformerTest.cs \
 	SelectiveIgnoreTests/FilterTest.cs \
+	SelectiveIgnoreTests/IgnoreFlagChangeDetectionTest.cs \
 	SelectiveIgnoreTests/IgnoredEntitiesCollectionTest.cs \
+	SelectiveIgnoreTests/IgnoredEntitiesStorageTest.cs \
 	SelectiveIgnoreTests/IgnoredEntityTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
