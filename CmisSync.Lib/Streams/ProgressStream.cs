@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ProgressStream.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -208,13 +208,14 @@ namespace CmisSync.Lib.Streams
         /// </param>
         public override void Write(byte[] buffer, int offset, int count)
         {
+            //  for it may be chained before CryptoStream, we should write the content for CryptoStream has calculated the hash of the content
+            this.Stream.Write(buffer, offset, count);
+            this.CalculateBandwidth(count);
+
             if (this.transmissionEvent.Status.Aborting.GetValueOrDefault()) {
                 this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = false, Aborted = true });
                 throw new FileTransmission.AbortException(this.transmissionEvent.Path);
             }
-
-            this.Stream.Write(buffer, offset, count);
-            this.CalculateBandwidth(count);
         }
 #endregion
 

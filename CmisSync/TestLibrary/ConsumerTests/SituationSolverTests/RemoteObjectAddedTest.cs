@@ -336,15 +336,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
 
             long length = 0;
-            int countWrite = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => {
-                ++countWrite;
-                length += count;
-                if (countWrite >= 3) {
+                if (length > 0) {
                     foreach (FileTransmissionEvent transmissionEvent in this.manager.ActiveTransmissions) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
                     }
                 }
+                length += count;
             });
 
             cacheFileInfo.Setup(f => f.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(() => {
@@ -382,6 +380,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             stream.SetupAllProperties();
             stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => length += count);
+            stream.Setup(f => f.Length).Returns(() => { return length; });
 
             long lengthRead = 0;
             stream.Setup(f => f.Seek(It.IsAny<long>(), It.IsAny<SeekOrigin>())).Callback((long offset, SeekOrigin loc) => lengthRead = offset);
@@ -407,6 +406,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
             Assert.That(length, Is.EqualTo(content.Length));
+            stream.Verify(f => f.Seek(0, SeekOrigin.Begin), Times.Once());
             cacheFileInfo.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3));   //  first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
             cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
             cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
@@ -431,6 +431,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
             long length = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => length += count);
+            stream.Setup(f => f.Length).Returns(() => { return length; });
             stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => count);
             cacheFileInfo.Setup(f => f.Delete()).Callback(() => {
                 stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
@@ -445,6 +446,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
             Assert.That(length, Is.EqualTo(content.Length));
+            stream.Verify(f => f.Seek(0, SeekOrigin.Begin), Times.Never());
             cacheFileInfo.Verify(f => f.Delete(), Times.Once());
             cacheFileInfo.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(2));   //  first open in SetupToAbortThePreviousDownload, second open to download
             cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
@@ -493,6 +495,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             long length = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => length += count);
+            stream.Setup(f => f.Length).Returns(() => { return length; });
 
             cacheFileInfo.Setup(f => f.Delete()).Callback(() => {
                 stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
@@ -507,6 +510,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
             Assert.That(length, Is.EqualTo(content.Length));
+            stream.Verify(f => f.Seek(0, SeekOrigin.Begin), Times.Never());
             cacheFileInfo.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3));   //  first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
             cacheFileInfo.Verify(f => f.Delete(), Times.Once());
             cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());

@@ -50,12 +50,12 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
         public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
         {
-            {
+            byte[] buffer = new byte[8 * 1024];
+            int len;
+
+            if (localFileStream.Length > 0) {
                 localFileStream.Seek(0, SeekOrigin.Begin);
-                byte[] buffer = new byte[8 * 1024];
-                int len;
-                while ((len = localFileStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
+                while ((len = localFileStream.Read(buffer, 0, buffer.Length)) > 0) {
                     hashAlg.TransformBlock(buffer, 0, len, buffer, 0);
                 }
             }
@@ -75,15 +75,14 @@ namespace CmisSync.Lib.FileTransmission
                 contentStream = remoteDocument.GetContentStream();
             }
 
-            using (CryptoStream hashstream = new CryptoStream(localFileStream, hashAlg, CryptoStreamMode.Write))
-            using (ProgressStream progressStream = new ProgressStream(hashstream, status))
-            using (Stream remoteStream = contentStream.Stream) {
+            using (ProgressStream progressStream = new ProgressStream(localFileStream, status))
+            using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
+            using (Stream remoteStream = contentStream.Stream)
+            {
                 status.ReportProgress(new TransmissionProgressEventArgs {
                     Length = remoteDocument.ContentStreamLength,
-                    ActualPosition = 0
+                    ActualPosition = offset
                 });
-                byte[] buffer = new byte[8 * 1024];
-                int len;
                 while ((len = remoteStream.Read(buffer, 0, buffer.Length)) > 0) {
                     lock(this.disposeLock)
                     {
@@ -92,8 +91,8 @@ namespace CmisSync.Lib.FileTransmission
                             throw new ObjectDisposedException(status.Path);
                         }
 
-                        progressStream.Write(buffer, 0, len);
-                        progressStream.Flush();
+                        hashstream.Write(buffer, 0, len);
+                        hashstream.Flush();
                     }
                 }
             }
