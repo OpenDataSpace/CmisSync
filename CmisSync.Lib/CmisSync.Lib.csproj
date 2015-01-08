@@ -255,7 +255,6 @@
     <Compile Include="SelectiveIgnore\IgnoreFlagChangeDetection.cs" />
     <Compile Include="Storage\FileSystem\DateTimeToFileConverter.cs" />
     <Compile Include="Storage\FileSystem\FSType.cs" />
-    <Compile Include="SelectiveIgnore\IIgnoredEntitiesStorage.cs" />
     <Compile Include="Algorithms\CyclicDependencies\ICycleDetector.cs" />
     <Compile Include="Algorithms\Tarjan\Tarjan.cs" />
     <Compile Include="Events\ConfigurationNeededEvent.cs" />
@@ -265,6 +264,7 @@
     <Compile Include="Events\InteractionNeededEvent.cs" />
     <Compile Include="Consumer\InteractionNeededException.cs" />
     <Compile Include="SelectiveIgnore\CmisSelectiveIgnoreCapability.cs" />
+    <Compile Include="SelectiveIgnore\IIgnoredEntitiesCollection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

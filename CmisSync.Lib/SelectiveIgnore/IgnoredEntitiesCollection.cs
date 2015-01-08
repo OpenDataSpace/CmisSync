@@ -24,7 +24,7 @@ namespace CmisSync.Lib.SelectiveIgnore
 
     using DotCMIS.Client;
 
-    public class IgnoredEntitiesCollection : IIgnoredEntitiesStorage
+    public class IgnoredEntitiesCollection : IIgnoredEntitiesCollection
     {
         private Dictionary<string, IIgnoredEntity> entries = new Dictionary<string, IIgnoredEntity>();
 

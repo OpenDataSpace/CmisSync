@@ -173,7 +173,7 @@ SOURCES =  \
 	SelectiveIgnore/IgnoredEntity.cs \
 	SelectiveIgnore/IgnoredState.cs \
 	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
-	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IIgnoredEntity.cs \
 	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
 	SelectiveIgnore/SelectiveIgnoreFilter.cs \

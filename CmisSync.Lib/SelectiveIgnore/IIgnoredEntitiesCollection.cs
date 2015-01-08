@@ -23,7 +23,7 @@ namespace CmisSync.Lib.SelectiveIgnore
 
     using DotCMIS.Client;
 
-    public interface IIgnoredEntitiesStorage
+    public interface IIgnoredEntitiesCollection
     {
         void Add(IIgnoredEntity ignore);
         void Remove(IIgnoredEntity ignore);
