@@ -43,6 +43,11 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
             this.InitializeAndRunRepo();
 
+            string tree = @"
+.
+└── ignored";
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(tree)));
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(tree)));
             ignoredFolder.Refresh();
             ignoredFolder.IgnoreAllChildren();
 
@@ -57,6 +62,11 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
+            tree = @"
+.
+└── newName";
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(tree)));
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(tree)));
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
@@ -86,13 +96,43 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             Assert.That(ignoredFolder.Name, Is.EqualTo(newFolderName));
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore"), Ignore("TODO")]
+        [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void RenameLocalFolderToIgnoredRemoteFolderName([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             string folderName = "ignored";
+            string notIgnoredFolderName = "A";
+            var notIgnoredFolder = this.remoteRootDir.CreateFolder(notIgnoredFolderName);
             var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
             ignoredFolder.IgnoreAllChildren();
+            this.InitializeAndRunRepo(swallowExceptions: true);
+
+            string localTree = @"
+.
+└── A";
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
+            string remoteTree = @"
+.
+├── ignored
+└── A";
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(remoteTree)));
+
+            this.localRootDir.GetDirectories()[0].MoveTo(Path.Combine(this.localRootDir.FullName, folderName));
+            this.WaitUntilQueueIsNotEmpty();
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+
+            this.remoteRootDir.Refresh();
+
+            localTree = @"
+.
+└── ignored_Conflict";
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
+            remoteTree = @"
+.
+├── ignored
+└── ignored_Conflict";
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(remoteTree)));
         }
     }
 }
