@@ -144,8 +144,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
             matcher.Setup(m => m.GetRelativeLocalPath(It.Is<string>(f => f == testpath))).Returns(testfilename);
             var storage = new MetaDataStorage(this.engine, matcher.Object);
 
-            var path = Mock.Of<IFileSystemInfo>(p =>
-                                                p.FullName == testpath);
+            var path = Mock.Of<IFileSystemInfo>(p => p.FullName == testpath);
             Assert.That(storage.GetObjectByLocalPath(path), Is.Null);
         }
 
@@ -157,10 +156,10 @@ namespace TestLibrary.StorageTests.DataBaseTests
             matcher.Setup(m => m.CanCreateRemotePath(It.Is<string>(f => f == Path.Combine(Path.GetTempPath(), "a")))).Returns(true);
             matcher.Setup(m => m.GetRelativeLocalPath(It.Is<string>(p => p == Path.Combine(Path.GetTempPath(), "a")))).Returns("a");
             var storage = new MetaDataStorage(this.engine, matcher.Object);
-            var folder = Mock.Of<IDirectoryInfo>(f =>
-                                                 f.FullName == Path.Combine(Path.GetTempPath(), "a"));
-            var mappedFolder = new MappedObject("a", "remoteId", MappedObjectType.Folder, null, null)
-            {
+            var folder = Mock.Of<IDirectoryInfo>(
+                f =>
+                f.FullName == Path.Combine(Path.GetTempPath(), "a"));
+            var mappedFolder = new MappedObject("a", "remoteId", MappedObjectType.Folder, null, null) {
                 Guid = Guid.NewGuid(),
             };
             storage.SaveMappedObject(mappedFolder);
@@ -175,13 +174,12 @@ namespace TestLibrary.StorageTests.DataBaseTests
         {
             var matcher = new PathMatcher(Path.GetTempPath(), "/");
             var storage = new MetaDataStorage(this.engine, matcher);
-            var root = Mock.Of<IDirectoryInfo>(f =>
-                                               f.FullName == Path.GetTempPath());
-            var folder = Mock.Of<IDirectoryInfo>(f =>
-                                                 f.FullName == Path.Combine(Path.GetTempPath(), "a"));
+            var root = Mock.Of<IDirectoryInfo>(f => f.FullName == Path.GetTempPath());
+            var folder = Mock.Of<IDirectoryInfo>(
+                f =>
+                f.FullName == Path.Combine(Path.GetTempPath(), "a"));
             var mappedRoot = new MappedObject("/", "rootId", MappedObjectType.Folder, null, null);
-            var mappedFolder = new MappedObject("a", "remoteId", MappedObjectType.Folder, "rootId", null)
-            {
+            var mappedFolder = new MappedObject("a", "remoteId", MappedObjectType.Folder, "rootId", null) {
                 Guid = Guid.NewGuid(),
             };
             storage.SaveMappedObject(mappedRoot);
@@ -201,19 +199,17 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void GetChildrenThrowsExceptionOnNullArgument()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.GetChildren(null);
+            Assert.Throws<ArgumentNullException>(() => storage.GetChildren(null));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
         public void GetChildrenThrowsExceptionIfMappedObjectDoesNotContainsId()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.GetChildren(Mock.Of<IMappedObject>());
+            Assert.Throws<ArgumentException>(() => storage.GetChildren(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
@@ -227,19 +223,17 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void SaveMappedObjectThrowsExceptionOnNullArgument()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.SaveMappedObject(null);
+            Assert.Throws<ArgumentNullException>(() => storage.SaveMappedObject(null));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
         public void SaveMappedObjectThrowsExceptionOnNonExistingIdInObject()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.SaveMappedObject(Mock.Of<IMappedObject>());
+            Assert.Throws<ArgumentException>(() => storage.SaveMappedObject(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
@@ -279,19 +273,17 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void RemoveObjectThrowsExceptionOnNullArgument()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.RemoveObject(null);
+            Assert.Throws<ArgumentNullException>(() => storage.RemoveObject(null));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
         public void RemoveObjectThrowsExceptionOnNonExistingIdInObject()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.RemoveObject(Mock.Of<IMappedObject>());
+            Assert.Throws<ArgumentException>(() => storage.RemoveObject(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
@@ -350,24 +342,19 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void GetLocalPathThrowsExceptionOnNullArgument()
-        {
+        public void GetLocalPathThrowsExceptionOnNullArgument() {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.GetLocalPath(null);
+            Assert.Throws<ArgumentNullException>(() => storage.GetLocalPath(null));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
-        public void GetLocalPathThrowsExceptionOnNonExistingIdInObject()
-        {
+        public void GetLocalPathThrowsExceptionOnNonExistingIdInObject() {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.GetLocalPath(Mock.Of<IMappedObject>());
+            Assert.Throws<ArgumentException>(() => storage.GetLocalPath(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
-        public void GetLocalPath()
-        {
+        public void GetLocalPath() {
             var matcher = new Mock<IPathMatcher>();
             matcher.Setup(m => m.LocalTargetRootPath).Returns(Path.GetTempPath());
             var storage = new MetaDataStorage(this.engine, matcher.Object);
@@ -381,19 +368,29 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void GetRemotePathThrowsExceptionOnNullArgument()
-        {
-            var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.GetRemotePath(null);
+        public void GetLocalPathOfNonExistingEntryReturnsNull() {
+            var matcher = new Mock<IPathMatcher>();
+            matcher.Setup(m => m.LocalTargetRootPath).Returns(Path.GetTempPath());
+            var storage = new MetaDataStorage(this.engine, matcher.Object);
+            string id = "nonExistingId";
+            var rootFolder = new MappedObject("name", "otherId", MappedObjectType.Folder, null, null);
+            var otherFolder = new MappedObject("name", id, MappedObjectType.Folder, "otherId", null);
+            storage.SaveMappedObject(rootFolder);
+
+            Assert.That(storage.GetLocalPath(otherFolder), Is.Null);
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentException))]
+        public void GetRemotePathThrowsExceptionOnNullArgument() {
+            var storage = new MetaDataStorage(this.engine, this.matcher);
+            Assert.Throws<ArgumentNullException>(() => storage.GetRemotePath(null));
+        }
+
+        [Test, Category("Fast")]
         public void GetRemotePathThrowsExceptionOnNonExistingIdInObject()
         {
             var storage = new MetaDataStorage(this.engine, this.matcher);
-            storage.GetRemotePath(Mock.Of<IMappedObject>());
+            Assert.Throws<ArgumentException>(() => storage.GetRemotePath(Mock.Of<IMappedObject>()));
         }
 
         [Test, Category("Fast")]
@@ -521,18 +518,16 @@ namespace TestLibrary.StorageTests.DataBaseTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(InvalidDataException))]
         public void ValidateFolderStructureThrowsExceptionIfRootObjectIsMissingButOtherObjectsAreStored()
         {
             var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
             var child1Folder = new MappedObject("sub1", "subId1", MappedObjectType.Folder, "rootId", "token");
             storage.SaveMappedObject(child1Folder);
 
-            storage.ValidateObjectStructure();
+            Assert.Throws<InvalidDataException>(() => storage.ValidateObjectStructure());
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(InvalidDataException))]
         public void ValidateFolderStructureThrowsExceptionIfParentObjectIsMissing()
         {
             var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
@@ -541,11 +536,10 @@ namespace TestLibrary.StorageTests.DataBaseTests
             storage.SaveMappedObject(rootFolder);
             storage.SaveMappedObject(child1Folder);
 
-            storage.ValidateObjectStructure();
+            Assert.Throws<InvalidDataException>(() => storage.ValidateObjectStructure());
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(InvalidDataException))]
         public void ValidateFolderStructureThrowsExceptionIfFileParentIdIsFileObject()
         {
             var storage = new MetaDataStorage(this.engine, Mock.Of<IPathMatcher>());
@@ -556,7 +550,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
             storage.SaveMappedObject(child1File);
             storage.SaveMappedObject(child2File);
 
-            storage.ValidateObjectStructure();
+            Assert.Throws<InvalidDataException>(() => storage.ValidateObjectStructure());
         }
 
         [Test, Category("Fast")]

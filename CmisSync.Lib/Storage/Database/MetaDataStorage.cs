@@ -324,7 +324,7 @@ namespace CmisSync.Lib.Storage.Database
         /// </param>
         public string GetRemotePath(IMappedObject obj)
         {
-            Stopwatch watch = Stopwatch.StartNew();
+            // Stopwatch watch = Stopwatch.StartNew();
             string id = this.GetId(obj);
             using(var tran = this.engine.GetTransaction())
             {
@@ -334,8 +334,8 @@ namespace CmisSync.Lib.Storage.Database
                     pathBuilder.Append("/").Append(name);
                 }
 
-                watch.Stop();
-                Logger.Debug(string.Format("Method GetRemotePath returned after {0} ms", watch.ElapsedMilliseconds));
+                // watch.Stop();
+                // Logger.Debug(string.Format("Method GetRemotePath returned after {0} ms", watch.ElapsedMilliseconds));
                 return this.slashRegex.Replace(pathBuilder.ToString(), @"/");
             }
         }
@@ -351,18 +351,25 @@ namespace CmisSync.Lib.Storage.Database
         /// </param>
         public string GetLocalPath(IMappedObject mappedObject)
         {
-            Stopwatch watch = Stopwatch.StartNew();
+            // Stopwatch watch = Stopwatch.StartNew();
             string id = this.GetId(mappedObject);
             using(var tran = this.engine.GetTransaction())
             {
                 string[] segments = this.GetRelativePathSegments(tran, id);
+                if (segments == null) {
+                    return null;
+                }
+
                 if (segments.Length > 0 && segments[0].Equals("/")) {
                     string[] temp = new string[segments.Length - 1];
-                    Array.Copy(segments, 1, temp, 0, segments.Length - 1);
+                    for (int i = 1; i < segments.Length; i++) {
+                        temp[i - 1] = segments[i];
+                    }
+
                     segments = temp;
                 }
 
-                watch.Stop();
+                // watch.Stop();
                 // Logger.Debug(string.Format("Method GetLocalPath returned after {0} ms", watch.ElapsedMilliseconds));
                 return Path.Combine(this.matcher.LocalTargetRootPath, Path.Combine(segments));
             }
@@ -379,7 +386,7 @@ namespace CmisSync.Lib.Storage.Database
         /// </param>
         public List<IMappedObject> GetChildren(IMappedObject parent)
         {
-            Stopwatch watch = Stopwatch.StartNew();
+            // Stopwatch watch = Stopwatch.StartNew();
             string parentId = this.GetId(parent);
             List<IMappedObject> results = new List<IMappedObject>();
             bool parentExists = false;
@@ -400,11 +407,11 @@ namespace CmisSync.Lib.Storage.Database
                 }
             }
 
-            if(!parentExists) {
+            if (!parentExists) {
                 throw new EntryNotFoundException();
             }
 
-            watch.Stop();
+            // watch.Stop();
             // Logger.Debug(string.Format("Method GetChildren returned after {0} ms", watch.ElapsedMilliseconds));
             return results;
         }
@@ -665,7 +672,12 @@ namespace CmisSync.Lib.Storage.Database
         private string[] GetRelativePathSegments(Transaction tran, string id)
         {
             Stack<string> pathSegments = new Stack<string>();
-            MappedObject entry = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value.Get;
+            var value = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value;
+            if (value == null) {
+                return null;
+            }
+
+            MappedObject entry = value.Get;
             pathSegments.Push(entry.Name);
             while(entry.ParentId != null)
             {
