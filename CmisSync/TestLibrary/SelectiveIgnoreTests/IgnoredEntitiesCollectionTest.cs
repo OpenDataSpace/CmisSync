@@ -73,6 +73,15 @@ namespace TestLibrary.SelectiveIgnoreTests
         }
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void DoNotIgnorePathsWithSameBeginningButDifferentEndings() {
+            var underTest = new IgnoredEntitiesCollection();
+
+            underTest.Add(Mock.Of<IIgnoredEntity>(o => o.ObjectId == this.objectId && o.LocalPath == this.localPath));
+
+            Assert.That(underTest.IsIgnoredPath(this.localPath + "bla"), Is.EqualTo(IgnoredState.NOT_IGNORED));
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void RemoveElement() {
             var underTest = new IgnoredEntitiesCollection();
             Assert.That(underTest.IsIgnoredId(this.objectId), Is.EqualTo(IgnoredState.NOT_IGNORED));

@@ -21,6 +21,7 @@ namespace CmisSync.Lib.SelectiveIgnore
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
 
     using DotCMIS.Client;
 
@@ -88,7 +89,7 @@ namespace CmisSync.Lib.SelectiveIgnore
             foreach (var entry in this.entries.Values) {
                 if (localPath == entry.LocalPath) {
                     return IgnoredState.IGNORED;
-                } else if (localPath.StartsWith(entry.LocalPath)) {
+                } else if (localPath.StartsWith(entry.LocalPath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? entry.LocalPath : entry.LocalPath + Path.DirectorySeparatorChar)) {
                     return IgnoredState.INHERITED;
                 }
             }
