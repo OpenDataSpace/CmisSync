@@ -94,9 +94,9 @@ namespace CmisSync.Lib.Queueing
             map[typeof(LocalObjectFetcher)] = HIGH;
 
             // SelectedIgnore filter and transformer do need the fetched objects and must be called before the NORMAL category
+            map[typeof(IgnoreFlagChangeDetection)] = NORMAL + 3;
             map[typeof(SelectiveIgnoreEventTransformer)] = NORMAL + 2;
             map[typeof(SelectiveIgnoreFilter)] = NORMAL + 1;
-            map[typeof(IgnoreFlagChangeDetection)] = NORMAL + 1;
 
             map[typeof(ContentChangeEventTransformer)] = NORMAL;
             map[typeof(SyncScheduler)] = NORMAL;
