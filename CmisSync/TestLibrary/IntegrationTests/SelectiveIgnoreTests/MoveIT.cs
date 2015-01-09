@@ -35,7 +35,6 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
     {
         [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void MoveRemoteFolderTreeInsideIgnoredFolder([Values(true, false)]bool contentChanges) {
-            this.repo.SingleStepQueue.SwallowExceptions = true;
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
@@ -48,7 +47,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 └── A
     └── B";
             Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(tree)));
-            this.InitializeAndRunRepo();
+            this.InitializeAndRunRepo(swallowExceptions: true);
             Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(tree)));
 
             ignoredFolder.Refresh();
