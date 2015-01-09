@@ -66,13 +66,13 @@ namespace CmisSync.Lib.Producer.ContentChange
         /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
         /// </exception>
         public ContentChangeEventTransformer(ISyncEventQueue queue, IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) : base(queue) {
-            if(storage == null) {
+            if (storage == null) {
                 throw new ArgumentNullException("Storage instance is needed for the ContentChangeEventTransformer, but was null");
             }
 
             this.storage = storage;
 
-            if(fsFactory == null) {
+            if (fsFactory == null) {
                 this.fsFactory = new FileSystemInfoFactory();
             } else {
                 this.fsFactory = fsFactory;
@@ -92,22 +92,22 @@ namespace CmisSync.Lib.Producer.ContentChange
         /// Is thrown when an operation cannot be performed.
         /// </exception>
         public override bool Handle(ISyncEvent e) {
-            if(!(e is ContentChangeEvent)) {
+            if (!(e is ContentChangeEvent)) {
                 return false;
             }
 
             Logger.Debug("Handling ContentChangeEvent");
 
             var contentChangeEvent = e as ContentChangeEvent;
-            if(contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted && contentChangeEvent.CmisObject == null) {
+            if (contentChangeEvent.Type != DotCMIS.Enums.ChangeType.Deleted && contentChangeEvent.CmisObject == null) {
                 throw new InvalidOperationException("ERROR, ContentChangeEventAccumulator Missing");
             }
 
-            if(contentChangeEvent.Type == DotCMIS.Enums.ChangeType.Deleted) {
+            if (contentChangeEvent.Type == DotCMIS.Enums.ChangeType.Deleted) {
                 this.HandleDeletion(contentChangeEvent);
-            } else if(contentChangeEvent.CmisObject is IFolder) {
+            } else if (contentChangeEvent.CmisObject is IFolder) {
                 this.HandleAsIFolder(contentChangeEvent);
-            } else if(contentChangeEvent.CmisObject is IDocument) {
+            } else if (contentChangeEvent.CmisObject is IDocument) {
                 this.HandleAsIDocument(contentChangeEvent);
             }
 
@@ -117,19 +117,14 @@ namespace CmisSync.Lib.Producer.ContentChange
         private void HandleDeletion(ContentChangeEvent contentChangeEvent) {
             Logger.Debug(contentChangeEvent.ObjectId);
             IMappedObject savedObject = this.storage.GetObjectByRemoteId(contentChangeEvent.ObjectId);
-            if(savedObject != null)
-            {
+            if (savedObject != null) {
                 IMappedObject obj = savedObject as IMappedObject;
-                if(obj != null)
-                {
-                    if(obj.Type == MappedObjectType.Folder)
-                    {
+                if (obj != null) {
+                    if (obj.Type == MappedObjectType.Folder) {
                         var dirInfo = this.fsFactory.CreateDirectoryInfo(this.storage.GetLocalPath(obj));
                         Queue.AddEvent(new FolderEvent(dirInfo, null, this) { Remote = MetaDataChangeType.DELETED });
                         return;
-                    }
-                    else
-                    {
+                    } else {
                         var fileInfo = this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(obj));
                         Queue.AddEvent(new FileEvent(fileInfo, null) { Remote = MetaDataChangeType.DELETED });
                         return;
@@ -157,7 +152,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                 IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
                 var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
                 var fileEvent = new FileEvent(fileInfo, doc);
-                if(fileInfo != null) {
+                if (fileInfo != null) {
                     fileEvent.Remote = MetaDataChangeType.CHANGED;
                 } else {
                     fileEvent.Remote = MetaDataChangeType.CREATED;
@@ -182,7 +177,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                 IMappedObject file = this.storage.GetObjectByRemoteId(doc.Id);
                 var fileInfo = (file == null) ? null : this.fsFactory.CreateFileInfo(this.storage.GetLocalPath(file));
                 var fileEvent = new FileEvent(fileInfo, doc);
-                if(fileInfo != null) {
+                if (fileInfo != null) {
                     fileEvent.Remote = MetaDataChangeType.CHANGED;
                     if (file != null) {
                         byte[] hash = doc.ContentStreamHash(file.ChecksumAlgorithmName);
