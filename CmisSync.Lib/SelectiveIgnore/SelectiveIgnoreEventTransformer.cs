@@ -26,12 +26,15 @@ namespace CmisSync.Lib.SelectiveIgnore
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
+    using DotCMIS.Client;
+    using DotCMIS.Enums;
+
     public class SelectiveIgnoreEventTransformer : SyncEventHandler
     {
         private ISyncEventQueue queue;
-        private IIgnoredEntitiesStorage ignores;
+        private IIgnoredEntitiesCollection ignores;
 
-        public SelectiveIgnoreEventTransformer(IIgnoredEntitiesStorage ignores, ISyncEventQueue queue) {
+        public SelectiveIgnoreEventTransformer(IIgnoredEntitiesCollection ignores, ISyncEventQueue queue) {
             if (queue == null) {
                 throw new ArgumentNullException("Given queue is empty");
             }
@@ -54,6 +57,24 @@ namespace CmisSync.Lib.SelectiveIgnore
                 } else if (this.IsInsideIgnoredPath(movedEvent.LocalPath) && !this.IsInsideIgnoredPath(movedEvent.OldPath)) {
                     this.queue.AddEvent(new FSEvent(WatcherChangeTypes.Deleted, movedEvent.OldPath, movedEvent.IsDirectory));
                     return true;
+                }
+            }
+
+            if (e is ContentChangeEvent) {
+                var contentChangeEvent = e as ContentChangeEvent;
+                if (contentChangeEvent.Type != ChangeType.Deleted) {
+                    var state = IgnoredState.NOT_IGNORED;
+                    var cmisObject = contentChangeEvent.CmisObject;
+                    if (cmisObject is IFolder) {
+                        state = this.ignores.IsIgnored(cmisObject as IFolder);
+                    } else if (cmisObject is IDocument) {
+                        state = this.ignores.IsIgnored(cmisObject as IDocument);
+                    }
+
+                    if (state == IgnoredState.INHERITED) {
+                        this.queue.AddEvent(new ContentChangeEvent(ChangeType.Deleted, contentChangeEvent.ObjectId));
+                        return true;
+                    }
                 }
             }
 

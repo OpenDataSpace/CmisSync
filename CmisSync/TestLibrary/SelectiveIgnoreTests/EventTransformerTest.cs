@@ -131,6 +131,33 @@ namespace TestLibrary.SelectiveIgnoreTests
             this.queue.VerifyThatNoEventIsAdded();
         }
 
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void TransformContentChangeEventFromChangeToDeleteIfTargetIsInsideAnIgnoredFolder() {
+            this.SetupMocks();
+            var objectId = Guid.NewGuid().ToString();
+            var folderObject = Mock.Of<IFolder>(f => f.Id == objectId);
+            var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Updated, objectId);
+            var session = new Mock<ISession>();
+            session.Setup(s => s.GetObject(objectId, It.IsAny<IOperationContext>())).Returns(folderObject);
+            contentChangeEvent.UpdateObject(session.Object);
+            this.ignores.Setup(i => i.IsIgnored(folderObject)).Returns(IgnoredState.INHERITED);
+
+            Assert.That(this.underTest.Handle(contentChangeEvent), Is.True);
+
+            this.queue.VerifyThatNoOtherEventIsAddedThan<ContentChangeEvent>();
+            this.queue.Verify(q => q.AddEvent(It.Is<ContentChangeEvent>(e => e.ObjectId == objectId && e.Type == DotCMIS.Enums.ChangeType.Deleted)));
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void DoNotTouchDeletedContentChangeEvents() {
+            this.SetupMocks();
+            var contentChangeEvent = new ContentChangeEvent(DotCMIS.Enums.ChangeType.Deleted, Guid.NewGuid().ToString());
+
+            Assert.That(this.underTest.Handle(contentChangeEvent), Is.False);
+
+            this.queue.VerifyThatNoEventIsAdded();
+        }
+
         private void SetupMocks() {
             this.queue = new Mock<ISyncEventQueue>();
             this.ignores = new Mock<IIgnoredEntitiesStorage>();
