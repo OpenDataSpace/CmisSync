@@ -373,7 +373,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Length, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Ignore("https://bugzilla.xamarin.com/show_bug.cgi?id=21135")]
         public void ManyRemoteFilesCreated()
         {
             int fileNumber = 100;
