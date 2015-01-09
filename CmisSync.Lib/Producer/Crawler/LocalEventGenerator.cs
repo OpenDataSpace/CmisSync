@@ -92,6 +92,10 @@ namespace CmisSync.Lib.Producer.Crawler
                 IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
                     var localPath = this.storage.GetLocalPath(storedMappedChild);
+                    if (localPath == null) {
+                        continue;
+                    }
+
                     #if __COCOA__
                     if ((!localPath.Normalize(NormalizationForm.FormD).Equals(child.Item.FullName.Normalize(NormalizationForm.FormD))) && this.fsFactory.IsDirectory(localPath) != null) {
                     #else
