@@ -200,9 +200,18 @@ ignored
             var folder = this.remoteRootDir.CreateFolder("folder");
             var past = DateTime.UtcNow - TimeSpan.FromDays(7);
             folder.UpdateLastWriteTimeUtc(past);
-            folder.IgnoreAllChildren();
-            folder.UpdateLastWriteTimeUtc(DateTime.UtcNow);
+            var anotherDeviceId = Guid.NewGuid();
+            folder.IgnoreAllChildren(anotherDeviceId.ToString());
+
+            this.InitializeAndRunRepo();
+            this.localRootDir.GetDirectories()[0].CreateSubdirectory("NotIgnored");
+            this.WaitUntilQueueIsNotEmpty();
+            this.AddStartNextSyncEvent();
+            this.repo.Run();
+
+            folder.Refresh();
             Assert.That(folder.LastModificationDate, Is.EqualTo(DateTime.UtcNow).Within(1).Days);
+            Assert.That(folder.GetChildren(), Is.Not.Empty);
         }
     }
 }
