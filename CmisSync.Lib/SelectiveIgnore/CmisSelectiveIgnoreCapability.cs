@@ -22,6 +22,7 @@ namespace CmisSync.Lib.SelectiveIgnore
     using System;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     public static class CmisSelectiveIgnoreCapability
     {
@@ -31,15 +32,18 @@ namespace CmisSync.Lib.SelectiveIgnore
         /// <returns><c>true</c> if is server able to selectivly ignore folders; otherwise, <c>false</c>.</returns>
         /// <param name="session">Cmis session.</param>
         public static bool SupportsSelectiveIgnore(this ISession session) {
-            var type = session.GetTypeDefinition("gds:sync");
-            if (type == null) {
-                return false;
-            }
-
-            foreach (var prop in type.PropertyDefinitions) {
-                if (prop.Id.Equals("gds:ignoreDeviceIds")) {
-                    return true;
+            try {
+                var type = session.GetTypeDefinition("gds:sync");
+                if (type == null) {
+                    return false;
                 }
+
+                foreach (var prop in type.PropertyDefinitions) {
+                    if (prop.Id.Equals("gds:ignoreDeviceIds")) {
+                        return true;
+                    }
+                }
+            } catch (CmisObjectNotFoundException) {
             }
 
             return false;
