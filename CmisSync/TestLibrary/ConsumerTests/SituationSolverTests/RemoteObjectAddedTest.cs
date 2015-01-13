@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RemoteObjectAddedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -138,7 +138,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             cacheFileInfo.Setup(f => f.Directory).Returns(parentDir);
             cacheFileInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
             using (var stream = new MemoryStream()) {
-                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(stream);
+                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
                 this.fsFactory.AddIFileInfo(cacheFileInfo.Object);
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
@@ -146,7 +146,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
-                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
+                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.None), Times.Once());
                 cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
@@ -175,7 +175,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             cacheFileInfo.Setup(f => f.Directory).Returns(parentDir);
             cacheFileInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
             using (var stream = new MemoryStream()) {
-                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(stream);
+                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
                 this.fsFactory.AddIFileInfo(cacheFileInfo.Object);
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
@@ -183,7 +183,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
-                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
+                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.None), Times.Once());
                 cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 fileInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
@@ -213,7 +213,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             cacheFileInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
             cacheFileInfo.Setup(f => f.Replace(fileInfo.Object, conflictFileInfo, true)).Returns(fileInfo.Object);
             using (var stream = new MemoryStream()) {
-                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(stream).Callback(() => fileInfo.Setup(f => f.Exists).Returns(true));
+                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream).Callback(() => fileInfo.Setup(f => f.Exists).Returns(true));
                 cacheFileInfo.Setup(f => f.MoveTo(this.path)).Throws(new IOException());
                 fileInfo.SetupStream(Encoding.UTF8.GetBytes("other content"));
                 this.fsFactory.AddIFileInfo(cacheFileInfo.Object);
@@ -223,7 +223,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
-                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
+                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.None), Times.Once());
                 cacheFileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 cacheFileInfo.Verify(f => f.Replace(fileInfo.Object, conflictFileInfo, true), Times.Once());
@@ -288,7 +288,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             cacheFileInfo.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
             cacheFileInfo.Setup(f => f.MoveTo(this.path)).Throws<IOException>();
             using (var stream = new MemoryStream()) {
-                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read)).Returns(stream);
+                cacheFileInfo.Setup(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
                 this.fsFactory.AddIFileInfo(cacheFileInfo.Object);
 
                 Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.id, this.objectName, this.parentId, content.Length, content, this.lastChangeToken);
@@ -296,7 +296,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
                 this.underTest.Solve(fileInfo.Object, remoteObject.Object);
 
-                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.Read), Times.Once());
+                cacheFileInfo.Verify(f => f.Open(FileMode.Create, FileAccess.Write, FileShare.None), Times.Once());
                 fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
                 cacheFileInfo.Verify(f => f.MoveTo(this.path), Times.Once());
                 cacheFileInfo.Verify(f => f.Delete(), Times.Once());

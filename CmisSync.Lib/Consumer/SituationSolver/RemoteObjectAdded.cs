@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RemoteObjectAdded.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -114,14 +114,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {
-                Guid guid = Guid.NewGuid();
-                byte[] localFileHash = null;
-                DateTime? lastLocalFileModificationDate = null;
-                var file = localFile as IFileInfo;
                 if (!(remoteId is IDocument)) {
                     throw new ArgumentException("remoteId has to be a prefetched Document");
                 }
 
+                Guid guid = Guid.NewGuid();
+                byte[] localFileHash = null;
+                DateTime? lastLocalFileModificationDate = null;
+                var file = localFile as IFileInfo;
                 if (file.Exists) {
                     Guid? uuid = file.Uuid;
                     if (uuid != null) {
@@ -143,20 +143,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IDocument remoteDoc = remoteId as IDocument;
                 var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
                 this.manager.AddTransmission(transmissionEvent);
-                byte[] hash = null;
-                using (var hashAlg = new SHA1Managed())
-                using (var fileStream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
-                using (var downloader = FileTransmission.ContentTaskUtils.CreateDownloader())
-                {
-                    try {
-                        downloader.DownloadFile(remoteDoc, fileStream, transmissionEvent, hashAlg);
-                    } catch(Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        throw;
-                    }
-
-                    hash = hashAlg.Hash;
-                }
+                byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmissionEvent);
 
                 try {
                     cacheFile.Uuid = guid;

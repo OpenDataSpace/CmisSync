@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AbstractEnhancedSolver.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -130,23 +130,33 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             return hash;
         }
 
+        protected static byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent) {
+            try {
+                using (SHA1 hashAlg = new SHA1Managed()) {
+                    using (var filestream = target.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
+                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        return hashAlg.Hash;
+                    }
+                }
+            }
+            catch (Exception ex) {
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                throw;
+            }
+        }
+
         protected static byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager, ILog logger) {
             // Download changes
-            byte[] lastChecksum = obj.LastChecksum;
             byte[] hash = null;
+
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
             var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
-            try {
-                using (SHA1 hashAlg = new SHA1Managed()) {
-                    using (var filestream = cacheFile.Open(FileMode.Create, FileAccess.Write, FileShare.None))
-                    using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
-                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
-                        obj.ChecksumAlgorithmName = "SHA-1";
-                        hash = hashAlg.Hash;
-                    }
-                }
+            hash = DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent);
+            obj.ChecksumAlgorithmName = "SHA-1";
 
+            try {
                 var backupFile = fsFactory.CreateFileInfo(target.FullName + ".bak.sync");
                 Guid? uuid = target.Uuid;
                 cacheFile.Replace(target, backupFile, true);
@@ -167,7 +177,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     checksumOfOldFile = SHA1Managed.Create().ComputeHash(oldFileStream);
                 }
 
-                if (!lastChecksum.SequenceEqual(checksumOfOldFile)) {
+                if (!obj.LastChecksum.SequenceEqual(checksumOfOldFile)) {
                     var conflictFile = fsFactory.CreateConflictFileInfo(target);
                     backupFile.MoveTo(conflictFile.FullName);
                     OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1} and created conflict file {2}", target.FullName, remoteDocument.Id, conflictFile.FullName));
