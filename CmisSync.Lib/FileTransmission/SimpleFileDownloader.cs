@@ -70,6 +70,10 @@ namespace CmisSync.Lib.FileTransmission
             DotCMIS.Data.IContentStream contentStream = null;
             if (offset > 0) {
                 long remainingBytes = (long)fileLength - offset;
+                status.ReportProgress(new TransmissionProgressEventArgs {
+                    Length = remoteDocument.ContentStreamLength,
+                    ActualPosition = offset
+                });
                 contentStream = remoteDocument.GetContentStream(remoteDocument.ContentStreamId, offset, remainingBytes);
             } else {
                 contentStream = remoteDocument.GetContentStream();
