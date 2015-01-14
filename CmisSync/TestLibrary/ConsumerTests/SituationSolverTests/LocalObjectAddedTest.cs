@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectAddedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -81,7 +81,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var localFileStream = new MemoryStream(fileContent);
             byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
 
-            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
+            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(localFileStream);
 
             Mock<IDocument> document;
             this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
@@ -103,7 +103,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             using (var localFileStream = new MemoryStream(fileContent)) {
                 byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
 
-                fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
+                fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(localFileStream);
 
                 Mock<IDocument> document;
                 this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
@@ -344,7 +344,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var fileContent = new byte[1];
             var localFileStream = new MemoryStream(fileContent);
 
-            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read)).Returns(localFileStream);
+            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(localFileStream);
 
             Mock<IDocument> document;
             this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document, failsOnUploadContent: true);

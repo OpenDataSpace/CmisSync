@@ -96,7 +96,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         // Upload local content
                         updateRemoteDate = true;
                         try {
-                            obj.LastChecksum = LocalObjectChanged.UploadFile(fileInfo, doc, this.transmissionManager);
+                            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
+                            this.transmissionManager.AddTransmission(transmissionEvent);
+                            obj.LastChecksum = LocalObjectChanged.UploadFile(fileInfo, doc, transmissionEvent);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
                         } catch(Exception ex) {
                             if (ex.InnerException is CmisPermissionDeniedException) {
