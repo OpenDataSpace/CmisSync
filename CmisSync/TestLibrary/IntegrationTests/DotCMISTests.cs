@@ -160,6 +160,101 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void CheckoutTest(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId,
+            string binding)
+        {
+            string subFolderName = "subFolder";
+            string fileName = "testFile.bin";
+            string subFolderPath = remoteFolderPath.TrimEnd('/') + "/" + subFolderName;
+            string filePath = subFolderPath + "/" + fileName;
+
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            try {
+                IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
+                if (dir != null) {
+                    dir.DeleteTree(true, null, true);
+                }
+            } catch (CmisObjectNotFoundException) {
+            }
+
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            IFolder subFolder = folder.CreateFolder(subFolderName);
+
+            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
+            Assert.That(doc.IsVersionSeriesCheckedOut, Is.Not.True);
+
+            IObjectId checkoutId = doc.CheckOut();
+            doc.Refresh();
+            Assert.That(doc.IsVersionSeriesCheckedOut, Is.True);
+            Assert.That(doc.VersionSeriesCheckedOutId, Is.EqualTo(checkoutId.Id));
+
+            doc.CancelCheckOut();
+            doc.Refresh();
+            Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void CheckinTest(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId,
+            string binding)
+        {
+            string subFolderName = "subFolder";
+            string fileName = "testFile.bin";
+            string subFolderPath = remoteFolderPath.TrimEnd('/') + "/" + subFolderName;
+            string filePath = subFolderPath + "/" + fileName;
+
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            try {
+                IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
+                if (dir != null) {
+                    dir.DeleteTree(true, null, true);
+                }
+            } catch (CmisObjectNotFoundException) {
+            }
+
+            IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
+            IFolder subFolder = folder.CreateFolder(subFolderName);
+
+            string content = "testContent";
+            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
+            Assert.That(doc.IsVersionSeriesCheckedOut, Is.Not.True);
+
+            IObjectId checkoutId = doc.CheckOut();
+            doc.Refresh();
+            IDocument docCheckout = session.GetObject(checkoutId) as IDocument;
+            Assert.That(docCheckout, Is.Not.Null);
+
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = fileName;
+            contentStream.MimeType = MimeType.GetMIMEType(fileName);
+            contentStream.Length = content.Length;
+            for (int i = 0; i < 10; ++i) {
+                using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
+                    contentStream.Stream = memstream;
+                    docCheckout.AppendContentStream(contentStream, i == 9);
+                }
+                Assert.That(docCheckout.ContentStreamLength, Is.EqualTo(content.Length * (i + 2)));
+            }
+            docCheckout.CheckIn(true, null, null, "checkin");
+
+            doc.Refresh();
+            Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void RemovingRemoteFolderAndAddingADocumentToItShouldThrowException(
             string canonical_name,
             string localPath,
@@ -779,15 +874,17 @@ namespace TestLibrary.IntegrationTests
 
             ISession session = SessionFactory.NewInstance().CreateSession(cmisParameters);
             HashSet<string> filters = new HashSet<string>();
-            filters.Add("cmis:objectId");
-            filters.Add("cmis:name");
-            filters.Add("cmis:contentStreamFileName");
-            filters.Add("cmis:contentStreamLength");
-            filters.Add("cmis:lastModificationDate");
-            filters.Add("cmis:creationDate");
-            filters.Add("cmis:path");
-            filters.Add("cmis:changeToken");
+            filters.Add(PropertyIds.ObjectId);
+            filters.Add(PropertyIds.Name);
+            filters.Add(PropertyIds.ContentStreamFileName);
+            filters.Add(PropertyIds.ContentStreamLength);
+            filters.Add(PropertyIds.LastModificationDate);
+            filters.Add(PropertyIds.CreationDate);
+            filters.Add(PropertyIds.Path);
+            filters.Add(PropertyIds.ChangeToken);
             filters.Add(PropertyIds.SecondaryObjectTypeIds);
+            filters.Add(PropertyIds.IsVersionSeriesCheckedOut);
+            filters.Add(PropertyIds.VersionSeriesCheckedOutId);
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);

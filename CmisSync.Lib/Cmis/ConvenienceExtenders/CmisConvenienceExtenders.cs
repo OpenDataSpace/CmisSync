@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="CmisConvenienceExtenders.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -65,6 +65,26 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
 
             if (string.IsNullOrEmpty(content)) {
                 return folder.CreateDocument(properties, null, null);
+            }
+
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = name;
+            contentStream.MimeType = MimeType.GetMIMEType(name);
+            contentStream.Length = content.Length;
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
+                contentStream.Stream = stream;
+                return folder.CreateDocument(properties, contentStream, null);
+            }
+        }
+
+        public static IDocument CreateVersionedDocument(this IFolder folder, string name, string content)
+        {
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, name);
+            properties.Add(PropertyIds.ObjectTypeId, "VersionableType");
+
+            if (string.IsNullOrEmpty(content)) {
+                return folder.CreateDocument(properties, null, DotCMIS.Enums.VersioningState.Major);
             }
 
             ContentStream contentStream = new ContentStream();
