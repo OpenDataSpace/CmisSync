@@ -249,9 +249,14 @@ namespace TestLibrary.IntegrationTests
                 Assert.That(docCheckout.ContentStreamLength, Is.EqualTo(content.Length * (i + 2)));
             }
             docCheckout.CheckIn(true, null, null, "checkin");
+            docCheckout.Refresh();
+            Assert.That(docCheckout.IsVersionSeriesCheckedOut, Is.False);
 
             doc.Refresh();
             Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
+
+            doc = session.GetObjectByPath(filePath) as IDocument;
+            Assert.That(doc.Id, Is.EqualTo(checkoutId.Id));
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
