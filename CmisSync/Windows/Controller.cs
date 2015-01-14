@@ -110,11 +110,13 @@ namespace CmisSync
         /// <returns></returns>
         public override bool CreateCmisSyncFolder()
         {
-            if (Directory.Exists(FoldersPath))
+            if (Directory.Exists(FoldersPath)) {
+                File.SetAttributes(FoldersPath, File.GetAttributes(FoldersPath) & ~FileAttributes.System);
                 return false;
+            }
 
             Directory.CreateDirectory(FoldersPath);
-            File.SetAttributes(FoldersPath, File.GetAttributes(FoldersPath) | FileAttributes.System);
+            File.SetAttributes(FoldersPath, File.GetAttributes(FoldersPath) & ~FileAttributes.System);
 
             Logger.Info("Config | Created '" + FoldersPath + "'");
 
