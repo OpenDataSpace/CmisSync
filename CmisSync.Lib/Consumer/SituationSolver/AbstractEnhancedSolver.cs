@@ -112,7 +112,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="localFile">Local file.</param>
         /// <param name="doc">Remote document.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
-        protected static byte[] UploadFile(IFileInfo localFile, IDocument doc, FileTransmissionEvent transmissionEvent) {
+        protected static byte[] UploadFile(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent) {
             byte[] hash = null;
             IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });

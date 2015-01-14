@@ -107,6 +107,16 @@ namespace TestLibrary.TestUtils
                 .Returns(doc.Object);
         }
 
+        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC) {
+            doc.Setup(d => d.CheckOut()).Returns(() => {
+                doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
+                doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(docPWC.Object.Id);
+                Mock<IObjectId> objectIdPWC = new Mock<IObjectId>();
+                objectIdPWC.Setup(o => o.Id).Returns(docPWC.Object.Id);
+                return objectIdPWC.Object;
+            });
+        }
+
         public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {
             doc.VerifySetContentStream(Times.Once(), overwrite, refresh, mimeType);
         }
