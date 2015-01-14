@@ -181,14 +181,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         if (uuid != null) {
                             localFile.Uuid = uuid;
                         }
+
                         target.Delete();
                     }
+
                     localFile.MoveTo(target.FullName);
                     target.Refresh();
                 }
+
                 return true;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 localFile.Delete();
                 return false;
             }
@@ -210,14 +212,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }
                         return hashAlg.Hash;
-                    }
-                    catch (FileTransmission.AbortException ex) {
+                    } catch (FileTransmission.AbortException ex) {
                         target.Refresh();
                         SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
                     }
