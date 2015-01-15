@@ -60,6 +60,10 @@ namespace TestLibrary.TestUtils
                     s.FileName == fileName &&
                     s.Stream == new MemoryStream(content));
                 doc.Setup(d => d.GetContentStream()).Returns(stream);
+                doc.Setup(d => d.GetContentStream(It.IsAny<string>(), It.IsAny<long?>(), It.IsAny<long?>())).Callback((string id, long? offset, long? length) => {
+                    stream.Stream.Seek((long)offset, SeekOrigin.Begin);
+                    stream.Stream.SetLength((long)offset + (long)length);
+                }).Returns(stream);
             }
         }
 
@@ -101,6 +105,16 @@ namespace TestLibrary.TestUtils
                     (dict, b) =>
                     doc.Setup(d => d.LastModificationDate).Returns((DateTime?)dict[PropertyIds.LastModificationDate]))
                 .Returns(doc.Object);
+        }
+
+        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC) {
+            doc.Setup(d => d.CheckOut()).Returns(() => {
+                doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
+                doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(docPWC.Object.Id);
+                Mock<IObjectId> objectIdPWC = new Mock<IObjectId>();
+                objectIdPWC.Setup(o => o.Id).Returns(docPWC.Object.Id);
+                return objectIdPWC.Object;
+            });
         }
 
         public static void VerifySetContentStream(this Mock<IDocument> doc, bool overwrite = true, bool refresh = true, string mimeType = null) {

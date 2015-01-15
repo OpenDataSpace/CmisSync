@@ -135,8 +135,10 @@ SOURCES =  \
 	SelectiveIgnoreTests/IgnoredEntitiesStorageTest.cs \
 	SelectiveIgnoreTests/IgnoredEntityTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
+	StorageTests/DataBaseTests/EntitiesTests/FileTransmissionObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/MappedObjectsTest.cs \
+	StorageTests/DataBaseTests/FileTransmissionStorageTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
 	StorageTests/FileSystemTests/DateTimeConverterTest.cs \

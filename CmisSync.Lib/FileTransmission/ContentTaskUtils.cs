@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ContentTaskUtils.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,8 @@ namespace CmisSync.Lib.FileTransmission
     using System;
     using System.IO;
     using System.Security.Cryptography;
+
+    using CmisSync.Lib.Storage.Database;
 
     /// <summary>
     /// Content task utils.
@@ -62,8 +64,8 @@ namespace CmisSync.Lib.FileTransmission
         /// </summary>
         /// <returns>The downloader.</returns>
         /// <param name="chunkSize">Chunk size.</param>
-        public static IFileDownloader CreateDownloader(long chunkSize = 0) {
-            return chunkSize > 0 ? (IFileDownloader)new ChunkedDownloader(chunkSize) : (IFileDownloader)new SimpleFileDownloader();
+        public static IFileDownloader CreateDownloader(long chunkSize = 0, IFileTransmissionStorage storage = null) {
+            return chunkSize > 0 ? (IFileDownloader)new ChunkedDownloader(chunkSize, storage) : (IFileDownloader)new SimpleFileDownloader();
         }
     }
 }

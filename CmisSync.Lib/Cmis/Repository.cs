@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Repository.cs" company="GRAU DATA AG">
 //
 //   Copyright (C) 2012  Nicolas Raoul &lt;nicolas.raoul@aegif.jp&gt;
@@ -152,12 +152,16 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         protected MetaDataStorage storage;
 
+        protected FileTransmissionStorage fileTransmissionStorage;
+
         /// <summary>
         /// The connection scheduler.
         /// </summary>
         protected ConnectionScheduler connectionScheduler;
 
         private IFileSystemInfoFactory fileSystemFactory;
+
+        private ActivityListenerAggregator activityListener;
 
         static Repository()
         {
@@ -191,6 +195,7 @@ namespace CmisSync.Lib.Cmis
             }
 
             this.fileSystemFactory = new FileSystemInfoFactory();
+            this.activityListener = activityListener;
 
             // Initialize local variables
             this.RepoInfo = repoInfo;
@@ -218,6 +223,7 @@ namespace CmisSync.Lib.Cmis
 
             // Initialize storage
             this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+            this.fileTransmissionStorage = new FileTransmissionStorage(this.db);
 
             // Add ignore file/folder filter
             this.ignoredFoldersFilter = new IgnoredFoldersFilter { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
@@ -266,7 +272,7 @@ namespace CmisSync.Lib.Cmis
 
             this.ignoredStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), this.storage);
 
-            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.ignoredStorage, this.fileSystemFactory));
+            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
 
             this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
 
@@ -379,6 +385,26 @@ namespace CmisSync.Lib.Cmis
             {
                 if (disposing)
                 {
+                    bool transmissionRun = false;
+                    do
+                    {
+                        transmissionRun = false;
+                        List<FileTransmissionEvent> transmissionEvents = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
+                        foreach (FileTransmissionEvent transmissionEvent in transmissionEvents)
+                        {
+                            string localFolder = this.RepoInfo.LocalPath;
+                            if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString()))
+                            {
+                                localFolder = localFolder + System.IO.Path.DirectorySeparatorChar;
+                            }
+                            if (transmissionEvent.Path.StartsWith(localFolder))
+                            {
+                                transmissionRun = true;
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
+                            }
+                        }
+                    } while (transmissionRun);
+
                     this.connectionScheduler.Dispose();
                     this.Scheduler.Dispose();
                     this.WatcherProducer.Dispose();

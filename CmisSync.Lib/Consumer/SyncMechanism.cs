@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SyncMechanism.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -47,6 +47,7 @@ namespace CmisSync.Lib.Consumer
 
         private ISession session;
         private IMetaDataStorage storage;
+        private IFileTransmissionStorage transmissionStorage;
         private ActivityListenerAggregator activityListener;
         private IFilterAggregator filters;
 
@@ -67,6 +68,7 @@ namespace CmisSync.Lib.Consumer
             ISyncEventQueue queue,
             ISession session,
             IMetaDataStorage storage,
+            IFileTransmissionStorage transmissionStorage,
             ActivityListenerAggregator activityListener,
             IFilterAggregator filters,
             ISolver[,] solver = null) : base(queue)
@@ -79,7 +81,13 @@ namespace CmisSync.Lib.Consumer
                 throw new ArgumentNullException("Given storage is null");
             }
 
-            if (localSituation == null) {
+            if (transmissionStorage == null)
+            {
+                throw new ArgumentNullException("Given fileTransmissionStorage is null");
+            }
+
+            if (localSituation == null)
+            {
                 throw new ArgumentNullException("Given local situation detection is null");
             }
 
@@ -97,6 +105,7 @@ namespace CmisSync.Lib.Consumer
 
             this.session = session;
             this.storage = storage;
+            this.transmissionStorage = transmissionStorage;
             this.LocalSituation = localSituation;
             this.RemoteSituation = remoteSituation;
             this.activityListener = activityListener;
@@ -148,7 +157,7 @@ namespace CmisSync.Lib.Consumer
         {
             int dim = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[dim, dim];
-            var changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
+            var changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
             var renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
             var renameChangeSolver = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, changeChangeSolver);
 
@@ -159,9 +168,9 @@ namespace CmisSync.Lib.Consumer
             solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed(this.session, this.storage);
             solver[(int)SituationType.REMOVED, (int)SituationType.NOCHANGE] = new LocalObjectDeleted(this.session, this.storage);
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.ADDED] = new RemoteObjectAdded(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
 
-            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.NOCHANGE, (int)SituationType.CHANGED] = new RemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
             solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] = changeChangeSolver;
             solver[(int)SituationType.MOVED, (int)SituationType.CHANGED] = new LocalObjectMovedRemoteObjectChanged(this.session, this.storage, renameChangeSolver, changeChangeSolver);
             solver[(int)SituationType.RENAMED, (int)SituationType.CHANGED] = renameChangeSolver;

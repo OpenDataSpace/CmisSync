@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AbstractEnhancedSolverTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -113,7 +113,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             }
 
             public byte[] Upload(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
-                return AbstractEnhancedSolver.UploadFile(localFile, doc, transmissionManager);
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                transmissionManager.AddTransmission(transmissionEvent);
+                return AbstractEnhancedSolver.UploadFile(localFile, ref doc, transmissionEvent);
             }
 
             public override void Solve(

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RemoteObjectChangedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -56,19 +56,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
             this.fsFactory = new Mock<IFileSystemInfoFactory>();
-            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.manager, this.fsFactory.Object);
+            this.underTest = new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager, this.fsFactory.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new RemoteObjectChanged(this.session.Object, this.storage.Object, null));
+            Assert.Throws<ArgumentNullException>(() => new RemoteObjectChanged(this.session.Object, this.storage.Object, null, null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorTakesQueueAndTransmissionManager()
         {
-            new RemoteObjectChanged(this.session.Object, this.storage.Object, this.manager);
+            new RemoteObjectChanged(this.session.Object, this.storage.Object, null, this.manager);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -232,7 +232,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -295,7 +295,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
 
                 this.SetupContentWithCallBack(remoteObject, newContent, fileName).Callback(
                     () =>
@@ -365,7 +365,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -427,7 +427,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, new DateTime(0));
                 localFile.Setup(f => f.FullName).Returns(path);
                 var cacheFile = this.fsFactory.SetupDownloadCacheFile(localFile.Object);
-                cacheFile.Setup(c => c.Open(FileMode.Create, FileAccess.Write, FileShare.None)).Returns(stream);
+                cacheFile.Setup(c => c.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(stream);
                 cacheFile.Setup(
                     c =>
                     c.Replace(localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(

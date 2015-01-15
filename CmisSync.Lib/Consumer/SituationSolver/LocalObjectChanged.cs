@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChanged.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -111,7 +111,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                 var doc = remoteId as IDocument;
                 try {
-                    mappedObject.LastChecksum = AbstractEnhancedSolver.UploadFile(localFile, doc, this.transmissionManager);
+                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    this.transmissionManager.AddTransmission(transmissionEvent);
+                    mappedObject.LastChecksum = AbstractEnhancedSolver.UploadFile(localFile, ref doc, transmissionEvent);
+                    mappedObject.RemoteObjectId = doc.Id;
                 } catch(Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));

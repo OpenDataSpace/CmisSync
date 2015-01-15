@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectAdded.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -138,26 +138,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     Stopwatch watch = new Stopwatch();
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                     watch.Start();
-                    IFileUploader uploader = ContentTaskUtils.CreateUploader();
-                    using (SHA1 hashAlg = new SHA1Managed()) {
-                        try {
-                            using (var fileStream = localFile.Open(FileMode.Open, FileAccess.Read)) {
-                                uploader.UploadFile(addedObject as IDocument, fileStream, transmissionEvent, hashAlg);
-                                mapped.ChecksumAlgorithmName = "SHA-1";
-                                mapped.LastChecksum = hashAlg.Hash;
-                            }
-                        } catch (Exception ex) {
-                            if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
-                                OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
-                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                                return;
-                            }
-
-                            transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                            throw;
+                    try {
+                        IDocument doc = addedObject as IDocument;
+                        mapped.LastChecksum = UploadFile(localFile, ref doc, transmissionEvent);
+                        mapped.ChecksumAlgorithmName = "SHA-1";
+                        mapped.RemoteObjectId = doc.Id;
+                        addedObject = doc;
+                    } catch (Exception ex) {
+                        if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
+                            OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
+                            return;
                         }
+                        throw;
                     }
-
                     watch.Stop();
 
                     if (this.ServerCanModifyDateTimes) {
@@ -175,9 +168,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
                     this.Storage.SaveMappedObject(mapped);
                     OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
+                } else {
+                    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 }
-
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
 
             completewatch.Stop();

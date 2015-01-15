@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AllHandlersIT.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -371,7 +371,7 @@ namespace TestLibrary.IntegrationTests
             var invalidFolderNameFilter = new InvalidFolderNameFilter();
             var filterAggregator = new FilterAggregator(ignoreFileNamesFilter, ignoreFolderNameFilter, invalidFolderNameFilter, ignoreFolderFilter);
 
-            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, activityAggregator, filterAggregator);
+            var syncMechanism = new SyncMechanism(localDetection, remoteDetection, queue, session.Object, storage, Mock.Of<IFileTransmissionStorage>(), activityAggregator, filterAggregator);
             manager.AddEventHandler(syncMechanism);
 
             var remoteFolder = MockSessionUtil.CreateCmisFolder();

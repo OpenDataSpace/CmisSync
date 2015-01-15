@@ -55,8 +55,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public RemoteObjectAdded(
             ISession session,
             IMetaDataStorage storage,
+            IFileTransmissionStorage transmissionStorage,
             ActiveActivitiesManager transmissonManager,
-            IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
             if (transmissonManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
@@ -143,7 +144,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 IDocument remoteDoc = remoteId as IDocument;
                 var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
                 this.manager.AddTransmission(transmissionEvent);
-                byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmissionEvent);
+                byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmissionEvent, this.fsFactory);
 
                 try {
                     cacheFile.Uuid = guid;

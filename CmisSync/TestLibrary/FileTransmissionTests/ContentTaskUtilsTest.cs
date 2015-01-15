@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ContentTaskUtilsTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@ namespace TestLibrary.FileTransmissionTests
     using System.Security.Cryptography;
 
     using CmisSync.Lib.FileTransmission;
+    using CmisSync.Lib.Storage.Database;
 
     using Moq;
 
@@ -58,7 +59,13 @@ namespace TestLibrary.FileTransmissionTests
         [Test, Category("Fast")]
         public void CreateNewChunkedDownloader() {
             long chunkSize = 1024;
-            var downloader = ContentTaskUtils.CreateDownloader(chunkSize);
+            var downloader = ContentTaskUtils.CreateDownloader(chunkSize, Mock.Of<IFileTransmissionStorage>());
+            Assert.IsTrue(downloader is ChunkedDownloader);
+            Assert.AreEqual(chunkSize, (downloader as ChunkedDownloader).ChunkSize);
+            downloader = ContentTaskUtils.CreateDownloader(chunkSize, null);
+            Assert.IsTrue(downloader is ChunkedDownloader);
+            Assert.AreEqual(chunkSize, (downloader as ChunkedDownloader).ChunkSize);
+            downloader = ContentTaskUtils.CreateDownloader(chunkSize);
             Assert.IsTrue(downloader is ChunkedDownloader);
             Assert.AreEqual(chunkSize, (downloader as ChunkedDownloader).ChunkSize);
         }

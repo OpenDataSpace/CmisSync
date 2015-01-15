@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedRemoteObjectChanged.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -56,8 +56,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChangedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
+            IFileTransmissionStorage transmissionStorage,
             ActiveActivitiesManager transmissionManager,
-            IFileSystemInfoFactory fsFactory = null) : base(session, storage) {
+            IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
@@ -95,8 +96,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         // Upload local content
                         updateRemoteDate = true;
                         try {
-                            obj.LastChecksum = LocalObjectChanged.UploadFile(fileInfo, doc, this.transmissionManager);
+                            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
+                            this.transmissionManager.AddTransmission(transmissionEvent);
+                            obj.LastChecksum = LocalObjectChanged.UploadFile(fileInfo, ref doc, transmissionEvent);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
+                            obj.RemoteObjectId = doc.Id;
                         } catch(Exception ex) {
                             if (ex.InnerException is CmisPermissionDeniedException) {
                                 OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", fileInfo.FullName), ex.InnerException);

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="EventManagerInitializer.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -51,6 +51,7 @@ namespace CmisSync.Lib
         private ContentChangeEventAccumulator ccaccumulator;
         private RepoInfo repoInfo;
         private IMetaDataStorage storage;
+        private IFileTransmissionStorage fileTransmissionStorage;
         private ContentChanges contentChanges;
         private RemoteObjectFetcher remoteFetcher;
         private DescendantsCrawler crawler;
@@ -80,17 +81,24 @@ namespace CmisSync.Lib
         public EventManagerInitializer(
             ISyncEventQueue queue,
             IMetaDataStorage storage,
+            IFileTransmissionStorage fileTransmissionStorage,
+            IIgnoredEntitiesStorage ignoredStorage,
             RepoInfo repoInfo,
             IFilterAggregator filter,
             ActivityListenerAggregator activityListener,
-            IIgnoredEntitiesStorage ignoredStorage,
             IFileSystemInfoFactory fsFactory = null) : base(queue)
         {
             if (storage == null) {
                 throw new ArgumentNullException("storage null");
             }
 
-            if (repoInfo == null) {
+            if (fileTransmissionStorage == null)
+            {
+                throw new ArgumentNullException("fileTransmissionStorage null");
+            }
+
+            if (repoInfo == null)
+            {
                 throw new ArgumentNullException("Repoinfo null");
             }
 
@@ -116,6 +124,7 @@ namespace CmisSync.Lib
             this.repoInfo = repoInfo;
             this.storage = storage;
             this.ignoredStorage = ignoredStorage;
+            this.fileTransmissionStorage = fileTransmissionStorage;
             this.activityListener = activityListener;
         }
 
@@ -222,7 +231,7 @@ namespace CmisSync.Lib
                 var localDetection = new LocalSituationDetection();
                 var remoteDetection = new RemoteSituationDetection();
 
-                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.activityListener, this.filter);
+                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.fileTransmissionStorage, this.activityListener, this.filter);
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);

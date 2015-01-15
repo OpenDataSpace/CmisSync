@@ -51,10 +51,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis Session.</param>
         /// <param name="storage">Meta Data Storage.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">Enables the last modification date sync.</param>
+        /// <param name="transmissionStorage">File Transmission Storage.</param>
         public AbstractEnhancedSolver(
             ISession session,
-            IMetaDataStorage storage)
+            IMetaDataStorage storage,
+            IFileTransmissionStorage transmissionStorage = null)
         {
             this.Storage = storage;
             if (session == null) {
@@ -67,6 +68,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
             this.Session = session;
             this.Storage = storage;
+            this.TransmissionStorage = transmissionStorage;
             this.ServerCanModifyDateTimes = this.Session.IsServerAbleToUpdateModificationDate();
         }
 
@@ -81,6 +83,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <value>The storage.</value>
         protected IMetaDataStorage Storage { get; private set; }
+
+        private IFileTransmissionStorage TransmissionStorage { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this cmis server can modify date times.
@@ -108,11 +112,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="localFile">Local file.</param>
         /// <param name="doc">Remote document.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
-        protected static byte[] UploadFile(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
+        protected static byte[] UploadFile(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent) {
             byte[] hash = null;
             IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
-            FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-            transmissionManager.AddTransmission(transmissionEvent);
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
             using (var hashAlg = new SHA1Managed()) {
                 try {
@@ -130,30 +132,109 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             return hash;
         }
 
-        protected static byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent) {
-            try {
-                using (SHA1 hashAlg = new SHA1Managed()) {
-                    using (var filestream = target.Open(FileMode.Create, FileAccess.Write, FileShare.None))
-                    using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
-                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
-                        return hashAlg.Hash;
-                    }
-                }
+        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, FileTransmissionEvent transmissionEvent)
+        {
+            if (TransmissionStorage == null) {
+                return;
             }
-            catch (Exception ex) {
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                throw;
+
+            IFileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, target, remoteDocument);
+            obj.ChecksumAlgorithmName = "SHA-1";
+            obj.LastChecksum = hash;
+
+            TransmissionStorage.SaveObject(obj);
+        }
+
+        private bool LoadCacheFile(IFileInfo target, IDocument remoteDocument, IFileSystemInfoFactory fsFactory) {
+            if (TransmissionStorage == null) {
+                return false;
+            }
+
+            IFileTransmissionObject obj = TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
+            if (obj == null) {
+                return false;
+            }
+
+            IFileInfo localFile = fsFactory.CreateFileInfo(obj.LocalPath);
+            if (!localFile.Exists) {
+                return false;
+            }
+
+            if (obj.LastChangeToken != remoteDocument.ChangeToken || localFile.Length != obj.LastContentSize) {
+                localFile.Delete();
+                return false;
+            }
+
+            try {
+                byte[] localHash;
+                using (var f = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
+                    localHash = SHA1Managed.Create().ComputeHash(f);
+                }
+                if (!localHash.SequenceEqual(obj.LastChecksum)) {
+                    localFile.Delete();
+                    return false;
+                }
+
+                if (target.FullName != obj.LocalPath) {
+                    if (target.Exists) {
+                        Guid? uuid = target.Uuid;
+                        if (uuid != null) {
+                            localFile.Uuid = uuid;
+                        }
+
+                        target.Delete();
+                    }
+
+                    localFile.MoveTo(target.FullName);
+                    target.Refresh();
+                }
+
+                return true;
+            } catch (Exception ex) {
+                localFile.Delete();
+                return false;
             }
         }
 
-        protected static byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager, ILog logger) {
+        protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent, IFileSystemInfoFactory fsFactory) {
+            if (!LoadCacheFile(target, remoteDocument, fsFactory)) {
+                if (target.Exists) {
+                    target.Delete();
+                }
+            }
+
+            using (SHA1 hashAlg = new SHA1Managed()) {
+                using (var filestream = target.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+                using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
+                    try {
+                        download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
+                        if (TransmissionStorage != null) {
+                            TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+                        }
+                    } catch (FileTransmission.AbortException ex) {
+                        target.Refresh();
+                        SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        throw;
+                    } catch (Exception ex) {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        throw;
+                    }
+                }
+
+                target.Refresh();
+                return hashAlg.Hash;
+            }
+        }
+
+        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ActiveActivitiesManager transmissonManager, ILog logger) {
             // Download changes
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
             var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
-            hash = DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent);
+            hash = DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
 
             try {
