@@ -55,6 +55,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
+            ignoredFolder.Refresh();
             ignoredFolder.Rename(newFolderName);
 
             Thread.Sleep(3000);
