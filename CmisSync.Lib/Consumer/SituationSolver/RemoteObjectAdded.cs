@@ -174,11 +174,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             }
                         } else {
                             IFileInfo conflictFile = this.fsFactory.CreateConflictFileInfo(file);
-                            IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
                             try {
-                                targetFile.Uuid = guid;
-                            } catch (RestoreModificationDateException restoreException) {
-                                Logger.Debug("Could not retore the last modification date of " + targetFile.FullName, restoreException);
+                                IFileInfo targetFile = cacheFile.Replace(file, conflictFile, true);
+                                try {
+                                    targetFile.Uuid = guid;
+                                } catch (RestoreModificationDateException restoreException) {
+                                    Logger.Debug("Could not retore the last modification date of " + targetFile.FullName, restoreException);
+                                }
+                            } catch (Exception ex) {
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                                throw;
                             }
 
                             try {
