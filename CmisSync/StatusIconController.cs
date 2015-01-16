@@ -30,7 +30,7 @@ namespace CmisSync {
     using CmisSync.Lib.Config;
 
     /// <summary>
-    /// State of the CmisSync status icon.
+    /// State of the DataSpace Sync status icon.
     /// </summary>
     public enum IconState {
         Idle,
