@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Events Created By ContentChange Eventhandler
     /// </summary>
-    public class ContentChangeEvent : ISyncEvent
+    public class ContentChangeEvent : ICountableEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.ContentChangeEvent"/> class.
@@ -40,15 +40,12 @@ namespace CmisSync.Lib.Events
         /// <param name='objectId'>
         /// Object identifier.
         /// </param>
-        public ContentChangeEvent(DotCMIS.Enums.ChangeType? type, string objectId)
-        {
-            if (objectId == null)
-            {
+        public ContentChangeEvent(DotCMIS.Enums.ChangeType? type, string objectId) {
+            if (objectId == null) {
                 throw new ArgumentNullException("Argument null in ContenChangeEvent Constructor", "path");
             }
 
-            if (type == null)
-            {
+            if (type == null) {
                 throw new ArgumentNullException("Argument null in ContenChangeEvent Constructor", "type");
             }
 
@@ -81,13 +78,23 @@ namespace CmisSync.Lib.Events
         public ICmisObject CmisObject { get; private set; }
 
         /// <summary>
+        /// Gets the category of the event. This can be used to differ between multiple event types.
+        /// The returned value should never ever change its value after requesting it the first time.
+        /// </summary>
+        /// <value>The event category is "DetectedChange".</value>
+        public string Category {
+            get {
+                return "DetectedChange";
+            }
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.ContentChangeEvent"/>.
         /// </summary>
         /// <returns>
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.ContentChangeEvent"/>.
         /// </returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("ContenChangeEvent with type \"{0}\" and ID \"{1}\"", this.Type, this.ObjectId);
         }
 
@@ -97,8 +104,7 @@ namespace CmisSync.Lib.Events
         /// <param name='session'>
         /// Session from where the object should be requested.
         /// </param>
-        public void UpdateObject(ISession session)
-        {
+        public void UpdateObject(ISession session) {
            this.CmisObject = session.GetObject(this.ObjectId, OperationContextFactory.CreateNonCachingPathIncludingContext(session));
         }
     }

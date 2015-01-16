@@ -32,7 +32,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Sync event queue.
     /// </summary>
-    public class SyncEventQueue : IDisposableSyncEventQueue, ICountingQueue {
+    public class SyncEventQueue : ICountingQueue {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
         private Task consumer;
@@ -42,6 +42,7 @@ namespace CmisSync.Lib.Queueing
         private List<IObserver<int>> fullCounterObservers;
         private int fullCounter = 0;
         private List<IObserver<Tuple<string, int>>> categoryCounterObservers;
+        private ConcurrentDictionary<string, int> categoryCounter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/> class.
@@ -54,6 +55,7 @@ namespace CmisSync.Lib.Queueing
 
             this.fullCounterObservers = new List<IObserver<int>>();
             this.categoryCounterObservers = new List<IObserver<Tuple<string, int>>>();
+            this.categoryCounter = new ConcurrentDictionary<string, int>();
             this.EventManager = manager;
             this.consumer = new Task(() => this.Listen(this.queue, this.EventManager, this.suspendHandle));
             this.consumer.Start();
@@ -103,9 +105,19 @@ namespace CmisSync.Lib.Queueing
 
             try {
                 if (newEvent is ICountableEvent) {
-                    Interlocked.Increment(ref this.fullCounter);
-                    foreach (var observer in this.fullCounterObservers) {
-                        observer.OnNext(this.fullCounter);
+                    string category = (newEvent as ICountableEvent).Category;
+                    if (!string.IsNullOrEmpty(category)) {
+                        Interlocked.Increment(ref this.fullCounter);
+                        foreach (var observer in this.fullCounterObservers) {
+                            observer.OnNext(this.fullCounter);
+                        }
+
+                        var value = this.categoryCounter.AddOrUpdate(category, 1, delegate(string cat, int counter) {
+                            return counter + 1;
+                        });
+                        foreach (var observer in this.categoryCounterObservers) {
+                            observer.OnNext(new Tuple<string, int>(category, value));
+                        }
                     }
                 }
 
@@ -211,6 +223,10 @@ namespace CmisSync.Lib.Queueing
                 throw new ArgumentNullException("Given observer is null");
             }
 
+            if (!this.categoryCounterObservers.Contains(observer)) {
+                this.categoryCounterObservers.Add(observer);
+            }
+
             return new Unsubscriber<Tuple<string, int>>(this.categoryCounterObservers, observer);
         }
 
@@ -270,12 +286,22 @@ namespace CmisSync.Lib.Queueing
                         }
 
                         manager.Handle(syncEvent);
-                        Interlocked.Decrement(ref this.fullCounter);
+                        if (syncEvent is ICountableEvent) {
+                            string category = (syncEvent as ICountableEvent).Category;
+                            if (!string.IsNullOrEmpty(category)) {
+                                Interlocked.Decrement(ref this.fullCounter);
+                                foreach (var observer in this.fullCounterObservers) {
+                                    observer.OnNext(this.fullCounter);
+                                }
 
-                        foreach (var observer in this.fullCounterObservers) {
-                            observer.OnNext(this.fullCounter);
+                                var value = this.categoryCounter.AddOrUpdate(category, 0, delegate(string cat, int counter) {
+                                    return counter - 1;
+                                });
+                                foreach (var observer in this.categoryCounterObservers) {
+                                    observer.OnNext(new Tuple<string, int>(category, value));
+                                }
+                            }
                         }
-
                     } catch(Exception e) {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
                     }

@@ -26,7 +26,7 @@ namespace CmisSync.Lib.Events
     /// This event should be used by scheduler to periodically start sync processes.
     /// If any inconsitancy is detected, it could also be used by the algorithm itself to force a full sync on the next sync execution.
     /// </summary>
-    public class StartNextSyncEvent : ISyncEvent, IRemoveFromLoggingEvent
+    public class StartNextSyncEvent : IRemoveFromLoggingEvent, ICountableEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.StartNextSyncEvent"/> class.
@@ -52,13 +52,23 @@ namespace CmisSync.Lib.Events
         public bool FullSyncRequested { get; private set; }
 
         /// <summary>
+        /// Gets the category of the event. This can be used to differ between multiple event types.
+        /// The returned value should never ever change its value after requesting it the first time.
+        /// </summary>
+        /// <value>The event category is "SyncRequested" if a full sync should be started, otherwise it returns an empty string.</value>
+        public string Category {
+            get {
+                return this.FullSyncRequested ? "SyncRequested" : string.Empty;
+            }
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.StartNextSyncEvent"/>.
         /// </summary>
         /// <returns>
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.StartNextSyncEvent"/>.
         /// </returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("[StartNextSyncEvent: FullSyncRequested={0}]", this.FullSyncRequested);
         }
     }

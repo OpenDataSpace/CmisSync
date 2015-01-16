@@ -203,7 +203,7 @@ namespace TestLibrary.QueueingTests
             manager.Verify(m => m.Handle(countableEvent), Times.Once);
         }
 
-        [Test, Category("Medium"), Ignore("TODO")]
+        [Test, Category("Medium")]
         public void SubscribeForCategoryCountableEventsAndGetInformedOnAddEvent() {
             string category = "test";
             var countableEvent = Mock.Of<ICountableEvent>(e => e.Category == category);

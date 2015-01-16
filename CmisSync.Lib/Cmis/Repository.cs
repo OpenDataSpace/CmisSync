@@ -160,8 +160,7 @@ namespace CmisSync.Lib.Cmis
 
         private ActivityListenerAggregator activityListener;
 
-        static Repository()
-        {
+        static Repository() {
             DBreezeInitializerSingleton.Init();
         }
 
@@ -170,8 +169,7 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
-        public Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener) : this(repoInfo, activityListener, false, CreateQueue())
-        {
+        public Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener) : this(repoInfo, activityListener, false, CreateQueue()) {
         }
 
         /// <summary>
@@ -181,7 +179,7 @@ namespace CmisSync.Lib.Cmis
         /// <param name="activityListener">Activity listener.</param>
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="queue">Event Queue.</param>
-        protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, IDisposableSyncEventQueue queue)
+        protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, ICountingQueue queue)
         {
             if (repoInfo == null) {
                 throw new ArgumentNullException("Given repoInfo is null");
@@ -205,7 +203,6 @@ namespace CmisSync.Lib.Cmis
             }
 
             this.Queue = queue;
-
             this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
 
             // Create Database connection
@@ -310,7 +307,7 @@ namespace CmisSync.Lib.Cmis
         /// Use this to notifiy events for this repository.
         /// </summary>
         /// <value>The queue.</value>
-        public IDisposableSyncEventQueue Queue { get; protected set; }
+        public ICountingQueue Queue { get; protected set; }
 
         /// <summary>
         /// Gets the watcherproducer of the local filesystem for changes.
@@ -422,7 +419,7 @@ namespace CmisSync.Lib.Cmis
             }
         }
 
-        private static IDisposableSyncEventQueue CreateQueue() {
+        private static ICountingQueue CreateQueue() {
             var manager = new SyncEventManager();
             return new SyncEventQueue(manager);
         }
