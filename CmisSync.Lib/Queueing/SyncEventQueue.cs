@@ -31,7 +31,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Sync event queue.
     /// </summary>
-    public class SyncEventQueue : IDisposableSyncEventQueue {
+    public class SyncEventQueue : IDisposableSyncEventQueue, ICountingQueue {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueue));
         private BlockingCollection<ISyncEvent> queue = new BlockingCollection<ISyncEvent>();
         private Task consumer;
@@ -168,6 +168,14 @@ namespace CmisSync.Lib.Queueing
         public void Continue() {
             this.suspend = false;
             this.suspendHandle.Set();
+        }
+
+        public IDisposable Subscribe(IObserver<int> observer) {
+            return null;
+        }
+
+        public IDisposable Subscribe(IObserver<Tuple<string, int>> observer) {
+            return null;
         }
 
         /// <summary>

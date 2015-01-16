@@ -261,6 +261,7 @@
     <Compile Include="Events\InteractionNeededEvent.cs" />
     <Compile Include="Consumer\InteractionNeededException.cs" />
     <Compile Include="Events\ICountableEvent.cs" />
+    <Compile Include="Queueing\ICountingQueue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
