@@ -208,7 +208,7 @@ namespace CmisSync.Lib.Streams
         /// </param>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            //  for it may be chained before CryptoStream, we should write the content for CryptoStream has calculated the hash of the content
+            // for it may be chained before CryptoStream, we should write the content for CryptoStream has calculated the hash of the content
             this.Stream.Write(buffer, offset, count);
             this.CalculateBandwidth(count);
 
@@ -220,8 +220,8 @@ namespace CmisSync.Lib.Streams
 #endregion
 
         /// <summary>
-            /// Close this instance and calculates the bandwidth of the last second.
-            /// </summary>
+        /// Close this instance and calculates the bandwidth of the last second.
+        /// </summary>
         public override void Close()
         {
             long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
