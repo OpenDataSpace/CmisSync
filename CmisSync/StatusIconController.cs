@@ -19,18 +19,15 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System;
-using System.IO;
-using System.Timers;
-
-using Threading = System.Threading;
-
-using System.Globalization;
-
-using System.Diagnostics;
-using CmisSync.Lib.Config;
-
 namespace CmisSync {
+    using System;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using Threading = System.Threading;
+    using System.Timers;
+
+    using CmisSync.Lib.Config;
 
     /// <summary>
     /// State of the CmisSync status icon.
@@ -43,9 +40,8 @@ namespace CmisSync {
         Error
     }
 
-
     /// <summary>
-    /// MVC controller for the CmisSync status icon.
+    /// MVC controller for the DataSpace Sync status icon.
     /// </summary>
     public class StatusIconController {
 
@@ -67,10 +63,9 @@ namespace CmisSync {
         public delegate void UpdateTransmissionMenuEventHandler();
 
         /// <summary>
-        /// Current state of the CmisSync tray icon.
+        /// Current state of the DataSpace Sync tray icon.
         /// </summary>
         public IconState CurrentState = IconState.Idle;
-
 
         /// <summary>
         /// Warn some anormal cases
@@ -90,27 +85,23 @@ namespace CmisSync {
 
         private bool warning;
 
-
         /// <summary>
-        /// Short text shown at the top of the menu of the CmisSync tray icon.
+        /// Short text shown at the top of the menu of the DataSpace Sync tray icon.
         /// </summary>
         public string StateText = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
-
 
         /// <summary>
         /// Maximum number of remote folders in the menu before the overflow menu appears.
         /// </summary>
         public readonly int MenuOverflowThreshold = 9;
 
-
         /// <summary>
         /// Minimum number of remote folders to populate the overflow menu.
         /// </summary>
         public readonly int MinSubmenuOverflowCount = 3;
 
-
         /// <summary>
-        /// The list of remote folders to show in the CmisSync tray menu.
+        /// The list of remote folders to show in the DataSpace Sync tray menu.
         /// </summary>
         public string [] Folders {
             get {
@@ -123,9 +114,8 @@ namespace CmisSync {
             }
         }
 
-
         /// <summary>
-        /// The list of remote folders to show in the CmisSync tray's overflow menu.
+        /// The list of remote folders to show in the DataSpace Sync tray's overflow menu.
         /// </summary>
         public string[] OverflowFolders {
             get {
@@ -144,14 +134,12 @@ namespace CmisSync {
         /// </summary>
         private Timer animation;
 
-
         /// <summary>
         /// Current frame of the animation being shown.
         /// First frame is the still icon.
         /// </summary>
         private int animation_frame_number;
-
-
+        
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -191,7 +179,6 @@ namespace CmisSync {
                 this.animation.Stop ();
 
                 UpdateIconEvent (0);
-//                UpdateMenuEvent (CurrentState);
             };
 
             Program.Controller.OnTransmissionListChanged += delegate {
@@ -216,31 +203,19 @@ namespace CmisSync {
             Program.Controller.OpenCmisSyncFolder (reponame);
         }
 
-        /*
-        /// <summary>
-        /// With the default web browser, open the remote folder of a CmisSync synchronized folder.
-        /// </summary>
-        public void RemoteFolderClicked(string reponame)
-        {
-            Program.Controller.OpenRemoteFolder(reponame);
-        }*/
-
-
         /// <summary>
         /// Open the remote folder addition wizard.
         /// </summary>
         public void AddRemoteFolderClicked () {
             Program.Controller.ShowSetupWindow (PageType.Add1);
         }
-
-
+        
         /// <summary>
         /// Show the Setting dialog.
         /// </summary>
         public void SettingClicked() {
             Program.Controller.ShowSettingWindow();
         }
-
 
         /// <summary>
         /// Show the Transmission window.
@@ -249,14 +224,12 @@ namespace CmisSync {
             Program.Controller.ShowTransmissionWindow();
         }
 
-
         /// <summary>
-        /// Open the CmisSync log with a text file viewer.
+        /// Open the DataSpace Sync log with a text file viewer.
         /// </summary>
         public void LogClicked() {
             Program.Controller.ShowLog(ConfigManager.CurrentConfig.GetLogFilePath());
         }
-
 
         /// <summary>
         /// Show the About dialog.
@@ -265,9 +238,8 @@ namespace CmisSync {
             Program.Controller.ShowAboutWindow();
         }
 
-
         /// <summary>
-        /// Quit CmisSync.
+        /// Quit DataSpace Sync.
         /// </summary>
         public void QuitClicked() {
             Program.Controller.Quit ();
