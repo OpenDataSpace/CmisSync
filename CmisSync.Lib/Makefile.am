@@ -93,6 +93,7 @@ SOURCES =  \
 	Events/FSEvent.cs \
 	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
+	Events/ICountableEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
