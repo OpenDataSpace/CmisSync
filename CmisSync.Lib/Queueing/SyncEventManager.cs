@@ -39,15 +39,13 @@ namespace CmisSync.Lib.Queueing
         /// <param name='handler'>
         /// Handler to add.
         /// </param>
-        public void AddEventHandler(SyncEventHandler handler)
-        {
+        public void AddEventHandler(SyncEventHandler handler) {
             // The zero-based index of item in the sorted List<T>,
             // if item is found; otherwise, a negative number that
             // is the bitwise complement of the index of the next
             // element that is larger than item or.
             int pos = this.handler.BinarySearch(handler);
-            if (pos < 0)
-            {
+            if (pos < 0) {
                 pos = ~pos;
             }
 
@@ -60,14 +58,11 @@ namespace CmisSync.Lib.Queueing
         /// <param name='e'>
         /// Event to handle.
         /// </param>
-        public void Handle(ISyncEvent e)
-        {
-            for (int i = this.handler.Count - 1; i >= 0; i--)
-            {
+        public void Handle(ISyncEvent e) {
+            for (int i = this.handler.Count - 1; i >= 0; i--) {
                 var h = this.handler[i];
-                if (this.handler[i].Handle(e))
-                {
-                    if(!(e is IRemoveFromLoggingEvent)) {
+                if (this.handler[i].Handle(e)) {
+                    if (!(e is IRemoveFromLoggingEvent)) {
                         Logger.Debug(string.Format("Event {0} was handled by {1}", e.ToString(), this.handler[i].GetType()));
                     }
 
@@ -82,8 +77,7 @@ namespace CmisSync.Lib.Queueing
         /// <param name='handler'>
         /// Handler to remove.
         /// </param>
-        public void RemoveEventHandler(SyncEventHandler handler)
-        {
+        public void RemoveEventHandler(SyncEventHandler handler) {
             this.handler.Remove(handler);
         }
     }

@@ -25,7 +25,7 @@ namespace CmisSync.Lib.Events
     /// Instances of this event are able to be counted by categories.
     /// Every event, which should be able to be tracked inside the SyncEventQueue must return a category.
     /// </summary>
-    public interface ICountableEvent
+    public interface ICountableEvent : ISyncEvent
     {
         /// <summary>
         /// Gets the category of the event. This can be used to differ between multiple event types.
