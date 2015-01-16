@@ -1,6 +1,8 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="StatusIconController.cs" company="GRAU DATA AG">
 //
+//   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
+//   Copyright (C) 2013  GRAUDATA AG <info@graudata.com>
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
 //   the Free Software Foundation, either version 3 of the License, or
@@ -16,22 +18,6 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-//   CmisSync, a collaboration and sharing tool.
-//   Copyright (C) 2010  Hylke Bons <hylkebons@gmail.com>
-//
-//   This program is free software: you can redistribute it and/or modify
-//   it under the terms of the GNU General Public License as published by
-//   the Free Software Foundation, either version 3 of the License, or
-//   (at your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//   GNU General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 
 using System;
 using System.IO;
@@ -89,21 +75,19 @@ namespace CmisSync {
         /// <summary>
         /// Warn some anormal cases
         /// </summary>
-        public bool Warning
-        {
-            get
-            {
+        public bool Warning {
+            get {
                 return warning;
             }
-            set
-            {
+
+            set {
                 warning = value;
-                if (CurrentState == IconState.Idle)
-                {
+                if (CurrentState == IconState.Idle) {
                     UpdateIconEvent(0);
                 }
             }
         }
+
         private bool warning;
 
 
@@ -116,7 +100,7 @@ namespace CmisSync {
         /// <summary>
         /// Maximum number of remote folders in the menu before the overflow menu appears.
         /// </summary>
-        public readonly int MenuOverflowThreshold   = 9;
+        public readonly int MenuOverflowThreshold = 9;
 
 
         /// <summary>
@@ -143,15 +127,15 @@ namespace CmisSync {
         /// <summary>
         /// The list of remote folders to show in the CmisSync tray's overflow menu.
         /// </summary>
-        public string[] OverflowFolders
-        {
+        public string[] OverflowFolders {
             get {
-                int overflow_count = (Program.Controller.Folders.Count - MenuOverflowThreshold);
+                int overflow_count = Program.Controller.Folders.Count - MenuOverflowThreshold;
 
-                if (overflow_count >= MinSubmenuOverflowCount)
-                    return Program.Controller.Folders.GetRange (MenuOverflowThreshold, overflow_count).ToArray ();
-                else
-                    return new string [0];
+                if (overflow_count >= MinSubmenuOverflowCount) {
+                    return Program.Controller.Folders.GetRange(MenuOverflowThreshold, overflow_count).ToArray();
+                } else {
+                    return new string[0];
+                }
             }
         }
 
@@ -171,19 +155,19 @@ namespace CmisSync {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public StatusIconController ()
-        {
-            InitAnimation ();
+        public StatusIconController() {
+            InitAnimation();
 
             // A remote folder has been added.
             Program.Controller.FolderListChanged += delegate {
                 if (CurrentState != IconState.Error) {
                     CurrentState = IconState.Idle;
 
-                    if (Program.Controller.Folders.Count == 0)
+                    if (Program.Controller.Folders.Count == 0) {
                         StateText = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
-                    else
+                    } else {
                         StateText = Properties_Resources.FilesUpToDate;
+                    }
                 }
 
                 UpdateStatusItemEvent (StateText);
@@ -195,10 +179,11 @@ namespace CmisSync {
                 if (CurrentState != IconState.Error) {
                     CurrentState = IconState.Idle;
 
-                    if (Program.Controller.Folders.Count == 0)
+                    if (Program.Controller.Folders.Count == 0) {
                         StateText = String.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
-                    else
+                    } else {
                         StateText = Properties_Resources.FilesUpToDate;
+                    }
                 }
 
                 UpdateStatusItemEvent (StateText);
@@ -215,23 +200,19 @@ namespace CmisSync {
 
             // Syncing.
             Program.Controller.OnSyncing += delegate {
-                if (CurrentState != IconState.Syncing)
-                {
+                if (CurrentState != IconState.Syncing) {
                     CurrentState = IconState.Syncing;
                     StateText = Properties_Resources.SyncingChanges;
                     UpdateStatusItemEvent(StateText);
-
                     this.animation.Start();
                 }
             };
         }
 
-
         /// <summary>
         /// With the local file explorer, open the folder where the local synchronized folders are.
         /// </summary>
-        public void LocalFolderClicked (string reponame)
-        {
+        public void LocalFolderClicked (string reponame) {
             Program.Controller.OpenCmisSyncFolder (reponame);
         }
 
@@ -248,8 +229,7 @@ namespace CmisSync {
         /// <summary>
         /// Open the remote folder addition wizard.
         /// </summary>
-        public void AddRemoteFolderClicked ()
-        {
+        public void AddRemoteFolderClicked () {
             Program.Controller.ShowSetupWindow (PageType.Add1);
         }
 
@@ -257,8 +237,7 @@ namespace CmisSync {
         /// <summary>
         /// Show the Setting dialog.
         /// </summary>
-        public void SettingClicked()
-        {
+        public void SettingClicked() {
             Program.Controller.ShowSettingWindow();
         }
 
@@ -266,8 +245,7 @@ namespace CmisSync {
         /// <summary>
         /// Show the Transmission window.
         /// </summary>
-        public void TransmissionClicked()
-        {
+        public void TransmissionClicked() {
             Program.Controller.ShowTransmissionWindow();
         }
 
@@ -275,8 +253,7 @@ namespace CmisSync {
         /// <summary>
         /// Open the CmisSync log with a text file viewer.
         /// </summary>
-        public void LogClicked()
-        {
+        public void LogClicked() {
             Program.Controller.ShowLog(ConfigManager.CurrentConfig.GetLogFilePath());
         }
 
@@ -284,8 +261,7 @@ namespace CmisSync {
         /// <summary>
         /// Show the About dialog.
         /// </summary>
-        public void AboutClicked()
-        {
+        public void AboutClicked() {
             Program.Controller.ShowAboutWindow();
         }
 
@@ -293,55 +269,51 @@ namespace CmisSync {
         /// <summary>
         /// Quit CmisSync.
         /// </summary>
-        public void QuitClicked()
-        {
-                Program.Controller.Quit ();
+        public void QuitClicked() {
+            Program.Controller.Quit ();
         }
-
 
         /// <summary>
         /// Suspend synchronization for a particular folder.
         /// </summary>
-        public void SuspendSyncClicked(string reponame)
-        {
+        public void SuspendSyncClicked(string reponame) {
             Program.Controller.StartOrSuspendRepository(reponame);
             UpdateSuspendSyncFolderEvent(reponame);
         }
+
         /// <summary>
         /// Tries to remove a given repo from sync
         /// </summary>
         /// <param name="reponame"></param>
-        public void RemoveFolderFromSyncClicked(string reponame)
-        {
+        public void RemoveFolderFromSyncClicked(string reponame) {
             Program.Controller.RemoveRepositoryFromSync(reponame);
         }
 
         /// <summary>
         /// Edit a particular folder.
         /// </summary>
-        public void EditFolderClicked(string reponame)
-        {
+        public void EditFolderClicked(string reponame) {
             Program.Controller.EditRepositoryFolder(reponame);
         }
 
         /// <summary>
         /// Start the tray icon animation.
         /// </summary>
-        private void InitAnimation ()
-        {
+        private void InitAnimation() {
             this.animation_frame_number = 0;
 
-            this.animation = new Timer () {
+            this.animation = new Timer() {
                 Interval = 100
             };
 
             this.animation.Elapsed += delegate {
-                if (this.animation_frame_number < 4)
+                if (this.animation_frame_number < 4) {
                     this.animation_frame_number++;
-                else
+                } else {
                     this.animation_frame_number = 0;
+                }
 
-                UpdateIconEvent (this.animation_frame_number);
+                UpdateIconEvent(this.animation_frame_number);
             };
         }
     }
