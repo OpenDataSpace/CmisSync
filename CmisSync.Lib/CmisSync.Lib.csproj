@@ -262,6 +262,9 @@
     <Compile Include="Consumer\InteractionNeededException.cs" />
     <Compile Include="Events\ICountableEvent.cs" />
     <Compile Include="Queueing\ICountingQueue.cs" />
+    <Compile Include="Status\ConnectionStatus.cs" />
+    <Compile Include="Status\RepositoryStatus.cs" />
+    <Compile Include="Status\SynchronizationStatus.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -327,5 +330,6 @@
     <Folder Include="Algorithms\" />
     <Folder Include="Algorithms\CyclicDependencies\" />
     <Folder Include="Algorithms\Tarjan\" />
+    <Folder Include="Status\" />
   </ItemGroup>
 </Project>

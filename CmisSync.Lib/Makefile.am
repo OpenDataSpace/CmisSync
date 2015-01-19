@@ -170,6 +170,9 @@ SOURCES =  \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	Status/ConnectionStatus.cs \
+	Status/RepositoryStatus.cs \
+	Status/SynchronizationStatus.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
 	Storage/Database/Entities/FileTransmissionObject.cs \
