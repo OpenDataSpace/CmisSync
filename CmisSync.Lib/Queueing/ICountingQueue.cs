@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IFSEvent.cs" company="GRAU DATA AG">
+// <copyright file="ICountingQueue.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,21 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Events
+
+namespace CmisSync.Lib.Queueing
 {
-    using System.IO;
-    
+    using System;
+
     /// <summary>
-    /// Interface for FileSystem Events.
+    /// I counting queue counts every countable event by its category if its added and substracts it if the event is handled and removed from queue.
+    /// This queue also notifies listener about changes on categories or all countable events.
     /// </summary>
-    public interface IFSEvent : IFilterableLocalPathEvent, IFilterableNameEvent, ICountableEvent
+    public interface ICountingQueue : IDisposableSyncEventQueue, IObservable<int>, IObservable<Tuple<string, int>>
     {
-        /// <summary>
-        /// Gets the type.
-        /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        WatcherChangeTypes Type { get; }
     }
 }

@@ -135,6 +135,9 @@
     <Compile Include="FolderTreeMVC\IgnoreStatusConverter.cs" />
     <Compile Include="FolderTreeMVC\LoadingStatusModel.cs" />
     <Compile Include="FolderTreeMVC\LoadingStatusConverter.cs" />
+    <Compile Include="RepositoryMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Setting.cs" />
     <Compile Include="SettingWPF.xaml.cs">
       <DependentUpon>SettingWPF.xaml</DependentUpon>

@@ -38,6 +38,7 @@ SOURCES =  \
 	gtk-gui/generated.cs \
 	Notification/NotificationUtils.cs \
 	ProxyWidget.cs \
+	RepositoryMenuItem.cs \
 	Setting.cs \
 	Setup.cs \
 	SetupWindow.cs \

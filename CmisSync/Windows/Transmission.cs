@@ -16,34 +16,31 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Controls;
-using System.Collections.ObjectModel;
+namespace CmisSync {
+    ﻿using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Linq;
+    using System.Text;
 
-using CmisSync.Lib.Events;
+    using System.Windows;
+    using System.Windows.Data;
+    using System.Windows.Controls;
 
+    using CmisSync.Lib.Events;
 
-namespace CmisSync
-{
     /// <summary>
     /// Tranmission widget
     /// </summary>
-    public class Transmission : Window
-    {
+    public class Transmission : Window {
         private TransmissionController Controller = new TransmissionController();
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Transmission()
-        {
+        public Transmission() {
             Title = Properties_Resources.Transmission;
             Height = 480;
             Width = 640;
@@ -58,20 +55,17 @@ namespace CmisSync
 
             LoadTransmission();
 
-            OkButton.Click += delegate
-            {
+            OkButton.Click += delegate {
                 Controller_HideWindowEvent();
             };
         }
 
-        private void Transmission_Closing(object sender, CancelEventArgs e)
-        {
+        private void Transmission_Closing(object sender, CancelEventArgs e) {
             Controller.HideWindow();
             e.Cancel = true;
         }
 
-        private void Controller_ShowWindowEvent()
-        {
+        private void Controller_ShowWindowEvent() {
             Dispatcher.BeginInvoke((Action)delegate
             {
                 Show();
@@ -84,20 +78,17 @@ namespace CmisSync
             });
         }
 
-        private void Controller_HideWindowEvent()
-        {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
+        private void Controller_HideWindowEvent() {
+            Dispatcher.BeginInvoke((Action)delegate {
                 Hide();
             });
         }
 
-        public class TransmissionData : INotifyPropertyChanged
-        {
+        public class TransmissionData : INotifyPropertyChanged {
+
             public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
-            public TransmissionData(TransmissionItem item)
-            {
+            public TransmissionData(TransmissionItem item) {
                 Update(item);
             }
 
@@ -109,8 +100,7 @@ namespace CmisSync
             public string Progress { get; private set; }
             public bool Done { get; private set; }
 
-            public void Update(TransmissionItem item)
-            {
+            public void Update(TransmissionItem item) {
                 UpdateTime = item.UpdateTime;
                 FullPath = item.FullPath;
                 Repo = item.Repo;
@@ -130,14 +120,10 @@ namespace CmisSync
 
         private ObservableCollection<TransmissionData> TransmissionList = new ObservableCollection<TransmissionData>();
 
-        private void Controller_DeleteTransmissionEvent(TransmissionItem item)
-        {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
-                for (int i = TransmissionList.Count - 1; i >= 0; --i)
-                {
-                    if (TransmissionList[i].FullPath == item.FullPath)
-                    {
+        private void Controller_DeleteTransmissionEvent(TransmissionItem item) {
+            Dispatcher.BeginInvoke((Action)delegate {
+                for (int i = TransmissionList.Count - 1; i >= 0; --i) {
+                    if (TransmissionList[i].FullPath == item.FullPath) {
                         TransmissionList.RemoveAt(i);
                         return;
                     }
@@ -145,37 +131,30 @@ namespace CmisSync
             });
         }
 
-        private void Controller_InsertTransmissionEvent(TransmissionItem item)
-        {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
+        private void Controller_InsertTransmissionEvent(TransmissionItem item) {
+            Dispatcher.BeginInvoke((Action)delegate {
                 TransmissionList.Insert(0, new TransmissionData(item));
             });
         }
 
-        private void Controller_UpdateTransmissionEvent(TransmissionItem item)
-        {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
-                for (int i = 0; i < TransmissionList.Count; ++i)
-                {
-                    if (TransmissionList[i].FullPath == item.FullPath)
-                    {
+        private void Controller_UpdateTransmissionEvent(TransmissionItem item) {
+            Dispatcher.BeginInvoke((Action)delegate {
+                for (int i = 0; i < TransmissionList.Count; ++i) {
+                    if (TransmissionList[i].FullPath == item.FullPath) {
                         TransmissionList[i].Update(item);
-                        if (item.Done)
-                        {
+                        if (item.Done) {
                             //  put finished TransmissionData to the tail
-                            for (; i + 1 < TransmissionList.Count; ++i)
-                            {
-                                if (TransmissionList[i + 1].Done)
-                                {
+                            for (; i + 1 < TransmissionList.Count; ++i) {
+                                if (TransmissionList[i + 1].Done) {
                                     break;
                                 }
+
                                 TransmissionData data = TransmissionList[i];
                                 TransmissionList[i] = TransmissionList[i + 1];
                                 TransmissionList[i + 1] = data;
                             }
                         }
+
                         ListView_SelectionChanged(this, null);
                         return;
                     }
@@ -186,8 +165,7 @@ namespace CmisSync
         private ListView ListView;
         private Button OkButton;
 
-        private void LoadTransmission()
-        {
+        private void LoadTransmission() {
             System.Uri resourceLocater = new System.Uri("/DataSpaceSync;component/TransmissionWPF.xaml", System.UriKind.Relative);
             UserControl wpf = Application.LoadComponent(resourceLocater) as UserControl;
 
@@ -202,21 +180,18 @@ namespace CmisSync
             Content = wpf;
         }
 
-        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             bool open = false;
-            foreach (object item in ListView.SelectedItems)
-            {
+            foreach (object item in ListView.SelectedItems) {
                 Transmission.TransmissionData data = item as Transmission.TransmissionData;
-                if (data.Done)
-                {
+                if (data.Done) {
                     open = true;
                     break;
                 }
             }
+
             MenuItem openMenu = ListView.FindResource("ListViewItemContextMenuOpen") as MenuItem;
-            if (openMenu != null)
-            {
+            if (openMenu != null) {
                 openMenu.IsEnabled = open;
             }
         }

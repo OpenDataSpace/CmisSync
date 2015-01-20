@@ -406,12 +406,11 @@ namespace CmisSync
         {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-
+                repo.Queue.Subscribe((IObserver<int>)new CountingSubscriber(this.activityListenerAggregator));
                 repo.SyncStatusChanged += delegate(SyncStatus status)
                 {
                     this.UpdateState();
                 };
-
                 repo.Queue.EventManager.AddEventHandler(
                     new GenericSyncEventHandler<FileTransmissionEvent>(
                     50,
@@ -863,6 +862,37 @@ namespace CmisSync
         public void ActivityStopped()
         {
             this.OnIdle();
+        }
+
+        private class CountingSubscriber: IObserver<int> {
+            private ActivityListenerAggregator aggregator;
+            private object activeLock = new object();
+            private bool active = false;
+            public CountingSubscriber(ActivityListenerAggregator aggregator) {
+                this.aggregator = aggregator;
+            }
+
+            public void OnCompleted() {
+            }
+
+            public void OnError(Exception e) {
+            }
+
+            public virtual void OnNext(int fullCounter) {
+                lock(this.activeLock) {
+                    if (fullCounter > 0) {
+                        if (!this.active) {
+                            this.active = true;
+                            this.aggregator.ActivityStarted();
+                        }
+                    } else {
+                        if (this.active) {
+                            this.active = false;
+                            this.aggregator.ActivityStopped();
+                        }
+                    }
+                }
+            }
         }
     }
 }

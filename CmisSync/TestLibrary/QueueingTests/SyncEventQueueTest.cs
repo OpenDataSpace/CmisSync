@@ -151,6 +151,79 @@ namespace TestLibrary.QueueingTests
             }
         }
 
+        [Test, Category("Fast")]
+        public void SubscribeForAllCountableEvents() {
+            using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
+                using (var unsubscriber = queue.Subscribe(Mock.Of<IObserver<int>>())) {
+                    Assert.That(unsubscriber, Is.Not.Null);
+                }
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void SubscribeForAllCategorizesCountableEvents() {
+            using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
+                using (var unsubscriber = queue.Subscribe(Mock.Of<IObserver<Tuple<string,int>>>())) {
+                    Assert.That(unsubscriber, Is.Not.Null);
+                }
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void SubscribeThrowsExceptionIfAllObserverIsNull() {
+            using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
+                Assert.Throws<ArgumentNullException>(() => queue.Subscribe((IObserver<int>) null));
+            }
+        }
+
+        [Test, Category("Fast")]
+        public void SubscribeThrowsExceptionIfCategorizedObserverIsNull() {
+            using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
+                Assert.Throws<ArgumentNullException>(() => queue.Subscribe((IObserver<Tuple<string,int>>) null));
+            }
+        }
+
+        [Test, Category("Medium")]
+        public void SubscribeForAllCountableEventsAndGetInformedOnAddEvent() {
+            var countableEvent = Mock.Of<ICountableEvent>(e => e.Category == "test");
+            var manager = new Mock<ISyncEventManager>();
+            using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
+                var observer = new Mock<IObserver<int>>();
+                using (var unsubscriber = queue.Subscribe(observer.Object)) {
+                    queue.AddEvent(countableEvent);
+                    WaitFor(queue, (q) => { return q.IsStopped; });
+                    queue.Dispose();
+                }
+
+                observer.Verify(o => o.OnNext(1), Times.Once());
+                observer.Verify(o => o.OnNext(0), Times.Once());
+                observer.Verify(o => o.OnCompleted(), Times.Once());
+            }
+
+            manager.Verify(m => m.Handle(countableEvent), Times.Once);
+        }
+
+        [Test, Category("Medium")]
+        public void SubscribeForCategoryCountableEventsAndGetInformedOnAddEvent() {
+            string category = "test";
+            var countableEvent = Mock.Of<ICountableEvent>(e => e.Category == category);
+            var manager = new Mock<ISyncEventManager>();
+            using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
+                var observer = new Mock<IObserver<Tuple<string, int>>>();
+                using (var unsubscriber = queue.Subscribe(observer.Object)) {
+                    queue.AddEvent(countableEvent);
+                    WaitFor(queue, (q) => { return q.IsStopped; });
+                    queue.Dispose();
+                }
+
+                observer.Verify(o => o.OnNext(It.Is<Tuple<string, int>>(t => t.Item1 == category && t.Item2 == 1)), Times.Once());
+                observer.Verify(o => o.OnNext(It.Is<Tuple<string, int>>(t => t.Item1 == category && t.Item2 == 0)), Times.Once());
+                observer.Verify(o => o.OnCompleted(), Times.Once());
+            }
+
+            manager.Verify(m => m.Handle(countableEvent), Times.Once);
+        }
+
         private static void WaitFor<T>(T obj, Func<T, bool> check)
         {
             for (int i = 0; i < 50; i++)

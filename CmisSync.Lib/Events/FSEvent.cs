@@ -87,6 +87,17 @@ namespace CmisSync.Lib.Events
         public string Name { get; private set; }
 
         /// <summary>
+        /// Gets the category of the event. This can be used to differ between multiple event types.
+        /// The returned value should never ever change its value after requesting it the first time.
+        /// </summary>
+        /// <value>The event category is "DetectedChange".</value>
+        public string Category {
+            get {
+                return "DetectedChange";
+            }
+        }
+
+        /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.FSEvent"/>.
         /// </summary>
         /// <returns>

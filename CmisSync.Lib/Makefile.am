@@ -93,6 +93,7 @@ SOURCES =  \
 	Events/FSEvent.cs \
 	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
+	Events/ICountableEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
@@ -160,6 +161,7 @@ SOURCES =  \
 	Queueing/EventHandlerPriorities.cs \
 	Queueing/GenericSyncEventHandler.cs \
 	Queueing/IConnectionScheduler.cs \
+	Queueing/ICountingQueue.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \
@@ -169,16 +171,19 @@ SOURCES =  \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
 	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
+	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IIgnoredEntity.cs \
+	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
 	SelectiveIgnore/IgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IgnoredEntitiesStorage.cs \
 	SelectiveIgnore/IgnoredEntity.cs \
 	SelectiveIgnore/IgnoredState.cs \
-	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
-	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
-	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
-	SelectiveIgnore/IIgnoredEntity.cs \
 	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
 	SelectiveIgnore/SelectiveIgnoreFilter.cs \
+	Status/ConnectionStatus.cs \
+	Status/RepositoryStatus.cs \
+	Status/SynchronizationStatus.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
 	Storage/Database/Entities/FileTransmissionObject.cs \

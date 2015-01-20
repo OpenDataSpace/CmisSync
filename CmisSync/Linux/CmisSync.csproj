@@ -121,6 +121,7 @@
     <Compile Include="Setting.cs" />
     <Compile Include="gtk-gui\CmisSync.Setting.cs" />
     <Compile Include="ClientBrand.cs" />
+    <Compile Include="RepositoryMenuItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
