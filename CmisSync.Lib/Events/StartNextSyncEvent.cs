@@ -58,7 +58,7 @@ namespace CmisSync.Lib.Events
         /// <value>The event category is "SyncRequested" if a full sync should be started, otherwise it returns an empty string.</value>
         public string Category {
             get {
-                return this.FullSyncRequested ? "SyncRequested" : string.Empty;
+                return this.FullSyncRequested ? "SyncRequested" : "PeriodicSync";
             }
         }
 

@@ -204,14 +204,19 @@ namespace CmisSync.Lib.Producer.Crawler
             IObjectTree<IFileSystemInfo> localTree = null;
             IObjectTree<IFileableCmisObject> remoteTree = null;
 
+            /*
             // Request 3 trees in parallel
             Task[] tasks = new Task[3];
-            tasks[0] = Task.Factory.StartNew(() => storedTree = this.storage.GetObjectTree());
-            tasks[1] = Task.Factory.StartNew(() => localTree = GetLocalDirectoryTree(this.localFolder, this.filter));
-            tasks[2] = Task.Factory.StartNew(() => remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter, this.ignoredStorage, this.matcher));
+            tasks[0] = Task.Factory.StartNew(() => );
+            tasks[1] = Task.Factory.StartNew(() => );
+            tasks[2] = Task.Factory.StartNew(() => );
 
             // Wait until all tasks are finished
             Task.WaitAll(tasks);
+            */
+            localTree = GetLocalDirectoryTree(this.localFolder, this.filter);
+            remoteTree = GetRemoteDirectoryTree(this.remoteFolder, this.remoteFolder.GetDescendants(-1), this.filter, this.ignoredStorage, this.matcher);
+            storedTree = this.storage.GetObjectTree();
             return new DescendantsTreeCollection(storedTree, localTree, remoteTree);
         }
     }

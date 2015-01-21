@@ -289,9 +289,9 @@ namespace CmisSync.Lib.Queueing
                         if (syncEvent is ICountableEvent) {
                             string category = (syncEvent as ICountableEvent).Category;
                             if (!string.IsNullOrEmpty(category)) {
-                                Interlocked.Decrement(ref this.fullCounter);
+                                int fullcounter = Interlocked.Decrement(ref this.fullCounter);
                                 foreach (var observer in this.fullCounterObservers) {
-                                    observer.OnNext(this.fullCounter);
+                                    observer.OnNext(fullcounter);
                                 }
 
                                 var value = this.categoryCounter.AddOrUpdate(category, 0, delegate(string cat, int counter) {
