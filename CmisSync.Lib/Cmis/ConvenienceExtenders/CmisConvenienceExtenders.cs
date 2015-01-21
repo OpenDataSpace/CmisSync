@@ -29,6 +29,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data.Impl;
+    using DotCMIS.Enums;
 
     /// <summary>
     /// Cmis convenience extenders.
@@ -77,6 +78,13 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             }
         }
 
+        /// <summary>
+        /// Creates the versioned document.
+        /// </summary>
+        /// <returns>The versioned document.</returns>
+        /// <param name="folder">Parent Folder.</param>
+        /// <param name="name">Name of the document.</param>
+        /// <param name="content">Content of the document.</param>
         public static IDocument CreateVersionedDocument(this IFolder folder, string name, string content)
         {
             Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -161,6 +169,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// Sets a flag to ignores all children of this folder.
         /// </summary>
         /// <param name="folder">Folder which children should be ignored.</param>
+        /// <param name="deviceId">Device Ids which should be ignored.</param>
         public static void IgnoreAllChildren(this IFolder folder, string deviceId = "*") {
             if (deviceId == null) {
                 throw new ArgumentException("Given deviceId is null or empty");
@@ -182,6 +191,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             folder.UpdateProperties(properties, true);
         }
 
+        /// <summary>
+        /// Removes the sync ignore flags of the given device Ids from the given cmis object.
+        /// </summary>
+        /// <param name="obj">Remote CMIS Object.</param>
+        /// <param name="deviceIds">Device identifiers which should be removed from ignore list.</param>
         public static void RemoveSyncIgnore(this ICmisObject obj, params Guid[] deviceIds) {
             string[] ids = new string[deviceIds.Length];
             for (int i = 0; i < deviceIds.Length; i++) {
@@ -189,6 +203,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             }
         }
 
+        /// <summary>
+        /// Removes the sync ignore flags of the given device Ids from the given cmis object.
+        /// </summary>
+        /// <param name="obj">Remote CMIS Object.</param>
+        /// <param name="deviceIds">Device identifiers which should be removed from ignore list.</param>
         public static void RemoveSyncIgnore(this ICmisObject obj, params string[] deviceIds) {
             var ids = obj.SecondaryObjectTypeIds();
             if (ids.Contains("gds:sync")) {
@@ -225,6 +244,10 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             }
         }
 
+        /// <summary>
+        /// Removes all sync ignores flags from the given cmis object
+        /// </summary>
+        /// <param name="obj">Remote CMIS Object.</param>
         public static void RemoveAllSyncIgnores(this ICmisObject obj) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             var ids = obj.SecondaryObjectTypeIds();
@@ -312,6 +335,22 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Detect whether the repository has the ChangeLog capability.
+        /// </summary>
+        /// <param name="session">The Cmis Session</param>
+        /// <returns>
+        /// <c>true</c> if this feature is available, otherwise <c>false</c>
+        /// </returns>
+        public static bool AreChangeEventsSupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
+                    session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly;
+            } catch (NullReferenceException) {
+                return false;
+            }
         }
 
         /// <summary>
