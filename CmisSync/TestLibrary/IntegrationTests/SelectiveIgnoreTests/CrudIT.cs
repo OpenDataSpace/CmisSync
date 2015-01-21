@@ -97,7 +97,7 @@ ignored
             Assert.That(new FolderTree(remoteTree), Is.EqualTo(new FolderTree(ignoredFolder)));
             this.InitializeAndRunRepo();
             Assert.That(new FolderTree(localTree), Is.EqualTo(new FolderTree(this.localRootDir.GetDirectories()[0])));
-            Thread.Sleep(3000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 

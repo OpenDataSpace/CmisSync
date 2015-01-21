@@ -51,14 +51,14 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             ignoredFolder.Refresh();
             ignoredFolder.IgnoreAllChildren();
 
-            Thread.Sleep(3000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
             ignoredFolder.Refresh();
-            ignoredFolder.Rename(newFolderName);
+            ignoredFolder.Rename(newFolderName, true);
 
-            Thread.Sleep(3000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -82,7 +82,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             ignoredFolder.Refresh();
             ignoredFolder.IgnoreAllChildren();
 
-            Thread.Sleep(3000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -103,7 +103,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
             string folderName = "ignored";
             string notIgnoredFolderName = "A";
-            var notIgnoredFolder = this.remoteRootDir.CreateFolder(notIgnoredFolderName);
+            this.remoteRootDir.CreateFolder(notIgnoredFolderName);
             this.InitializeAndRunRepo(swallowExceptions: true);
 
             string localTree = @"
@@ -120,6 +120,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
             this.localRootDir.GetDirectories()[0].MoveTo(Path.Combine(this.localRootDir.FullName, folderName));
             this.WaitUntilQueueIsNotEmpty();
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 

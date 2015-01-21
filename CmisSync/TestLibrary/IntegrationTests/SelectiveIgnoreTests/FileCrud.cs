@@ -48,7 +48,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.Refresh();
             folder.IgnoreAllChildren();
 
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -80,7 +80,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.Refresh();
             folder.IgnoreAllChildren();
 
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -113,7 +113,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             folder.Refresh();
             folder.IgnoreAllChildren();
 
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -140,7 +140,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
             this.InitializeAndRunRepo();
 
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
             folder.Refresh();
             folder.IgnoreAllChildren();
 

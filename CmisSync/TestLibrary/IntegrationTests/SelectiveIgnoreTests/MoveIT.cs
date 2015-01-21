@@ -56,7 +56,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             anotherFolderTree.Refresh();
             anotherFolderTree.Move(this.remoteRootDir, ignoredFolder);
 
-            Thread.Sleep(3000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -86,7 +86,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             ignoredFolder.Refresh();
             ignoredFolder.IgnoreAllChildren();
 
-            Thread.Sleep(3000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 

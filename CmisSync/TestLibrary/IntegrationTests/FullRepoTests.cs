@@ -160,7 +160,6 @@ namespace TestLibrary.IntegrationTests
             this.InitializeAndRunRepo();
 
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
-            Thread.Sleep(5000);
 
             this.AddStartNextSyncEvent(forceCrawl: true);
 
@@ -175,13 +174,14 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Erratic")]
         public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByContentChange()
         {
+            this.EnsureThatContentChangesAreSupported();
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
             var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
 
             this.InitializeAndRunRepo();
 
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
-            Thread.Sleep(30000);
+            this.WaitForRemoteChanges();
 
             this.AddStartNextSyncEvent();
 
@@ -367,7 +367,7 @@ namespace TestLibrary.IntegrationTests
             string fileName = "file";
             this.remoteRootDir.CreateDocument(fileName, null);
 
-            Thread.Sleep(contentChanges ? 3000 : 0);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -414,7 +414,7 @@ namespace TestLibrary.IntegrationTests
             string newChangeToken = doc.ChangeToken;
             Assert.That(oldChangeToken, Is.Not.EqualTo(newChangeToken));
             Assert.That(doc.ContentStreamLength, Is.Not.EqualTo(content.Length));
-            Thread.Sleep(contentChanges ? 3000 : 0);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -440,7 +440,7 @@ namespace TestLibrary.IntegrationTests
             string changeToken = doc.ChangeToken;
             doc.SetContent(content);
 
-            Thread.Sleep(contentChanges ? 3000 : 0);
+            this.WaitForRemoteChanges();
 
             this.AddStartNextSyncEvent();
             this.repo.Run();

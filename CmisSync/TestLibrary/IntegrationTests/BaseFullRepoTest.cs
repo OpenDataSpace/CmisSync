@@ -63,8 +63,18 @@ namespace TestLibrary.IntegrationTests
 
         private static dynamic config;
         private string subfolder;
-
-        protected bool ContentChangesActive { get; set; }
+        private bool contentChanges;
+        protected bool ContentChangesActive {
+            get {
+                return this.contentChanges;
+            }
+            set {
+                this.contentChanges = value;
+                if (value) {
+                    this.EnsureThatContentChangesAreSupported();
+                }
+            }
+        }
 
         [TestFixtureSetUp]
         public void ClassInit()
@@ -136,7 +146,7 @@ namespace TestLibrary.IntegrationTests
 
             SessionFactory factory = SessionFactory.NewInstance();
             this.session = factory.CreateSession(cmisParameters);
-
+            this.ContentChangesActive = this.session.AreChangeEventsSupported();
             IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
             this.remoteRootDir = root.CreateFolder(this.subfolder);
         }
@@ -144,6 +154,12 @@ namespace TestLibrary.IntegrationTests
         [TearDown]
         public void TestDown()
         {
+            InvalidDataException repoDBException = null;
+            try {
+                this.repo.RunDbObjectValidationCheck();
+            } catch (InvalidDataException e) {
+                repoDBException = e;
+            }
             this.repo.Dispose();
             if (this.localRootDir.Exists) {
                 this.localRootDir.Delete(true);
@@ -152,6 +168,10 @@ namespace TestLibrary.IntegrationTests
             this.remoteRootDir.Refresh();
             this.remoteRootDir.DeleteTree(true, null, true);
             this.repo.Dispose();
+
+            if (repoDBException != null) {
+                throw new Exception(repoDBException.Message, repoDBException);
+            }
         }
 
         protected void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue = null, int timeout = 10000) {
@@ -173,6 +193,16 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
+        protected void WaitForRemoteChanges(int sleepDuration = 3000) {
+            Thread.Sleep(this.ContentChangesActive ? sleepDuration : 0);
+        }
+
+        protected void EnsureThatContentChangesAreSupported() {
+            if (!this.session.AreChangeEventsSupported()) {
+                Assert.Ignore("skipped because the server does not support content changes");
+            }
+        }
+
         protected class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
             public BlockingSingleConnectionScheduler(ConnectionScheduler original) : base(original) {
             }
@@ -184,20 +214,21 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        protected class CmisRepoMock : CmisSync.Lib.Cmis.Repository
-        {
+        protected class CmisRepoMock : CmisSync.Lib.Cmis.Repository {
             public SingleStepEventQueue SingleStepQueue;
 
-            public CmisRepoMock(RepoInfo repoInfo, ActivityListenerAggregator activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
-            {
+            public CmisRepoMock(RepoInfo repoInfo, ActivityListenerAggregator activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue) {
                 this.SingleStepQueue = queue;
             }
 
-            public void Run()
-            {
+            public void Run() {
                 this.SingleStepQueue.Run();
                 Thread.Sleep(500);
                 this.SingleStepQueue.Run();
+            }
+
+            public void RunDbObjectValidationCheck() {
+                this.storage.ValidateObjectStructure();
             }
 
             public override void Initialize() {
