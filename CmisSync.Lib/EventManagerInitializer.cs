@@ -169,7 +169,8 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.ignoreChangeDetector);
                 }
 
-                if (this.AreChangeEventsSupported(session)) {
+                if (session.AreChangeEventsSupported() &&
+                    (this.repoInfo.SupportedFeatures == null || this.repoInfo.SupportedFeatures.GetContentChangesSupport != false)) {
                     Logger.Info("Session supports content changes");
 
                     // Add Accumulator
@@ -262,24 +263,6 @@ namespace CmisSync.Lib
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Detect whether the repository has the ChangeLog capability.
-        /// </summary>
-        /// <param name="session">The Cmis Session</param>
-        /// <returns>
-        /// <c>true</c> if this feature is available, otherwise <c>false</c>
-        /// </returns>
-        private bool AreChangeEventsSupported(ISession session) {
-            try {
-                return (session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
-                        session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
-                    (this.repoInfo.SupportedFeatures == null ||
-                    this.repoInfo.SupportedFeatures.GetContentChangesSupport != false);
-            } catch (NullReferenceException) {
-                return false;
-            }
         }
     }
 }
