@@ -316,6 +316,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
                     object.Equals(this.Name, p.Name) &&
                     object.Equals(this.Guid, p.Guid) &&
                     object.Equals(this.LastContentSize, p.LastContentSize) &&
+                    object.Equals(this.Ignored, p.Ignored) &&
                     ((this.LastChecksum == null && p.LastChecksum == null) || (this.LastChecksum != null && p.LastChecksum != null && this.LastChecksum.SequenceEqual(p.LastChecksum)));
         }
 
