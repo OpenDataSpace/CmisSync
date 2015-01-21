@@ -85,6 +85,16 @@ namespace CmisSync.Lib.Storage.Database
 
             this.engine = engine;
             this.matcher = matcher;
+
+            if (Logger.IsDebugEnabled) {
+                try {
+                    this.ValidateObjectStructure();
+                } catch(InvalidDataException e) {
+                    Logger.Debug("Database object structure is invalid", e);
+                    Logger.Debug(this.ToString());
+                    Logger.Debug(this.ToFindString());
+                }
+            }
         }
 
         /// <summary>
