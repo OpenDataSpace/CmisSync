@@ -45,7 +45,6 @@ namespace TestLibrary.SelectiveIgnoreTests
         private readonly string ignoredObjectId = "ignoredObjectId";
         private readonly string ignoredPath = Path.Combine(Path.GetTempPath(), "IgnoredLocalPath");
         private Mock<IIgnoredEntitiesStorage> storage;
-        private ObservableCollection<IIgnoredEntity> ignores;
         private SelectiveIgnoreFilter underTest;
 
         [Test, Category("Fast"), Category("SelectiveIgnore")]
@@ -123,7 +122,7 @@ namespace TestLibrary.SelectiveIgnoreTests
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void DoNotFilterIgnoredFolderRenameEvent() {
             this.SetupMocks();
-            var folderEvent = new FolderMovedEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(Path.GetTempPath(), "newPath")),null,null,null);
+            var folderEvent = new FolderMovedEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), Mock.Of<IDirectoryInfo>(d => d.FullName == Path.Combine(Path.GetTempPath(), "newPath")), null, null, null);
 
             Assert.That(this.underTest.Handle(folderEvent), Is.False);
         }
@@ -131,7 +130,23 @@ namespace TestLibrary.SelectiveIgnoreTests
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void DoNotFilterIgnoredLocalFolderChangedEvent() {
             this.SetupMocks();
-            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), null) {Local = MetaDataChangeType.CHANGED };
+            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), null) { Local = MetaDataChangeType.CHANGED };
+
+            Assert.That(this.underTest.Handle(folderEvent), Is.False);
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void DoNotFilterIgnoredLocalFolderDeleteEvent() {
+            this.SetupMocks();
+            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), null) { Local = MetaDataChangeType.DELETED };
+
+            Assert.That(this.underTest.Handle(folderEvent), Is.False);
+        }
+
+        [Test, Category("Fast"), Category("SelectiveIgnore")]
+        public void DoNotFilterIgnoredLocalFolderAddEvent() {
+            this.SetupMocks();
+            var folderEvent = new FolderEvent(Mock.Of<IDirectoryInfo>(d => d.FullName == this.ignoredPath), null) { Local = MetaDataChangeType.CREATED };
 
             Assert.That(this.underTest.Handle(folderEvent), Is.False);
         }
@@ -139,7 +154,7 @@ namespace TestLibrary.SelectiveIgnoreTests
         [Test, Category("Fast"), Category("SelectiveIgnore")]
         public void DoNotFilterIgnoredRemoteFolderAddedEvent() {
             this.SetupMocks();
-            var folderEvent = new FolderEvent(null, Mock.Of<IFolder>(f => f.Id == this.ignoredObjectId)) {Local = MetaDataChangeType.CREATED };
+            var folderEvent = new FolderEvent(null, Mock.Of<IFolder>(f => f.Id == this.ignoredObjectId)) { Local = MetaDataChangeType.CREATED };
 
             Assert.That(this.underTest.Handle(folderEvent), Is.False);
         }

@@ -68,9 +68,10 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void RemoteIgnoredFolderIsNotSynced() {
+        public void RemoteIgnoredFolderIsSynced() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
-            var ignoredFolder = this.remoteRootDir.CreateFolder("ignored");
+            var folderName = "ignored";
+            var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
             ignoredFolder.IgnoreAllChildren();
             ignoredFolder.CreateFolder("sub");
 
@@ -78,7 +79,8 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
             var folder = this.session.GetObject(ignoredFolder.Id) as IFolder;
             Assert.That(folder.AreAllChildrenIgnored(), Is.True);
-            Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
+            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo(folderName));
+            Assert.That(this.localRootDir.GetDirectories()[0].GetDirectories(), Is.Empty);
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore"), Timeout(60000)]
@@ -126,11 +128,10 @@ ignored
 
             this.InitializeAndRunRepo();
 
-            Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
+            Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo(folderName));
 
-            var localFolder = this.localRootDir.CreateSubdirectory(folderName);
+            var localFolder = this.localRootDir.GetDirectories()[0];
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
             this.AddStartNextSyncEvent();
 
             localFolder.Delete();
@@ -139,7 +140,8 @@ ignored
             this.AddStartNextSyncEvent();
 
             ignoredFolder.Refresh();
-            Assert.That((this.remoteRootDir.GetChildren().First() as IFolder).Name, Is.EqualTo("ignored"));
+            this.remoteRootDir.Refresh();
+            Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]

@@ -104,14 +104,14 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             string folderName = "ignored";
             string notIgnoredFolderName = "A";
             var notIgnoredFolder = this.remoteRootDir.CreateFolder(notIgnoredFolderName);
-            var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
-            ignoredFolder.IgnoreAllChildren();
             this.InitializeAndRunRepo(swallowExceptions: true);
 
             string localTree = @"
 .
 └── A";
             Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
+            var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
+            ignoredFolder.IgnoreAllChildren();
             string remoteTree = @"
 .
 ├── ignored
@@ -127,6 +127,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
             localTree = @"
 .
+├── ignored
 └── ignored_Conflict";
             Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
             remoteTree = @"
