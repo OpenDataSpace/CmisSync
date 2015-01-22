@@ -27,14 +27,11 @@ namespace TestLibrary.StorageTests.FileSystemTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class DateTimeConverterTest
-    {
-        [Test, Category("Medium"), Ignore("https://bugzilla.xamarin.com/show_bug.cgi?id=23933")]
+    public class DateTimeConverterTest {
+        [Test, Category("Medium")]
         public void RequestingDriveType() {
-            foreach (DriveInfo objDrive in DriveInfo.GetDrives())
-            {
-                if (objDrive.IsReady)
-                {
+            foreach (DriveInfo objDrive in DriveInfo.GetDrives()) {
+                if (objDrive.IsReady) {
                     Console.WriteLine("Drive Name :   " + objDrive.Name);
                     Console.WriteLine("Drive Format : " + objDrive.DriveFormat);
                     Console.WriteLine(string.Empty);

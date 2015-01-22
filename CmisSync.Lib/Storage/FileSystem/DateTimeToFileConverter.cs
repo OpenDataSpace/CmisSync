@@ -17,25 +17,24 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
 
-    public class DateTimeToFileConverter
-    {
-        public static DateTime Convert(DateTime originalDate, FSType fsType)
-        {
+    public class DateTimeToFileConverter {
+        public static DateTime Convert(DateTime originalDate, FSType fsType) {
+#if __MonoCS__
+            // https://bugzilla.xamarin.com/show_bug.cgi?id=23933
+            originalDate = originalDate < new DateTime(1972, 1, 1) ? new DateTime(1972, 1, 1) : originalDate;
+#endif
             switch(fsType) {
             case FSType.NTFS:
                 return LimitDateTime(originalDate, new DateTime(1601, 1, 1), new DateTime(5000, 1, 1));
             case FSType.ext2:
                 goto case FSType.ext3;
             case FSType.ext3:
-//                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2038, 1, 18));
-                return LimitDateTime(originalDate, new DateTime(1972, 01, 01), new DateTime(2038, 1, 18));
+                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2038, 1, 18));
             case FSType.ext4:
-//                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2514, 4, 25));
-                return LimitDateTime(originalDate, new DateTime(1972, 01, 01), new DateTime(2514, 4, 25));
+                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2514, 4, 25));
             case FSType.FAT12:
                 goto case FSType.FAT32X;
             case FSType.FAT16:

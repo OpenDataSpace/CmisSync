@@ -53,6 +53,8 @@ namespace CmisSync.Lib.Storage.FileSystem
                 return FSType.ext3;
             case "ext4":
                 return FSType.ext4;
+            case "hfs":
+                return FSType.HFS_Plus;
             default:
                 return FSType.Unkown;
             }
