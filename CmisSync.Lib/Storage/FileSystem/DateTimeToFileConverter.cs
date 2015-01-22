@@ -31,9 +31,11 @@ namespace CmisSync.Lib.Storage.FileSystem
             case FSType.ext2:
                 goto case FSType.ext3;
             case FSType.ext3:
-                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2038, 1, 18));
+//                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2038, 1, 18));
+                return LimitDateTime(originalDate, new DateTime(1972, 01, 01), new DateTime(2038, 1, 18));
             case FSType.ext4:
-                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2514, 4, 25));
+//                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2514, 4, 25));
+                return LimitDateTime(originalDate, new DateTime(1972, 01, 01), new DateTime(2514, 4, 25));
             case FSType.FAT12:
                 goto case FSType.FAT32X;
             case FSType.FAT16:

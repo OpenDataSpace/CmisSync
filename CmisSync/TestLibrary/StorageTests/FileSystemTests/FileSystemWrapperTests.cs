@@ -484,7 +484,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
             Assert.That(file.LastWriteTimeUtc, Is.EqualTo(nearFutureTime).Within(1).Seconds);
         }
 
-        [Test, Category("Medium"), Ignore("https://bugzilla.xamarin.com/show_bug.cgi?id=23934")]
+        [Test, Category("Medium")]
         public void SetOldModificationDate() {
             string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var file = Factory.CreateFileInfo(path);
