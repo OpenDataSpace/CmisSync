@@ -472,6 +472,40 @@ namespace TestLibrary.StorageTests.FileSystemTests
             Assert.That(Factory.CreateFileInfo(newPath).GetExtendedAttribute("test"), Is.EqualTo("test"));
         }
 
+        [Test, Category("Medium")]
+        public void SetModificationDate() {
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var file = Factory.CreateFileInfo(path);
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            var nearFutureTime = DateTime.UtcNow.AddHours(1);
+            file.LastWriteTimeUtc = nearFutureTime;
+            Assert.That(file.LastWriteTimeUtc, Is.EqualTo(nearFutureTime).Within(1).Seconds);
+        }
+
+        [Test, Category("Medium")]
+        public void SetOldModificationDate() {
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var file = Factory.CreateFileInfo(path);
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            var veryOldDate = new DateTime(1500, 1, 1);
+            file.LastWriteTimeUtc = veryOldDate;
+        }
+
+        [Test, Category("Medium")]
+        public void SetFutureModificationDate() {
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var file = Factory.CreateFileInfo(path);
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            var veryFuturisticDate = new DateTime(6000, 1, 1);
+            file.LastWriteTimeUtc = veryFuturisticDate;
+        }
+
         [Test, Category("Fast")]
         public void CreateDownloadCacheIfExtendedAttributesAreAvailable() {
             Guid uuid = Guid.NewGuid();
