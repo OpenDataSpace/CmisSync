@@ -571,7 +571,8 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void LocalAndRemoteFolderAreMovedIntoTheSameSubfolder() {
+        public void LocalAndRemoteFolderAreMovedIntoTheSameSubfolder([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             string oldParentName = "oldParent";
             string newParentName = "newParent";
             string oldName = "moveThis";
@@ -926,7 +927,8 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneFileIsCopiedAFewTimes() {
+        public void OneFileIsCopiedAFewTimes([Values(true, false)]bool contentChanges, [Values(1,2,5,10)]int times) {
+            this.ContentChangesActive = contentChanges;
             FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
             var fileNames = new List<string>();
             string fileName = "file";
@@ -938,7 +940,7 @@ namespace TestLibrary.IntegrationTests
             fileNames.Add(file.FullName);
             var fileInfo = fsFactory.CreateFileInfo(file.FullName);
             Guid uuid = (Guid)fileInfo.Uuid;
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < times; i++) {
                 var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, string.Format("{0}{1}.txt", fileName, i)));
                 file.CopyTo(fileCopy.FullName);
                 Thread.Sleep(50);
