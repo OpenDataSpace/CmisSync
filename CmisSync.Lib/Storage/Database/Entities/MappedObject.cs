@@ -140,6 +140,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
                 this.Type = data.Type;
                 this.LastContentSize = data.LastContentSize;
                 this.ActualOperation = data.ActualOperation;
+                this.Ignored = data.Ignored;
                 this.Retries = data.Retries ?? new Dictionary<OperationType, int>();
                 if (data.LastChecksum == null) {
                     this.LastChecksum = null;

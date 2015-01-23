@@ -41,9 +41,15 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
         private readonly string localFilePath = Path.Combine("local", "test", "folder", "file.test");
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesData() {
+        public void ConstructorTakesData([Values(true, false)]bool ignored) {
             var data = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken") {
-                LastChecksum = new byte[20]
+                LastChecksum = new byte[20],
+                Ignored = ignored,
+                Guid = Guid.NewGuid(),
+                LastLocalWriteTimeUtc = DateTime.Now,
+                LastRemoteWriteTimeUtc = DateTime.UtcNow,
+                Description = "desc",
+                LastContentSize = 2345
             };
 
             var file = new MappedObject(data);
