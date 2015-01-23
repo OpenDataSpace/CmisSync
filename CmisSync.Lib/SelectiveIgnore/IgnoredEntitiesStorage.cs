@@ -39,7 +39,7 @@ namespace CmisSync.Lib.SelectiveIgnore
             if (mappedEntry != null) {
                 var children = this.storage.GetChildren(mappedEntry);
                 if (children != null) {
-                    foreach(var child in children) {
+                    foreach (var child in children) {
                         this.storage.RemoveObject(child);
                     }
                 }

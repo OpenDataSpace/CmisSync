@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -39,8 +38,7 @@ namespace CmisSync.Lib.Storage.Database
     /// <summary>
     /// Meta data storage.
     /// </summary>
-    public class MetaDataStorage : IMetaDataStorage
-    {
+    public class MetaDataStorage : IMetaDataStorage {
         private static readonly string PropertyTable = "properties";
         private static readonly string MappedObjectsTable = "objects";
         private static readonly string MappedObjectsGuidsTable = "guids";
