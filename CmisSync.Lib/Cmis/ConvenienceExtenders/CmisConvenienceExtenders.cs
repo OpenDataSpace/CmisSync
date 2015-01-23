@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis.ConvenienceExtenders
-{
+namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -30,20 +29,19 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
     using DotCMIS.Client;
     using DotCMIS.Data.Impl;
     using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     /// <summary>
     /// Cmis convenience extenders.
     /// </summary>
-    public static class CmisConvenienceExtenders
-    {
+    public static class CmisConvenienceExtenders {
         /// <summary>
         /// Creates a sub folder with the given name.
         /// </summary>
         /// <returns>The created folder.</returns>
         /// <param name="folder">parent folder.</param>
         /// <param name="name">Name of the new sub folder.</param>
-        public static IFolder CreateFolder(this IFolder folder, string name)
-        {
+        public static IFolder CreateFolder(this IFolder folder, string name) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
@@ -58,8 +56,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// <param name="folder">Parent folder.</param>
         /// <param name="name">Name of the document.</param>
         /// <param name="content">If content is not null, a content stream containing the given content will be added.</param>
-        public static IDocument CreateDocument(this IFolder folder, string name, string content)
-        {
+        public static IDocument CreateDocument(this IFolder folder, string name, string content) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
@@ -85,8 +82,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// <param name="folder">Parent Folder.</param>
         /// <param name="name">Name of the document.</param>
         /// <param name="content">Content of the document.</param>
-        public static IDocument CreateVersionedDocument(this IFolder folder, string name, string content)
-        {
+        public static IDocument CreateVersionedDocument(this IFolder folder, string name, string content) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
             properties.Add(PropertyIds.ObjectTypeId, "VersionableType");
@@ -140,8 +136,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// <param name="content">New content as string.</param>
         /// <param name="overwrite">If set to <c>true</c> overwrites existing content.</param>
         /// <param name="refresh">If set to <c>true</c> refreshs the original remote doc instance.</param>
-        public static IObjectId SetContent(this IDocument doc, string content, bool overwrite = true, bool refresh = true)
-        {
+        public static IObjectId SetContent(this IDocument doc, string content, bool overwrite = true, bool refresh = true) {
             ContentStream contentStream = new ContentStream();
             contentStream.FileName = doc.Name;
             contentStream.MimeType = MimeType.GetMIMEType(doc.Name);
@@ -160,9 +155,46 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders
         /// <param name="obj">Fileable cmis object.</param>
         /// <param name="modificationDate">Modification date.</param>
         public static IObjectId UpdateLastWriteTimeUtc(this IFileableCmisObject obj, DateTime modificationDate) {
+            var oldObject = obj.ToLogString();
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.LastModificationDate, modificationDate);
-            return obj.UpdateProperties(properties, true);
+            try {
+                return obj.UpdateProperties(properties, true);
+            } catch(CmisConstraintException e) {
+                obj.Refresh();
+                throw new CmisConstraintException(string.Format("Old object: {0}{1}New object: {2}", oldObject, Environment.NewLine, obj.ToLogString()), e);
+            }
+        }
+
+        public static string ToLogString(this IFileableCmisObject obj) {
+            var sb = new StringBuilder(obj.ToString());
+            sb.AppendLine(string.Format("ID:           {0}", obj.Id));
+            sb.AppendLine(string.Format("Name:         {0}", obj.Name));
+            sb.AppendLine(string.Format("ChangeToken:  {0}", obj.ChangeToken));
+            if (obj.LastModificationDate != null) {
+                DateTime date = obj.LastModificationDate.Value;
+                sb.AppendLine(string.Format("LastModified: {0} Ticks", date.Ticks));
+            } else {
+                sb.AppendLine(string.Format("LastModified: {0}", obj.LastModificationDate));
+            }
+            sb.AppendLine(string.Format("ObjectType:   {0}", obj.ObjectType));
+            sb.AppendLine(string.Format("BaseType:     {0}", obj.BaseType.DisplayName));
+            if (obj is IFolder) {
+                var folder = obj as IFolder;
+                sb.AppendLine(string.Format("Path:         {0}", folder.Path));
+                sb.AppendLine(string.Format("ParentId:     {0}", folder.ParentId));
+            } else if (obj is IDocument) {
+                var doc = obj as IDocument;
+                sb.AppendLine(string.Format("StreamLength: {0}", doc.ContentStreamLength));
+                sb.AppendLine(string.Format("MimeType:     {0}", doc.ContentStreamMimeType));
+                sb.AppendLine(string.Format("StreamName:   {0}", doc.ContentStreamFileName));
+            }
+
+            foreach (var prop in obj.Properties) {
+                sb.AppendLine(string.Format("Property {0}: {1}", prop.DisplayName, prop.ValuesAsString));
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>

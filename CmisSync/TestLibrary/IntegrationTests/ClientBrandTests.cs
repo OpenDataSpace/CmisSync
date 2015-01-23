@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -42,15 +41,13 @@ namespace TestLibrary.IntegrationTests
     /// <summary>
     /// Client Brand integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
     /// </summary>
-    [TestFixture, Timeout(900000)]
-    class ClientBrandTests : IsTestWithConfiguredLog4Net
-    {
+    [TestFixture, Timeout(900000), Category("Branding")]
+    class ClientBrandTests : IsTestWithConfiguredLog4Net {
         /// <summary>
         /// Disable HTTPS Verification
         /// </summary>
         [TestFixtureSetUp]
-        public void ClassInit()
-        {
+        public void ClassInit() {
 #if __MonoCS__
             Environment.SetEnvironmentVariable("MONO_XMLSERIALIZER_THS", "no");
 #endif
@@ -61,8 +58,7 @@ namespace TestLibrary.IntegrationTests
         /// Reanable HTTPS Verification
         /// </summary>
         [TestFixtureTearDown]
-        public void FixtureTearDown()
-        {
+        public void FixtureTearDown() {
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
