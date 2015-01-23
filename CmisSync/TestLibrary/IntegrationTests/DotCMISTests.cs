@@ -160,7 +160,7 @@ namespace TestLibrary.IntegrationTests
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Not yet implemented by CMIS GW")]
         public void CheckoutTest(
             string canonical_name,
             string localPath,
@@ -201,7 +201,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Not yet implemented by CMIS GW")]
         public void CheckinTest(
             string canonical_name,
             string localPath,
