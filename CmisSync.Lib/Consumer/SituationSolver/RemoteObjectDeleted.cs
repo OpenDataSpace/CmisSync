@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -33,8 +32,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Remote object has been deleted. => Delete the corresponding local object as well.
     /// </summary>
-    public class RemoteObjectDeleted : AbstractEnhancedSolver
-    {
+    public class RemoteObjectDeleted : AbstractEnhancedSolver {
         private IFilterAggregator filters;
 
         /// <summary>
@@ -64,7 +62,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             if (localFileInfo is IDirectoryInfo) {
-                if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(this.Storage, localFileInfo)) {
+                if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(localFileInfo)) {
                     this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
                     throw new IOException(string.Format("Not all local objects under {0} have been synced yet", localFileInfo.FullName));
                 } else {
@@ -93,15 +91,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
         }
 
-        private bool DeleteLocalObjectIfHasBeenSyncedBefore(IMetaDataStorage storage, IFileSystemInfo fsInfo) {
+        private bool DeleteLocalObjectIfHasBeenSyncedBefore(IFileSystemInfo fsInfo) {
             bool delete = true;
             string reason;
             Guid? uuid = fsInfo.Uuid;
             IMappedObject obj = null;
             if (uuid != null) {
-                obj = storage.GetObjectByGuid((Guid)uuid);
+                obj = this.Storage.GetObjectByGuid((Guid)uuid);
             } else {
-                obj = storage.GetObjectByLocalPath(fsInfo);
+                obj = this.Storage.GetObjectByLocalPath(fsInfo);
             }
 
             if (fsInfo is IFileInfo) {
@@ -114,16 +112,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
             } else if (fsInfo is IDirectoryInfo) {
                 var dir = fsInfo as IDirectoryInfo;
+                if (obj != null && obj.Ignored) {
+                    dir.Delete(true);
+                    return true;
+                }
+
                 if (!this.filters.FolderNamesFilter.CheckFolderName(dir.Name, out reason)) {
                     foreach (var folder in dir.GetDirectories()) {
-                        if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(storage, folder)) {
+                        if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(folder)) {
                             delete = false;
                         }
                     }
 
                     foreach (var file in dir.GetFiles()) {
                         if (!this.filters.FileNamesFilter.CheckFile(file.Name, out reason)) {
-                            if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(storage, file)) {
+                            if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(file)) {
                                 delete = false;
                             }
                         } else {

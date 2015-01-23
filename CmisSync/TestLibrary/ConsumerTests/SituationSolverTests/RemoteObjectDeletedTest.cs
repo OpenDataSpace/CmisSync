@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -38,8 +37,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class RemoteObjectDeletedTest
-    {
+    public class RemoteObjectDeletedTest {
         private readonly string name = "a";
         private readonly string path = Path.Combine(Path.GetTempPath(), "a");
         private Mock<ISession> session;
@@ -64,8 +62,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderDeleted()
-        {
+        public void RemoteFolderDeleted() {
             this.SetUpTestMocks();
             Mock<IMappedObject> folder = this.storage.AddLocalFolder(this.path, "id");
             var dirInfo = new Mock<IDirectoryInfo>();
@@ -78,8 +75,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileDeleted()
-        {
+        public void RemoteFileDeleted() {
             this.SetUpTestMocks();
             DateTime lastModified = DateTime.UtcNow;
             var fileInfo = new Mock<IFileInfo>();
@@ -99,8 +95,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileDeletedButLocalFileHasBeenChangedBeforeBeingHandled()
-        {
+        public void RemoteFileDeletedButLocalFileHasBeenChangedBeforeBeingHandled() {
             this.SetUpTestMocks();
             Mock<IMappedObject> file = this.storage.AddLocalFile(this.path, "id");
             var fileInfo = new Mock<IFileInfo>();
@@ -114,8 +109,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileDeletedButLocalFileDoesNotExistsInStorage()
-        {
+        public void RemoteFileDeletedButLocalFileDoesNotExistsInStorage() {
             this.SetUpTestMocks();
             var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.FullName).Returns(this.path);
@@ -127,8 +121,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderDeletedButNotAllContainingFilesAreSyncedYet()
-        {
+        public void RemoteFolderDeletedButNotAllContainingFilesAreSyncedYet() {
             this.SetUpTestMocks();
             string fileName = "fileName";
             string filePath = Path.Combine(this.path, fileName);
@@ -186,6 +179,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             ignoredFolderInfo.Verify(f => f.Delete(true), Times.Once());
             this.storage.Verify(s => s.RemoveObject(It.Is<IMappedObject>(o => o == folder.Object)), Times.Once());
         }
+
+        [Test, Category("Fast"), Category("Solver"), Category("SelectiveIgnore")]
+        public void RemoteFolderDeletedAndHasBeenFlaggedToBeIgnored() {
+            this.SetUpTestMocks();
+            var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.Name).Returns(this.name);
+            Mock<IMappedObject> folder = this.storage.AddLocalFolder(this.path, "id");
+            folder.Setup(f => f.Ignored).Returns(true);
+
+            this.underTest.Solve(dirInfo.Object, null);
+
+            dirInfo.Verify(d => d.Delete(true), Times.Once());
+            this.storage.Verify(s => s.RemoveObject(folder.Object), Times.Once());
+        }
+
 
         private void SetUpTestMocks() {
             this.session = new Mock<ISession>();
