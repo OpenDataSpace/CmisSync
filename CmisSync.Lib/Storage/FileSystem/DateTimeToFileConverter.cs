@@ -16,23 +16,25 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
-    public class DateTimeToFileConverter
-    {
-        public static DateTime Convert(DateTime originalDate, FSType fsType)
-        {
+namespace CmisSync.Lib.Storage.FileSystem {
+    using System;
+
+    public class DateTimeToFileConverter {
+        public static DateTime Convert(DateTime originalDate, FSType fsType) {
+#if __MonoCS__
+            // https://bugzilla.xamarin.com/show_bug.cgi?id=23933
+            originalDate = originalDate < new DateTime(1972, 1, 1) ? new DateTime(1972, 1, 1) : originalDate;
+#endif
             switch(fsType) {
             case FSType.NTFS:
-                return limitDateTime(originalDate, new DateTime(1601, 1, 1), new DateTime(5000, 1, 1));
+                return LimitDateTime(originalDate, new DateTime(1601, 1, 1), new DateTime(5000, 1, 1));
             case FSType.ext2:
                 goto case FSType.ext3;
             case FSType.ext3:
-                return limitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2038, 1, 18));
+                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2038, 1, 18));
             case FSType.ext4:
-                return limitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2514, 4, 25));
+                return LimitDateTime(originalDate, new DateTime(1901, 12, 15), new DateTime(2514, 4, 25));
             case FSType.FAT12:
                 goto case FSType.FAT32X;
             case FSType.FAT16:
@@ -44,9 +46,9 @@ namespace CmisSync.Lib.Storage.FileSystem
             case FSType.FAT32:
                 goto case FSType.FAT32X;
             case FSType.FAT32X:
-                return limitDateTime(originalDate, new DateTime(1980, 1, 1), new DateTime(2099, 12, 31));
+                return LimitDateTime(originalDate, new DateTime(1980, 1, 1), new DateTime(2099, 12, 31));
             case FSType.HFS_Plus:
-                return limitDateTime(originalDate, new DateTime(1904, 1, 1), new DateTime(2040, 2, 6));
+                return LimitDateTime(originalDate, new DateTime(1904, 1, 1), new DateTime(2040, 2, 6));
             case FSType.reiserfs:
                 goto case FSType.ext3;
             case FSType.zfs:
@@ -58,7 +60,7 @@ namespace CmisSync.Lib.Storage.FileSystem
             }
         }
 
-        private static DateTime limitDateTime(DateTime orig, DateTime min, DateTime max) {
+        private static DateTime LimitDateTime(DateTime orig, DateTime min, DateTime max) {
             if (orig < min) {
                 return min;
             } else if (orig > max) {

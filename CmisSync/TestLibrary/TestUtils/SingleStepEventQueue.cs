@@ -30,7 +30,7 @@ namespace TestLibrary
     /// </summary>
     /// Do not use this in production code.
     /// It contains public fields that could do a lot of harm
-    public class SingleStepEventQueue : IDisposableSyncEventQueue
+    public class SingleStepEventQueue : ICountingQueue
     {
         public ISyncEventManager Manager;
         public ConcurrentQueue<ISyncEvent> Queue = new ConcurrentQueue<ISyncEvent>();
@@ -102,6 +102,14 @@ namespace TestLibrary
         }
 
         public void Continue() {
+        }
+
+        public IDisposable Subscribe(IObserver<int> observer) {
+            return null;
+        }
+
+        public IDisposable Subscribe(IObserver<Tuple<string, int>> observer) {
+            return null;
         }
     }
 }

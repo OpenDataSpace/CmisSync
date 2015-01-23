@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IFSEvent.cs" company="GRAU DATA AG">
+// <copyright file="ICountableEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,21 +16,22 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 namespace CmisSync.Lib.Events
 {
-    using System.IO;
-    
+    using System;
+
     /// <summary>
-    /// Interface for FileSystem Events.
+    /// Instances of this event are able to be counted by categories.
+    /// Every event, which should be able to be tracked inside the SyncEventQueue must return a category.
     /// </summary>
-    public interface IFSEvent : IFilterableLocalPathEvent, IFilterableNameEvent, ICountableEvent
+    public interface ICountableEvent : ISyncEvent
     {
         /// <summary>
-        /// Gets the type.
+        /// Gets the category of the event. This can be used to differ between multiple event types.
+        /// The returned value should never ever change its value after requesting it the first time.
         /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        WatcherChangeTypes Type { get; }
+        /// <value>The event category.</value>
+        string Category { get; }
     }
 }

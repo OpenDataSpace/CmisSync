@@ -93,6 +93,7 @@ SOURCES =  \
 	Events/FSEvent.cs \
 	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
+	Events/ICountableEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
@@ -160,6 +161,7 @@ SOURCES =  \
 	Queueing/EventHandlerPriorities.cs \
 	Queueing/GenericSyncEventHandler.cs \
 	Queueing/IConnectionScheduler.cs \
+	Queueing/ICountingQueue.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \
@@ -168,6 +170,9 @@ SOURCES =  \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	Status/ConnectionStatus.cs \
+	Status/RepositoryStatus.cs \
+	Status/SynchronizationStatus.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
 	Storage/Database/Entities/FileTransmissionObject.cs \

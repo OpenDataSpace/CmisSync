@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="DateTimeConverterTest.cs" company="GRAU DATA AG">
+// <copyright file="ConnectionStatus.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,37 +16,35 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.IO;
 
-namespace TestLibrary.StorageTests.FileSystemTests
+namespace CmisSync.Lib.Status
 {
     using System;
 
-    using NUnit.Framework;
+    public class ConnectionStatus
+    {
+        private bool connected = false;
+        public bool IsConnected {
+            get {
+                return this.connected;
+            }
 
-    using Moq;
-
-    [TestFixture]
-    public class DateTimeConverterTest {
-        [Test, Category("Medium")]
-        public void RequestingDriveType() {
-            foreach (DriveInfo objDrive in DriveInfo.GetDrives()) {
-                if (objDrive.IsReady) {
-                    Console.WriteLine("Drive Name :   " + objDrive.Name);
-                    Console.WriteLine("Drive Format : " + objDrive.DriveFormat);
-                    Console.WriteLine("");
+            set {
+                if (value != this.connected) {
+                    this.connected = value;
+                    if (this.connected) {
+                        ConnectedSince = DateTime.Now;
+                        DisconnectedSince = null;
+                    } else {
+                        ConnectedSince = null;
+                        DisconnectedSince = DateTime.Now;
+                    }
                 }
             }
         }
 
-        [Test, Category("Fast")]
-        public void CreateOldDateTime() {
-            new DateTime(1601, 1, 1);
-        }
+        public DateTime? ConnectedSince { get; private set; }
 
-        [Test, Category("Fast")]
-        public void CreateFutureTime() {
-            new DateTime(5000, 1, 1);
-        }
+        public DateTime? DisconnectedSince { get; private set; }
     }
 }
