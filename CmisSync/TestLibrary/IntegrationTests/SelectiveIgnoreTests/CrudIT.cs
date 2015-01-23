@@ -136,10 +136,10 @@ ignored
 
             localFolder.Delete();
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty();
             this.AddStartNextSyncEvent();
+            this.repo.Run();
 
-            ignoredFolder.Refresh();
             this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren(), Is.Empty);
         }
