@@ -98,7 +98,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         try {
                             FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
                             this.transmissionManager.AddTransmission(transmissionEvent);
-                            obj.LastChecksum = LocalObjectChanged.UploadFile(fileInfo, ref doc, transmissionEvent);
+                            obj.LastChecksum = UploadFile(fileInfo, ref doc, transmissionEvent);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
                             obj.RemoteObjectId = doc.Id;
                         } catch(Exception ex) {

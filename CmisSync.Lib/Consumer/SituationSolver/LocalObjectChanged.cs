@@ -113,7 +113,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 try {
                     FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                     this.transmissionManager.AddTransmission(transmissionEvent);
-                    mappedObject.LastChecksum = AbstractEnhancedSolver.UploadFile(localFile, ref doc, transmissionEvent);
+                    mappedObject.LastChecksum = UploadFile(localFile, ref doc, transmissionEvent);
                     mappedObject.RemoteObjectId = doc.Id;
                 } catch(Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {
