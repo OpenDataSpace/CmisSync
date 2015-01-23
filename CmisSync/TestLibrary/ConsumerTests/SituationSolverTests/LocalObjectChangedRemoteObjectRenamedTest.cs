@@ -108,27 +108,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RenameFolder()
-        {
+        public void RenameFolder([Values(true, false)]bool childrenAreIgnored) {
             this.SetUpMocks();
             string oldPath = Path.Combine(Path.GetTempPath(), "oldname");
             string newPath = Path.Combine(Path.GetTempPath(), "newname");
             var mappedObject = new MappedObject("oldname", "remoteId", MappedObjectType.Folder, "parentId", "changeToken") { Guid = Guid.NewGuid() };
             this.storage.AddMappedFolder(mappedObject);
-            var remoteFolder = Mock.Of<IFolder>(
-                f =>
-                f.Id == "remoteId" &&
-                f.Name == "newname" &&
-                f.ParentId == "parentId");
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteId", "newname", "path", "parentId", ignored: childrenAreIgnored);
             var dir = Mock.Of<IDirectoryInfo>(
                 d =>
                 d.FullName == oldPath &&
                 d.Parent.FullName == Path.GetTempPath());
-            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFolder)).Returns(newPath);
-            this.underTest.Solve(dir, remoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);
+            this.storage.Setup(s => s.Matcher.CreateLocalPath(remoteFolder.Object)).Returns(newPath);
+            this.underTest.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
             Mock.Get(dir).Verify(d => d.MoveTo(newPath), Times.Once());
-            this.changeSolver.Verify(s => s.Solve(dir, remoteFolder, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "newname", "parentId", "changeToken");
+            this.changeSolver.Verify(s => s.Solve(dir, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "newname", "parentId", "changeToken", ignored: childrenAreIgnored);
         }
 
         private void SetUpMocks() {

@@ -83,7 +83,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderAdded()
+        public void RemoteFolderAdded([Values(true, false)]bool childrenAreIgnored)
         {
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.SetupAllProperties();
@@ -92,19 +92,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(false);
 
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken, ignored: childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
             dirInfo.Verify(d => d.Create(), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, false, this.creationDate);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, false, this.creationDate, ignored: childrenAreIgnored);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderAddedAndExtendedAttributesAreAvailable()
+        public void RemoteFolderAddedAndExtendedAttributesAreAvailable([Values(true, false)]bool childrenAreIgnored)
         {
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.SetupAllProperties();
@@ -113,12 +113,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             dirInfo.Setup(d => d.Parent).Returns(Mock.Of<IDirectoryInfo>());
             dirInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
 
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.objectName, this.path, this.parentId, this.lastChangeToken, ignored: childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
             dirInfo.Verify(d => d.Create(), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.objectName, this.parentId, this.lastChangeToken, true, this.creationDate, ignored: childrenAreIgnored);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
         }

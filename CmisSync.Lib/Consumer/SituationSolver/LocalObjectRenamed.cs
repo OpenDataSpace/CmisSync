@@ -119,6 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             obj.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
             obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFile.LastWriteTimeUtc;
             obj.LastChangeToken = (remoteId as ICmisObject).ChangeToken;
+            obj.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
             if (isContentChanged) {
                 throw new ArgumentException("Local file content is also changed => force crawl sync.");

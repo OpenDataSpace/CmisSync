@@ -22,6 +22,8 @@ namespace TestLibrary.TestUtils
     using System;
     using System.Collections.Generic;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
+
     using DotCMIS;
     using DotCMIS.Client;
 
@@ -90,7 +92,7 @@ namespace TestLibrary.TestUtils
             folder.Setup(f => f.Properties).Returns(props);
         }
 
-        public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken") {
+        public static Mock<IFolder> CreateRemoteFolderMock(string id, string name, string path, string parentId = null, string changetoken = "changetoken", bool ignored = false) {
             var newRemoteObject = new Mock<IFolder>();
             newRemoteObject.Setup(d => d.Id).Returns(id);
             newRemoteObject.Setup(d => d.Path).Returns(path);
@@ -100,12 +102,31 @@ namespace TestLibrary.TestUtils
             newRemoteObject.Setup(d => d.ChangeToken).Returns(changetoken);
             newRemoteObject.Setup(d => d.GetDescendants(It.IsAny<int>())).Returns(new List<ITree<IFileableCmisObject>>());
             newRemoteObject.Setup(d => d.Move(It.IsAny<IObjectId>(), It.IsAny<IObjectId>())).Returns((IObjectId old, IObjectId current) => CreateRemoteFolderMock(id, name, path, current.Id, changetoken).Object);
-            newRemoteObject.Setup(d => d.Properties).Returns(new List<IProperty>());
+            newRemoteObject.SetupIgnoreFlag(ignored);
             return newRemoteObject;
         }
 
-        public static void VerifyUpdateLastModificationDate(this Mock<IFolder> folder, DateTime modificationDate, bool refresh = true)
-        {
+        public static void SetupIgnoreFlag(this Mock<IFolder> folder, bool ignored) {
+            var properties = folder.Object.Properties ?? new List<IProperty>();
+            if (ignored && !folder.Object.AreAllChildrenIgnored()) {
+                var ignoreEntry = new Mock<IProperty>();
+                ignoreEntry.Setup(i => i.Id).Returns("gds:ignoreDeviceIds");
+                IList<object> values = new List<object>();
+                values.Add("*");
+                ignoreEntry.Setup(i => i.Values).Returns(values);
+                properties.Add(ignoreEntry.Object);
+            } if(!ignored && folder.Object.AreAllChildrenIgnored()) {
+                foreach (var prop in properties) {
+                    if (prop.Id == "gds:ignoreDeviceIds") {
+                        properties.Remove(prop);
+                    }
+                }
+            }
+
+            folder.Setup(d => d.Properties).Returns(properties);
+        }
+
+        public static void VerifyUpdateLastModificationDate(this Mock<IFolder> folder, DateTime modificationDate, bool refresh = true) {
             folder.VerifyUpdateLastModificationDate(modificationDate, Times.Once(), refresh);
         }
 

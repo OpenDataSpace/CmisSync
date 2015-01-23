@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -72,6 +73,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             obj.Name = localFileSystemInfo.Name;
+            obj.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
         }

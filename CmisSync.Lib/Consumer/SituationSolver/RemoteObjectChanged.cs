@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
@@ -94,6 +95,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         Logger.Debug("Couldn't set the server side modification date", e);
                     }
 
+                    obj.Ignored = remoteFolder.AreAllChildrenIgnored();
                     obj.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
                 }
             } else if (remoteId is IDocument) {

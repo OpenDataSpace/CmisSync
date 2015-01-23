@@ -94,11 +94,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderRenamed()
+        public void LocalFolderRenamed([Values(true, false)]bool childrenAreIgnored)
         {
-            var remoteFolder = new Mock<IFolder>();
-            remoteFolder.Setup(f => f.Name).Returns(this.oldName);
-            remoteFolder.Setup(f => f.Id).Returns(this.id);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.oldName, "path", null, changetoken: null, ignored: childrenAreIgnored);
             remoteFolder.Setup(f => f.Rename(this.newName, true)).Callback(
                 () => 
                 {
@@ -115,14 +113,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             mappedFolder.SetupProperty(f => f.Name, this.oldName);
             mappedFolder.SetupProperty(f => f.RemoteObjectId, this.id);
             mappedFolder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
-
+            mappedFolder.Setup(f => f.LastContentSize).Returns(-1);
             this.storage.AddMappedFolder(mappedFolder.Object);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, this.newModificationDate);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, this.newModificationDate, ignored: childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]

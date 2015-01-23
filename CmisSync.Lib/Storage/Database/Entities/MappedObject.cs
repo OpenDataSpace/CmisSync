@@ -165,6 +165,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
             this.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
             this.ActualOperation = OperationType.No;
             this.Retries = new Dictionary<OperationType, int>();
+            this.LastContentSize = -1;
         }
 
         /// <summary>

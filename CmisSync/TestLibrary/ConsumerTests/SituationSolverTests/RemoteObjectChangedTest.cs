@@ -72,7 +72,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderChangedAndModificationDateCouldNotBeSet()
+        public void RemoteFolderChangedAndModificationDateCouldNotBeSet([Values(true, false)]bool childrenAreIgnored)
         {
             DateTime creationDate = DateTime.UtcNow;
             string folderName = "a";
@@ -102,18 +102,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.storage.AddMappedFolder(mappedObject);
 
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken, childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, lastLocalModification: modification);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, lastLocalModification: modification, ignored: childrenAreIgnored);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFolderChanged()
-        {
+        public void RemoteFolderChanged([Values(true, false)]bool childrenAreIgnored) {
             DateTime creationDate = DateTime.UtcNow;
             string folderName = "a";
             string path = Path.Combine(Path.GetTempPath(), folderName);
@@ -139,12 +138,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.storage.AddMappedFolder(mappedObject);
 
-            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken);
+            Mock<IFolder> remoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, newChangeToken, childrenAreIgnored);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)creationDate);
 
             this.underTest.Solve(dirInfo.Object, remoteObject.Object);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, id, folderName, parentId, newChangeToken, ignored: childrenAreIgnored);
             dirInfo.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(creationDate)), Times.Once());
         }
 
