@@ -704,7 +704,8 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFileIsChangedAndRenamedDetectedByCrawler() {
+        public void OneRemoteFileIsChangedAndRenamed([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             string fileName = "file.txt";
             string newFileName = "file_1.txt";
             string content = "cat";
@@ -718,40 +719,7 @@ namespace TestLibrary.IntegrationTests
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
 
-            this.AddStartNextSyncEvent(forceCrawl: true);
-            this.repo.Run();
-
-            document = this.remoteRootDir.GetChildren().First() as IDocument;
-            var file = this.localRootDir.GetFiles().First();
-
-            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
-            Assert.That(document.Name, Is.EqualTo(newFileName));
-            Assert.That(file.Name, Is.EqualTo(newFileName));
-            Assert.That(file.Length, Is.EqualTo(length));
-            Assert.That(document.ContentStreamLength, Is.EqualTo(length));
-        }
-
-        [Test, Category("Slow")]
-        public void OneRemoteFileIsChangedAndRenamedDetectedByContentChanges() {
-            string fileName = "file.txt";
-            string newFileName = "file_1.txt";
-            string content = "cat";
-            var document = this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.InitializeAndRunRepo();
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-
-            Thread.Sleep(5000);
-            this.AddStartNextSyncEvent();
-            this.repo.Run();
-
-            document.Refresh();
-            document.SetContent(content + content, true, true);
-            long length = (long)document.ContentStreamLength;
-            document.Rename(newFileName);
-
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
