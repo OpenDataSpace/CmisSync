@@ -110,7 +110,7 @@ namespace TestLibrary.IntegrationTests
             string folderName = "Cat";
             string fileName = "localFile.bin";
             var folder = this.remoteRootDir.CreateFolder(folderName);
-            folder.CreateDocument("foo.txt", "bar");
+            folder.CreateDocument("foo.bin", "bar");
             this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
@@ -320,7 +320,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow")]
         public void OneLocalFileIsRemoved()
         {
-            string fileName = "removingFile.txt";
+            string fileName = "removingFile.bin";
             string content = string.Empty;
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             this.remoteRootDir.CreateDocument(fileName, content);
@@ -429,7 +429,7 @@ namespace TestLibrary.IntegrationTests
         public void OneRemoteFileUpdated([Values(true, false)]bool contentChanges)
         {
             this.ContentChangesActive = contentChanges;
-            string fileName = "file.txt";
+            string fileName = "file.bin";
             string content = "cat";
             var doc = this.remoteRootDir.CreateDocument(fileName, content);
 
@@ -453,7 +453,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow")]
         public void RemoteCreatedFileIsDeletedLocally()
         {
-            string fileName = "file.txt";
+            string fileName = "file.bin";
             string content = "cat";
             this.remoteRootDir.CreateDocument(fileName, content);
 
@@ -474,7 +474,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Conflict"), Category("Erratic")]
         public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConflictFileIsCreated()
         {
-            string fileName = "fileConflictTest.txt";
+            string fileName = "fileConflictTest.bin";
             string remoteContent = "remotecontent";
             string localContent = "local";
 
@@ -497,7 +497,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Conflict"), Category("Erratic")]
         public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved()
         {
-            string fileName = "fileConflictTest.txt";
+            string fileName = "fileConflictTest.bin";
             string changedLocalContent = "changedContent";
             string localContent = "local";
             var localPath = Path.Combine(this.localRootDir.FullName, fileName);
@@ -530,9 +530,9 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalAndTheRemoteFileAreBothRenamed() {
-            string originalName = "original.txt";
-            string localName = "local.txt";
-            string remoteName = "remote.txt";
+            string originalName = "original.bin";
+            string localName = "local.bin";
+            string remoteName = "remote.bin";
 
             this.remoteRootDir.CreateDocument(originalName, "content");
 
@@ -601,7 +601,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Erratic")]
         public void OneLocalFileContentIsChanged()
         {
-            string fileName = "file.txt";
+            string fileName = "file.bin";
             string content = "cat";
             byte[] newContent = Encoding.UTF8.GetBytes("new born citty");
             this.remoteRootDir.CreateDocument(fileName, content);
@@ -670,8 +670,8 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow")]
         public void OneLocalFileIsChangedAndRenamed() {
-            string fileName = "file.txt";
-            string newFileName = "file_1.txt";
+            string fileName = "file.bin";
+            string newFileName = "file_1.bin";
             string content = "cat";
             this.remoteRootDir.CreateDocument(fileName, content);
             Thread.Sleep(100);
@@ -706,8 +706,8 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow")]
         public void OneRemoteFileIsChangedAndRenamed([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
-            string fileName = "file.txt";
-            string newFileName = "file_1.txt";
+            string fileName = "file.bin";
+            string newFileName = "file_1.bin";
             string content = "cat";
             var document = this.remoteRootDir.CreateDocument(fileName, content);
 
@@ -800,8 +800,8 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow")]
         public void LocalFileRenamedAndDeletedRemotely() {
-            string newName = "newtestfile.txt";
-            string oldName = "testfile.txt";
+            string newName = "newtestfile.bin";
+            string oldName = "testfile.bin";
             string content = "text";
             this.remoteRootDir.CreateDocument(oldName, content);
             this.InitializeAndRunRepo();
@@ -828,8 +828,8 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow")]
         public void LocalFileMovedAndDeletedRemotely() {
-            string newName = "newtestfile.txt";
-            string oldName = "testfile.txt";
+            string newName = "newtestfile.bin";
+            string oldName = "testfile.bin";
             string content = "text";
 
             this.remoteRootDir.CreateFolder("folder").CreateDocument(oldName, content);
@@ -867,8 +867,8 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow")]
         public void LocalFolderWithContentRenamedAndDeletedRemotely() {
-            string newName = "newtestfile.txt";
-            string oldName = "testfile.txt";
+            string newName = "newtestfile.bin";
+            string oldName = "testfile.bin";
             string content = "text";
             this.remoteRootDir.CreateFolder("folder").CreateFolder(oldName).CreateDocument("doc", content);
             this.InitializeAndRunRepo();
@@ -901,7 +901,7 @@ namespace TestLibrary.IntegrationTests
             var fileNames = new List<string>();
             string fileName = "file";
             string content = "content";
-            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
+            this.remoteRootDir.CreateDocument(fileName + ".bin", content);
             this.InitializeAndRunRepo();
 
             var file = this.localRootDir.GetFiles().First();
@@ -909,7 +909,7 @@ namespace TestLibrary.IntegrationTests
             var fileInfo = fsFactory.CreateFileInfo(file.FullName);
             Guid uuid = (Guid)fileInfo.Uuid;
             for (int i = 0; i < times; i++) {
-                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, string.Format("{0}{1}.txt", fileName, i)));
+                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, string.Format("{0}{1}.bin", fileName, i)));
                 file.CopyTo(fileCopy.FullName);
                 Thread.Sleep(50);
                 fileCopy.Refresh();
@@ -942,14 +942,14 @@ namespace TestLibrary.IntegrationTests
             var fileNames = new List<string>();
             string fileName = "file";
             string content = "content";
-            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
+            this.remoteRootDir.CreateDocument(fileName + ".bin", content);
             this.InitializeAndRunRepo();
 
             var file = this.localRootDir.GetFiles().First();
             fileNames.Add(file.FullName);
             var fileInfo = fsFactory.CreateFileInfo(file.FullName);
             Guid uuid = (Guid)fileInfo.Uuid;
-            var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + " - copy.txt"));
+            var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + " - copy.bin"));
             file.CopyTo(fileCopy.FullName);
             fileCopy.Refresh();
             fileCopy.Uuid = uuid;
@@ -963,7 +963,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
             var child = this.localRootDir.GetFiles().First();
             Assert.That(child.Length, Is.EqualTo(content.Length));
-            Assert.That(child.Name, Is.EqualTo(fileName + ".txt"));
+            Assert.That(child.Name, Is.EqualTo(fileName + ".bin"));
         }
 
         [Test, Category("Slow"), Ignore("Not needed anymore")]
@@ -997,7 +997,7 @@ namespace TestLibrary.IntegrationTests
         public void OneLocalAndOneRemoteFileAreBothChangedToTheSameContent() {
             string oldContent = "a";
             string newContent = "bbb";
-            this.remoteRootDir.CreateDocument("fileName.txt", oldContent);
+            this.remoteRootDir.CreateDocument("fileName.bin", oldContent);
             this.InitializeAndRunRepo(swallowExceptions: true);
 
             this.remoteRootDir.Refresh();
@@ -1200,7 +1200,7 @@ namespace TestLibrary.IntegrationTests
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             string content = "a";
-            string fileName = "file.txt";
+            string fileName = "file.bin";
             var remoteFile = this.remoteRootDir.CreateDocument(fileName, content);
             if (remoteFile.ContentStreamHash() == null) {
                 Assert.Ignore("Server does not support hash of content stream");
