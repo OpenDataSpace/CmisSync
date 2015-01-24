@@ -378,7 +378,7 @@ namespace CmisSync.Lib.Cmis
                         foreach (FileTransmissionEvent transmissionEvent in transmissionEvents) {
                             string localFolder = this.RepoInfo.LocalPath;
                             if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
-                                localFolder = localFolder + System.IO.Path.DirectorySeparatorChar;
+                                localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
                             }
 
                             if (transmissionEvent.Path.StartsWith(localFolder)) {
