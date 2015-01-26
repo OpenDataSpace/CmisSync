@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.IO;
     using System.Collections.Generic;
@@ -28,8 +27,7 @@ namespace TestLibrary.TestUtils
 
     using DotCMIS.Client;
 
-    public class FolderTree
-    {
+    public class FolderTree {
         private List<FolderTree> Children = new List<FolderTree>();
         public string Name { get; private set; }
         public FolderTree(string tree) {
@@ -106,8 +104,7 @@ namespace TestLibrary.TestUtils
             this.Name = file.Name;
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             var tree = new StringBuilder();
             tree.AppendLine(this.Name);
             int count = this.Children.Count;
@@ -146,13 +143,11 @@ namespace TestLibrary.TestUtils
 
         }
 
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             return this.ToString().Equals(obj.ToString());
         }
 
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return this.ToString().GetHashCode();
         }
     }
