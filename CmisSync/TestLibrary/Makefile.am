@@ -87,6 +87,7 @@ SOURCES =  \
 	IntegrationTests/BaseFullRepoTest.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/DownloadLinkTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullInMemoryRepoTest.cs \
 	IntegrationTests/FullRepoTests.cs \
