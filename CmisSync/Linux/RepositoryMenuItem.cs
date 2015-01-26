@@ -153,10 +153,10 @@ namespace CmisSync
                 }
 
                 this.UpdateStatusText();
-            } else if (changeCounter.Item1 == "SyncRequested") {
+            } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
                 if (changeCounter.Item2 > 0) {
                     lock(this.counterLock) {
-                        this.syncRequested = true;
+                        this.syncRequested = changeCounter.Item1 == "SyncRequested";
                     }
                 } else {
                     lock(this.counterLock) {
