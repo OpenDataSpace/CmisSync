@@ -155,18 +155,22 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="obj">Fileable cmis object.</param>
         /// <param name="modificationDate">Modification date.</param>
         public static IObjectId UpdateLastWriteTimeUtc(this IFileableCmisObject obj, DateTime modificationDate) {
-            var oldObject = obj.ToLogString();
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.LastModificationDate, modificationDate);
             try {
                 return obj.UpdateProperties(properties, true);
             } catch(CmisConstraintException e) {
+                var oldObject = obj.ToLogString();
                 obj.Refresh();
                 throw new CmisConstraintException(string.Format("Old object: {0}{1}New object: {2}", oldObject, Environment.NewLine, obj.ToLogString()), e);
             }
         }
 
         public static string ToLogString(this IFileableCmisObject obj) {
+            if (obj == null) {
+                return "null";
+            }
+
             var sb = new StringBuilder(obj.ToString());
             sb.AppendLine(string.Format("ID:           {0}", obj.Id));
             sb.AppendLine(string.Format("Name:         {0}", obj.Name));
