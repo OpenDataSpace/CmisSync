@@ -32,25 +32,25 @@ namespace TestLibrary.TestUtils
     [TestFixture]
     public class FolderTreeTest
     {
-        private readonly string tree =
-            ".\n" +
-                "├── A\n" +
-                "│   └── E\n" +
-                "│       ├── F\n" +
-                "│       └── G\n" +
-                "├── B\n" +
-                "└── C\n" +
-                "    └── D\n";
-
-        private readonly string tree2 = @"
-.
+        private readonly string tree = @".
 ├── A
 │   └── E
 │       ├── F
 │       └── G
 ├── B
 └── C
-    └── D";
+    └── D
+";
+
+        private readonly string tree2 = @".
+├── A
+│   └── E
+│       ├── F
+│       └── G
+├── B
+└── C
+    └── D
+";
 
         [Test, Category("Fast")]
         public void ConstructFolderTreeByString()
@@ -62,15 +62,15 @@ namespace TestLibrary.TestUtils
 
         [Test, Category("Fast")]
         public void DifferentOrderingsWillProduceEqualOutput() {
-            string treeReorderd =@"
-.
+            string treeReorderd =@".
 ├── B
 ├── A
 │   └── E
 │       ├── G
 │       └── F
 └── C
-    └── D";
+    └── D
+";
             var underTest = new FolderTree(treeReorderd);
 
             Assert.That(underTest, Is.EqualTo(new FolderTree(this.tree)));
@@ -185,15 +185,15 @@ namespace TestLibrary.TestUtils
 
         [Test, Category("Fast")]
         public void EqualTrees() {
-            string tree = @"
-.
+            string tree = @".
 ├── A
 │   └── E
 │       ├── F
 │       └── G
 ├── B
 └── C
-    └── D";
+    └── D
+";
             var underTest = new FolderTree(tree);
 
             Assert.That(underTest, Is.EqualTo(new FolderTree(tree)));
@@ -201,15 +201,15 @@ namespace TestLibrary.TestUtils
 
         [Test, Category("Fast")]
         public void NotEqualTrees() {
-            string differentTree =@"
-.
+            string differentTree =@".
 ├── A
 │   └── K
 │       ├── F
 │       └── G
 ├── B
 └── C
-    └── D";
+    └── D
+";
             var underTest = new FolderTree(this.tree);
 
             Assert.That(underTest, Is.Not.EqualTo(new FolderTree(differentTree)));
