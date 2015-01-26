@@ -43,6 +43,7 @@ namespace CmisSync.Lib.Queueing
         private int fullCounter = 0;
         private List<IObserver<Tuple<string, int>>> categoryCounterObservers;
         private ConcurrentDictionary<string, int> categoryCounter;
+        private object subscriberLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.SyncEventQueue"/> class.
@@ -108,15 +109,17 @@ namespace CmisSync.Lib.Queueing
                     string category = (newEvent as ICountableEvent).Category;
                     if (!string.IsNullOrEmpty(category)) {
                         Interlocked.Increment(ref this.fullCounter);
-                        foreach (var observer in this.fullCounterObservers) {
-                            observer.OnNext(this.fullCounter);
-                        }
+                        lock (subscriberLock) {
+                            foreach (var observer in this.fullCounterObservers) {
+                                observer.OnNext(this.fullCounter);
+                            }
 
-                        var value = this.categoryCounter.AddOrUpdate(category, 1, delegate(string cat, int counter) {
-                            return counter + 1;
-                        });
-                        foreach (var observer in this.categoryCounterObservers) {
-                            observer.OnNext(new Tuple<string, int>(category, value));
+                            var value = this.categoryCounter.AddOrUpdate(category, 1, delegate(string cat, int counter) {
+                                return counter + 1;
+                            });
+                            foreach (var observer in this.categoryCounterObservers) {
+                                observer.OnNext(new Tuple<string, int>(category, value));
+                            }
                         }
                     }
                 }
@@ -290,15 +293,17 @@ namespace CmisSync.Lib.Queueing
                             string category = (syncEvent as ICountableEvent).Category;
                             if (!string.IsNullOrEmpty(category)) {
                                 int fullcounter = Interlocked.Decrement(ref this.fullCounter);
-                                foreach (var observer in this.fullCounterObservers) {
-                                    observer.OnNext(fullcounter);
-                                }
+                                lock (subscriberLock) {
+                                    foreach (var observer in this.fullCounterObservers) {
+                                        observer.OnNext(fullcounter);
+                                    }
 
-                                var value = this.categoryCounter.AddOrUpdate(category, 0, delegate(string cat, int counter) {
-                                    return counter - 1;
-                                });
-                                foreach (var observer in this.categoryCounterObservers) {
-                                    observer.OnNext(new Tuple<string, int>(category, value));
+                                    var value = this.categoryCounter.AddOrUpdate(category, 0, delegate(string cat, int counter) {
+                                        return counter - 1;
+                                    });
+                                    foreach (var observer in this.categoryCounterObservers) {
+                                        observer.OnNext(new Tuple<string, int>(category, value));
+                                    }
                                 }
                             }
                         }
