@@ -42,15 +42,15 @@ namespace TestLibrary.TestUtils
     └── D
 ";
 
-        private readonly string tree2 = @".
+        private readonly string tree2 = @"
+.
 ├── A
 │   └── E
 │       ├── F
 │       └── G
 ├── B
 └── C
-    └── D
-";
+    └── D";
 
         [Test, Category("Fast")]
         public void ConstructFolderTreeByString()
@@ -194,7 +194,8 @@ namespace TestLibrary.TestUtils
 └── C
     └── D
 ";
-            var underTest = new FolderTree(tree);
+            Assert.That(new FolderTree(tree), Is.EqualTo(new FolderTree(tree)));
+            var underTest = new FolderTree(tree).ToString();
 
             Assert.That(underTest, Is.EqualTo(new FolderTree(tree)));
         }
