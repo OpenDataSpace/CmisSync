@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.Crawler
-{
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
 
     using CmisSync.Lib.Events;
@@ -36,8 +35,7 @@ namespace CmisSync.Lib.Producer.Crawler
     /// <summary>
     /// Decendants crawler.
     /// </summary>
-    public class DescendantsCrawler : ReportingSyncEventHandler
-    {
+    public class DescendantsCrawler : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(DescendantsCrawler));
         private IActivityListener activityListener;
         private IDescendantsTreeBuilder treebuilder;
@@ -135,8 +133,7 @@ namespace CmisSync.Lib.Producer.Crawler
         /// </summary>
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is StartNextSyncEvent) {
                 Logger.Debug("Starting DecendantsCrawlSync upon " + e);
                 using (var activity = new ActivityListenerResource(this.activityListener)) {
@@ -150,8 +147,7 @@ namespace CmisSync.Lib.Producer.Crawler
             return false;
         }
 
-        private void CrawlDescendants()
-        {
+        private void CrawlDescendants() {
             DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
 
             CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);
