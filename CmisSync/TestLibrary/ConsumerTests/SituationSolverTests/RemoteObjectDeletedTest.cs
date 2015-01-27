@@ -100,8 +100,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Mock<IMappedObject> file = this.storage.AddLocalFile(this.path, "id");
             var fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.FullName).Returns(this.path);
+            fileInfo.Setup(f => f.Exists).Returns(true);
+            fileInfo.Setup(f => f.Delete()).Callback(() => fileInfo.Setup(fi => fi.Exists).Returns(false));
 
-            this.underTest.Solve(fileInfo.Object, null);
+            Assert.Throws<IOException>(() => this.underTest.Solve(fileInfo.Object, null));
 
             fileInfo.Verify(f => f.Delete(), Times.Never());
             fileInfo.VerifySet(f => f.Uuid = null, Times.Once());
@@ -194,6 +196,24 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.RemoveObject(folder.Object), Times.Once());
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileDeletedAndAlsoLocalFileDoesNotExistsAnymore() {
+            this.SetUpTestMocks();
+            DateTime lastModified = DateTime.UtcNow;
+            var fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.FullName).Returns(this.path);
+            fileInfo.Setup(f => f.LastWriteTimeUtc).Returns(new DateTime());
+            fileInfo.Setup(f => f.Exists).Returns(false);
+            var mappedObject = new MappedObject("a", "id", MappedObjectType.File, "parentId", "changeToken", 0) {
+                LastLocalWriteTimeUtc = lastModified
+            };
+            this.storage.AddMappedFile(mappedObject, this.path);
+
+            this.underTest.Solve(fileInfo.Object, null);
+
+            fileInfo.Verify(f => f.Delete(), Times.Never());
+            this.storage.Verify(s => s.RemoveObject(mappedObject), Times.Once());
+        }
 
         private void SetUpTestMocks() {
             this.session = new Mock<ISession>();
