@@ -72,7 +72,7 @@ namespace CmisSync.Lib.Storage.FileSystem
 #if __MonoCS__
                 value = value < new DateTime(1972, 1, 1) ? new DateTime(1972, 1, 1) : value;
 #endif
-                this.original.LastWriteTimeUtc = value;
+                this.original.LastWriteTimeUtc = value < new DateTime(1601, 1, 1) ? new DateTime(1601, 1, 1) : value;
             }
         }
 
