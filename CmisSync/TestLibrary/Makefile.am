@@ -56,6 +56,7 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/RemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
+	EventsTests/ActivityListenerAggregatorTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/ExceptionEventTest.cs \
@@ -83,8 +84,10 @@ SOURCES =  \
 	FilterTests/IgnoredFolderNamesFilterTest.cs \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
+	FilterTests/ReportingFilterTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/BaseFullRepoTest.cs \
+	IntegrationTests/ClientBrandTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
 	IntegrationTests/DownloadLinkTests.cs \
@@ -124,6 +127,7 @@ SOURCES =  \
 	ProducerTests/WatcherTests/RenamedFileSystemEventHandlerTest.cs \
 	ProducerTests/WatcherTests/WatcherTest.cs \
 	ProducerTests/WatcherTests/WatcherTestUtils.cs \
+	QueueingTests/ConnectionSchedulerTest.cs \
 	QueueingTests/DebugLoggingHandlerTest.cs \
 	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
 	QueueingTests/EventManagerInitializerTest.cs \
@@ -154,6 +158,7 @@ SOURCES =  \
 	StreamsTests/OffsetStreamTest.cs \
 	StreamsTests/ProgressStreamTest.cs \
 	TestUtils/FolderTree.cs \
+	TestUtils/FolderTreeTest.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIDocumentUtil.cs \
