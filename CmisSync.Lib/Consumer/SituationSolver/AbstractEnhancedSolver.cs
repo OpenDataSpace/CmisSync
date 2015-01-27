@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -39,8 +38,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Abstract enhanced solver.
     /// </summary>
-    public abstract class AbstractEnhancedSolver : ISolver
-    {
+    public abstract class AbstractEnhancedSolver : ISolver {
         /// <summary>
         /// The file operations logger.
         /// </summary>
@@ -132,8 +130,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             return hash;
         }
 
-        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, FileTransmissionEvent transmissionEvent)
-        {
+        private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, FileTransmissionEvent transmissionEvent) {
             if (TransmissionStorage == null) {
                 return;
             }
@@ -190,7 +187,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 return true;
-            } catch (Exception ex) {
+            } catch (Exception) {
                 localFile.Delete();
                 return false;
             }
