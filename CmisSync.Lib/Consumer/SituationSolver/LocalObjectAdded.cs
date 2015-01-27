@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -49,8 +48,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Solver to handle the situation of a locally added file/folderobject.
     /// </summary>
-    public class LocalObjectAdded : AbstractEnhancedSolver
-    {
+    public class LocalObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
         private ActiveActivitiesManager transmissionManager;
 
@@ -60,7 +58,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="manager">Activitiy manager for transmission propagations</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectAdded(
             ISession session,
             IMetaDataStorage storage,
@@ -88,6 +85,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             Stopwatch completewatch = new Stopwatch();
             completewatch.Start();
             Logger.Debug("Starting LocalObjectAdded");
+            localFileSystemInfo.Refresh();
+            if (!localFileSystemInfo.Exists) {
+                throw new FileNotFoundException(string.Format("Local file/folder {0} has been renamed/moved/deleted", localFileSystemInfo.FullName));
+            }
+
             string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
 
             ICmisObject addedObject;
@@ -149,8 +151,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
                             return;
                         }
+
                         throw;
                     }
+
                     watch.Stop();
 
                     if (this.ServerCanModifyDateTimes) {
@@ -177,11 +181,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             Logger.Debug(string.Format("Finished LocalObjectAdded after [{0} msec]", completewatch.ElapsedMilliseconds));
         }
 
-        private Guid WriteOrUseUuidIfSupported(IFileSystemInfo localFile)
-        {
+        private Guid WriteOrUseUuidIfSupported(IFileSystemInfo localFile) {
             Guid uuid = Guid.Empty;
-            if (localFile.IsExtendedAttributeAvailable())
-            {
+            if (localFile.IsExtendedAttributeAvailable()) {
                 try {
                     Guid? localUuid = localFile.Uuid;
                     if (localUuid == null || this.Storage.GetObjectByGuid((Guid)localUuid) != null) {
@@ -202,8 +204,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             return uuid;
         }
 
-        private string GetParentId(IFileSystemInfo fileInfo, IMetaDataStorage storage)
-        {
+        private string GetParentId(IFileSystemInfo fileInfo, IMetaDataStorage storage) {
             IDirectoryInfo parent = null;
             if (fileInfo is IDirectoryInfo) {
                 IDirectoryInfo localDirInfo = fileInfo as IDirectoryInfo;
@@ -225,8 +226,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             return mappedParent.RemoteObjectId;
         }
 
-        private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session)
-        {
+        private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session) {
             string name = localFile.Name;
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);

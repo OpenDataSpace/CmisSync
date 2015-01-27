@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -46,8 +45,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectAddedTest : IsTestWithConfiguredLog4Net
-    {
+    public class LocalObjectAddedTest : IsTestWithConfiguredLog4Net {
         private readonly string parentId = "parentId";
         private readonly string localObjectName = "localName";
         private readonly string remoteObjectId = "remoteId";
@@ -59,15 +57,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private byte[] emptyhash = SHA1.Create().ComputeHash(new byte[0]);
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorWithGivenQueueAndActivityManager()
-        {
+        public void ConstructorWithGivenQueueAndActivityManager() {
             this.SetUpMocks();
             new LocalObjectAdded(this.session.Object, this.storage.Object, new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorThrowsExceptionIfTransmissionManagerIsNull()
-        {
+        public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
             this.SetUpMocks();
             Assert.Throws<ArgumentNullException>(() => new LocalObjectAdded(this.session.Object, this.storage.Object, null));
         }
@@ -168,8 +164,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderAddedWithoutExtAttr()
-        {
+        public void LocalFolderAddedWithoutExtAttr() {
             this.SetUpMocks();
             bool extendedAttributes = false;
             Mock<IFolder> futureFolder;
@@ -183,8 +178,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderAddedWithExtendedAttributes()
-        {
+        public void LocalFolderAddedWithExtendedAttributes() {
             this.SetUpMocks(true);
             Mock<IFolder> futureFolder;
 
@@ -202,6 +196,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var transmissionManager = new ActiveActivitiesManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
             var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.Name).Returns("dir");
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
@@ -220,6 +215,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             var transmissionManager = new ActiveActivitiesManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
             var dirInfo = new Mock<IDirectoryInfo>();
+            dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.Name).Returns(@"ä".Normalize(System.Text.NormalizationForm.FormD));
             var parentDirInfo = this.SetupParentFolder(parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
@@ -233,8 +229,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderAddedWithAlreadyExistingGuid()
-        {
+        public void LocalFolderAddedWithAlreadyExistingGuid() {
             this.SetUpMocks(true);
             Mock<IFolder> futureFolder;
             Guid guid = Guid.NewGuid();
@@ -287,8 +282,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void DoNotWriteLastWriteTimeUtcIfNotNecessary()
-        {
+        public void DoNotWriteLastWriteTimeUtcIfNotNecessary() {
             this.SetUpMocks(true);
 
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
@@ -301,8 +295,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void PermissionDeniedLeadsToNoOperation()
-        {
+        public void PermissionDeniedLeadsToNoOperation() {
             this.SetUpMocks(true);
 
             string path = Path.Combine(Path.GetTempPath(), this.localObjectName);
@@ -335,9 +328,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void StorageExceptionOnUploadLeadsToSavedEmptyState()
-        {
-            this.SetUpMocks(true);
+        public void StorageExceptionOnUploadLeadsToSavedEmptyState() {
+            this.SetUpMocks();
 
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(1);
@@ -356,8 +348,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             document.Verify(d => d.UpdateProperties(It.IsAny<IDictionary<string, object>>()), Times.Never());
         }
 
-        private IDirectoryInfo SetupParentFolder(string parentId)
-        {
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverFailsIfLocalFileOrFolderDoesNotExistsAnymore() {
+            this.SetUpMocks();
+            string path = Path.Combine(Path.GetTempPath(), this.localObjectName);
+
+            var fileSystemInfo = new Mock<IFileSystemInfo>(MockBehavior.Strict);
+            fileSystemInfo.Setup(f => f.Refresh());
+            fileSystemInfo.Setup(f => f.Exists).Returns(false);
+            fileSystemInfo.Setup(f => f.FullName).Returns(path);
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, new ActiveActivitiesManager());
+
+            Assert.Throws<FileNotFoundException>(() => solver.Solve(fileSystemInfo.Object, null));
+        }
+
+        private IDirectoryInfo SetupParentFolder(string parentId) {
             var parentDirInfo = Mock.Of<IDirectoryInfo>(
                 d =>
                 d.FullName == Path.GetTempPath() &&
@@ -372,8 +377,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             return parentDirInfo;
         }
 
-        private void RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, Mock<IFileInfo> fileInfo, out Mock<IDocument> documentMock, bool returnLastModificationDate = false, bool failsOnUploadContent = false)
-        {
+        private void RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, Mock<IFileInfo> fileInfo, out Mock<IDocument> documentMock, bool returnLastModificationDate = false, bool failsOnUploadContent = false) {
             var parentDirInfo = this.SetupParentFolder(parentId);
 
             var parents = new List<IFolder>();
