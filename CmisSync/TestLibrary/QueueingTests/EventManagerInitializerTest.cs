@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.QueueingTests
-{
+namespace TestLibrary.QueueingTests {
     using System;
     using System.IO;
 
@@ -49,8 +48,7 @@ namespace TestLibrary.QueueingTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class EventManagerInitializerTest
-    {
+    public class EventManagerInitializerTest {
         private ActivityListenerAggregator listener;
         private Mock<ISyncEventQueue> queue;
 
@@ -61,22 +59,19 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTakesQueueAndManagerAndStorage()
-        {
+        public void ConstructorTakesQueueAndManagerAndStorage() {
             new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfQueueIsNull()
-        {
+        public void ConstructorThrowsExceptionIfQueueIsNull() {
             new EventManagerInitializer(null, Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfStorageIsNull()
-        {
+        public void ConstructorThrowsExceptionIfStorageIsNull() {
             new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
@@ -89,14 +84,12 @@ namespace TestLibrary.QueueingTests
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfRepoInfoIsNull()
-        {
+        public void ConstructorThrowsExceptionIfRepoInfoIsNull() {
             new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
-        public void IgnoresWrongEventsTest()
-        {
+        public void IgnoresWrongEventsTest() {
             var queue = new Mock<ISyncEventQueue>();
             var storage = new Mock<IMetaDataStorage>();
             var handler = new EventManagerInitializer(queue.Object, storage.Object, Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
@@ -107,8 +100,7 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void RootFolderGetsAddedToStorage()
-        {
+        public void RootFolderGetsAddedToStorage() {
             string id = "id";
             string token = "token";
             var storage = new Mock<IMetaDataStorage>();
@@ -127,8 +119,7 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void HandlersAddedInitiallyWithoutContentChanges()
-        {
+        public void HandlersAddedInitiallyWithoutContentChanges() {
             var storage = new Mock<IMetaDataStorage>();
             var manager = new Mock<ISyncEventManager>();
             this.RunSuccessfulLoginEvent(
@@ -145,8 +136,7 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void HandlersAddedInitiallyWithContentChanges()
-        {
+        public void HandlersAddedInitiallyWithContentChanges() {
             var storage = new Mock<IMetaDataStorage>();
             var manager = new Mock<ISyncEventManager>();
             this.RunSuccessfulLoginEvent(
@@ -165,7 +155,6 @@ namespace TestLibrary.QueueingTests
         [Test, Category("Fast")]
         public void SelectiveIgnoreFilterAddedIsSupported() {
             var storage = new Mock<IMetaDataStorage>();
-            var ignoreStorage = new Mock<IIgnoredEntitiesStorage>();
             var manager = new Mock<ISyncEventManager>();
             this.RunSuccessfulLoginEvent(
                 storage: storage.Object,
@@ -181,7 +170,6 @@ namespace TestLibrary.QueueingTests
         [Test, Category("Fast")]
         public void SelectiveIgnoreFilterAreNotAddedIfUnsupported() {
             var storage = new Mock<IMetaDataStorage>();
-            var ignoreStorage = new Mock<IIgnoredEntitiesStorage>();
             var manager = new Mock<ISyncEventManager>();
             this.RunSuccessfulLoginEvent(
                 storage: storage.Object,
