@@ -21,7 +21,6 @@ namespace CmisSync.Lib.Status {
 
                         string m2 = client.ReceiveString();
                         Console.WriteLine("From Server: {0}", m2);
-                        Console.ReadLine();
                     }
                 }
             }
