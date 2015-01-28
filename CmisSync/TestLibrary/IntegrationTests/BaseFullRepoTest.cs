@@ -126,6 +126,9 @@ namespace TestLibrary.IntegrationTests
             // FileSystemDir
             this.localRootDir = new DirectoryInfo(this.repoInfo.LocalPath);
             this.localRootDir.Create();
+            if (!new DirectoryInfoWrapper(this.localRootDir).IsExtendedAttributeAvailable()) {
+                Assert.Fail(string.Format("The local path {0} does not support extended attributes", this.localRootDir.FullName));
+            }
 
             // Repo
             var activityListener = new Mock<IActivityListener>();
