@@ -38,11 +38,11 @@ SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
 ])]
 )
 
-AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
-AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
+AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/packages/NUnit.2.6.4/lib/nunit.framework.dll]])
+AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.4/lib/nunit.framework.dll]])
 
-AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
-AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll]])
 
 AC_SUBST(LOG4NET_LIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
 AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
@@ -50,8 +50,8 @@ AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client
 AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
 AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
 
-AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
-AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
 
 AC_SUBST(NETMQ_LIBS,[[-r:\$\(top_srcdir\)/packages/NetMQ.3.3.0.11/lib/net40/NetMQ.dll]])
 AC_SUBST(NETMQ_PATH,[[\$\(top_srcdir\)/packages/NetMQ.3.3.0.11/lib/net40/NetMQ.dll]])
