@@ -56,6 +56,9 @@
     <Reference Include="System.Net" />
     <Reference Include="System.Core" />
     <Reference Include="System.Configuration" />
+    <Reference Include="NetMQ">
+      <HintPath>..\packages\NetMQ.3.3.0.11\lib\net40\NetMQ.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\Tarjan\AbstractTarjanNode.cs" />
@@ -276,6 +279,7 @@
     <Compile Include="Status\ConnectionStatus.cs" />
     <Compile Include="Status\RepositoryStatus.cs" />
     <Compile Include="Status\SynchronizationStatus.cs" />
+    <Compile Include="Status\Server.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

@@ -71,6 +71,9 @@
     <Reference Include="Moq">
       <HintPath>..\..\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
     </Reference>
+    <Reference Include="NetMQ">
+      <HintPath>..\..\packages\NetMQ.3.3.0.11\lib\net40\NetMQ.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccumulatorTests\LocalObjectFetcherTest.cs" />
@@ -239,6 +242,7 @@
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="UtilsTests\ProcessDiagnosticsTest.cs" />
     <Compile Include="UtilsTests\X509StoreTest.cs" />
+    <Compile Include="StatusTests\ServerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -291,5 +295,6 @@
     <Folder Include="AlgorithmsTests\" />
     <Folder Include="AlgorithmsTests\CyclicDependencies\" />
     <Folder Include="IntegrationTests\SelectiveIgnoreTests\" />
+    <Folder Include="StatusTests\" />
   </ItemGroup>
 </Project>

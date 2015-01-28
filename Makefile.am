@@ -34,6 +34,7 @@ install-exec-local:
 	$(INSTALL) -m 0755 $(DBREEZE_PATH) $(DESTDIR)$(pkglibdir)
 	$(INSTALL) -m 0755 $(LOG4NET_PATH) $(DESTDIR)$(pkglibdir)
 	$(INSTALL) -m 0755 $(DOTCMIS_PATH) $(DESTDIR)$(pkglibdir)
+	$(INSTALL) -m 0755 $(NETMQ_PATH) $(DESTDIR)$(pkglibdir)
 
 uninstall-local:
 	$(RM) \
@@ -42,7 +43,8 @@ uninstall-local:
 		$(DESTDIR)$(pkglibdir)/$(notdir $(MOQ_PATH)) \
 		$(DESTDIR)$(pkglibdir)/$(notdir $(DBREEZE_PATH)) \
 		$(DESTDIR)$(pkglibdir)/$(notdir $(LOG4NET_PATH)) \
-		$(DESTDIR)$(pkglibdir)/$(notdir $(DOTCMIS_PATH))
+		$(DESTDIR)$(pkglibdir)/$(notdir $(DOTCMIS_PATH)) \
+		$(DESTDIR)$(pkglibdir)/$(notdir $(NETMQ_PATH))
 
 # make it a .PHONY target, so it's always executed
 .PHONY: tmpinst

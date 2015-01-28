@@ -3,7 +3,7 @@ TARGET = library
 
 ASSEMBLY_INFO_SOURCE = Defines.cs
 
-LIBS = $(LOG4NET_LIBS) $(CONFIGLIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
+LIBS = $(LOG4NET_LIBS) $(CONFIGLIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS) $(NETMQ_LIBS)
 
 SOURCES =  \
 	Accumulator/LocalObjectFetcher.cs \
@@ -183,6 +183,7 @@ SOURCES =  \
 	SelectiveIgnore/SelectiveIgnoreFilter.cs \
 	Status/ConnectionStatus.cs \
 	Status/RepositoryStatus.cs \
+	Status/Server.cs \
 	Status/SynchronizationStatus.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
