@@ -54,7 +54,7 @@ SHARPDLLS=4.5/Mono.Posix.dll atk-sharp.dll gdk-sharp.dll glib-sharp.dll gtk-shar
 # We will then explicitly name then when calling mkbundle with our program DLLs
 
 I18NDLLS=I18N.Rare.dll I18N.Other.dll I18N.MidEast.dll I18N.dll I18N.West.dll I18N.CJK.dll
-FATDLLS=CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtonsoft.Json.dll $(I18NDLLS) $(addprefix ./$(INCLIBDIR)/, $(notdir $(SHARPDLLS))) 
+FATDLLS=CmisSync.Lib.dll DotCMIS.dll DBreeze.dll DotCMIS.dll log4net.dll Newtonsoft.Json.dll NetMQ.dll $(I18NDLLS) $(addprefix ./$(INCLIBDIR)/, $(notdir $(SHARPDLLS)))
 
 # - But how do we find the DLLs, configs and gluelibs on our system?
 # Because they are on different locations on each system, this isn't easy.
