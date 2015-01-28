@@ -23,6 +23,7 @@
               <File Id='Newtonsoft.Json.dll' Name='Newtonsoft.Json.dll' Source='!(wix.root)\CmisSync\Windows\bin\Debug\Newtonsoft.Json.dll' DiskId='1' />
               <File Id='dataspacesync_app.ico' Name='app.ico' Source='!(wix.root)\CmisSync\Windows\Pixmaps\app.ico' DiskId='1' />
               <File Id='DBreeze.dll' Name='DBreeze.dll' Source='!(wix.root)\CmisSync\Windows\bin\Debug\DBreeze.dll' DiskId='1' />
+              <File ID='NetMQ.dll' Name='NetMQ.dll' Source='!(wix.root)\CmisSync\Windows\bin\Debug\NetMQ.dll' DiskId='1' />
             </Component>
             <Directory Id='localeDirectoryDE' Name='de'>
               <Component Id='localeComponentDE' Guid='2ee0c16c-f4b8-4a8c-8d07-b3a73fc27f59'>
