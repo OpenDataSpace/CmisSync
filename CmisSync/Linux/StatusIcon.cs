@@ -81,7 +81,7 @@ namespace CmisSync {
             this.statusIcon        = new Gtk.StatusIcon();
             this.statusIcon.Pixbuf = this.animationFrames[0];
 
-            this.statusIcon.Activate  += this.OpenFolderDelegate(null); // Primary mouse button click shows default folder
+            this.statusIcon.Activate  += this.Controller.LocalFolderClicked(null); // Primary mouse button click shows default folder
             this.statusIcon.PopupMenu += this.ShowMenu; // Secondary mouse button click
 #endif
 
