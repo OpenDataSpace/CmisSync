@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ChunkedUploader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -112,6 +112,8 @@ namespace CmisSync.Lib.FileTransmission
                         }
 
                         result.AppendContentStream(contentStream, isLastChunk, true);
+                    } catch(FileTransmission.AbortException e) {
+                        throw;
                     } catch(Exception e) {
                         throw new UploadFailedException(e, result);
                     }

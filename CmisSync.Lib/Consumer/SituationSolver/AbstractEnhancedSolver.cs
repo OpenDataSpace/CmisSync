@@ -114,7 +114,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
                 remoteDocument.CheckOut();
                 remoteDocument.Refresh();
-                return Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
+                IDocument remotePWCDocument = Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
+                remotePWCDocument.DeleteContentStream();
+                return remotePWCDocument;
             } catch (Exception ex) {
                 return null;
             }
@@ -146,7 +148,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             return remotePWCDocument;
         }
 
-        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, FileTransmissionEvent transmissionEvent) {
+        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] hash, FileTransmissionEvent transmissionEvent) {
+            if (TransmissionStorage == null) {
+                return;
+            }
+
+            FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument);
+            obj.ChecksumAlgorithmName = "SHA-1";
+            obj.LastChecksum = hash;
+            obj.RemoteObjectPWCId = remotePWCDocument.Id;
+            obj.LastChangeToken = remotePWCDocument.ChangeToken;
+
+            TransmissionStorage.SaveObject(obj);
         }
 
         /// <summary>
@@ -171,9 +184,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
                                 int bufsize = 8 * 1024;
                                 byte[] buffer = new byte[bufsize];
-                                for (long offset = 0; offset < docPWC.ContentStreamLength; ) {
+                                for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault(); ) {
                                     int readsize = bufsize;
-                                    if (readsize + offset > docPWC.ContentStreamLength) {
+                                    if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
                                         readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
                                     }
                                     readsize = hashstream.Read(buffer, 0, readsize);
@@ -183,13 +196,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                                     }
                                 }
                             }
-                            file.Position = docPWC.ContentStreamLength.GetValueOrDefault();
+                            file.Seek(docPWC.ContentStreamLength.GetValueOrDefault(), SeekOrigin.Begin);
                             uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false);
                         }
                         hash = hashAlg.Hash;
                     }
                 } catch (FileTransmission.AbortException ex) {
-                    SaveRemotePWCDocument(localFile, doc,docPWC, transmissionEvent);
+                    hashAlg.TransformFinalBlock(new byte[0], 0, 0);
+                    SaveRemotePWCDocument(localFile, doc, docPWC, hashAlg.Hash, transmissionEvent);
                     transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                     throw;
                 }

@@ -59,12 +59,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
+        /// <param name="transmissionStorage">File transmission storage.</param>
         /// <param name="manager">Activitiy manager for transmission propagations</param>
         /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectAdded(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager manager) : base(session, storage) {
+            IFileTransmissionStorage transmissionStorage,
+            ActiveActivitiesManager manager) : base(session, storage, transmissionStorage)
+        {
             if (manager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
