@@ -26,6 +26,7 @@ MAINTAINERCLEANFILES = \
 bootstrap:
 	autoreconf -f -s -i
 	nuget restore CmisSync/Linux/CmisSync.sln
+	mkdir -p bin
 	cp packages/NUnit.2.6.4/lib/nunit.framework.dll bin/nunit.framework.dll
 	cp packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll bin/Newtonsoft.Json.dll
 	cp packages/log4net.2.0.3/lib/net40-client/log4net.dll bin/log4net.dll
