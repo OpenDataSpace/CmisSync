@@ -16,15 +16,15 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.IO;
 
 namespace TestLibrary.StorageTests.FileSystemTests
 {
     using System;
-
-    using NUnit.Framework;
+    using System.IO;
 
     using Moq;
+
+    using NUnit.Framework;
 
     [TestFixture]
     public class DateTimeConverterTest {
@@ -34,7 +34,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
                 if (objDrive.IsReady) {
                     Console.WriteLine("Drive Name :   " + objDrive.Name);
                     Console.WriteLine("Drive Format : " + objDrive.DriveFormat);
-                    Console.WriteLine("");
+                    Console.WriteLine(string.Empty);
                 }
             }
         }

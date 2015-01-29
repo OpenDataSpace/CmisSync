@@ -21,6 +21,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 {
     using System;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -79,6 +80,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
 
             savedObject.Name = (remoteId as ICmisObject).Name;
+            savedObject.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             savedObject.ParentId = remoteId is IFolder ? (remoteId as IFolder).ParentId : (remoteId as IDocument).Parents[0].Id;
             this.Storage.SaveMappedObject(savedObject);
 

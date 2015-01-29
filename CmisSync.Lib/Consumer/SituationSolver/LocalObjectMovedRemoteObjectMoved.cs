@@ -120,20 +120,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject.Name = local.Name;
             } else if (mappedObject.Name == local.Name && mappedObject.Name != remote.Name) {
                 // remote has been renamed => rename local
-                if (local is IFileInfo)
-                {
+                if (local is IFileInfo) {
                     IFileInfo localFile = local as IFileInfo;
                     localFile.MoveTo(Path.Combine(localFile.Directory.FullName, remote.Name));
-                }
-                else if (local is IDirectoryInfo)
-                {
+                } else if (local is IDirectoryInfo) {
                     IDirectoryInfo localFolder = local as IDirectoryInfo;
                     localFolder.MoveTo(Path.Combine(localFolder.Parent.FullName, remote.Name));
-                }
-                else
-                {
+                } else {
                     throw new ArgumentException("Solved move conflict => invoke crawl sync to detect other changes");
                 }
+
                 mappedObject.Name = remote.Name;
             } else if (mappedObject.Name != local.Name && mappedObject.Name != remote.Name) {
                 // both are renamed => rename to the latest change
@@ -145,20 +141,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     mappedObject.Name = local.Name;
                 } else {
                     // remote modification is newer
-                    if (local is IFileInfo)
-                    {
+                    if (local is IFileInfo) {
                         IFileInfo localFile = local as IFileInfo;
                         localFile.MoveTo(Path.Combine(localFile.Directory.FullName, remote.Name));
-                    }
-                    else if (local is IDirectoryInfo)
-                    {
+                    } else if (local is IDirectoryInfo) {
                         IDirectoryInfo localFolder = local as IDirectoryInfo;
                         localFolder.MoveTo(Path.Combine(localFolder.Parent.FullName, remote.Name));
-                    }
-                    else
-                    {
+                    } else {
                         throw new ArgumentException("Solved move conflict => invoke crawl sync to detect other changes");
                     }
+
                     local.LastWriteTimeUtc = (DateTime)remote.LastModificationDate;
                     mappedObject.Name = remote.Name;
                 }
@@ -178,6 +170,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             mappedObject.LastRemoteWriteTimeUtc = (DateTime)remote.LastModificationDate;
             mappedObject.ParentId = remote.Parents[0].Id;
             mappedObject.LastChangeToken = remote.ChangeToken;
+            mappedObject.Ignored = remote.AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(mappedObject);
         }
     }

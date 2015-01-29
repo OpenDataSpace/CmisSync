@@ -84,6 +84,10 @@ namespace CmisSync.Lib.Producer.Crawler
             bool areLocalEvents) {
             foreach (var deleted in storedObjectList) {
                 string path = this.storage.GetLocalPath(deleted);
+                if (path == null) {
+                    continue;
+                }
+
                 IFileSystemInfo info = deleted.Type == MappedObjectType.File ? (IFileSystemInfo)this.fsFactory.CreateFileInfo(path) : (IFileSystemInfo)this.fsFactory.CreateDirectoryInfo(path);
                 var newEvent = FileOrFolderEventFactory.CreateEvent(
                     null,

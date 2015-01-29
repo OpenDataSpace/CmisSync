@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -56,8 +57,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             IMappedObject obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
-            if(remoteId is IFolder)
-            {
+            if (remoteId is IFolder) {
                 // Rename local folder
                 IFolder remoteFolder = remoteId as IFolder;
                 IDirectoryInfo dirInfo = localFile as IDirectoryInfo;
@@ -77,15 +77,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     dirInfo.LastWriteTimeUtc = (DateTime)remoteFolder.LastModificationDate;
                 }
 
-
                 obj.LastChangeToken = remoteFolder.ChangeToken;
                 obj.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 obj.LastLocalWriteTimeUtc = dirInfo.LastWriteTimeUtc;
+                obj.Ignored = remoteFolder.AreAllChildrenIgnored();
                 this.Storage.SaveMappedObject(obj);
                 OperationsLogger.Info(string.Format("Renamed local folder {0} to {1}", oldPath, remoteFolder.Name));
-            }
-            else if(remoteId is IDocument)
-            {
+            } else if(remoteId is IDocument) {
                 // Rename local file
                 IDocument remoteDocument = remoteId as IDocument;
                 IFileInfo fileInfo = localFile as IFileInfo;

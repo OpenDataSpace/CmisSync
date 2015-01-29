@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -53,14 +52,12 @@ namespace TestLibrary.IntegrationTests
     /// Dot CMIS integration tests. Each method tests one specific test case. The test got to be finished after 15 mins, otherwise the test will fail.
     /// </summary>
     [TestFixture, Timeout(900000)]
-    public class DotCMISTests : IsTestWithConfiguredLog4Net
-    {
+    public class DotCMISTests : IsTestWithConfiguredLog4Net {
         /// <summary>
         /// Disable HTTPS Verification
         /// </summary>
         [TestFixtureSetUp]
-        public void ClassInit()
-        {
+        public void ClassInit() {
 #if __MonoCS__
             Environment.SetEnvironmentVariable("MONO_XMLSERIALIZER_THS", "no");
 #endif
@@ -71,8 +68,7 @@ namespace TestLibrary.IntegrationTests
         /// Reanable HTTPS Verification
         /// </summary>
         [TestFixtureTearDown]
-        public void FixtureTearDown()
-        {
+        public void FixtureTearDown() {
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
@@ -127,6 +123,7 @@ namespace TestLibrary.IntegrationTests
                 }
             } catch (Exception) {
             }
+
             string content = "test";
             doc = folder.CreateDocument(filename, content);
             Assert.That(doc.ContentStreamLength == content.Length, "returned document should have got content");
@@ -159,7 +156,7 @@ namespace TestLibrary.IntegrationTests
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Not yet implemented by CMIS GW")]
         public void CheckoutTest(
             string canonical_name,
             string localPath,
@@ -200,7 +197,7 @@ namespace TestLibrary.IntegrationTests
             Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Not yet implemented by CMIS GW")]
         public void CheckinTest(
             string canonical_name,
             string localPath,
@@ -279,6 +276,7 @@ namespace TestLibrary.IntegrationTests
                 }
             } catch (CmisObjectNotFoundException) {
             }
+
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             IFolder subFolder = folder.CreateFolder(subFolderName);
@@ -458,6 +456,7 @@ namespace TestLibrary.IntegrationTests
                         }
                     }
                 }
+
                 byte[] remoteHash = requestedDoc.ContentStreamHash();
                 if (remoteHash != null) {
                     Assert.That(remoteHash, Is.EqualTo(SHA1.Create().ComputeHash(new byte[1])));
@@ -596,6 +595,7 @@ namespace TestLibrary.IntegrationTests
             if (!session.IsServerAbleToUpdateModificationDate()) {
                 Assert.Ignore("Server is not able to sync modification dates");
             }
+
             string filename = "name";
             IDocument doc;
             try {
@@ -870,6 +870,7 @@ namespace TestLibrary.IntegrationTests
                 cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
                 cmisParameters[SessionParameter.BrowserUrl] = url;
             }
+
             cmisParameters[SessionParameter.User] = user;
             cmisParameters[SessionParameter.Password] = password.ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoId;

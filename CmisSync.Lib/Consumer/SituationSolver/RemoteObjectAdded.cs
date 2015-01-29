@@ -112,6 +112,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject.Guid = uuid;
                 mappedObject.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
                 mappedObject.LastLocalWriteTimeUtc = localFolder.LastWriteTimeUtc;
+                mappedObject.Ignored = remoteFolder.AreAllChildrenIgnored();
                 this.Storage.SaveMappedObject(mappedObject);
                 OperationsLogger.Info(string.Format("New local folder {0} created and mapped to remote folder {1}", localFolder.FullName, remoteId.Id));
             } else if (localFile is IFileInfo) {

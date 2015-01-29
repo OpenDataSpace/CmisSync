@@ -406,7 +406,7 @@ namespace CmisSync
         {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                repo.Queue.Subscribe((IObserver<int>)new CountingSubscriber(this.activityListenerAggregator));
+                repo.Queue.Subscribe((IObserver<Tuple<string, int>>)new CountingSubscriber(this.activityListenerAggregator));
                 repo.SyncStatusChanged += delegate(SyncStatus status)
                 {
                     this.UpdateState();
@@ -864,10 +864,11 @@ namespace CmisSync
             this.OnIdle();
         }
 
-        private class CountingSubscriber: IObserver<int> {
+        private class CountingSubscriber: IObserver<Tuple<string, int>> {
             private ActivityListenerAggregator aggregator;
             private object activeLock = new object();
-            private bool active = false;
+            private bool activeSync = false;
+            private bool changeDetected = false;
             public CountingSubscriber(ActivityListenerAggregator aggregator) {
                 this.aggregator = aggregator;
             }
@@ -878,17 +879,31 @@ namespace CmisSync
             public void OnError(Exception e) {
             }
 
-            public virtual void OnNext(int fullCounter) {
-                lock(this.activeLock) {
-                    if (fullCounter > 0) {
-                        if (!this.active) {
-                            this.active = true;
-                            this.aggregator.ActivityStarted();
+            public virtual void OnNext(Tuple<string, int> changeCounter) {
+                lock (this.activeLock) {
+                    if (changeCounter.Item1 == "DetectedChange") {
+                        if (changeCounter.Item2 > 0 ) {
+                            if (!this.changeDetected) {
+                                this.changeDetected = true;
+                                this.aggregator.ActivityStarted();
+                            }
+                        } else {
+                            if (this.changeDetected) {
+                                this.changeDetected = false;
+                                this.aggregator.ActivityStopped();
+                            }
                         }
-                    } else {
-                        if (this.active) {
-                            this.active = false;
-                            this.aggregator.ActivityStopped();
+                    } else if (changeCounter.Item1 == "SyncRequested") {
+                        if (changeCounter.Item2 > 0) {
+                            if (!this.activeSync) {
+                                this.activeSync = true;
+                                this.aggregator.ActivityStarted();
+                            }
+                        } else {
+                            if (this.activeSync) {
+                                this.activeSync = false;
+                                this.aggregator.ActivityStopped();
+                            }
                         }
                     }
                 }

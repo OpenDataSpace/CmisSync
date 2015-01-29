@@ -92,6 +92,10 @@ namespace CmisSync.Lib.Producer.Crawler
                 IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
                     var localPath = this.storage.GetLocalPath(storedMappedChild);
+                    if (localPath == null) {
+                        continue;
+                    }
+
                     #if __COCOA__
                     if ((!localPath.Normalize(NormalizationForm.FormD).Equals(child.Item.FullName.Normalize(NormalizationForm.FormD))) && this.fsFactory.IsDirectory(localPath) != null) {
                     #else
@@ -137,9 +141,12 @@ namespace CmisSync.Lib.Producer.Crawler
             return FileOrFolderEventFactory.CreateEvent(null, fsInfo, localChange: MetaDataChangeType.CREATED, src: this);
         }
 
-        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild)
-        {
+        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild) {
             AbstractFolderEvent createdEvent = null;
+            if (storedParent == null) {
+                throw new ArgumentNullException("stored parent is null. Stored child: " + storedMappedChild.ToString() + Environment.NewLine + "local object is: " + fsObject.FullName);
+            }
+
             if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                 // Renamed, Updated or Equal
                 #if __COCOA__

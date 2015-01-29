@@ -38,19 +38,7 @@ namespace CmisSync.Lib.Cmis
         /// <returns>The content change event context.</returns>
         /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateContentChangeEventContext(ISession session) {
-            HashSet<string> filters = new HashSet<string>();
-            filters.Add("cmis:objectId");
-            filters.Add("cmis:name");
-            filters.Add("cmis:contentStreamFileName");
-            filters.Add("cmis:contentStreamLength");
-            filters.Add("cmis:lastModificationDate");
-            filters.Add("cmis:path");
-            filters.Add("cmis:changeToken");
-            filters.Add("cmis:parentId");
-            filters.Add("cmis:contentStreamHash");
-            HashSet<string> renditions = new HashSet<string>();
-            renditions.Add("cmis:none");
-            return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
+            return CreateContext(session: session, cacheEnabled: true, includePathSegments: true, elements: "cmis:path");
         }
 
         /// <summary>
@@ -59,18 +47,7 @@ namespace CmisSync.Lib.Cmis
         /// <returns>The crawl context.</returns>
         /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateCrawlContext(ISession session) {
-            HashSet<string> filters = new HashSet<string>();
-            filters.Add("cmis:objectId");
-            filters.Add("cmis:name");
-            filters.Add("cmis:contentStreamFileName");
-            filters.Add("cmis:contentStreamLength");
-            filters.Add("cmis:lastModificationDate");
-            filters.Add("cmis:changeToken");
-            filters.Add("cmis:parentId");
-            filters.Add("cmis:contentStreamHash");
-            HashSet<string> renditions = new HashSet<string>();
-            renditions.Add("cmis:none");
-            return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
+            return CreateContext(session: session, cacheEnabled: true, includePathSegments: true, elements: null);
         }
 
         /// <summary>
@@ -79,19 +56,7 @@ namespace CmisSync.Lib.Cmis
         /// <returns>The default context.</returns>
         /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateDefaultContext(ISession session) {
-            HashSet<string> filters = new HashSet<string>();
-            filters.Add("cmis:objectId");
-            filters.Add("cmis:name");
-            filters.Add("cmis:contentStreamFileName");
-            filters.Add("cmis:contentStreamLength");
-            filters.Add("cmis:lastModificationDate");
-            filters.Add("cmis:path");
-            filters.Add("cmis:changeToken");
-            filters.Add("cmis:parentId");
-            filters.Add("cmis:contentStreamHash");
-            HashSet<string> renditions = new HashSet<string>();
-            renditions.Add("cmis:none");
-            return session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, renditions, true, null, true, 100);
+            return CreateContext(session: session, cacheEnabled: true, includePathSegments: true, elements: "cmis:path");
         }
 
         /// <summary>
@@ -100,19 +65,7 @@ namespace CmisSync.Lib.Cmis
         /// <returns>The non caching and path including context.</returns>
         /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateNonCachingPathIncludingContext(ISession session) {
-            return CreateContext(
-                session,
-                false,
-                true,
-                "cmis:objectId",
-                "cmis:name",
-                "cmis:contentStreamFileName",
-                "cmis:contentStreamLength",
-                "cmis:lastModificationDate",
-                "cmis:path",
-                "cmis:changeToken",
-                "cmis:parentId",
-                "cmis:contentStreamHash");
+            return CreateContext(session: session, cacheEnabled: false, includePathSegments: true, elements: "cmis:path");
         }
 
         /// <summary>
@@ -124,11 +77,7 @@ namespace CmisSync.Lib.Cmis
         /// <param name="includePathSegments">If set to <c>true</c> include path segments.</param>
         /// <param name="elements">Requested cmis elements.</param>
         public static IOperationContext CreateContext(ISession session, bool cacheEnabled, bool includePathSegments, params string[] elements) {
-            HashSet<string> filter = new HashSet<string>();
-            foreach (var entry in elements) {
-                filter.Add(entry);
-            }
-
+            HashSet<string> filter = CreateFilter(elements);
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             return session.CreateOperationContext(
@@ -142,6 +91,27 @@ namespace CmisSync.Lib.Cmis
                 orderBy: null,
                 cacheEnabled: cacheEnabled,
                 maxItemsPerPage: MaximumItemsPerPage);
+        }
+
+        private static HashSet<string> CreateFilter(params string[] additionalElements) {
+            HashSet<string> filter = new HashSet<string>();
+            filter.Add("cmis:objectId");
+            filter.Add("cmis:name");
+            filter.Add("cmis:contentStreamFileName");
+            filter.Add("cmis:contentStreamLength");
+            filter.Add("cmis:lastModificationDate");
+            filter.Add("cmis:changeToken");
+            filter.Add("cmis:parentId");
+            filter.Add("cmis:contentStreamHash");
+            filter.Add("cmis:secondaryObjectTypeIds");
+            filter.Add("gds:sync.gds:ignoreDeviceIds");
+            if (additionalElements != null) {
+                foreach (var entry in additionalElements) {
+                    filter.Add(entry);
+                }
+            }
+
+            return filter;
         }
     }
 }

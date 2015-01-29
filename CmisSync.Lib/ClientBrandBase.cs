@@ -28,6 +28,7 @@ namespace CmisSync.Lib
 
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -90,17 +91,22 @@ namespace CmisSync.Lib
             try {
                 ISession session = repo.CreateSession();
                 foreach (string path in this.GetPathList()) {
-                    IDocument doc = session.GetObjectByPath(path) as IDocument;
-                    if (doc == null) {
+                    try {
+                        IDocument doc = session.GetObjectByPath(path) as IDocument;
+                        if (doc == null) {
+                            return false;
+                        }
+                    } catch (CmisObjectNotFoundException e) {
+                        Logger.Debug(e.ErrorContent, e);
                         return false;
                     }
                 }
-
-                return true;
             } catch (Exception e) {
-                Logger.Debug(e.Message);
+                Logger.Debug(e.Message, e);
                 return false;
             }
+
+            return true;
         }
 
         /// <summary>

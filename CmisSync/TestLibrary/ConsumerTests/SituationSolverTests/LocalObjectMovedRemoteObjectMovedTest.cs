@@ -93,44 +93,44 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void FolderMovedToEqualFolderAndNamesAreEqual() {
+        public void FolderMovedToEqualFolderAndNamesAreEqual([Values(true, false)]bool childrenAreIgnored) {
             this.SetupOldMappedFolder();
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid);
             var localFolder = this.CreateLocalFolder(this.oldName, newLocalParent, this.localModification);
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.oldName, "/" + this.oldName, this.newRemoteParentId, this.newChangeToken);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.oldName, "/" + this.oldName, this.newRemoteParentId, this.newChangeToken, ignored: childrenAreIgnored);
             remoteFolder.SetupLastModificationDate(remoteModification);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
             remoteFolder.VerifyUpdateLastModificationDate(this.localModification);
-            this.VerifySavedFolder(this.oldName, this.localModification);
+            this.VerifySavedFolder(this.oldName, this.localModification, childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void FolderMovedToEqualFolderAndRemoteNameChanged() {
+        public void FolderMovedToEqualFolderAndRemoteNameChanged([Values(true, false)]bool childrenAreIgnored) {
             this.SetupOldMappedFolder();
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
             var localFolder = this.CreateLocalFolder(this.oldName, newLocalParent, this.localModification);
             localFolder.SetupMoveTo(Path.Combine(this.newParentPath, this.newRemoteName));
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.newRemoteName, this.newRemoteParentId, this.newChangeToken);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.newRemoteName, this.newRemoteParentId, this.newChangeToken, ignored: childrenAreIgnored);
             remoteFolder.SetupLastModificationDate(remoteModification);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
             remoteFolder.Verify(r => r.Rename(It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
             remoteFolder.VerifyUpdateLastModificationDate(this.localModification);
-            this.VerifySavedFolder(this.newRemoteName, this.localModification);
+            this.VerifySavedFolder(this.newRemoteName, this.localModification, childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void FolderMovedToEqualFolderAndLocalNameChanged() {
+        public void FolderMovedToEqualFolderAndLocalNameChanged([Values(true, false)]bool childrenAreIgnored) {
             this.SetupOldMappedFolder();
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid);
             var localFolder = this.CreateLocalFolder(this.newLocalName, newLocalParent, this.localModification);
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.oldName, "/" + this.oldName, this.newRemoteParentId, "change");
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.oldName, "/" + this.oldName, this.newRemoteParentId, "change", ignored: childrenAreIgnored);
             remoteFolder.Setup(
                 r =>
                 r.Rename(this.newLocalName, true))
@@ -142,16 +142,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(r => r.Rename(this.newLocalName, true), Times.Once());
             localFolder.Verify(f => f.MoveTo(It.IsAny<string>()), Times.Never());
             remoteFolder.VerifyUpdateLastModificationDate(this.localModification);
-            this.VerifySavedFolder(this.newLocalName, this.localModification);
+            this.VerifySavedFolder(this.newLocalName, this.localModification, childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void FolderMovedToEqualFolderAndBothNamesAreChangedAndLocalModificationIsNewer() {
+        public void FolderMovedToEqualFolderAndBothNamesAreChangedAndLocalModificationIsNewer([Values(true, false)]bool childrenAreIgnored) {
             this.SetupOldMappedFolder();
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid);
             var localFolder = this.CreateLocalFolder(this.newLocalName, newLocalParent, localModification);
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.oldName, this.newRemoteParentId, "change");
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.oldName, this.newRemoteParentId, "change", ignored: childrenAreIgnored);
             remoteFolder.Setup(
                 r =>
                 r.Rename(this.newLocalName, true))
@@ -163,23 +163,23 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             remoteFolder.Verify(r => r.Rename(this.newLocalName, true), Times.Once());
             localFolder.Verify(f => f.MoveTo(It.IsAny<string>()), Times.Never());
             remoteFolder.VerifyUpdateLastModificationDate(localModification);
-            this.VerifySavedFolder(this.newLocalName, localModification);
+            this.VerifySavedFolder(this.newLocalName, localModification, childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void FolderMovedToEqualFolderAndBothNamesAreChangedAndRemoteModificationIsNewer() {
+        public void FolderMovedToEqualFolderAndBothNamesAreChangedAndRemoteModificationIsNewer([Values(true, false)]bool childrenAreIgnored) {
             this.SetupOldMappedFolder();
             this.localModification = this.remoteModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
             var localFolder = this.CreateLocalFolder(this.newLocalName, newLocalParent, localModification);
-            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.oldName, this.newRemoteParentId, this.newChangeToken);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.remoteObjectId, this.newRemoteName, "/" + this.oldName, this.newRemoteParentId, this.newChangeToken, ignored: childrenAreIgnored);
             remoteFolder.SetupLastModificationDate(remoteModification);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object, ContentChangeType.NONE, ContentChangeType.NONE);
 
             remoteFolder.Verify(r => r.Rename(It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
             localFolder.Verify(f => f.MoveTo(Path.Combine()), Times.Never());
-            this.VerifySavedFolder(this.newRemoteName, remoteModification);
+            this.VerifySavedFolder(this.newRemoteName, remoteModification, childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -231,8 +231,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void FilesMovedToEqualFolderAndBothNamesAreChangedAndRemoteModificationIsNewerButContentStaysEqual()
-        {
+        public void FilesMovedToEqualFolderAndBothNamesAreChangedAndRemoteModificationIsNewerButContentStaysEqual() {
             this.SetupOldMappedFile();
             this.localModification = this.remoteModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
@@ -248,8 +247,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void FilesMovedToEqualFolderAndBothNamesAreChangedAndLocalModificationIsNewerButContentStaysEqual()
-        {
+        public void FilesMovedToEqualFolderAndBothNamesAreChangedAndLocalModificationIsNewerButContentStaysEqual() {
             this.SetupOldMappedFile();
             this.remoteModification = this.localModification - TimeSpan.FromMinutes(30);
             var newLocalParent = this.CreateNewLocalParent(this.newParentUuid, this.newParentPath);
@@ -264,26 +262,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.VerifySavedFile(this.newLocalName, this.localModification, 0);
         }
 
-        [Ignore]
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void FolderMovedIntoDifferentFoldersButNameStaysEqual() {
             Assert.Fail("TODO");
         }
 
-        [Ignore]
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void FolderMovedIntoDifferentFoldersAndRemoteNameChanged() {
             Assert.Fail("TODO");
         }
 
-        [Ignore]
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void FolderMovedIntoDifferentFoldersAndLocalNameChanged() {
             Assert.Fail("TODO");
         }
 
-        [Ignore]
-        [Test, Category("Fast"), Category("Solver")]
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void FolderMovedIntoDifferentFoldersAndBothNamesChanged() {
             Assert.Fail("TODO");
         }
@@ -298,8 +292,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             return Mock.Get(folder);
         }
 
-        private Mock<IFileInfo> CreateLocalFile(string name, IDirectoryInfo parent, DateTime modificationDate)
-        {
+        private Mock<IFileInfo> CreateLocalFile(string name, IDirectoryInfo parent, DateTime modificationDate) {
             var file = Mock.Of<IFileInfo>(
                 f =>
                 f.Uuid == this.localUuid &&
@@ -309,26 +302,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             return Mock.Get(file);
         }
 
-        private IDirectoryInfo CreateNewLocalParent(Guid uuid, string fullName = null)
-        {
+        private IDirectoryInfo CreateNewLocalParent(Guid uuid, string fullName = null) {
             return Mock.Of<IDirectoryInfo>(
                 d =>
                 d.Uuid == uuid &&
                 d.FullName == fullName);
         }
 
-        private void SetupOldMappedFolder()
-        {
+        private void SetupOldMappedFolder() {
             this.SetupOldMappedObject(true);
         }
 
-        private void SetupOldMappedFile()
-        {
+        private void SetupOldMappedFile() {
             this.SetupOldMappedObject(false);
         }
 
-        private void SetupOldMappedObject(bool isFolder)
-        {
+        private void SetupOldMappedObject(bool isFolder) {
             var mappedObject = new MappedObject(
                 this.oldName,
                 this.remoteObjectId,
@@ -340,25 +329,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 LastRemoteWriteTimeUtc = this.oldModification,
                 LastContentSize = isFolder ? -1 : 0
             };
-            if (isFolder)
-            {
+            if (isFolder) {
                 this.storage.AddMappedFolder(mappedObject);
-            }
-            else
-            {
+            } else {
                 this.storage.AddMappedFile(mappedObject);
             }
         }
 
-        private void VerifySavedFolder(string newName, DateTime modificationDate) {
-            this.VerifySavedObject(newName, modificationDate, true);
+        private void VerifySavedFolder(string newName, DateTime modificationDate, bool ignored) {
+            this.VerifySavedObject(newName, modificationDate, true, ignored);
         }
 
         private void VerifySavedFile(string newName, DateTime modificationDate, long contentSize) {
-            this.VerifySavedObject(newName, modificationDate, false, contentSize);
+            this.VerifySavedObject(newName, modificationDate, false, contentSize: contentSize);
         }
 
-        private void VerifySavedObject(string newName, DateTime modificationDate, bool isFolder, long contentSize = -1) {
+        private void VerifySavedObject(string newName, DateTime modificationDate, bool isFolder, bool ignored = false, long contentSize = -1) {
             this.storage.VerifySavedMappedObject(
                 isFolder ? MappedObjectType.Folder : MappedObjectType.File,
                 this.remoteObjectId,
@@ -369,7 +355,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 modificationDate,
                 modificationDate,
                 null,
-                contentSize);
+                contentSize,
+                ignored);
         }
     }
 }

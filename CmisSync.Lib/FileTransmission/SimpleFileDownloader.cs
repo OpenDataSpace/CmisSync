@@ -81,7 +81,7 @@ namespace CmisSync.Lib.FileTransmission
 
             using (ProgressStream progressStream = new ProgressStream(localFileStream, status))
             using (CryptoStream hashstream = new CryptoStream(progressStream, hashAlg, CryptoStreamMode.Write))
-            using (Stream remoteStream = contentStream.Stream)
+            using (Stream remoteStream = contentStream != null ? contentStream.Stream : new MemoryStream(0))
             {
                 status.ReportProgress(new TransmissionProgressEventArgs {
                     Length = remoteDocument.ContentStreamLength,
