@@ -171,14 +171,30 @@ namespace CmisSync
 
         private void UpdateStatusText() {
             string message;
-            lock(this.counterLock) {
-                string since = string.Format(" since {0}", this.changesFoundAt);
+            lock (this.counterLock) {
                 if (this.syncRequested == true) {
-                    message = string.Format("Searching for changes{0}", this.changesFound > 0 ? string.Format(" (actually {0} found)", this.changesFound) : string.Empty);
+                    if (this.changesFound > 0) {
+                        message = string.Format(Properties_Resources.StatusSearchingForChangesAndFound, this.changesFound.ToString());
+                    } else {
+                        message = Properties_Resources.StatusSearchingForChanges;
+                    }
                 } else {
-                    message = string.Format("{0} Changes detected{1}", this.changesFound > 0 ? this.changesFound.ToString() : "No", this.changesFoundAt != null ? since : string.Empty);
+                    if (this.changesFound > 0) {
+                        if (this.changesFoundAt == null) {
+                            message = string.Format(Properties_Resources.StatusChangesDetected, this.changesFound.ToString());
+                        } else {
+                            message = string.Format(Properties_Resources.StatusChangesDetectedSince, this.changesFound.ToString(), this.changesFoundAt.Value);
+                        }
+                    } else {
+                        if (this.changesFoundAt == null) {
+                            message = string.Format(Properties_Resources.StatusNoChangeDetected);
+                        } else {
+                            message = string.Format(Properties_Resources.StatusNoChangeDetectedSince, this.changesFoundAt.Value);
+                        }
+                    }
                 }
             }
+
             Application.Invoke(delegate {
                 (this.statusItem.Child as Label).Text = message;
             });

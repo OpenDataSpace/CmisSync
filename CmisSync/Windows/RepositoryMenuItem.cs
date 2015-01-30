@@ -138,13 +138,13 @@ namespace CmisSync {
                 }
 
                 this.UpdateStatusText();
-            } else if (changeCounter.Item1 == "SyncRequested") {
+            } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
                 if (changeCounter.Item2 > 0) {
-                    lock(this.counterLock) {
-                        this.syncRequested = true;
+                    lock (this.counterLock) {
+                        this.syncRequested = changeCounter.Item1 == "SyncRequested";
                     }
                 } else {
-                    lock(this.counterLock) {
+                    lock (this.counterLock) {
                         this.syncRequested = false;
                         this.changesFoundAt = this.syncRequested ? this.changesFoundAt : DateTime.Now;
                     }
@@ -157,11 +157,26 @@ namespace CmisSync {
         private void UpdateStatusText() {
             string message;
             lock(this.counterLock) {
-                string since = string.Format(" since {0}", this.changesFoundAt);
                 if (this.syncRequested == true) {
-                    message = string.Format("Searching for changes{0}", this.changesFound > 0 ? string.Format(" (actually {0} found)", this.changesFound) : string.Empty);
+                    if (this.changesFound > 0) {
+                        message = string.Format(Properties_Resources.StatusSearchingForChangesAndFound, this.changesFound.ToString());
+                    } else {
+                        message = Properties_Resources.StatusSearchingForChanges;
+                    }
                 } else {
-                    message = string.Format("{0} Changes detected{1}", this.changesFound > 0 ? this.changesFound.ToString() : "No", this.changesFoundAt != null ? since : string.Empty);
+                    if (this.changesFound > 0) {
+                        if (this.changesFoundAt == null) {
+                            message = string.Format(Properties_Resources.StatusChangesDetected, this.changesFound.ToString());
+                        } else {
+                            message = string.Format(Properties_Resources.StatusChangesDetectedSince, this.changesFound.ToString(), this.changesFoundAt.Value);
+                        }
+                    } else {
+                        if (this.changesFoundAt == null) {
+                            message = string.Format(Properties_Resources.StatusNoChangeDetected);
+                        } else {
+                            message = string.Format(Properties_Resources.StatusNoChangeDetectedSince, this.changesFoundAt.Value);
+                        }
+                    }
                 }
             }
 
