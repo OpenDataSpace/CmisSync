@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -52,8 +51,7 @@ namespace TestLibrary.IntegrationTests
     using TestLibrary.TestUtils;
 
     [TestFixture, Timeout(900000)]
-    public abstract class BaseFullRepoTest : IsTestWithConfiguredLog4Net
-    {
+    public abstract class BaseFullRepoTest : IsTestWithConfiguredLog4Net {
         protected RepoInfo repoInfo;
         protected DirectoryInfo localRootDir;
         protected IFolder remoteRootDir;
@@ -77,8 +75,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [TestFixtureSetUp]
-        public void ClassInit()
-        {
+        public void ClassInit() {
             // Disable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
             #if __COCOA__
@@ -91,15 +88,13 @@ namespace TestLibrary.IntegrationTests
         }
 
         [TestFixtureTearDown]
-        public void ClassTearDown()
-        {
+        public void ClassTearDown() {
             // Reanable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
 
         [SetUp]
-        public void Init()
-        {
+        public void Init() {
             string testName = this.GetType().Name;
             object[] attributes = this.GetType().GetCustomAttributes(true);
             foreach (var attr in attributes) {
@@ -155,8 +150,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [TearDown]
-        public void TestDown()
-        {
+        public void TestDown() {
             InvalidDataException repoDBException = null;
             try {
                 this.repo.RunDbObjectValidationCheck();
