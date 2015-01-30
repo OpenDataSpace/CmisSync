@@ -59,7 +59,6 @@ namespace CmisSync {
         private NSMenu menu;
 
         private NSStatusItem status_item;
-        private NSMenuItem state_item;
 
         private NSMenuItem add_item;
         private NSMenuItem about_item;
@@ -72,38 +71,27 @@ namespace CmisSync {
         private NSImage [] animation_frames_active;
         private NSImage error_image;
         private NSImage error_image_active;
-        private NSImage caution_image;
-        private NSImage cmissync_image;
-        private NSImage download_image;
-        private NSImage upload_image;
-        private NSImage update_image;
-
-        private Dictionary<String, NSMenuItem> FolderItems;
         private List<RepositoryMenuItem> repoItems;
 
-        public StatusIcon () : base ()
-        {
-            using (var a = new NSAutoreleasePool ())
-            {
-                CreateAnimationFrames ();
+        public StatusIcon() : base() {
+            using (var a = new NSAutoreleasePool()) {
+                CreateAnimationFrames();
 
-                this.status_item = NSStatusBar.SystemStatusBar.CreateStatusItem (28);
+                this.status_item = NSStatusBar.SystemStatusBar.CreateStatusItem(28);
                 this.status_item.HighlightMode = true;
-                this.status_item.Image = this.animation_frames [0];
+                this.status_item.Image = this.animation_frames[0];
 
-                this.status_item.Image               = this.animation_frames [0];
-                this.status_item.Image.Size          = new SizeF (16, 16);
-                this.status_item.AlternateImage      = this.animation_frames_active [0];
-                this.status_item.AlternateImage.Size = new SizeF (16, 16);
+                this.status_item.Image               = this.animation_frames[0];
+                this.status_item.Image.Size          = new SizeF(16, 16);
+                this.status_item.AlternateImage      = this.animation_frames_active[0];
+                this.status_item.AlternateImage.Size = new SizeF(16, 16);
 
                 CreateMenu ();
             }
-            
 
             Controller.UpdateIconEvent += delegate (int icon_frame) {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    BeginInvokeOnMainThread (delegate {
+                using (var a = new NSAutoreleasePool()) {
+                    BeginInvokeOnMainThread(delegate {
                         if (icon_frame > -1) {
                             this.status_item.Image               = this.animation_frames [icon_frame];
                             this.status_item.Image.Size          = new SizeF (16, 16);
@@ -120,24 +108,13 @@ namespace CmisSync {
                 }
             };
 
-            Controller.UpdateStatusItemEvent += delegate (string state_text) {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    BeginInvokeOnMainThread (delegate {
-                        this.state_item.Title = state_text;
-                    });
-                }
-            };
-
             Controller.UpdateMenuEvent += delegate {
-                using (var a = new NSAutoreleasePool ())
-                {
-                    InvokeOnMainThread (() => CreateMenu ());
+                using (var a = new NSAutoreleasePool()) {
+                    InvokeOnMainThread(() => CreateMenu());
                 }
             };
 
-            Controller.UpdateSuspendSyncFolderEvent += delegate(string reponame)
-            {
+            Controller.UpdateSuspendSyncFolderEvent += delegate(string reponame) {
                 using (var a = new NSAutoreleasePool()){
                     InvokeOnMainThread(delegate {
                         foreach (var repoItem in this.repoItems) {
@@ -155,46 +132,11 @@ namespace CmisSync {
                     });
                 }
             };
-
-            // TODO Need to implement this method like the COCOA way to do it
-            Controller.UpdateTransmissionMenuEvent += delegate
-            {
-                //  Put Program.Controller.ActiveTransmissions() before transmit from managed code to native code
-                //  https://mantis.dataspace.cc/view.php?id=3781
-                List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
-
-                using (var a = new NSAutoreleasePool()) {
-                    BeginInvokeOnMainThread(delegate {
-                        if(state_item.Submenu!=null){
-                            foreach(NSMenuItem item in state_item.Submenu.ItemArray()){
-                                item.Dispose();
-                            }
-                            state_item.Submenu.RemoveAllItems();
-                        } else {
-                            state_item.Submenu = new NSMenu();
-                        }
-                        if(ConfigManager.CurrentConfig.Notifications){
-                            foreach(FileTransmissionEvent transmission in transmissions) {
-                                NSMenuItem transmissionItem = new TransmissionMenuItem(transmission);
-                                state_item.Submenu.AddItem(transmissionItem);
-                            }
-                            if(transmissions.Count > 0) {
-                                state_item.Enabled = true;
-                            }else{
-                                state_item.Enabled = false;
-                            }
-                        }else{
-                            state_item.Enabled = false;
-                        }
-                    });
-                }
-            };
         }
 
         private SyncStatus getSyncStatus(string reponame) {
-            foreach (var repo in Program.Controller.Repositories)
-            {
-                if(repo.Name.Equals(reponame)){
+            foreach (var repo in Program.Controller.Repositories) {
+                if (repo.Name.Equals(reponame)) {
                     return repo.Status;
                 }
             }
@@ -204,21 +146,14 @@ namespace CmisSync {
         public void CreateMenu () {
             using (NSAutoreleasePool a = new NSAutoreleasePool ()) {
                 this.repoItems = new List<RepositoryMenuItem>();
-                this.menu                  = new NSMenu ();
+                this.menu = new NSMenu ();
                 this.menu.AutoEnablesItems = false;
 
-                this.state_item = new NSMenuItem () {
-                    Title   = Controller.StateText,
-                    Enabled = false
-                };
-
-                this.general_settings_item = new NSMenuItem()
-                {
+                this.general_settings_item = new NSMenuItem() {
                     Title = Properties_Resources.EditTitle
                 };
 
-                this.general_settings_item.Activated += delegate
-                {
+                this.general_settings_item.Activated += delegate {
                     Controller.SettingClicked();
                 };
 
@@ -226,8 +161,7 @@ namespace CmisSync {
                     Title = Properties_Resources.Transmission
                 };
 
-                this.transmission_item.Activated += delegate
-                {
+                this.transmission_item.Activated += delegate {
                     Controller.TransmissionClicked();
                 };
 
@@ -235,8 +169,7 @@ namespace CmisSync {
                     Title = Properties_Resources.ViewLog
                 };
 
-                this.log_item.Activated += delegate
-                {
+                this.log_item.Activated += delegate {
                     Controller.LogClicked();
                 };
 
@@ -267,9 +200,6 @@ namespace CmisSync {
                     Controller.QuitClicked ();
                 };
 
-                this.menu.AddItem (this.state_item);
-                this.menu.AddItem (NSMenuItem.SeparatorItem);
-
                 var repos = Program.Controller.Repositories;
                 if (repos.Length > 0) {
                     foreach (var repo in repos) {
@@ -294,138 +224,36 @@ namespace CmisSync {
             }
         }
 
-        private void CreateAnimationFrames ()
-        {
-            this.animation_frames = new NSImage [] {
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-i")),
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-ii")),
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iii")),
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iiii")),
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iiiii"))
+        private void CreateAnimationFrames() {
+            this.animation_frames = new NSImage[] {
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-i")),
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-ii")),
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-iii")),
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-iiii")),
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-iiiii"))
             };
 
             this.animation_frames_active = new NSImage [] {
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-i-active")),
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-ii-active")),
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iii-active")),
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iiii-active")),
-                new NSImage (UIHelpers.GetImagePathname ("process-syncing-iiiii-active"))
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-i-active")),
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-ii-active")),
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-iii-active")),
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-iiii-active")),
+                new NSImage(UIHelpers.GetImagePathname("process-syncing-iiiii-active"))
             };
-            
-            this.error_image = new NSImage (
-                UIHelpers.GetImagePathname ("process-syncing-error"));
 
-            this.error_image_active = new NSImage (
-                UIHelpers.GetImagePathname ("process-syncing-error-active"));
-
-            this.caution_image      = new NSImage (UIHelpers.GetImagePathname ("process-syncing-error"));
+            this.error_image = new NSImage(UIHelpers.GetImagePathname("process-syncing-error"));
+            this.error_image_active = new NSImage(UIHelpers.GetImagePathname ("process-syncing-error-active"));
         }
     }
-    
-    
+
     public class StatusIconMenuDelegate : NSMenuDelegate {
-        
-        public override void MenuWillHighlightItem (NSMenu menu, NSMenuItem item)
-        {
+        public override void MenuWillHighlightItem(NSMenu menu, NSMenuItem item) {
         }
 
-    
-        public override void MenuWillOpen (NSMenu menu)
-        {
+        public override void MenuWillOpen(NSMenu menu) {
             InvokeOnMainThread (delegate {
                 NSApplication.SharedApplication.DockTile.BadgeLabel = null;
             });
-        }
-    }
-
-    //TODO This isn't working well, please create a native COCOA like solution 
-    public class TransmissionMenuItem : NSMenuItem {
-
-        private FileTransmissionEvent transmissionEvent;
-        private int updateInterval = 1;
-        private DateTime updateTime;
-        private bool run = false;
-        private object disposeLock = new object ();
-        private bool disposed = false;
-
-        private string TransmissionStatus(TransmissionProgressEventArgs e)
-        {
-            double? percent = e.Percent;
-            long? bitsPerSecond = e.BitsPerSecond;
-            if (percent != null && bitsPerSecond != null) {
-                return String.Format ("{0} ({1} {2})",
-                    System.IO.Path.GetFileName (transmissionEvent.Path),
-                    CmisSync.Lib.Utils.FormatPercent((double)percent),
-                    CmisSync.Lib.Utils.FormatBandwidth ((long)bitsPerSecond));
-            } else {
-                return System.IO.Path.GetFileName (transmissionEvent.Path);
-            }
-        }
-
-        private void TransmissionEvent(object sender, TransmissionProgressEventArgs e)
-        {
-            lock (disposeLock) {
-                if (disposed) {
-                    return;
-                }
-                TimeSpan diff = DateTime.Now - updateTime;
-                if (diff.Seconds < updateInterval) {
-                    return;
-                }
-                if (run) {
-                    return;
-                }
-
-                run = true;
-                updateTime = DateTime.Now;
-                string title = TransmissionStatus (e);
-                BeginInvokeOnMainThread (delegate
-                {
-                    lock(disposeLock) {
-                        if (!disposed) {
-                            Title = title;
-                        }
-                    }
-                });
-                run = false;
-            }
-        }
-
-        public TransmissionMenuItem(FileTransmissionEvent transmission)
-        {
-            Activated += delegate
-            {
-                NSWorkspace.SharedWorkspace.OpenFile (System.IO.Directory.GetParent (transmission.Path).FullName);
-            };
-
-            transmissionEvent = transmission;
-            updateTime = DateTime.Now;
-
-            Title = TransmissionStatus (transmission.Status);
-            switch (transmission.Type) {
-            case FileTransmissionType.DOWNLOAD_NEW_FILE:
-                Image = new NSImage (UIHelpers.GetImagePathname ("Downloading"));
-                break;
-            case FileTransmissionType.UPLOAD_NEW_FILE:
-                Image = new NSImage (UIHelpers.GetImagePathname ("Uploading"));
-                break;
-            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
-                goto case FileTransmissionType.UPLOAD_MODIFIED_FILE;
-            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
-                Image = new NSImage (UIHelpers.GetImagePathname ("Updating"));
-                break;
-            }
-            transmissionEvent.TransmissionStatus += TransmissionEvent;
-        }
-
-        protected override void Dispose (bool disposing) {
-            lock (disposeLock) {
-                if (!disposed) {
-                    transmissionEvent.TransmissionStatus -= TransmissionEvent;
-                }
-                disposed = true;
-            }
-            base.Dispose (disposing);
         }
     }
 }
