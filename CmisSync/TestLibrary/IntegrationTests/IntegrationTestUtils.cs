@@ -17,19 +17,19 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
 
     using Newtonsoft.Json;
 
+    using NUnit.Framework;
+
     /// <summary>
     /// Helper functions for integration tests
     /// </summary>
-    public class ITUtils
-    {
+    public class ITUtils {
         private static dynamic config = null;
 
         /// <summary>
@@ -38,14 +38,11 @@ namespace TestLibrary.IntegrationTests
         /// <value>
         /// The test servers.
         /// </value>
-        public static IEnumerable<object[]> TestServers
-        {
-            get
-            {
+        public static IEnumerable<object[]> TestServers {
+            get {
                 var path = GetServerPath();
 
-                return JsonConvert.DeserializeObject<List<object[]>>(
-                    File.ReadAllText(path));
+                return JsonConvert.DeserializeObject<List<object[]>>(File.ReadAllText(path));
             }
         }
 
@@ -73,40 +70,37 @@ namespace TestLibrary.IntegrationTests
         /// Gets the proxy server settings saved in "proxy-server.json" file.
         /// </summary>
         /// <value>The proxy server.</value>
-        public static IEnumerable<object[]> ProxyServer
-        {
-            get
-            {
+        public static IEnumerable<object[]> ProxyServer {
+            get {
                 string path = "../../proxy-server.json";
                 bool exists = File.Exists(path);
 
-                if (!exists)
-                {
+                if (!exists) {
                     path = "../CmisSync/TestLibrary/proxy-server.json";
                 }
 
-                return JsonConvert.DeserializeObject<List<object[]>>(
-                    File.ReadAllText(path));
+                return JsonConvert.DeserializeObject<List<object[]>>(File.ReadAllText(path));
             }
         }
 
-        public static dynamic GetConfig()
-        {
+        public static dynamic GetConfig() {
             if (config == null) {
                 var path = GetServerPath();
                 config = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
             }
 
+            if (string.IsNullOrEmpty(config[1].ToString())) {
+                Assert.Fail("Given local path is empty, please correct this in your test-server.json file or via configure");
+            }
+
             return config;
         }
 
-        private static string GetServerPath()
-        {
+        private static string GetServerPath() {
             string path = "../../test-servers.json";
             bool exists = File.Exists(path);
 
-            if (!exists)
-            {
+            if (!exists) {
                 path = "../CmisSync/TestLibrary/test-servers.json";
             }
 
