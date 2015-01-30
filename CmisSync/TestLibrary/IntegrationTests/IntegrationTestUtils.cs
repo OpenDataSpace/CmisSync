@@ -56,20 +56,16 @@ namespace TestLibrary.IntegrationTests
         /// <value>
         /// The test servers fuzzy.
         /// </value>
-        public static IEnumerable<object[]> TestServersFuzzy
-        {
-            get
-            {
-                string path = "../../test-servers-fuzzy.json";
-                bool exists = File.Exists(path);
-
-                if (!exists)
-                {
-                    path = "../CmisSync/TestLibrary/test-servers-fuzzy.json";
-                }
-
-                return JsonConvert.DeserializeObject<List<object[]>>(
-                    File.ReadAllText(path));
+        public static dynamic TestServersFuzzy {
+            get {
+                var list = new List<object[]>();
+                var config = ITUtils.GetConfig();
+                var array = new object[3];
+                array[0] = config[3].ToString();
+                array[1] = config[4].ToString();
+                array[2] = config[5].ToString();
+                list.Add(array);
+                return list;
             }
         }
 
