@@ -52,11 +52,8 @@ using CmisSync.Lib.Cmis;
 using CmisSync.Lib.Config;
 
 namespace CmisSync {
-
+    [CLSCompliant(false)]
     public class StatusIcon : NSObject {
-
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(ControllerBase));
-
         public StatusIconController Controller = new StatusIconController ();
 
         private NSMenu menu;
@@ -75,17 +72,14 @@ namespace CmisSync {
         private NSImage [] animation_frames_active;
         private NSImage error_image;
         private NSImage error_image_active;
-        private NSImage folder_image;
         private NSImage caution_image;
         private NSImage cmissync_image;
-        private NSImage pause_image;
-        private NSImage resume_image;
         private NSImage download_image;
         private NSImage upload_image;
         private NSImage update_image;
 
         private Dictionary<String, NSMenuItem> FolderItems;
-
+        private List<RepositoryMenuItem> repoItems;
 
         public StatusIcon () : base ()
         {
@@ -146,9 +140,17 @@ namespace CmisSync {
             {
                 using (var a = new NSAutoreleasePool()){
                     InvokeOnMainThread(delegate {
-                        NSMenuItem PauseItem;
-                        if(FolderItems.TryGetValue(reponame,out PauseItem)){
-                            setSyncItemState(PauseItem, getSyncStatus(reponame));
+                        foreach (var repoItem in this.repoItems) {
+                            if (repoItem.RepositoryName == reponame) {
+                                foreach (var repo in Program.Controller.Repositories) {
+                                    if (repo.Name.Equals(reponame)) {
+                                        repoItem.Status = repo.Status;
+                                        break;
+                                    }
+                                }
+
+                                break;
+                            }
                         }
                     });
                 }
@@ -185,38 +187,8 @@ namespace CmisSync {
                             state_item.Enabled = false;
                         }
                     });
-				}
+                }
             };
-        }
-
-        NSMenuItem CreateFolderMenuItem(string folder_name)
-        {
-            NSMenuItem folderitem = new NSMenuItem();
-            folderitem.Image = this.folder_image;
-            folderitem.Image.Size = new SizeF(16, 16);
-            folderitem.Title = folder_name;
-            NSMenu foldersubmenu = new NSMenu();
-            NSMenuItem openitem = new NSMenuItem();
-            openitem.Title = Properties_Resources.OpenLocalFolder;
-            openitem.Activated += OpenFolderDelegate(folder_name);
-            NSMenuItem pauseitem = new NSMenuItem();
-            setSyncItemState(pauseitem, getSyncStatus(folder_name));
-            FolderItems.Add(folder_name, pauseitem);
-            pauseitem.Activated += PauseFolderDelegate(folder_name);
-            NSMenuItem removeitem = new NSMenuItem();
-            removeitem.Title = Properties_Resources.RemoveFolderFromSync;
-            removeitem.Activated += RemoveFolderDelegate(folder_name);
-            NSMenuItem settingsitem = new NSMenuItem();
-            settingsitem.Title = Properties_Resources.EditTitle;
-            settingsitem.Activated += OpenSettingsDialogDelegate(folder_name);
-            foldersubmenu.AddItem(openitem);
-            foldersubmenu.AddItem(pauseitem);
-            foldersubmenu.AddItem(NSMenuItem.SeparatorItem);
-            foldersubmenu.AddItem(settingsitem);
-            foldersubmenu.AddItem(NSMenuItem.SeparatorItem);
-            foldersubmenu.AddItem(removeitem);
-            folderitem.Submenu = foldersubmenu;
-            return folderitem;
         }
 
         private SyncStatus getSyncStatus(string reponame) {
@@ -229,29 +201,11 @@ namespace CmisSync {
             return SyncStatus.Idle;
         }
 
-        private void setSyncItemState(NSMenuItem item, SyncStatus status) {
-            switch (status)
-            {
-                case SyncStatus.Idle:
-                    item.Title = Properties_Resources.PauseSync;
-                    item.Image = this.pause_image;
-                    break;
-                case SyncStatus.Suspend:
-                    item.Title = Properties_Resources.ResumeSync;
-                    item.Image = this.resume_image;
-                    break;
-            }
-            item.Image.Size = new SizeF(16, 16);
-        }
-
-        public void CreateMenu ()
-        {
-            using (NSAutoreleasePool a = new NSAutoreleasePool ())
-            {
+        public void CreateMenu () {
+            using (NSAutoreleasePool a = new NSAutoreleasePool ()) {
+                this.repoItems = new List<RepositoryMenuItem>();
                 this.menu                  = new NSMenu ();
                 this.menu.AutoEnablesItems = false;
-
-                this.FolderItems = new Dictionary<String, NSMenuItem>();
 
                 this.state_item = new NSMenuItem () {
                     Title   = Controller.StateText,
@@ -316,21 +270,13 @@ namespace CmisSync {
                 this.menu.AddItem (this.state_item);
                 this.menu.AddItem (NSMenuItem.SeparatorItem);
 
-                if (Controller.Folders.Length > 0) {
-                    foreach (string folder_name in Controller.Folders) {
-                        this.menu.AddItem(CreateFolderMenuItem(folder_name));
+                var repos = Program.Controller.Repositories;
+                if (repos.Length > 0) {
+                    foreach (var repo in repos) {
+                        var repoItem = new RepositoryMenuItem(repo, this.Controller);
+                        this.repoItems.Add(repoItem);
+                        this.menu.AddItem(repoItem);
                     };
-                    if (Controller.OverflowFolders.Length > 0)
-                    {
-                        NSMenuItem moreitem = new NSMenuItem();
-                        moreitem.Title = "More Folder";
-                        NSMenu moreitemsmenu = new NSMenu();
-                        foreach (string folder_name in Controller.OverflowFolders) {
-                            moreitemsmenu.AddItem(CreateFolderMenuItem(folder_name));
-                        };
-                        moreitem.Submenu = moreitemsmenu;
-                        this.menu.AddItem(moreitem);
-                    }
                     this.menu.AddItem (NSMenuItem.SeparatorItem);
                 }
 
@@ -347,46 +293,6 @@ namespace CmisSync {
                 this.status_item.Menu = this.menu;
             }
         }
-
-
-        // A method reference that makes sure that opening the
-        // event log for each repository works correctly
-        private EventHandler OpenFolderDelegate (string name)
-        {
-            return delegate {
-                Controller.LocalFolderClicked (name);
-            };
-        }
-
-        private EventHandler PauseFolderDelegate ( string name)
-        {
-            return delegate
-            {
-                Controller.SuspendSyncClicked(name);
-            };
-        }
-
-        private EventHandler RemoveFolderDelegate(string name)
-        {
-            return delegate
-            {
-                NSAlert alert = NSAlert.WithMessage(Properties_Resources.RemoveSyncQuestion,"No, please continue syncing","Yes, stop syncing",null,"");
-                alert.Icon = this.caution_image;
-                alert.Window.OrderFrontRegardless();
-                int i = alert.RunModal();
-                if(i == 0)
-                    Controller.RemoveFolderFromSyncClicked(name);
-            };
-        }
-
-        private EventHandler OpenSettingsDialogDelegate(string name)
-        {
-            return delegate
-            {
-                Controller.EditFolderClicked(name);
-            };
-        }
-
 
         private void CreateAnimationFrames ()
         {
@@ -412,11 +318,7 @@ namespace CmisSync {
             this.error_image_active = new NSImage (
                 UIHelpers.GetImagePathname ("process-syncing-error-active"));
 
-            this.folder_image       = new NSImage (UIHelpers.GetImagePathname ("cmissync-folder", "icns"));
-            this.cmissync_image     = new NSImage (UIHelpers.GetImagePathname ("cmissync-app", "icns"));
             this.caution_image      = new NSImage (UIHelpers.GetImagePathname ("process-syncing-error"));
-            this.pause_image        = new NSImage (UIHelpers.GetImagePathname ("media_playback_pause"));
-            this.resume_image       = new NSImage (UIHelpers.GetImagePathname ("media_playback_start"));
         }
     }
     
@@ -516,8 +418,7 @@ namespace CmisSync {
             transmissionEvent.TransmissionStatus += TransmissionEvent;
         }
 
-        protected override void Dispose (bool disposing)
-        {
+        protected override void Dispose (bool disposing) {
             lock (disposeLock) {
                 if (!disposed) {
                     transmissionEvent.TransmissionStatus -= TransmissionEvent;
@@ -527,6 +428,4 @@ namespace CmisSync {
             base.Dispose (disposing);
         }
     }
-
-
 }

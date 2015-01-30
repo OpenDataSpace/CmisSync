@@ -29,6 +29,7 @@
     <I18n>cjk,mideast,other,rare,west</I18n>
     <UseSGen>true</UseSGen>
     <DefineConstants>__COCOA__</DefineConstants>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Optimize>false</Optimize>
@@ -46,6 +47,7 @@
     <PackageSigningKey>Developer ID Installer</PackageSigningKey>
     <I18n>
     </I18n>
+    <UseRefCounting>false</UseRefCounting>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -195,6 +197,7 @@
     </Compile>
     <Compile Include="ClientBrand.cs" />
     <Compile Include="UIHelpers.cs" />
+    <Compile Include="RepositoryMenuItem.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
