@@ -44,7 +44,7 @@ namespace CmisSync
             this.Status = repo.Status;
 
             this.suspendItem.Activated += this.SuspendSyncFolderDelegate();
-            this.statusItem = new MenuItem("Searching for changes") {
+            this.statusItem = new MenuItem(Properties_Resources.StatusSearchingForChanges) {
                 Sensitive = false
             };
 

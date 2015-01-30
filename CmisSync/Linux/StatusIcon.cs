@@ -184,22 +184,7 @@ namespace CmisSync {
             };
         }
 
-        private void SetSyncItemState(ImageMenuItem syncitem, SyncStatus status) {
-            switch (status)
-            {
-            case SyncStatus.Idle:
-                (syncitem.Child as Label).Text = CmisSync.Properties_Resources.PauseSync;
-                syncitem.Image = new Image(UIHelpers.GetIcon("dataspacesync-pause", 12));
-                break;
-            case SyncStatus.Suspend:
-                (syncitem.Child as Label).Text = CmisSync.Properties_Resources.ResumeSync;
-                syncitem.Image = new Image(UIHelpers.GetIcon("dataspacesync-start", 12));
-                break;
-            }
-        }
-
-        public void CreateMenu()
-        {
+        public void CreateMenu() {
             this.menu = new Menu();
             this.repoItems = new List<RepositoryMenuItem>();
             // State Menu
