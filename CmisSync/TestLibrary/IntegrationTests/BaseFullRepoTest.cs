@@ -190,7 +190,7 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        protected void WaitForRemoteChanges(int sleepDuration = 3000) {
+        protected void WaitForRemoteChanges(int sleepDuration = 5000) {
             Thread.Sleep(this.ContentChangesActive ? sleepDuration : 0);
         }
 
