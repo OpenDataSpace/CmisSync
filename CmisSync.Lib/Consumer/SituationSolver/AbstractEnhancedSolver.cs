@@ -178,7 +178,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         if (docPWC == null) {
                             uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
                         } else {
-                            using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
+                            using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read))
+                            {
                                 int bufsize = 8 * 1024;
                                 byte[] buffer = new byte[bufsize];
                                 for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault(); ) {

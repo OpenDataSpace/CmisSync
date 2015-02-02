@@ -235,7 +235,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.VerifyCreateDocument();
             fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(ChunkCount));
+            documentPWC.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(ChunkCount + 1));  //  plus 1 for one AppendContentStream is aborted
             document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
         }
 
