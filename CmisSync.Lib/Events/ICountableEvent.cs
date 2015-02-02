@@ -17,16 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// Instances of this event are able to be counted by categories.
     /// Every event, which should be able to be tracked inside the SyncEventQueue must return a category.
     /// </summary>
-    public interface ICountableEvent : ISyncEvent
-    {
+    public interface ICountableEvent : ISyncEvent {
         /// <summary>
         /// Gets the category of the event. This can be used to differ between multiple event types.
         /// The returned value should never ever change its value after requesting it the first time.
