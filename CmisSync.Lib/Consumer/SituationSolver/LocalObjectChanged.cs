@@ -55,7 +55,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager) : base(session, storage)
+            IFileTransmissionStorage transmissionStorage,
+            ActiveActivitiesManager transmissionManager) : base(session, storage, transmissionStorage)
         {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");

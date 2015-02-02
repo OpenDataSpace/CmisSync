@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -63,14 +63,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void DefaultConstructorTest() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
-            new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
+            new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null));
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -300,7 +300,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
-            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, this.manager.Object);
+            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, null, this.manager.Object);
             this.uuid = Guid.NewGuid();
             this.modificationDate = DateTime.UtcNow;
             this.localPath = Path.Combine("temp", this.objectName);

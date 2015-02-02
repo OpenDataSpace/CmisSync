@@ -183,10 +183,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             ActiveActivitiesManager transmissionManager = new ActiveActivitiesManager();
 
-            ContentTaskUtils.DefaultChunkSize = 1024;
+            ContentTaskUtils.DefaultChunkSize = 8 * 1024;
+            const int ChunkCount = 4;
 
-            long fileLength = 1024 * 1024;
+            long fileLength = ChunkCount * ContentTaskUtils.DefaultChunkSize;
             var fileContent = new byte[fileLength];
+            fileContent[0] = 0;
+            fileContent[ContentTaskUtils.DefaultChunkSize] = 1;
+            fileContent[ContentTaskUtils.DefaultChunkSize * 2] = 2;
+            fileContent[ContentTaskUtils.DefaultChunkSize * 3] = 3;
             byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
 
             var stream = new Mock<MemoryStream>();
@@ -219,6 +224,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             Assert.Throws<AbortException>(() => this.RunSolveFile(fileInfo, transmissionManager));
 
+            readLength = 0;
             stream.Setup(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => {
                 if (readLength + count > fileLength) {
                     count = (int)(fileLength - readLength);
@@ -228,13 +234,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 return count;
             });
 
-            this.RunSolveFile(fileInfo, transmissionManager);
+            this.RunSolveFileChanged(fileInfo, document, transmissionManager);
             
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, Times.Exactly(2), this.withExtendedAttributes, null, null, hash, fileLength);
             this.VerifyCreateDocument();
             fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
+            document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(ChunkCount));
             document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
         }
 
@@ -512,13 +518,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             this.session.Setup(s => s.GetObject(fileId)).Returns(documentPWCMock.Object);
 
-            documentPWCMock.Setup(
-                doc =>
-                doc.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()))
-                .Callback<IContentStream, bool, bool>((stream, last, refresh) => {
-                    byte[] buffer = new byte[stream.Stream.Length];
-                    stream.Stream.Read(buffer, 0, buffer.Length);
-                });
+            long length = 0;
+            documentPWCMock.Setup(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>())).Callback<IContentStream, bool, bool>((stream, last, refresh) => {
+                byte[] buffer = new byte[stream.Length.GetValueOrDefault()];
+                length += stream.Stream.Read(buffer, 0, buffer.Length);
+            });
+            documentPWCMock.Setup(d => d.ContentStreamLength).Returns(() => { return length; });
         }
 
         private void RunSolveFile(Mock<IFileInfo> fileInfo, ActiveActivitiesManager transmissionManager = null)
@@ -533,7 +538,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
         }
 
-        private bool SetupFutureRemoteDocStream(Mock<IDocument> doc, IContentStream stream) {
+        private void RunSolveFileChanged(Mock<IFileInfo> fileInfo, Mock<IDocument> document, ActiveActivitiesManager transmissionManager = null)
+        {
+            if (transmissionManager == null) {
+                transmissionManager = new ActiveActivitiesManager();
+            }
+
+            var solver = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
+
+            solver.Solve(fileInfo.Object, document.Object);
+            Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
+        }
+
+        private bool SetupFutureRemoteDocStream(Mock<IDocument> doc, IContentStream stream)
+        {
             if (stream == null) {
                 return true;
             } else {
@@ -623,6 +641,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
+            this.storage.Setup(f => f.SaveMappedObject(It.IsAny<IMappedObject>())).Callback<IMappedObject>((o) => {
+                this.storage.Setup(f => f.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(o);
+            });
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.transmissionStorage.Setup(f => f.SaveObject(It.IsAny<IFileTransmissionObject>())).Callback<IFileTransmissionObject>((o) => {
                 this.transmissionStorage.Setup(f => f.GetObjectByRemoteObjectId(It.IsAny<string>())).Returns(o);

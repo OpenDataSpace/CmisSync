@@ -148,14 +148,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             return remotePWCDocument;
         }
 
-        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] hash, FileTransmissionEvent transmissionEvent) {
+        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, FileTransmissionEvent transmissionEvent) {
             if (TransmissionStorage == null) {
                 return;
             }
 
             FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument);
             obj.ChecksumAlgorithmName = "SHA-1";
-            obj.LastChecksum = hash;
             obj.RemoteObjectPWCId = remotePWCDocument.Id;
             obj.LastChangeToken = remotePWCDocument.ChangeToken;
 
@@ -196,14 +195,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                                     }
                                 }
                             }
-                            file.Seek(docPWC.ContentStreamLength.GetValueOrDefault(), SeekOrigin.Begin);
                             uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false);
                         }
                         hash = hashAlg.Hash;
                     }
                 } catch (FileTransmission.AbortException ex) {
-                    hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                    SaveRemotePWCDocument(localFile, doc, docPWC, hashAlg.Hash, transmissionEvent);
+                    SaveRemotePWCDocument(localFile, doc, docPWC, transmissionEvent);
                     transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                     throw;
                 }
