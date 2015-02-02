@@ -51,13 +51,11 @@ namespace CmisSync.Lib.Accumulator {
         /// <param name="session">Session to be used.</param>
         /// <param name="storage">Storage to look for mapped objects.</param>
         public RemoteObjectFetcher(ISession session, IMetaDataStorage storage) {
-            if(session == null)
-            {
+            if (session == null) {
                 throw new ArgumentNullException("Session instance is needed , but was null");
             }
 
-            if(storage == null)
-            {
+            if (storage == null) {
                 throw new ArgumentNullException("MetaDataStorage instance is needed, but was null");
             }
 
@@ -72,7 +70,7 @@ namespace CmisSync.Lib.Accumulator {
         /// <param name="e">sync events</param>
         /// <returns>Always returns <c>false</c></returns>
         public override bool Handle(ISyncEvent e) {
-            if(!(e is FileEvent || e is FolderEvent || e is CrawlRequestEvent)) {
+            if (!(e is FileEvent || e is FolderEvent || e is CrawlRequestEvent)) {
                 return false;
             }
 
@@ -84,13 +82,13 @@ namespace CmisSync.Lib.Accumulator {
             }
 
             string id;
-            if(e is AbstractFolderEvent && (e as AbstractFolderEvent).Local == MetaDataChangeType.DELETED) {
+            if (e is AbstractFolderEvent && (e as AbstractFolderEvent).Local == MetaDataChangeType.DELETED) {
                 id = this.FetchIdFromStorage(e);
             } else {
                 id = this.FetchIdFromExtendedAttribute(e);
             }
 
-            if(id != null) {
+            if (id != null) {
                 Logger.Debug("Fetching remote Object with id " + id);
                 try {
                     remote = this.session.GetObject(id, this.operationContext);
@@ -132,8 +130,7 @@ namespace CmisSync.Lib.Accumulator {
             IFileSystemInfo path = null;
             if (e is FileEvent) {
                 path = (e as FileEvent).LocalFile;
-            }
-            else if (e is FolderEvent) {
+            } else if (e is FolderEvent) {
                 path = (e as FolderEvent).LocalFolder;
             }
 
@@ -149,13 +146,11 @@ namespace CmisSync.Lib.Accumulator {
 
         private string FetchIdFromExtendedAttribute(ISyncEvent e) {
             IFileSystemInfo path = null;
-            if(e is FileEvent) {
+            if (e is FileEvent) {
                 path = (e as FileEvent).LocalFile;
-            }
-            else if (e is CrawlRequestEvent) {
+            } else if (e is CrawlRequestEvent) {
                 path = (e as CrawlRequestEvent).LocalFolder;
-            }
-            else if (e is FolderEvent) {
+            } else if (e is FolderEvent) {
                 path = (e as FolderEvent).LocalFolder;
             }
 

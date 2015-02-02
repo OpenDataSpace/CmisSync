@@ -16,16 +16,16 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using DotCMIS;
-using DotCMIS.Binding;
-using DotCMIS.Client.Impl.Cache;
 
 namespace TestLibrary.MockedServer
 {
     using System;
     using System.Collections.Generic;
 
+    using DotCMIS;
+    using DotCMIS.Binding;
     using DotCMIS.Client;
+    using DotCMIS.Client.Impl.Cache;
 
     using Moq;
 

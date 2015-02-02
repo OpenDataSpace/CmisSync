@@ -26,8 +26,8 @@ namespace TestLibrary.IntegrationTests
     using System.Threading;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using Moq;
 
@@ -102,7 +102,7 @@ namespace TestLibrary.IntegrationTests
                 DirectoryInfo dirB = new DirectoryInfo(Path.Combine(this.path, Path.GetRandomFileName()));
                 dirB.Create();
                 FileInfo movingFile = new FileInfo(Path.Combine(dirA.FullName, oldName));
-                using (movingFile.Create()){
+                using (movingFile.Create()) {
                 }
 
                 fsWatcher.EnableRaisingEvents = true;

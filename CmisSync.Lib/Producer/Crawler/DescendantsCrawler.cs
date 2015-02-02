@@ -17,13 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.Crawler
-{
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -35,8 +35,7 @@ namespace CmisSync.Lib.Producer.Crawler
     /// <summary>
     /// Decendants crawler.
     /// </summary>
-    public class DescendantsCrawler : ReportingSyncEventHandler
-    {
+    public class DescendantsCrawler : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(DescendantsCrawler));
         private IActivityListener activityListener;
         private IDescendantsTreeBuilder treebuilder;
@@ -58,7 +57,8 @@ namespace CmisSync.Lib.Producer.Crawler
             IDirectoryInfo localFolder,
             IMetaDataStorage storage,
             IFilterAggregator filter,
-            IActivityListener activityListener)
+            IActivityListener activityListener,
+            IIgnoredEntitiesStorage ignoredStorage)
             : base(queue)
         {
             if (remoteFolder == null) {
@@ -82,7 +82,7 @@ namespace CmisSync.Lib.Producer.Crawler
             }
 
             this.activityListener = activityListener;
-            this.treebuilder = new DescendantsTreeBuilder(storage, remoteFolder, localFolder, filter);
+            this.treebuilder = new DescendantsTreeBuilder(storage, remoteFolder, localFolder, filter, ignoredStorage);
             this.eventGenerator = new CrawlEventGenerator(storage);
             this.notifier = new CrawlEventNotifier(queue);
         }
@@ -133,8 +133,7 @@ namespace CmisSync.Lib.Producer.Crawler
         /// </summary>
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is StartNextSyncEvent) {
                 Logger.Debug("Starting DecendantsCrawlSync upon " + e);
                 using (var activity = new ActivityListenerResource(this.activityListener)) {
@@ -148,8 +147,7 @@ namespace CmisSync.Lib.Producer.Crawler
             return false;
         }
 
-        private void CrawlDescendants()
-        {
+        private void CrawlDescendants() {
             DescendantsTreeCollection trees = this.treebuilder.BuildTrees();
 
             CrawlEventCollection events = this.eventGenerator.GenerateEvents(trees);

@@ -16,10 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
 
 namespace CmisSync.Lib.Storage.FileSystem
 {
+    using System;
+
     public enum FSType
     {
         Unkown,

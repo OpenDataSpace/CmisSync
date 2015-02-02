@@ -30,6 +30,8 @@ namespace TestLibrary.IntegrationTests
     /// </summary>
     public class ITUtils
     {
+        private static dynamic config = null;
+
         /// <summary>
         /// Gets the test servers configuration with repository id in json file "test-servers.json".
         /// </summary>
@@ -92,14 +94,13 @@ namespace TestLibrary.IntegrationTests
             }
         }
 
-        private static dynamic config = null;
-
         public static dynamic GetConfig()
         {
-            if(config == null){
+            if (config == null) {
                 var path = GetServerPath();
                 config = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(path))[0];
             }
+
             return config;
         }
 

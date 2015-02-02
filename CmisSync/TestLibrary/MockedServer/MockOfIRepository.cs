@@ -17,7 +17,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-
 namespace TestLibrary.MockedServer
 {
     using System;
@@ -37,18 +36,15 @@ namespace TestLibrary.MockedServer
         private static Dictionary<string, MockOfIRepository> repositories = new Dictionary<string, MockOfIRepository>();
 
         private MockedFolder rootFolder = new MockedFolder("/");
+
         public IFolder RootFolder {
             get {
                 return this.rootFolder.Object;
             }
         }
 
-        public void SetupName(string name) {
-            this.Setup(r => r.Name).Returns(name);
-        }
-
         public static MockOfIRepository GetRepository(string id) {
-            lock(repositories) {
+            lock (repositories) {
                 MockOfIRepository repo;
                 if (!repositories.TryGetValue(id, out repo)) {
                     repo = new MockOfIRepository(id);
@@ -57,6 +53,10 @@ namespace TestLibrary.MockedServer
 
                 return repo;
             }
+        }
+
+        public void SetupName(string name) {
+            this.Setup(r => r.Name).Returns(name);
         }
 
         public void Destroy() {

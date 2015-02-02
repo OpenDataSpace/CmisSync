@@ -17,7 +17,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-
 namespace TestLibrary.MockedServer
 {
     using System;
@@ -27,8 +26,14 @@ namespace TestLibrary.MockedServer
     {
         private static Dictionary<string, MockedCmisServer> servers = new Dictionary<string, MockedCmisServer>();
 
+        private MockedCmisServer(string hostname) {
+            this.Hostname = hostname;
+        }
+
+        public string Hostname { get; private set; }
+
         public static MockedCmisServer GetServer(string hostname) {
-            lock(servers) {
+            lock (servers) {
                 var server = servers[hostname];
                 if (server == null) {
                     server = new MockedCmisServer(hostname);
@@ -39,16 +44,10 @@ namespace TestLibrary.MockedServer
             }
         }
 
-        private MockedCmisServer(string hostname) {
-            this.Hostname = hostname;
-        }
-
         public void Destroy() {
-            lock(servers) {
+            lock (servers) {
                 servers.Remove(this.Hostname);
             }
         }
-
-        public string Hostname { get; private set; }
     }
 }

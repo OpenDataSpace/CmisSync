@@ -17,7 +17,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-
 namespace TestLibrary.MockedServer
 {
     using System;

@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -81,6 +82,23 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                             Description = string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName)
                         };
                     } else {
+                        try {
+                            string wishedRemotePath = this.Storage.Matcher.CreateRemotePath(localFile.FullName);
+                            var conflictingRemoteObject = this.Session.GetObjectByPath(wishedRemotePath) as IFileableCmisObject;
+                            if (conflictingRemoteObject != null && conflictingRemoteObject.AreAllChildrenIgnored()) {
+                                OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, because there is an ignored file/folder with this name already, trying to create conflict file/folder name", oldName, localFile.Name, localFile.FullName), e);
+                                string newName = localFile.Name;
+                                if (localFile is IDirectoryInfo) {
+                                    (localFile as IDirectoryInfo).MoveTo(Path.Combine((localFile as IDirectoryInfo).Parent.FullName, newName + "_Conflict"));
+                                } else if (localFile is IFileInfo) {
+                                    (localFile as IFileInfo).MoveTo(Path.Combine((localFile as IFileInfo).Directory.FullName, newName + "_Conflict"));
+                                }
+
+                                return;
+                            }
+                        } catch (CmisObjectNotFoundException) {
+                        }
+
                         OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}", oldName, localFile.Name, localFile.FullName), e);
                     }
 
@@ -101,6 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             obj.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
             obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFile.LastWriteTimeUtc;
             obj.LastChangeToken = (remoteId as ICmisObject).ChangeToken;
+            obj.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
             if (isContentChanged) {
                 throw new ArgumentException("Local file content is also changed => force crawl sync.");

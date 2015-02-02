@@ -17,33 +17,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-/**
- * Unit Tests for CmisSync.
- *
- * To use them, first create a JSON file containing the credentials/parameters to your CMIS server(s)
- * Put it in TestLibrary/test-servers.json and use this format:
-[
-    [
-        "unittest1",
-        "/mylocalpath",
-        "/myremotepath",
-        "http://example.com/p8cmis/resources/Service",
-        "myuser",
-        "mypassword",
-        "repository987080"
-    ],
-    [
-        "unittest2",
-        "/mylocalpath",
-        "/myremotepath",
-        "http://example.org:8080/Nemaki/cmis",
-        "myuser",
-        "mypassword",
-        "repo3"
-    ]
-]
- */
-
 namespace TestLibrary.IntegrationTests
 {
     using System;
@@ -68,131 +41,22 @@ namespace TestLibrary.IntegrationTests
     using DotCMIS.Client.Impl;
     using DotCMIS.Exceptions;
 
-    using log4net;
-
-    #if __COCOA__
-    using MonoMac.AppKit;
-    #endif
-
     using Moq;
 
     using NUnit.Framework;
 
     using TestLibrary.TestUtils;
 
-    // Important!
-    // These tests tend to be Erratic Tests, they can not be used for QA
-    // This more of a "rapid szenario creation" class
-    // Please do write predictable unit tests for all fixes (IT here is not enough)
-
     // Default timeout per test is 15 minutes
-    [TestFixture, Timeout(900000)]
-    public class FullRepoTests : IsTestWithConfiguredLog4Net
+    [TestFixture, Timeout(900000), TestName("FullRepo")]
+    public class FullRepoTests : BaseFullRepoTest
     {
-        private static readonly string SubfolderBase = "FullRepoTests_";
-        private static dynamic config;
-        private string subfolder;
-        private RepoInfo repoInfo;
-        private DirectoryInfo localRootDir;
-        private IFolder remoteRootDir;
-        private ISession session;
-        private CmisRepoMock repo;
-        private ActiveActivitiesManager transmissionManager;
-
-        [TestFixtureSetUp]
-        public void ClassInit()
-        {
-            // Disable HTTPS Verification
-            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-            #if __COCOA__
-            try {
-                NSApplication.Init();
-            } catch (InvalidOperationException) {
-            }
-            #endif
-            config = ITUtils.GetConfig();
-        }
-
-        [TestFixtureTearDown]
-        public void ClassTearDown()
-        {
-            // Reanable HTTPS Verification
-            ServicePointManager.ServerCertificateValidationCallback = null;
-        }
-
-        [SetUp]
-        public void Init()
-        {
-            this.subfolder = SubfolderBase + Guid.NewGuid().ToString();
-            Console.WriteLine("Working on " + this.subfolder);
-
-            // RepoInfo
-            this.repoInfo = new RepoInfo {
-                AuthenticationType = AuthenticationType.BASIC,
-                LocalPath = Path.Combine(config[1].ToString(), this.subfolder),
-                RemotePath = config[2].ToString() + "/" + this.subfolder,
-                Address = new XmlUri(new Uri(config[3].ToString())),
-                User = config[4].ToString(),
-                RepositoryId = config[6].ToString(),
-                Binding = config[7].ToString()
-            };
-            this.repoInfo.RemotePath = this.repoInfo.RemotePath.Replace("//", "/");
-            this.repoInfo.SetPassword(config[5].ToString());
-
-            // FileSystemDir
-            this.localRootDir = new DirectoryInfo(this.repoInfo.LocalPath);
-            this.localRootDir.Create();
-
-            // Repo
-            var activityListener = new Mock<IActivityListener>();
-            this.transmissionManager = new ActiveActivitiesManager();
-            var activityAggregator = new ActivityListenerAggregator(activityListener.Object, transmissionManager);
-            var queue = new SingleStepEventQueue(new SyncEventManager());
-
-            this.repo = new CmisRepoMock(this.repoInfo, activityAggregator, queue);
-
-            // Session
-            var cmisParameters = new Dictionary<string, string>();
-            if (this.repoInfo.Binding.Equals(BindingType.AtomPub, StringComparison.OrdinalIgnoreCase)) {
-                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-                cmisParameters[SessionParameter.AtomPubUrl] = this.repoInfo.Address.ToString();
-            } else if (this.repoInfo.Binding.Equals(BindingType.Browser, StringComparison.OrdinalIgnoreCase)) {
-                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
-                cmisParameters[SessionParameter.BrowserUrl] = this.repoInfo.Address.ToString();
-            }
-
-            cmisParameters[SessionParameter.User] = this.repoInfo.User;
-            cmisParameters[SessionParameter.Password] = this.repoInfo.GetPassword().ToString();
-            cmisParameters[SessionParameter.RepositoryId] = this.repoInfo.RepositoryId;
-
-            SessionFactory factory = SessionFactory.NewInstance();
-            this.session = factory.CreateSession(cmisParameters);
-
-            IFolder root = (IFolder)this.session.GetObjectByPath(config[2].ToString());
-            this.remoteRootDir = root.CreateFolder(this.subfolder);
-        }
-
-        [TearDown]
-        public void TestDown()
-        {
-            this.repo.Dispose();
-            if (this.localRootDir.Exists) {
-                this.localRootDir.Delete(true);
-            }
-
-            this.remoteRootDir.Refresh();
-            this.remoteRootDir.DeleteTree(true, null, true);
-            this.repo.Dispose();
-        }
-
         [Test, Category("Slow")]
         public void OneLocalFolderCreated()
         {
             this.localRootDir.CreateSubdirectory("Cat");
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
             var children = this.remoteRootDir.GetChildren();
             Assert.AreEqual(children.TotalNumItems, 1);
         }
@@ -202,9 +66,7 @@ namespace TestLibrary.IntegrationTests
         {
             this.localRootDir.CreateSubdirectory("Cat");
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             this.localRootDir.GetDirectories().First().Delete();
 
@@ -220,9 +82,7 @@ namespace TestLibrary.IntegrationTests
         {
             this.remoteRootDir.CreateFolder("Cat");
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo("Cat"));
@@ -233,12 +93,11 @@ namespace TestLibrary.IntegrationTests
         {
             this.remoteRootDir.CreateFolder("Cat");
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(true, null, true);
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(0));
@@ -251,9 +110,8 @@ namespace TestLibrary.IntegrationTests
             string folderName = "Cat";
             string fileName = "localFile.bin";
             var folder = this.remoteRootDir.CreateFolder(folderName);
-            folder.CreateDocument("foo.txt", "bar");
-            this.repo.Initialize();
-            this.repo.Run();
+            folder.CreateDocument("foo.bin", "bar");
+            this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             using (var file = File.Open(Path.Combine(this.localRootDir.GetDirectories().First().FullName, fileName), FileMode.Create)) {
@@ -280,14 +138,12 @@ namespace TestLibrary.IntegrationTests
         {
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             remoteFolder.Refresh();
             remoteFolder.Rename("Dog", true);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
 
@@ -301,14 +157,11 @@ namespace TestLibrary.IntegrationTests
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
             var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
-            Thread.Sleep(5000);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
 
             this.repo.Run();
 
@@ -321,17 +174,16 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Erratic")]
         public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByContentChange()
         {
+            this.EnsureThatContentChangesAreSupported();
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
             var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             remoteFolder.Move(this.remoteRootDir, remoteTargetFolder);
-            Thread.Sleep(30000);
+            this.WaitForRemoteChanges();
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
 
             this.repo.Run();
 
@@ -354,9 +206,7 @@ namespace TestLibrary.IntegrationTests
 
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(1));
             var child = children.First();
@@ -389,9 +239,7 @@ namespace TestLibrary.IntegrationTests
             fileInfo.CreationTimeUtc = creationDate;
             creationDate = fileInfo.CreationTimeUtc;
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
             var children = this.remoteRootDir.GetChildren();
             Assert.That(children.TotalNumItems, Is.EqualTo(1));
             var child = children.First();
@@ -415,9 +263,7 @@ namespace TestLibrary.IntegrationTests
                 sw.WriteLine(content);
             }
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, newFileName));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
@@ -451,9 +297,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
             new DirectoryInfo(Path.Combine(this.localRootDir.FullName, folderName)).Create();
             fileInfo.MoveTo(Path.Combine(this.localRootDir.FullName, folderName, newFileName));
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
@@ -476,14 +320,12 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow")]
         public void OneLocalFileIsRemoved()
         {
-            string fileName = "removingFile.txt";
+            string fileName = "removingFile.bin";
             string content = string.Empty;
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
             this.remoteRootDir.CreateDocument(fileName, content);
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             // Stabilize test by waiting for all delayed fs events
             Thread.Sleep(500);
@@ -501,15 +343,14 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFileCreated()
+        public void OneRemoteFileCreated([Values(true, false)]bool contentChanges)
         {
+            this.ContentChangesActive = contentChanges;
             string fileName = "file";
             string content = "content";
             this.remoteRootDir.CreateDocument(fileName, content);
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             var children = this.localRootDir.GetFiles();
             Assert.That(children.Length, Is.EqualTo(1));
@@ -519,13 +360,15 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneEmptyRemoteFileCreated()
+        public void OneEmptyRemoteFileCreated([Values(true, false)]bool contentChanges)
         {
+            this.ContentChangesActive = contentChanges;
+            this.InitializeAndRunRepo();
             string fileName = "file";
             this.remoteRootDir.CreateDocument(fileName, null);
 
-            this.repo.Initialize();
-
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var children = this.localRootDir.GetFiles();
@@ -535,19 +378,17 @@ namespace TestLibrary.IntegrationTests
             Assert.That(child.Length, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Ignore("https://bugzilla.xamarin.com/show_bug.cgi?id=21135")]
         public void ManyRemoteFilesCreated()
         {
             int fileNumber = 100;
-            string content = new string ('A', 1024 * 1024);
+            string content = new string('A', 1024 * 1024);
             for (int i = 0; i < fileNumber; ++i) {
                 string fileName = "file" + i.ToString();
-                this.remoteRootDir.CreateDocument (fileName, content);
+                this.remoteRootDir.CreateDocument(fileName, content);
             }
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             var children = this.localRootDir.GetFiles();
             Assert.That(children.Length, Is.EqualTo(fileNumber));
@@ -557,103 +398,51 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFileContentIsDeleted()
+        public void OneRemoteFileContentIsDeleted([Values(true, false)]bool contentChanges)
         {
+            this.ContentChangesActive = contentChanges;
+
             string fileName = "file";
             string content = "content";
             var doc = this.remoteRootDir.CreateDocument(fileName, content);
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             doc.Refresh();
+            string oldChangeToken = doc.ChangeToken;
             doc.DeleteContentStream(true);
-
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            string newChangeToken = doc.ChangeToken;
+            Assert.That(oldChangeToken, Is.Not.EqualTo(newChangeToken));
+            Assert.That(doc.ContentStreamLength, Is.Not.EqualTo(content.Length));
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var children = this.localRootDir.GetFiles();
             Assert.That(children.Length, Is.EqualTo(1));
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(child.Length, Is.EqualTo(0));
+            Assert.That(child.Length, Is.EqualTo(0), child.ToString());
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFileUpdated()
+        public void OneRemoteFileUpdated([Values(true, false)]bool contentChanges)
         {
-            string fileName = "file.txt";
+            this.ContentChangesActive = contentChanges;
+            string fileName = "file.bin";
             string content = "cat";
             var doc = this.remoteRootDir.CreateDocument(fileName, content);
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             content += content;
             doc.Refresh();
+            string changeToken = doc.ChangeToken;
             doc.SetContent(content);
 
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
-
-            this.repo.Run();
-
-            var file = this.localRootDir.GetFiles().First();
-            Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(file.Length, Is.EqualTo(content.Length));
-        }
-
-        [Test, Category("Slow")]
-        public void OneRemoteFileUpdatedAndRecognizedByContentChanges()
-        {
-            string fileName = "file.txt";
-            string content = "cat";
-            var doc = this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.repo.Initialize();
-
-            this.repo.Run();
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
-            this.repo.Run();
-            Thread.Sleep(5000);
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
-            this.repo.Run();
-
-            content += content;
-            doc.Refresh();
-            doc.SetContent(content);
-
-            Thread.Sleep(5000);
-
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
-
-            this.repo.Run();
-
-            var file = this.localRootDir.GetFiles().First();
-            Assert.That(file, Is.InstanceOf(typeof(FileInfo)));
-            Assert.That(file.Length, Is.EqualTo(content.Length));
-        }
-
-        [Test, Category("Slow")]
-        public void OneRemoteFileUpdatedAndDetectedByCrawlSync()
-        {
-            string fileName = "file.txt";
-            string content = "cat";
-            var doc = this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.repo.Initialize();
-
-            this.repo.Run();
-
-            content += content;
-            doc.Refresh();
-            doc.SetContent(content);
-
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
-
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var file = this.localRootDir.GetFiles().First();
@@ -664,13 +453,11 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow")]
         public void RemoteCreatedFileIsDeletedLocally()
         {
-            string fileName = "file.txt";
+            string fileName = "file.bin";
             string content = "cat";
             this.remoteRootDir.CreateDocument(fileName, content);
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             this.localRootDir.GetFiles().First().Delete();
 
@@ -687,7 +474,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Conflict"), Category("Erratic")]
         public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConflictFileIsCreated()
         {
-            string fileName = "fileConflictTest.txt";
+            string fileName = "fileConflictTest.bin";
             string remoteContent = "remotecontent";
             string localContent = "local";
 
@@ -700,9 +487,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(200);
 
-            this.repo.Initialize();
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.Run();
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(2));
             Assert.That(new FileInfo(localDoc).Length, Is.EqualTo(remoteContent.Length));
@@ -712,7 +497,7 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Conflict"), Category("Erratic")]
         public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved()
         {
-            string fileName = "fileConflictTest.txt";
+            string fileName = "fileConflictTest.bin";
             string changedLocalContent = "changedContent";
             string localContent = "local";
             var localPath = Path.Combine(this.localRootDir.FullName, fileName);
@@ -722,9 +507,7 @@ namespace TestLibrary.IntegrationTests
                 sw.WriteLine(localContent);
             }
 
-            this.repo.Initialize();
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.Run();
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
             this.remoteRootDir.GetChildren().First().Delete(true);
             Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(0));
@@ -737,7 +520,7 @@ namespace TestLibrary.IntegrationTests
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().Count(), Is.EqualTo(1));
@@ -747,23 +530,20 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow"), Category("Conflict")]
         public void OneLocalAndTheRemoteFileAreBothRenamed() {
-            string originalName = "original.txt";
-            string localName = "local.txt";
-            string remoteName = "remote.txt";
+            string originalName = "original.bin";
+            string localName = "local.bin";
+            string remoteName = "remote.bin";
 
             this.remoteRootDir.CreateDocument(originalName, "content");
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
             this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, localName));
             this.remoteRootDir.GetChildren().First().Rename(remoteName);
 
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(localName));
@@ -774,7 +554,7 @@ namespace TestLibrary.IntegrationTests
             this.remoteRootDir.GetChildren().First().Rename(localName);
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             // Conflict is solved
@@ -784,29 +564,28 @@ namespace TestLibrary.IntegrationTests
             this.remoteRootDir.GetChildren().First().Rename(remoteName);
 
             Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
-            this.repo.SingleStepQueue.SwallowExceptions = false;
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().First().Name, Is.EqualTo(remoteName));
         }
 
         [Test, Category("Slow")]
-        public void LocalAndRemoteFolderAreMovedIntoTheSameSubfolder() {
+        public void LocalAndRemoteFolderAreMovedIntoTheSameSubfolder([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             string oldParentName = "oldParent";
             string newParentName = "newParent";
             string oldName = "moveThis";
             var source = this.remoteRootDir.CreateFolder(oldParentName);
             var folder = source.CreateFolder(oldName);
             var target = this.remoteRootDir.CreateFolder(newParentName);
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             folder.Refresh();
             folder.Move(source, target);
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var localSource = this.localRootDir.GetDirectories(oldParentName).First();
@@ -822,14 +601,12 @@ namespace TestLibrary.IntegrationTests
         [Test, Category("Slow"), Category("Erratic")]
         public void OneLocalFileContentIsChanged()
         {
-            string fileName = "file.txt";
+            string fileName = "file.bin";
             string content = "cat";
             byte[] newContent = Encoding.UTF8.GetBytes("new born citty");
             this.remoteRootDir.CreateDocument(fileName, content);
 
-            this.repo.Initialize();
-
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             using (var filestream = this.localRootDir.GetFiles().First().Open(FileMode.Truncate, FileAccess.Write, FileShare.None)) {
                 filestream.Write(newContent, 0, newContent.Length);
@@ -858,8 +635,7 @@ namespace TestLibrary.IntegrationTests
             DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(2);
             int count = 100;
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             for (int i = 1; i <= count; i++) {
@@ -894,13 +670,12 @@ namespace TestLibrary.IntegrationTests
 
         [Test, Category("Slow")]
         public void OneLocalFileIsChangedAndRenamed() {
-            string fileName = "file.txt";
-            string newFileName = "file_1.txt";
+            string fileName = "file.bin";
+            string newFileName = "file_1.bin";
             string content = "cat";
             this.remoteRootDir.CreateDocument(fileName, content);
             Thread.Sleep(100);
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             var file = this.localRootDir.GetFiles().First();
             using (var stream = file.AppendText()) {
@@ -929,14 +704,14 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFileIsChangedAndRenamedDetectedByCrawler() {
-            string fileName = "file.txt";
-            string newFileName = "file_1.txt";
+        public void OneRemoteFileIsChangedAndRenamed([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            string fileName = "file.bin";
+            string newFileName = "file_1.bin";
             string content = "cat";
             var document = this.remoteRootDir.CreateDocument(fileName, content);
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             document.Refresh();
@@ -944,42 +719,8 @@ namespace TestLibrary.IntegrationTests
             long length = (long)document.ContentStreamLength;
             document.Rename(newFileName);
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(true));
-            this.repo.Run();
-
-            document = this.remoteRootDir.GetChildren().First() as IDocument;
-            var file = this.localRootDir.GetFiles().First();
-
-            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(1));
-            Assert.That(document.Name, Is.EqualTo(newFileName));
-            Assert.That(file.Name, Is.EqualTo(newFileName));
-            Assert.That(file.Length, Is.EqualTo(length));
-            Assert.That(document.ContentStreamLength, Is.EqualTo(length));
-        }
-
-        [Test, Category("Slow")]
-        public void OneRemoteFileIsChangedAndRenamedDetectedByContentChanges() {
-            string fileName = "file.txt";
-            string newFileName = "file_1.txt";
-            string content = "cat";
-            var document = this.remoteRootDir.CreateDocument(fileName, content);
-
-            this.repo.Initialize();
-            this.repo.Run();
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-
-            Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
-            this.repo.Run();
-
-            document.Refresh();
-            document.SetContent(content + content, true, true);
-            long length = (long)document.ContentStreamLength;
-            document.Rename(newFileName);
-
-            Thread.Sleep(5000);
-            this.repo.Queue.AddEvent(new StartNextSyncEvent(false));
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             document = this.remoteRootDir.GetChildren().First() as IDocument;
@@ -1000,8 +741,7 @@ namespace TestLibrary.IntegrationTests
 
             var folder = this.remoteRootDir.CreateFolder(oldFolderName);
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             // Wait for all fs change events
@@ -1014,7 +754,7 @@ namespace TestLibrary.IntegrationTests
             folder.Rename(newFolderName);
             this.localRootDir.GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newFolderName));
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().First().Name, Is.EqualTo(newFolderName));
@@ -1022,7 +762,8 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void EmptyLocalFileIsCreatedAndChangedRemotely() {
+        public void EmptyLocalFileIsCreatedAndChangedRemotely([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             string fileName = "file";
             string content = "content";
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
@@ -1032,14 +773,13 @@ namespace TestLibrary.IntegrationTests
 
             DateTime modificationDate = fileInfo.LastWriteTimeUtc;
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
-            Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
             this.repo.Run();
-            Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             var children = this.remoteRootDir.GetChildren();
@@ -1050,8 +790,8 @@ namespace TestLibrary.IntegrationTests
             doc.SetContent(content, true, true);
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length), "ContentStream not set correctly");
 
-            Thread.Sleep(5000);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.WaitForRemoteChanges();
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             doc.Refresh();
@@ -1060,21 +800,21 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void LocalFileRenamedAndDeletedRemotely() {
-            string newName = "newtestfile.txt";
-            string oldName = "testfile.txt";
+        public void LocalFileRenamedAndDeletedRemotely([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            string newName = "newtestfile.bin";
+            string oldName = "testfile.bin";
             string content = "text";
             this.remoteRootDir.CreateDocument(oldName, content);
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
             this.remoteRootDir.Refresh();
             this.remoteRootDir.GetChildren().First().Delete(true);
 
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories(), Is.Empty);
@@ -1089,23 +829,23 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void LocalFileMovedAndDeletedRemotely() {
-            string newName = "newtestfile.txt";
-            string oldName = "testfile.txt";
+        public void LocalFileMovedAndDeletedRemotely([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            string newName = "newtestfile.bin";
+            string oldName = "testfile.bin";
             string content = "text";
 
             this.remoteRootDir.CreateFolder("folder").CreateDocument(oldName, content);
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             this.localRootDir.GetDirectories().First().GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
             this.remoteRootDir.Refresh();
             ((this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument).Delete(true);
 
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetDirectories().Length, Is.EqualTo(1));
@@ -1129,21 +869,21 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void LocalFolderWithContentRenamedAndDeletedRemotely() {
-            string newName = "newtestfile.txt";
-            string oldName = "testfile.txt";
+        public void LocalFolderWithContentRenamedAndDeletedRemotely([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            string newName = "newtestfile.bin";
+            string oldName = "testfile.bin";
             string content = "text";
             this.remoteRootDir.CreateFolder("folder").CreateFolder(oldName).CreateDocument("doc", content);
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             this.localRootDir.GetDirectories().First().GetDirectories().First().MoveTo(Path.Combine(this.localRootDir.FullName, newName));
             this.remoteRootDir.Refresh();
             (this.remoteRootDir.GetChildren().First() as IFolder).DeleteTree(true, null, true);
 
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles(), Is.Empty);
@@ -1159,21 +899,21 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneFileIsCopiedAFewTimes() {
+        public void OneFileIsCopiedAFewTimes([Values(true, false)]bool contentChanges, [Values(1,2,5,10)]int times) {
+            this.ContentChangesActive = contentChanges;
             FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
             var fileNames = new List<string>();
             string fileName = "file";
             string content = "content";
-            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
-            this.repo.Initialize();
-            this.repo.Run();
+            this.remoteRootDir.CreateDocument(fileName + ".bin", content);
+            this.InitializeAndRunRepo();
 
             var file = this.localRootDir.GetFiles().First();
             fileNames.Add(file.FullName);
             var fileInfo = fsFactory.CreateFileInfo(file.FullName);
             Guid uuid = (Guid)fileInfo.Uuid;
-            for (int i = 0; i < 10; i++) {
-                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, string.Format("{0}{1}.txt", fileName, i)));
+            for (int i = 0; i < times; i++) {
+                var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, string.Format("{0}{1}.bin", fileName, i)));
                 file.CopyTo(fileCopy.FullName);
                 Thread.Sleep(50);
                 fileCopy.Refresh();
@@ -1183,7 +923,7 @@ namespace TestLibrary.IntegrationTests
 
             Thread.Sleep(500);
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent(forceCrawl: true);
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(fileNames.Count));
@@ -1201,20 +941,20 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneFileIsCopiedAndTheCopyIsRemoved() {
+        public void OneFileIsCopiedAndTheCopyIsRemoved([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
             var fileNames = new List<string>();
             string fileName = "file";
             string content = "content";
-            this.remoteRootDir.CreateDocument(fileName + ".txt", content);
-            this.repo.Initialize();
-            this.repo.Run();
+            this.remoteRootDir.CreateDocument(fileName + ".bin", content);
+            this.InitializeAndRunRepo();
 
             var file = this.localRootDir.GetFiles().First();
             fileNames.Add(file.FullName);
             var fileInfo = fsFactory.CreateFileInfo(file.FullName);
             Guid uuid = (Guid)fileInfo.Uuid;
-            var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + " - copy.txt"));
+            var fileCopy = fsFactory.CreateFileInfo(Path.Combine(this.localRootDir.FullName, fileName + " - copy.bin"));
             file.CopyTo(fileCopy.FullName);
             fileCopy.Refresh();
             fileCopy.Uuid = uuid;
@@ -1222,51 +962,22 @@ namespace TestLibrary.IntegrationTests
             Thread.Sleep(500);
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(true));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(1));
             var child = this.localRootDir.GetFiles().First();
             Assert.That(child.Length, Is.EqualTo(content.Length));
-            Assert.That(child.Name, Is.EqualTo(fileName + ".txt"));
-        }
-
-        [Test, Category("Slow"), Ignore("Not needed anymore")]
-        public void CreateFilesWithLongNames() {
-            this.repo.Initialize();
-            this.repo.Run();
-            string content = "content";
-            int count = 40;
-            string fileNameFormat = "Toller_Langer_Name mit Leerzeichen - Kopie ({0}) - Kopie.pdf";
-            for (int i = 0; i < count; i++) {
-                var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
-                using (var stream = file.CreateText()) {
-                    stream.Write(content);
-                }
-            }
-
-            Thread.Sleep(500);
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
-            this.repo.Run();
-
-            this.remoteRootDir.Refresh();
-            Assert.That(this.remoteRootDir.GetChildren().Count(), Is.EqualTo(count));
-            Assert.That(this.localRootDir.GetFiles().Length, Is.EqualTo(count));
-            for (int i = 0; i < count; i++) {
-                var file = new FileInfo(Path.Combine(this.localRootDir.FullName, string.Format(fileNameFormat, i)));
-                Assert.That(file.Length, Is.EqualTo(content.Length), file.FullName);
-            }
+            Assert.That(child.Name, Is.EqualTo(fileName + ".bin"));
         }
 
         [Test, Category("Slow")]
-        public void OneLocalAndOneRemoteFileAreBothChangedToTheSameContent() {
+        public void OneLocalAndOneRemoteFileAreBothChangedToTheSameContent([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             string oldContent = "a";
             string newContent = "bbb";
-            this.remoteRootDir.CreateDocument("fileName.txt", oldContent);
-            this.repo.Initialize();
-            this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.Run();
+            this.remoteRootDir.CreateDocument("fileName.bin", oldContent);
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
             this.remoteRootDir.Refresh();
             var doc = this.remoteRootDir.GetChildren().First() as IDocument;
@@ -1278,7 +989,7 @@ namespace TestLibrary.IntegrationTests
             }
 
             Thread.Sleep(500);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             this.remoteRootDir.Refresh();
@@ -1294,19 +1005,19 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFolderIsRenamedToLowerCase() {
+        public void OneRemoteFolderIsRenamedToLowerCase([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             string oldFolderName = "A";
             string newFolderName = oldFolderName.ToLower();
             var folder = this.remoteRootDir.CreateFolder(oldFolderName);
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             folder.Refresh();
             folder.Rename(newFolderName);
-            Thread.Sleep(5000);
+            this.WaitForRemoteChanges();
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             folder.Refresh();
@@ -1338,7 +1049,8 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneLocalFileIsRemovedAndChangedRemotely() {
+        public void OneLocalFileIsRemovedAndChangedRemotely([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
             string oldContent = "old content";
             string newContent = "new content replaces old content";
@@ -1346,13 +1058,13 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.Initialize();
             this.repo.SingleStepQueue.SwallowExceptions = true;
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             this.localRootDir.GetFiles().First().Delete();
             (this.remoteRootDir.GetChildren().First() as IDocument).SetContent(newContent);
 
-            this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
+            this.WaitUntilQueueIsNotEmpty();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(newContent.Length));
@@ -1366,8 +1078,7 @@ namespace TestLibrary.IntegrationTests
             var a = this.remoteRootDir.CreateFolder("A");
             var b = this.remoteRootDir.CreateFolder("B");
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             this.localRootDir.GetFiles().First().MoveTo(Path.Combine(this.localRootDir.FullName, a.Name, fileName));
             doc.Refresh();
@@ -1377,7 +1088,7 @@ namespace TestLibrary.IntegrationTests
 
             this.repo.SingleStepQueue.SwallowExceptions = true;
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             doc.Refresh();
@@ -1408,8 +1119,7 @@ namespace TestLibrary.IntegrationTests
             var folder2 = this.localRootDir.CreateSubdirectory(folderName2);
             folder1.CreateSubdirectory(subFolderName);
 
-            this.repo.Initialize();
-            this.repo.Run();
+            this.InitializeAndRunRepo();
 
             var children = this.remoteRootDir.GetChildren();
             IFolder remoteA = null;
@@ -1432,7 +1142,7 @@ namespace TestLibrary.IntegrationTests
             new DirectoryInfo(fullName1 + "_renamed").MoveTo(fullName2);
             this.WaitUntilQueueIsNotEmpty(this.repo.SingleStepQueue);
 
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(false));
+            this.AddStartNextSyncEvent();
             this.repo.SingleStepQueue.SwallowExceptions = true;
             this.repo.Run();
 
@@ -1465,13 +1175,13 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void DoNotTransferDataIfLocalAndRemoteFilesAreEqual() {
-            this.repo.Initialize();
-            this.repo.Run();
+        public void DoNotTransferDataIfLocalAndRemoteFilesAreEqual([Values(true, false)]bool contentChanges) {
+            this.ContentChangesActive = contentChanges;
+            this.InitializeAndRunRepo();
             this.repo.SingleStepQueue.SwallowExceptions = true;
 
             string content = "a";
-            string fileName = "file.txt";
+            string fileName = "file.bin";
             var remoteFile = this.remoteRootDir.CreateDocument(fileName, content);
             if (remoteFile.ContentStreamHash() == null) {
                 Assert.Ignore("Server does not support hash of content stream");
@@ -1487,7 +1197,7 @@ namespace TestLibrary.IntegrationTests
                 Assert.Fail("There should be no transmission, but a new transmission object is added");
             };
 
-            this.repo.Queue.AddEvent(new StartNextSyncEvent());
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles()[0].Length, Is.EqualTo(content.Length));
@@ -1506,66 +1216,6 @@ namespace TestLibrary.IntegrationTests
             folder.Move(source, target1);
 
             Assert.Throws<CmisConstraintException>(() => anotherFolderInstance.Move(source, target2));
-        }
-
-        private void WaitUntilQueueIsNotEmpty(SingleStepEventQueue queue, int timeout = 10000) {
-            int waited = 0;
-            while (queue.Queue.IsEmpty)
-            {
-                int interval = 20;
-
-                // Wait for event to kick in
-                Thread.Sleep(interval);
-                waited += interval;
-                if (waited > timeout) {
-                    Assert.Fail("Timeout exceeded");
-                }
-            }
-        }
-
-        private void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
-            if (msg != null) {
-                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
-            } else {
-                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds);
-            }
-        }
-
-        private class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
-            public BlockingSingleConnectionScheduler(ConnectionScheduler original) : base(original) {
-            }
-
-            public override void Start() {
-                if (!this.Connect()) {
-                    Assert.Fail("Connection failed");
-                }
-            }
-        }
-
-        public class CmisRepoMock : CmisSync.Lib.Cmis.Repository
-        {
-            public SingleStepEventQueue SingleStepQueue;
-
-            public CmisRepoMock(RepoInfo repoInfo, ActivityListenerAggregator activityListener, SingleStepEventQueue queue) : base(repoInfo, activityListener, true, queue)
-            {
-                this.SingleStepQueue = queue;
-            }
-
-            public void Run()
-            {
-                this.SingleStepQueue.Run();
-                Thread.Sleep(500);
-                this.SingleStepQueue.Run();
-            }
-
-            public override void Initialize() {
-                ConnectionScheduler original = this.connectionScheduler;
-                this.connectionScheduler = new BlockingSingleConnectionScheduler(original);
-                original.Dispose();
-                base.Initialize();
-                this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
-                this.Scheduler.Stop();
-            }
         }
     }
 }

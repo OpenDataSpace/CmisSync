@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
@@ -60,6 +61,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             var savedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
             Guid? newParentUuid = localFileSystemInfo is IFileInfo ? (localFileSystemInfo as IFileInfo).Directory.Uuid : (localFileSystemInfo as IDirectoryInfo).Parent.Uuid;
             string newParentId = this.Storage.GetObjectByGuid((Guid)newParentUuid).RemoteObjectId;
+            savedObject.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             if (localFileSystemInfo.Name == (remoteId as ICmisObject).Name) {
                 // Both names are equal => only move to new remote parent
                 try {

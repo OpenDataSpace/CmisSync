@@ -84,7 +84,8 @@ namespace CmisSync.Lib.Producer.Watcher
                     this.fsFactory.CreateDirectoryInfo(movedEvent.OldPath),
                     this.fsFactory.CreateDirectoryInfo(movedEvent.LocalPath),
                     null,
-                    null)
+                    null,
+                    this)
                 { Local = MetaDataChangeType.MOVED };
             } else {
                 folderEvent = new FolderEvent(this.fsFactory.CreateDirectoryInfo(e.LocalPath), null, this);

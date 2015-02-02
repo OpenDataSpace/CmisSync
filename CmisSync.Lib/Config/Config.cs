@@ -585,6 +585,9 @@ namespace CmisSync.Lib.Config
       <level value=""INFO"" />
       <appender-ref ref=""OperationsAppender"" />
     </logger>
+    <logger name=""CmisSync.Lib.Cmis.DotCMISLogListener"">
+      <level value=""OFF"" />
+    </logger>
   </log4net>"))
             {
                 XmlElement result = (XmlElement)deserializer.Deserialize(textReader);

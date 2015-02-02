@@ -85,6 +85,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 obj.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
                 obj.LastRemoteWriteTimeUtc = (remoteId as IFolder).LastModificationDate;
                 obj.LastChangeToken = (remoteId as IFolder).ChangeToken;
+                obj.Ignored = (remoteId as IFolder).AreAllChildrenIgnored();
                 this.Storage.SaveMappedObject(obj);
             } else if (localFileSystemInfo is IFileInfo) {
                 var fileInfo = localFileSystemInfo as IFileInfo;

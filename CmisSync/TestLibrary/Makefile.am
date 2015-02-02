@@ -18,8 +18,8 @@ SOURCES =  \
 	AlgorithmsTests/CyclicDependencies/NoCycleDetectionTests.cs \
 	AlgorithmsTests/CyclicDependencies/SimpleCycleDetectionTests.cs \
 	AlgorithmsTests/StringTarjanNode.cs \
-	AlgorithmsTests/TrajanSimpleCircleTests.cs \
 	AlgorithmsTests/TarjanSimpleLinearTests.cs \
+	AlgorithmsTests/TrajanSimpleCircleTests.cs \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
@@ -28,11 +28,10 @@ SOURCES =  \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
 	ConfigTests/ConfigurationTest.cs \
 	ConfigTests/CredentialsTest.cs \
-	ConfigTests/RepoInfoTests.cs \
 	ConfigTests/DefaultSettingsTests.cs \
+	ConfigTests/RepoInfoTests.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
-	StorageTests/FileSystemTests/DateTimeConverterTest.cs \
 	ConsumerTests/SituationSolverTests/AbstractEnhancedSolverTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectAddedTest.cs \
 	ConsumerTests/SituationSolverTests/LocalObjectChangedRemoteObjectChangedTest.cs \
@@ -57,13 +56,14 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/RemoteObjectMovedTest.cs \
 	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
-	EventManagerInitializerTest.cs \
+	EventsTests/ActivityListenerAggregatorTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileOrFolderEventFactoryTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
+	EventsTests/FolderEventTest.cs \
 	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
 	EventsTests/GenericSyncEventHandlerTest.cs \
@@ -84,9 +84,13 @@ SOURCES =  \
 	FilterTests/IgnoredFolderNamesFilterTest.cs \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
+	FilterTests/ReportingFilterTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
+	IntegrationTests/BaseFullRepoTest.cs \
+	IntegrationTests/ClientBrandTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
 	IntegrationTests/DotCMISTests.cs \
+	IntegrationTests/DownloadLinkTests.cs \
 	IntegrationTests/FileSystemEventOrderTest.cs \
 	IntegrationTests/FullInMemoryRepoTest.cs \
 	IntegrationTests/FullRepoTests.cs \
@@ -94,6 +98,11 @@ SOURCES =  \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
+	IntegrationTests/SelectiveIgnoreTests/CrudIT.cs \
+	IntegrationTests/SelectiveIgnoreTests/FileCrud.cs \
+	IntegrationTests/SelectiveIgnoreTests/MoveIT.cs \
+	IntegrationTests/SelectiveIgnoreTests/RenameIT.cs \
+	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfIRepository.cs \
@@ -118,10 +127,18 @@ SOURCES =  \
 	ProducerTests/WatcherTests/RenamedFileSystemEventHandlerTest.cs \
 	ProducerTests/WatcherTests/WatcherTest.cs \
 	ProducerTests/WatcherTests/WatcherTestUtils.cs \
+	QueueingTests/ConnectionSchedulerTest.cs \
 	QueueingTests/DebugLoggingHandlerTest.cs \
 	QueueingTests/DelayRetryAndNextSyncEventHandlerTest.cs \
+	QueueingTests/EventManagerInitializerTest.cs \
 	QueueingTests/SyncEventManagerTest.cs \
 	QueueingTests/SyncEventQueueTest.cs \
+	SelectiveIgnoreTests/EventTransformerTest.cs \
+	SelectiveIgnoreTests/FilterTest.cs \
+	SelectiveIgnoreTests/IgnoreFlagChangeDetectionTest.cs \
+	SelectiveIgnoreTests/IgnoredEntitiesCollectionTest.cs \
+	SelectiveIgnoreTests/IgnoredEntitiesStorageTest.cs \
+	SelectiveIgnoreTests/IgnoredEntityTest.cs \
 	StorageTests/DataBaseTests/DBreezeTests.cs \
 	StorageTests/DataBaseTests/EntitiesTests/FileTransmissionObjectsTest.cs \
 	StorageTests/DataBaseTests/EntitiesTests/IFileConvenienceExtendersTest.cs \
@@ -129,6 +146,7 @@ SOURCES =  \
 	StorageTests/DataBaseTests/FileTransmissionStorageTest.cs \
 	StorageTests/DataBaseTests/MetaDataStorageTest.cs \
 	StorageTests/DataBaseTests/PersistentCookieStorageTest.cs \
+	StorageTests/FileSystemTests/DateTimeConverterTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderDosTest.cs \
 	StorageTests/FileSystemTests/ExtendedAttributeReaderUnixTest.cs \
 	StorageTests/FileSystemTests/FileSystemWrapperTests.cs \
@@ -139,6 +157,8 @@ SOURCES =  \
 	StreamsTests/NonClosingHashStreamTest.cs \
 	StreamsTests/OffsetStreamTest.cs \
 	StreamsTests/ProgressStreamTest.cs \
+	TestUtils/FolderTree.cs \
+	TestUtils/FolderTreeTest.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfIDocumentUtil.cs \

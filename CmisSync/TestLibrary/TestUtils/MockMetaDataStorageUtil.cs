@@ -141,7 +141,7 @@ namespace TestLibrary.TestUtils
             DateTime? lastLocalModification = null,
             DateTime? lastRemoteModification = null,
             byte[] checksum = null,
-            long contentSize = -1)
+            long contentSize = -1, bool ignored = false)
         {
             VerifySavedMappedObject(
                 db,
@@ -155,7 +155,8 @@ namespace TestLibrary.TestUtils
                 lastLocalModification,
                 lastRemoteModification,
                 checksum,
-                contentSize);
+                contentSize,
+                ignored);
         }
 
         public static void VerifySavedMappedObject(
@@ -170,11 +171,12 @@ namespace TestLibrary.TestUtils
             DateTime? lastLocalModification = null,
             DateTime? lastRemoteModification = null,
             byte[] checksum = null,
-            long contentSize = -1)
+            long contentSize = -1,
+            bool ignored = false)
         {
             db.Verify(
                 s =>
-                s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, extendedAttributeAvailable, lastLocalModification, lastRemoteModification, checksum, contentSize))),
+                s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, extendedAttributeAvailable, lastLocalModification, lastRemoteModification, checksum, contentSize, ignored))),
                 times);
         }
 
@@ -189,13 +191,15 @@ namespace TestLibrary.TestUtils
             DateTime? lastLocalModification,
             DateTime? lastRemoteModification,
             byte[] checksum,
-            long contentSize)
+            long contentSize,
+            bool ignored)
         {
-            Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId));
-            Assert.That(o.Name, Is.EqualTo(name));
-            Assert.That(o.ParentId, Is.EqualTo(parentId));
-            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken));
-            Assert.That(o.Type, Is.EqualTo(type));
+            Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId), "Object remote Id is wrong");
+            Assert.That(o.Name, Is.EqualTo(name), "Object name is wrong");
+            Assert.That(o.ParentId, Is.EqualTo(parentId), "Object parent Id is wrong");
+            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken), "Object change token is wrong");
+            Assert.That(o.Type, Is.EqualTo(type), "Object type is wrong");
+            Assert.That(o.Ignored, Is.EqualTo(ignored), "Object ignore flag is wrong");
             if (extendedAttributeAvailable) {
                 Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty), "Given Guid must not be empty");
             } else {
@@ -203,11 +207,11 @@ namespace TestLibrary.TestUtils
             }
 
             if (lastLocalModification != null) {
-                Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastLocalModification));
+                Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastLocalModification), "Last local modification date is wrong");
             }
 
             if (lastRemoteModification != null) {
-                Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastRemoteModification));
+                Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastRemoteModification), "Last remote modification date is wrong");
             }
 
             if (checksum != null) {
@@ -216,8 +220,12 @@ namespace TestLibrary.TestUtils
             }
 
             if (type == MappedObjectType.File) {
-                Assert.That(o.LastContentSize, Is.GreaterThanOrEqualTo(0));
-                Assert.That(o.LastContentSize, Is.EqualTo(contentSize));
+                Assert.That(o.LastContentSize, Is.GreaterThanOrEqualTo(0), "Last content size is wrong");
+                Assert.That(o.LastContentSize, Is.EqualTo(contentSize), "Last content size is wrong");
+            }
+
+            if (type == MappedObjectType.Folder) {
+                Assert.That(o.LastContentSize, Is.EqualTo(-1), "Folder content size is wrong");
             }
 
             return true;

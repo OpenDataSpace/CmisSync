@@ -170,6 +170,17 @@ SOURCES =  \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
+	SelectiveIgnore/IgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IgnoredEntity.cs \
+	SelectiveIgnore/IgnoredState.cs \
+	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
+	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IIgnoredEntity.cs \
+	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
+	SelectiveIgnore/SelectiveIgnoreFilter.cs \
 	Status/ConnectionStatus.cs \
 	Status/RepositoryStatus.cs \
 	Status/SynchronizationStatus.cs \

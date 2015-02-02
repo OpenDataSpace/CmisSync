@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
@@ -56,6 +57,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             string newPath = Path.Combine(parentPath, (remoteId as ICmisObject).Name);
             this.MoveTo(localFileSystemInfo, oldPath, newPath);
             savedObject.Name = (remoteId as ICmisObject).Name;
+            savedObject.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(savedObject);
             this.changeChangeSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
         }
