@@ -46,8 +46,8 @@ namespace TestLibrary.IntegrationTests {
 
     using TestLibrary.TestUtils;
 
-    // Default timeout per test is 15 minutes
-    [TestFixture, Timeout(900000), TestName("FullRepo")]
+    // Default timeout per test is 2 minutes but test fails if it need more then 1 minute
+    [TestFixture, MaxTime(60000), Timeout(180000), TestName("FullRepo")]
     public class FullRepoTests : BaseFullRepoTest {
         [Test, Category("Slow")]
         public void OneLocalFolderCreated() {
