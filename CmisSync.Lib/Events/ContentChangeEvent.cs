@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.IO;
 
@@ -29,8 +28,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Events Created By ContentChange Eventhandler
     /// </summary>
-    public class ContentChangeEvent : ICountableEvent
-    {
+    public class ContentChangeEvent : ISyncEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.ContentChangeEvent"/> class.
         /// </summary>
@@ -76,17 +74,6 @@ namespace CmisSync.Lib.Events
         /// The cmis object.
         /// </value>
         public ICmisObject CmisObject { get; private set; }
-
-        /// <summary>
-        /// Gets the category of the event. This can be used to differ between multiple event types.
-        /// The returned value should never ever change its value after requesting it the first time.
-        /// </summary>
-        /// <value>The event category is "DetectedChange".</value>
-        public string Category {
-            get {
-                return "DetectedChange";
-            }
-        }
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.ContentChangeEvent"/>.
