@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -49,11 +48,9 @@ namespace TestLibrary.IntegrationTests
 
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000), TestName("FullRepo")]
-    public class FullRepoTests : BaseFullRepoTest
-    {
+    public class FullRepoTests : BaseFullRepoTest {
         [Test, Category("Slow")]
-        public void OneLocalFolderCreated()
-        {
+        public void OneLocalFolderCreated() {
             this.localRootDir.CreateSubdirectory("Cat");
 
             this.InitializeAndRunRepo();
@@ -62,8 +59,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Erratic")]
-        public void OneLocalFolderRemoved()
-        {
+        public void OneLocalFolderRemoved() {
             this.localRootDir.CreateSubdirectory("Cat");
 
             this.InitializeAndRunRepo();
@@ -78,8 +74,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFolderCreated()
-        {
+        public void OneRemoteFolderCreated() {
             this.remoteRootDir.CreateFolder("Cat");
 
             this.InitializeAndRunRepo();
@@ -89,8 +84,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFolderIsDeleted()
-        {
+        public void OneRemoteFolderIsDeleted() {
             this.remoteRootDir.CreateFolder("Cat");
 
             this.InitializeAndRunRepo();
@@ -105,8 +99,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Conflict")]
-        public void OneRemoteFolderIsDeletedAndOneUnsyncedFileExistsInTheCorrespondingLocalFolder()
-        {
+        public void OneRemoteFolderIsDeletedAndOneUnsyncedFileExistsInTheCorrespondingLocalFolder() {
             string folderName = "Cat";
             string fileName = "localFile.bin";
             var folder = this.remoteRootDir.CreateFolder(folderName);
@@ -134,8 +127,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Erratic")]
-        public void OneRemoteFolderIsRenamedAndOneCrawlSyncShouldDetectIt()
-        {
+        public void OneRemoteFolderIsRenamedAndOneCrawlSyncShouldDetectIt() {
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
 
             this.InitializeAndRunRepo();
@@ -152,8 +144,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Erratic")]
-        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByCrawler()
-        {
+        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByCrawler() {
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
             var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
 
@@ -172,8 +163,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Erratic")]
-        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByContentChange()
-        {
+        public void OneRemoteFolderIsMovedIntoAnotherRemoteFolderAndDetectedByContentChange() {
             this.EnsureThatContentChangesAreSupported();
             var remoteFolder = this.remoteRootDir.CreateFolder("Cat");
             var remoteTargetFolder = this.remoteRootDir.CreateFolder("target");
@@ -194,8 +184,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneLocalFileCreated()
-        {
+        public void OneLocalFileCreated() {
             string fileName = "file";
             string content = "content";
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
@@ -217,8 +206,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneLocalFileCreatedAndModificationDateIsSynced()
-        {
+        public void OneLocalFileCreatedAndModificationDateIsSynced() {
             if (!this.session.IsServerAbleToUpdateModificationDate()) {
                 Assert.Ignore("Server does not support the synchronization of modification dates");
             }
@@ -252,8 +240,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Erratic")]
-        public void OneLocalFileRenamed()
-        {
+        public void OneLocalFileRenamed() {
             string fileName = "file";
             string newFileName = "renamedFile";
             string content = "content";
@@ -283,8 +270,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Erratic")]
-        public void OneLocalFileRenamedAndMoved()
-        {
+        public void OneLocalFileRenamedAndMoved() {
             string fileName = "file";
             string newFileName = "renamedFile";
             string folderName = "folder";
@@ -318,8 +304,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneLocalFileIsRemoved()
-        {
+        public void OneLocalFileIsRemoved() {
             string fileName = "removingFile.bin";
             string content = string.Empty;
             var filePath = Path.Combine(this.localRootDir.FullName, fileName);
@@ -343,8 +328,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFileCreated([Values(true, false)]bool contentChanges)
-        {
+        public void OneRemoteFileCreated([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file";
             string content = "content";
@@ -360,8 +344,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneEmptyRemoteFileCreated([Values(true, false)]bool contentChanges)
-        {
+        public void OneEmptyRemoteFileCreated([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo();
             string fileName = "file";
@@ -398,8 +381,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFileContentIsDeleted([Values(true, false)]bool contentChanges)
-        {
+        public void OneRemoteFileContentIsDeleted([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
 
             string fileName = "file";
@@ -426,8 +408,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void OneRemoteFileUpdated([Values(true, false)]bool contentChanges)
-        {
+        public void OneRemoteFileUpdated([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             string fileName = "file.bin";
             string content = "cat";
@@ -451,8 +432,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow")]
-        public void RemoteCreatedFileIsDeletedLocally()
-        {
+        public void RemoteCreatedFileIsDeletedLocally() {
             string fileName = "file.bin";
             string content = "cat";
             this.remoteRootDir.CreateDocument(fileName, content);
@@ -472,8 +452,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Conflict"), Category("Erratic")]
-        public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConflictFileIsCreated()
-        {
+        public void OneLocalFileAndOneRemoteFileIsCreatedAndOneConflictFileIsCreated() {
             string fileName = "fileConflictTest.bin";
             string remoteContent = "remotecontent";
             string localContent = "local";
@@ -495,8 +474,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Conflict"), Category("Erratic")]
-        public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved()
-        {
+        public void OneLocalFileIsChangedAndTheRemoteFileIsRemoved() {
             string fileName = "fileConflictTest.bin";
             string changedLocalContent = "changedContent";
             string localContent = "local";
@@ -599,8 +577,7 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, Category("Slow"), Category("Erratic")]
-        public void OneLocalFileContentIsChanged()
-        {
+        public void OneLocalFileContentIsChanged() {
             string fileName = "file.bin";
             string content = "cat";
             byte[] newContent = Encoding.UTF8.GetBytes("new born citty");
@@ -629,8 +606,7 @@ namespace TestLibrary.IntegrationTests
         /// Creates the hundred files and sync.
         /// </summary>
         [Test, Category("Slow"), Category("Erratic"), Timeout(1800000), Ignore("Just for benchmarks")]
-        public void CreateHundredFilesAndSync()
-        {
+        public void CreateHundredFilesAndSync() {
             DateTime modificationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
             DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(2);
             int count = 100;

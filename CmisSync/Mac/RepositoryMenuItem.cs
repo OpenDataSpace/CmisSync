@@ -1,64 +1,93 @@
-﻿
+
 namespace CmisSync {
     using System;
-    using System.Windows.Forms;
+    using System.Drawing;
+    using System.IO;
+    using System.Collections.Generic;
+    using System.Text;
 
-    using CmisSync;
+    using Mono.Unix.Native;
+
+    using log4net;
+
+    using MonoMac.Foundation;
+    using MonoMac.AppKit;
+    using MonoMac.ObjCRuntime;
+
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Cmis;
-    using System.Windows;
+    using CmisSync.Lib.Config;
 
-    public class RepositoryMenuItem : ToolStripMenuItem, IObserver<Tuple<string, int>> {
+    [CLSCompliant(false)]
+    public class RepositoryMenuItem : NSMenuItem, IObserver<Tuple<string, int>>{
         private StatusIconController controller;
-        private ToolStripMenuItem openLocalFolderItem;
-        private ToolStripMenuItem removeFolderFromSyncItem;
-        private ToolStripMenuItem suspendItem;
-        private ToolStripMenuItem editItem;
-        private ToolStripMenuItem statusItem;
+        private NSMenuItem openLocalFolderItem;
+        private NSMenuItem removeFolderFromSyncItem;
+        private NSMenuItem suspendItem;
+        private NSMenuItem editItem;
+        private NSMenuItem statusItem;
         private Repository repository;
         private SyncStatus status;
         private bool syncRequested;
         private int changesFound;
         private DateTime? changesFoundAt;
         private object counterLock = new object();
-        private Control parent;
+        private NSImage pauseImage = new NSImage(UIHelpers.GetImagePathname("media_playback_pause"));
+        private NSImage resumeImage = new NSImage(UIHelpers.GetImagePathname ("media_playback_start"));
+        private NSImage removeImage = new NSImage(UIHelpers.GetImagePathname("process-syncing-error"));
+        private NSImage folderImage = new NSImage(UIHelpers.GetImagePathname ("cmissync-folder", "icns"));
 
-        public RepositoryMenuItem(Repository repo, StatusIconController controller, Control parent)
-            : base(repo.Name) {
+        public RepositoryMenuItem(Repository repo, StatusIconController controller) : base(repo.Name) {
             this.repository = repo;
             this.controller = controller;
-            this.parent = parent;
-            this.Image = UIHelpers.GetBitmap("folder");
+            this.Image = this.folderImage;
+            this.Image.Size = new SizeF(16, 16);
 
-            this.openLocalFolderItem = new ToolStripMenuItem(Properties_Resources.OpenLocalFolder) {
-                Image = UIHelpers.GetBitmap("folder")
+            this.openLocalFolderItem = new NSMenuItem(Properties_Resources.OpenLocalFolder) {
+                Image = this.folderImage
             };
+            this.openLocalFolderItem.Image.Size = new SizeF(16, 16);
 
-            this.openLocalFolderItem.Click += this.OpenFolderDelegate();
+            this.openLocalFolderItem.Activated += this.OpenFolderDelegate();
 
-            this.editItem = new ToolStripMenuItem(Properties_Resources.Settings);
-            this.editItem.Click += this.EditFolderDelegate();
+            this.editItem = new NSMenuItem(Properties_Resources.Settings);
+            this.editItem.Activated += this.EditFolderDelegate();
 
-            this.suspendItem = new ToolStripMenuItem(Properties_Resources.PauseSync);
+            this.suspendItem = new NSMenuItem(Properties_Resources.PauseSync);
 
             this.Status = repo.Status;
 
-            this.suspendItem.Click += this.SuspendSyncFolderDelegate();
-            this.statusItem = new ToolStripMenuItem("Searching for changes") {
+            this.suspendItem.Activated += this.SuspendSyncFolderDelegate();
+            this.statusItem = new NSMenuItem(Properties_Resources.StatusSearchingForChanges) {
                 Enabled = false
             };
 
-            this.removeFolderFromSyncItem = new ToolStripMenuItem(Properties_Resources.RemoveFolderFromSync);
-            this.removeFolderFromSyncItem.Click += this.RemoveFolderFromSyncDelegate();
+            this.removeFolderFromSyncItem = new NSMenuItem(Properties_Resources.RemoveFolderFromSync);
+            this.removeFolderFromSyncItem.Activated += this.RemoveFolderFromSyncDelegate();
 
-            this.DropDownItems.Add(this.statusItem);
-            this.DropDownItems.Add(new ToolStripSeparator());
-            this.DropDownItems.Add(this.openLocalFolderItem);
-            this.DropDownItems.Add(this.suspendItem);
-            this.DropDownItems.Add(this.editItem);
-            this.DropDownItems.Add(new ToolStripSeparator());
-            this.DropDownItems.Add(this.removeFolderFromSyncItem);
+            var subMenu = new NSMenu();
+            subMenu.AddItem(this.statusItem);
+            subMenu.AddItem(NSMenuItem.SeparatorItem);
+            subMenu.AddItem(this.openLocalFolderItem);
+            subMenu.AddItem(this.suspendItem);
+            subMenu.AddItem(this.editItem);
+            subMenu.AddItem(NSMenuItem.SeparatorItem);
+            subMenu.AddItem(this.removeFolderFromSyncItem);
+            this.Submenu = subMenu;
 
             this.repository.Queue.Subscribe(this);
+        }
+
+        private EventHandler RemoveFolderFromSyncDelegate() {
+            return delegate {
+                NSAlert alert = NSAlert.WithMessage(Properties_Resources.RemoveSyncQuestion,"No, please continue syncing","Yes, stop syncing",null,"");
+                alert.Icon = this.removeImage;
+                alert.Window.OrderFrontRegardless();
+                int i = alert.RunModal();
+                if (i == 0) {
+                    this.controller.RemoveFolderFromSyncClicked(this.repository.Name);
+                }
+            };
         }
 
         // A method reference that makes sure that opening the
@@ -80,21 +109,6 @@ namespace CmisSync {
                 this.controller.SuspendSyncClicked(this.repository.Name);
             };
         }
-
-        private EventHandler RemoveFolderFromSyncDelegate() {
-            return delegate {
-                if (System.Windows.MessageBox.Show(
-                    CmisSync.Properties_Resources.RemoveSyncQuestion,
-                    CmisSync.Properties_Resources.RemoveSyncTitle,
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question,
-                    MessageBoxResult.No
-                    ) == MessageBoxResult.Yes) {
-                    this.controller.RemoveFolderFromSyncClicked(this.repository.Name);
-                }
-            };
-        }
-
         public SyncStatus Status {
             get {
                 return this.status;
@@ -104,14 +118,14 @@ namespace CmisSync {
                 this.status = value;
                 switch (this.status)
                 {
-                case SyncStatus.Idle:
-                    this.suspendItem.Text = Properties_Resources.PauseSync;
-                    this.suspendItem.Image = UIHelpers.GetBitmap("media_playback_pause");
-                    break;
-                case SyncStatus.Suspend:
-                    this.suspendItem.Text = Properties_Resources.ResumeSync;
-                    this.suspendItem.Image = UIHelpers.GetBitmap("media_playback_start");
-                    break;
+                    case SyncStatus.Idle:
+                        this.suspendItem.Title = Properties_Resources.PauseSync;
+                        this.suspendItem.Image = this.pauseImage;
+                        break;
+                    case SyncStatus.Suspend:
+                        this.suspendItem.Title = Properties_Resources.ResumeSync;
+                        this.suspendItem.Image = this.resumeImage;
+                        break;
                 }
             }
         }
@@ -140,11 +154,11 @@ namespace CmisSync {
                 this.UpdateStatusText();
             } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
                 if (changeCounter.Item2 > 0) {
-                    lock (this.counterLock) {
+                    lock(this.counterLock) {
                         this.syncRequested = changeCounter.Item1 == "SyncRequested";
                     }
                 } else {
-                    lock (this.counterLock) {
+                    lock(this.counterLock) {
                         this.syncRequested = false;
                         this.changesFoundAt = this.syncRequested ? this.changesFoundAt : DateTime.Now;
                     }
@@ -156,7 +170,7 @@ namespace CmisSync {
 
         private void UpdateStatusText() {
             string message;
-            lock(this.counterLock) {
+            lock (this.counterLock) {
                 if (this.syncRequested == true) {
                     if (this.changesFound > 0) {
                         message = string.Format(Properties_Resources.StatusSearchingForChangesAndFound, this.changesFound.ToString());
@@ -180,8 +194,8 @@ namespace CmisSync {
                 }
             }
 
-            this.parent.BeginInvoke((Action)delegate {
-                this.statusItem.Text = message;
+            InvokeOnMainThread (delegate {
+                this.statusItem.Title = message;
             });
         }
     }

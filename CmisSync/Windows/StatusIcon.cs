@@ -56,16 +56,6 @@ namespace CmisSync {
         private Icon[] animationFrames;
 
         /// <summary>
-        /// Menu item that shows the state of CmisSync (up-to-date, etc).
-        /// </summary>
-        private ToolStripMenuItem stateItem;
-        /*
-        /// <summary>
-        /// Menu item that shows the state of active transmissions (like up/downloads)
-        /// </summary>
-        private ToolStripMenuItem transmissionItem;*/
-
-        /// <summary>
         /// Menu item that allows the user to exit CmisSync.
         /// </summary>
         private ToolStripMenuItem exitItem;
@@ -175,17 +165,7 @@ namespace CmisSync {
                     });
                 }
             };
-
-            // Status item.
-            Controller.UpdateStatusItemEvent += delegate(string state_text) {
-                if (IsHandleCreated) {
-                    BeginInvoke((Action)delegate {
-                        this.stateItem.Text = state_text;
-                        this.trayicon.Text = String.Format("{0}\n{1}", Properties_Resources.ApplicationName, state_text);
-                    });
-                }
-            };
-
+            
             // Menu.
             Controller.UpdateMenuEvent += delegate(IconState state) {
                 if (IsHandleCreated) {
@@ -213,30 +193,6 @@ namespace CmisSync {
                     });
                 }
             };
-
-            //Transmission Submenu.
-            Controller.UpdateTransmissionMenuEvent += delegate {
-                if (IsHandleCreated) {
-                    BeginInvoke((Action)delegate {
-                        this.stateItem.DropDownItems.Clear();
-                        if (ConfigManager.CurrentConfig.Notifications) {
-                            List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
-                            foreach (FileTransmissionEvent transmission in transmissions) {
-                                ToolStripMenuItem transmission_sub_menu_item = new TransmissionMenuItem(transmission, this);
-                                this.stateItem.DropDownItems.Add(transmission_sub_menu_item);
-                            }
-
-                            if (transmissions.Count > 0) {
-                                this.stateItem.Enabled = true;
-                            } else {
-                                this.stateItem.Enabled = false;
-                            }
-                        } else {
-                            this.stateItem.Enabled = false;
-                        }
-                    });
-                }
-            };
         }
 
         /// <summary>
@@ -259,14 +215,7 @@ namespace CmisSync {
             this.traymenu.Items.Clear();
             this.repoItems = new List<RepositoryMenuItem>();
 
-            // Create the state menu item.
-            this.stateItem = new ToolStripMenuItem() {
-                Text = Controller.StateText,
-                Enabled = false
-            };
-            this.traymenu.Items.Add(stateItem);
             this.trayicon.Text = String.Format("{0}\n{1}", Properties_Resources.ApplicationName, Controller.StateText);
-            this.traymenu.Items.Add(new ToolStripSeparator());
 
             // Create a menu item per synchronized folder.
             if (Controller.Folders.Length > 0) {

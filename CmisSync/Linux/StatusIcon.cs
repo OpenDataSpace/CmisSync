@@ -59,7 +59,6 @@ namespace CmisSync {
 
         private Menu menu;
         private MenuItem quitItem;
-        private MenuItem stateItem;
         private List<RepositoryMenuItem> repoItems;
         private bool isHandleCreated = false;
 
@@ -120,17 +119,6 @@ namespace CmisSync {
                 });
             };
 
-            this.Controller.UpdateStatusItemEvent += delegate(string state_text) {
-                if (!this.isHandleCreated) {
-                    return;
-                }
-
-                Application.Invoke(delegate {
-                    (this.stateItem.Child as Label).Text = state_text;
-                    this.stateItem.ShowAll();
-                });
-            };
-
             this.Controller.UpdateMenuEvent += delegate(IconState state) {
                 Application.Invoke(delegate {
                     this.CreateMenu();
@@ -157,57 +145,11 @@ namespace CmisSync {
                     }
                 });
             };
-
-            this.Controller.UpdateTransmissionMenuEvent += delegate {
-                if (!this.isHandleCreated) {
-                    return;
-                }
-
-                Application.Invoke(delegate {
-                    List<FileTransmissionEvent> transmissionEvents = Program.Controller.ActiveTransmissions();
-                    if (transmissionEvents.Count != 0) {
-                        this.stateItem.Sensitive = true;
-
-                        Menu submenu = new Menu();
-                        this.stateItem.Submenu = submenu;
-
-                        foreach (FileTransmissionEvent e in transmissionEvents) {
-                            ImageMenuItem transmission_sub_menu_item = new TransmissionMenuItem(e);
-                            submenu.Add(transmission_sub_menu_item);
-                            this.stateItem.ShowAll();
-                        }
-                    } else {
-                        this.stateItem.Submenu = null;
-                        this.stateItem.Sensitive = false;
-                    }
-                });
-            };
         }
 
-        private void SetSyncItemState(ImageMenuItem syncitem, SyncStatus status) {
-            switch (status)
-            {
-            case SyncStatus.Idle:
-                (syncitem.Child as Label).Text = CmisSync.Properties_Resources.PauseSync;
-                syncitem.Image = new Image(UIHelpers.GetIcon("dataspacesync-pause", 12));
-                break;
-            case SyncStatus.Suspend:
-                (syncitem.Child as Label).Text = CmisSync.Properties_Resources.ResumeSync;
-                syncitem.Image = new Image(UIHelpers.GetIcon("dataspacesync-start", 12));
-                break;
-            }
-        }
-
-        public void CreateMenu()
-        {
+        public void CreateMenu() {
             this.menu = new Menu();
             this.repoItems = new List<RepositoryMenuItem>();
-            // State Menu
-            this.stateItem = new MenuItem(this.Controller.StateText) {
-                Sensitive = false
-            };
-            this.menu.Add(this.stateItem);
-            this.menu.Add(new SeparatorMenuItem());
 
             // Folders Menu
             if (this.Controller.Folders.Length > 0) {

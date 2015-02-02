@@ -46,6 +46,7 @@ SOURCES =  \
 	ProxySettings.cs \
 	ProxySettings.designer.cs \
 	ProxySettingsController.cs \
+	RepositoryMenuItem.cs \
 	SetupSubCustomize.cs \
 	SetupSubCustomize.designer.cs \
 	SetupSubCustomizeController.cs \
