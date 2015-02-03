@@ -171,6 +171,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             byte[] hash = null;
             IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
+            if (Session.ArePrivateWorkingCopySupported()) {
+                uploader = FileTransmission.ContentTaskUtils.CreateUploader(TransmissionStorage.ChunkSize);
+            }
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
             using (var hashAlg = new SHA1Managed()) {
                 try {
@@ -178,8 +181,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         if (docPWC == null) {
                             uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
                         } else {
-                            using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read))
-                            {
+                            using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
                                 int bufsize = 8 * 1024;
                                 byte[] buffer = new byte[bufsize];
                                 for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault(); ) {
@@ -202,8 +204,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     SaveRemotePWCDocument(localFile, doc, docPWC, transmissionEvent);
                     transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                     throw;
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                     throw;
                 }

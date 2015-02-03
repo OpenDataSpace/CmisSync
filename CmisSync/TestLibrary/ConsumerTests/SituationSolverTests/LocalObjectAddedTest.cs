@@ -176,17 +176,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void LocalFileAddedWhileAbortThePreviousUploadAndContinueTheNextUpload() {
             this.SetUpMocks();
 
-            ActiveActivitiesManager transmissionManager = new ActiveActivitiesManager();
-
-            ContentTaskUtils.DefaultChunkSize = 8 * 1024;
+            const long ChunkSize = 8 * 1024;
             const int ChunkCount = 4;
 
-            long fileLength = ChunkCount * ContentTaskUtils.DefaultChunkSize;
+            ActiveActivitiesManager transmissionManager = new ActiveActivitiesManager();
+            this.transmissionStorage.Setup(s => s.ChunkSize).Returns(ChunkSize);
+            this.session.Setup(s => s.RepositoryInfo.Capabilities.IsPwcUpdatableSupported).Returns(true);
+
+            long fileLength = ChunkCount * ChunkSize;
             var fileContent = new byte[fileLength];
-            fileContent[0] = 0;
-            fileContent[ContentTaskUtils.DefaultChunkSize] = 1;
-            fileContent[ContentTaskUtils.DefaultChunkSize * 2] = 2;
-            fileContent[ContentTaskUtils.DefaultChunkSize * 3] = 3;
             byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
 
             var stream = new Mock<MemoryStream>();
@@ -649,7 +647,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.transmissionStorage.Setup(f => f.GetObjectByRemoteObjectId(It.IsAny<string>())).Returns(o);
             });
             this.session.SetupCreateOperationContext();
-            ContentTaskUtils.DefaultChunkSize = 0;
         }
     }
 }
