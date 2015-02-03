@@ -243,7 +243,7 @@ namespace CmisSync {
             }
 
             ClientBrand clientBrand = new ClientBrand();
-            foreach (string path in clientBrand.GetPathList()) {
+            foreach (string path in clientBrand.PathList) {
                 if (!File.Exists(Path.Combine(config.GetConfigPath(), this.BrandConfigFolder, path.Substring(1)))) {
                     return false;
                 }
@@ -266,7 +266,7 @@ namespace CmisSync {
 
                 if (clientBrand.SetupServer(folder.Credentials)) {
                     bool success = true;
-                    foreach (string path in clientBrand.GetPathList()) {
+                    foreach (string path in clientBrand.PathList) {
                         DateTime date;
                         if (!clientBrand.GetFileDateTime(path, out date)) {
                             success = false;
@@ -302,7 +302,7 @@ namespace CmisSync {
                 ClientBrand clientBrand = new ClientBrand();
                 if (clientBrand.SetupServer(folder.Credentials)) {
                     bool success = true;
-                    foreach (string path in clientBrand.GetPathList()) {
+                    foreach (string path in clientBrand.PathList) {
                         DateTime date;
                         if (!clientBrand.GetFileDateTime(path, out date)) {
                             success = false;
