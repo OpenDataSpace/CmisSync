@@ -875,7 +875,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(doc.Name, Is.EqualTo("doc"));
         }
 
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Timeout(360000)]
         public void OneFileIsCopiedAFewTimes([Values(true, false)]bool contentChanges, [Values(1,2,5,10)]int times) {
             this.ContentChangesActive = contentChanges;
             FileSystemInfoFactory fsFactory = new FileSystemInfoFactory();
