@@ -16,20 +16,18 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Config;
+namespace CmisSync {
+    ﻿using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
 
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Events;
 
-namespace CmisSync
-{
-    public class TransmissionItem : IDisposable
-    {
+    public class TransmissionItem : IDisposable {
         public string FullPath { get; private set; }
         public string Repo { get; private set; }
         public string Path { get; private set; }
@@ -52,45 +50,39 @@ namespace CmisSync
 
         private object lockController = new object();
         private TransmissionController Controller_;
-        public TransmissionController Controller
-        {
-            get
-            {
-                lock (lockController)
-                {
+        public TransmissionController Controller {
+            get {
+                lock (lockController) {
                     return Controller_;
                 }
             }
-            set
-            {
-                lock (lockController)
-                {
+
+            set {
+                lock (lockController) {
                     Controller_ = value;
                 }
             }
         }
 
-        public TransmissionItem(FileTransmissionEvent transmission)
-        {
+        public TransmissionItem(FileTransmissionEvent transmission) {
             Transmission = transmission;
             UpdateTime = new DateTime(1970, 1, 1);
 
             FullPath = transmission.Path;
             Repo = string.Empty;
             Path = FullPath;
-            foreach (RepoInfo folder in ConfigManager.CurrentConfig.Folders)
-            {
+            foreach (RepoInfo folder in ConfigManager.CurrentConfig.Folders) {
                 string localFolder = folder.LocalPath;
-                if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString()))
-                {
-                    localFolder = localFolder + System.IO.Path.DirectorySeparatorChar;
+                if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
+                    localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
                 }
-                if (FullPath.StartsWith(localFolder))
-                {
+
+                if (FullPath.StartsWith(localFolder)) {
                     Repo = folder.DisplayName;
                     Path = FullPath.Substring(localFolder.Length);
                 }
             }
+
             Type = transmission.Type;
 
             Update(this, transmission.Status);
@@ -98,27 +90,22 @@ namespace CmisSync
             Transmission.TransmissionStatus += Update;
         }
 
-        ~TransmissionItem()
-        {
+        ~TransmissionItem() {
             Dispose(false);
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             Dispose(true);
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!Disposed)
-            {
+        protected virtual void Dispose(bool disposing) {
+            if (!Disposed) {
                 Transmission.TransmissionStatus -= Update;
                 Disposed = true;
             }
         }
 
-        private void Update(object sender, TransmissionProgressEventArgs status)
-        {
+        private void Update(object sender, TransmissionProgressEventArgs status) {
             string oldState = State;
             string oldStatus = Status;
             string oldProgress = Progress;
@@ -139,51 +126,35 @@ namespace CmisSync
                 default:
                     break;
             }
-            if (status.Completed.GetValueOrDefault())
-            {
+
+            if (status.Completed.GetValueOrDefault()) {
                 State += " Finished";
                 Done = true;
-            }
-            else if (status.Aborted.GetValueOrDefault())
-            {
+            } else if (status.Aborted.GetValueOrDefault()) {
                 State += " Aborted";
                 Done = true;
-            }
-            else if (status.FailedException != null)
-            {
+            } else if (status.FailedException != null) {
                 State += " Aborted";
                 Done = true;
-            }
-            else if (status.Aborting.GetValueOrDefault())
-            {
+            } else if (status.Aborting.GetValueOrDefault()) {
                 State += " Aborting";
                 Done = false;
-            }
-            else if (status.Paused.GetValueOrDefault())
-            {
+            } else if (status.Paused.GetValueOrDefault()) {
                 State += " Paused";
                 Done = false;
-            }
-            else if (status.Resumed.GetValueOrDefault())
-            {
+            } else if (status.Resumed.GetValueOrDefault()) {
                 State += " Resumed";
                 Done = false;
-            }
-            else if (status.Started.GetValueOrDefault())
-            {
+            } else if (status.Started.GetValueOrDefault()) {
                 State += " Started";
                 Done = false;
-            }
-            else
-            {
+            } else {
                 Done = false;
             }
 
-            if (oldState == State)
-            {
+            if (oldState == State) {
                 TimeSpan diff = DateTime.Now - UpdateTime;
-                if (diff.TotalSeconds < UpdateIntervalSeconds)
-                {
+                if (diff.TotalSeconds < UpdateIntervalSeconds) {
                     return;
                 }
             }
@@ -192,17 +163,13 @@ namespace CmisSync
 
             Status = State;
             long speed = status.BitsPerSecond.GetValueOrDefault();
-            if (speed != 0)
-            {
+            if (speed != 0) {
                 Status += " (" + CmisSync.Lib.Utils.FormatBandwidth(speed) + ")";
             }
 
-            if (status.Percent == null)
-            {
+            if (status.Percent == null) {
                 Progress = string.Empty;
-            }
-            else
-            {
+            } else {
                 double percent = status.Percent.GetValueOrDefault();
                 long position = status.ActualPosition.GetValueOrDefault();
                 long length = status.Length.GetValueOrDefault();
@@ -214,15 +181,12 @@ namespace CmisSync
                 Progress += ")";
             }
 
-            if (oldStatus == Status && oldProgress == Progress)
-            {
+            if (oldStatus == Status && oldProgress == Progress) {
                 return;
             }
 
-            lock (lockController)
-            {
-                if (Controller != null)
-                {
+            lock (lockController) {
+                if (Controller != null) {
                     Controller.UpdateTransmission(this);
                     Controller.ShowTransmission(this);
                 }
@@ -230,8 +194,7 @@ namespace CmisSync
         }
     }
 
-    public class TransmissionController
-    {
+    public class TransmissionController {
         public event Action ShowWindowEvent = delegate { };
         public event Action HideWindowEvent = delegate { };
 
@@ -246,73 +209,60 @@ namespace CmisSync
         private readonly int TransmissionLimitLeast = 15;
         private HashSet<string> FullPathList = new HashSet<string>();
 
-        public TransmissionController()
-        {
+        public TransmissionController() {
             Program.Controller.ShowTransmissionWindowEvent += ShowWindow;
 
             Program.Controller.OnTransmissionListChanged += Controller_OnTransmissionListChanged;
         }
 
-        public void ShowWindow()
-        {
+        public void ShowWindow() {
             ShowWindowEvent();
         }
 
-        public void HideWindow()
-        {
+        public void HideWindow() {
             HideWindowEvent();
         }
 
-        public void UpdateTransmission(TransmissionItem item)
-        {
+        public void UpdateTransmission(TransmissionItem item) {
             UpdateTransmissionEvent(item);
         }
 
-        public void ShowTransmissionList()
-        {
+        public void ShowTransmissionList() {
             ShowTransmissionListEvent();
         }
 
-        public void ShowTransmission(TransmissionItem item)
-        {
+        public void ShowTransmission(TransmissionItem item) {
             ShowTransmissionEvent(item);
         }
 
-        public class TransmissionCompare : IComparer<TransmissionItem>
-        {
-            public int Compare(TransmissionItem x, TransmissionItem y)
-            {
-                if (x.Done != y.Done)
-                {
+        public class TransmissionCompare : IComparer<TransmissionItem> {
+            public int Compare(TransmissionItem x, TransmissionItem y) {
+                if (x.Done != y.Done) {
                     return x.Done ? 1 : -1;
                 }
 
-                if (x.UpdateTime == y.UpdateTime)
-                {
+                if (x.UpdateTime == y.UpdateTime) {
                     return 0;
                 }
-                if (x.UpdateTime > y.UpdateTime)
-                {
+
+                if (x.UpdateTime > y.UpdateTime) {
                     return -1;
                 }
+
                 return 1;
             }
         }
 
-        private void Controller_OnTransmissionListChanged()
-        {
+        private void Controller_OnTransmissionListChanged() {
             int transmissionLimit = ConfigManager.CurrentConfig.TransmissionLimit;
-            if (transmissionLimit < TransmissionLimitLeast)
-            {
+            if (transmissionLimit < TransmissionLimitLeast) {
                 transmissionLimit = TransmissionLimitLeast;
             }
 
             List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
-            foreach (FileTransmissionEvent transmission in transmissions)
-            {
+            foreach (FileTransmissionEvent transmission in transmissions) {
                 string fullPath = transmission.Path;
-                if (FullPathList.Contains(fullPath))
-                {
+                if (FullPathList.Contains(fullPath)) {
                     continue;
                 }
 
@@ -325,16 +275,14 @@ namespace CmisSync
                 item.Controller = this;
             }
 
-            if (FullPathList.Count > transmissionLimit)
-            {
+            if (FullPathList.Count > transmissionLimit) {
                 TransmissionList.Sort(new TransmissionCompare());
-                for (int i = FullPathList.Count - 1; i >= 0 && TransmissionList.Count > transmissionLimit; --i)
-                {
+                for (int i = FullPathList.Count - 1; i >= 0 && TransmissionList.Count > transmissionLimit; --i) {
                     TransmissionItem item = TransmissionList[i];
-                    if (!item.Done)
-                    {
+                    if (!item.Done) {
                         break;
                     }
+
                     //  un-register TransmissionController.UpdateTransmissionEvent
                     item.Controller = null;
 

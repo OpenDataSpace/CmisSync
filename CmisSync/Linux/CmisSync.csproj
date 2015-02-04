@@ -122,6 +122,9 @@
     <Compile Include="gtk-gui\CmisSync.Setting.cs" />
     <Compile Include="ClientBrand.cs" />
     <Compile Include="RepositoryMenuItem.cs" />
+    <Compile Include="..\TransmissionController.cs">
+      <Link>TransmissionController.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

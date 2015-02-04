@@ -18,7 +18,7 @@ namespace CmisSync
         private MenuItem separator1;
         private MenuItem separator2;
         private MenuItem statusItem;
-        private Repository repository;
+        private Repository repository { get; set; }
         private SyncStatus status;
         private bool syncRequested;
         private int changesFound;
