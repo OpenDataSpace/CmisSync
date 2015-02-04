@@ -139,7 +139,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 return CreateRemotePWCDocument(remoteDocument);
             }
 
-            if (remotePWCDocument.ChangeToken != obj.LastChangeToken) {
+            if (remotePWCDocument.ChangeToken != obj.LastChangeTokenPWC) {
                 return CreateRemotePWCDocument(remoteDocument);
             }
 
@@ -150,11 +150,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             if (TransmissionStorage == null) {
                 return;
             }
+            if (remotePWCDocument == null) {
+                return;
+            }
 
             FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument);
             obj.ChecksumAlgorithmName = "SHA-1";
             obj.RemoteObjectPWCId = remotePWCDocument.Id;
-            obj.LastChangeToken = remotePWCDocument.ChangeToken;
+            obj.LastChangeTokenPWC = remotePWCDocument.ChangeToken;
 
             TransmissionStorage.SaveObject(obj);
         }

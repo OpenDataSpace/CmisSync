@@ -112,9 +112,13 @@ namespace CmisSync.Lib.FileTransmission
                         }
 
                         result.AppendContentStream(contentStream, isLastChunk, true);
-                    } catch(FileTransmission.AbortException e) {
-                        throw;
                     } catch(Exception e) {
+                        if (e is FileTransmission.AbortException) {
+                            throw;
+                        }
+                        if (e.InnerException is FileTransmission.AbortException) {
+                            throw e.InnerException;
+                        }
                         throw new UploadFailedException(e, result);
                     }
                 }
