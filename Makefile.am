@@ -25,7 +25,13 @@ MAINTAINERCLEANFILES = \
 
 bootstrap:
 	autoreconf -f -s -i
-	nuget restore CmisSync/Linux/CmisSync.sln
+	TEMP=$(shell mktemp -u) nuget restore CmisSync/Linux/CmisSync.sln
+	mkdir -p bin
+	cp packages/NUnit.2.6.4/lib/nunit.framework.dll bin/
+	cp packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll bin/
+	cp packages/log4net.2.0.3/lib/net40-client/log4net.dll bin/
+	cp packages/DBreeze.1.61.1/lib/net45/DBreeze.dll bin/
+	cp packages/Moq.4.2.1409.1722/lib/net40/Moq.dll bin/
 
 install-exec-local:
 	$(INSTALL) -m 0755 $(JSON_PATH) $(DESTDIR)$(pkglibdir)

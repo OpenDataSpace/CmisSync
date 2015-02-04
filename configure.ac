@@ -73,31 +73,31 @@ AC_ARG_WITH([test-url],
     TEST_URL=${withval})
 AC_SUBST(TEST_URL)
 
-TEST_LOCALPATH="/localpath"
+TEST_LOCALPATH="<localpath>"
 AC_ARG_WITH([test-localpath],
     AS_HELP_STRING([--with-test-localpath=PATH],[Specify local path for testing]),
     TEST_LOCALPATH=${withval})
 AC_SUBST(TEST_LOCALPATH)
 
-TEST_REMOTEPATH="/remotepath"
+TEST_REMOTEPATH="<remotepath>"
 AC_ARG_WITH([test-remotepath],
     AS_HELP_STRING([--with-test-remotepath=PATH],[Specify remote path for testing]),
     TEST_REMOTEPATH=${withval})
 AC_SUBST(TEST_REMOTEPATH)
 
-TEST_USER="testuser"
+TEST_USER="<username>"
 AC_ARG_WITH([test-user],
     AS_HELP_STRING([--with-test-user=PATH],[Specify username for testing]),
     TEST_USER=${withval})
 AC_SUBST(TEST_USER)
 
-TEST_PASSWORD="secret"
+TEST_PASSWORD="<password>"
 AC_ARG_WITH([test-password],
     AS_HELP_STRING([--with-test-password=PATH],[Specify password for testing]),
     TEST_PASSWORD=${withval})
 AC_SUBST(TEST_PASSWORD)
 
-TEST_REPOID="1094505"
+TEST_REPOID="<repo id>"
 AC_ARG_WITH([test-repoid],
     AS_HELP_STRING([--with-test-repoid=PATH],[Specify remote repository-ID for testing]),
     TEST_REPOID=${withval})

@@ -44,8 +44,7 @@
 ]
  */
 
-namespace TestLibrary.IntegrationTests
-{
+namespace TestLibrary.IntegrationTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -76,63 +75,15 @@ namespace TestLibrary.IntegrationTests
 
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000)]
-    public class RepositoryUtilsTests : IsTestWithConfiguredLog4Net
-    {
-        private readonly string cmisSyncDir = ConfigManager.CurrentConfig.GetFoldersPath();
-
-        /// <summary>
-        /// Waits until checkStop is true or waiting duration is reached.
-        /// </summary>
-        /// <returns>
-        /// True if checkStop is true, otherwise waits for pollInterval miliseconds and checks again until the wait threshold is reached.
-        /// </returns>
-        /// <param name='checkStop'>
-        /// Checks if the condition, which is waited for is <c>true</c>.
-        /// </param>
-        /// <param name='wait'>
-        /// Waiting threshold. If this is reached, <c>false</c> will be returned.
-        /// </param>
-        /// <param name='pollInterval'>
-        /// Sleep duration between two condition validations by calling checkStop.
-        /// </param>
-        public static bool WaitUntilDone(Func<bool> checkStop, int wait = 300000, int pollInterval = 1000)
-        {
-            while (wait > 0)
-            {
-                System.Threading.Thread.Sleep(pollInterval);
-                wait -= pollInterval;
-                if (checkStop()) {
-                    return true;
-                }
-
-                Console.WriteLine(string.Format("Retry Wait in {0}ms", pollInterval));
-            }
-
-            Console.WriteLine("Wait was not successful");
-            return false;
-        }
-
+    public class RepositoryUtilsTests : IsTestWithConfiguredLog4Net {
         [TestFixtureSetUp]
-        public void ClassInit()
-        {
+        public void ClassInit() {
             // Disable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-            try {
-                File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
-            } catch (IOException) {
-            }
         }
 
         [TearDown]
-        public void TearDown()
-        {
-            foreach (string file in Directory.GetFiles(this.cmisSyncDir)) {
-                if (file.EndsWith(".cmissync"))
-                {
-                    File.Delete(file);
-                }
-            }
-
+        public void TearDown() {
             // Reanable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
@@ -148,8 +99,7 @@ namespace TestLibrary.IntegrationTests
             string repositoryId,
             string binding)
         {
-            ServerCredentials credentials = new ServerCredentials()
-            {
+            ServerCredentials credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 Binding = binding,
                 UserName = user,
@@ -158,8 +108,7 @@ namespace TestLibrary.IntegrationTests
 
             Dictionary<string, string> repos = CmisUtils.GetRepositories(credentials);
 
-            foreach (KeyValuePair<string, string> pair in repos)
-            {
+            foreach (KeyValuePair<string, string> pair in repos) {
                 Assert.That(string.IsNullOrEmpty(pair.Key), Is.False);
                 Assert.That(string.IsNullOrEmpty(pair.Value), Is.False);
             }
@@ -168,10 +117,8 @@ namespace TestLibrary.IntegrationTests
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(60000)]
-        public void GetRepositoriesFuzzy(string url, string user, string password)
-        {
-            ServerCredentials credentials = new ServerCredentials()
-            {
+        public void GetRepositoriesFuzzy(string url, string user, string password) {
+            ServerCredentials credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 UserName = user,
                 Password = password
