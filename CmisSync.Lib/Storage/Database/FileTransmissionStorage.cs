@@ -29,24 +29,25 @@ namespace CmisSync.Lib.Storage.Database {
     public class FileTransmissionStorage : IFileTransmissionStorage {
         private static readonly string FileTransmissionObjectsTable = "FileTransmissionObjects";
 
-        private DBreezeEngine Engine;
+        private DBreezeEngine engine;
 
         static FileTransmissionStorage() {
             DBreezeInitializerSingleton.Init();
         }
 
+        [CLSCompliant(false)]
         public FileTransmissionStorage(DBreezeEngine engine) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
 
-            Engine = engine;
+            this.engine = engine;
         }
 
         public IList<IFileTransmissionObject> GetObjectList() {
             List<IFileTransmissionObject> objects = new List<IFileTransmissionObject>();
 
-            using (var tran = Engine.GetTransaction()) {
+            using (var tran = this.engine.GetTransaction()) {
                 foreach (var row in tran.SelectForward<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable)) {
                     var value = row.Value;
                     if (value == null) {
@@ -90,14 +91,14 @@ namespace CmisSync.Lib.Storage.Database {
                 throw new ArgumentException("require FileTransmissionObject type", "obj");
             }
 
-            using (var tran = Engine.GetTransaction()) {
+            using (var tran = this.engine.GetTransaction()) {
                 tran.Insert<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, obj.RemoteObjectId, obj as FileTransmissionObject);
                 tran.Commit();
             }
         }
 
         public IFileTransmissionObject GetObjectByRemoteObjectId(string remoteObjectId) {
-            using (var tran = Engine.GetTransaction()) {
+            using (var tran = this.engine.GetTransaction()) {
                 DbCustomSerializer<FileTransmissionObject> value = tran.Select<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable, remoteObjectId).Value;
                 if (value == null) {
                     return null;
@@ -116,14 +117,14 @@ namespace CmisSync.Lib.Storage.Database {
                 throw new ArgumentException("empty string", "remoteObjectId");
             }
 
-            using (var tran = Engine.GetTransaction()) {
+            using (var tran = this.engine.GetTransaction()) {
                 tran.RemoveKey(FileTransmissionObjectsTable, remoteObjectId);
                 tran.Commit();
             }
         }
 
         public void ClearObjectList() {
-            using (var tran = Engine.GetTransaction()) {
+            using (var tran = this.engine.GetTransaction()) {
                 tran.RemoveAllKeys(FileTransmissionObjectsTable, true);
                 tran.Commit();
             }

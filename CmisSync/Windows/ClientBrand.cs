@@ -17,25 +17,24 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
     using System.Collections.Generic;
 
     using CmisSync.Lib;
 
-    class ClientBrand : ClientBrandBase
-    {
-        public override List<string> GetPathList()
-        {
-            List<string> pathList = new List<string>();
-            pathList.Add("/branding/DataSpaceSync/common/about.png");
-            pathList.Add("/branding/DataSpaceSync/common/about@2x.png");
-            pathList.Add("/branding/DataSpaceSync/common/side-splash.png");
-            pathList.Add("/branding/DataSpaceSync/common/side-splash@2x.png");
-            pathList.Add("/branding/DataSpaceSync/windows/app.ico");
-            pathList.Add("/branding/DataSpaceSync/windows/folder.ico");
-            return pathList;
+    class ClientBrand : ClientBrandBase {
+        public override List<string> PathList {
+            get {
+                List<string> pathList = new List<string>();
+                pathList.Add("/branding/DataSpaceSync/common/about.png");
+                pathList.Add("/branding/DataSpaceSync/common/about@2x.png");
+                pathList.Add("/branding/DataSpaceSync/common/side-splash.png");
+                pathList.Add("/branding/DataSpaceSync/common/side-splash@2x.png");
+                pathList.Add("/branding/DataSpaceSync/windows/app.ico");
+                pathList.Add("/branding/DataSpaceSync/windows/folder.ico");
+                return pathList;
+            }
         }
     }
 }

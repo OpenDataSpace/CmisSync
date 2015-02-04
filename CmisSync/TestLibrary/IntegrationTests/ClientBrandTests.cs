@@ -65,7 +65,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Test CMIS server connection
         /// </summary>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Erratic")]
         public void TestServer(
             string canonical_name,
             string localPath,
@@ -91,7 +91,7 @@ namespace TestLibrary.IntegrationTests {
         /// <summary>
         /// Test Client Brand
         /// </summary>
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Erratic")]
         public void TestClientBrand(
             string canonical_name,
             string localPath,
@@ -113,7 +113,7 @@ namespace TestLibrary.IntegrationTests {
 
             Assert.That(underTest.SetupServer(credentials), Is.True);
 
-            foreach (string path in underTest.GetPathList()) {
+            foreach (string path in underTest.PathList) {
                 DateTime date;
                 Assert.That(underTest.GetFileDateTime(path, out date), Is.True);
                 using (var stream = new MemoryStream()) {
@@ -123,8 +123,7 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        internal class ClientBrand : ClientBrandBase
-        {
+        internal class ClientBrand : ClientBrandBase {
             private string repoName;
             private IRepository repository;
             private ISession session;
@@ -133,8 +132,7 @@ namespace TestLibrary.IntegrationTests {
             private List<string> nameList = new List<string>() { "TestFile0", "TestFile1" };
             private List<string> pathList = new List<string>();
 
-            public ClientBrand(ServerCredentials credentials, string repositoryId, string remoteFolderPath)
-            {
+            public ClientBrand(ServerCredentials credentials, string repositoryId, string remoteFolderPath) {
                 Dictionary<string, string> parameters = CmisUtils.GetCmisParameters(credentials);
                 ISessionFactory factory = SessionFactory.NewInstance();
                 IList<IRepository> repos = factory.GetRepositories(parameters);
@@ -167,16 +165,19 @@ namespace TestLibrary.IntegrationTests {
                 this.DeleteFiles();
             }
 
-            public override List<string> GetPathList() {
-                return new List<string>(this.pathList);
+            public override List<string> PathList {
+                get {
+                    return new List<string>(this.pathList);
+                }
             }
 
-            public override string GetRepoName() {
-                return this.repoName;
+            protected override string RepoName {
+                get {
+                    return this.repoName;
+                }
             }
 
-            private void DeleteFiles()
-            {
+            private void DeleteFiles() {
                 foreach (string path in this.pathList) {
                     try {
                         IDocument doc = this.session.GetObjectByPath(path) as IDocument;

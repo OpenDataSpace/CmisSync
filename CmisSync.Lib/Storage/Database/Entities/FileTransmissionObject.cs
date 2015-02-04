@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database.Entities
-{
+namespace CmisSync.Lib.Storage.Database.Entities {
     using System;
     using System.IO;
     using System.Linq;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     /// Implementation of <c>IFileTransmissionObject</c>
     /// </summary>
     [Serializable]
-    public class FileTransmissionObject : IFileTransmissionObject
-    {
+    public class FileTransmissionObject : IFileTransmissionObject {
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/> class.
@@ -41,8 +39,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// <param name="type">Type of transmission.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteFile">Remote file.</param>
-        public FileTransmissionObject(FileTransmissionType type, IFileInfo localFile, IDocument remoteFile)
-        {
+        public FileTransmissionObject(FileTransmissionType type, IFileInfo localFile, IDocument remoteFile) {
             if (localFile == null) {
                 throw new ArgumentNullException("localFile");
             }
@@ -89,8 +86,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// <param name="obj">The <see cref="System.Object"/> to compare with the current <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/>.</param>
         /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
         /// <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/>; otherwise, <c>false</c>.</returns>
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             if (obj == null) {
                 return false;
             }
@@ -113,6 +109,21 @@ namespace CmisSync.Lib.Storage.Database.Entities
                     object.Equals(this.RemoteObjectId, o.RemoteObjectId) &&
                     object.Equals(this.LastChangeToken, o.LastChangeToken) &&
                     object.Equals(this.LastRemoteWriteTimeUtc, o.LastRemoteWriteTimeUtc);
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/> object.
+        /// </summary>
+        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
+        /// hash table.</returns>
+        public override int GetHashCode() {
+            int localPath = (this.LocalPath ?? string.Empty).GetHashCode();
+            int checksumName = (this.ChecksumAlgorithmName ?? string.Empty).GetHashCode();
+            int lastlocalwritetime = this.LastLocalWriteTimeUtc.GetValueOrDefault().GetHashCode();
+            int remoteId = (this.RemoteObjectId ?? string.Empty).GetHashCode();
+            int changeToken = (this.LastChangeToken ?? string.Empty).GetHashCode();
+            int lastremotewritetime = this.LastRemoteWriteTimeUtc.GetValueOrDefault().GetHashCode();
+            return localPath ^ checksumName ^ lastlocalwritetime ^ remoteId ^ changeToken ^ lastremotewritetime;
         }
 
         /// <summary>
