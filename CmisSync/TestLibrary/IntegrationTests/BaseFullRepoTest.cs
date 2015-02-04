@@ -51,7 +51,7 @@ namespace TestLibrary.IntegrationTests {
     using TestLibrary.TestUtils;
 
     [TestFixture, Timeout(900000)]
-    public abstract class BaseFullRepoTest : IsTestWithConfiguredLog4Net {
+    public abstract class BaseFullRepoTest : IsTestWithConfiguredLog4Net, IDisposable {
         protected RepoInfo repoInfo;
         protected DirectoryInfo localRootDir;
         protected IFolder remoteRootDir;
@@ -62,16 +62,28 @@ namespace TestLibrary.IntegrationTests {
         private static dynamic config;
         private string subfolder;
         private bool contentChanges;
+        private bool disposed = false;
+
+        ~BaseFullRepoTest() {
+            this.Dispose(false);
+        }
+
         protected bool ContentChangesActive {
             get {
                 return this.contentChanges;
             }
+
             set {
                 this.contentChanges = value;
                 if (value) {
                     this.EnsureThatContentChangesAreSupported();
                 }
             }
+        }
+
+        public void Dispose() {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         [TestFixtureSetUp]
@@ -157,6 +169,7 @@ namespace TestLibrary.IntegrationTests {
             } catch (InvalidDataException e) {
                 repoDBException = e;
             }
+
             this.repo.Dispose();
             if (this.localRootDir.Exists) {
                 this.localRootDir.Delete(true);
@@ -200,6 +213,40 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
+        protected void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
+            if (msg != null) {
+                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
+            } else {
+                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds);
+            }
+        }
+
+        protected void InitializeAndRunRepo(bool swallowExceptions = false) {
+            this.repo.Initialize();
+            this.repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
+            this.repo.Run();
+        }
+
+        protected void AddStartNextSyncEvent(bool forceCrawl = false) {
+            if (!this.ContentChangesActive) {
+                forceCrawl = true;
+            }
+
+            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(forceCrawl));
+        }
+
+        protected virtual void Dispose(bool disposing) {
+            if (this.disposed) {
+                return;
+            }
+
+            if (disposing) {
+                this.repo.Dispose();
+            }
+
+            this.disposed = true;
+        }
+
         protected class BlockingSingleConnectionScheduler : CmisSync.Lib.Queueing.ConnectionScheduler {
             public BlockingSingleConnectionScheduler(ConnectionScheduler original) : base(original) {
             }
@@ -236,28 +283,6 @@ namespace TestLibrary.IntegrationTests {
                 this.Queue.EventManager.RemoveEventHandler(this.Scheduler);
                 this.Scheduler.Stop();
             }
-        }
-
-        protected void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
-            if (msg != null) {
-                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
-            } else {
-                Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds);
-            }
-        }
-
-        protected void InitializeAndRunRepo(bool swallowExceptions = false) {
-            this.repo.Initialize();
-            this.repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
-            this.repo.Run();
-        }
-
-        protected void AddStartNextSyncEvent(bool forceCrawl = false) {
-            if (!this.ContentChangesActive) {
-                forceCrawl = true;
-            }
-
-            this.repo.SingleStepQueue.AddEvent(new StartNextSyncEvent(forceCrawl));
         }
     }
 }

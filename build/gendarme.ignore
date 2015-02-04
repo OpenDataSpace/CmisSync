@@ -102,12 +102,13 @@ T: CmisSync.Lib.Cmis.UiUtils.CmisUtils/NodeTree
 #Ignore DoNotHardCodePaths
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 T: TestLibrary.ConfigTests.RepoInfoTests
+T: CmisSync.ClientBrand 
 # Install dir
 T: CmisSync.Controller
 
 # Test for Events which have nested exceptions
 R: Gendarme.Rules.BadPractice.CheckNewExceptionWithoutThrowingRule
-T: TestLibrary.EventsTests.EventsFilterTests.GenericHandleDublicatedEventsFilterTest
+T: TestLibrary.FilterTests.GenericHandleDublicatedEventsFilterTest
 
 # Ignore disturbing Rule
 R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
@@ -119,3 +120,8 @@ M: System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`
 M: System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>> CmisSync.Lib.Storage.Database.ObjectTree`1::get_Children()
 M: System.Void CmisSync.Lib.Storage.Database.ObjectTree`1::set_Children(System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>>)
 M: CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject> CmisSync.Lib.Producer.Crawler.DescendantsCrawler::GetRemoteDirectoryTree(DotCMIS.Client.IFolder,System.Collections.Generic.IList`1<DotCMIS.Client.ITree`1<DotCMIS.Client.IFileableCmisObject>>,CmisSync.Lib.Filter.IFilterAggregator)
+M: System.IDisposable CmisSync.Lib.Queueing.SyncEventQueue::Subscribe(System.IObserver`1<System.Tuple`2<System.String,System.Int32>>)
+
+# TryParseRule should not give any warning in test library
+R: Gendarme.Rules.BadPractice.PreferTryParseRule
+A: TestLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null

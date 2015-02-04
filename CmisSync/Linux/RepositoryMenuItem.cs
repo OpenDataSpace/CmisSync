@@ -15,6 +15,8 @@ namespace CmisSync
         private ImageMenuItem removeFolderFromSyncItem;
         private ImageMenuItem suspendItem;
         private ImageMenuItem editItem;
+        private MenuItem separator1;
+        private MenuItem separator2;
         private MenuItem statusItem;
         private Repository repository;
         private SyncStatus status;
@@ -22,6 +24,7 @@ namespace CmisSync
         private int changesFound;
         private DateTime? changesFoundAt;
         private object counterLock = new object();
+        private bool disposed = false;
 
         public RepositoryMenuItem(Repository repo, StatusIconController controller) : base(repo.Name) {
             this.SetProperty("always-show-image", new GLib.Value(true));
@@ -53,14 +56,16 @@ namespace CmisSync
                 Image = new Image(UIHelpers.GetIcon("dataspacesync-deleted", 12))
             };
             this.removeFolderFromSyncItem.Activated += this.RemoveFolderFromSyncDelegate();
+            this.separator1 = new SeparatorMenuItem();
+            this.separator2 = new SeparatorMenuItem();
 
             var subMenu = new Menu();
             subMenu.Add(this.statusItem);
-            subMenu.Add(new SeparatorMenuItem());
+            subMenu.Add(this.separator1);
             subMenu.Add(this.openLocalFolderItem);
             subMenu.Add(this.suspendItem);
             subMenu.Add(this.editItem);
-            subMenu.Add(new SeparatorMenuItem());
+            subMenu.Add(this.separator2);
             subMenu.Add(this.removeFolderFromSyncItem);
             this.Submenu = subMenu;
 
@@ -167,6 +172,60 @@ namespace CmisSync
 
                 this.UpdateStatusText();
             }
+        }
+
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.RepositoryMenuItem"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.RepositoryMenuItem"/>. The
+        /// <see cref="Dispose"/> method leaves the <see cref="CmisSync.RepositoryMenuItem"/> in an unusable state.
+        /// After calling <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.RepositoryMenuItem"/> so the garbage collector can reclaim the memory that the
+        /// <see cref="CmisSync.RepositoryMenuItem"/> was occupying.</remarks>
+        public void Dispose() {
+            this.Dispose(true);
+        }
+
+        /// <summary>
+        /// Dispose the specified Menu Item.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing.</param>
+        public void Dispose(bool disposing) {
+            if (this.disposed) {
+                return;
+            }
+
+            if (disposing) {
+                if (this.editItem != null) {
+                    this.editItem.Dispose();
+                }
+
+                if (this.statusItem != null) {
+                    this.statusItem.Dispose();
+                }
+
+                if (this.suspendItem != null) {
+                    this.suspendItem.Dispose();
+                }
+
+                if (this.openLocalFolderItem != null) {
+                    this.openLocalFolderItem.Dispose();
+                }
+
+                if (this.separator1 != null) {
+                    this.separator1.Dispose();
+                }
+
+                if (this.separator2 != null) {
+                    this.separator2.Dispose();
+                }
+
+                if (this.removeFolderFromSyncItem != null) {
+                    this.removeFolderFromSyncItem.Dispose();
+                }
+            }
+
+            this.disposed = true;
         }
 
         private void UpdateStatusText() {

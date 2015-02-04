@@ -17,14 +17,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Widgets
-{
+namespace CmisSync.Widgets {
     using System;
     using System.Text.RegularExpressions;
 
     [System.ComponentModel.ToolboxItem(true)]
-    public partial class UrlWidget : Gtk.Bin
-    {
+    public partial class UrlWidget : Gtk.Bin {
         private bool isValidUrl = true;
 
         private static Gdk.Color RED;
@@ -52,8 +50,7 @@ namespace CmisSync.Widgets
 
         public event EventHandler Changed;
 
-        public UrlWidget(bool urlValidation = true)
-        {
+        public UrlWidget(bool urlValidation = true) {
             this.Build();
             this.IsUrlEditable = true;
             this.ValidationActivated = urlValidation;
@@ -112,8 +109,9 @@ namespace CmisSync.Widgets
 
         private void UrlChanged(object sender, EventArgs args) {
             this.ValidateUrl(sender, args);
-            if (this.Changed != null) {
-                this.Changed(this, args);
+            var handler = this.Changed;
+            if (handler != null) {
+                handler(this, args);
             }
         }
     }
