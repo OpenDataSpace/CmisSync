@@ -196,7 +196,10 @@ namespace CmisSync
             }
 
             Application.Invoke(delegate {
-                (this.statusItem.Child as Label).Text = message;
+                try {
+                    (this.statusItem.Child as Label).Text = message;
+                } catch(NullReferenceException) {
+                }
             });
         }
     }
