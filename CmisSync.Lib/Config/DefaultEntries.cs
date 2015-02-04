@@ -16,13 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Configuration;
 
-    public class DefaultEntries
-    {
+    public class DefaultEntries {
         private static DefaultEntries defaults;
 
         /// <summary>
@@ -30,6 +28,7 @@ namespace CmisSync.Lib.Config
         /// </summary>
         private static object configlock = new object();
         private KeyValueConfigurationCollection loadedDefaultConfig;
+
         private DefaultEntries() {
             Configuration exeConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
             this.loadedDefaultConfig = exeConfig.AppSettings.Settings;

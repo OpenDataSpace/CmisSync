@@ -17,14 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests.DataBaseTests
-{
+namespace TestLibrary.StorageTests.DataBaseTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DBreeze;
     using DBreeze.DataTypes;
@@ -35,7 +34,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
 
     using NUnit.Framework;
 
-    public class DBreezeTests {
+    public class DBreezeTests : IDisposable {
         private DBreezeEngine engine = null;
         private string path = null;
         private Mock<IFileInfo> file = null;
@@ -63,6 +62,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
         [TearDown]
         public void TearDown() {
             this.engine.Dispose();
+            this.engine = null;
             if (Directory.Exists(this.path)) {
                 Directory.Delete(this.path, true);
             }
@@ -70,8 +70,7 @@ namespace TestLibrary.StorageTests.DataBaseTests
 
         [Test, Category("Fast"), Category("IT")]
         public void InsertInteger() {
-            using (var tran = this.engine.GetTransaction())
-            {
+            using (var tran = this.engine.GetTransaction()) {
                 tran.Insert<int, int>("t1", 1, 2);
                 tran.Commit();
                 Assert.AreEqual(2, tran.Select<int, int>("t1", 1).Value);
@@ -130,6 +129,15 @@ namespace TestLibrary.StorageTests.DataBaseTests
                 Assert.That((tran.Select<string, DbCustomSerializer<FileTransmissionObject>>("objects", key).Value.Get as FileTransmissionObject).Equals(data));
             }
         }
+
+        #region builerplatecode
+        public void Dispose() {
+            if (this.engine != null) {
+                this.engine.Dispose();
+                this.engine = null;
+            }
+        }
+        #endregion
 
         [Serializable]
         public class TestClass {

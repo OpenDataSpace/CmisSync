@@ -33,6 +33,7 @@ M: System.Void CmisSync.CmisSyncMenuItem::.ctor(System.String)
 R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 M: System.Void CmisSync.UI::.cctor()
 M: System.Void TestLibrary.PathMatcherTests.PathMatcherTest::SetUp()
+M: TestLibrary.ConfigTests::TestBrand()
 T: TestLibrary.EventsTests.EventsFilterTests.IgnoredFolderNamesFilterTest
 
 #Required to be type long for error code

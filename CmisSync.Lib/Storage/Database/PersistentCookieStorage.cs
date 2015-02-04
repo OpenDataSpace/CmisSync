@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Net;
 
@@ -28,13 +27,11 @@ namespace CmisSync.Lib.Storage.Database
     /// <summary>
     /// Persistent cookie storage. Saves the cookie collection into the given dbreeze instance
     /// </summary>
-    public class PersistentCookieStorage : ICookieStorage
-    {
+    public class PersistentCookieStorage : ICookieStorage {
         private static readonly string CookieTable = "cookies";
         private DBreezeEngine db;
 
-        static PersistentCookieStorage()
-        {
+        static PersistentCookieStorage() {
             DBreezeInitializerSingleton.Init();
         }
 
@@ -45,8 +42,7 @@ namespace CmisSync.Lib.Storage.Database
         /// DBreeze engine instance to be used for saving collection.
         /// </param>
         [CLSCompliant(false)]
-        public PersistentCookieStorage(DBreezeEngine db)
-        {
+        public PersistentCookieStorage(DBreezeEngine db) {
             if (db == null) {
                 throw new ArgumentNullException("Given db engine is null");
             }
@@ -60,15 +56,11 @@ namespace CmisSync.Lib.Storage.Database
         /// <value>
         /// The cookies.
         /// </value>
-        public CookieCollection Cookies
-        {
-            get
-            {
+        public CookieCollection Cookies {
+            get {
                 CookieCollection cookies = new CookieCollection();
-                using (var tran = this.db.GetTransaction())
-                {
-                    foreach (var row in tran.SelectForward<int, DbCustomSerializer<Cookie>>(CookieTable))
-                    {
+                using (var tran = this.db.GetTransaction()) {
+                    foreach (var row in tran.SelectForward<int, DbCustomSerializer<Cookie>>(CookieTable)) {
                         var value = row.Value;
                         if (value == null) {
                             continue;
@@ -88,16 +80,13 @@ namespace CmisSync.Lib.Storage.Database
                 return cookies;
             }
 
-            set
-            {
-                using (var tran = this.db.GetTransaction())
-                {
+            set {
+                using (var tran = this.db.GetTransaction()) {
                     if (value == null) {
                         tran.RemoveAllKeys(CookieTable, false);
                     } else {
                         int i = 0;
-                        foreach(Cookie cookie in value)
-                        {
+                        foreach(Cookie cookie in value) {
                             if (!cookie.Expired) {
                                 tran.Insert<int, DbCustomSerializer<Cookie>>(CookieTable, i, cookie);
                             }
