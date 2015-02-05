@@ -190,7 +190,7 @@ namespace TestLibrary.QueueingTests {
                     }
 
                     queue.StopListener();
-                    WaitFor(queue, (q) => { return q.IsStopped; }, events * 20 + 1000);
+                    WaitFor(queue, (q) => { return q.IsStopped; }, events * 20 + 5000);
                     queue.Dispose();
                 }
 
@@ -217,7 +217,7 @@ namespace TestLibrary.QueueingTests {
                     }
 
                     queue.StopListener();
-                    WaitFor(queue, (q) => { return q.IsStopped; }, events * 20 + 1000);
+                    WaitFor(queue, (q) => { return q.IsStopped; }, events * 20 + 5000);
                     queue.Dispose();
                 }
 
