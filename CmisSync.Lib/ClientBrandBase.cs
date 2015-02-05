@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib
-{
+namespace CmisSync.Lib {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -36,43 +35,24 @@ namespace CmisSync.Lib
     /// The Base Class (template) for Client Brand support, based on CMIS
     /// The client code should derive from this class to support client brand
     /// </summary>
-    public abstract class ClientBrandBase
-    {
+    public abstract class ClientBrandBase {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ClientBrandBase));
-
+        private static readonly string DefaultRepoName = "config";
         private ISession session;
 
         /// <summary>
-        /// Get path list for the client brand files in CMIS server
+        /// Gets path list for the client brand files in CMIS server
         /// </summary>
         /// <returns>Path list for the client brand files</returns>
-        public abstract List<string> GetPathList();
+        public abstract List<string> PathList { get; }
 
         /// <summary>
-        /// Get the CMIS repository name, which holds the client brand files in CMIS server
+        /// Gets the CMIS repository name, which holds the client brand files in CMIS server
         /// </summary>
         /// <returns>the CMIS repository name</returns>
-        public virtual string GetRepoName()
-        {
-            return "config";
-        }
-
-        private IRepository GetRepo(ServerCredentials credentials)
-        {
-            Dictionary<string, string> parameters = CmisUtils.GetCmisParameters(credentials);
-            try {
-                ISessionFactory factory = SessionFactory.NewInstance();
-                IList<IRepository> repos = factory.GetRepositories(parameters);
-                foreach (IRepository repo in repos) {
-                    if (repo.Name == GetRepoName()) {
-                        return repo;
-                    }
-                }
-
-                return null;
-            } catch (Exception e) {
-                Logger.Debug(e.Message);
-                return null;
+        protected virtual string RepoName {
+            get {
+                return DefaultRepoName;
             }
         }
 
@@ -81,8 +61,7 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="credentials"></param>
         /// <returns>Whether the CMIS server holds the client brand files</returns>
-        public bool TestServer(ServerCredentials credentials)
-        {
+        public bool TestServer(ServerCredentials credentials) {
             IRepository repo = this.GetRepo(credentials);
             if (repo == null) {
                 return false;
@@ -90,7 +69,7 @@ namespace CmisSync.Lib
 
             try {
                 ISession session = repo.CreateSession();
-                foreach (string path in this.GetPathList()) {
+                foreach (string path in this.PathList) {
                     try {
                         IDocument doc = session.GetObjectByPath(path) as IDocument;
                         if (doc == null) {
@@ -114,8 +93,7 @@ namespace CmisSync.Lib
         /// </summary>
         /// <param name="credentials"></param>
         /// <returns>Whether the CMIS server is setup</returns>
-        public bool SetupServer(ServerCredentials credentials)
-        {
+        public bool SetupServer(ServerCredentials credentials) {
             if (!this.TestServer(credentials)) {
                 return false;
             }
@@ -140,8 +118,7 @@ namespace CmisSync.Lib
         /// <param name="pathname">Client brand file path</param>
         /// <param name="date">The DateTime for the client brand file</param>
         /// <returns>Whether to get the DateTime for the cilent brand file</returns>
-        public bool GetFileDateTime(string pathname, out DateTime date)
-        {
+        public bool GetFileDateTime(string pathname, out DateTime date) {
             date = DateTime.Now;
 
             if (this.session == null) {
@@ -168,8 +145,7 @@ namespace CmisSync.Lib
         /// <param name="pathname">Client brand file path</param>
         /// <param name="output">Stream to hold the client brand file</param>
         /// <returns>Whether to get the content for the client brand file</returns>
-        public bool GetFile(string pathname, Stream output)
-        {
+        public bool GetFile(string pathname, Stream output) {
             if (this.session == null) {
                 return false;
             }
@@ -190,6 +166,24 @@ namespace CmisSync.Lib
             } catch (Exception e) {
                 Logger.Debug(e.Message);
                 return false;
+            }
+        }
+
+        private IRepository GetRepo(ServerCredentials credentials) {
+            Dictionary<string, string> parameters = CmisUtils.GetCmisParameters(credentials);
+            try {
+                ISessionFactory factory = SessionFactory.NewInstance();
+                IList<IRepository> repos = factory.GetRepositories(parameters);
+                foreach (IRepository repo in repos) {
+                    if (repo.Name == this.RepoName) {
+                        return repo;
+                    }
+                }
+
+                return null;
+            } catch (Exception e) {
+                Logger.Debug(e.Message);
+                return null;
             }
         }
     }

@@ -52,14 +52,17 @@ namespace CmisSync {
 
     using Mono.Unix;
 
-    public class StatusIcon {
+    public class StatusIcon : IDisposable {
         public StatusIconController Controller = new StatusIconController();
 
         private Gdk.Pixbuf[] animationFrames;
 
         private Menu menu;
         private MenuItem quitItem;
-        private List<RepositoryMenuItem> repoItems;
+        private List<RepositoryMenuItem> repoItems = new List<RepositoryMenuItem>();
+
+        bool disposed = false;
+
         private bool isHandleCreated = false;
 
 #if HAVE_APP_INDICATOR
@@ -149,7 +152,12 @@ namespace CmisSync {
 
         public void CreateMenu() {
             this.menu = new Menu();
-            this.repoItems = new List<RepositoryMenuItem>();
+            if (this.repoItems != null) {
+                foreach(var repoItem in this.repoItems) {
+                    repoItem.Dispose();
+                }
+            }
+            this.repoItems.Clear();
 
             // Folders Menu
             if (this.Controller.Folders.Length > 0) {
@@ -234,6 +242,34 @@ namespace CmisSync {
             Gtk.StatusIcon.PositionMenu(menu, out x, out y, out push_in, this.statusIcon.Handle);
         }
 #endif
+
+        public void Dispose() {
+            if (this.disposed) {
+                return;
+            }
+
+            if (this.repoItems != null) {
+                foreach(var repoItem in this.repoItems) {
+                    repoItem.Dispose();
+                }
+            }
+
+            if (this.menu != null) {
+                this.menu.Dispose();
+            }
+
+            if (this.quitItem != null) {
+                this.quitItem.Dispose();
+            }
+
+            #if HAVE_APP_INDICATOR
+            if (this.indicator != null) {
+                this.indicator.Dispose();
+            }
+            #endif
+
+            this.disposed = true;
+        }
     }
 
     [CLSCompliant(false)]

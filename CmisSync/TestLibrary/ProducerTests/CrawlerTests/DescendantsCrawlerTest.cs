@@ -16,8 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace TestLibrary.ProducerTests.CrawlerTests
-{
+
+namespace TestLibrary.ProducerTests.CrawlerTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -47,8 +47,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
     using TestUtils;
 
     [TestFixture]
-    public class DescendantsCrawlerTest
-    {
+    public class DescendantsCrawlerTest : IDisposable {
         private readonly string remoteRootId = "rootId";
         private readonly string remoteRootPath = "/";
         private readonly Guid rootGuid = Guid.NewGuid();
@@ -66,16 +65,14 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         private Mock<IActivityListener> listener;
 
         [TestFixtureSetUp]
-        public void InitCustomSerializator()
-        {
+        public void InitCustomSerializator() {
             // Use Newtonsoft.Json as Serializator
             DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
         [SetUp]
-        public void CreateMockObjects()
-        {
+        public void CreateMockObjects() {
             this.storageEngine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
             this.localRootPath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             this.matcher = new PathMatcher(this.localRootPath, this.remoteRootPath);
@@ -105,58 +102,51 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.listener = new Mock<IActivityListener>();
         }
 
-        [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfLocalFolderIsNull()
-        {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), null, Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>());
+        [TearDown]
+        public void TearDownStorage() {
+            this.storageEngine.Dispose();
+            this.storageEngine = null;
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfRemoteFolderIsNull()
-        {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>());
+        public void ConstructorThrowsExceptionIfLocalFolderIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), null, Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>()));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfQueueIsNull()
-        {
-            new DescendantsCrawler(null, Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>());
+        public void ConstructorThrowsExceptionIfRemoteFolderIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>()));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfStorageIsNull()
-        {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), null, this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>());
+        public void ConstructorThrowsExceptionIfQueueIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new DescendantsCrawler(null, Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>()));
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfListenerIsNull()
-        {
-            new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, null, Mock.Of<IIgnoredEntitiesStorage>());
+        public void ConstructorThrowsExceptionIfStorageIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), null, this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>()));
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWorksWithoutFsInfoFactory()
-        {
+        public void ConstructorThrowsExceptionIfListenerIsNull() {
+            Assert.Throws<ArgumentNullException>(() => new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), Mock.Of<IFolder>(), Mock.Of<IDirectoryInfo>(), Mock.Of<IMetaDataStorage>(), this.filter, null, Mock.Of<IIgnoredEntitiesStorage>()));
+        }
+
+        [Test, Category("Fast")]
+        public void ConstructorWorksWithoutFsInfoFactory() {
             var localFolder = Mock.Of<IDirectoryInfo>(p => p.FullName == this.localRootPath);
             var remoteFolder = Mock.Of<IFolder>(p => p.Path == this.remoteRootPath);
             new DescendantsCrawler(Mock.Of<ISyncEventQueue>(), remoteFolder, localFolder, Mock.Of<IMetaDataStorage>(), this.filter, this.listener.Object, Mock.Of<IIgnoredEntitiesStorage>());
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTakesFsInfoFactory()
-        {
+        public void ConstructorTakesFsInfoFactory() {
             this.CreateCrawler();
         }
 
         [Test, Category("Fast")]
-        public void PriorityIsNormal()
-        {
+        public void PriorityIsNormal() {
             var crawler = this.CreateCrawler();
             Assert.That(crawler.Priority == EventHandlerPriorities.NORMAL);
         }
@@ -171,8 +161,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void HandlesStartNextSyncEventAndReportsOnQueueIfDone()
-        {
+        public void HandlesStartNextSyncEventAndReportsOnQueueIfDone() {
             var crawler = this.CreateCrawler();
             var startEvent = new StartNextSyncEvent();
             Assert.That(crawler.Handle(startEvent), Is.True);
@@ -181,8 +170,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteFolderAdded()
-        {
+        public void OneRemoteFolderAdded() {
             IFolder newRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("id", "name", "/name", this.remoteRootId).Object;
             this.remoteFolder.SetupDescendants(newRemoteFolder);
             var crawler = this.CreateCrawler();
@@ -193,8 +181,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteFileAdded()
-        {
+        public void OneRemoteFileAdded() {
             IDocument newRemoteDocument = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "id", "name", this.remoteRootId).Object;
             this.remoteFolder.SetupDescendants(newRemoteDocument);
             var crawler = this.CreateCrawler();
@@ -206,8 +193,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteFileRemoved()
-        {
+        public void OneRemoteFileRemoved() {
             Guid fileGuid = Guid.NewGuid();
             DateTime modificationDate = DateTime.UtcNow;
             MappedObject obj = new MappedObject("name", "id", MappedObjectType.File, this.remoteRootId, "changeToken", 0) {
@@ -229,8 +215,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void SimpleRemoteFolderHierarchyAdded()
-        {
+        public void SimpleRemoteFolderHierarchyAdded() {
             var newRemoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteSubFolder", "sub", "/name/sub", "remoteFolder");
             var newRemoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock("remoteFolder", "name", "/name", this.remoteRootId);
             newRemoteFolder.SetupDescendants(newRemoteSubFolder.Object);
@@ -245,8 +230,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneLocalFolderAdded()
-        {
+        public void OneLocalFolderAdded() {
             var newFolderMock = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
             this.localFolder.SetupDirectories(newFolderMock.Object);
             var crawler = this.CreateCrawler();
@@ -257,8 +241,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneLocalFileAdded()
-        {
+        public void OneLocalFileAdded() {
             var newFileMock = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "newFile"));
             this.localFolder.SetupFiles(newFileMock.Object);
             var crawler = this.CreateCrawler();
@@ -270,8 +253,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneLocalFileRemoved()
-        {
+        public void OneLocalFileRemoved() {
             var oldLocalFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "oldFile"));
             oldLocalFile.Setup(f => f.Exists).Returns(false);
             var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, "oldFileId", "oldFile", this.remoteRootId, changeToken: "oldChange");
@@ -290,8 +272,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneLocalFolderRemoved()
-        {
+        public void OneLocalFolderRemoved() {
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "oldFolder"));
             oldLocalFolder.Setup(f => f.Exists).Returns(false);
             var remoteSubFolder = MockOfIFolderUtil.CreateRemoteFolderMock("oldFolderId", "oldFolder", this.remoteRootPath + "oldFolder", this.remoteRootId, "oldChange");
@@ -309,8 +290,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneLocalFolderRenamed()
-        {
+        public void OneLocalFolderRenamed() {
             var uuid = Guid.NewGuid();
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "oldFolder"));
             var newLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "newFolder"));
@@ -340,8 +320,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneLocalFileCopied()
-        {
+        public void OneLocalFileCopied() {
             var uuid = Guid.NewGuid();
             var oldFile = this.fsFactory.AddFile(Path.Combine(this.localRootPath, "old"), uuid);
             oldFile.Setup(f => f.LastWriteTimeUtc).Returns(this.lastLocalWriteTime);
@@ -371,8 +350,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void NoChangeOnExistingFileAndFolderCreatesNoEventsInQueue()
-        {
+        public void NoChangeOnExistingFileAndFolderCreatesNoEventsInQueue() {
             DateTime changeTime = DateTime.UtcNow;
             string changeToken = "token";
             string fileName = "name";
@@ -403,8 +381,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteFolderRenamed()
-        {
+        public void OneRemoteFolderRenamed() {
             DateTime modification = DateTime.UtcNow;
             string oldFolderName = "folderName";
             string newFolderName = "newfolderName";
@@ -436,8 +413,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteFileRenamedAndContentHashIsNotAvailable()
-        {
+        public void OneRemoteFileRenamedAndContentHashIsNotAvailable() {
             string oldFileName = "fileName";
             string newFileName = "newfileName";
             string fileId = "fileId";
@@ -470,8 +446,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteFileRenamedAndContentHashIsAvailable()
-        {
+        public void OneRemoteFileRenamedAndContentHashIsAvailable() {
             byte[] checksum = new byte[20];
             string type = "SHA-1";
             string oldFileName = "fileName";
@@ -509,8 +484,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteFolderMoved()
-        {
+        public void OneRemoteFolderMoved() {
             string oldFolderName = "folderName";
             string folderId = "folderId";
             var localGuid = Guid.NewGuid();
@@ -552,8 +526,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteFolderRemoved()
-        {
+        public void OneRemoteFolderRemoved() {
             Guid uuid = Guid.NewGuid();
             DateTime modification = DateTime.UtcNow;
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, "folderName"));
@@ -574,8 +547,7 @@ namespace TestLibrary.ProducerTests.CrawlerTests
         }
 
         [Test, Category("Fast")]
-        public void OneRemoteAndTheSameLocalFolderRemoved()
-        {
+        public void OneRemoteAndTheSameLocalFolderRemoved() {
             string folderName = "folderName";
             var oldLocalFolder = this.fsFactory.AddDirectory(Path.Combine(this.localRootPath, folderName));
             var storedFolder = new MappedObject(folderName, "folderId", MappedObjectType.Folder, this.remoteRootId, "changeToken");
@@ -590,8 +562,16 @@ namespace TestLibrary.ProducerTests.CrawlerTests
             this.VerifyThatListenerHasBeenUsed();
         }
 
-        private DescendantsCrawler CreateCrawler()
-        {
+        #region boilerplatecode
+        public void Dispose() {
+            if (this.storageEngine != null) {
+                this.storageEngine.Dispose();
+                this.storageEngine = null;
+            }
+        }
+        #endregion
+
+        private DescendantsCrawler CreateCrawler() {
             var generator = new CrawlEventGenerator(this.storage, this.fsFactory.Object);
             var treeBuilder = new DescendantsTreeBuilder(this.storage, this.remoteFolder.Object, this.localFolder.Object, this.filter, Mock.Of<IIgnoredEntitiesStorage>());
             var notifier = new CrawlEventNotifier(this.queue.Object);

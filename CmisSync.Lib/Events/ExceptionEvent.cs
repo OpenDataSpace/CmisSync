@@ -17,23 +17,20 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// Exception event.
     /// </summary>
-    public class ExceptionEvent : ISyncEvent
-    {
+    public class ExceptionEvent : ISyncEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.ExceptionEvent"/> class.
         /// </summary>
         /// <param name='e'>
         /// The exception, which should be embedded. Must not be null.
         /// </param>
-        public ExceptionEvent(Exception e)
-        {
+        public ExceptionEvent(Exception e) {
             if (e == null) {
                 throw new ArgumentNullException("Given Exception is null");
             }
@@ -55,8 +52,7 @@ namespace CmisSync.Lib.Events
         /// <returns>
         /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.ExceptionEvent"/>.
         /// </returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return this.Exception.Message;
         }
     }
