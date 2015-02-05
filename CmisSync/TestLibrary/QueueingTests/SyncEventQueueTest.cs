@@ -147,7 +147,7 @@ namespace TestLibrary.QueueingTests {
         [Test, Category("Fast")]
         public void SubscribeForAllCategorizesCountableEvents() {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
-                using (var unsubscriber = queue.Subscribe(Mock.Of<IObserver<Tuple<string,int>>>())) {
+                using (var unsubscriber = queue.Subscribe(Mock.Of<IObserver<Tuple<string, int>>>())) {
                     Assert.That(unsubscriber, Is.Not.Null);
                 }
             }
@@ -158,7 +158,7 @@ namespace TestLibrary.QueueingTests {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
                 Assert.Throws<ArgumentNullException>(
                     () => {
-                    using (var unsubscriber = queue.Subscribe((IObserver<int>) null)) {
+                    using (var unsubscriber = queue.Subscribe((IObserver<int>)null)) {
                     }
                 });
             }
@@ -169,55 +169,68 @@ namespace TestLibrary.QueueingTests {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
                 Assert.Throws<ArgumentNullException>(
                     () => {
-                    using (var unsubscriber = queue.Subscribe((IObserver<Tuple<string,int>>) null)) {
+                    using (var unsubscriber = queue.Subscribe((IObserver<Tuple<string, int>>)null)) {
                     }
                 });
             }
         }
 
         [Test, Category("Medium")]
-        public void SubscribeForAllCountableEventsAndGetInformedOnAddEvent() {
-            var countableEvent = Mock.Of<ICountableEvent>(e => e.Category == "test");
+        public void SubscribeForAllCountableEventsAndGetInformedOnAddEvent([Values(1, 5, 1000)]int events) {
+            string category = "test";
+            int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();
+            manager.Setup(m => m.Handle(It.IsAny<ICountableEvent>())).Callback(() => Thread.Sleep(10));
+            var observer = new Mock<IObserver<int>>();
+            observer.Setup(o => o.OnNext(It.IsAny<int>())).Callback<int>(t => { lastCount = t; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
             using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
-                var observer = new Mock<IObserver<int>>();
                 using (var unsubscriber = queue.Subscribe(observer.Object)) {
-                    queue.AddEvent(countableEvent);
-                    WaitFor(queue, (q) => { return q.IsStopped; });
+                    for (int i = 0; i < events; i++) {
+                        queue.AddEvent(Mock.Of<ICountableEvent>(e => e.Category == category));
+                    }
+
+                    queue.StopListener();
+                    WaitFor(queue, (q) => { return q.IsStopped; }, events * 20 + 1000);
                     queue.Dispose();
                 }
 
-                observer.Verify(o => o.OnNext(1), Times.Once());
-                observer.Verify(o => o.OnNext(0), Times.Once());
-                observer.Verify(o => o.OnCompleted(), Times.Once());
+                observer.Verify(o => o.OnNext(It.IsAny<int>()), Times.Exactly(2 * events));
+                Assert.That(lastCount, Is.EqualTo(0));
             }
 
-            manager.Verify(m => m.Handle(countableEvent), Times.Once);
+            observer.Verify(o => o.OnCompleted(), Times.Once());
+            manager.Verify(m => m.Handle(It.Is<ICountableEvent>(e => e.Category == category)), Times.Exactly(events));
         }
 
         [Test, Category("Medium")]
-        public void SubscribeForCategoryCountableEventsAndGetInformedOnAddEvent() {
+        public void SubscribeForCategoryCountableEventsAndGetInformedOnAddEvent([Values(1, 5, 1000)]int events) {
             string category = "test";
-            var countableEvent = Mock.Of<ICountableEvent>(e => e.Category == category);
+            int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();
+            manager.Setup(m => m.Handle(It.IsAny<ICountableEvent>())).Callback(() => Thread.Sleep(10));
+            var observer = new Mock<IObserver<Tuple<string, int>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<Tuple<string, int>>())).Callback<Tuple<string, int>>(t => { lastCount = t.Item2; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
             using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
-                var observer = new Mock<IObserver<Tuple<string, int>>>();
                 using (var unsubscriber = queue.Subscribe(observer.Object)) {
-                    queue.AddEvent(countableEvent);
-                    WaitFor(queue, (q) => { return q.IsStopped; });
+                    for (int i = 0; i < events; i++) {
+                        queue.AddEvent(Mock.Of<ICountableEvent>(e => e.Category == category));
+                    }
+
+                    queue.StopListener();
+                    WaitFor(queue, (q) => { return q.IsStopped; }, events * 20 + 1000);
                     queue.Dispose();
                 }
 
-                observer.Verify(o => o.OnNext(It.Is<Tuple<string, int>>(t => t.Item1 == category && t.Item2 == 1)), Times.Once());
-                observer.Verify(o => o.OnNext(It.Is<Tuple<string, int>>(t => t.Item1 == category && t.Item2 == 0)), Times.Once());
-                observer.Verify(o => o.OnCompleted(), Times.Once());
+                observer.Verify(o => o.OnNext(It.Is<Tuple<string, int>>(t => t.Item1 == category)), Times.Exactly(2 * events));
+                Assert.That(lastCount, Is.EqualTo(0));
             }
 
-            manager.Verify(m => m.Handle(countableEvent), Times.Once);
+            observer.Verify(o => o.OnCompleted(), Times.Once());
+            manager.Verify(m => m.Handle(It.Is<ICountableEvent>(e => e.Category == category)), Times.Exactly(events));
         }
 
-        private static void WaitFor<T>(T obj, Func<T, bool> check) {
-            for (int i = 0; i < 50; i++) {
+        private static void WaitFor<T>(T obj, Func<T, bool> check, int timeout = 5000) {
+            for (int i = 0; i < (int)(timeout/100); i++) {
                 if (check(obj)) {
                     return;
                 }
@@ -225,7 +238,7 @@ namespace TestLibrary.QueueingTests {
                 Thread.Sleep(100);
             }
 
-            Logger.Error("Timeout exceeded!");
+            Assert.Fail("Timeout exceeded!");
         }
     }
 }
