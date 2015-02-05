@@ -106,6 +106,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
         private IDocument CreateRemotePWCDocument(IDocument remoteDocument) {
             try {
+                if (TransmissionStorage != null) {
+                    TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+                }
                 if (!string.IsNullOrEmpty(remoteDocument.VersionSeriesCheckedOutId)) {
                     remoteDocument.CancelCheckOut();
                     remoteDocument.Refresh();
@@ -143,6 +146,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 return CreateRemotePWCDocument(remoteDocument);
             }
 
+            TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
             return remotePWCDocument;
         }
 
@@ -157,6 +161,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument);
             obj.ChecksumAlgorithmName = "SHA-1";
             obj.RemoteObjectPWCId = remotePWCDocument.Id;
+            remotePWCDocument.Refresh();
             obj.LastChangeTokenPWC = remotePWCDocument.ChangeToken;
 
             TransmissionStorage.SaveObject(obj);

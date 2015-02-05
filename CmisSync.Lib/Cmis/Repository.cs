@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Cmis
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
@@ -371,9 +372,17 @@ namespace CmisSync.Lib.Cmis
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
         protected virtual void Dispose(bool disposing) {
             if (!this.disposed) {
+                this.connectionScheduler.Dispose();
+                this.Scheduler.Dispose();
+                this.WatcherProducer.Dispose();
+                this.Queue.StopListener();
+
                 if (disposing) {
                     bool transmissionRun = false;
                     do {
+                        if (transmissionRun) {
+                            Thread.Sleep(10);
+                        }
                         transmissionRun = false;
                         List<FileTransmissionEvent> transmissionEvents = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
                         foreach (FileTransmissionEvent transmissionEvent in transmissionEvents) {
@@ -389,11 +398,7 @@ namespace CmisSync.Lib.Cmis
                         }
                     } while (transmissionRun);
 
-                    this.connectionScheduler.Dispose();
-                    this.Scheduler.Dispose();
-                    this.WatcherProducer.Dispose();
-                    this.Queue.StopListener();
-                    int timeout = 500;
+                    int timeout = 5000;
                     if (!this.Queue.WaitForStopped(timeout)) {
                         Logger.Debug(string.Format("Event Queue is of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
                     }
