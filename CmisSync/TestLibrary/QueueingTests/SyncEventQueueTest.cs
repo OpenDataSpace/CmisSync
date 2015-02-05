@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.QueueingTests
-{
+namespace TestLibrary.QueueingTests {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
@@ -37,15 +36,12 @@ namespace TestLibrary.QueueingTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class SyncEventQueueTest : IsTestWithConfiguredLog4Net
-    {
+    public class SyncEventQueueTest : IsTestWithConfiguredLog4Net {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueueTest));
 
         [Test, Category("Medium")]
-        public void EventlessStartStop()
-        {
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
-            {
+        public void EventlessStartStop() {
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
                 WaitFor(queue, (q) => { return !q.IsStopped; });
                 Assert.False(queue.IsStopped);
                 queue.StopListener();
@@ -55,12 +51,10 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Medium")]
-        public void AddEvent()
-        {
+        public void AddEvent() {
             var managerMock = new Mock<ISyncEventManager>();
             var eventMock = new Mock<ISyncEvent>();
-            using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object))
-            {
+            using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object)) {
                 queue.AddEvent(eventMock.Object);
                 queue.AddEvent(eventMock.Object);
                 queue.StopListener();
@@ -73,10 +67,8 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Medium")]
-        public void AddEventToStoppedQueueDoesNotRaise()
-        {
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
-            {
+        public void AddEventToStoppedQueueDoesNotRaise() {
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
                 queue.StopListener();
                 WaitFor(queue, (q) => { return q.IsStopped; });
                 queue.AddEvent(new Mock<ISyncEvent>().Object);
@@ -84,8 +76,7 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Medium")]
-        public void AddEventToDisposedQueueDoesNotRaise()
-        {
+        public void AddEventToDisposedQueueDoesNotRaise() {
             SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object);
             queue.Dispose();
 
@@ -93,11 +84,9 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Medium")]
-        public void WaitForStop()
-        {
+        public void WaitForStop() {
             Task t;
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
-            {
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
                 t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
                 queue.WaitForStopped();
                 Assert.True(queue.IsStopped);
@@ -107,11 +96,9 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Medium")]
-        public void WaitForStopWithTimeout()
-        {
+        public void WaitForStopWithTimeout() {
             Task t;
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
-            {
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
                 t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
                 Assert.False(queue.WaitForStopped(10));
                 Assert.True(queue.WaitForStopped(10000));
@@ -122,11 +109,9 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Medium")]
-        public void WaitForStopWithTimeSpan()
-        {
+        public void WaitForStopWithTimeSpan() {
             Task t;
-            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object))
-            {
+            using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {
                 t = Task.Factory.StartNew(() => { Thread.Sleep(100); queue.StopListener(); });
                 Assert.False(queue.WaitForStopped(new TimeSpan(0, 0, 0, 0, 10)));
                 Assert.True(queue.WaitForStopped(new TimeSpan(0, 0, 0, 0, 500)));
@@ -142,8 +127,7 @@ namespace TestLibrary.QueueingTests
             managerMock.Setup(m => m.Handle(It.IsAny<ISyncEvent>())).Throws(new Exception("Generic Exception Message"));
             var eventMock = new Mock<ISyncEvent>();
             eventMock.Setup(e => e.ToString()).Returns("Mocked Event");
-            using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object))
-            {
+            using (SyncEventQueue queue = new SyncEventQueue(managerMock.Object)) {
                 queue.AddEvent(eventMock.Object);
                 queue.StopListener();
                 WaitFor(queue, (q) => { return q.IsStopped; });
@@ -172,14 +156,22 @@ namespace TestLibrary.QueueingTests
         [Test, Category("Fast")]
         public void SubscribeThrowsExceptionIfAllObserverIsNull() {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
-                Assert.Throws<ArgumentNullException>(() => queue.Subscribe((IObserver<int>) null));
+                Assert.Throws<ArgumentNullException>(
+                    () => {
+                    using (var unsubscriber = queue.Subscribe((IObserver<int>) null)) {
+                    }
+                });
             }
         }
 
         [Test, Category("Fast")]
         public void SubscribeThrowsExceptionIfCategorizedObserverIsNull() {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
-                Assert.Throws<ArgumentNullException>(() => queue.Subscribe((IObserver<Tuple<string,int>>) null));
+                Assert.Throws<ArgumentNullException>(
+                    () => {
+                    using (var unsubscriber = queue.Subscribe((IObserver<Tuple<string,int>>) null)) {
+                    }
+                });
             }
         }
 
@@ -224,12 +216,9 @@ namespace TestLibrary.QueueingTests
             manager.Verify(m => m.Handle(countableEvent), Times.Once);
         }
 
-        private static void WaitFor<T>(T obj, Func<T, bool> check)
-        {
-            for (int i = 0; i < 50; i++)
-            {
-                if (check(obj))
-                {
+        private static void WaitFor<T>(T obj, Func<T, bool> check) {
+            for (int i = 0; i < 50; i++) {
+                if (check(obj)) {
                     return;
                 }
 
