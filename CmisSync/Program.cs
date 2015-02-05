@@ -35,9 +35,7 @@
 using System;
 
 [assembly: CLSCompliant(true)]
-
-namespace CmisSync
-{
+namespace CmisSync {
     using System.Diagnostics;
     using System.IO;
     using System.Net;
@@ -54,8 +52,7 @@ namespace CmisSync
     /// Main Program.
     /// </summary>
     [CLSCompliant(false)]
-    public class Program
-    {
+    public class Program {
         /// <summary>
         /// User interface for CmisSync.
         /// </summary>
@@ -81,8 +78,7 @@ namespace CmisSync
         /// </summary>
         /// <param name="args">The command-line arguments.</param>
         [STAThread]
-        public static void Main(string[] args)
-        {
+        public static void Main(string[] args) {
 #if __MonoCS__
             Environment.SetEnvironmentVariable("MONO_XMLSERIALIZER_THS", "no");
 #endif
@@ -100,23 +96,18 @@ namespace CmisSync
             }
 
             FileInfo alternativeLog4NetConfigFile = new FileInfo(Path.Combine(Directory.GetParent(ConfigManager.CurrentConfigFile).FullName, "log4net.config"));
-            if(alternativeLog4NetConfigFile.Exists)
-            {
+            if (alternativeLog4NetConfigFile.Exists) {
                 log4net.Config.XmlConfigurator.ConfigureAndWatch(alternativeLog4NetConfigFile);
-            }
-            else
-            {
+            } else {
                 log4net.Config.XmlConfigurator.Configure(ConfigManager.CurrentConfig.GetLog4NetConfig());
             }
 
             Logger.Info("Starting. Version: " + CmisSync.Lib.Backend.Version);
-            using (var listener = new CmisSync.Lib.Cmis.DotCMISLogListener())
-            {
+            using (var listener = new CmisSync.Lib.Cmis.DotCMISLogListener()) {
                 Trace.Listeners.Add(listener);
                 if (args.Length != 0 && !args[0].Equals("start") &&
                 Backend.Platform != PlatformID.MacOSX &&
-                Backend.Platform != PlatformID.Win32NT)
-                {
+                Backend.Platform != PlatformID.Win32NT) {
                     string n = Environment.NewLine;
 
                     Console.WriteLine(n + Properties_Resources.ApplicationName +
@@ -141,11 +132,9 @@ namespace CmisSync
                     Environment.Exit(-1);
                 }
 
-                try
-                {
+                try {
                     CmisSync.Lib.Utils.EnsureNeededDependenciesAreAvailable();
-                } catch (Exception e)
-                {
+                } catch (Exception e) {
                     string message = string.Format("Missing Dependency: {0}{1}{2}", e.Message, Environment.NewLine, e.StackTrace);
                     Logger.Error(message);
                     Console.Error.WriteLine(message);
@@ -163,18 +152,15 @@ namespace CmisSync
 
                     UI = new UI();
                     UI.Run();
-                } catch (Exception e)
-                {
+                } catch (Exception e) {
                     Logger.Fatal("Exception in Program.Main", e);
                     Environment.Exit(-1);
+                } finally {
+                    if (Controller != null) {
+                        Controller.Dispose();
+                    }
                 }
             }
-
-#if !__MonoCS__
-            //// Suppress assertion messages in debug mode
-            //GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
-            //GC.WaitForPendingFinalizers();
-#endif
         }
     }
 }
