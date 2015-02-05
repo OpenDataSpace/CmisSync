@@ -81,52 +81,6 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/>.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object"/> to compare with the current <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/>.</param>
-        /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
-        /// <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/>; otherwise, <c>false</c>.</returns>
-        public override bool Equals(object obj) {
-            if (obj == null) {
-                return false;
-            }
-
-            if (this == obj) {
-                return true;
-            }
-
-            // If parameter cannot be casted to FileTransmissionObject return false.
-            FileTransmissionObject o = obj as FileTransmissionObject;
-            if (o == null) {
-                return false;
-            }
-
-            return this.Type.Equals(o.Type) &&
-                object.Equals(this.LocalPath, o.LocalPath) &&
-                    ((this.LastChecksum == null && o.LastChecksum == null) || (this.LastChecksum != null && o.LastChecksum != null && this.LastChecksum.SequenceEqual(o.LastChecksum))) &&
-                    object.Equals(this.ChecksumAlgorithmName, o.ChecksumAlgorithmName) &&
-                    object.Equals(this.LastLocalWriteTimeUtc, o.LastLocalWriteTimeUtc) &&
-                    object.Equals(this.RemoteObjectId, o.RemoteObjectId) &&
-                    object.Equals(this.LastChangeToken, o.LastChangeToken) &&
-                    object.Equals(this.LastRemoteWriteTimeUtc, o.LastRemoteWriteTimeUtc);
-        }
-
-        /// <summary>
-        /// Serves as a hash function for a <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/> object.
-        /// </summary>
-        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
-        /// hash table.</returns>
-        public override int GetHashCode() {
-            int localPath = (this.LocalPath ?? string.Empty).GetHashCode();
-            int checksumName = (this.ChecksumAlgorithmName ?? string.Empty).GetHashCode();
-            int lastlocalwritetime = this.LastLocalWriteTimeUtc.GetValueOrDefault().GetHashCode();
-            int remoteId = (this.RemoteObjectId ?? string.Empty).GetHashCode();
-            int changeToken = (this.LastChangeToken ?? string.Empty).GetHashCode();
-            int lastremotewritetime = this.LastRemoteWriteTimeUtc.GetValueOrDefault().GetHashCode();
-            return localPath ^ checksumName ^ lastlocalwritetime ^ remoteId ^ changeToken ^ lastremotewritetime;
-        }
-
-        /// <summary>
         /// Gets or sets the type
         /// </summary>
         /// <value>The type.</value>
@@ -190,5 +144,53 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// </summary>
         /// <value>The last remote write time in UTC</value>
         public DateTime? LastRemoteWriteTimeUtc { get; set; }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/>.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object"/> to compare with the current <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
+        /// <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/>; otherwise, <c>false</c>.</returns>
+        public override bool Equals(object obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            if (this == obj) {
+                return true;
+            }
+
+            // If parameter cannot be casted to FileTransmissionObject return false.
+            FileTransmissionObject o = obj as FileTransmissionObject;
+            if (o == null) {
+                return false;
+            }
+
+            return this.Type.Equals(o.Type) &&
+                object.Equals(this.LocalPath, o.LocalPath) &&
+                    ((this.LastChecksum == null && o.LastChecksum == null) || (this.LastChecksum != null && o.LastChecksum != null && this.LastChecksum.SequenceEqual(o.LastChecksum))) &&
+                    object.Equals(this.ChecksumAlgorithmName, o.ChecksumAlgorithmName) &&
+                    object.Equals(this.LastLocalWriteTimeUtc, o.LastLocalWriteTimeUtc) &&
+                    object.Equals(this.RemoteObjectId, o.RemoteObjectId) &&
+                    object.Equals(this.LastChangeToken, o.LastChangeToken) &&
+                    object.Equals(this.LastRemoteWriteTimeUtc, o.LastRemoteWriteTimeUtc);
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="CmisSync.Lib.Storage.Database.Entities.FileTransmissionObject"/> object.
+        /// </summary>
+        /// <returns>A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
+        /// hash table.</returns>
+        public override int GetHashCode() {
+            int localPath = (this.LocalPath ?? string.Empty).GetHashCode();
+            int checksumName = (this.ChecksumAlgorithmName ?? string.Empty).GetHashCode();
+            int lastlocalwritetime = this.LastLocalWriteTimeUtc.GetValueOrDefault().GetHashCode();
+            int remoteId = (this.RemoteObjectId ?? string.Empty).GetHashCode();
+            int changeToken = (this.LastChangeToken ?? string.Empty).GetHashCode();
+            int lastremotewritetime = this.LastRemoteWriteTimeUtc.GetValueOrDefault().GetHashCode();
+
+            // This is really slow. If it is a problem, choose another way to calculate hash code
+            return string.Format("{0}-{1}-{2}-{3}-{4}-{5}", localPath, checksumName, lastlocalwritetime, remoteId, changeToken, lastremotewritetime).GetHashCode();
+        }
     }
 }
