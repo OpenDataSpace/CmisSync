@@ -97,7 +97,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
             Assert.That(ignoredFolder.Name, Is.EqualTo(newFolderName));
         }
 
-        [Test, Category("Slow"), Category("SelectiveIgnore")]
+        [Test, Category("Slow"), Category("SelectiveIgnore"), Category("Erratic")]
         public void RenameLocalFolderToIgnoredRemoteFolderName([Values(true, false)]bool contentChanges) {
             this.ContentChangesActive = contentChanges;
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
@@ -130,12 +130,12 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 .
 ├── ignored
 └── ignored_Conflict";
-            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)));
+            Assert.That(new FolderTree(this.localRootDir, "."), Is.EqualTo(new FolderTree(localTree)), "Local tree is wrong");
             remoteTree = @"
 .
 ├── ignored
 └── ignored_Conflict";
-            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(remoteTree)));
+            Assert.That(new FolderTree(this.remoteRootDir, "."), Is.EqualTo(new FolderTree(remoteTree)), "Remote tree is wrong");
         }
     }
 }

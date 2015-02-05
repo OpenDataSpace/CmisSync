@@ -59,7 +59,7 @@ namespace CmisSync {
     /// <summary>
     /// Platform-independant part of the main CmisSync controller.
     /// </summary>
-    public abstract class ControllerBase : IActivityListener {
+    public abstract class ControllerBase : IActivityListener, IDisposable {
         /// <summary>
         /// Log.
         /// </summary>
@@ -74,6 +74,11 @@ namespace CmisSync {
         /// All the info about the CmisSync synchronized folder being created.
         /// </summary>
         private RepoInfo repoInfo;
+
+        /// <summary>
+        /// Is this controller disposed already?
+        /// </summary>
+        bool disposed = false;
 
         /// <summary>
         /// Whether the reporsitories have finished loading.
@@ -784,6 +789,27 @@ namespace CmisSync {
         /// </summary>
         public void ActivityStopped() {
             this.OnIdle();
+        }
+
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing) {
+            if (this.disposed) {
+                return;
+            }
+
+            if (disposing) {
+                lock(this.repo_lock) {
+                    foreach (var repo in this.repositories) {
+                        repo.Dispose();
+                    }
+                }
+            }
+
+            this.disposed = true;
         }
 
         private class CountingSubscriber: IObserver<Tuple<string, int>> {

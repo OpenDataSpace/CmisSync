@@ -43,16 +43,14 @@ namespace CmisSync {
 
     public class Controller : ControllerBase {
 
-        public Controller() : base()
-        {
+        public Controller() : base() {
         }
 
         /// <summary>
         /// Initialize the controller
         /// </summary>
         /// <param name="firstRun">Whether it is the first time that CmisSync is being run.</param>
-        public override void Initialize(bool firstRun)
-        {
+        public override void Initialize(bool firstRun) {
             this.ProxyAuthReqired += delegate(string reponame) {
                 NotificationUtils.NotifyAsync(reponame, Properties_Resources.NetworkProxyLogin);
             };
@@ -70,8 +68,7 @@ namespace CmisSync {
 
         // Creates a .desktop entry in autostart folder to
         // start CmisSync automatically at login
-        public override void CreateStartupItem()
-        {
+        public override void CreateStartupItem() {
             string autostart_path = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "autostart");
@@ -99,10 +96,10 @@ namespace CmisSync {
             }
         }
 
-        // Adds the CmisSync folder to the user's
-        // list of bookmarked places
-        public override void AddToBookmarks()
-        {
+        /// <summary>
+        /// Adds the DataSpace folder to the user's list of bookmarked places
+        /// </summary>
+        public override void AddToBookmarks() {
             string bookmarks_file_path   = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.Personal),
                 ".gtk-bookmarks");
@@ -130,9 +127,11 @@ namespace CmisSync {
             }
         }
 
-        // Creates the CmisSync folder in the user's home folder
-        public override bool CreateCmisSyncFolder()
-        {
+        /// <summary>
+        /// Creates the DataSpace folder in the user's home folder
+        /// </summary>
+        /// <returns><c>true</c>, if cmis sync folder was created, <c>false</c> otherwise.</returns>
+        public override bool CreateCmisSyncFolder() {
             if (!Directory.Exists(this.FoldersPath)) {
                 Directory.CreateDirectory(this.FoldersPath);
                 Logger.Info("Created '" + this.FoldersPath + "'");
@@ -192,13 +191,18 @@ namespace CmisSync {
             return false;
         }
 
-        public void OpenCmisSyncFolder()
-        {
+        /// <summary>
+        /// Opens the default sync target folder.
+        /// </summary>
+        public void OpenCmisSyncFolder() {
             Utils.OpenFolder(ConfigManager.CurrentConfig.GetFoldersPath());
         }
 
-        public void OpenCmisSyncFolder(string name)
-        {
+        /// <summary>
+        /// Opens the sync target folder for the repository with the given name.
+        /// </summary>
+        /// <param name="name">Name of the repository.</param>
+        public void OpenCmisSyncFolder(string name) {
             var f = ConfigManager.CurrentConfig.GetRepoInfo(name);
             if (f != null) {
                 Utils.OpenFolder(f.LocalPath);
@@ -209,8 +213,11 @@ namespace CmisSync {
             }
         }
 
-        public void ShowLog(string path)
-        {
+        /// <summary>
+        /// Opens the given file as log in default console.
+        /// </summary>
+        /// <param name="path">Absolute path to the log file.</param>
+        public void ShowLog(string path) {
             Process process = new Process();
             process.StartInfo.FileName  = "x-terminal-emulator";
             process.StartInfo.Arguments = "-title \"DataSpace Sync Log\" -e tail -f \"" + path + "\"";
