@@ -126,7 +126,7 @@ ignored
             var ignoredFolder = this.remoteRootDir.CreateFolder(folderName);
             ignoredFolder.IgnoreAllChildren();
 
-            this.InitializeAndRunRepo();
+            this.InitializeAndRunRepo(swallowExceptions: !contentChanges);
 
             Assert.That(this.localRootDir.GetDirectories()[0].Name, Is.EqualTo(folderName));
 
