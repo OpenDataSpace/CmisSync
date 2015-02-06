@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -34,8 +33,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// A Local object has been deleted. => Delete the corresponding object on the server, if possible
     /// </summary>
-    public class LocalObjectDeleted : AbstractEnhancedSolver
-    {
+    public class LocalObjectDeleted : AbstractEnhancedSolver {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectDeleted"/> class.
         /// </summary>
@@ -71,8 +69,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
         }
 
-        private bool TryDeleteObjectOnServer(IObjectId remoteId, MappedObjectType type)
-        {
+        private bool TryDeleteObjectOnServer(IObjectId remoteId, MappedObjectType type) {
             try {
                 if (type == MappedObjectType.Folder) {
                     (remoteId as IFolder).DeleteTree(false, UnfileObject.DeleteSinglefiled, true);
