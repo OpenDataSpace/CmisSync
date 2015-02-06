@@ -16,6 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
+
 ﻿namespace CmisSync {
     using System;
     using System.IO;
