@@ -97,6 +97,8 @@ namespace CmisSync {
         /// </summary>
         private List<Repository> sleepingRepositories = new List<Repository>();
 
+        private List<IDisposable> repoUnsubscriber = new List<IDisposable>();
+
         /// <summary>
         /// Dictionary of the edit folder diaglogs
         /// Key: synchronized folder name
@@ -511,6 +513,10 @@ namespace CmisSync {
                     foreach (var repo in this.repositories) {
                         repo.Dispose();
                     }
+
+                    foreach (var unsubscriber in this.repoUnsubscriber) {
+                        unsubscriber.Dispose();
+                    }
                 }
             }
 
@@ -636,7 +642,7 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                repo.Queue.Subscribe((IObserver<Tuple<string, int>>)new CountingSubscriber(this.activityListenerAggregator));
+                this.repoUnsubscriber.Add(repo.Queue.Subscribe((IObserver<Tuple<string, int>>)new CountingSubscriber(this.activityListenerAggregator)));
                 repo.SyncStatusChanged += delegate(SyncStatus status) {
                     this.UpdateState();
                 };
