@@ -28,6 +28,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
+    using CmisSync.Lib.Consumer.SituationSolver;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -63,14 +65,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IDocument> remotePWCDocument;
 
         [SetUp]
-        private void Setup() {
+        public void Setup() {
             this.session = new Mock<ISession>();
-            //this.session.SetupTypeSystem();
+            this.session.SetupTypeSystem();
             //this.session.SetupCreateOperationContext();
 
             this.storage = new Mock<IMetaDataStorage>();
             this.storage.Setup(f => f.SaveMappedObject(It.IsAny<IMappedObject>())).Callback<IMappedObject>((o) => {
-                //this.storage.Setup(f => f.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(o);
+                this.storage.Setup(f => f.GetObjectByLocalPath(It.IsAny<IFileSystemInfo>())).Returns(o);
             });
 
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
@@ -93,19 +95,30 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Setup(f => f.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == Path.GetTempPath()))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == parentId));
 
             var parents = new List<IFolder>();
-            parents.Add(Mock.Of<IFolder>(f => f.Id == parentId));
+            parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
 
             string path = Path.Combine(Path.GetTempPath(), this.objectName);
 
-            var doc = Mock.Of<IDocument>(
+            var file = Mock.Of<IFileInfo>(
                 f =>
+                f.FullName == path &&
                 f.Name == this.objectName &&
-                f.Id == this.objectOldId &&
-                f.Parents == parents &&
-                f.ChangeToken == this.changeTokenOld);
+                f.Exists == true &&
+                f.IsExtendedAttributeAvailable() == true &&
+                f.Directory == parentDirInfo);
+            this.localFile = Mock.Get(file);
+
             var docId = Mock.Of<IObjectId>(
                 o =>
                 o.Id == this.objectOldId);
+
+            var doc = Mock.Of<IDocument>(
+                d =>
+                d.Name == this.objectName &&
+                d.Id == this.objectOldId &&
+                d.Parents == parents &&
+                d.ChangeToken == this.changeTokenOld);
+            this.remoteDocument = Mock.Get(doc);
 
             this.session.Setup(s => s.CreateDocument(
                 It.IsAny<IDictionary<string, object>>(),
@@ -115,8 +128,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 null,
                 null,
                 null)).Returns(docId);
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == docId), It.IsAny<IOperationContext>())).Returns(doc);
-            Mock.Get(doc).Setup(
+            this.remoteDocument.Setup(
                 d =>
                 d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .Callback<IContentStream, bool, bool>((s, o, r) => {
@@ -124,19 +136,31 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                         s.Stream.CopyTo(temp);
                     }
                 });
-            Mock.Get(doc).Setup(d => d.LastModificationDate).Returns(new DateTime());
+            this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == docId), It.IsAny<IOperationContext>())).Returns(doc);
 
-            this.localFile.Setup(d => d.FullName).Returns(path);
-            this.localFile.Setup(d => d.Name).Returns(this.objectName);
-            this.localFile.Setup(d => d.Exists).Returns(true);
-            this.localFile.Setup(d => d.IsExtendedAttributeAvailable()).Returns(true);
-            this.localFile.Setup(d => d.Directory).Returns(parentDirInfo);
+            var docPWC = Mock.Of<IDocument>(
+                d =>
+                d.Name == this.objectName &&
+                d.Id == this.objectPWCId &&
+                d.ChangeToken == this.changeTokenPWC);
+            this.remotePWCDocument = Mock.Get(docPWC);
+            this.remotePWCDocument.SetupAllProperties();
+            long length = 0;
+            this.remotePWCDocument.Setup(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>())).Callback<IContentStream, bool, bool>((stream, last, refresh) => {
+                byte[] buffer = new byte[stream.Length.GetValueOrDefault()];
+                length += stream.Stream.Read(buffer, 0, buffer.Length);
+            });
+            this.remotePWCDocument.Setup(d => d.ContentStreamLength).Returns(() => { return length; });
+            this.session.Setup(s=>s.GetObject(this.objectPWCId)).Returns(this.remotePWCDocument.Object);
 
-            this.remoteDocument = Mock.Get(doc);
+            this.remoteDocument.SetupCheckout(this.remotePWCDocument, this.changeTokenNew);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileAdded() {
+            this.SetupFile();
+
             long fileLength = this.chunkCount * this.chunkSize;
             var fileContent = new byte[fileLength];
             byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
@@ -161,11 +185,45 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             });
             stream.Setup(s => s.Position).Returns(() => { return readLength; });
 
-            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
-            fileInfo.Setup(f => f.Length).Returns(fileLength);
-            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream.Object);
+            this.localFile.Setup(f => f.Length).Returns(fileLength);
+            this.localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream.Object);
 
-            Assert.Fail("TODO");
+            var solverAdded = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            Assert.Throws<AbortException>(() => solverAdded.Solve(this.localFile.Object, null));
+            Assert.That(this.transmissionManager.ActiveTransmissions, Is.Empty);
+
+            readLength = 0;
+            stream.Setup(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => {
+                if (readLength + count > fileLength) {
+                    count = (int)(fileLength - readLength);
+                }
+                Array.Copy(fileContent, readLength, buffer, offset, count);
+                readLength += count;
+                return count;
+            });
+
+            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+
+            solverChanged.Solve(this.localFile.Object, this.remoteDocument.Object);
+            Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, hash, fileLength);
+            this.session.Verify(
+                s =>
+                s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
+                It.Is<IObjectId>(o => o.Id == this.parentId),
+                It.Is<IContentStream>(st => st == null),
+                null,
+                null,
+                null,
+                null),
+                Times.Once());
+            this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(this.chunkCount + 1));  //  plus 1 for one AppendContentStream is aborted
+            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, true);
+
         }
 
         [Test, Category("Fast"), Category("Solver")]

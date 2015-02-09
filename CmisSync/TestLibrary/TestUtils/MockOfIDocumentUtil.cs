@@ -107,13 +107,16 @@ namespace TestLibrary.TestUtils
                 .Returns(doc.Object);
         }
 
-        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC) {
+        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC, string newChangeToken) {
             doc.Setup(d => d.CheckOut()).Returns(() => {
                 doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
                 doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(docPWC.Object.Id);
                 Mock<IObjectId> objectIdPWC = new Mock<IObjectId>();
                 objectIdPWC.Setup(o => o.Id).Returns(docPWC.Object.Id);
                 return objectIdPWC.Object;
+            });
+            docPWC.Setup(d => d.CheckIn(It.IsAny<bool>(),It.IsAny<IDictionary<string,object>>(),It.IsAny<IContentStream>(),It.IsAny<string>())).Callback(() => {
+                doc.Setup(d => d.ChangeToken).Returns(newChangeToken);
             });
         }
 

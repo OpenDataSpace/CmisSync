@@ -218,6 +218,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
             }
 
+            if (docPWC != null) {
+                docPWC.CheckIn(true, null, null, string.Empty);
+                doc.Refresh();
+            }
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             return hash;
         }

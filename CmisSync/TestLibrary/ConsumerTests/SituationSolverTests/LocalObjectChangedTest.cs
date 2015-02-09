@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -42,8 +41,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectChangedTest
-    {
+    public class LocalObjectChangedTest {
         private readonly string objectName = "name";
         private readonly string remoteId = "remoteId";
         private readonly string oldChangeToken = "oldChangeToken";
