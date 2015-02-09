@@ -566,12 +566,11 @@ namespace TestLibrary.IntegrationTests {
             var source = this.remoteRootDir.CreateFolder(oldParentName);
             var folder = source.CreateFolder(oldName);
             var target = this.remoteRootDir.CreateFolder(newParentName);
-            this.InitializeAndRunRepo();
+            this.InitializeAndRunRepo(swallowExceptions: true);
 
             folder.Refresh();
             folder.Move(source, target);
 
-            this.repo.SingleStepQueue.SwallowExceptions = true;
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
