@@ -189,6 +189,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChanged() {
             Assert.Fail("TODO");
@@ -255,6 +256,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChangedWhileChangeLocalBeforeContinue() {
             Assert.Fail("TODO");
@@ -298,16 +300,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChangedWhileChangeRemoteBeforeContinue() {
             Assert.Fail("TODO");
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAddedWhileChangeLocalAndRemoteBeforeContinue() {
             Assert.Fail("TODO");
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChangedWhileChangeLocalAndRemoteBeforeContinue() {
             Assert.Fail("TODO");

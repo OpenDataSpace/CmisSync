@@ -225,36 +225,43 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileChanged() {
             Assert.Fail("TODO");
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileAddedWhileChangeLocalBeforeContinue() {
             Assert.Fail("TODO");
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileChangedWhileChangeLocalBeforeContinue() {
             Assert.Fail("TODO");
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileAddedWhileChangeRemoteBeforeContinue() {
             Assert.Fail("TODO");
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileChangedWhileChangeRemoteBeforeContinue() {
             Assert.Fail("TODO");
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileAddedWhileChangeLocalAndRemoteBeforeContinue() {
             Assert.Fail("TODO");
         }
 
+        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileChangedWhileChangeLocalAndRemoteBeforeContinue() {
             Assert.Fail("TODO");
