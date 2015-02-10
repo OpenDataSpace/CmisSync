@@ -313,5 +313,102 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.Fail("TODO");
         }
 
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileAddedWhileChangeLocalCacheBeforeContinue() {
+            long lengthPrev = 0;
+            SetupToAbortDownload(out lengthPrev);
+
+            Mock<MemoryStream> stream = new Mock<MemoryStream>();
+            stream.SetupAllProperties();
+            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
+
+            long lengthRead = 0;
+            stream.Setup(f => f.Seek(It.IsAny<long>(), It.IsAny<SeekOrigin>())).Callback((long offset, SeekOrigin loc) => lengthRead = offset);
+            stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => {
+                if (lengthRead >= lengthPrev) {
+                    return 0;
+                }
+                int countRead = count;
+                if (countRead > (lengthPrev - lengthRead)) {
+                    countRead = (int)(lengthPrev - lengthRead);
+                }
+                Array.Copy(this.fileContent, lengthRead, buffer, 0, countRead);
+                //  change the first byte
+                if (buffer[0] == (byte)0) {
+                    buffer[0] = (byte)1;
+                } else {
+                    buffer[0] = (byte)0;
+                }
+                lengthRead += countRead;
+                stream.Object.Position = lengthRead;
+                return countRead;
+            });
+
+            long length = 0;
+            stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => length += count);
+            stream.Setup(f => f.Length).Returns(() => { return length; });
+
+            this.cacheFile.Setup(f => f.Delete()).Callback(() => {
+                stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
+                stream.Object.Position = 0;
+                this.cacheFile.Setup(f => f.Exists).Returns(false);
+            });
+            this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(stream.Object);
+
+            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, this.changeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            solver.Solve(this.localFile.Object, remoteObject.Object);
+
+            Assert.That(length, Is.EqualTo(this.fileContent.Length));
+            stream.Verify(f => f.Seek(0, SeekOrigin.Begin), Times.Never());
+            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3));   //  first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
+            this.cacheFile.Verify(f => f.Delete(), Times.Once());
+            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
+            this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
+            this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
+            this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileAddedWhileDeleteLocalCacheBeforeContinue() {
+            long lengthPrev = 0;
+            SetupToAbortDownload(out lengthPrev);
+
+            this.cacheFile.Setup(f => f.Exists).Returns(false);
+
+            Mock<MemoryStream> stream = new Mock<MemoryStream>();
+            stream.SetupAllProperties();
+            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
+
+            long length = 0;
+            stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => length += count);
+
+            this.cacheFile.Setup(f => f.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)).Returns(() => {
+                this.cacheFile.Setup(f => f.Exists).Returns(true);
+                return stream.Object;
+            });
+
+            Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, this.changeToken);
+            remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
+
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+            solver.Solve(this.localFile.Object, remoteObject.Object);
+
+            Assert.That(length, Is.EqualTo(this.fileContent.Length));
+            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(2));   //  first open in SetupToAbortThePreviousDownload, second open to download
+            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
+            this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
+            this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
+            this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
+            this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
+        }
+
     }
 }
