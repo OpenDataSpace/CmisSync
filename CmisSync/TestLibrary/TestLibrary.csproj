@@ -95,6 +95,7 @@
     <Compile Include="ConsumerTests\LocalSituationDetectionTest.cs" />
     <Compile Include="ConsumerTests\RemoteSituationDetectionTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\AbstractEnhancedSolverTest.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\ContinueDownloadTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\ContinueUploadTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectAddedTest.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\LocalObjectChangedRemoteObjectChangedTest.cs" />

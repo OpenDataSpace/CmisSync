@@ -60,6 +60,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
         private readonly long chunkSize = 8 * 1024;
         private readonly int chunkCount = 4;
+        private string parentPath;
+        private string localPath;
         private Mock<IFileInfo> localFile;
         private Mock<IDocument> remoteDocument;
         private Mock<IDocument> remotePWCDocument;
@@ -87,21 +89,18 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         private void SetupFile() {
-            this.localFile = new Mock<IFileInfo>();
-            this.remoteDocument = new Mock<IDocument>();
-            this.remotePWCDocument = new Mock<IDocument>();
+            this.parentPath = Path.GetTempPath();
+            this.localPath = Path.Combine(this.parentPath, this.objectName);
 
-            var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetTempPath() && d.Name == Path.GetFileName(Path.GetTempPath()));
-            this.storage.Setup(f => f.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == Path.GetTempPath()))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == parentId));
+            var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath));
+            this.storage.Setup(f => f.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == this.parentPath))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == parentId));
 
             var parents = new List<IFolder>();
             parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
 
-            string path = Path.Combine(Path.GetTempPath(), this.objectName);
-
             var file = Mock.Of<IFileInfo>(
                 f =>
-                f.FullName == path &&
+                f.FullName == this.localPath &&
                 f.Name == this.objectName &&
                 f.Exists == true &&
                 f.IsExtendedAttributeAvailable() == true &&
