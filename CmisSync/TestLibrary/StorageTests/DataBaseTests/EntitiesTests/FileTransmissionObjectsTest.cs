@@ -65,6 +65,7 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             remoteFile.Setup(m => m.Id).Returns("RemoteId");
             remoteFile.Setup(m => m.ChangeToken).Returns("ChangeToken");
             remoteFile.Setup(m => m.LastModificationDate).Returns(LocalFile.Object.LastWriteTimeUtc);
+            remoteFile.Setup(m => m.VersionSeriesCheckedOutId).Returns("RemotePWCId");
             var obj = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object);
             Assert.AreEqual(FileTransmissionType.UPLOAD_NEW_FILE, obj.Type);
             Assert.AreEqual(LocalFile.Object.FullName, obj.LocalPath);
@@ -74,6 +75,7 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests
             Assert.AreEqual(LocalFile.Object.LastWriteTimeUtc, obj.LastLocalWriteTimeUtc);
             Assert.AreEqual("RemoteId", obj.RemoteObjectId);
             Assert.AreEqual("ChangeToken", obj.LastChangeToken);
+            Assert.AreEqual("RemotePWCId", obj.RemoteObjectPWCId);
             Assert.AreEqual(LocalFile.Object.LastWriteTimeUtc, obj.LastRemoteWriteTimeUtc);
             var obj2 = new FileTransmissionObject(FileTransmissionType.UPLOAD_NEW_FILE, LocalFile.Object, remoteFile.Object);
             Assert.IsTrue(obj.Equals(obj2));

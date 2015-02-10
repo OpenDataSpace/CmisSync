@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="OperationContextFactory.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Cmis
     using System;
     using System.Collections.Generic;
 
+    using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Enums;
 
@@ -95,16 +96,18 @@ namespace CmisSync.Lib.Cmis
 
         private static HashSet<string> CreateFilter(params string[] additionalElements) {
             HashSet<string> filter = new HashSet<string>();
-            filter.Add("cmis:objectId");
-            filter.Add("cmis:name");
-            filter.Add("cmis:contentStreamFileName");
-            filter.Add("cmis:contentStreamLength");
-            filter.Add("cmis:lastModificationDate");
-            filter.Add("cmis:changeToken");
-            filter.Add("cmis:parentId");
+            filter.Add(PropertyIds.ObjectId);
+            filter.Add(PropertyIds.Name);
+            filter.Add(PropertyIds.ContentStreamFileName);
+            filter.Add(PropertyIds.ContentStreamLength);
+            filter.Add(PropertyIds.LastModificationDate);
+            filter.Add(PropertyIds.ChangeToken);
+            filter.Add(PropertyIds.ParentId);
             filter.Add("cmis:contentStreamHash");
-            filter.Add("cmis:secondaryObjectTypeIds");
+            filter.Add(PropertyIds.SecondaryObjectTypeIds);
             filter.Add("gds:sync.gds:ignoreDeviceIds");
+            filter.Add(PropertyIds.IsVersionSeriesCheckedOut);
+            filter.Add(PropertyIds.VersionSeriesCheckedOutId);
             if (additionalElements != null) {
                 foreach (var entry in additionalElements) {
                     filter.Add(entry);

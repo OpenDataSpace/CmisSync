@@ -390,6 +390,21 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         /// <summary>
+        /// Detect whether the repository supports checkout/cancelCheckout/checkin
+        /// </summary>
+        /// <param name="session">The Cmis Session</param>
+        /// <returns>
+        /// <c>true</c> if this feature is available, otherwise <c>false</c>
+        /// </returns>
+        public static bool ArePrivateWorkingCopySupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.IsPwcUpdatableSupported.GetValueOrDefault();
+            } catch (NullReferenceException) {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Hex string to byte array.
         /// </summary>
         /// <returns>The byte array.</returns>

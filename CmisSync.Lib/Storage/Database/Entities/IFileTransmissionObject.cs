@@ -72,10 +72,21 @@ namespace CmisSync.Lib.Storage.Database.Entities
         string RemoteObjectId { get; }
 
         /// <summary>
-        /// Gets or sets the last change token of last action make on CMIS server
+        /// Gets the CMIS remote object private working copy identifier
+        /// </summary>
+        string RemoteObjectPWCId { get; }
+
+        /// <summary>
+        /// Gets or sets the last change token of last action make on CMIS server remote object
         /// </summary>
         /// <value>The last change token of last action make on CMIS server</value>
         string LastChangeToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last change token of last action make on CMIS server remote object private working copy
+        /// </summary>
+        /// <value>The last change token of last action make on CMIS server</value>
+        string LastChangeTokenPWC { get; set; }
 
         /// <summary>
         /// Gets or sets the last remote write time in UTC

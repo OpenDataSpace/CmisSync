@@ -71,5 +71,10 @@ namespace CmisSync.Lib.Storage.Database
         /// Remove all saved <c>IFileTransmissionObject</c> list
         /// </summary>
         void ClearObjectList();
+
+        /// <summary>
+        /// Chunk size for file transmission
+        /// </summary>
+        long ChunkSize { get; }
     }
 }

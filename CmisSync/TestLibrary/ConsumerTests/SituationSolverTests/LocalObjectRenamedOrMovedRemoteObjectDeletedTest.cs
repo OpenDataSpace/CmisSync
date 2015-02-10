@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -41,6 +41,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     public class LocalObjectRenamedRemoteObjectDeletedTest
     {
         private Mock<IMetaDataStorage> storage;
+        private Mock<IFileTransmissionStorage> transmissionStorage;
         private Mock<ISession> session;
         private Mock<ISolver> secondSolver;
         private Mock<ActiveActivitiesManager> manager;
@@ -51,11 +52,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
+            this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.manager = new Mock<ActiveActivitiesManager> { CallBase = true };
             this.secondSolver = new Mock<ISolver>();
             this.underTest = new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 this.storage.Object,
+                this.transmissionStorage.Object,
                 this.manager.Object,
                 this.secondSolver.Object);
         }
@@ -65,6 +68,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
+                Mock.Of<IFileTransmissionStorage>(),
                 Mock.Of<ActiveActivitiesManager>());
         }
 
@@ -73,6 +77,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
+                Mock.Of<IFileTransmissionStorage>(),
                 Mock.Of<ActiveActivitiesManager>());
         }
 

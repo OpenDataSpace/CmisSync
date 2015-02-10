@@ -66,6 +66,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
             this.LastLocalWriteTimeUtc = localFile.LastWriteTimeUtc;
             this.RemoteObjectId = remoteFile.Id;
             this.LastChangeToken = remoteFile.ChangeToken;
+            this.RemoteObjectPWCId = remoteFile.VersionSeriesCheckedOutId;
             this.LastRemoteWriteTimeUtc = remoteFile.LastModificationDate;
             if (this.LastRemoteWriteTimeUtc != null) {
                 this.LastRemoteWriteTimeUtc = this.LastRemoteWriteTimeUtc.GetValueOrDefault().ToUniversalTime();
@@ -122,10 +123,21 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         public string RemoteObjectId { get; set; }
 
         /// <summary>
-        /// Gets or sets the last change token of last action make on CMIS server
+        /// Gets or sets the CMIS remote object private working copy identifier
+        /// </summary>
+        public string RemoteObjectPWCId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last change token of last action make on CMIS server remote object
         /// </summary>
         /// <value>The last change token of last action make on CMIS server</value>
         public string LastChangeToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last change token of last action make on CMIS server remote object private working copy
+        /// </summary>
+        /// <value>The last change token of last action make on CMIS server</value>
+        public string LastChangeTokenPWC { get; set; }
 
         /// <summary>
         /// Gets or sets the last remote write time in UTC

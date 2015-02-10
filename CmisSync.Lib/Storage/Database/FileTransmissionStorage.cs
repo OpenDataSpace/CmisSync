@@ -129,5 +129,7 @@ namespace CmisSync.Lib.Storage.Database {
                 tran.Commit();
             }
         }
+
+        public long ChunkSize { get; set; }
     }
 }
