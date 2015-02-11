@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
@@ -31,15 +30,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Enums;
     using DotCMIS.Exceptions;
 
-    using log4net;
-
     /// <summary>
     /// A Local object has been deleted. => Delete the corresponding object on the server, if possible
     /// </summary>
-    public class LocalObjectDeleted : AbstractEnhancedSolver
-    {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
+    public class LocalObjectDeleted : AbstractEnhancedSolver {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectDeleted"/> class.
         /// </summary>
@@ -62,9 +56,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
+            if (mappedObject.LastChangeToken != (remoteId as ICmisObject).ChangeToken) {
+                throw new ArgumentException("Remote object has been changed since last sync => force crawl sync");
+            }
 
             bool hasBeenDeleted = this.TryDeleteObjectOnServer(remoteId, mappedObject.Type);
-            if(hasBeenDeleted) {
+            if (hasBeenDeleted) {
                 this.Storage.RemoveObject(mappedObject);
                 OperationsLogger.Info(string.Format("Deleted the corresponding remote object {0} of locally deleted object {1}", remoteId.Id, mappedObject.Name));
             } else {
@@ -72,8 +69,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             }
         }
 
-        private bool TryDeleteObjectOnServer(IObjectId remoteId, MappedObjectType type)
-        {
+        private bool TryDeleteObjectOnServer(IObjectId remoteId, MappedObjectType type) {
             try {
                 if (type == MappedObjectType.Folder) {
                     (remoteId as IFolder).DeleteTree(false, UnfileObject.DeleteSinglefiled, true);

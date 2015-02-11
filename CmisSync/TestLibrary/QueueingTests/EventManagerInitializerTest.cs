@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="EventManagerInitializerTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.QueueingTests
-{
+namespace TestLibrary.QueueingTests {
     using System;
     using System.IO;
 
@@ -33,6 +32,7 @@ namespace TestLibrary.QueueingTests
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -48,8 +48,7 @@ namespace TestLibrary.QueueingTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class EventManagerInitializerTest
-    {
+    public class EventManagerInitializerTest {
         private ActivityListenerAggregator listener;
         private Mock<ISyncEventQueue> queue;
 
@@ -60,38 +59,40 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void ConstructorTakesQueueAndManagerAndStorage()
-        {
-            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+        public void ConstructorTakesQueueAndManagerAndStorage() {
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfQueueIsNull()
-        {
-            new EventManagerInitializer(null, Mock.Of<IMetaDataStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+        public void ConstructorThrowsExceptionIfQueueIsNull() {
+            new EventManagerInitializer(null, Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfStorageIsNull()
-        {
-            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), null, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+        public void ConstructorThrowsExceptionIfStorageIsNull() {
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), null, Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorThrowsExceptionIfRepoInfoIsNull()
+        public void ConstructorThrowsExceptionIfFileTransmissionStorageIsNull()
         {
-            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), null, Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
         }
 
         [Test, Category("Fast")]
-        public void IgnoresWrongEventsTest()
-        {
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructorThrowsExceptionIfRepoInfoIsNull() {
+            new EventManagerInitializer(Mock.Of<ISyncEventQueue>(), Mock.Of<IMetaDataStorage>(), Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), null, MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+        }
+
+        [Test, Category("Fast")]
+        public void IgnoresWrongEventsTest() {
             var queue = new Mock<ISyncEventQueue>();
             var storage = new Mock<IMetaDataStorage>();
-            var handler = new EventManagerInitializer(queue.Object, storage.Object, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
+            var handler = new EventManagerInitializer(queue.Object, storage.Object, Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, this.listener);
 
             var e = new Mock<ISyncEvent>();
             Assert.False(handler.Handle(e.Object));
@@ -99,8 +100,7 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void RootFolderGetsAddedToStorage()
-        {
+        public void RootFolderGetsAddedToStorage() {
             string id = "id";
             string token = "token";
             var storage = new Mock<IMetaDataStorage>();
@@ -119,8 +119,7 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void HandlersAddedInitiallyWithoutContentChanges()
-        {
+        public void HandlersAddedInitiallyWithoutContentChanges() {
             var storage = new Mock<IMetaDataStorage>();
             var manager = new Mock<ISyncEventManager>();
             this.RunSuccessfulLoginEvent(
@@ -129,7 +128,7 @@ namespace TestLibrary.QueueingTests
                 listener: this.listener,
                 changeEventSupported: false);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(4));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(7));
             VerifyNonContenChangeHandlersAdded(manager, Times.Once());
             VerifyContenChangeHandlersAdded(manager, Times.Never());
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
@@ -137,8 +136,7 @@ namespace TestLibrary.QueueingTests
         }
 
         [Test, Category("Fast")]
-        public void HandlersAddedInitiallyWithContentChanges()
-        {
+        public void HandlersAddedInitiallyWithContentChanges() {
             var storage = new Mock<IMetaDataStorage>();
             var manager = new Mock<ISyncEventManager>();
             this.RunSuccessfulLoginEvent(
@@ -147,11 +145,42 @@ namespace TestLibrary.QueueingTests
                 listener: this.listener,
                 changeEventSupported: true);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(7));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(10));
             VerifyNonContenChangeHandlersAdded(manager, Times.Once());
             VerifyContenChangeHandlersAdded(manager, Times.Once());
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(e => e.FullSyncRequested == true)), Times.Once());
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void SelectiveIgnoreFilterAddedIsSupported() {
+            var storage = new Mock<IMetaDataStorage>();
+            var manager = new Mock<ISyncEventManager>();
+            this.RunSuccessfulLoginEvent(
+                storage: storage.Object,
+                manager: manager.Object,
+                listener: this.listener,
+                changeEventSupported: true);
+
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SelectiveIgnoreFilter>()), Times.Once());
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SelectiveIgnoreEventTransformer>()), Times.Once());
+            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreFlagChangeDetection>()),Times.Once());
+        }
+
+        [Test, Category("Fast")]
+        public void SelectiveIgnoreFilterAreNotAddedIfUnsupported() {
+            var storage = new Mock<IMetaDataStorage>();
+            var manager = new Mock<ISyncEventManager>();
+            this.RunSuccessfulLoginEvent(
+                storage: storage.Object,
+                manager: manager.Object,
+                listener: this.listener,
+                changeEventSupported: true,
+                supportsSelectiveIgnore: false);
+
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SelectiveIgnoreFilter>()), Times.Never());
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SelectiveIgnoreEventTransformer>()), Times.Never());
+            manager.Verify(m => m.AddEventHandler(It.IsAny<IgnoreFlagChangeDetection>()),Times.Never());
         }
 
         [Test, Category("Fast")]
@@ -170,11 +199,11 @@ namespace TestLibrary.QueueingTests
 
             handler.Handle(e);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(14));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(20));
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(s => s.FullSyncRequested == true)), Times.Exactly(2));
             VerifyNonContenChangeHandlersAdded(manager, Times.Exactly(2));
             VerifyContenChangeHandlersAdded(manager, Times.Exactly(2));
-            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(7));
+            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(10));
             VerifyNonContenChangeHandlersRemoved(manager, Times.Once());
             VerifyContenChangeHandlersRemoved(manager, Times.Once());
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
@@ -197,11 +226,11 @@ namespace TestLibrary.QueueingTests
             e = CreateNewSessionEvent(changeEventSupported: true);
             handler.Handle(e);
 
-            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(11));
+            manager.Verify(m => m.AddEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(17));
             this.queue.Verify(q => q.AddEvent(It.Is<StartNextSyncEvent>(s => s.FullSyncRequested == true)), Times.Exactly(2));
             VerifyNonContenChangeHandlersAdded(manager, Times.Exactly(2));
             VerifyContenChangeHandlersAdded(manager, Times.Exactly(1));
-            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(4));
+            manager.Verify(m => m.RemoveEventHandler(It.IsAny<SyncEventHandler>()), Times.Exactly(7));
             VerifyNonContenChangeHandlersRemoved(manager, Times.Exactly(1));
             VerifyContenChangeHandlersRemoved(manager, Times.Never());
             this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
@@ -217,13 +246,14 @@ namespace TestLibrary.QueueingTests
             };
         }
 
-        private static SuccessfulLoginEvent CreateNewSessionEvent(bool changeEventSupported, string id = "i", string token = "t")
+        private static SuccessfulLoginEvent CreateNewSessionEvent(bool changeEventSupported, bool supportsSelectiveIgnore = true, string id = "i", string token = "t")
         {
             var session = new Mock<ISession>();
             var remoteObject = new Mock<IFolder>();
             remoteObject.Setup(r => r.Id).Returns(id);
             remoteObject.Setup(r => r.ChangeToken).Returns(token);
-            session.SetupTypeSystem();
+            remoteObject.Setup(r => r.Path).Returns("path");
+            session.SetupTypeSystem(true, supportsSelectiveIgnore);
             session.Setup(s => s.GetObjectByPath(It.IsAny<string>())).Returns(remoteObject.Object);
             if (changeEventSupported)
             {
@@ -280,12 +310,12 @@ namespace TestLibrary.QueueingTests
         private EventManagerInitializer CreateStrategyInitializer(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener)
         {
             this.queue.Setup(s => s.EventManager).Returns(manager);
-            return new EventManagerInitializer(this.queue.Object, storage, CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, listener);
+            return new EventManagerInitializer(this.queue.Object, storage, Mock.Of<IFileTransmissionStorage>(), Mock.Of<IIgnoredEntitiesStorage>(), CreateRepoInfo(), MockOfIFilterAggregatorUtil.CreateFilterAggregator().Object, listener);
         }
 
-        private void RunSuccessfulLoginEvent(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener, bool changeEventSupported = false, string id = "i", string token = "t")
+        private void RunSuccessfulLoginEvent(IMetaDataStorage storage, ISyncEventManager manager, ActivityListenerAggregator listener, bool changeEventSupported = false, bool supportsSelectiveIgnore = true, string id = "i", string token = "t")
         {
-            var e = CreateNewSessionEvent(changeEventSupported, id, token);
+            var e = CreateNewSessionEvent(changeEventSupported, supportsSelectiveIgnore, id, token);
 
             var handler = this.CreateStrategyInitializer(storage, manager, listener);
 

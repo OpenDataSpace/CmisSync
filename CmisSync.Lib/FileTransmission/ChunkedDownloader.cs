@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ChunkedDownloader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -20,11 +20,15 @@
 namespace CmisSync.Lib.FileTransmission
 {
     using System;
+    using System.Linq;
+    using System.Collections.Generic;
     using System.IO;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Streams;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -38,33 +42,31 @@ namespace CmisSync.Lib.FileTransmission
     {
         private bool disposed = false;
         private object disposeLock = new object();
-        private long chunkSize;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> class.
         /// </summary>
         /// <param name="chunkSize">Chunk size.</param>
-        public ChunkedDownloader(long chunkSize = 1024 * 1024)
-        {
-            if (chunkSize <= 0)
-            {
+        /// <param name="storage"><c>IFileTransmissionStorage</c> to persist</param>
+        public ChunkedDownloader(long chunkSize = 1024 * 1024, IFileTransmissionStorage storage = null) {
+            if (chunkSize <= 0) {
                 throw new ArgumentException("The chunk size must be a positive number and cannot be zero or less");
             }
 
-            this.chunkSize = chunkSize;
+            this.ChunkSize = chunkSize;
+            this.Storage = storage;
         }
 
         /// <summary>
         /// Gets the size of the chunk.
         /// </summary>
         /// <value>The size of the chunk.</value>
-        public long ChunkSize
-        {
-            get
-            {
-                return this.chunkSize;
-            }
-        }
+        public long ChunkSize { get; private set; }
+
+        /// <summary>
+        /// Gets the <c>IFileTransmissionStorage for persistence support</c>.
+        /// </summary>
+        public IFileTransmissionStorage Storage { get; private set; }
 
         /// <summary>
         /// Downloads the file and returns the SHA-1 hash of the content of the saved file
@@ -77,8 +79,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="DisposeException">If the remote object has been disposed before the dowload is finished</exception>
         /// <exception cref="AbortException">If download is aborted</exception>
         /// <exception cref="CmisException">On exceptions thrown by the CMIS Server/Client</exception>
-        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg)
-        {
+        public void DownloadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg) {
             {
                 byte[] buffer = new byte[8 * 1024];
                 int len;
@@ -89,25 +90,16 @@ namespace CmisSync.Lib.FileTransmission
 
             long? fileLength = remoteDocument.ContentStreamLength;
 
-            // Skip downloading empty content, just go on with an empty file
-            if (null == fileLength || fileLength == 0)
-            {
-                hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                return;
-            }
-
-            long offset = localFileStream.Position;
-            long remainingBytes = (fileLength != null) ? (long)fileLength - offset : this.chunkSize;
-            try
-            {
-                do
-                {
-                    offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, status, localFileStream, hashAlg);
+            // Download content if exists
+            if (fileLength > 0) {
+                long offset = localFileStream.Position;
+                long remainingBytes = (fileLength != null) ? (long)fileLength - offset : this.ChunkSize;
+                try {
+                    do {
+                        offset += this.DownloadNextChunk(remoteDocument, offset, remainingBytes, status, localFileStream, hashAlg);
+                    } while(fileLength == null);
+                } catch (DotCMIS.Exceptions.CmisConstraintException) {
                 }
-                while(fileLength == null);
-            }
-            catch (DotCMIS.Exceptions.CmisConstraintException)
-            {
             }
 
             hashAlg.TransformFinalBlock(new byte[0], 0, 0);
@@ -122,8 +114,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> so the garbage collector can reclaim the memory
         /// that the <see cref="CmisSync.Lib.FileTransmission.ChunkedDownloader"/> was occupying.</remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
         }
 
@@ -137,25 +128,21 @@ namespace CmisSync.Lib.FileTransmission
         /// other objects. Only unmanaged resources can be disposed.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
+        protected virtual void Dispose(bool disposing) {
             lock (this.disposeLock)
             {
                 // Check to see if Dispose has already been called.
-                if (!this.disposed)
-                {
+                if (!this.disposed) {
                     // Note disposing has been done.
                     this.disposed = true;
                 }
             }
         }
 
-        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, FileTransmissionEvent status, Stream outputstream, HashAlgorithm hashAlg)
-        {
+        private int DownloadNextChunk(IDocument remoteDocument, long offset, long remainingBytes, FileTransmissionEvent status, Stream outputstream, HashAlgorithm hashAlg) {
             lock(this.disposeLock)
             {
-                if (this.disposed)
-                {
+                if (this.disposed) {
                     status.ReportProgress(new TransmissionProgressEventArgs() { Aborted = true });
                     throw new ObjectDisposedException(status.Path);
                 }
@@ -168,15 +155,14 @@ namespace CmisSync.Lib.FileTransmission
                 });
 
                 using (Stream remoteStream = contentStream.Stream)
-                    using (ForwardReadingStream forwardstream = new ForwardReadingStream(remoteStream))
-                        using (OffsetStream offsetstream = new OffsetStream(forwardstream, offset))
-                        using (ProgressStream progress = new ProgressStream(offsetstream, status))
+                using (ForwardReadingStream forwardstream = new ForwardReadingStream(remoteStream))
+                using (OffsetStream offsetstream = new OffsetStream(forwardstream, offset))
+                using (ProgressStream progress = new ProgressStream(offsetstream, status))
                 {
                     byte[] buffer = new byte[8 * 1024];
                     int result = 0;
                     int len;
-                    while ((len = progress.Read(buffer, 0, buffer.Length)) > 0)
-                    {
+                    while ((len = progress.Read(buffer, 0, buffer.Length)) > 0) {
                         outputstream.Write(buffer, 0, len);
                         hashAlg.TransformBlock(buffer, 0, len, buffer, 0);
                         result += len;

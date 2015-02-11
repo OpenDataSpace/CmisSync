@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database.Entities
-{
+namespace CmisSync.Lib.Storage.Database.Entities {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     /// Mapped object type.
     /// </summary>
     [Serializable]
-    public enum MappedObjectType
-    {
+    public enum MappedObjectType {
         /// <summary>
         /// The type is unkown. This should never happen, but is inserted as help for detecting not set type.
         /// </summary>
@@ -54,8 +52,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     /// Operation type.
     /// </summary>
     [Serializable]
-    public enum OperationType
-    {
+    public enum OperationType {
         /// <summary>
         /// No operation. (default)
         /// </summary>
@@ -76,8 +73,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     /// Mapped object data to save the content of a mapped object in the MetaDataStorage.
     /// </summary>
     [Serializable]
-    public class MappedObject : IMappedObject
-    {
+    public class MappedObject : IMappedObject {
         /// <summary>
         /// The extended attribute key.
         /// </summary>
@@ -87,8 +83,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// Initializes a new instance of the <see cref="MappedObject"/> class.
         /// </summary>
         [Obsolete("Must not be used manually. This constructor should be used for serialization only.", true)]
-        public MappedObject()
-        {
+        public MappedObject() {
             this.LastContentSize = -1;
         }
 
@@ -101,24 +96,18 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// <param name="parentId">Parent identifier.</param>
         /// <param name="changeToken">Change token.</param>
         /// <param name="contentSize">Size of the content. Only exists on Documents.</param>
-        public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1)
-        {
-            if(string.IsNullOrEmpty(name))
-            {
+        public MappedObject(string name, string remoteId, MappedObjectType type, string parentId, string changeToken, long contentSize = -1) {
+            if (string.IsNullOrEmpty(name)) {
                 throw new ArgumentNullException("Given name is null or empty");
             }
 
-            if(string.IsNullOrEmpty(remoteId))
-            {
+            if (string.IsNullOrEmpty(remoteId)) {
                 throw new ArgumentNullException("Given remote ID is null");
             }
 
-            if(type == MappedObjectType.Unkown)
-            {
+            if (type == MappedObjectType.Unkown) {
                 throw new ArgumentException("Given type is unknown but must be set to a known type");
-            }
-            else
-            {
+            } else {
                 this.Type = type;
             }
 
@@ -137,10 +126,8 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// <param name='data'>
         /// Data to copy.
         /// </param>
-        public MappedObject(MappedObject data)
-        {
-            if(data != null)
-            {
+        public MappedObject(MappedObject data) {
+            if (data != null) {
                 this.ParentId = data.ParentId;
                 this.Description = data.Description;
                 this.ChecksumAlgorithmName = data.ChecksumAlgorithmName;
@@ -153,6 +140,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
                 this.Type = data.Type;
                 this.LastContentSize = data.LastContentSize;
                 this.ActualOperation = data.ActualOperation;
+                this.Ignored = data.Ignored;
                 this.Retries = data.Retries ?? new Dictionary<OperationType, int>();
                 if (data.LastChecksum == null) {
                     this.LastChecksum = null;
@@ -169,8 +157,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// <param name='remoteFolder'>
         /// A IFolder fetched via cmis.
         /// </param>
-        public MappedObject(IFolder remoteFolder)
-        {
+        public MappedObject(IFolder remoteFolder) {
             this.RemoteObjectId = remoteFolder.Id;
             this.ParentId = remoteFolder.ParentId;
             this.LastChangeToken = remoteFolder.ChangeToken;
@@ -179,6 +166,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
             this.LastRemoteWriteTimeUtc = remoteFolder.LastModificationDate;
             this.ActualOperation = OperationType.No;
             this.Retries = new Dictionary<OperationType, int>();
+            this.LastContentSize = -1;
         }
 
         /// <summary>
@@ -307,18 +295,15 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// <c>true</c> if the specified <see cref="System.Object"/> is equal to the current
         /// <see cref="CmisSync.Lib.Data.MappedObject"/>; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             // If parameter is null return false.
-            if (obj == null)
-            {
+            if (obj == null) {
                 return false;
             }
 
             // If parameter cannot be cast to MappedObjectData return false.
             MappedObject p = obj as MappedObject;
-            if (p == null)
-            {
+            if (p == null) {
                 return false;
             }
 
@@ -333,6 +318,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
                     object.Equals(this.Name, p.Name) &&
                     object.Equals(this.Guid, p.Guid) &&
                     object.Equals(this.LastContentSize, p.LastContentSize) &&
+                    object.Equals(this.Ignored, p.Ignored) &&
                     ((this.LastChecksum == null && p.LastChecksum == null) || (this.LastChecksum != null && p.LastChecksum != null && this.LastChecksum.SequenceEqual(p.LastChecksum)));
         }
 
@@ -343,8 +329,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// A hash code for this instance that is suitable for use in hashing algorithms and data structures such as a
         /// hash table.
         /// </returns>
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return (this.RemoteObjectId != null) ? this.RemoteObjectId.GetHashCode() : base.GetHashCode();
         }
 
@@ -352,8 +337,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Data.MappedObject"/>.</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format(
                 "[MappedObject: ParentId={0}, Type={1}, RemoteObjectId={2}, LastChangeToken={3}, LastRemoteWriteTimeUtc={4}, LastLocalWriteTimeUtc={5}, LastChecksum={6}, ChecksumAlgorithmName={7}, Name={8}, Description={9}, Guid={10}, LastContentSize={11}, Ignored={12}]",
                 this.ParentId,

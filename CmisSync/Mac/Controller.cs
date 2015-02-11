@@ -158,6 +158,7 @@ namespace CmisSync {
                 if (IsNotificationTransmission(e.Notification)) {
                     LocalFolderClicked (Path.GetDirectoryName (e.Notification.InformativeText));
                 }
+
                 if (IsNotificationCredentials(e.Notification)) {
                     //RemoveNotificationCredentials(e.Notification.Title);
                     EditRepositoryCredentials(e.Notification.Title);
@@ -186,26 +187,28 @@ namespace CmisSync {
                         lock (transmissionLock) {
                             List<FileTransmissionEvent> transmissions = ActiveTransmissions();
                             NSUserNotification[] notifications = notificationCenter.DeliveredNotifications;
-                            List<NSUserNotification> finishedNotifications = new List<NSUserNotification> ();
+                            List<NSUserNotification> finishedNotifications = new List<NSUserNotification>();
                             foreach (NSUserNotification notification in notifications) {
                                 if (!IsNotificationTransmission(notification)) {
                                     continue;
                                 }
-                                FileTransmissionEvent transmission = transmissions.Find( (FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
+                                FileTransmissionEvent transmission = transmissions.Find((FileTransmissionEvent e)=>{return (e.Path == notification.InformativeText);});
                                 if (transmission == null) {
-                                    finishedNotifications.Add (notification);
+                                    finishedNotifications.Add(notification);
                                 } else {
-                                    if (transmissionFiles.ContainsKey (transmission.Path)) {
+                                    if (transmissionFiles.ContainsKey(transmission.Path)) {
                                         transmissions.Remove(transmission);
                                     } else {
-                                        notificationCenter.RemoveDeliveredNotification (notification);
+                                        notificationCenter.RemoveDeliveredNotification(notification);
                                     }
                                 }
                             }
-                            finishedNotifications.Sort (new ComparerNSUserNotification ());
-                            for (int i = 0; i<(notifications.Length - notificationKeep) && i<finishedNotifications.Count; ++i) {
+
+                            finishedNotifications.Sort(new ComparerNSUserNotification());
+                            for (int i = 0; i < (notifications.Length - notificationKeep) && i < finishedNotifications.Count; ++i) {
                                 notificationCenter.RemoveDeliveredNotification (finishedNotifications[i]);
                             }
+
                             foreach (FileTransmissionEvent transmission in transmissions) {
                                 if (transmission.Status.Aborted == true) {
                                     continue;
@@ -214,10 +217,11 @@ namespace CmisSync {
                                 if (transmission.Status.FailedException != null) {
                                     continue;
                                 }
-                                Console.WriteLine(startedTransmissions.Count);
+
                                 if(startedTransmissions.Contains(transmission.Path)) {
                                     continue;
                                 }
+
                                 startedTransmissions.Add(transmission.Path);
 
                                 NSUserNotification notification = new NSUserNotification();
@@ -231,7 +235,6 @@ namespace CmisSync {
                                 notificationCenter.DeliverNotification (notification);
 
                                 transmissionFiles.Add (transmission.Path, NSDate.Now);
-                                //UpdateFileStatus (transmission, null);
                                 transmission.TransmissionStatus += TransmissionReport;
                             }
                         }
@@ -359,66 +362,54 @@ namespace CmisSync {
             process.WaitForExit ();
         }
 
-        // Adds the CmisSync folder to the user's
+        // Adds the DataSpace folder to the user's
         // list of bookmarked places
-        public override void AddToBookmarks ()
-        {
+        public override void AddToBookmarks() {
             /*
-            NSMutableDictionary sidebar_plist = NSMutableDictionary.FromDictionary (
-                NSUserDefaults.StandardUserDefaults.PersistentDomainForName ("com.apple.sidebarlists"));
-
+            NSMutableDictionary sidebar_plist = NSMutableDictionary.FromDictionary(
+                NSUserDefaults.StandardUserDefaults.PersistentDomainForName("com.apple.sidebarlists"));
             // Go through the sidebar categories
             foreach (NSString sidebar_category in sidebar_plist.Keys) {
-
                 // Find the favorites
-                if (sidebar_category.ToString ().Equals ("favorites")) {
-
+                if (sidebar_category.ToString().Equals("favoriteitems")) {
                     // Get the favorites
                     NSMutableDictionary favorites = NSMutableDictionary.FromDictionary(
-                        (NSDictionary) sidebar_plist.ValueForKey (sidebar_category));
-
+                        (NSDictionary)sidebar_plist.ValueForKey(sidebar_category));
                     // Go through the favorites
                     foreach (NSString favorite in favorites.Keys) {
-
                         // Find the custom favorites
-                        if (favorite.ToString ().Equals ("VolumesList")) {
-
+                        if (favorite.ToString().Equals("CustomListItems")) {
                             // Get the custom favorites
-                            NSMutableArray custom_favorites = (NSMutableArray) favorites.ValueForKey (favorite);
+                            NSMutableArray custom_favorites = (NSMutableArray)favorites.ValueForKey(favorite);
+                            NSMutableDictionary new_favorite = new NSMutableDictionary();
+                            new_favorite.SetValueForKey(new NSString("DataSpace"), new NSString("Name"));
+                            Console.WriteLine(Program.Controller.FoldersPath);
+                            using (NSUrl origUrl = new NSUrl(Program.Controller.FoldersPath, true)) {
+                                NSError error;
+                                NSData bookmarkdata = origUrl.CreateBookmarkData(NSUrlBookmarkCreationOptions.SuitableForBookmarkFile, new string[0], null, out error);
+                                if (error == null && bookmarkdata != null) {
+                                    new_favorite.SetValueForKey(bookmarkdata, new NSString("Alias"));
 
-                            NSMutableDictionary properties = new NSMutableDictionary ();
-                            properties.SetValueForKey (new NSString ("1935819892"), new NSString ("com.apple.LSSharedFileList.TemplateSystemSelector"));
-
-                            NSMutableDictionary new_favorite = new NSMutableDictionary ();
-                            new_favorite.SetValueForKey (new NSString ("DataSpace Sync"),  new NSString ("Name"));
-
-                            new_favorite.SetValueForKey (NSData.FromString ("ImgR SYSL fldr"),  new NSString ("Icon"));
-
-                            new_favorite.SetValueForKey (NSData.FromString (ConfigManager.CurrentConfig.FoldersPath),
-                                new NSString ("Alias"));
-
-                            new_favorite.SetValueForKey (properties, new NSString ("CustomItemProperties"));
-
-                            // Add to the favorites
-                            custom_favorites.Add (new_favorite);
-                            favorites.SetValueForKey ((NSArray) custom_favorites, new NSString (favorite.ToString ()));
-                            sidebar_plist.SetValueForKey (favorites, new NSString (sidebar_category.ToString ()));
+                                    // Add to the favorites
+                                    custom_favorites.Add(new_favorite);
+                                    favorites.SetValueForKey((NSArray)custom_favorites, new NSString(favorite.ToString()));
+                                    sidebar_plist.SetValueForKey(favorites, new NSString(sidebar_category.ToString()));
+                                }
+                            }
+                            break;
                         }
                     }
 
+                    break;
                 }
             }
 
-            NSUserDefaults.StandardUserDefaults.SetPersistentDomain (sidebar_plist, "com.apple.sidebarlists");
-            */
+            NSUserDefaults.StandardUserDefaults.SetPersistentDomain(sidebar_plist, "com.apple.sidebarlists");*/
         }
 
-
-        public override bool CreateCmisSyncFolder ()
-        {
-
-            if (!Directory.Exists (Program.Controller.FoldersPath)) {
-                Directory.CreateDirectory (Program.Controller.FoldersPath);
+        public override bool CreateCmisSyncFolder() {
+            if (!Directory.Exists(Program.Controller.FoldersPath)) {
+                Directory.CreateDirectory(Program.Controller.FoldersPath);
                 return true;
             } else {
                 return false;

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -42,8 +41,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectChangedTest
-    {
+    public class LocalObjectChangedTest {
         private readonly string objectName = "name";
         private readonly string remoteId = "remoteId";
         private readonly string oldChangeToken = "oldChangeToken";
@@ -61,12 +59,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
         [Test, Category("Fast"), Category("Solver")]
         public void DefaultConstructorTest() {
-            new LocalObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), new ActiveActivitiesManager());
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, new ActiveActivitiesManager());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
-            Assert.Throws<ArgumentNullException>(() => new LocalObjectChanged(Mock.Of<ISession>(), Mock.Of<IMetaDataStorage>(), null));
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            Assert.Throws<ArgumentNullException>(() => new LocalObjectChanged(session.Object, Mock.Of<IMetaDataStorage>(), null, null));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -223,6 +225,29 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void StorageExceptionTriggersNoOperation() {
+            this.SetUpMocks();
+            int fileLength = 20;
+            byte[] content = new byte[fileLength];
+
+            var localFile = this.CreateLocalFile(fileLength, this.modificationDate.AddMinutes(1));
+            using (var uploadedContent = new MemoryStream()) {
+                localFile.Setup(
+                    f =>
+                    f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(() => { return new MemoryStream(content); });
+                var mappedObject = this.CreateMappedFile(this.modificationDate.AddMinutes(1), fileLength, new byte[20]);
+                this.storage.AddMappedFile(mappedObject);
+                var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteId, this.objectName, this.parentId, fileLength, new byte[20], this.oldChangeToken);
+                remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Throws(new CmisStorageException());
+
+                this.underTest.Solve(localFile.Object, remoteFile.Object);
+
+                this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+                remoteFile.VerifySetContentStream();
+            }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void PermissionDeniedOnModificationDateSavesTheLocalDate() {
             this.SetUpMocks();
             var localFolder = this.CreateLocalDirectory(this.modificationDate.AddMinutes(1));
@@ -272,7 +297,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             };
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
-            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, this.manager.Object, true);
+            this.session.SetupTypeSystem();
+            this.underTest = new LocalObjectChanged(this.session.Object, this.storage.Object, null, this.manager.Object);
             this.uuid = Guid.NewGuid();
             this.modificationDate = DateTime.UtcNow;
             this.localPath = Path.Combine("temp", this.objectName);

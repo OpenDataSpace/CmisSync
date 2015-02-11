@@ -24,7 +24,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using System.Security.Cryptography;
     using System.Text;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -46,6 +49,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         private readonly string id = "id";
         private readonly string newChangeToken = "newChange";
         private readonly DateTime modificationDate = DateTime.UtcNow;
+        private readonly DateTime newModificationDate = DateTime.UtcNow.AddMinutes(1);
 
         private Mock<IMetaDataStorage> storage;
         private Mock<ISession> session;
@@ -55,6 +59,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         public void SetUp() {
             this.storage = new Mock<IMetaDataStorage>();
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.underTest = new LocalObjectRenamed(this.session.Object, this.storage.Object);
         }
 
@@ -63,7 +68,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         {
             new LocalObjectRenamed(this.session.Object, this.storage.Object);
         }
-        
+
         [Test, Category("Fast"), Category("Solver")]
         public void PermissionDeniedLeadsToNoOperation()
         {
@@ -89,17 +94,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderRenamed()
+        public void LocalFolderRenamed([Values(true, false)]bool childrenAreIgnored)
         {
-            var newFolder = Mock.Of<IFolder>(
-                f =>
-                f.LastModificationDate == this.modificationDate &&
-                f.Name == this.newName &&
-                f.ChangeToken == this.newChangeToken);
-            var remoteFolder = new Mock<IFolder>();
-            remoteFolder.Setup(f => f.Name).Returns(this.oldName);
-            remoteFolder.Setup(f => f.Id).Returns(this.id);
-            remoteFolder.Setup(f => f.Rename(this.newName, true)).Returns(newFolder);
+            var remoteFolder = MockOfIFolderUtil.CreateRemoteFolderMock(this.id, this.oldName, "path", null, changetoken: null, ignored: childrenAreIgnored);
+            remoteFolder.Setup(f => f.Rename(this.newName, true)).Callback(
+                () => 
+                {
+                remoteFolder.Setup(f => f.Name).Returns(this.newName);
+                remoteFolder.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
+                remoteFolder.Setup(f => f.LastModificationDate).Returns(this.newModificationDate);
+            }).Returns(Mock.Of<IObjectId>(o => o.Id == this.id));
             var localFolder = new Mock<IDirectoryInfo>();
             localFolder.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
             localFolder.Setup(f => f.Name).Returns(this.newName);
@@ -109,14 +113,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             mappedFolder.SetupProperty(f => f.Name, this.oldName);
             mappedFolder.SetupProperty(f => f.RemoteObjectId, this.id);
             mappedFolder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
-
+            mappedFolder.Setup(f => f.LastContentSize).Returns(-1);
             this.storage.AddMappedFolder(mappedFolder.Object);
 
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, this.newModificationDate, ignored: childrenAreIgnored);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -125,15 +129,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             byte[] content = Encoding.UTF8.GetBytes("content");
             byte[] hash = SHA1.Create().ComputeHash(content);
             using (var contentStream = new MemoryStream(content)) {
-                var newFile = Mock.Of<IDocument>(
-                    f =>
-                    f.LastModificationDate == this.modificationDate &&
-                    f.Name == this.newName &&
-                    f.ChangeToken == this.newChangeToken);
                 var remoteFile = new Mock<IDocument>();
                 remoteFile.Setup(f => f.Name).Returns(this.oldName);
                 remoteFile.Setup(f => f.Id).Returns(this.id);
-                remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
+                remoteFile.Setup(f => f.Rename(this.newName, true)).Callback(
+                    () =>
+                    {
+                    remoteFile.Setup(f => f.Name).Returns(this.newName);
+                    remoteFile.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
+                    remoteFile.Setup(f => f.LastModificationDate).Returns(this.modificationDate.AddMinutes(1));
+                }
+                    ).Returns(Mock.Of<IObjectId>(o => o.Id == this.id));
                 var localFile = new Mock<IFileInfo>();
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
                 localFile.Setup(f => f.Exists).Returns(true);
@@ -155,7 +161,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
                 remoteFile.Verify(f => f.Rename(It.Is<string>(s => s == this.newName), It.Is<bool>(b => b == true)), Times.Once());
 
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, contentSize: content.Length);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, this.modificationDate, this.modificationDate.AddMinutes(1), contentSize: content.Length);
             }
         }
 
@@ -166,15 +172,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             byte[] hash = SHA1.Create().ComputeHash(content);
             DateTime oldModificationDate = DateTime.UtcNow.AddDays(1);
             using (var contentStream = new MemoryStream(content)) {
-                var newFile = Mock.Of<IDocument>(
-                    f =>
-                    f.LastModificationDate == this.modificationDate &&
-                    f.Name == this.newName &&
-                    f.ChangeToken == this.newChangeToken);
                 var remoteFile = new Mock<IDocument>();
                 remoteFile.Setup(f => f.Name).Returns(this.oldName);
                 remoteFile.Setup(f => f.Id).Returns(this.id);
-                remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
+                remoteFile.Setup(f => f.Rename(this.newName, true)).Callback(
+                    () =>
+                    {
+                    remoteFile.Setup(f => f.Name).Returns(this.newName);
+                    remoteFile.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
+                    remoteFile.Setup(f => f.LastModificationDate).Returns(this.newModificationDate);
+                }).Returns(Mock.Of<IObjectId>(o => o.Id == this.id));
                 var localFile = new Mock<IFileInfo>();
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
                 localFile.Setup(f => f.Name).Returns(this.newName);
@@ -207,15 +214,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             byte[] content = Encoding.UTF8.GetBytes("content");
             DateTime oldModificationDate = DateTime.UtcNow.AddDays(1);
             using (var contentStream = new MemoryStream(content)) {
-                var newFile = Mock.Of<IDocument>(
-                    f =>
-                    f.LastModificationDate == this.modificationDate &&
-                    f.Name == this.newName &&
-                    f.ChangeToken == this.newChangeToken);
                 var remoteFile = new Mock<IDocument>();
                 remoteFile.Setup(f => f.Name).Returns(this.oldName);
                 remoteFile.Setup(f => f.Id).Returns(this.id);
-                remoteFile.Setup(f => f.Rename(this.newName, true)).Returns(newFile);
+                remoteFile.Setup(f => f.Rename(this.newName, true)).Callback(
+                    () =>
+                    {
+                    remoteFile.Setup(f => f.Name).Returns(this.newName);
+                    remoteFile.Setup(f => f.ChangeToken).Returns(this.newChangeToken);
+                    remoteFile.Setup(f => f.LastModificationDate).Returns(this.modificationDate.AddMinutes(1));
+                }).Returns(Mock.Of<IObjectId>(o => o.Id == this.id));
                 var localFile = new Mock<IFileInfo>();
                 localFile.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
                 localFile.Setup(f => f.Name).Returns(this.newName);
@@ -240,6 +248,32 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.id, this.newName, null, this.newChangeToken, true, oldModificationDate, contentSize: content.Length);
             }
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ConflictOnUtf8CharacterLeadsToNoSavings()
+        {
+            var remoteFolder = new Mock<IFolder>();
+            remoteFolder.Setup(f => f.Name).Returns(this.oldName);
+            remoteFolder.Setup(f => f.Id).Returns(this.id);
+            remoteFolder.Setup(f => f.Rename(@"ä".Normalize(NormalizationForm.FormD), true)).Throws<CmisConstraintException>();
+            var localFolder = new Mock<IDirectoryInfo>();
+            localFolder.SetupProperty(f => f.LastWriteTimeUtc, this.modificationDate);
+            localFolder.Setup(f => f.Name).Returns(@"ä".Normalize(NormalizationForm.FormD));
+            var mappedFolder = new Mock<IMappedObject>();
+            mappedFolder.SetupAllProperties();
+            mappedFolder.SetupProperty(f => f.Guid, Guid.NewGuid());
+            mappedFolder.SetupProperty(f => f.Name, this.oldName);
+            mappedFolder.SetupProperty(f => f.RemoteObjectId, this.id);
+            mappedFolder.Setup(f => f.Type).Returns(MappedObjectType.Folder);
+
+            this.storage.AddMappedFolder(mappedFolder.Object);
+
+            Assert.Throws<InteractionNeededException>(() => this.underTest.Solve(localFolder.Object, remoteFolder.Object));
+
+            remoteFolder.Verify(f => f.Rename(It.Is<string>(s => s == @"ä".Normalize(NormalizationForm.FormD)), It.Is<bool>(b => b == true)), Times.Once());
+
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
     }
 }

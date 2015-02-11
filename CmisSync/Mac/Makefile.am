@@ -21,10 +21,12 @@ SOURCES =  \
 	../Windows/FolderTreeMVC/NodeLoader.cs \
 	../Windows/FolderTreeMVC/NodeModel.cs \
 	../Windows/FolderTreeMVC/NodeModelUtils.cs \
+	../TransmissionController.cs \
 	About.cs \
 	AppDelegate.cs \
 	Badger.cs \
 	CertPolicyWindow.cs \
+	ClientBrand.cs \
 	CmisTree/CmisOutline.cs \
 	CmisTree/CmisOutline.designer.cs \
 	CmisTree/CmisOutlineController.cs \
@@ -44,6 +46,7 @@ SOURCES =  \
 	ProxySettings.cs \
 	ProxySettings.designer.cs \
 	ProxySettingsController.cs \
+	RepositoryMenuItem.cs \
 	SetupSubCustomize.cs \
 	SetupSubCustomize.designer.cs \
 	SetupSubCustomizeController.cs \
@@ -72,8 +75,12 @@ SOURCES =  \
 	SetupWizard.designer.cs \
 	SetupWizardController.cs \
 	StatusIcon.cs \
+	TransmissionWidget.cs \
+	TransmissionWidget.designer.cs \
+	TransmissionWidgetController.cs \
 	TextFieldDelegate.cs \
-	UI.cs
+	UI.cs \
+	UIHelpers.cs
 
 RESOURCES = $(RESOURCES_RESOURCES)
 

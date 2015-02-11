@@ -24,7 +24,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using System.Linq;
     using System.Security.Cryptography;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -32,15 +34,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    using log4net;
-
     /// <summary>
     /// Local object has been renamed. => Rename the corresponding object on the server.
     /// </summary>
     public class LocalObjectRenamed : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectRenamed"/> class.
         /// </summary>
@@ -49,8 +47,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectRenamed(
             ISession session,
-            IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
+            IMetaDataStorage storage) : base(session, storage) {
         }
 
         /// <summary>
@@ -67,29 +64,62 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             var obj = this.Storage.GetObjectByRemoteId(remoteId.Id);
-            ICmisObject remoteObject;
 
             // Rename remote object
-            if(remoteId is ICmisObject) {
+            if (remoteId is ICmisObject) {
+                if ((remoteId as ICmisObject).ChangeToken != obj.LastChangeToken) {
+                    throw new ArgumentException("Last changetoken is invalid => force crawl sync");
+                }
+
                 string oldName = (remoteId as ICmisObject).Name;
                 try {
-                    remoteObject = (remoteId as ICmisObject).Rename(localFile.Name, true) as ICmisObject;
+                    (remoteId as ICmisObject).Rename(localFile.Name, true);
+                } catch (CmisConstraintException e) {
+                    if (!Utils.IsValidISO885915(localFile.Name)) {
+                        OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName));
+                        throw new InteractionNeededException(string.Format("Server denied renaming of {0}", oldName), e) {
+                            Title = string.Format("Server denied renaming of {0}", oldName),
+                            Description = string.Format("The server denies the renaming of {2} from {0} to {1}, perhaps because the new name contains UTF-8 characters", oldName, localFile.Name, localFile.FullName)
+                        };
+                    } else {
+                        try {
+                            string wishedRemotePath = this.Storage.Matcher.CreateRemotePath(localFile.FullName);
+                            var conflictingRemoteObject = this.Session.GetObjectByPath(wishedRemotePath) as IFileableCmisObject;
+                            if (conflictingRemoteObject != null && conflictingRemoteObject.AreAllChildrenIgnored()) {
+                                OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}, because there is an ignored file/folder with this name already, trying to create conflict file/folder name", oldName, localFile.Name, localFile.FullName), e);
+                                string newName = localFile.Name;
+                                if (localFile is IDirectoryInfo) {
+                                    (localFile as IDirectoryInfo).MoveTo(Path.Combine((localFile as IDirectoryInfo).Parent.FullName, newName + "_Conflict"));
+                                } else if (localFile is IFileInfo) {
+                                    (localFile as IFileInfo).MoveTo(Path.Combine((localFile as IFileInfo).Directory.FullName, newName + "_Conflict"));
+                                }
+
+                                return;
+                            }
+                        } catch (CmisObjectNotFoundException) {
+                        }
+
+                        OperationsLogger.Warn(string.Format("The server denies the renaming of {2} from {0} to {1}", oldName, localFile.Name, localFile.FullName), e);
+                    }
+
+                    throw;
                 } catch (CmisPermissionDeniedException) {
                     OperationsLogger.Warn(string.Format("Unable to renamed remote object from {0} to {1}: Permission Denied", oldName, localFile.Name));
                     return;
                 }
 
-                OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteObject.Id, oldName, localFile.Name));
+                OperationsLogger.Info(string.Format("Renamed remote object {0} from {1} to {2}", remoteId.Id, oldName, localFile.Name));
             } else {
                 throw new ArgumentException("Given remoteId type is unknown: " + remoteId.GetType().Name);
             }
 
             bool isContentChanged = localFile is IFileInfo ? (localFile as IFileInfo).IsContentChangedTo(obj) : false;
 
-            obj.Name = remoteObject.Name;
-            obj.LastRemoteWriteTimeUtc = remoteObject.LastModificationDate;
+            obj.Name = (remoteId as ICmisObject).Name;
+            obj.LastRemoteWriteTimeUtc = (remoteId as ICmisObject).LastModificationDate;
             obj.LastLocalWriteTimeUtc = isContentChanged ? obj.LastLocalWriteTimeUtc : localFile.LastWriteTimeUtc;
-            obj.LastChangeToken = remoteObject.ChangeToken;
+            obj.LastChangeToken = (remoteId as ICmisObject).ChangeToken;
+            obj.Ignored = (remoteId as ICmisObject).AreAllChildrenIgnored();
             this.Storage.SaveMappedObject(obj);
             if (isContentChanged) {
                 throw new ArgumentException("Local file content is also changed => force crawl sync.");

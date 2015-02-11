@@ -117,7 +117,7 @@ namespace CmisSync
                 "Yes, I understand the risk",
                 null,
                 "");
-            alert.Icon = new NSImage (Path.Combine (NSBundle.MainBundle.ResourcePath, "Pixmaps", "process-syncing-error.icns"));
+            alert.Icon = new NSImage (UIHelpers.GetImagePathname ("process-syncing-error", "icns"));
             int i = alert.RunModal();
             return (i == 0);
         }

@@ -23,7 +23,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Interface for FileSystem Events.
     /// </summary>
-    public interface IFSEvent : IFilterableLocalPathEvent, IFilterableNameEvent
+    public interface IFSEvent : IFilterableLocalPathEvent, IFilterableNameEvent, ICountableEvent
     {
         /// <summary>
         /// Gets the type.

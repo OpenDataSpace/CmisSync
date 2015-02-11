@@ -17,23 +17,51 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
+    using System.Collections.Generic;
 
     using DotCMIS.Exceptions;
 
     /// <summary>
     /// Permission denied event.
     /// </summary>
-    public class PermissionDeniedEvent : ExceptionEvent
-    {
+    public class PermissionDeniedEvent : ExceptionEvent {
+        private static readonly string HttpHeaderRetryAfter = "Retry-After";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.PermissionDeniedEvent"/> class.
         /// </summary>
         /// <param name="e">thrown permission denied exception</param>
-        public PermissionDeniedEvent(DotCMIS.Exceptions.CmisPermissionDeniedException e) : base(e)
-        {
+        public PermissionDeniedEvent(CmisPermissionDeniedException e) : base(e) {
+            if (e.Data != null && e.Data.Contains(HttpHeaderRetryAfter)) {
+                string[] values = e.Data[HttpHeaderRetryAfter] as string[];
+                if (values == null) {
+                    return;
+                }
+
+                List<DateTime> dates = new List<DateTime>();
+                foreach (var value in values) {
+                    try {
+                        long seconds = Convert.ToInt64(value);
+                        dates.Add(DateTime.UtcNow + TimeSpan.FromSeconds(seconds));
+                    } catch(FormatException) {
+                        DateTime parsed;
+                        if (DateTime.TryParse(value, out parsed)) {
+                            dates.Add(parsed);
+                        }
+                    }
+                }
+
+                dates.Sort();
+                this.IsBlockedUntil = dates.Count > 0 ? dates[0] : (DateTime?)null;
+            }
         }
+
+        /// <summary>
+        /// Gets the DateTime until the login is blocked.
+        /// </summary>
+        /// <value>The blocked until.</value>
+        public DateTime? IsBlockedUntil { get; private set; }
     }
 }

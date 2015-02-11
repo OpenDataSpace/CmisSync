@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ProgressStream.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -62,17 +62,13 @@ namespace CmisSync.Lib.Streams
         /// </param>
         public ProgressStream(Stream stream, FileTransmissionEvent e) : base(stream)
         {
-            if (e == null)
-            {
+            if (e == null) {
                 throw new ArgumentNullException("The event, where to publish the prgress cannot be null");
             }
-                
-            try
-            {
+
+            try {
                 e.Status.Length = stream.Length;
-            }
-            catch (NotSupportedException)
-            {
+            } catch (NotSupportedException) {
                 e.Status.Length = null;
             }
 
@@ -126,8 +122,7 @@ namespace CmisSync.Lib.Streams
             get
             {
                 long pos = this.Stream.Position;
-                if (pos != this.transmissionEvent.Status.ActualPosition)
-                {
+                if (pos != this.transmissionEvent.Status.ActualPosition) {
                     this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos });
                 }
 
@@ -174,8 +169,7 @@ namespace CmisSync.Lib.Streams
         /// </param>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (this.transmissionEvent.Status.Aborting.GetValueOrDefault())
-            {
+            if (this.transmissionEvent.Status.Aborting.GetValueOrDefault()) {
                 this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = false, Aborted = true });
                 throw new FileTransmission.AbortException(this.transmissionEvent.Path);
             }
@@ -195,8 +189,7 @@ namespace CmisSync.Lib.Streams
         public override void SetLength(long value)
         {
             this.Stream.SetLength(value);
-            if (this.transmissionEvent.Status.Length == null || value > (long)this.transmissionEvent.Status.Length)
-            {
+            if (this.transmissionEvent.Status.Length == null || value > (long)this.transmissionEvent.Status.Length) {
                 this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Length = value });
             }
         }
@@ -215,20 +208,20 @@ namespace CmisSync.Lib.Streams
         /// </param>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (this.transmissionEvent.Status.Aborting.GetValueOrDefault())
-            {
+            // for it may be chained before CryptoStream, we should write the content for CryptoStream has calculated the hash of the content
+            this.Stream.Write(buffer, offset, count);
+            this.CalculateBandwidth(count);
+
+            if (this.transmissionEvent.Status.Aborting.GetValueOrDefault()) {
                 this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = false, Aborted = true });
                 throw new FileTransmission.AbortException(this.transmissionEvent.Path);
             }
-
-            this.Stream.Write(buffer, offset, count);
-            this.CalculateBandwidth(count);
         }
 #endregion
 
         /// <summary>
-            /// Close this instance and calculates the bandwidth of the last second.
-            /// </summary>
+        /// Close this instance and calculates the bandwidth of the last second.
+        /// </summary>
         public override void Close()
         {
             long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
@@ -247,27 +240,25 @@ namespace CmisSync.Lib.Streams
             this.bytesTransmittedSinceLastSecond += transmittedBytes;
             TimeSpan diff = DateTime.Now - this.start;
             long? pos;
-            try
-            {
+            long? length = null;
+            try {
                 pos = Stream.Position;
-            }
-            catch (NotSupportedException)
-            {
+                if (pos > this.transmissionEvent.Status.Length) {
+                    length = this.Stream.Length;
+                }
+            } catch (NotSupportedException) {
                 pos = null;
             }
 
-            if (diff.Seconds >= 1)
-            {
+            if (diff.Seconds >= 1) {
                 long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(this.start, DateTime.Now, this.bytesTransmittedSinceLastSecond);
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos, BitsPerSecond = result });
+                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos, BitsPerSecond = result, Length = length });
                 this.bytesTransmittedSinceLastSecond = 0;
                 this.start = this.start + diff;
                 this.blockingDetectionTimer.Stop();
                 this.blockingDetectionTimer.Start();
-            }
-            else
-            {
-                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos });
+            } else {
+                this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { ActualPosition = pos, Length = length });
             }
         }
     }

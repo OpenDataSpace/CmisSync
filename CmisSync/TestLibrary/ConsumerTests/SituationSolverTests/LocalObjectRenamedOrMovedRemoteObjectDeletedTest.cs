@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectRenamedOrMovedRemoteObjectDeletedTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -41,6 +41,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     public class LocalObjectRenamedRemoteObjectDeletedTest
     {
         private Mock<IMetaDataStorage> storage;
+        private Mock<IFileTransmissionStorage> transmissionStorage;
         private Mock<ISession> session;
         private Mock<ISolver> secondSolver;
         private Mock<ActiveActivitiesManager> manager;
@@ -49,33 +50,35 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         [SetUp]
         public void SetUp() {
             this.session = new Mock<ISession>();
+            this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>();
+            this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.manager = new Mock<ActiveActivitiesManager> { CallBase = true };
             this.secondSolver = new Mock<ISolver>();
             this.underTest = new LocalObjectRenamedOrMovedRemoteObjectDeleted(
                 this.session.Object,
                 this.storage.Object,
+                this.transmissionStorage.Object,
                 this.manager.Object,
-                true,
                 this.secondSolver.Object);
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithDateModification() {
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
-                Mock.Of<ISession>(),
+                this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
-                Mock.Of<ActiveActivitiesManager>(),
-                true);
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<ActiveActivitiesManager>());
         }
 
         [Test, Category("Fast")]
         public void ConstructorWorksWithoutDateModification() {
             new LocalObjectRenamedOrMovedRemoteObjectDeleted(
-                Mock.Of<ISession>(),
+                this.session.Object,
                 Mock.Of<IMetaDataStorage>(),
-                Mock.Of<ActiveActivitiesManager>(),
-                false);
+                Mock.Of<IFileTransmissionStorage>(),
+                Mock.Of<ActiveActivitiesManager>());
         }
 
         [Test, Category("Fast")]

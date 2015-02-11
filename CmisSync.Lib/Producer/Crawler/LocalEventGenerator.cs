@@ -21,6 +21,9 @@ namespace CmisSync.Lib.Producer.Crawler
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    #if __COCOA__
+    using System.Text;
+    #endif
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
@@ -77,10 +80,10 @@ namespace CmisSync.Lib.Producer.Crawler
             List<AbstractFolderEvent> creationEvents = new List<AbstractFolderEvent>();
             var parent = localTree.Item;
             IMappedObject storedParent = null;
-            Guid guid;
+            Guid? guid = parent.Uuid;
 
-            if (this.TryGetExtendedAttribute(parent, out guid)) {
-                storedParent = storedObjects.Find(o => o.Guid.Equals(guid));
+            if (guid != null) {
+                storedParent = storedObjects.Find(o => o.Guid.Equals((Guid)guid));
             }
 
             foreach (var child in localTree.Children) {
@@ -89,7 +92,15 @@ namespace CmisSync.Lib.Producer.Crawler
                 IMappedObject storedMappedChild = this.FindStoredObjectByFileSystemInfo(storedObjects, child.Item);
                 if (storedMappedChild != null) {
                     var localPath = this.storage.GetLocalPath(storedMappedChild);
-                    if((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
+                    if (localPath == null) {
+                        continue;
+                    }
+
+                    #if __COCOA__
+                    if ((!localPath.Normalize(NormalizationForm.FormD).Equals(child.Item.FullName.Normalize(NormalizationForm.FormD))) && this.fsFactory.IsDirectory(localPath) != null) {
+                    #else
+                    if ((!localPath.Equals(child.Item.FullName)) && this.fsFactory.IsDirectory(localPath) != null) {
+                    #endif
                         // Copied
                         creationEvents.Add(this.GenerateCreatedEvent(child.Item));
                     } else {
@@ -130,12 +141,19 @@ namespace CmisSync.Lib.Producer.Crawler
             return FileOrFolderEventFactory.CreateEvent(null, fsInfo, localChange: MetaDataChangeType.CREATED, src: this);
         }
 
-        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild)
-        {
+        private AbstractFolderEvent CreateLocalEventBasedOnStorage(IFileSystemInfo fsObject, IMappedObject storedParent, IMappedObject storedMappedChild) {
             AbstractFolderEvent createdEvent = null;
+            if (storedParent == null) {
+                throw new ArgumentNullException("stored parent is null. Stored child: " + storedMappedChild.ToString() + Environment.NewLine + "local object is: " + fsObject.FullName);
+            }
+
             if (storedMappedChild.ParentId == storedParent.RemoteObjectId) {
                 // Renamed, Updated or Equal
+                #if __COCOA__
+                if (fsObject.Name.Normalize(NormalizationForm.FormD) == storedMappedChild.Name.Normalize(NormalizationForm.FormD) && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                #else
                 if (fsObject.Name == storedMappedChild.Name && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                #endif
                     // Equal
                     createdEvent = null;
                 } else {
@@ -151,21 +169,10 @@ namespace CmisSync.Lib.Producer.Crawler
             return createdEvent;
         }
 
-        private bool TryGetExtendedAttribute(IFileSystemInfo fsInfo, out Guid guid) {
-            string ea = fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey);
-            if (!string.IsNullOrEmpty(ea) &&
-                Guid.TryParse(ea, out guid)) {
-                return true;
-            } else {
-                guid = Guid.Empty;
-                return false;
-            }
-        }
-
         private IMappedObject FindStoredObjectByFileSystemInfo(List<IMappedObject> storedObjects, IFileSystemInfo fsInfo) {
-            Guid childGuid;
-            if (this.TryGetExtendedAttribute(fsInfo, out childGuid)) {
-               return storedObjects.Find(o => o.Guid == childGuid);
+            Guid? childGuid = fsInfo.Uuid;
+            if (childGuid != null) {
+               return storedObjects.Find(o => o.Guid == (Guid)childGuid);
             }
 
             return null;

@@ -116,7 +116,7 @@ namespace CmisSync
 
             Controller.CloseWindowEvent += delegate
             {
-                asyncLoader.Cancel();
+                Close();
             };
 
             finishButton.Click += delegate
@@ -124,21 +124,25 @@ namespace CmisSync
                 Ignores = NodeModelUtils.GetIgnoredFolder(repo);
                 Credentials.Password = passwordBox.Password;
                 Controller.SaveFolder();
-                Close();
+                Controller.CloseWindow();
             };
 
             cancelButton.Click += delegate
             {
-                Close();
+                Controller.CloseWindow();
+            };
+
+            Closed += delegate
+            {
+                Controller.CleanWindow();
             };
         }
 
-
         protected override void Close(object sender, CancelEventArgs args)
         {
+            asyncLoader.Cancel();
             backgroundWorker.CancelAsync();
             backgroundWorker.Dispose();
-            Controller.CloseWindow();
         }
 
 
@@ -178,6 +182,7 @@ namespace CmisSync
             ServerCredentials cred = new ServerCredentials()
             {
                 Address = Credentials.Address,
+                Binding = Credentials.Binding,
                 UserName = Credentials.UserName,
                 Password = passwordBox.Password
             };
@@ -245,6 +250,7 @@ namespace CmisSync
             //tabItemSelection = editWPF.FindName("tabItemSelection") as TabItem;
             //  GUI workaround to remove ignore folder }}
             tabItemCredentials = editWPF.FindName("tabItemCredentials") as TabItem;
+            tabItemCredentials.Header = Properties_Resources.Credentials;
             addressLabel = editWPF.FindName("addressLabel") as TextBlock;
             addressBox = editWPF.FindName("addressBox") as TextBox;
             userLabel = editWPF.FindName("userLabel") as TextBlock;

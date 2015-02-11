@@ -14,8 +14,10 @@ SOURCES =  \
 	../EditController.cs \
 	../Program.cs \
 	../Properties/Resources.Designer.cs \
+	../SettingController.cs \
 	../SetupController.cs \
 	../StatusIconController.cs \
+	../TransmissionController.cs \
 	../Windows/FolderTreeMVC/IgnoredFolderLoader.cs \
 	../Windows/FolderTreeMVC/LoadingStatusModel.cs \
 	../Windows/FolderTreeMVC/LocalFolderLoader.cs \
@@ -24,17 +26,28 @@ SOURCES =  \
 	../Windows/FolderTreeMVC/NodeModelUtils.cs \
 	About.cs \
 	CertPolicyWindow.cs \
+	ClientBrand.cs \
 	CmisTree/CmisTreeStore.cs \
 	CmisTree/StatusCellRenderer.cs \
 	Controller.cs \
+	CredentialsWidget.cs \
 	Edit.cs \
+	gtk-gui/CmisSync.CredentialsWidget.cs \
+	gtk-gui/CmisSync.Setting.cs \
+	gtk-gui/CmisSync.Widgets.ProxyWidget.cs \
+	gtk-gui/CmisSync.Widgets.UrlWidget.cs \
+	gtk-gui/generated.cs \
 	Notification/NotificationUtils.cs \
+	ProxyWidget.cs \
+	RepositoryMenuItem.cs \
+	Setting.cs \
 	Setup.cs \
 	SetupWindow.cs \
 	Spinner.cs \
 	StatusIcon.cs \
 	UI.cs \
 	UIHelpers.cs \
+	UrlWidget.cs \
 	Utils.cs
 
 RESOURCES = $(RESOURCES_RESOURCES)

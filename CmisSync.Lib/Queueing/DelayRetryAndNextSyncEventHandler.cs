@@ -38,8 +38,7 @@ namespace CmisSync.Lib.Queueing
         /// <param name='queue'>
         /// The SyncEventQueue.
         /// </param>
-        public DelayRetryAndNextSyncEventHandler(ISyncEventQueue queue) : base(queue)
-        {
+        public DelayRetryAndNextSyncEventHandler(ISyncEventQueue queue) : base(queue) {
         }
 
         /// <summary>
@@ -54,12 +53,12 @@ namespace CmisSync.Lib.Queueing
         public override bool Handle(ISyncEvent e) {
             bool isEventDelayed = false;
 
-            if(e is AbstractFolderEvent) {
+            if (e is AbstractFolderEvent) {
                 isEventDelayed = this.DelayEventIfRetryCountPositive(e as AbstractFolderEvent);
             }
 
-            if(e is StartNextSyncEvent) {
-                if(this.SyncHasToBeDelayed()) {
+            if (e is StartNextSyncEvent) {
+                if (this.SyncHasToBeDelayed()) {
                     this.DelayNextSyncEvent(e as StartNextSyncEvent);
                     isEventDelayed = true;
                 }
@@ -71,7 +70,7 @@ namespace CmisSync.Lib.Queueing
         }
 
         private bool DelayEventIfRetryCountPositive(AbstractFolderEvent fileOrFolderEvent) {
-            if(fileOrFolderEvent.RetryCount > 0) {
+            if (fileOrFolderEvent.RetryCount > 0) {
                 this.retryEvents.Add(fileOrFolderEvent);
                 return true;
             }
@@ -81,22 +80,23 @@ namespace CmisSync.Lib.Queueing
 
         private void DelayNextSyncEvent(StartNextSyncEvent startNextSyncEvent) {
             this.syncHasBeenDelayed = true;
-            if(!this.lastDelayedSyncWasFullSync && startNextSyncEvent.FullSyncRequested == true) {
+            if (!this.lastDelayedSyncWasFullSync && startNextSyncEvent.FullSyncRequested == true) {
                 this.lastDelayedSyncWasFullSync = true;
             }
         }
 
         private void FireDelayedEventsIfQueueIsEmpty() {
-            if(this.Queue.IsEmpty && this.syncHasBeenDelayed) {
-                if(this.lastDelayedSyncWasFullSync) {
+            if (this.Queue.IsEmpty && this.syncHasBeenDelayed) {
+                if (this.lastDelayedSyncWasFullSync) {
                     this.retryEvents.Clear();
-                }
-
-                foreach(var storedRetryEvent in this.retryEvents) {
-                    Queue.AddEvent(storedRetryEvent);
+                } else {
+                    foreach (var storedRetryEvent in this.retryEvents) {
+                        Queue.AddEvent(storedRetryEvent);
+                    }
                 }
 
                 this.Queue.AddEvent(new StartNextSyncEvent(this.lastDelayedSyncWasFullSync));
+                this.lastDelayedSyncWasFullSync = false;
                 this.syncHasBeenDelayed = false;
             }
         }

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="EventManagerInitializer.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@ namespace CmisSync.Lib
     using CmisSync.Lib.Producer.Crawler;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -50,6 +51,7 @@ namespace CmisSync.Lib
         private ContentChangeEventAccumulator ccaccumulator;
         private RepoInfo repoInfo;
         private IMetaDataStorage storage;
+        private IFileTransmissionStorage fileTransmissionStorage;
         private ContentChanges contentChanges;
         private RemoteObjectFetcher remoteFetcher;
         private DescendantsCrawler crawler;
@@ -59,6 +61,10 @@ namespace CmisSync.Lib
         private RemoteObjectMovedOrRenamedAccumulator romaccumulator;
         private IFilterAggregator filter;
         private ActivityListenerAggregator activityListener;
+        private IIgnoredEntitiesStorage ignoredStorage;
+        private SelectiveIgnoreEventTransformer transformer;
+        private SelectiveIgnoreFilter selectiveIgnoreFilter;
+        private IgnoreFlagChangeDetection ignoreChangeDetector;
   
         /// <summary>
         /// Initializes a new instance of the <see cref="EventManagerInitializer"/> class.
@@ -75,6 +81,8 @@ namespace CmisSync.Lib
         public EventManagerInitializer(
             ISyncEventQueue queue,
             IMetaDataStorage storage,
+            IFileTransmissionStorage fileTransmissionStorage,
+            IIgnoredEntitiesStorage ignoredStorage,
             RepoInfo repoInfo,
             IFilterAggregator filter,
             ActivityListenerAggregator activityListener,
@@ -84,7 +92,13 @@ namespace CmisSync.Lib
                 throw new ArgumentNullException("storage null");
             }
 
-            if (repoInfo == null) {
+            if (fileTransmissionStorage == null)
+            {
+                throw new ArgumentNullException("fileTransmissionStorage null");
+            }
+
+            if (repoInfo == null)
+            {
                 throw new ArgumentNullException("Repoinfo null");
             }
 
@@ -96,6 +110,10 @@ namespace CmisSync.Lib
                 throw new ArgumentNullException("Given activityListener is null");
             }
 
+            if (ignoredStorage == null) {
+                throw new ArgumentNullException("Given storage for ignored entries is null");
+            }
+
             if (fsFactory == null) {
                 this.fileSystemFactory = new FileSystemInfoFactory();
             } else {
@@ -105,6 +123,8 @@ namespace CmisSync.Lib
             this.filter = filter;
             this.repoInfo = repoInfo;
             this.storage = storage;
+            this.ignoredStorage = ignoredStorage;
+            this.fileTransmissionStorage = fileTransmissionStorage;
             this.activityListener = activityListener;
         }
 
@@ -117,8 +137,7 @@ namespace CmisSync.Lib
         /// <returns>
         /// true if handled.
         /// </returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is SuccessfulLoginEvent) {
                 var successfulLoginEvent = e as SuccessfulLoginEvent;
                 var session = successfulLoginEvent.Session;
@@ -138,8 +157,22 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.alreadyHandledFilter);
                 }
 
-                if (this.AreChangeEventsSupported(session))
-                {
+                if (this.selectiveIgnoreFilter != null) {
+                    this.Queue.EventManager.RemoveEventHandler(this.selectiveIgnoreFilter);
+                }
+
+                if (this.transformer != null) {
+                    this.Queue.EventManager.RemoveEventHandler(this.transformer);
+                }
+
+                if (this.ignoreChangeDetector != null) {
+                    this.Queue.EventManager.RemoveEventHandler(this.ignoreChangeDetector);
+                }
+
+                if (session.AreChangeEventsSupported() &&
+                    (this.repoInfo.SupportedFeatures == null || this.repoInfo.SupportedFeatures.GetContentChangesSupport != false)) {
+                    Logger.Info("Session supports content changes");
+
                     // Add Accumulator
                     this.ccaccumulator = new ContentChangeEventAccumulator(session, this.Queue);
                     this.Queue.EventManager.AddEventHandler(this.ccaccumulator);
@@ -151,6 +184,20 @@ namespace CmisSync.Lib
                     // Add Filter of already handled change events
                     this.alreadyHandledFilter = new IgnoreAlreadyHandledContentChangeEventsFilter(this.storage, session);
                     this.Queue.EventManager.AddEventHandler(this.alreadyHandledFilter);
+                }
+
+                if (session.SupportsSelectiveIgnore()) {
+                    // Transforms events of ignored folders
+                    this.transformer = new SelectiveIgnoreEventTransformer(this.ignoredStorage, this.Queue);
+                    this.Queue.EventManager.AddEventHandler(this.transformer);
+
+                    // Filters events of ignored folders
+                    this.selectiveIgnoreFilter = new SelectiveIgnoreFilter(this.ignoredStorage);
+                    this.Queue.EventManager.AddEventHandler(this.selectiveIgnoreFilter);
+
+                    // Detection if any ignored object has changed its state
+                    this.ignoreChangeDetector = new IgnoreFlagChangeDetection(this.ignoredStorage, new PathMatcher.PathMatcher(this.repoInfo.LocalPath, this.repoInfo.RemotePath), this.Queue);
+                    this.Queue.EventManager.AddEventHandler(this.ignoreChangeDetector);
                 }
 
                 // Add remote object fetcher
@@ -166,7 +213,7 @@ namespace CmisSync.Lib
                     this.Queue.EventManager.RemoveEventHandler(this.crawler);
                 }
 
-                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener);
+                this.crawler = new DescendantsCrawler(this.Queue, remoteRoot, this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath), this.storage, this.filter, this.activityListener, this.ignoredStorage);
                 this.Queue.EventManager.AddEventHandler(this.crawler);
 
                 // Add remote object moved accumulator
@@ -185,7 +232,7 @@ namespace CmisSync.Lib
                 var localDetection = new LocalSituationDetection();
                 var remoteDetection = new RemoteSituationDetection();
 
-                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.activityListener, isServerAbleToUpdateModificationDate: session.IsServerAbleToUpdateModificationDate());
+                this.mechanism = new SyncMechanism(localDetection, remoteDetection, this.Queue, session, this.storage, this.fileTransmissionStorage, this.activityListener, this.filter);
                 this.Queue.EventManager.AddEventHandler(this.mechanism);
 
                 var localRootFolder = this.fileSystemFactory.CreateDirectoryInfo(this.repoInfo.LocalPath);
@@ -194,8 +241,7 @@ namespace CmisSync.Lib
                     try {
                         rootFolderGuid = Guid.NewGuid();
                         localRootFolder.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, rootFolderGuid.ToString(), false);
-                    } catch (ExtendedAttributeException ex)
-                    {
+                    } catch (ExtendedAttributeException ex) {
                         Logger.Warn("Problem on setting Guid of the root path", ex);
                         rootFolderGuid = Guid.Empty;
                     }
@@ -217,28 +263,6 @@ namespace CmisSync.Lib
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Detect whether the repository has the ChangeLog capability.
-        /// </summary>
-        /// <param name="session">The Cmis Session</param>
-        /// <returns>
-        /// <c>true</c> if this feature is available, otherwise <c>false</c>
-        /// </returns>
-        private bool AreChangeEventsSupported(ISession session)
-        {
-            try
-            {
-                return (session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.All ||
-                        session.RepositoryInfo.Capabilities.ChangesCapability == CapabilityChanges.ObjectIdsOnly) &&
-                    (this.repoInfo.SupportedFeatures == null ||
-                    this.repoInfo.SupportedFeatures.GetContentChangesSupport != false);
-            }
-            catch(NullReferenceException)
-            {
-                return false;
-            }
         }
     }
 }

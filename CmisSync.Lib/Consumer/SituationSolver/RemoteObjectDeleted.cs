@@ -17,33 +17,35 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
 
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Filter;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
-    using log4net;
-
     /// <summary>
     /// Remote object has been deleted. => Delete the corresponding local object as well.
     /// </summary>
-    public class RemoteObjectDeleted : AbstractEnhancedSolver
-    {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+    public class RemoteObjectDeleted : AbstractEnhancedSolver {
+        private IFilterAggregator filters;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.RemoteObjectDeleted"/> class.
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        public RemoteObjectDeleted(ISession session, IMetaDataStorage storage) : base(session, storage) {
+        public RemoteObjectDeleted(ISession session, IMetaDataStorage storage, IFilterAggregator filters) : base(session, storage) {
+            if (filters == null) {
+                throw new ArgumentNullException("Given filter aggregator is null");
+            }
+
+            this.filters = filters;
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             if (localFileInfo is IDirectoryInfo) {
-                if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(this.Storage, localFileInfo)) {
+                if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(localFileInfo)) {
                     this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
                     throw new IOException(string.Format("Not all local objects under {0} have been synced yet", localFileInfo.FullName));
                 } else {
@@ -68,35 +70,45 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
             } else if (localFileInfo is IFileInfo) {
                 var file = localFileInfo as IFileInfo;
+                file.Refresh();
                 var mappedFile = this.Storage.GetObjectByLocalPath(file);
-                if (mappedFile != null && file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
-                    file.Delete();
-                    OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", file.FullName, mappedFile.RemoteObjectId));
+                if (file.Exists) {
+                    if (mappedFile != null && file.LastWriteTimeUtc.Equals(mappedFile.LastLocalWriteTimeUtc)) {
+                        file.Delete();
+                        OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", file.FullName, mappedFile.RemoteObjectId));
+                    } else {
+                        file.Uuid = null;
+                        if (mappedFile == null) {
+                            return;
+                        }
+
+                        OperationsLogger.Info(string.Format("Deletion of local file {0} skipped because of not yet uploaded changes", file.FullName));
+                    }
                 } else {
-                    file.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
                     if (mappedFile == null) {
                         return;
+                    } else {
+                        OperationsLogger.Info(string.Format("Deletion of local file {0} skipped because it has already been deleted", file.FullName));
                     }
-
-                    OperationsLogger.Info(string.Format("Deletion of local file {0} skipped because of not yet uploaded changes", file.FullName));
                 }
 
                 this.Storage.RemoveObject(this.Storage.GetObjectByLocalPath(localFileInfo));
+                file.Refresh();
                 if (file.Exists) {
                     throw new IOException(string.Format("Deletion of local file {0} skipped because of not yet uploaded changes", localFileInfo.FullName));
                 }
             }
         }
 
-        private bool DeleteLocalObjectIfHasBeenSyncedBefore(IMetaDataStorage storage, IFileSystemInfo fsInfo) {
+        private bool DeleteLocalObjectIfHasBeenSyncedBefore(IFileSystemInfo fsInfo) {
             bool delete = true;
-
-            Guid uuid;
+            string reason;
+            Guid? uuid = fsInfo.Uuid;
             IMappedObject obj = null;
-            if (Guid.TryParse(fsInfo.GetExtendedAttribute(MappedObject.ExtendedAttributeKey), out uuid)) {
-                obj = storage.GetObjectByGuid(uuid);
+            if (uuid != null) {
+                obj = this.Storage.GetObjectByGuid((Guid)uuid);
             } else {
-                obj = storage.GetObjectByLocalPath(fsInfo);
+                obj = this.Storage.GetObjectByLocalPath(fsInfo);
             }
 
             if (fsInfo is IFileInfo) {
@@ -104,33 +116,53 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                     (fsInfo as IFileInfo).Delete();
                     OperationsLogger.Info(string.Format("Deleted local file {0} because the mapped remote object {0} has been deleted", fsInfo.FullName, obj.RemoteObjectId));
                 } else {
-                    fsInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                    fsInfo.Uuid = null;
                     return false;
                 }
             } else if (fsInfo is IDirectoryInfo) {
                 var dir = fsInfo as IDirectoryInfo;
-                foreach (var folder in dir.GetDirectories()) {
-                    if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(storage, folder)) {
-                        delete = false;
-                    }
+                if (obj != null && obj.Ignored) {
+                    dir.Delete(true);
+                    return true;
                 }
 
-                foreach (var file in dir.GetFiles()) {
-                    if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(storage, file)) {
-                        delete = false;
+                if (!this.filters.FolderNamesFilter.CheckFolderName(dir.Name, out reason)) {
+                    foreach (var folder in dir.GetDirectories()) {
+                        if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(folder)) {
+                            delete = false;
+                        }
                     }
-                }
 
-                if (delete) {
-                    try {
-                        (fsInfo as IDirectoryInfo).Delete(false);
-                        OperationsLogger.Info(string.Format("Deleted local folder {0} because the mapped remote folder has been deleted", fsInfo.FullName));
-                    } catch (IOException) {
-                        fsInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
-                        return false;
+                    foreach (var file in dir.GetFiles()) {
+                        if (!this.filters.FileNamesFilter.CheckFile(file.Name, out reason)) {
+                            if (!this.DeleteLocalObjectIfHasBeenSyncedBefore(file)) {
+                                delete = false;
+                            }
+                        } else {
+                            file.Delete();
+                            OperationsLogger.Info(string.Format("Deleted local ignored file {0} because the mapped remote parent object {0} has been deleted", fsInfo.FullName, obj.RemoteObjectId));
+                        }
+                    }
+
+                    if (delete) {
+                        try {
+                            (fsInfo as IDirectoryInfo).Delete(false);
+                            OperationsLogger.Info(string.Format("Deleted local folder {0} because the mapped remote folder has been deleted", fsInfo.FullName));
+                        } catch (IOException) {
+                            fsInfo.Uuid = null;
+                            return false;
+                        }
+                    } else {
+                        fsInfo.Uuid = null;
                     }
                 } else {
-                    fsInfo.SetExtendedAttribute(MappedObject.ExtendedAttributeKey, null, true);
+                    try {
+                        (fsInfo as IDirectoryInfo).Delete(true);
+                        OperationsLogger.Info(string.Format("Deleted locally ignored folder {0} because the parent mapped remote folder has been deleted", fsInfo.FullName));
+                    } catch (IOException e) {
+                        OperationsLogger.Info(string.Format("Deletion of locally ignored folder {0} failed", fsInfo.FullName), e);
+                        return false;
+                    }
                 }
             }
 

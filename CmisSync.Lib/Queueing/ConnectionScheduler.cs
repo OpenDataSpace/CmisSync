@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -39,30 +38,23 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Connection scheduler.
     /// </summary>
-    public class ConnectionScheduler : SyncEventHandler, IConnectionScheduler
-    {
+    public class ConnectionScheduler : SyncEventHandler, IConnectionScheduler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionScheduler));
         private Task task;
+        private CancellationTokenSource cancelTaskSource;
+        private CancellationToken cancelToken;
         private object connectionLock = new object();
         private object repoInfoLock = new object();
-        private bool isForbidden = false;
-
-        protected ISyncEventQueue Queue { get; set; }
-
-        protected RepoInfo RepoInfo { get; set; }
-
-        protected IAuthenticationProvider AuthProvider { get; set; }
-
-        protected ISessionFactory SessionFactory { get; set; }
+        private DateTime isForbiddenUntil = DateTime.MinValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.ConnectionScheduler"/> class.
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
-        /// <param name="queue">Queue.</param>
+        /// <param name="queue">Event queue.</param>
         /// <param name="sessionFactory">Session factory.</param>
         /// <param name="authProvider">Auth provider.</param>
-        /// <param name="interval">Interval.</param>
+        /// <param name="interval">Retry interval in msec.</param>
         public ConnectionScheduler(
             RepoInfo repoInfo,
             ISyncEventQueue queue,
@@ -101,7 +93,7 @@ namespace CmisSync.Lib.Queueing
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Queueing.ConnectionScheduler"/> class by copy all members.
         /// </summary>
         /// <param name="original">Original Instance.</param>
-        protected ConnectionScheduler(ConnectionScheduler original) : this(original.RepoInfo, original.Queue, original.SessionFactory, original.AuthProvider, original.Interval){
+        protected ConnectionScheduler(ConnectionScheduler original) : this(original.RepoInfo, original.Queue, original.SessionFactory, original.AuthProvider, original.Interval) {
         }
 
         /// <summary>
@@ -109,6 +101,14 @@ namespace CmisSync.Lib.Queueing
         /// </summary>
         /// <value>The interval.</value>
         public int Interval { get; private set; }
+
+        protected ISyncEventQueue Queue { get; set; }
+
+        protected RepoInfo RepoInfo { get; set; }
+
+        protected IAuthenticationProvider AuthProvider { get; set; }
+
+        protected ISessionFactory SessionFactory { get; set; }
 
         /// <summary>
         /// Releases all resource used by the <see cref="CmisSync.Lib.Queueing.SyncScheduler"/> object.
@@ -121,9 +121,17 @@ namespace CmisSync.Lib.Queueing
         public void Dispose() {
             if (this.task != null) {
                 try {
+                    this.cancelTaskSource.Cancel();
+                    this.task.Wait(this.Interval);
                     this.task.Dispose();
-                } catch(InvalidOperationException) {
+                } catch (InvalidOperationException) {
                     // Disposing the login task before it is finished is not a problem
+                } catch (TaskCanceledException) {
+                    // It is fine if the task is canceled
+                } catch (AggregateException) {
+                    // It is also fine if the task is canceled
+                } finally {
+                    this.cancelTaskSource.Dispose();
                 }
             }
         }
@@ -134,12 +142,15 @@ namespace CmisSync.Lib.Queueing
         public virtual void Start() {
             lock(this.connectionLock) {
                 if (this.task == null) {
+                    this.cancelTaskSource = new CancellationTokenSource();
+                    this.cancelToken = this.cancelTaskSource.Token;
                     this.task = Task.Factory.StartNew(
                         () => {
-                        while (!this.Connect()) {
-                            Thread.Sleep(this.Interval);
+                        this.cancelToken.ThrowIfCancellationRequested();
+                        while (!this.cancelToken.IsCancellationRequested && !this.Connect()) {
+                            this.cancelToken.WaitHandle.WaitOne(this.Interval);
                         }
-                    });
+                    }, this.cancelTaskSource.Token);
                 }
             }
         }
@@ -148,22 +159,29 @@ namespace CmisSync.Lib.Queueing
         /// Handles repository configuration change events by extracting new login informations and returns false
         /// </summary>
         /// <param name="e">The event to handle.</param>
-        /// <returns>false</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        /// <returns><c>false</c></returns>
+        public override bool Handle(ISyncEvent e) {
             if (e is RepoConfigChangedEvent) {
                 var changedConfig = (e as RepoConfigChangedEvent).RepoInfo;
                 if (changedConfig != null) {
                     lock(this.repoInfoLock) {
                         this.RepoInfo = changedConfig;
-                        this.isForbidden = false;
+                        this.isForbiddenUntil = DateTime.MinValue;
                         lock(this.connectionLock) {
                             if (this.task != null) {
                                 try {
+                                    this.cancelTaskSource.Cancel();
+                                    this.task.Wait(this.Interval);
                                     this.task.Dispose();
-                                    this.task = null;
-                                } catch(InvalidOperationException) {
+                                } catch (InvalidOperationException) {
                                     // Disposing the login task before it is finished is not a problem.
+                                } catch (TaskCanceledException) {
+                                    // It is also fine if the task is canceled
+                                } catch (AggregateException) {
+                                    // It is also fine if the task is canceled
+                                } finally {
+                                    this.cancelTaskSource.Dispose();
+                                    this.task = null;
                                 }
                             }
 
@@ -179,33 +197,39 @@ namespace CmisSync.Lib.Queueing
         /// <summary>
         /// Connect this instance.
         /// </summary>
-        protected bool Connect()
-        {
+        /// <returns><c>true</c>, if connection was successful, otherwise <c>false</c></returns>
+        protected bool Connect() {
             lock(this.repoInfoLock) {
                 try {
-                    if (this.isForbidden) {
+                    if (this.isForbiddenUntil > DateTime.UtcNow) {
                         return false;
                     }
 
                     // Create session.
                     var session = this.SessionFactory.CreateSession(this.GetCmisParameter(this.RepoInfo), null, this.AuthProvider, null);
-
+                    this.cancelToken.ThrowIfCancellationRequested();
                     session.DefaultContext = OperationContextFactory.CreateDefaultContext(session);
+                    this.cancelToken.ThrowIfCancellationRequested();
                     this.Queue.AddEvent(new SuccessfulLoginEvent(this.RepoInfo.Address, session));
                     return true;
                 } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {
                     Logger.Info(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
-                    this.Queue.AddEvent(new PermissionDeniedEvent(e));
-                    this.isForbidden = true;
+                    var permissionDeniedEvent = new PermissionDeniedEvent(e);
+                    this.Queue.AddEvent(permissionDeniedEvent);
+                    this.isForbiddenUntil = permissionDeniedEvent.IsBlockedUntil ?? DateTime.MaxValue;
                 } catch (CmisRuntimeException e) {
                     if (e.Message == "Proxy Authentication Required") {
                         this.Queue.AddEvent(new ProxyAuthRequiredEvent(e));
                         Logger.Warn("Proxy Settings Problem", e);
-                        this.isForbidden = true;
+                        this.isForbiddenUntil = DateTime.MaxValue;
                     } else {
                         Logger.Error("Connection to repository failed: ", e);
                         this.Queue.AddEvent(new ExceptionEvent(e));
                     }
+                } catch (DotCMIS.Exceptions.CmisInvalidArgumentException e) {
+                    Logger.Warn(string.Format("Failed to connect to server {0}", this.RepoInfo.Address.ToString()), e);
+                    this.Queue.AddEvent(new ConfigurationNeededEvent(e));
+                    this.isForbiddenUntil = DateTime.MaxValue;
                 } catch (CmisObjectNotFoundException e) {
                     Logger.Error("Failed to find cmis object: ", e);
                 } catch (CmisBaseException e) {
@@ -225,11 +249,16 @@ namespace CmisSync.Lib.Queueing
         /// <param name='repoInfo'>
         /// The repository infos.
         /// </param>
-        private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo)
-        {
+        private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo) {
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
-            cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
-            cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
+            if (repoInfo.Binding == DotCMIS.BindingType.AtomPub) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
+                cmisParameters[SessionParameter.AtomPubUrl] = repoInfo.Address.ToString();
+            } else if (repoInfo.Binding == DotCMIS.BindingType.Browser) {
+                cmisParameters[SessionParameter.BindingType] = BindingType.Browser;
+                cmisParameters[SessionParameter.BrowserUrl] = repoInfo.Address.ToString();
+            }
+
             cmisParameters[SessionParameter.User] = repoInfo.User;
             cmisParameters[SessionParameter.Password] = repoInfo.GetPassword().ToString();
             cmisParameters[SessionParameter.RepositoryId] = repoInfo.RepositoryId;

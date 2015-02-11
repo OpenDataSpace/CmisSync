@@ -35,7 +35,7 @@ namespace TestLibrary.EventsTests
         {
             var inner = new Mock<ISyncEvent>().Object;
             var outer = new EncapsuledEvent(inner);
-            Assert.AreEqual(inner, outer.Event);
+            Assert.That(inner, Is.EqualTo(outer.Event));
         }
 
         [Test, Category("Fast")]

@@ -34,8 +34,6 @@ namespace CmisSync.Lib.Consumer
     /// </summary>
     public class LocalSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalSituationDetection));
-
         /// <summary>
         /// Analyse the situation of the actual event in combination with the meta data storage.
         /// </summary>
@@ -45,12 +43,12 @@ namespace CmisSync.Lib.Consumer
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
             SituationType type = this.DoAnalyse(storage, actualEvent);
-            Logger.Debug(string.Format("Local Situation is: {0}", type));
             return type;
         }
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
+            IFileSystemInfo localPath = actualEvent is FolderEvent ? (IFileSystemInfo)(actualEvent as FolderEvent).LocalFolder : (IFileSystemInfo)(actualEvent is FileEvent ? (actualEvent as FileEvent).LocalFile : null);
             switch (actualEvent.Local)
             {
             case MetaDataChangeType.CREATED:
@@ -58,9 +56,19 @@ namespace CmisSync.Lib.Consumer
             case MetaDataChangeType.DELETED:
                 return SituationType.REMOVED;
             case MetaDataChangeType.MOVED:
+                try {
+                    Guid? guid = localPath.Uuid;
+                    var obj = storage.GetObjectByGuid((Guid)guid);
+                    var parent = storage.GetObjectByRemoteId(obj.ParentId);
+                    Guid? parentGuid = (localPath is IFileInfo) ? (localPath as IFileInfo).Directory.Uuid : (localPath as IDirectoryInfo).Parent.Uuid;
+                    if (parent.Guid == (Guid)parentGuid) {
+                        return SituationType.RENAMED;
+                    }
+                } catch (Exception) {
+                }
+
                 return SituationType.MOVED;
             case MetaDataChangeType.CHANGED:
-                IFileSystemInfo localPath = actualEvent is FolderEvent ? (IFileSystemInfo)(actualEvent as FolderEvent).LocalFolder : (IFileSystemInfo)(actualEvent is FileEvent ? (actualEvent as FileEvent).LocalFile : null);
                 if (storage.GetObjectByLocalPath(localPath) == null) {
                     Guid? guid = localPath.Uuid;
                     if (guid != null && storage.GetObjectByGuid((Guid)guid) != null) {

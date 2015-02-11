@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Repository.cs" company="GRAU DATA AG">
 //
 //   Copyright (C) 2012  Nicolas Raoul &lt;nicolas.raoul@aegif.jp&gt;
@@ -25,6 +25,7 @@ namespace CmisSync.Lib.Cmis
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Accumulator;
@@ -36,6 +37,7 @@ namespace CmisSync.Lib.Cmis
     using CmisSync.Lib.Producer.ContentChange;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.SelectiveIgnore;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -53,8 +55,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Current status of the synchronization.
     /// </summary>
-    public enum SyncStatus
-    {
+    public enum SyncStatus {
         /// <summary>
         /// Normal operation.
         /// </summary>
@@ -74,8 +75,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Synchronized CMIS repository.
     /// </summary>
-    public class Repository : IDisposable
-    {
+    public class Repository : IDisposable {
         /// <summary>
         /// Name of the synchronized folder, as found in the CmisSync XML configuration file.
         /// </summary>
@@ -125,6 +125,8 @@ namespace CmisSync.Lib.Cmis
 
         private FilterAggregator filters;
 
+        private IIgnoredEntitiesStorage ignoredStorage;
+
         /// <summary>
         /// Track whether <c>Dispose</c> has been called.
         /// </summary>
@@ -149,6 +151,8 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         protected MetaDataStorage storage;
 
+        protected FileTransmissionStorage fileTransmissionStorage;
+
         /// <summary>
         /// The connection scheduler.
         /// </summary>
@@ -156,8 +160,9 @@ namespace CmisSync.Lib.Cmis
 
         private IFileSystemInfoFactory fileSystemFactory;
 
-        static Repository()
-        {
+        private ActivityListenerAggregator activityListener;
+
+        static Repository() {
             DBreezeInitializerSingleton.Init();
         }
 
@@ -166,8 +171,7 @@ namespace CmisSync.Lib.Cmis
         /// </summary>
         /// <param name="repoInfo">Repo info.</param>
         /// <param name="activityListener">Activity listener.</param>
-        public Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener) : this(repoInfo, activityListener, false, CreateQueue())
-        {
+        public Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener) : this(repoInfo, activityListener, false, CreateQueue()) {
         }
 
         /// <summary>
@@ -177,8 +181,7 @@ namespace CmisSync.Lib.Cmis
         /// <param name="activityListener">Activity listener.</param>
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="queue">Event Queue.</param>
-        protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, IDisposableSyncEventQueue queue)
-        {
+        protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, ICountingQueue queue) {
             if (repoInfo == null) {
                 throw new ArgumentNullException("Given repoInfo is null");
             }
@@ -188,6 +191,7 @@ namespace CmisSync.Lib.Cmis
             }
 
             this.fileSystemFactory = new FileSystemInfoFactory();
+            this.activityListener = activityListener;
 
             // Initialize local variables
             this.RepoInfo = repoInfo;
@@ -196,11 +200,10 @@ namespace CmisSync.Lib.Cmis
             this.RemoteUrl = repoInfo.Address;
 
             if (!this.fileSystemFactory.CreateDirectoryInfo(this.LocalPath).IsExtendedAttributeAvailable()) {
-                throw new ArgumentException("Extended Attributes are not available on the local path: " + this.LocalPath);
+                throw new ExtendedAttributeException("Extended Attributes are not available on the local path: " + this.LocalPath);
             }
 
             this.Queue = queue;
-
             this.Queue.EventManager.AddEventHandler(new DebugLoggingHandler());
 
             // Create Database connection
@@ -215,6 +218,8 @@ namespace CmisSync.Lib.Cmis
 
             // Initialize storage
             this.storage = new MetaDataStorage(this.db, new PathMatcher(this.LocalPath, this.RepoInfo.RemotePath));
+            this.fileTransmissionStorage = new FileTransmissionStorage(this.db);
+            this.fileTransmissionStorage.ChunkSize = RepoInfo.ChunkSize;
 
             // Add ignore file/folder filter
             this.ignoredFoldersFilter = new IgnoredFoldersFilter { IgnoredPaths = new List<string>(repoInfo.GetIgnoredPaths()) };
@@ -261,7 +266,9 @@ namespace CmisSync.Lib.Cmis
                 this.Status = status;
             };
 
-            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
+            this.ignoredStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), this.storage);
+
+            this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
 
             this.Queue.EventManager.AddEventHandler(new DelayRetryAndNextSyncEventHandler(this.Queue));
 
@@ -274,8 +281,7 @@ namespace CmisSync.Lib.Cmis
         /// Finalizes an instance of the <see cref="Repository"/> class and releases unmanaged
         /// resources and performs other cleanup operations before the is reclaimed by garbage collection.
         /// </summary>
-        ~Repository()
-        {
+        ~Repository() {
             this.Dispose(false);
         }
 
@@ -304,12 +310,7 @@ namespace CmisSync.Lib.Cmis
         /// Use this to notifiy events for this repository.
         /// </summary>
         /// <value>The queue.</value>
-        public IDisposableSyncEventQueue Queue { get; protected set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this Repo is stopped, to control for machine sleep/wake power management.
-        /// </summary>
-        public bool Stopped { get; set; }
+        public ICountingQueue Queue { get; protected set; }
 
         /// <summary>
         /// Gets the watcherproducer of the local filesystem for changes.
@@ -329,8 +330,7 @@ namespace CmisSync.Lib.Cmis
         /// <summary>
         /// Stop syncing momentarily.
         /// </summary>
-        public void Suspend()
-        {
+        public void Suspend() {
             this.Status = SyncStatus.Suspend;
             this.Scheduler.Stop();
             this.Queue.Suspend();
@@ -339,8 +339,7 @@ namespace CmisSync.Lib.Cmis
         /// <summary>
         /// Restart syncing.
         /// </summary>
-        public void Resume()
-        {
+        public void Resume() {
             this.Status = SyncStatus.Idle;
             this.Queue.Continue();
             this.Scheduler.Start();
@@ -349,8 +348,7 @@ namespace CmisSync.Lib.Cmis
         /// <summary>
         /// Implement IDisposable interface.
         /// </summary>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -358,8 +356,7 @@ namespace CmisSync.Lib.Cmis
         /// <summary>
         /// Initialize the scheduled background sync processes.
         /// </summary>
-        public virtual void Initialize()
-        {
+        public virtual void Initialize() {
             this.connectionScheduler.Start();
 
             // Enable FS Watcher events
@@ -373,26 +370,42 @@ namespace CmisSync.Lib.Cmis
         /// Dispose the managed and unmanaged resources if disposing is <c>true</c>.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!this.disposed)
-            {
-                if (disposing)
-                {
-                    this.connectionScheduler.Dispose();
-                    this.Scheduler.Dispose();
-                    this.WatcherProducer.Dispose();
-                    this.Queue.StopListener();
-                    int timeout = 500;
-                    if(!this.Queue.WaitForStopped(timeout))
-                    {
+        protected virtual void Dispose(bool disposing) {
+            if (!this.disposed) {
+                this.connectionScheduler.Dispose();
+                this.Scheduler.Dispose();
+                this.WatcherProducer.Dispose();
+                this.Queue.StopListener();
+
+                if (disposing) {
+                    bool transmissionRun = false;
+                    do {
+                        if (transmissionRun) {
+                            Thread.Sleep(10);
+                        }
+                        transmissionRun = false;
+                        List<FileTransmissionEvent> transmissionEvents = this.activityListener.TransmissionManager.ActiveTransmissionsAsList();
+                        foreach (FileTransmissionEvent transmissionEvent in transmissionEvents) {
+                            string localFolder = this.RepoInfo.LocalPath;
+                            if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
+                                localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
+                            }
+
+                            if (transmissionEvent.Path.StartsWith(localFolder)) {
+                                transmissionRun = true;
+                                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
+                            }
+                        }
+                    } while (transmissionRun);
+
+                    int timeout = 5000;
+                    if (!this.Queue.WaitForStopped(timeout)) {
                         Logger.Debug(string.Format("Event Queue is of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
                     }
 
                     this.Queue.Dispose();
                     this.authProvider.Dispose();
-                    if(this.db != null)
-                    {
+                    if (this.db != null) {
                         this.db.Dispose();
                     }
                 }
@@ -401,13 +414,12 @@ namespace CmisSync.Lib.Cmis
             }
         }
 
-        private static IDisposableSyncEventQueue CreateQueue() {
+        private static ICountingQueue CreateQueue() {
             var manager = new SyncEventManager();
             return new SyncEventQueue(manager);
         }
 
-        private bool RepoInfoChanged(ISyncEvent e)
-        {
+        private bool RepoInfoChanged(ISyncEvent e) {
             if (e is RepoConfigChangedEvent) {
                 this.RepoInfo = (e as RepoConfigChangedEvent).RepoInfo;
                 this.ignoredFoldersFilter.IgnoredPaths = new List<string>(this.RepoInfo.GetIgnoredPaths());

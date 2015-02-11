@@ -29,7 +29,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Abstract folder event.
     /// </summary>
-    public abstract class AbstractFolderEvent : ISyncEvent
+    public abstract class AbstractFolderEvent : ICountableEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.AbstractFolderEvent"/> class.
@@ -68,5 +68,16 @@ namespace CmisSync.Lib.Events
         /// The retry count.
         /// </value>
         public int RetryCount { get; set; }
+
+        /// <summary>
+        /// Gets the category of the event. This can be used to differ between multiple event types.
+        /// The returned value should never ever change its value after requesting it the first time.
+        /// </summary>
+        /// <value>The event category is "DetectedChange".</value>
+        public string Category {
+            get {
+                return "DetectedChange";
+            }
+        }
     }
 }

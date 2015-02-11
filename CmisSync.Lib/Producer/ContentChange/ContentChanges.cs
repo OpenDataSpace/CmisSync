@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.ContentChange
-{
+namespace CmisSync.Lib.Producer.ContentChange {
     using System;
     using System.IO;
     using System.Threading;
@@ -37,8 +36,7 @@ namespace CmisSync.Lib.Producer.ContentChange
     /// <summary>
     /// Content changes are collected and published to the queue.
     /// </summary>
-    public class ContentChanges : ReportingSyncEventHandler
-    {
+    public class ContentChanges : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ContentChanges));
         private ISession session;
         private IMetaDataStorage storage;
@@ -83,13 +81,10 @@ namespace CmisSync.Lib.Producer.ContentChange
         /// </summary>
         /// <param name="e">The event to handle.</param>
         /// <returns>true if handled</returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             StartNextSyncEvent syncEvent = e as StartNextSyncEvent;
-            if(syncEvent != null)
-            {
-                if(syncEvent.FullSyncRequested)
-                {
+            if (syncEvent != null) {
+                if (syncEvent.FullSyncRequested) {
                     // Get last change log token on server side.
                     string lastRemoteChangeLogTokenBeforeFullCrawlSync = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
                     if (this.storage.ChangeLogToken == null) {
@@ -98,9 +93,7 @@ namespace CmisSync.Lib.Producer.ContentChange
 
                     // Use fallback sync algorithm
                     return false;
-                }
-                else
-                {
+                } else {
                     Logger.Debug("Starting ContentChange Sync");
                     bool result = this.StartSync();
                     return result;
@@ -109,10 +102,9 @@ namespace CmisSync.Lib.Producer.ContentChange
 
             // The above started full sync is finished.
             FullSyncCompletedEvent syncCompleted = e as FullSyncCompletedEvent;
-            if(syncCompleted != null) {
+            if (syncCompleted != null) {
                 string lastTokenOnServer = syncCompleted.StartEvent.LastTokenOnServer;
-                if(!string.IsNullOrEmpty(lastTokenOnServer))
-                {
+                if (!string.IsNullOrEmpty(lastTokenOnServer)) {
                     this.storage.ChangeLogToken = lastTokenOnServer;
                 }
             }
@@ -149,8 +141,7 @@ namespace CmisSync.Lib.Producer.ContentChange
             }
         }
 
-        private void Sync()
-        {
+        private void Sync() {
             // Get last change log token on server side.
             this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);    // refresh
             string lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
@@ -158,8 +149,7 @@ namespace CmisSync.Lib.Producer.ContentChange
             // Get last change token that had been saved on client side.
             string lastTokenOnClient = this.storage.ChangeLogToken;
 
-            if (lastTokenOnClient == null)
-            {
+            if (lastTokenOnClient == null) {
                 // Token is null, which means no content change sync has ever happened yet, so just sync everything from remote.
                 // Force full sync
                 var fullsyncevent = new StartNextSyncEvent(true);
@@ -167,22 +157,19 @@ namespace CmisSync.Lib.Producer.ContentChange
                 return;
             }
 
-            do
-            {
+            do {
                 // Check which files/folders have changed.
                 IChangeEvents changes = this.session.GetContentChanges(lastTokenOnClient, this.isPropertyChangesSupported, this.maxNumberOfContentChanges);
 
                 // Replicate each change to the local side.
                 bool first = true;
-                foreach (IChangeEvent change in changes.ChangeEventList)
-                {
+                foreach (IChangeEvent change in changes.ChangeEventList) {
                     // ignore first event when lists overlapp
-                    if(first) {
+                    if (first) {
                         first = false;
-                        if(this.lastChange != null &&
+                        if (this.lastChange != null &&
                            (this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Created
-                         || this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Deleted))
-                        {
+                         || this.lastChange.ChangeType == DotCMIS.Enums.ChangeType.Deleted)) {
                             if (change != null && change.ChangeType == this.lastChange.ChangeType && change.ObjectId == this.lastChange.ObjectId) {
                                 continue;
                             }
@@ -195,12 +182,9 @@ namespace CmisSync.Lib.Producer.ContentChange
                 }
 
                 // Save change log token locally.
-                if (changes.HasMoreItems == true)
-                {
+                if (changes.HasMoreItems == true) {
                     lastTokenOnClient = changes.LatestChangeLogToken;
-                }
-                else
-                {
+                } else {
                     lastTokenOnClient = lastTokenOnServer;
                 }
 
@@ -209,8 +193,7 @@ namespace CmisSync.Lib.Producer.ContentChange
                 // refresh
                 this.session.Binding.GetRepositoryService().GetRepositoryInfos(null);
                 lastTokenOnServer = this.session.Binding.GetRepositoryService().GetRepositoryInfo(this.session.RepositoryInfo.Id, null).LatestChangeLogToken;
-            }
-            while (!lastTokenOnServer.Equals(lastTokenOnClient));
+            } while (!lastTokenOnServer.Equals(lastTokenOnClient));
         }
     }
 }

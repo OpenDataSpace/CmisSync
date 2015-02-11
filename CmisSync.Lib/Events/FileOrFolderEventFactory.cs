@@ -114,7 +114,7 @@ namespace CmisSync.Lib.Events
                         oldLocalObject as IDirectoryInfo,
                         localObject as IDirectoryInfo,
                         oldRemotePath,
-                        remoteObject as IFolder) {
+                        remoteObject as IFolder, src) {
                         Local = localChange,
                         Remote = remoteChange
                     };

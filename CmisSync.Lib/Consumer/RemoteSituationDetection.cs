@@ -36,8 +36,6 @@ namespace CmisSync.Lib.Consumer
     /// </summary>
     public class RemoteSituationDetection : ISituationDetection<AbstractFolderEvent>
     {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(RemoteSituationDetection));
-
         /// <summary>
         /// Analyse the specified actual event.
         /// </summary>
@@ -46,14 +44,17 @@ namespace CmisSync.Lib.Consumer
         /// <returns>The detected situation type</returns>
         public SituationType Analyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
+            if (actualEvent.Remote == MetaDataChangeType.NONE && this.IsRemoteObjectDifferentToLastSync(storage, actualEvent)) {
+                actualEvent.Remote = MetaDataChangeType.CHANGED;
+            }
+
             SituationType type = this.DoAnalyse(storage, actualEvent);
-            Logger.Debug(string.Format("Remote Situation is: {0}", type));
             return type;
         }
 
         private SituationType DoAnalyse(IMetaDataStorage storage, AbstractFolderEvent actualEvent)
         {
-            switch (actualEvent.Remote) 
+            switch (actualEvent.Remote)
             {
             case MetaDataChangeType.CREATED:
                 if (this.IsChangeEventAHintForMove(storage, actualEvent)) {
@@ -146,6 +147,21 @@ namespace CmisSync.Lib.Consumer
                 if (storedFile != null) {
                     return storedFile.Name != fileEvent.RemoteFile.Name;
                 }
+            }
+
+            return false;
+        }
+
+        private bool IsRemoteObjectDifferentToLastSync(IMetaDataStorage storage, AbstractFolderEvent actualEvent) {
+            try {
+                if (actualEvent is FileEvent) {
+                    var obj = storage.GetObjectByRemoteId((actualEvent as FileEvent).RemoteFile.Id);
+                    return obj != null && obj.LastChangeToken != (actualEvent as FileEvent).RemoteFile.ChangeToken;
+                } else if (actualEvent is FolderEvent) {
+                    var obj = storage.GetObjectByRemoteId((actualEvent as FolderEvent).RemoteFolder.Id);
+                    return obj != null && obj.LastChangeToken != (actualEvent as FolderEvent).RemoteFolder.ChangeToken;
+                }
+            } catch (Exception) {
             }
 
             return false;

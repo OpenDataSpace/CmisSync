@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_define([cmissync_version], [2.0.0])
+m4_define([cmissync_version], [2.0.2])
 
 AC_PREREQ([2.54])
 AC_INIT([DataSpace Sync], cmissync_version)
@@ -31,17 +31,18 @@ PKG_CHECK_EXISTS([mono >= 3.2],
 [SHAMROCK_FIND_MONO_4_0_COMPILER
 SHAMROCK_CHECK_MONO_4_0_GAC_ASSEMBLIES([
     System
+    System.Configuration
     System.Security
     System.Windows.Forms
     Mono.Posix
 ])]
 )
 
-AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
-AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.3/lib/nunit.framework.dll]])
+AC_SUBST(NUNIT_LIBS,[[-r:\$\(top_srcdir\)/packages/NUnit.2.6.4/lib/nunit.framework.dll]])
+AC_SUBST(NUNIT_PATH,[[\$\(top_srcdir\)/packages/NUnit.2.6.4/lib/nunit.framework.dll]])
 
-AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
-AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.2/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_LIBS,[[-r:\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll]])
+AC_SUBST(JSON_PATH,[[\$\(top_srcdir\)/packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll]])
 
 AC_SUBST(LOG4NET_LIBS,[[-r:\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
 AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client/log4net.dll]])
@@ -49,8 +50,8 @@ AC_SUBST(LOG4NET_PATH,[[\$\(top_srcdir\)/packages/log4net.2.0.3/lib/net40-client
 AC_SUBST(DBREEZE_LIBS,[-r:\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
 AC_SUBST(DBREEZE_PATH,[\$\(top_srcdir\)/packages/DBreeze.1.61.1/lib/net45/DBreeze.dll])
 
-AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
-AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1402.2112/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_LIBS,[[-r:\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
+AC_SUBST(MOQ_PATH,[[\$\(top_srcdir\)/packages/Moq.4.2.1409.1722/lib/net40/Moq.dll]])
 
 AC_SUBST(DOTCMIS_LIBS,[[-r:\$\(top_srcdir\)/Extras/DotCMIS.dll]])
 AC_SUBST(DOTCMIS_PATH,[[\$\(top_srcdir\)/Extras/DotCMIS.dll]])
@@ -69,35 +70,41 @@ AC_ARG_WITH([test-url],
     TEST_URL=${withval})
 AC_SUBST(TEST_URL)
 
-TEST_LOCALPATH="/localpath"
+TEST_LOCALPATH="<localpath>"
 AC_ARG_WITH([test-localpath],
     AS_HELP_STRING([--with-test-localpath=PATH],[Specify local path for testing]),
     TEST_LOCALPATH=${withval})
 AC_SUBST(TEST_LOCALPATH)
 
-TEST_REMOTEPATH="/remotepath"
+TEST_REMOTEPATH="<remotepath>"
 AC_ARG_WITH([test-remotepath],
     AS_HELP_STRING([--with-test-remotepath=PATH],[Specify remote path for testing]),
     TEST_REMOTEPATH=${withval})
 AC_SUBST(TEST_REMOTEPATH)
 
-TEST_USER="testuser"
+TEST_USER="<username>"
 AC_ARG_WITH([test-user],
     AS_HELP_STRING([--with-test-user=PATH],[Specify username for testing]),
     TEST_USER=${withval})
 AC_SUBST(TEST_USER)
 
-TEST_PASSWORD="secret"
+TEST_PASSWORD="<password>"
 AC_ARG_WITH([test-password],
     AS_HELP_STRING([--with-test-password=PATH],[Specify password for testing]),
     TEST_PASSWORD=${withval})
 AC_SUBST(TEST_PASSWORD)
 
-TEST_REPOID="1094505"
+TEST_REPOID="<repo id>"
 AC_ARG_WITH([test-repoid],
     AS_HELP_STRING([--with-test-repoid=PATH],[Specify remote repository-ID for testing]),
     TEST_REPOID=${withval})
 AC_SUBST(TEST_REPOID)
+
+TEST_BINDING="atompub"
+AC_ARG_WITH([test-binding],
+    AS_HELP_STRING([--with-test-binding=BINDING],[Specify CMIS Binding for testing]),
+    TEST_BINDING=${withval})
+AC_SUBST(TEST_BINDING)
 
 TEST_PROXY_USER=""
 AC_ARG_WITH([test-proxy-user],
@@ -150,10 +157,9 @@ if test "$OSNAME" = "Linux" ; then
             [BUILD_DEFINES="$BUILD_DEFINES -define:HAVE_APP_INDICATOR"]
 	fi
 
-    AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
+    AC_SUBST(CONFIGLIBS,[-r:System.Configuration.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
-
 
     AC_SUBST(BUILD_DEFINES,"${BUILD_DEFINES}")
     GUISUBDIRS=CmisSync
@@ -161,7 +167,13 @@ if test "$OSNAME" = "Linux" ; then
 	cocoa=false
 	macos=false
     OSOK=yes
-    PACKAGE_TARGET=debian-package
+
+    # On Debian and xUbuntu, build debian packages, otherwise rpms. Don't know a better syntax for this
+    if test `command -v lsb_release >/dev/null 2>&1 && lsb_release -i | grep -E "(ebian|buntu)" > /dev/null; echo "$?"` == "0"; then
+        PACKAGE_TARGET=debian-package
+    else
+	PACKAGE_TARGET=rpm-package
+    fi
 fi
 
 if test "$OSNAME" = "Darwin" ; then
@@ -170,7 +182,7 @@ if test "$OSNAME" = "Darwin" ; then
 	AC_SUBST(NOTIFY_SHARP_LIBS)
 
 
-    AC_SUBST(DATALIBS,[-r:System.Data.dll,Mono.Data.Sqlite.dll])
+    AC_SUBST(CONFIGLIBS,[-r:System.Configuration.dll])
     AC_SUBST(WEBLIBS,[-r:System.Web.dll])
     AC_SUBST(MONOPOSIX,[-r:Mono.Posix.dll])
     AC_SUBST(DRAWING, [-r:System.Drawing.dll])

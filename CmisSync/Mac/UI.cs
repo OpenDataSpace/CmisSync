@@ -74,6 +74,7 @@ namespace CmisSync {
                 Settings   = new GeneralSettingsController();
                 Transmission   = new TransmissionWidgetController ();
                 Transmission.LoadWindow ();
+                Transmission.Window.IsVisible = false;
 
                 Program.Controller.UIHasLoaded ();
             }

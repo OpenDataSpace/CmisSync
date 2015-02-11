@@ -115,23 +115,21 @@ namespace TestLibrary.FileTransmissionTests
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(CmisConnectionException))]
         public void ServerFailedExceptionTest()
         {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Throws<CmisConnectionException>();
             using (IFileDownloader downloader = new SimpleFileDownloader())
             {
-                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                Assert.Throws<CmisConnectionException>(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
             }
         }
 
         [Test, Category("Fast")]
-        [ExpectedException(typeof(IOException))]
-        public void IOExceptionTest()
+        public void IOExceptionThrownIfIOExceptionOccursOnRead()
         {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Throws<IOException>();
             using (IFileDownloader downloader = new SimpleFileDownloader()) {
-                downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg);
+                Assert.Throws<IOException>(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
             }
         }
 
@@ -158,12 +156,11 @@ namespace TestLibrary.FileTransmissionTests
         public void AbortWhileDownloadTest()
         {
             this.mockedMemStream.Setup(memstream => memstream.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback(() => Thread.Sleep(1)).Returns(1);
-            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
-            {
-                Assert.AreEqual(null, e.Completed);
+            this.transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e) {
+                Assert.That(e.Completed, Is.Null);
             };
-            try
-            {
+
+            try {
                 Task t;
                 IFileDownloader downloader = new SimpleFileDownloader();
                 t = Task.Factory.StartNew(() => downloader.DownloadFile(this.mockedDocument.Object, this.localFileStream, this.transmissionEvent, this.hashAlg));
@@ -171,12 +168,10 @@ namespace TestLibrary.FileTransmissionTests
                 this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
                 t.Wait();
                 Assert.Fail();
-            }
-            catch (AggregateException e)
-            {
+            } catch (AggregateException e) {
                 Assert.IsInstanceOf(typeof(AbortException), e.InnerException);
-                Assert.True(this.transmissionEvent.Status.Aborted.GetValueOrDefault());
-                Assert.AreEqual(false, this.transmissionEvent.Status.Aborting);
+                Assert.That(this.transmissionEvent.Status.Aborted.GetValueOrDefault(), Is.True);
+                Assert.That(this.transmissionEvent.Status.Aborting, Is.False);
                 return;
             }
 

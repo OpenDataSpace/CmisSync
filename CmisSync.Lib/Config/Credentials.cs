@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Credentials.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -30,8 +29,7 @@ namespace CmisSync.Lib.Config
     /// Typical user credantials used for generic logins
     /// </summary>
     [Serializable]
-    public class UserCredentials
-    {
+    public class UserCredentials {
         /// <summary>
         /// Gets or sets the user name
         /// </summary>
@@ -47,20 +45,35 @@ namespace CmisSync.Lib.Config
     /// Server Login for a specific Uri
     /// </summary>
     [Serializable]
-    public class ServerCredentials : UserCredentials
-    {
+    public class ServerCredentials : UserCredentials {
         /// <summary>
         /// Gets or sets the server Address and Path
         /// </summary>
         public Uri Address { get; set; }
+
+        public static readonly string BindingAtomPub = DotCMIS.BindingType.AtomPub;
+        public static readonly string BindingBrowser = DotCMIS.BindingType.Browser;
+
+        private string binding = BindingAtomPub;
+
+        /// <summary>
+        /// Gets or sets the CMIS binding
+        /// </summary>
+        public string Binding {
+            get {
+                return binding;
+            }
+            set {
+                binding = value;
+            }
+        }
     }
 
     /// <summary>
     /// Credentials needed to create a Session for a specific CMIS repository
     /// </summary>
     [Serializable]
-    public class CmisRepoCredentials : ServerCredentials
-    {
+    public class CmisRepoCredentials : ServerCredentials {
         /// <summary>
         /// Gets or sets the repository identifier.
         /// </summary>
@@ -72,24 +85,21 @@ namespace CmisSync.Lib.Config
     /// Password class stores the given password obfuscated
     /// </summary>
     [Serializable]
-    public class Password
-    {
+    public class Password {
         private string password = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Password"/> class with the given password.
         /// </summary>
         /// <param name="password">as plain text</param>
-        public Password(string password)
-        {
+        public Password(string password) {
             this.password = Crypto.Obfuscate(password);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Password"/> class without setting a password.
         /// </summary>
-        public Password()
-        {
+        public Password() {
         }
 
         /// <summary>
@@ -105,8 +115,7 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <param name="value">plain text password</param>
         /// <returns></returns>
-        public static implicit operator Password(string value)
-        {
+        public static implicit operator Password(string value) {
             return new Password(value);
         }
 
@@ -114,8 +123,7 @@ namespace CmisSync.Lib.Config
         /// Returns the password as plain text
         /// </summary>
         /// <returns>plain text password</returns>
-        public override string ToString()
-        {
+        public override string ToString() {
             return this.password == null ? null : Crypto.Deobfuscate(this.password);
         }
     }

@@ -32,39 +32,64 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
-
 
     using Gtk;
 
     [CLSCompliant(false)]
-    public class UI {
-
+    public class UI : IDisposable {
+        private bool disposed = false;
         public StatusIcon StatusIcon;
         public Setup Setup;
         public About About;
+        public Setting Setting;
 
         public static string AssetsPath =
             (null != Environment.GetEnvironmentVariable("CMISSYNC_ASSETS_DIR"))
             ? Environment.GetEnvironmentVariable("CMISSYNC_ASSETS_DIR") : Defines.ASSETS_DIR;
 
-        public UI()
-        {
+        public UI() {
             Application.Init();
 
             this.Setup      = new Setup();
             this.About      = new About();
             this.StatusIcon = new StatusIcon();
-
+            this.Setting    = new Setting();
             Program.Controller.UIHasLoaded();
         }
 
         // Runs the application
-        public void Run()
-        {
+        public void Run() {
             Application.Run();
+        }
+
+        public void Dispose() {
+            if (this.disposed) {
+                return;
+            }
+
+            if (this.Setup != null) {
+                this.Setup.Dispose();
+                this.Setup = null;
+            }
+
+            if (this.About != null) {
+                this.About.Dispose();
+                this.About = null;
+            }
+
+            if (this.StatusIcon != null) {
+                this.StatusIcon.Dispose();
+                this.StatusIcon = null;
+            }
+
+            if (this.Setting != null) {
+                this.Setting.Dispose();
+                this.Setting = null;
+            }
+
+            this.disposed = true;
         }
     }
 }

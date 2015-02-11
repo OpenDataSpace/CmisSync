@@ -24,6 +24,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
@@ -31,15 +32,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    using log4net;
-
     /// <summary>
     /// A Local object has been moved. => Move the corresponding object on the server.
     /// </summary>
     public class LocalObjectMoved : AbstractEnhancedSolver
     {
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectMoved"/> class.
         /// </summary>
@@ -48,9 +45,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectMoved(
             ISession session,
-            IMetaDataStorage storage,
-            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate)
-        {
+            IMetaDataStorage storage) : base(session, storage) {
         }
 
         /// <summary>
@@ -69,6 +64,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             // Move Remote Object
             var remoteObject = remoteId as IFileableCmisObject;
             var mappedObject = this.Storage.GetObjectByRemoteId(remoteId.Id);
+
+            if (mappedObject.LastChangeToken != (remoteId as ICmisObject).ChangeToken) {
+                throw new ArgumentException("The remote change token is different to the last synchronization");
+            }
+
             var targetPath = localFile is IDirectoryInfo ? (localFile as IDirectoryInfo).Parent : (localFile as IFileInfo).Directory;
             var targetId = this.Storage.GetObjectByLocalPath(targetPath).RemoteObjectId;
             try {
@@ -80,7 +80,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 }
 
                 if (localFile.Name != remoteObject.Name) {
-                    remoteObject.Rename(localFile.Name, true);
+                    try {
+                        remoteObject.Rename(localFile.Name, true);
+                    } catch (CmisConstraintException e) {
+                        if (!Utils.IsValidISO885915(localFile.Name)) {
+                            OperationsLogger.Warn(string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFile.Name));
+                            throw new InteractionNeededException(string.Format("Server denied renaming of {0}", remoteObject.Name), e) {
+                                Title = string.Format("Server denied renaming of {0}", remoteObject.Name),
+                                Description = string.Format("Server denied the rename of {0} to {1}, possibly because it contains UTF-8 charactes", remoteObject.Name, localFile.Name)
+                            };
+                        }
+
+                        throw;
+                    }
                 }
             } catch (CmisPermissionDeniedException) {
                 OperationsLogger.Info(string.Format("Moving remote object failed {0}: Permission Denied", localFile.FullName));

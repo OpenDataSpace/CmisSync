@@ -27,6 +27,7 @@ namespace TestLibrary.TestUtils
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.SelectiveIgnore;
 
     using DotCMIS.Binding;
     using DotCMIS.Binding.Services;
@@ -36,6 +37,8 @@ namespace TestLibrary.TestUtils
     using DotCMIS.Enums;
 
     using Moq;
+
+    using NUnit.Framework;
 
     public static class MockSessionUtil {
         public static void SetupSessionDefaultValues(this Mock<ISession> session) {
@@ -82,9 +85,8 @@ namespace TestLibrary.TestUtils
                 o.MaxItemsPerPage == maxItemsPerPage));
         }
 
-        public static void SetupTypeSystem(this Mock<ISession> session, bool serverCanModifyLastModificationDate = true) {
+        public static void SetupTypeSystem(this Mock<ISession> session, bool serverCanModifyLastModificationDate = true, bool supportsSelectiveIgnore = true) {
             string repoId = "repoId";
-            var repositoryService = new Mock<IRepositoryService>();
             IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
             if (serverCanModifyLastModificationDate) {
                 props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "cmis:lastModificationDate" && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
@@ -94,8 +96,23 @@ namespace TestLibrary.TestUtils
 
             var docType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
             var folderType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
+
+            Mock<IRepositoryService> repositoryService = new Mock<IRepositoryService>();
+
+            if (session.Object.Binding != null && session.Object.Binding.GetRepositoryService() != null) {
+                repositoryService = Mock.Get(session.Object.Binding.GetRepositoryService());
+            }
+
             repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:document", null)).Returns(docType);
             repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:folder", null)).Returns(folderType);
+            if (supportsSelectiveIgnore) {
+                IList<IPropertyDefinition> syncProps = new List<IPropertyDefinition>();
+                syncProps.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "gds:ignoreDeviceIds"));
+                var syncSecondaryObjects = Mock.Of<IObjectType>(d => d.PropertyDefinitions == syncProps);
+                repositoryService.Setup(s => s.GetTypeDefinition(repoId, "gds:sync", null)).Returns(syncSecondaryObjects);
+                session.Setup(s => s.GetTypeDefinition("gds:sync")).Returns(syncSecondaryObjects);
+            }
+
             session.Setup(s => s.Binding.GetRepositoryService()).Returns(repositoryService.Object);
             session.Setup(s => s.RepositoryInfo.Id).Returns(repoId);
         }
@@ -307,6 +324,12 @@ namespace TestLibrary.TestUtils
                 It.IsAny<bool>(),
                 It.IsAny<int>()),
                 Times.Once());
+        }
+
+        public static void EnsureSelectiveIgnoreSupportIsAvailable(this ISession session) {
+            if (!session.SupportsSelectiveIgnore()) {
+                Assert.Ignore("Selective Ignore is not available on server");
+            }
         }
 
         private static List<IChangeEvent> GenerateSingleChangeListMock(DotCMIS.Enums.ChangeType type, string objectId = "objId") {

@@ -16,24 +16,24 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
-using System.Drawing;
-using System.Windows;
-using System.Globalization;
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Config;
 
-namespace CmisSync
-{
+namespace CmisSync {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Globalization;
+    using System.Text;
+    using System.Windows;
+    using System.Windows.Forms;
+
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Events;
+
     /// <summary>
     /// CmisSync icon in the Windows status bar.
     /// </summary>
-    public class StatusIcon : Form
-    {
+    public class StatusIcon : Form {
         /// <summary>
         /// MVC controller for the the status icon.
         /// </summary>
@@ -56,26 +56,16 @@ namespace CmisSync
         private Icon[] animationFrames;
 
         /// <summary>
-        /// Menu item that shows the state of CmisSync (up-to-date, etc).
-        /// </summary>
-        private ToolStripMenuItem stateItem;
-        /*
-        /// <summary>
-        /// Menu item that shows the state of active transmissions (like up/downloads)
-        /// </summary>
-        private ToolStripMenuItem transmissionItem;*/
-
-        /// <summary>
         /// Menu item that allows the user to exit CmisSync.
         /// </summary>
         private ToolStripMenuItem exitItem;
 
+        private List<RepositoryMenuItem> repoItems;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public StatusIcon()
-        {
+        public StatusIcon() {
             // Create the menu.
             CreateAnimationFrames();
             CreateMenu();
@@ -87,15 +77,11 @@ namespace CmisSync
             this.trayicon.Visible = true;
             this.trayicon.MouseClick += NotifyIcon1_MouseClick;
 
-            Program.Controller.ShowChangePassword += delegate(string reponame)
-            {
-                lock (repoCreditsErrorListLock)
-                {
-                    if (string.IsNullOrEmpty(repoCreditsErrorList.Find((string name) => { return name == reponame; })))
-                    {
-                        repoCreditsErrorList.Add(reponame);
-                    }
+            Program.Controller.ShowChangePassword += delegate(string reponame) {
+                lock (repoCreditsErrorListLock) {
+                    repoCreditsErrorList.Add(reponame);
                 }
+
                 Controller.Warning = true;
                 this.trayicon.ShowBalloonTip(
                     30000,
@@ -104,8 +90,7 @@ namespace CmisSync
                     ToolTipIcon.Warning);
             };
 
-            Program.Controller.ShowException += delegate(string title, string message)
-            {
+            Program.Controller.ShowException += delegate(string title, string message) {
                 this.trayicon.ShowBalloonTip(
                     30000,
                     title,
@@ -116,19 +101,22 @@ namespace CmisSync
             this.trayicon.BalloonTipClicked += trayicon_BalloonTipClicked;
         }
 
-        private List<string> repoCreditsErrorList = new List<string>();
+        private HashSet<string> repoCreditsErrorList = new HashSet<string>();
 
         private Object repoCreditsErrorListLock = new Object();
 
-        private void trayicon_BalloonTipClicked(object sender, EventArgs e)
-        {
-            lock (repoCreditsErrorListLock)
-            {
-                foreach (string reponame in repoCreditsErrorList) {
-                    Program.Controller.EditRepositoryCredentials(reponame);
+        private void trayicon_BalloonTipClicked(object sender, EventArgs e) {
+            lock (repoCreditsErrorListLock) {
+                while (repoCreditsErrorList.Count > 0) {
+                    HashSet<string>.Enumerator i = repoCreditsErrorList.GetEnumerator();
+                    if (i.MoveNext()) {
+                        string reponame = i.Current;
+                        repoCreditsErrorList.Remove(reponame);
+                        Program.Controller.EditRepositoryCredentials(reponame);
+                    } else {
+                        break;
+                    }
                 }
-
-                repoCreditsErrorList.Clear();
             }
 
             Controller.Warning = false;
@@ -139,8 +127,7 @@ namespace CmisSync
         /// When form is loaded, 
         /// </summary>
         /// <param name="e"></param>
-        protected override void OnLoad(EventArgs e)
-        {
+        protected override void OnLoad(EventArgs e) {
             // Set up the controller to create menu elements on update.
             CreateInvokeMethods();
 
@@ -153,15 +140,11 @@ namespace CmisSync
         /// <summary>
         /// Set up the controller to create menu elements on update.
         /// </summary>
-        private void CreateInvokeMethods()
-        {
+        private void CreateInvokeMethods() {
             // Icon.
-            Controller.UpdateIconEvent += delegate(int icon_frame)
-            {
-                if (IsHandleCreated)
-                {
-                    BeginInvoke((Action)delegate
-                    {
+            Controller.UpdateIconEvent += delegate(int icon_frame) {
+                if (IsHandleCreated) {
+                    BeginInvoke((Action)delegate {
                         if (icon_frame < 0) {
                             this.trayicon.Icon = SystemIcons.Error;
                             return;
@@ -182,111 +165,41 @@ namespace CmisSync
                     });
                 }
             };
-
-            // Status item.
-            Controller.UpdateStatusItemEvent += delegate(string state_text)
-            {
-                if (IsHandleCreated)
-                {
-
-                    BeginInvoke((Action)delegate
-                    {
-                        this.stateItem.Text = state_text;
-                        this.trayicon.Text = String.Format("{0}\n{1}", Properties_Resources.ApplicationName, state_text);
-                    });
-                }
-            };
-
+            
             // Menu.
-            Controller.UpdateMenuEvent += delegate(IconState state)
-            {
-                if (IsHandleCreated)
-                {
-                    BeginInvoke((Action)delegate
-                    {
+            Controller.UpdateMenuEvent += delegate(IconState state) {
+                if (IsHandleCreated) {
+                    BeginInvoke((Action)delegate {
                         CreateMenu();
                     });
                 }
             };
 
             // Repo Submenu.
-            Controller.UpdateSuspendSyncFolderEvent += delegate(string reponame)
-            {
-                if (IsHandleCreated)
-                {
-                    BeginInvoke((Action)delegate
-                    {
-                        ToolStripMenuItem repoitem = (ToolStripMenuItem)this.traymenu.Items["tsmi" + reponame];
-                        ToolStripMenuItem syncitem = (ToolStripMenuItem)repoitem.DropDownItems[2];
-                        foreach (Repository aRepo in Program.Controller.Repositories)
-                        {
-                            if (aRepo.Name == reponame)
-                            {
-                                setSyncItemState(syncitem, aRepo.Status);
+            Controller.UpdateSuspendSyncFolderEvent += delegate(string reponame) {
+                if (IsHandleCreated) {
+                    BeginInvoke((Action)delegate {
+                        foreach (var repo in Program.Controller.Repositories) {
+                            if (repo.Name == reponame) {
+                                foreach (var item in this.repoItems) {
+                                    if (item.RepositoryName == reponame) {
+                                        item.Status = repo.Status;
+                                        break;
+                                    }
+                                }
                                 break;
                             }
                         }
                     });
                 }
             };
-
-            //Transmission Submenu.
-            Controller.UpdateTransmissionMenuEvent += delegate
-            {
-                if (IsHandleCreated)
-                {
-                    BeginInvoke((Action)delegate
-                    {
-                        this.stateItem.DropDownItems.Clear();
-                        if (ConfigManager.CurrentConfig.Notifications)
-                        {
-                            List<FileTransmissionEvent> transmissions = Program.Controller.ActiveTransmissions();
-                            foreach (FileTransmissionEvent transmission in transmissions)
-                            {
-                                ToolStripMenuItem transmission_sub_menu_item = new TransmissionMenuItem(transmission, this);
-                                this.stateItem.DropDownItems.Add(transmission_sub_menu_item);
-                            }
-                            if (transmissions.Count > 0)
-                            {
-                                this.stateItem.Enabled = true;
-                            }
-                            else
-                            {
-                                this.stateItem.Enabled = false;
-                            }
-                        }
-                        else
-                        {
-                            this.stateItem.Enabled = false;
-                        }
-                    });
-                }
-            };
-        }
-
-
-        private void setSyncItemState(ToolStripMenuItem syncitem, SyncStatus status)
-        {
-            switch (status)
-            {
-                case SyncStatus.Idle:
-                    syncitem.Text = CmisSync.Properties_Resources.PauseSync;
-                    syncitem.Image = UIHelpers.GetBitmap("media_playback_pause");
-                    break;
-                case SyncStatus.Suspend:
-                    syncitem.Text = CmisSync.Properties_Resources.ResumeSync;
-                    syncitem.Image = UIHelpers.GetBitmap("media_playback_start");
-                    break;
-            }
         }
 
         /// <summary>
         /// Dispose of the status icon UI elements.
         /// </summary>
-        protected override void Dispose(bool isDisposing)
-        {
-            if (isDisposing)
-            {
+        protected override void Dispose(bool isDisposing) {
+            if (isDisposing) {
                 // Release the icon resource.
                 this.trayicon.Dispose();
             }
@@ -294,160 +207,78 @@ namespace CmisSync
             base.Dispose(isDisposing);
         }
 
-
         /// <summary>
         /// Create the UI elements of the menu.
         /// </summary>
-        private void CreateMenu()
-        {
+        private void CreateMenu() {
             // Reset existing items.
             this.traymenu.Items.Clear();
+            this.repoItems = new List<RepositoryMenuItem>();
 
-            // Create the state menu item.
-            this.stateItem = new ToolStripMenuItem()
-            {
-                Text = Controller.StateText,
-                Enabled = false
-            };
-            this.traymenu.Items.Add(stateItem);
             this.trayicon.Text = String.Format("{0}\n{1}", Properties_Resources.ApplicationName, Controller.StateText);
-            this.traymenu.Items.Add(new ToolStripSeparator());
-            /*this.transmissionItem = new ToolStripMenuItem()
-            {
-                Text = "No active transmissions",
-                Enabled = false
-            };
-            this.traymenu.Items.Add(transmissionItem); */
-
 
             // Create a menu item per synchronized folder.
-            if (Controller.Folders.Length > 0)
-            {
-                foreach (string folderName in Controller.Folders)
-                {
-                    // Main item.
-                    ToolStripMenuItem subfolderItem = new ToolStripMenuItem()
-                    {
-                        Text = folderName,
-                        Name = "tsmi" + folderName,
-                        Image = UIHelpers.GetBitmap("folder")
-                    };
-
-                    // Sub-item: open locally.
-                    ToolStripMenuItem openLocalFolderItem = new ToolStripMenuItem()
-                    {
-                        Text = CmisSync.Properties_Resources.OpenLocalFolder,
-                        Image = UIHelpers.GetBitmap("folder")
-                    };
-                    openLocalFolderItem.Click += OpenLocalFolderDelegate(folderName);
-
-                    // Sub-item: edit ignore folder.
-                    ToolStripMenuItem editFolderItem = new ToolStripMenuItem()
-                    {
-                        Text = CmisSync.Properties_Resources.EditTitle
-                    };
-                    editFolderItem.Click += EditFolderDelegate(folderName);
-
-
-                    // Sub-item: suspend sync.
-                    ToolStripMenuItem suspendFolderItem = new ToolStripMenuItem();
-                    setSyncItemState(suspendFolderItem, SyncStatus.Idle);
-                    foreach (Repository aRepo in Program.Controller.Repositories)
-                    {
-                        if (aRepo.Name.Equals(folderName))
-                        {
-                            setSyncItemState(suspendFolderItem, aRepo.Status);
-                            break;
-                        }
-                    }
-                    suspendFolderItem.Click += SuspendSyncFolderDelegate(folderName);
-
-                    // Sub-item: remove folder from sync
-                    ToolStripMenuItem removeFolderFromSyncItem = new ToolStripMenuItem()
-                    {
-                        Text = Properties_Resources.RemoveFolderFromSync,
-                        Tag = "remove",
-                    };
-                    removeFolderFromSyncItem.Click += RemoveFolderFromSyncDelegate(folderName);
-
-                    // Add the sub-items.
-                    subfolderItem.DropDownItems.Add(openLocalFolderItem);
-                    //subfolderItem.DropDownItems.Add(openRemoteFolderItem);
-                    subfolderItem.DropDownItems.Add(new ToolStripSeparator());
-                    subfolderItem.DropDownItems.Add(suspendFolderItem);
-                    subfolderItem.DropDownItems.Add(new ToolStripSeparator());
-                    subfolderItem.DropDownItems.Add(editFolderItem);
-                    subfolderItem.DropDownItems.Add(new ToolStripSeparator());
-                    subfolderItem.DropDownItems.Add(removeFolderFromSyncItem);
-                    // Add the main item.
-                    this.traymenu.Items.Add(subfolderItem);
+            if (Controller.Folders.Length > 0) {
+                foreach (var repo in Program.Controller.Repositories) {
+                    var repoItem = new RepositoryMenuItem(repo, this.Controller, this);
+                    this.repoItems.Add(repoItem);
+                    this.traymenu.Items.Add(repoItem);
                 }
+
                 this.traymenu.Items.Add(new ToolStripSeparator());
             }
 
             // Create the menu item that lets the user add a new synchronized folder.
-            ToolStripMenuItem addFolderItem = new ToolStripMenuItem()
-            {
+            ToolStripMenuItem addFolderItem = new ToolStripMenuItem() {
                 Text = CmisSync.Properties_Resources.AddARemoteFolder
             };
-            addFolderItem.Click += delegate
-            {
+            addFolderItem.Click += delegate {
                 Controller.AddRemoteFolderClicked();
             };
             this.traymenu.Items.Add(addFolderItem);
             this.traymenu.Items.Add(new ToolStripSeparator());
 
             // Create the menu item that lets the user view setting.
-            ToolStripMenuItem setting_item = new ToolStripMenuItem()
-            {
-                Text = CmisSync.Properties_Resources.EditTitle
+            ToolStripMenuItem setting_item = new ToolStripMenuItem() {
+                Text = CmisSync.Properties_Resources.Settings
             };
-            setting_item.Click += delegate
-            {
+            setting_item.Click += delegate {
                 Controller.SettingClicked();
             };
             this.traymenu.Items.Add(setting_item);
 
             // Create the menu item that lets the uer view transmission.
-            ToolStripMenuItem transmission_item = new ToolStripMenuItem()
-            {
+            ToolStripMenuItem transmission_item = new ToolStripMenuItem() {
                 Text = CmisSync.Properties_Resources.Transmission
             };
-            transmission_item.Click += delegate
-            {
+            transmission_item.Click += delegate {
                 Controller.TransmissionClicked();
             };
             this.traymenu.Items.Add(transmission_item);
 
             // Create the menu item that lets the user view the log.
-            ToolStripMenuItem log_item = new ToolStripMenuItem()
-            {
+            ToolStripMenuItem log_item = new ToolStripMenuItem() {
                 Text = CmisSync.Properties_Resources.ViewLog
             };
-            log_item.Click += delegate
-            {
+            log_item.Click += delegate {
                 Controller.LogClicked();
             };
             this.traymenu.Items.Add(log_item);
 
             // Create the About menu.
-            ToolStripMenuItem about_item = new ToolStripMenuItem()
-            {
+            ToolStripMenuItem about_item = new ToolStripMenuItem() {
                 Text = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName)
             };
-            about_item.Click += delegate
-            {
+            about_item.Click += delegate {
                 Controller.AboutClicked();
             };
             this.traymenu.Items.Add(about_item);
 
             // Create the exit menu.
-            this.exitItem = new ToolStripMenuItem()
-            {
+            this.exitItem = new ToolStripMenuItem() {
                 Text = CmisSync.Properties_Resources.Exit
             };
-            this.exitItem.Click += delegate
-            {
+            this.exitItem.Click += delegate {
                 this.trayicon.Dispose();
                 Controller.QuitClicked();
             };
@@ -457,8 +288,7 @@ namespace CmisSync
         /// <summary>
         /// Create the animation frames from image files.
         /// </summary>
-        private void CreateAnimationFrames()
-        {
+        private void CreateAnimationFrames() {
             this.animationFrames = new Icon[] {
                 UIHelpers.GetIcon ("process-syncing-i"),
                 UIHelpers.GetIcon ("process-syncing-ii"),
@@ -468,72 +298,21 @@ namespace CmisSync
             };
         }
 
-
-        /// <summary>
-        /// Delegate for opening the local folder.
-        /// </summary>
-        private EventHandler OpenLocalFolderDelegate(string reponame)
-        {
-            return delegate
-            {
-                Controller.LocalFolderClicked(reponame);
-            };
-        }
-
         /// <summary>
         /// MouseEventListener function for opening the local folder.
         /// </summary>
-        private void NotifyIcon1_MouseClick(Object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
+        private void NotifyIcon1_MouseClick(Object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Left) {
                 trayicon_BalloonTipClicked(sender, e);
                 Controller.LocalFolderClicked("");
             }
-        }
-
-        /// <summary>
-        /// Delegate for suspending sync.
-        /// </summary>
-        private EventHandler SuspendSyncFolderDelegate(string reponame)
-        {
-            return delegate
-            {
-                Controller.SuspendSyncClicked(reponame);
-            };
-        }
-
-        private EventHandler RemoveFolderFromSyncDelegate(string reponame)
-        {
-            return delegate
-            {
-                if (System.Windows.MessageBox.Show(
-                    CmisSync.Properties_Resources.RemoveSyncQuestion,
-                    CmisSync.Properties_Resources.RemoveSyncTitle,
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question,
-                    MessageBoxResult.No
-                    ) == MessageBoxResult.Yes)
-                {
-                    Controller.RemoveFolderFromSyncClicked(reponame);
-                }
-            };
-        }
-
-        private EventHandler EditFolderDelegate(string reponame)
-        {
-            return delegate
-            {
-                Controller.EditFolderClicked(reponame);
-            };
         }
     }
 
     /// <summary>
     /// A specialized helper class for transmission menu items
     /// </summary>
-    public class TransmissionMenuItem : ToolStripMenuItem
-    {
+    public class TransmissionMenuItem : ToolStripMenuItem {
         private FileTransmissionType Type { get; set; }
         private string Path { get; set; }
         private Control ParentControl;
@@ -545,19 +324,15 @@ namespace CmisSync
         private object disposeLock = new object();
         private bool disposed = false;
 
-        private string TransmissionStatus(TransmissionProgressEventArgs status)
-        {
+        private string TransmissionStatus(TransmissionProgressEventArgs status) {
             double percent = (status.Percent != null) ? (double)status.Percent : 0;
             long? bitsPerSecond = status.BitsPerSecond;
-            if (bitsPerSecond != null)
-            {
+            if (bitsPerSecond != null) {
                 return String.Format("{0} ({1} {2})",
                     System.IO.Path.GetFileName(Path),
                     CmisSync.Lib.Utils.FormatPercent(percent),
                     CmisSync.Lib.Utils.FormatBandwidth((long)bitsPerSecond));
-            }
-            else
-            {
+            } else {
                 return String.Format("{0} ({1})",
                     System.IO.Path.GetFileName(Path),
                     CmisSync.Lib.Utils.FormatPercent(percent));
@@ -569,14 +344,12 @@ namespace CmisSync
         /// </summary>
         /// <param name="e">FileTransmissionEvent to listen to</param>
         /// <param name="parent">Parent control to avoid threading issues</param>
-        public TransmissionMenuItem(FileTransmissionEvent e, Control parent) : base(e.Type.ToString())
-        {
+        public TransmissionMenuItem(FileTransmissionEvent e, Control parent) : base(e.Type.ToString()) {
             Path = e.Path;
             Type = e.Type;
             ParentControl = parent;
             transmissionEvent = e;
-            switch (Type)
-            {
+            switch (Type) {
                 case FileTransmissionType.DOWNLOAD_NEW_FILE:
                     Image = UIHelpers.GetBitmap("Downloading");
                     break;
@@ -589,49 +362,50 @@ namespace CmisSync
                     Image = UIHelpers.GetBitmap("Updating");
                     break;
             }
+
             Text = TransmissionStatus(transmissionEvent.Status);
             transmissionEvent.TransmissionStatus += TransmissionEvent;
             Click += TransmissionEventMenuItem_Click;
         }
 
-        private void TransmissionEvent(object sender, TransmissionProgressEventArgs status)
-        {
-            lock (disposeLock)
-            {
-                if (disposed)
-                    return;
-                TimeSpan diff = DateTime.Now - updateTime;
-                if (diff.Seconds < updateInterval)
-                {
+        private void TransmissionEvent(object sender, TransmissionProgressEventArgs status) {
+            lock (disposeLock) {
+                if (disposed) {
                     return;
                 }
+
+                TimeSpan diff = DateTime.Now - updateTime;
+                if (diff.Seconds < updateInterval) {
+                    return;
+                }
+
                 updateTime = DateTime.Now;
 
-                ParentControl.BeginInvoke((Action)delegate()
-                {
-                    lock (disposeLock)
-                    {
-                        if (disposed)
+                ParentControl.BeginInvoke((Action)delegate() {
+                    lock (disposeLock) {
+                        if (disposed) {
                             return;
+                        }
+
                         Text = TransmissionStatus(status);
                     }
                 });
             }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            lock (disposeLock)
-            {
-                if (!disposed)
+        protected override void Dispose(bool disposing) {
+            lock (disposeLock) {
+                if (!disposed) {
                     transmissionEvent.TransmissionStatus -= TransmissionEvent;
+                }
+
                 disposed = true;
             }
+
             base.Dispose(disposing);
         }
 
-        void TransmissionEventMenuItem_Click(object sender, EventArgs e)
-        {
+        void TransmissionEventMenuItem_Click(object sender, EventArgs e) {
             Utils.OpenFolder(System.IO.Directory.GetParent(Path).FullName);
         }
     }

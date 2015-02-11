@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="MockMetaDataStorageUtil.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -23,11 +23,11 @@ namespace TestLibrary.TestUtils
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;
@@ -82,9 +82,9 @@ namespace TestLibrary.TestUtils
                                                  d.FullName == path &&
                                                  d.Name == Path.GetDirectoryName(path));
             return db.AddLocalFolder(folder, id);
-        }            
-        
-        public static void AddLocalFolder(this Mock<IMetaDataStorage> storage, string path, string id, Guid uuid){
+        }
+
+        public static void AddLocalFolder(this Mock<IMetaDataStorage> storage, string path, string id, Guid uuid) {
             var folder = new Mock<IMappedObject>();
             folder.Setup(f => f.Name).Returns(System.IO.Path.GetDirectoryName(path));
             folder.Setup(f => f.RemoteObjectId).Returns(id);
@@ -109,7 +109,7 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == file.RemoteObjectId))).Returns(file);
             db.Setup(foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns(localPath);
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(file)))).Returns(remotePath);
-            if(!file.Guid.Equals(Guid.Empty)) {
+            if (!file.Guid.Equals(Guid.Empty)) {
                 db.Setup(foo => foo.GetObjectByGuid(It.Is<Guid>(g => g.Equals(file.Guid)))).Returns(file);
             }
         }
@@ -120,7 +120,7 @@ namespace TestLibrary.TestUtils
             db.Setup(foo => foo.GetObjectByRemoteId(It.Is<string>(s => s == folder.RemoteObjectId))).Returns(folder);
             db.Setup(foo => foo.GetLocalPath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(localPath);
             db.Setup(foo => foo.GetRemotePath(It.Is<IMappedObject>(o => o.Equals(folder)))).Returns(remotePath);
-            if(!folder.Guid.Equals(Guid.Empty)) {
+            if (!folder.Guid.Equals(Guid.Empty)) {
                 db.Setup(foo => foo.GetObjectByGuid(It.Is<Guid>(g => g.Equals(folder.Guid)))).Returns(folder);
             }
         }
@@ -141,7 +141,7 @@ namespace TestLibrary.TestUtils
             DateTime? lastLocalModification = null,
             DateTime? lastRemoteModification = null,
             byte[] checksum = null,
-            long contentSize = -1)
+            long contentSize = -1, bool ignored = false)
         {
             VerifySavedMappedObject(
                 db,
@@ -155,7 +155,8 @@ namespace TestLibrary.TestUtils
                 lastLocalModification,
                 lastRemoteModification,
                 checksum,
-                contentSize);
+                contentSize,
+                ignored);
         }
 
         public static void VerifySavedMappedObject(
@@ -170,11 +171,12 @@ namespace TestLibrary.TestUtils
             DateTime? lastLocalModification = null,
             DateTime? lastRemoteModification = null,
             byte[] checksum = null,
-            long contentSize = -1)
+            long contentSize = -1,
+            bool ignored = false)
         {
             db.Verify(
                 s =>
-                s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, extendedAttributeAvailable, lastLocalModification, lastRemoteModification, checksum, contentSize))),
+                s.SaveMappedObject(It.Is<IMappedObject>(o => VerifyMappedObject(o, type, remoteId, name, parentId, changeToken, extendedAttributeAvailable, lastLocalModification, lastRemoteModification, checksum, contentSize, ignored))),
                 times);
         }
 
@@ -189,27 +191,27 @@ namespace TestLibrary.TestUtils
             DateTime? lastLocalModification,
             DateTime? lastRemoteModification,
             byte[] checksum,
-            long contentSize)
+            long contentSize,
+            bool ignored)
         {
-            Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId));
-            Assert.That(o.Name, Is.EqualTo(name));
-            Assert.That(o.ParentId, Is.EqualTo(parentId));
-            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken));
-            Assert.That(o.Type, Is.EqualTo(type));
+            Assert.That(o.RemoteObjectId, Is.EqualTo(remoteId), "Object remote Id is wrong");
+            Assert.That(o.Name, Is.EqualTo(name), "Object name is wrong");
+            Assert.That(o.ParentId, Is.EqualTo(parentId), "Object parent Id is wrong");
+            Assert.That(o.LastChangeToken, Is.EqualTo(changeToken), "Object change token is wrong");
+            Assert.That(o.Type, Is.EqualTo(type), "Object type is wrong");
+            Assert.That(o.Ignored, Is.EqualTo(ignored), "Object ignore flag is wrong");
             if (extendedAttributeAvailable) {
                 Assert.That(o.Guid, Is.Not.EqualTo(Guid.Empty), "Given Guid must not be empty");
-            }
-            else
-            {
+            } else {
                 Assert.That(o.Guid, Is.EqualTo(Guid.Empty), "Given Guid must be empty");
             }
 
             if (lastLocalModification != null) {
-                Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastLocalModification));
+                Assert.That(o.LastLocalWriteTimeUtc, Is.EqualTo(lastLocalModification), "Last local modification date is wrong");
             }
 
             if (lastRemoteModification != null) {
-                Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastRemoteModification));
+                Assert.That(o.LastRemoteWriteTimeUtc, Is.EqualTo(lastRemoteModification), "Last remote modification date is wrong");
             }
 
             if (checksum != null) {
@@ -218,8 +220,12 @@ namespace TestLibrary.TestUtils
             }
 
             if (type == MappedObjectType.File) {
-                Assert.That(o.LastContentSize, Is.GreaterThanOrEqualTo(0));
-                Assert.That(o.LastContentSize, Is.EqualTo(contentSize));
+                Assert.That(o.LastContentSize, Is.GreaterThanOrEqualTo(0), "Last content size is wrong");
+                Assert.That(o.LastContentSize, Is.EqualTo(contentSize), "Last content size is wrong");
+            }
+
+            if (type == MappedObjectType.Folder) {
+                Assert.That(o.LastContentSize, Is.EqualTo(-1), "Folder content size is wrong");
             }
 
             return true;

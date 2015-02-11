@@ -23,15 +23,20 @@ namespace CmisSync.Lib.Storage.FileSystem
     using System.IO;
     using System.Threading;
 
+#if __MonoCS__
+    using Mono.Unix;
+#endif
+
     /// <summary>
     /// Wrapper for DirectoryInfo
     /// </summary>
     public abstract class FileSystemInfoWrapper : IFileSystemInfo
     {
-        private static IExtendedAttributeReader reader = null;
         private static readonly string ExtendedAttributeKey = "DSS-UUID";
+        private static IExtendedAttributeReader reader = null;
 
         private FileSystemInfo original;
+        private FSType fsType;
 
         static FileSystemInfoWrapper()
         {
@@ -55,6 +60,11 @@ namespace CmisSync.Lib.Storage.FileSystem
         protected FileSystemInfoWrapper(FileSystemInfo original)
         {
             this.original = original;
+#if __MonoCS__
+            this.fsType = FSTypeCreator.GetType(new UnixDriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+#else
+            this.fsType = FSTypeCreator.GetType(new DriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
+#endif
         }
 
         /// <summary>
@@ -69,7 +79,8 @@ namespace CmisSync.Lib.Storage.FileSystem
 
             set
             {
-                this.original.LastWriteTimeUtc = value;
+                var date = DateTimeToFileConverter.Convert(value, this.fsType);
+                this.original.LastWriteTimeUtc = date;
             }
         }
 

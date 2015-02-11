@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StreamsTests
-{
+namespace TestLibrary.StreamsTests {
     using System;
     using System.IO;
 
@@ -31,8 +30,7 @@ namespace TestLibrary.StreamsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class ProgressStreamTest
-    {
+    public class ProgressStreamTest {
         private readonly string filename = "filename";
         private readonly FileTransmissionType transmissionType = FileTransmissionType.DOWNLOAD_NEW_FILE;
 
@@ -43,8 +41,7 @@ namespace TestLibrary.StreamsTests
         private double percent;
 
         [SetUp]
-        public void Setup()
-        {
+        public void Setup() {
             this.lengthCalls = 0;
             this.positionCalls = 0;
             this.length = 0;
@@ -53,47 +50,37 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ConstructorWorksWithNonNullParams()
-        {
+        public void ConstructorWorksWithNonNullParams() {
             Array values = Enum.GetValues(typeof(FileTransmissionType));
-            foreach (FileTransmissionType val in values)
-            {
-                using (new ProgressStream(new Mock<Stream>().Object, new Mock<FileTransmissionEvent>(val, this.filename, null).Object))
-                {
+            foreach (FileTransmissionType val in values) {
+                using (new ProgressStream(new Mock<Stream>().Object, new Mock<FileTransmissionEvent>(val, this.filename, null).Object)) {
                 }
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnAllParameterNull()
-        {
-            using (new ProgressStream(null, null))
-            {
+        public void ConstructorFailsOnAllParameterNull() {
+            using (new ProgressStream(null, null)) {
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnStreamIsNull()
-        {
-            using (new ProgressStream(null, new Mock<FileTransmissionEvent>(this.transmissionType, this.filename, null).Object))
-            {
+        public void ConstructorFailsOnStreamIsNull() {
+            using (new ProgressStream(null, new Mock<FileTransmissionEvent>(this.transmissionType, this.filename, null).Object)) {
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void ConstructorFailsOnTransmissionEventIsNull()
-        {
-            using (new ProgressStream(new Mock<Stream>().Object, null))
-            {
+        public void ConstructorFailsOnTransmissionEventIsNull() {
+            using (new ProgressStream(new Mock<Stream>().Object, null)) {
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void SetLengthTest()
-        {
+        public void SetLengthTest() {
             var mockedStream = new Mock<Stream>();
             FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
             transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
@@ -110,8 +97,7 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void PositionTest()
-        {
+        public void PositionTest() {
             var mockedStream = new Mock<Stream>();
             FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
             transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
@@ -140,8 +126,7 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ReadTest()
-        {
+        public void ReadTest() {
             using (Stream stream = new MemoryStream()) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
@@ -181,8 +166,7 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void WriteTest()
-        {
+        public void WriteTest() {
             using (Stream stream = new MemoryStream()) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
@@ -266,13 +250,11 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void ResumeTest()
-        {
+        public void ResumeTest() {
             byte[] inputContent = new byte[100];
             long offset = 100;
             using (Stream stream = new MemoryStream(inputContent)) 
-            using (OffsetStream offsetstream = new OffsetStream(stream, offset))
-            {
+            using (OffsetStream offsetstream = new OffsetStream(stream, offset)) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
                     if (args.ActualPosition != null && args.Percent != null) {
@@ -303,14 +285,12 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void EnsureBandwidthIsReportedIfProgressIsShorterThanOneSecond()
-        {
+        public void EnsureBandwidthIsReportedIfProgressIsShorterThanOneSecond() {
             byte[] inputContent = new byte[1024];
             FileTransmissionEvent transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
             using (var inputStream = new MemoryStream(inputContent))
             using (var outputStream = new MemoryStream())
-            using (var progressStream = new ProgressStream(inputStream, transmission))
-            {
+            using (var progressStream = new ProgressStream(inputStream, transmission)) {
                 progressStream.CopyTo(outputStream);
                 Assert.That(outputStream.Length == inputContent.Length);
             }
@@ -319,29 +299,52 @@ namespace TestLibrary.StreamsTests
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(AbortException))]
-        public void AbortReadIfTransmissionEventIsAborting()
-        {
+        public void AbortReadIfTransmissionEventIsAborting() {
             byte[] content = new byte[1024];
             var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
             using (var stream = new MemoryStream(content))
-            using (var progressStream = new ProgressStream(stream, transmission))
-            {
+            using (var progressStream = new ProgressStream(stream, transmission)) {
                 transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
-                progressStream.ReadByte();
+                Assert.Throws<AbortException>(() => progressStream.ReadByte());
             }
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        [ExpectedException(typeof(AbortException))]
-        public void AbortWriteIfTransmissionEventIsAborting()
-        {
+        public void AbortWriteIfTransmissionEventIsAborting() {
             var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
             using (var stream = new MemoryStream())
-            using (var progressStream = new ProgressStream(stream, transmission))
-            {
+            using (var progressStream = new ProgressStream(stream, transmission)) {
                 transmission.ReportProgress(new TransmissionProgressEventArgs() { Aborting = true });
-                progressStream.WriteByte(new byte());
+                Assert.Throws<AbortException>(() => progressStream.WriteByte(new byte()));
+            }
+        }
+
+        [Test, Category("Fast"), Category("Streams")]
+        public void UpdateLengthIfInputStreamGrowsAfterStartReading() {
+            using (Stream stream = new MemoryStream()) {
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
+                long initialLength = 100;
+                long length = initialLength;
+                transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
+                    if (args.ActualPosition != null) {
+                        Assert.That(args.ActualPosition, Is.LessThanOrEqualTo(length));
+                        Assert.That(args.Length, Is.LessThanOrEqualTo(length));
+                        Assert.That(args.Percent, Is.LessThanOrEqualTo(100));
+                    }
+                };
+                byte[] buffer = new byte[initialLength];
+                stream.Write(buffer, 0, buffer.Length);
+                using (ProgressStream progress = new ProgressStream(stream, transmissionEvent)) {
+                    progress.Read(buffer, 0, buffer.Length / 2);
+                    stream.Write(buffer, 0, buffer.Length);
+                    length = length + buffer.Length;
+                    progress.Read(buffer, 0, buffer.Length / 2);
+                    progress.Read(buffer, 0, buffer.Length / 2);
+                    progress.Read(buffer, 0, buffer.Length / 2);
+                    stream.Write(buffer, 0, buffer.Length);
+                    length = length + buffer.Length;
+                    progress.Read(buffer, 0, buffer.Length);
+                }
             }
         }
     }

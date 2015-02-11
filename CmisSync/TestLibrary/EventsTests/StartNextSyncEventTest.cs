@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -27,25 +26,21 @@ namespace TestLibrary.EventsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class StartNextSyncEventTest
-    {
+    public class StartNextSyncEventTest {
         [Test, Category("Fast")]
-        public void ContructorWithoutParamSetsFullSyncRequestedFlagToFalse()
-        {
+        public void ContructorWithoutParamSetsFullSyncRequestedFlagToFalse() {
             var start = new StartNextSyncEvent();
             Assert.IsFalse(start.FullSyncRequested);
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWithFalseParamSetsFullSyncRequestedFlagToFalse()
-        {
+        public void ConstructorWithFalseParamSetsFullSyncRequestedFlagToFalse() {
             var start = new StartNextSyncEvent(false);
             Assert.IsFalse(start.FullSyncRequested);
         }
 
         [Test, Category("Fast")]
-        public void ConstructorWithTrueParamSetsFullSyncRequestedFlagToTrue()
-        {
+        public void ConstructorWithTrueParamSetsFullSyncRequestedFlagToTrue() {
             var start = new StartNextSyncEvent(true);
             Assert.IsTrue(start.FullSyncRequested);
         }

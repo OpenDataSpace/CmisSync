@@ -3,14 +3,19 @@ TARGET = library
 
 ASSEMBLY_INFO_SOURCE = Defines.cs
 
-LIBS = $(LOG4NET_LIBS) $(DATALIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
+LIBS = $(LOG4NET_LIBS) $(CONFIGLIBS) $(JSON_LIBS) $(DOTCMIS_LIBS) $(WEBLIBS) $(MONOPOSIX) $(MONOMAC_LIBS) $(DBREEZE_LIBS)
 
 SOURCES =  \
 	Accumulator/LocalObjectFetcher.cs \
 	Accumulator/RemoteObjectFetcher.cs \
 	Accumulator/RemoteObjectMovedOrRenamedAccumulator.cs \
 	ActivityListenerAggregator.cs \
+	Algorithms/CyclicDependencies/CycleDetector.cs \
+	Algorithms/CyclicDependencies/ICycleDetector.cs \
+	Algorithms/Tarjan/AbstractTarjanNode.cs \
+	Algorithms/Tarjan/Tarjan.cs \
 	Backend.cs \
+	ClientBrandBase.cs \
 	Cmis/Authentication/AuthProviderFactory.cs \
 	Cmis/Authentication/IDisposableAuthProvider.cs \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
@@ -24,15 +29,18 @@ SOURCES =  \
 	Cmis/UiUtils/CmisPermissionDeniedException.cs \
 	Cmis/UiUtils/CmisServerNotFoundException.cs \
 	Cmis/UiUtils/CmisUtils.cs \
+	Config/Brand.cs \
 	Config/Config.cs \
 	Config/ConfigManager.cs \
 	Config/ConfigMigration.cs \
 	Config/Credentials.cs \
 	Config/Crypto.cs \
+	Config/DefaultEntries.cs \
 	Config/Feature.cs \
 	Config/ProxySettings.cs \
 	Config/RepoInfo.cs \
 	Config/XmlUri.cs \
+	Consumer/InteractionNeededException.cs \
 	Consumer/ISituationDetection.cs \
 	Consumer/LocalSituationDetection.cs \
 	Consumer/RemoteSituationDetection.cs \
@@ -42,14 +50,20 @@ SOURCES =  \
 	Consumer/SituationSolver/LocalObjectAdded.cs \
 	Consumer/SituationSolver/LocalObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectChangedRemoteObjectChanged.cs \
+	Consumer/SituationSolver/LocalObjectChangedRemoteObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectChangedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectDeleted.cs \
 	Consumer/SituationSolver/LocalObjectDeletedRemoteObjectRenamedOrMoved.cs \
 	Consumer/SituationSolver/LocalObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectMovedRemoteObjectChanged.cs \
 	Consumer/SituationSolver/LocalObjectMovedRemoteObjectMoved.cs \
+	Consumer/SituationSolver/LocalObjectMovedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectRenamed.cs \
 	Consumer/SituationSolver/LocalObjectRenamedOrMovedRemoteObjectDeleted.cs \
+	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectChanged.cs \
+	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/NothingToDoSolver.cs \
 	Consumer/SituationSolver/RemoteObjectAdded.cs \
@@ -64,6 +78,7 @@ SOURCES =  \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
 	Events/ConfigChangedEvent.cs \
+	Events/ConfigurationNeededEvent.cs \
 	Events/ContentChangeEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/EncapsuledEvent.cs \
@@ -78,6 +93,7 @@ SOURCES =  \
 	Events/FSEvent.cs \
 	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
+	Events/ICountableEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
@@ -85,6 +101,7 @@ SOURCES =  \
 	Events/IFilterableRemotePathEvent.cs \
 	Events/IFSEvent.cs \
 	Events/IFSMovedEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
 	Events/PermissionDeniedEvent.cs \
@@ -144,6 +161,7 @@ SOURCES =  \
 	Queueing/EventHandlerPriorities.cs \
 	Queueing/GenericSyncEventHandler.cs \
 	Queueing/IConnectionScheduler.cs \
+	Queueing/ICountingQueue.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \
@@ -152,18 +170,37 @@ SOURCES =  \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
+	SelectiveIgnore/IgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IgnoredEntity.cs \
+	SelectiveIgnore/IgnoredState.cs \
+	SelectiveIgnore/IgnoreFlagChangeDetection.cs \
+	SelectiveIgnore/IIgnoredEntitiesCollection.cs \
+	SelectiveIgnore/IIgnoredEntitiesStorage.cs \
+	SelectiveIgnore/IIgnoredEntity.cs \
+	SelectiveIgnore/SelectiveIgnoreEventTransformer.cs \
+	SelectiveIgnore/SelectiveIgnoreFilter.cs \
+	Status/ConnectionStatus.cs \
+	Status/RepositoryStatus.cs \
+	Status/SynchronizationStatus.cs \
 	Storage/Database/DBreezeInitializerSingleton.cs \
 	Storage/Database/DublicateGuidException.cs \
+	Storage/Database/Entities/FileTransmissionObject.cs \
 	Storage/Database/Entities/IFileConvenienceExtenders.cs \
+	Storage/Database/Entities/IFileTransmissionObject.cs \
 	Storage/Database/Entities/IMappedObject.cs \
 	Storage/Database/Entities/MappedObject.cs \
 	Storage/Database/EntryNotFoundException.cs \
+	Storage/Database/FileTransmissionStorage.cs \
 	Storage/Database/ICookieStorage.cs \
+	Storage/Database/IFileTransmissionStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
 	Storage/Database/IObjectTree.cs \
 	Storage/Database/MetaDataStorage.cs \
 	Storage/Database/ObjectTree.cs \
 	Storage/Database/PersistentCookieStorage.cs \
+	Storage/FileSystem/DateTimeToFileConverter.cs \
 	Storage/FileSystem/DirectoryInfoWrapper.cs \
 	Storage/FileSystem/ExtendedAttributeException.cs \
 	Storage/FileSystem/ExtendedAttributeReaderDos.cs \
@@ -171,6 +208,7 @@ SOURCES =  \
 	Storage/FileSystem/FileInfoWrapper.cs \
 	Storage/FileSystem/FileSystemInfoFactory.cs \
 	Storage/FileSystem/FileSystemInfoWrapper.cs \
+	Storage/FileSystem/FSType.cs \
 	Storage/FileSystem/IDirectoryInfo.cs \
 	Storage/FileSystem/IExtendedAttributeReader.cs \
 	Storage/FileSystem/IFileInfo.cs \

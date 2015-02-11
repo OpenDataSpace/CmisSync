@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChanged.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -43,7 +43,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     public class LocalObjectChanged : AbstractEnhancedSolver
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
-        private static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
 
         private ActiveActivitiesManager transmissionManager;
 
@@ -53,15 +52,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
         public LocalObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            ActiveActivitiesManager transmissionManager,
-            bool serverCanModifyCreationAndModificationDate = false) : base(session, storage, serverCanModifyCreationAndModificationDate) {
-
-
-            if(transmissionManager == null) {
+            IFileTransmissionStorage transmissionStorage,
+            ActiveActivitiesManager transmissionManager) : base(session, storage, transmissionStorage)
+        {
+            if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
             }
 
@@ -113,26 +110,22 @@ namespace CmisSync.Lib.Consumer.SituationSolver
             if (localFile != null && localFile.IsContentChangedTo(mappedObject, scanOnlyIfModificationDateDiffers: true)) {
                 Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
-                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
                 var doc = remoteId as IDocument;
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                this.transmissionManager.AddTransmission(transmissionEvent);
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
-                using (var hashAlg = new SHA1Managed())
-                using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
-                    try {
-                        uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
-                    } catch(Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        if (ex.InnerException is CmisPermissionDeniedException) {
-                            OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has been not been uploaded: PermissionDenied", localFile.FullName));
-                            return;
-                        }
-
-                        throw;
+                try {
+                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    this.transmissionManager.AddTransmission(transmissionEvent);
+                    mappedObject.LastChecksum = UploadFile(localFile, ref doc, transmissionEvent);
+                    mappedObject.RemoteObjectId = doc.Id;
+                } catch(Exception ex) {
+                    if (ex.InnerException is CmisPermissionDeniedException) {
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
+                        return;
+                    } else if (ex.InnerException is CmisStorageException) {
+                        OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: StorageException", localFile.FullName), ex);
+                        return;
                     }
 
-                    mappedObject.LastChecksum = hashAlg.Hash;
+                    throw;
                 }
 
                 mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate;
@@ -140,8 +133,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 mappedObject.LastContentSize = localFile.Length;
 
                 OperationsLogger.Info(string.Format("Local changed file \"{0}\" has been uploaded", localFile.FullName));
-
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             }
 
             if (this.ServerCanModifyDateTimes) {
@@ -151,7 +142,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                         doc.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
                         mappedObject.LastRemoteWriteTimeUtc = doc.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     } else if (remoteId is IFolder) {
-                        var folder = (remoteId as IFolder);
+                        var folder = remoteId as IFolder;
                         folder.UpdateLastWriteTimeUtc(localFileSystemInfo.LastWriteTimeUtc);
                         mappedObject.LastRemoteWriteTimeUtc = folder.LastModificationDate ?? localFileSystemInfo.LastWriteTimeUtc;
                     }
