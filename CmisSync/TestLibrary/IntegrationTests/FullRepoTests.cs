@@ -363,10 +363,9 @@ namespace TestLibrary.IntegrationTests {
             Assert.That(child.Length, Is.EqualTo(0));
         }
 
-        [Test, Category("Slow"), Ignore("https://bugzilla.xamarin.com/show_bug.cgi?id=21135")]
-        public void ManyRemoteFilesCreated()
-        {
-            int fileNumber = 100;
+        // Timeout is set to 10 minutes for 100 x 1 MB file
+        [Test, Category("Slow"), Timeout(360000)]
+        public void ManyRemoteFilesCreated([Values(100)]int fileNumber) {
             string content = new string('A', 1024 * 1024);
             for (int i = 0; i < fileNumber; ++i) {
                 string fileName = "file" + i.ToString();
