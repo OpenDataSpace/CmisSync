@@ -1051,6 +1051,7 @@ namespace TestLibrary.IntegrationTests {
             (this.remoteRootDir.GetChildren().First() as IDocument).SetContent(newContent);
 
             this.WaitUntilQueueIsNotEmpty();
+            this.AddStartNextSyncEvent();
             this.repo.Run();
 
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(newContent.Length));
