@@ -36,7 +36,10 @@ namespace CmisSync.Lib.FileTransmission
         /// <returns>The uploader.</returns>
         /// <param name="chunkSize">Chunk size.</param>
         public static IFileUploader CreateUploader(long chunkSize = 0) {
-            return chunkSize > 0 ? new ChunkedUploader(chunkSize) : new SimpleFileUploader();
+            if (chunkSize > 0) {
+                return new ChunkedUploader(chunkSize);
+            }
+            return new SimpleFileUploader();
         }
 
         /// <summary>

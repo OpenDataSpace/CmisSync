@@ -115,7 +115,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             public byte[] Upload(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                 transmissionManager.AddTransmission(transmissionEvent);
-                return AbstractEnhancedSolver.UploadFile(localFile, ref doc, transmissionEvent);
+                return base.UploadFile(localFile, ref doc, transmissionEvent);
             }
 
             public override void Solve(
