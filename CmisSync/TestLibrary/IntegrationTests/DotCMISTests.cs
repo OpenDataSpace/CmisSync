@@ -824,9 +824,10 @@ namespace TestLibrary.IntegrationTests {
             string url,
             string user,
             string password,
-            string repositoryId)
+            string repositoryId,
+            string binding)
         {
-            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId);
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
