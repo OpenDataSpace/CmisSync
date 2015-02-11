@@ -1,6 +1,5 @@
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
 
     using CmisSync;
@@ -25,6 +24,7 @@ namespace CmisSync
         private DateTime? changesFoundAt;
         private object counterLock = new object();
         private bool disposed = false;
+        private bool successfulLogin = false;
 
         public RepositoryMenuItem(Repository repo, StatusIconController controller) : base(repo.Name) {
             this.SetProperty("always-show-image", new GLib.Value(true));
