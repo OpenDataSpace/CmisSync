@@ -65,6 +65,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private Mock<IFileInfo> localFile;
         private long localFileLength;
         private Mock<IFileInfo> cacheFile;
+        private Mock<IFileInfo> backupFile;
 
         [SetUp]
         public void SetUp() {
@@ -106,6 +107,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Setup(f => f.Directory).Returns(parentDir);
             this.cacheFile.Setup(f => f.IsExtendedAttributeAvailable()).Returns(true);
             this.fsFactory.AddIFileInfo(this.cacheFile.Object);
+
+            this.backupFile = new Mock<IFileInfo>();
         }
 
         private void RunSolverToAbortDownload(
@@ -201,10 +204,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileChanged() {
+        private void SetupRemoteFileChanged() {
             this.localFile.Setup(f => f.LastWriteTimeUtc).Returns(this.creationDate);
-            var backupFile = this.fsFactory.AddFile(Path.Combine(this.parentPath, this.objectName + ".bak.sync"), false);
+            this.backupFile = this.fsFactory.AddFile(Path.Combine(this.parentPath, this.objectName + ".bak.sync"), false);
             this.cacheFile.Setup(
                 c =>
                 c.Replace(this.localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
@@ -226,22 +228,25 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                     LastLocalWriteTimeUtc = this.creationDate,
                 };
             this.storage.AddMappedFile(mappedObject);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileChanged() {
+            SetupRemoteFileChanged();
 
             var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
             RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
             RunSolverToContinueDownload(solver, remoteContent: ContentChangeType.CHANGED);
-            this.cacheFile.Verify(c => c.Replace(localFile.Object, backupFile.Object, true), Times.Once());
-            backupFile.Verify(b => b.Delete(), Times.Once());
+            this.cacheFile.Verify(c => c.Replace(localFile.Object, this.backupFile.Object, true), Times.Once());
+            this.backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileAddedWhileChangeLocalBeforeContinue() {
-            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
-
-            RunSolverToAbortDownload(solver);
-
+        private void RunSolverToChangeLocalCacheBeforeContinue(
+            AbstractEnhancedSolver solver,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE) {
             Mock<MemoryStream> stream = new Mock<MemoryStream>();
             stream.SetupAllProperties();
             stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
@@ -282,14 +287,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, this.changeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            solver.Solve(this.localFile.Object, remoteObject.Object);
+            solver.Solve(this.localFile.Object, remoteObject.Object, localContent, remoteContent);
 
             Assert.That(this.localFileLength, Is.EqualTo(this.fileContent.Length));
             stream.Verify(f => f.Seek(0, SeekOrigin.Begin), Times.Never());
             this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3));   //  first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
             this.cacheFile.Verify(f => f.Delete(), Times.Once());
-            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
-            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
@@ -297,18 +300,34 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
-        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileChangedWhileChangeLocalBeforeContinue() {
-            Assert.Fail("TODO");
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileAddedWhileChangeRemoteBeforeContinue() {
+        public void RemoteFileAddedWhileChangeLocalCacheBeforeContinue() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
             RunSolverToAbortDownload(solver);
 
+            RunSolverToChangeLocalCacheBeforeContinue(solver);
+            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileChangedWhileChangeLocalCacheBeforeContinue() {
+            SetupRemoteFileChanged();
+
+            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+
+            RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
+
+            RunSolverToChangeLocalCacheBeforeContinue(solver, remoteContent: ContentChangeType.CHANGED);
+            this.cacheFile.Verify(c => c.Replace(localFile.Object, this.backupFile.Object, true), Times.Once());
+            this.backupFile.Verify(b => b.Delete(), Times.Once());
+        }
+
+        private void RunSolverToChangeRemoteBeforeContinue(
+            AbstractEnhancedSolver solver,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE) {
             Mock<MemoryStream> stream = new Mock<MemoryStream>();
             stream.SetupAllProperties();
             stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
@@ -326,14 +345,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, newLastChangeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
 
-            solver.Solve(this.localFile.Object, remoteObject.Object);
+            solver.Solve(this.localFile.Object, remoteObject.Object, localContent, remoteContent);
 
             Assert.That(this.localFileLength, Is.EqualTo(this.fileContent.Length));
             stream.Verify(f => f.Seek(0, SeekOrigin.Begin), Times.Never());
             this.cacheFile.Verify(f => f.Delete(), Times.Once());
             this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(2));   //  first open in SetupToAbortThePreviousDownload, second open to download
-            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
-            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, newLastChangeToken, true, this.creationDate, this.creationDate, fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
@@ -341,26 +358,44 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
         }
 
-        [Ignore("TODO")]
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileAddedWhileChangeRemoteBeforeContinue() {
+            var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+
+            RunSolverToAbortDownload(solver);
+
+            RunSolverToChangeRemoteBeforeContinue(solver);
+            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
+        }
+
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChangedWhileChangeRemoteBeforeContinue() {
+            SetupRemoteFileChanged();
+
+            var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+
+            RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
+
+            RunSolverToChangeRemoteBeforeContinue(solver, remoteContent: ContentChangeType.CHANGED);
+            this.cacheFile.Verify(c => c.Replace(localFile.Object, this.backupFile.Object, true), Times.Once());
+            this.backupFile.Verify(b => b.Delete(), Times.Once());
+        }
+
+        [Ignore("TODO")]
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileAddedWhileChangeLocalCacheAndRemoteBeforeContinue() {
             Assert.Fail("TODO");
         }
 
         [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileAddedWhileChangeLocalAndRemoteBeforeContinue() {
-            Assert.Fail("TODO");
-        }
-
-        [Ignore("TODO")]
-        [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileChangedWhileChangeLocalAndRemoteBeforeContinue() {
+        public void RemoteFileChangedWhileChangeLocalCacheAndRemoteBeforeContinue() {
             Assert.Fail("TODO");
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void RemoteFileAddedWhileDeleteLocalBeforeContinue() {
+        public void RemoteFileAddedWhileDeleteLocalCacheBeforeContinue() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
             RunSolverToAbortDownload(solver);
@@ -393,6 +428,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
             this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
+        }
+
+        [Ignore("TODO")]
+        [Test, Category("Fast"), Category("Solver")]
+        public void RemoteFileChangedWhileDeleteLocalCacheBeforeContinue() {
+            Assert.Fail("TODO");
         }
     }
 }
