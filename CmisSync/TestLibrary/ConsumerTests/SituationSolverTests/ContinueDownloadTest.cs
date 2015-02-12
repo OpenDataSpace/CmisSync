@@ -59,6 +59,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private readonly int chunkCount = 4;
         private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
         private byte[] fileContentOld;
+        private byte[] fileHashOld;
         private byte[] fileContent;
         private byte[] fileHash;
         private Mock<IFileInfo> localFile;
@@ -84,8 +85,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.parentPath = Path.GetTempPath();
             this.localPath = Path.Combine(this.parentPath, this.objectName);
             this.fileContentOld = new byte[this.chunkCount * this.chunkSize];
-            this.fileContent = new byte[this.chunkCount * this.chunkSize];
             this.fileContentOld[0] = 0;
+            this.fileHashOld = SHA1.Create().ComputeHash(fileContentOld);
+            this.fileContent = new byte[this.chunkCount * this.chunkSize];
             this.fileContent[0] = 1;
             this.fileHash = SHA1.Create().ComputeHash(fileContent);
 
@@ -116,7 +118,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.localFileLength = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => {
-                Console.WriteLine("Write at " + this.localFileLength.ToString());
                 if (this.localFileLength > 0) {
                     foreach (FileTransmissionEvent transmissionEvent in this.transmissionManager.ActiveTransmissions) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
@@ -182,8 +183,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.That(this.localFileLength, Is.EqualTo(this.fileContent.Length));
             stream.Verify(f => f.Seek(0, SeekOrigin.Begin), Times.Once());
             this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3));   //  first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
-            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
-            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
@@ -194,8 +193,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileAdded() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+
             RunSolverToAbortDownload(solver);
+
             RunSolverToContinueDownload(solver);
+            this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
+            this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -218,15 +221,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.changeToken + ".old") {
                     Guid = Guid.NewGuid(),
                     LastContentSize = 0,
-                    LastChecksum = this.emptyHash,
+                    LastChecksum = this.fileHashOld,
                     ChecksumAlgorithmName = "SHA-1",
                     LastLocalWriteTimeUtc = this.creationDate,
                 };
             this.storage.AddMappedFile(mappedObject);
 
             var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
+
             RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
+
             RunSolverToContinueDownload(solver, remoteContent: ContentChangeType.CHANGED);
+            this.cacheFile.Verify(c => c.Replace(localFile.Object, backupFile.Object, true), Times.Once());
+            backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
