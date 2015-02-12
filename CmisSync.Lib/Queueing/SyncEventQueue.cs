@@ -16,12 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Collections.Generic;
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -108,10 +107,10 @@ namespace CmisSync.Lib.Queueing
                 if (newEvent is ICountableEvent) {
                     string category = (newEvent as ICountableEvent).Category;
                     if (!string.IsNullOrEmpty(category)) {
-                        Interlocked.Increment(ref this.fullCounter);
+                        int fullcounter = Interlocked.Increment(ref this.fullCounter);
                         lock (subscriberLock) {
                             foreach (var observer in this.fullCounterObservers) {
-                                observer.OnNext(this.fullCounter);
+                                observer.OnNext(fullcounter);
                             }
 
                             var value = this.categoryCounter.AddOrUpdate(category, 1, delegate(string cat, int counter) {
