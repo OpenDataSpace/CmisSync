@@ -350,6 +350,16 @@ namespace CmisSync.Lib.Cmis {
             this.Status = SyncStatus.Suspend;
             this.Scheduler.Stop();
             this.Queue.Suspend();
+            foreach (var transmission in this.activityListener.TransmissionManager.ActiveTransmissionsAsList()) {
+                string localFolder = this.RepoInfo.LocalPath;
+                if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
+                    localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
+                }
+
+                if (transmission.Path.StartsWith(localFolder)) {
+                    transmission.ReportProgress(new TransmissionProgressEventArgs { Paused = true });
+                }
+            }
         }
 
         /// <summary>
@@ -359,6 +369,16 @@ namespace CmisSync.Lib.Cmis {
             this.Status = SyncStatus.Idle;
             this.Queue.Continue();
             this.Scheduler.Start();
+            foreach (var transmission in this.activityListener.TransmissionManager.ActiveTransmissionsAsList()) {
+                string localFolder = this.RepoInfo.LocalPath;
+                if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
+                    localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
+                }
+
+                if (transmission.Path.StartsWith(localFolder)) {
+                    transmission.ReportProgress(new TransmissionProgressEventArgs { Paused = false });
+                }
+            }
         }
 
         /// <summary>
