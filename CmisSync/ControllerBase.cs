@@ -791,6 +791,7 @@ namespace CmisSync {
                 if (repo.LocalPath.Equals(folder.LocalPath)) {
                     repo.Dispose();
                     this.repositories.Remove(repo);
+                    repo.Dispose();
                     break;
                 }
             }
