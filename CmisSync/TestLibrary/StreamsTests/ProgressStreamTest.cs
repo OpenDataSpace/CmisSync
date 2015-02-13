@@ -362,7 +362,7 @@ namespace TestLibrary.StreamsTests {
                         progressStream.CopyTo(targetStream);
                         Assert.That(targetStream.Length, Is.EqualTo(length));
                         var duration = DateTime.Now - start;
-                        Assert.That(duration.TotalSeconds, Is.InRange(seconds, seconds + 1));
+                        Assert.That(Math.Round(duration.TotalSeconds), Is.InRange(seconds, seconds + 1));
                     }
                 });
                 System.Threading.Thread.Sleep(seconds * 1000);
