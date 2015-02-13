@@ -88,6 +88,7 @@ SOURCES =  \
 	Events/FileMovedEvent.cs \
 	Events/FileOrFolderEventFactory.cs \
 	Events/FileTransmissionEvent.cs \
+	Events/FileTransmissionEventArgs.cs \
 	Events/FolderEvent.cs \
 	Events/FolderMovedEvent.cs \
 	Events/FSEvent.cs \
