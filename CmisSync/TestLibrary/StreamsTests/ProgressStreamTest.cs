@@ -20,6 +20,7 @@
 namespace TestLibrary.StreamsTests {
     using System;
     using System.IO;
+    using System.Threading.Tasks;
 
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Events;
@@ -206,8 +207,7 @@ namespace TestLibrary.StreamsTests {
         }
 
         [Test, Category("Fast"), Category("Streams")]
-        public void SeekTest()
-        {
+        public void SeekTest() {
             using (Stream stream = new MemoryStream()) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(this.transmissionType, this.filename);
                 transmissionEvent.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs args) {
@@ -345,6 +345,29 @@ namespace TestLibrary.StreamsTests {
                     length = length + buffer.Length;
                     progress.Read(buffer, 0, buffer.Length);
                 }
+            }
+        }
+
+        [Test, Category("Medium"), Category("Streams")]
+        public void PauseAndResumeStream([Values(1,2,5)]int seconds) {
+            int length = 1024;
+            var start = DateTime.Now;
+            byte[] content = new byte[length];
+            var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
+            using (var stream = new MemoryStream(content))
+            using (var progressStream = new ProgressStream(stream, transmission)) {
+                transmission.ReportProgress(new TransmissionProgressEventArgs() { Paused = true });
+                var task = Task.Factory.StartNew(() => {
+                    using(var targetStream = new MemoryStream()) {
+                        progressStream.CopyTo(targetStream);
+                        Assert.That(targetStream.Length, Is.EqualTo(length));
+                        var duration = DateTime.Now - start;
+                        Assert.That(duration.TotalSeconds, Is.InRange(seconds, seconds + 1));
+                    }
+                });
+                System.Threading.Thread.Sleep(seconds * 1000);
+                transmission.ReportProgress(new TransmissionProgressEventArgs() { Paused = false });
+                task.Wait();
             }
         }
     }

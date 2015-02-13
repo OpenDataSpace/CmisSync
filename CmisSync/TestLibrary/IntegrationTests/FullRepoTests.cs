@@ -364,7 +364,7 @@ namespace TestLibrary.IntegrationTests {
         }
 
         // Timeout is set to 10 minutes for 100 x 1 MB file
-        [Test, Category("Slow"), Timeout(360000)]
+        [Test, Category("Slow"), Timeout(600000)]
         public void ManyRemoteFilesCreated([Values(100)]int fileNumber) {
             string content = new string('A', 1024 * 1024);
             for (int i = 0; i < fileNumber; ++i) {
