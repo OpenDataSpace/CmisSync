@@ -37,7 +37,7 @@ namespace CmisSync.Lib.Events {
             if (url == null) {
                 throw new ArgumentNullException("Given Url is null");
             }
-            
+
             if (session == null) {
                 throw new ArgumentNullException("Given session is null");
             }

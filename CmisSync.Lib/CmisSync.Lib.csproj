@@ -276,6 +276,7 @@
     <Compile Include="Status\ConnectionStatus.cs" />
     <Compile Include="Status\RepositoryStatus.cs" />
     <Compile Include="Status\SynchronizationStatus.cs" />
+    <Compile Include="Events\RepoConfigChangedEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

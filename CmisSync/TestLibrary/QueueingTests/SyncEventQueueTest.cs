@@ -37,8 +37,6 @@ namespace TestLibrary.QueueingTests {
 
     [TestFixture]
     public class SyncEventQueueTest : IsTestWithConfiguredLog4Net {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventQueueTest));
-
         [Test, Category("Medium")]
         public void EventlessStartStop() {
             using (SyncEventQueue queue = new SyncEventQueue(new Mock<ISyncEventManager>().Object)) {

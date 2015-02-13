@@ -108,6 +108,7 @@ SOURCES =  \
 	Events/ProxyAuthRequiredEvent.cs \
 	Events/RecentChangedEvent.cs \
 	Events/RemoteEvent.cs \
+	Events/RepoConfigChangedEvent.cs \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
 	Events/SuccessfulLoginEvent.cs \
