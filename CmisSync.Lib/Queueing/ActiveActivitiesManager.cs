@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Active activities manager.
     /// </summary>
-    public class ActiveActivitiesManager
-    {
+    public class ActiveActivitiesManager {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ActiveActivitiesManager));
 
         private object collectionLock = new object();
@@ -46,10 +44,8 @@ namespace CmisSync.Lib.Queueing
         /// <value>
         /// The active transmissions.
         /// </value>
-        public ObservableCollection<FileTransmissionEvent> ActiveTransmissions
-        {
-            get
-            {
+        public ObservableCollection<FileTransmissionEvent> ActiveTransmissions {
+            get {
                 return this.activeTransmissions;
             }
         }
@@ -60,10 +56,8 @@ namespace CmisSync.Lib.Queueing
         /// <returns>
         /// The transmissions as list.
         /// </returns>
-        public List<FileTransmissionEvent> ActiveTransmissionsAsList()
-        {
-            lock (this.collectionLock)
-            {
+        public List<FileTransmissionEvent> ActiveTransmissionsAsList() {
+            lock (this.collectionLock) {
                 return this.activeTransmissions.ToList<FileTransmissionEvent>();
             }
         }
@@ -73,17 +67,13 @@ namespace CmisSync.Lib.Queueing
         /// </summary>
         /// <param name="transmission">transmission which should be added</param>
         /// <returns>true if added</returns>
-        public virtual bool AddTransmission(FileTransmissionEvent transmission)
-        {
-            if(transmission == null)
-            {
+        public virtual bool AddTransmission(FileTransmissionEvent transmission) {
+            if (transmission == null) {
                 throw new ArgumentNullException();
             }
 
-            lock (this.collectionLock)
-            {
-                if (this.activeTransmissions.Contains(transmission))
-                {
+            lock (this.collectionLock) {
+                if (this.activeTransmissions.Contains(transmission)) {
                     return false;
                 }
 
@@ -98,8 +88,7 @@ namespace CmisSync.Lib.Queueing
         /// <summary>
         /// Aborts all open HTTP requests.
         /// </summary>
-        public void AbortAllRequests()
-        {
+        public void AbortAllRequests() {
             DotCMIS.Binding.HttpWebRequestResource.AbortAll();
         }
 
@@ -112,15 +101,11 @@ namespace CmisSync.Lib.Queueing
         /// <param name='e'>
         /// The progress parameters of the transmission.
         /// </param>
-        private void TransmissionFinished(object sender, TransmissionProgressEventArgs e)
-        {
-            if (e.Aborted == true || e.Completed == true || e.FailedException != null)
-            {
-                lock (this.collectionLock)
-                {
+        private void TransmissionFinished(object sender, TransmissionProgressEventArgs e) {
+            if (e.Aborted == true || e.Completed == true || e.FailedException != null) {
+                lock (this.collectionLock) {
                     FileTransmissionEvent transmission = sender as FileTransmissionEvent;
-                    if (transmission != null && this.activeTransmissions.Contains(transmission))
-                    {
+                    if (transmission != null && this.activeTransmissions.Contains(transmission)) {
                         this.activeTransmissions.Remove(transmission);
                         transmission.TransmissionStatus -= this.TransmissionFinished;
                         Logger.Debug("Transmission removed");
