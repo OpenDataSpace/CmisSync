@@ -20,10 +20,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis
-{
+namespace CmisSync.Lib.Cmis {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
 
     using CmisSync.Lib;
@@ -66,6 +66,16 @@ namespace CmisSync.Lib.Cmis
         Suspend,
 
         /// <summary>
+        /// Connection is offline.
+        /// </summary>
+        Offline,
+
+        /// <summary>
+        /// Actually changes are synchronized.
+        /// </summary>
+        Synchronizing,
+
+        /// <summary>
         /// Any sync conflict or warning happend
         /// </summary>
         Warning
@@ -74,7 +84,7 @@ namespace CmisSync.Lib.Cmis
     /// <summary>
     /// Synchronized CMIS repository.
     /// </summary>
-    public class Repository : IDisposable {
+    public class Repository : IDisposable, INotifyPropertyChanged {
         /// <summary>
         /// Name of the synchronized folder, as found in the CmisSync XML configuration file.
         /// </summary>
@@ -89,6 +99,21 @@ namespace CmisSync.Lib.Cmis
         /// Path of the local synchronized folder.
         /// </summary>
         public readonly string LocalPath;
+
+        /// <summary>
+        /// The storage.
+        /// </summary>
+        protected MetaDataStorage storage;
+
+        /// <summary>
+        /// The file transmission storage.
+        /// </summary>
+        protected FileTransmissionStorage fileTransmissionStorage;
+
+        /// <summary>
+        /// The connection scheduler.
+        /// </summary>
+        protected ConnectionScheduler connectionScheduler;
 
         private static readonly ILog Logger = LogManager.GetLogger(typeof(Repository));
 
@@ -144,18 +169,6 @@ namespace CmisSync.Lib.Cmis
         private ContentChangeEventTransformer transformer;
 
         private DBreezeEngine db;
-
-        /// <summary>
-        /// The storage.
-        /// </summary>
-        protected MetaDataStorage storage;
-
-        protected FileTransmissionStorage fileTransmissionStorage;
-
-        /// <summary>
-        /// The connection scheduler.
-        /// </summary>
-        protected ConnectionScheduler connectionScheduler;
 
         private IFileSystemInfoFactory fileSystemFactory;
 
@@ -282,6 +295,11 @@ namespace CmisSync.Lib.Cmis
         ~Repository() {
             this.Dispose(false);
         }
+
+        /// <summary>
+        /// Occurs when property changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Gets or sets the sync status. Affect a new <c>SyncStatus</c> value.
@@ -424,6 +442,21 @@ namespace CmisSync.Lib.Cmis
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// This method is called by the Set accessor of each property.
+        /// </summary>
+        /// <param name="propertyName">Property name.</param>
+        private void NotifyPropertyChanged(string propertyName) {
+            if (string.IsNullOrEmpty(propertyName)) {
+                throw new ArgumentNullException("Given property name is null");
+            }
+
+            var handler = this.PropertyChanged;
+            if (handler != null) {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }
