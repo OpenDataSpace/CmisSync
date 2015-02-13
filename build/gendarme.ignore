@@ -34,6 +34,7 @@ R: Gendarme.Rules.Portability.DoNotHardcodePathsRule
 M: System.Void CmisSync.UI::.cctor()
 M: System.Void TestLibrary.PathMatcherTests.PathMatcherTest::SetUp()
 M: TestLibrary.ConfigTests::TestBrand()
+M: System.Collections.Generic.List`1<System.String> CmisSync.ClientBrand::get_PathList()
 T: TestLibrary.EventsTests.EventsFilterTests.IgnoredFolderNamesFilterTest
 
 #Required to be type long for error code
@@ -66,10 +67,14 @@ T: CmisSync.Edit
 T: CmisSync.Lib.Storage.Database.PersistentCookieStorage
 T: CmisSync.Lib.Storage.Database.MetaDataStorage
 
-#Windows Gendarme bug? XmlNodeList is not an IDisposal object at all
+#Windows gendarme bug? XmlNodeList is not an IDisposal object at all
 R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
 M: System.Collections.ObjectModel.Collection`1<System.String> CmisSync.Lib.Config::get_Folders()
 M: System.Void CmisSync.Lib.Config::RemoveFolder(System.String)
+
+#Ignore correct implementation of dispose pattern in ControllerBase
+R: Gendarme.Rules.Correctness.EnsureLocalDisposalRule
+M: System.Void CmisSync.ControllerBase::AddRepository(CmisSync.Lib.Config.RepoInfo)
 
 #Ignore DotCMIS based rule
 R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
