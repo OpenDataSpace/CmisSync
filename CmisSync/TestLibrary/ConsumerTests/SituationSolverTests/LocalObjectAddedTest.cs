@@ -391,7 +391,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             return parentDirInfo;
         }
 
-        private void SetupSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, Mock<IFileInfo> fileInfo, out Mock<IDocument> documentMock, bool returnLastModificationDate = false, bool failsOnUploadContent = false) {
+        private void SetupSolveFile(
+            string fileName,
+            string fileId,
+            string parentId,
+            string lastChangeToken,
+            bool extendedAttributes,
+            Mock<IFileInfo> fileInfo,
+            out Mock<IDocument> documentMock,
+            bool returnLastModificationDate = false,
+            bool failsOnUploadContent = false)
+        {
             var parentDirInfo = this.SetupParentFolder(parentId);
             var parents = new List<IFolder>();
             parents.Add(Mock.Of<IFolder>(f => f.Id == parentId));
@@ -476,7 +486,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
         }
 
-        private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes, out Mock<IFolder> folderMock, Guid? existingGuid = null, ActiveActivitiesManager transmissionManager = null) {
+        private Mock<IDirectoryInfo> RunSolveFolder(
+            string folderName,
+            string id,
+            string parentId,
+            string lastChangeToken,
+            bool extendedAttributes,
+            out Mock<IFolder> folderMock,
+            Guid? existingGuid = null,
+                ActiveActivitiesManager transmissionManager = null)
+        {
             string path = Path.Combine(Path.GetTempPath(), folderName);
             var futureRemoteFolder = Mock.Of<IFolder>(
                 f =>

@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// Meta data change type.
     /// </summary>
-    public enum MetaDataChangeType
-    {
+    public enum MetaDataChangeType {
         /// <summary>
         /// Nothing has been changed.
         /// </summary>
@@ -55,8 +53,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Content change type.
     /// </summary>
-    public enum ContentChangeType
-    {
+    public enum ContentChangeType {
         /// <summary>
         /// The content has not been changed.
         /// </summary>

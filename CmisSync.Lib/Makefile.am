@@ -88,6 +88,7 @@ SOURCES =  \
 	Events/FileMovedEvent.cs \
 	Events/FileOrFolderEventFactory.cs \
 	Events/FileTransmissionEvent.cs \
+	Events/FileTransmissionEventArgs.cs \
 	Events/FolderEvent.cs \
 	Events/FolderMovedEvent.cs \
 	Events/FSEvent.cs \
@@ -108,6 +109,7 @@ SOURCES =  \
 	Events/ProxyAuthRequiredEvent.cs \
 	Events/RecentChangedEvent.cs \
 	Events/RemoteEvent.cs \
+	Events/RepoConfigChangedEvent.cs \
 	Events/RequestIgnoredEvent.cs \
 	Events/StartNextSyncEvent.cs \
 	Events/SuccessfulLoginEvent.cs \
