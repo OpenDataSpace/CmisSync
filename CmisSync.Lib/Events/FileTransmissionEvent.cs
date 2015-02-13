@@ -146,6 +146,7 @@ namespace CmisSync.Lib.Events {
             this.Status.Started = (status.Started != null) ? status.Started : this.Status.Started;
             this.Status.BitsPerSecond = (status.BitsPerSecond != null) ? status.BitsPerSecond : this.Status.BitsPerSecond;
             this.Status.FailedException = (status.FailedException != null) ? status.FailedException : this.Status.FailedException;
+            this.Status.Paused = (status.Paused != null) ? status.Paused : this.Status.Paused;
             if (this.TransmissionStatus != null) {
                 this.TransmissionStatus(this, this.Status);
             }
