@@ -17,19 +17,17 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// Filterable event.
     /// </summary>
-    public interface IFilterableEvent : ISyncEvent
-    {
+    public interface IFilterableEvent : ISyncEvent {
         /// <summary>
-        /// Determines whether this event contains a directory.
+        /// Gets a value indicating whether this instance is an event happend on a directory.
         /// </summary>
-        /// <returns><c>true</c> if this event contains a directory; otherwise, <c>false</c>.</returns>
+        /// <value><c>true</c> if this instance is a event on a directory; otherwise, <c>false</c>.</value>
         bool IsDirectory { get; }
     }
 }

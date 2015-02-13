@@ -377,7 +377,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             return parentDirInfo;
         }
 
-        private void RunSolveFile(string fileName, string fileId, string parentId, string lastChangeToken, bool extendedAttributes, Mock<IFileInfo> fileInfo, out Mock<IDocument> documentMock, bool returnLastModificationDate = false, bool failsOnUploadContent = false) {
+        private void RunSolveFile(
+            string fileName,
+            string fileId,
+            string parentId,
+            string lastChangeToken,
+            bool extendedAttributes,
+            Mock<IFileInfo> fileInfo,
+            out Mock<IDocument> documentMock,
+            bool returnLastModificationDate = false,
+            bool failsOnUploadContent = false)
+        {
             var parentDirInfo = this.SetupParentFolder(parentId);
 
             var parents = new List<IFolder>();
@@ -447,7 +457,14 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
         }
 
-        private Mock<IDirectoryInfo> RunSolveFolder(string folderName, string id, string parentId, string lastChangeToken, bool extendedAttributes, out Mock<IFolder> folderMock, Guid? existingGuid = null)
+        private Mock<IDirectoryInfo> RunSolveFolder(
+            string folderName,
+            string id,
+            string parentId,
+            string lastChangeToken,
+            bool extendedAttributes,
+            out Mock<IFolder> folderMock,
+            Guid? existingGuid = null)
         {
             string path = Path.Combine(Path.GetTempPath(), folderName);
             var futureRemoteFolder = Mock.Of<IFolder>(
@@ -518,8 +535,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
         }
 
-        private void SetUpMocks(bool withExtendedAttributes = true)
-        {
+        private void SetUpMocks(bool withExtendedAttributes = true) {
             this.withExtendedAttributes = withExtendedAttributes;
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
