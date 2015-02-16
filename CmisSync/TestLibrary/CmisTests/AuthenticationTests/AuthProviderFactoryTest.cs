@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.CmisTests.AuthenticationTests
-{
+namespace TestLibrary.CmisTests.AuthenticationTests {
     using System;
 
     using CmisSync.Lib.Cmis;
@@ -31,57 +30,59 @@ namespace TestLibrary.CmisTests.AuthenticationTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class AuthProviderFactoryTest
-    {
+    public class AuthProviderFactoryTest : IDisposable {
         private readonly Uri url = new Uri("https://example.com");
         private DBreezeEngine engine;
 
         [TestFixtureSetUp]
-        public void InitCustomSerializator()
-        {
+        public void InitCustomSerializator() {
             // Use Newtonsoft.Json as Serializator
-            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject; 
+            DBreeze.Utils.CustomSerializator.Serializator = JsonConvert.SerializeObject;
             DBreeze.Utils.CustomSerializator.Deserializator = JsonConvert.DeserializeObject;
         }
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.engine = new DBreezeEngine(new DBreezeConfiguration { Storage = DBreezeConfiguration.eStorage.MEMORY });
         }
 
         [TearDown]
-        public void TearDown()
-        {
+        public void TearDown() {
             this.engine.Dispose();
+            this.engine = null;
         }
 
         [Test, Category("Fast")]
-        public void CreateBasicAuthProvider()
-        {
+        public void CreateBasicAuthProvider() {
             var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.BASIC, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentStandardAuthenticationProvider>());
         }
 
         [Test, Category("Fast")]
-        public void CreateNtlmAuthProvider()
-        {
+        public void CreateNtlmAuthProvider() {
             var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.NTLM, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentNtlmAuthenticationProvider>());
         }
 
         [Test, Category("Fast")]
-        public void CreateKerberosAuthProvider()
-        {
+        public void CreateKerberosAuthProvider() {
             var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.KERBEROS, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<PersistentNtlmAuthenticationProvider>());
         }
 
         [Test, Category("Fast")]
-        public void CreateUnimplementedAuthTypeReturnDefaultAuthProvider()
-        {
+        public void CreateUnimplementedAuthTypeReturnDefaultAuthProvider() {
             var provider = AuthProviderFactory.CreateAuthProvider(AuthenticationType.SHIBBOLETH, this.url, this.engine);
             Assert.That(provider, Is.TypeOf<StandardAuthenticationProviderWrapper>());
         }
+
+        #region boilerplatecode
+        public void Dispose() {
+            if (this.engine != null) {
+                this.engine.Dispose();
+                this.engine = null;
+            }
+        }
+        #endregion
     }
 }

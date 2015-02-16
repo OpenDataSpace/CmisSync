@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.Collections.Generic;
 
@@ -26,14 +25,12 @@ namespace CmisSync.Lib.Events
     /// This event should be used by scheduler to periodically start sync processes.
     /// If any inconsitancy is detected, it could also be used by the algorithm itself to force a full sync on the next sync execution.
     /// </summary>
-    public class StartNextSyncEvent : IRemoveFromLoggingEvent, ICountableEvent
-    {
+    public class StartNextSyncEvent : IRemoveFromLoggingEvent, ICountableEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.StartNextSyncEvent"/> class.
         /// </summary>
         /// <param name="fullSyncRequested">If set to <c>true</c> a full sync is requested.</param>
-        public StartNextSyncEvent(bool fullSyncRequested = false)
-        {
+        public StartNextSyncEvent(bool fullSyncRequested = false) {
             this.FullSyncRequested = fullSyncRequested;
         }
 

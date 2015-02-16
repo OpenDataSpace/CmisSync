@@ -1,6 +1,23 @@
+//-----------------------------------------------------------------------
+// <copyright file="RepositoryMenuItem.cs" company="GRAU DATA AG">
+//
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General private License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//   GNU General private License for more details.
+//
+//   You should have received a copy of the GNU General private License
+//   along with this program. If not, see http://www.gnu.org/licenses/.
+//
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
 
     using CmisSync;
@@ -15,13 +32,17 @@ namespace CmisSync
         private ImageMenuItem removeFolderFromSyncItem;
         private ImageMenuItem suspendItem;
         private ImageMenuItem editItem;
+        private MenuItem separator1;
+        private MenuItem separator2;
         private MenuItem statusItem;
-        private Repository repository;
+        private Repository repository { get; set; }
         private SyncStatus status;
         private bool syncRequested;
         private int changesFound;
         private DateTime? changesFoundAt;
         private object counterLock = new object();
+        private bool disposed = false;
+        private bool successfulLogin = false;
 
         public RepositoryMenuItem(Repository repo, StatusIconController controller) : base(repo.Name) {
             this.SetProperty("always-show-image", new GLib.Value(true));
@@ -53,14 +74,16 @@ namespace CmisSync
                 Image = new Image(UIHelpers.GetIcon("dataspacesync-deleted", 12))
             };
             this.removeFolderFromSyncItem.Activated += this.RemoveFolderFromSyncDelegate();
+            this.separator1 = new SeparatorMenuItem();
+            this.separator2 = new SeparatorMenuItem();
 
             var subMenu = new Menu();
             subMenu.Add(this.statusItem);
-            subMenu.Add(new SeparatorMenuItem());
+            subMenu.Add(this.separator1);
             subMenu.Add(this.openLocalFolderItem);
             subMenu.Add(this.suspendItem);
             subMenu.Add(this.editItem);
-            subMenu.Add(new SeparatorMenuItem());
+            subMenu.Add(this.separator2);
             subMenu.Add(this.removeFolderFromSyncItem);
             this.Submenu = subMenu;
 
@@ -169,6 +192,60 @@ namespace CmisSync
             }
         }
 
+        /// <summary>
+        /// Releases all resource used by the <see cref="CmisSync.RepositoryMenuItem"/> object.
+        /// </summary>
+        /// <remarks>Call <see cref="Dispose"/> when you are finished using the <see cref="CmisSync.RepositoryMenuItem"/>. The
+        /// <see cref="Dispose"/> method leaves the <see cref="CmisSync.RepositoryMenuItem"/> in an unusable state.
+        /// After calling <see cref="Dispose"/>, you must release all references to the
+        /// <see cref="CmisSync.RepositoryMenuItem"/> so the garbage collector can reclaim the memory that the
+        /// <see cref="CmisSync.RepositoryMenuItem"/> was occupying.</remarks>
+        public void Dispose() {
+            this.Dispose(true);
+        }
+
+        /// <summary>
+        /// Dispose the specified Menu Item.
+        /// </summary>
+        /// <param name="disposing">If set to <c>true</c> disposing.</param>
+        public void Dispose(bool disposing) {
+            if (this.disposed) {
+                return;
+            }
+
+            if (disposing) {
+                if (this.editItem != null) {
+                    this.editItem.Dispose();
+                }
+
+                if (this.statusItem != null) {
+                    this.statusItem.Dispose();
+                }
+
+                if (this.suspendItem != null) {
+                    this.suspendItem.Dispose();
+                }
+
+                if (this.openLocalFolderItem != null) {
+                    this.openLocalFolderItem.Dispose();
+                }
+
+                if (this.separator1 != null) {
+                    this.separator1.Dispose();
+                }
+
+                if (this.separator2 != null) {
+                    this.separator2.Dispose();
+                }
+
+                if (this.removeFolderFromSyncItem != null) {
+                    this.removeFolderFromSyncItem.Dispose();
+                }
+            }
+
+            this.disposed = true;
+        }
+
         private void UpdateStatusText() {
             string message;
             lock (this.counterLock) {
@@ -196,7 +273,10 @@ namespace CmisSync
             }
 
             Application.Invoke(delegate {
-                (this.statusItem.Child as Label).Text = message;
+                try {
+                    (this.statusItem.Child as Label).Text = message;
+                } catch(NullReferenceException) {
+                }
             });
         }
     }

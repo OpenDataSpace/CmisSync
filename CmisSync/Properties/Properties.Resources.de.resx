@@ -412,4 +412,7 @@ Dies kann bei der Synchronisation zu Konfliktdateien führen.</value>
   <data name="TransmissionTitleStatus" xml:space="preserve">
     <value>Status</value>
   </data>
+  <data name="Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
 </root>

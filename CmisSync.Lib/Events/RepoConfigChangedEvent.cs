@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="BubbledEvent.cs" company="GRAU DATA AG">
+// <copyright file="RepoConfigChangedEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -19,35 +19,35 @@
 
 namespace CmisSync.Lib.Events {
     using System;
+    using CmisSync.Lib.Config;
 
     /// <summary>
-    /// Bubbled event ca be used to add an event of given source to another Queue
+    /// Repo config changed event.
     /// </summary>
-    public class BubbledEvent : EncapsuledEvent {
+    public class RepoConfigChangedEvent : ConfigChangedEvent {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.BubbledEvent"/> class with an embedded event and context
-        /// informations of the given event.
+        /// The repo info.
         /// </summary>
-        /// <param name="source">Context Informations of the given event</param>
-        /// <param name="e">An Event from another context. Must not be null</param>
-        public BubbledEvent(object source, ISyncEvent e) : base(e) {
-            this.Source = source;
+        public readonly RepoInfo RepoInfo;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.RepoConfigChangedEvent"/> class.
+        /// </summary>
+        /// <param name='repoInfo'>
+        /// Repo info.
+        /// </param>
+        public RepoConfigChangedEvent(RepoInfo repoInfo) {
+            this.RepoInfo = repoInfo;
         }
 
         /// <summary>
-        /// Gets the source.
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RepoConfigChangedEvent"/>.
         /// </summary>
-        /// <value>
-        /// The source.
-        /// </value>
-        public object Source { get; private set; }
-
-        /// <summary>
-        /// Returns the description of the source and the bubbled event
-        /// </summary>
-        /// <returns>The content of the encapsuled event</returns>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents the current <see cref="CmisSync.Lib.Events.RepoConfigChangedEvent"/>.
+        /// </returns>
         public override string ToString() {
-            return string.Format("Bubbled Event: From \"{0}\" with bubbled Event \"{1}\"", this.Source, this.Event.ToString());
+            return string.Format("RepoConfigChangedEvent: {0}", this.RepoInfo.DisplayName);
         }
     }
 }

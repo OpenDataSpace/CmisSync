@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     using CmisSync.Lib.Storage.FileSystem;
@@ -28,8 +27,7 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// File or folder event factory.
     /// </summary>
-    public static class FileOrFolderEventFactory
-    {
+    public static class FileOrFolderEventFactory {
         /// <summary>
         /// Creates the event.
         /// </summary>
@@ -114,7 +112,8 @@ namespace CmisSync.Lib.Events
                         oldLocalObject as IDirectoryInfo,
                         localObject as IDirectoryInfo,
                         oldRemotePath,
-                        remoteObject as IFolder, src) {
+                        remoteObject as IFolder,
+                        src) {
                         Local = localChange,
                         Remote = remoteChange
                     };

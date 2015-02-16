@@ -17,6 +17,7 @@ SOURCES =  \
 	../SettingController.cs \
 	../SetupController.cs \
 	../StatusIconController.cs \
+	../TransmissionController.cs \
 	../Windows/FolderTreeMVC/IgnoredFolderLoader.cs \
 	../Windows/FolderTreeMVC/LoadingStatusModel.cs \
 	../Windows/FolderTreeMVC/LocalFolderLoader.cs \

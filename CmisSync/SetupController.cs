@@ -257,10 +257,9 @@ namespace CmisSync
         }
 
         /// <summary>
-        /// First-time wizard has been cancelled, so quit CmisSync.
+        /// First-time wizard has been cancelled, so quit DataSpace Sync.
         /// </summary>
-        public void SetupPageCancelled()
-        {
+        public void SetupPageCancelled() {
             Program.Controller.Quit();
         }
 
@@ -311,10 +310,9 @@ namespace CmisSync
         }
 
         /// <summary>
-        /// Checkbox to add CmisSync to the list of programs to be started up when the user logs into Windows.
+        /// Checkbox to add CmisSync to the list of programs to be started up when the user logs into.
         /// </summary>
-        public void StartupItemChanged(bool create_startup_item)
-        {
+        public void StartupItemChanged(bool create_startup_item) {
             this.create_startup_item = create_startup_item;
         }
 
@@ -324,8 +322,7 @@ namespace CmisSync
         /// </summary>
         /// <param name="address">URL to check</param>
         /// <returns>validity error, or empty string if valid</returns>
-        public string CheckAddPage(string address)
-        {
+        public string CheckAddPage(string address) {
             address = address.Trim();
 
             // Check address validity.

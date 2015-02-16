@@ -486,4 +486,7 @@ This could lead to a lot of conflict files!</value>
   <data name="StatusSearchingForChangesAndFound" xml:space="preserve">
     <value>Searching for changes (actually {0} found)</value>
   </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
 </root>

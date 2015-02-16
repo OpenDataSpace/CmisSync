@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.Collections.Generic;
 
@@ -27,20 +26,15 @@ namespace CmisSync.Lib.Events
 
     using DotCMIS.Exceptions;
 
-    public class InteractionNeededEvent : ExceptionEvent
-    {
-        public string Title { get; set; }
-
-        public string Description { get; set; }
-
-        public string Details { get; set; }
-
-        public Dictionary<string, Action> Actions { get; private set; }
-
-        public List<IFileSystemInfo> AffectedFiles { get; private set; }
-
-        public InteractionNeededEvent(InteractionNeededException e) : base(e)
-        {
+    /// <summary>
+    /// Interaction needed event embeds exceptions which must be resolved by user interaction.
+    /// </summary>
+    public class InteractionNeededEvent : ExceptionEvent {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.InteractionNeededEvent"/> class.
+        /// </summary>
+        /// <param name="e">Exception which invokes a need for a user interaction.</param>
+        public InteractionNeededEvent(InteractionNeededException e) : base(e) {
             if (e == null) {
                 throw new ArgumentNullException("Given Exception is null");
             }
@@ -52,7 +46,41 @@ namespace CmisSync.Lib.Events
             this.Details = e.Details;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.InteractionNeededEvent"/> class.
+        /// </summary>
+        /// <param name="msg">Message of the interaction needed exception.</param>
         public InteractionNeededEvent(string msg) : this(new InteractionNeededException(msg)) {
         }
+
+        /// <summary>
+        /// Gets or sets the title.
+        /// </summary>
+        /// <value>The title.</value>
+        public string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        /// <value>The description.</value>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the details.
+        /// </summary>
+        /// <value>The details.</value>
+        public string Details { get; set; }
+
+        /// <summary>
+        /// Gets the actions to resolve problem.
+        /// </summary>
+        /// <value>The actions.</value>
+        public Dictionary<string, Action> Actions { get; private set; }
+
+        /// <summary>
+        /// Gets the affected files.
+        /// </summary>
+        /// <value>The affected files.</value>
+        public List<IFileSystemInfo> AffectedFiles { get; private set; }
     }
 }

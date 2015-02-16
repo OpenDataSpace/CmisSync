@@ -25,7 +25,7 @@ MAINTAINERCLEANFILES = \
 
 bootstrap:
 	autoreconf -f -s -i
-	TEMP=$(shell mktemp -u) nuget restore CmisSync/Linux/CmisSync.sln
+	TEMP=$(shell mktemp -du 2>/dev/null || mktemp -d -u -t 'nuget') nuget restore CmisSync/Linux/CmisSync.sln
 	mkdir -p bin
 	cp packages/NUnit.2.6.4/lib/nunit.framework.dll bin/
 	cp packages/Newtonsoft.Json.6.0.8/lib/net40/Newtonsoft.Json.dll bin/

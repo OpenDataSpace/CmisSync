@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -39,8 +38,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Connection scheduler.
     /// </summary>
-    public class ConnectionScheduler : SyncEventHandler, IConnectionScheduler
-    {
+    public class ConnectionScheduler : SyncEventHandler, IConnectionScheduler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(ConnectionScheduler));
         private Task task;
         private CancellationTokenSource cancelTaskSource;
@@ -162,8 +160,7 @@ namespace CmisSync.Lib.Queueing
         /// </summary>
         /// <param name="e">The event to handle.</param>
         /// <returns><c>false</c></returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is RepoConfigChangedEvent) {
                 var changedConfig = (e as RepoConfigChangedEvent).RepoInfo;
                 if (changedConfig != null) {
@@ -201,8 +198,7 @@ namespace CmisSync.Lib.Queueing
         /// Connect this instance.
         /// </summary>
         /// <returns><c>true</c>, if connection was successful, otherwise <c>false</c></returns>
-        protected bool Connect()
-        {
+        protected bool Connect() {
             lock(this.repoInfoLock) {
                 try {
                     if (this.isForbiddenUntil > DateTime.UtcNow) {
@@ -253,8 +249,7 @@ namespace CmisSync.Lib.Queueing
         /// <param name='repoInfo'>
         /// The repository infos.
         /// </param>
-        private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo)
-        {
+        private Dictionary<string, string> GetCmisParameter(RepoInfo repoInfo) {
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
             if (repoInfo.Binding == DotCMIS.BindingType.AtomPub) {
                 cmisParameters[SessionParameter.BindingType] = BindingType.AtomPub;
