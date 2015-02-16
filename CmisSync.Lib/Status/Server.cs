@@ -10,17 +10,12 @@ namespace CmisSync.Lib.Status {
                 using (var server = ctx.CreateResponseSocket()) {
                     var localSocketPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
                     server.Bind("ipc://" + localSocketPath);
-
                     using (var client = ctx.CreateRequestSocket()) {
                         client.Connect("ipc://" + localSocketPath);
                         client.Send("Hello");
-
-                        string m1 = server.ReceiveString();
-                        Console.WriteLine("From Client: {0}", m1);
+                        Console.WriteLine("From Client: {0}", server.ReceiveString());
                         server.Send("Hi Back");
-
-                        string m2 = client.ReceiveString();
-                        Console.WriteLine("From Server: {0}", m2);
+                        Console.WriteLine("From Server: {0}", client.ReceiveString());
                     }
                 }
             }
