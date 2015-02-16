@@ -8,7 +8,7 @@ namespace CmisSync.Lib.Status {
         public Server() {
             using (NetMQContext ctx = NetMQContext.Create()) {
                 using (var server = ctx.CreateResponseSocket()) {
-                    var localSocketPath = Path.GetTempFileName();
+                    var localSocketPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
                     server.Bind("ipc://" + localSocketPath);
 
                     using (var client = ctx.CreateRequestSocket()) {
