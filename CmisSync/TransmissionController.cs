@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="TransmissionController.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -263,7 +263,13 @@ namespace CmisSync {
             foreach (FileTransmissionEvent transmission in transmissions) {
                 string fullPath = transmission.Path;
                 if (FullPathList.Contains(fullPath)) {
-                    continue;
+                    TransmissionItem itemOld = TransmissionList.Find(t => t.FullPath == fullPath);
+                    if (!itemOld.Done) {
+                        continue;
+                    }
+                    DeleteTransmissionEvent(itemOld);
+                    TransmissionList.Remove(itemOld);
+                    FullPathList.Remove(fullPath);
                 }
 
                 FullPathList.Add(fullPath);
