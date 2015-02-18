@@ -486,7 +486,7 @@ namespace CmisSync.Lib.Cmis {
                     }
                 }
             } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
-                if (changeCounter.Item2 <= 0) {
+                if (changeCounter.Item2 <= 0 && this.NumberOfChanges <= 0 && this.status != SyncStatus.Disconnected) {
                     lock(this.counterLock) {
                         this.LastFinishedSync = this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing ? this.LastFinishedSync : DateTime.Now;
                     }
@@ -524,7 +524,7 @@ namespace CmisSync.Lib.Cmis {
                     this.Queue.StopListener();
                     int timeout = 500;
                     if (!this.Queue.WaitForStopped(timeout)) {
-                        Logger.Debug(string.Format("Event Queue is of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
+                        Logger.Debug(string.Format("Event Queue of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
                     }
 
                     this.Queue.Dispose();
