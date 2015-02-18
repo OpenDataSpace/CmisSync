@@ -136,7 +136,7 @@ namespace TestLibrary.QueueingTests {
         [Test, Category("Fast")]
         public void SubscribeForAllCountableEvents() {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
-                using (var unsubscriber = queue.Subscribe(Mock.Of<IObserver<int>>())) {
+                using (var unsubscriber = queue.FullCounter.Subscribe(Mock.Of<IObserver<int>>())) {
                     Assert.That(unsubscriber, Is.Not.Null);
                 }
             }
@@ -145,7 +145,7 @@ namespace TestLibrary.QueueingTests {
         [Test, Category("Fast")]
         public void SubscribeForAllCategorizesCountableEvents() {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
-                using (var unsubscriber = queue.Subscribe(Mock.Of<IObserver<Tuple<string, int>>>())) {
+                using (var unsubscriber = queue.CategoryCounter.Subscribe(Mock.Of<IObserver<Tuple<string, int>>>())) {
                     Assert.That(unsubscriber, Is.Not.Null);
                 }
             }
@@ -156,7 +156,7 @@ namespace TestLibrary.QueueingTests {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
                 Assert.Throws<ArgumentNullException>(
                     () => {
-                    using (var unsubscriber = queue.Subscribe((IObserver<int>)null)) {
+                    using (var unsubscriber = queue.FullCounter.Subscribe((IObserver<int>)null)) {
                     }
                 });
             }
@@ -167,7 +167,7 @@ namespace TestLibrary.QueueingTests {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
                 Assert.Throws<ArgumentNullException>(
                     () => {
-                    using (var unsubscriber = queue.Subscribe((IObserver<Tuple<string, int>>)null)) {
+                    using (var unsubscriber = queue.CategoryCounter.Subscribe((IObserver<Tuple<string, int>>)null)) {
                     }
                 });
             }
@@ -182,7 +182,7 @@ namespace TestLibrary.QueueingTests {
             var observer = new Mock<IObserver<int>>();
             observer.Setup(o => o.OnNext(It.IsAny<int>())).Callback<int>(t => { lastCount = t; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
             using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
-                using (var unsubscriber = queue.Subscribe(observer.Object)) {
+                using (var unsubscriber = queue.FullCounter.Subscribe(observer.Object)) {
                     for (int i = 0; i < events; i++) {
                         queue.AddEvent(Mock.Of<ICountableEvent>(e => e.Category == category));
                     }
@@ -209,7 +209,7 @@ namespace TestLibrary.QueueingTests {
             var observer = new Mock<IObserver<Tuple<string, int>>>();
             observer.Setup(o => o.OnNext(It.IsAny<Tuple<string, int>>())).Callback<Tuple<string, int>>(t => { lastCount = t.Item2; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
             using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
-                using (var unsubscriber = queue.Subscribe(observer.Object)) {
+                using (var unsubscriber = queue.CategoryCounter.Subscribe(observer.Object)) {
                     for (int i = 0; i < events; i++) {
                         queue.AddEvent(Mock.Of<ICountableEvent>(e => e.Category == category));
                     }

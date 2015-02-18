@@ -165,13 +165,17 @@ SOURCES =  \
 	Queueing/IConnectionScheduler.cs \
 	Queueing/ICountingQueue.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
+	Queueing/IEventCounter.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \
+	Queueing/QueuedCategorizedEventsCounter.cs \
+	Queueing/QueuedEventsCounter.cs \
 	Queueing/ReportingSyncEventHandler.cs \
 	Queueing/SyncEventHandler.cs \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	Queueing/Unsubscriber.cs \
 	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
 	SelectiveIgnore/IgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IgnoredEntitiesStorage.cs \

@@ -278,6 +278,10 @@
     <Compile Include="Status\SynchronizationStatus.cs" />
     <Compile Include="Events\RepoConfigChangedEvent.cs" />
     <Compile Include="Events\FileTransmissionEventArgs.cs" />
+    <Compile Include="Queueing\QueuedEventsCounter.cs" />
+    <Compile Include="Queueing\QueuedCategorizedEventsCounter.cs" />
+    <Compile Include="Queueing\Unsubscriber.cs" />
+    <Compile Include="Queueing\IEventCounter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
