@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Queueing
-{
+namespace CmisSync.Lib.Queueing {
     using System;
     using System.Collections.Generic;
 
@@ -28,8 +27,7 @@ namespace CmisSync.Lib.Queueing
     /// <summary>
     /// Sync event manager which has a list of all Handlers and forwards events to them.
     /// </summary>
-    public class SyncEventManager : ISyncEventManager
-    {
+    public class SyncEventManager : ISyncEventManager {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(SyncEventManager));
         private List<SyncEventHandler> handler = new List<SyncEventHandler>();
 
