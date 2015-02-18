@@ -78,8 +78,6 @@ namespace TestLibrary.IntegrationTests
     [TestFixture, Timeout(900000)]
     public class RepositoryUtilsTests : IsTestWithConfiguredLog4Net
     {
-        private readonly string cmisSyncDir = ConfigManager.CurrentConfig.GetFoldersPath();
-
         /// <summary>
         /// Waits until checkStop is true or waiting duration is reached.
         /// </summary>
@@ -117,22 +115,11 @@ namespace TestLibrary.IntegrationTests
         {
             // Disable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-            try {
-                File.Delete(ConfigManager.CurrentConfig.GetLogFilePath());
-            } catch (IOException) {
-            }
         }
 
         [TearDown]
         public void TearDown()
         {
-            foreach (string file in Directory.GetFiles(this.cmisSyncDir)) {
-                if (file.EndsWith(".cmissync"))
-                {
-                    File.Delete(file);
-                }
-            }
-
             // Reanable HTTPS Verification
             ServicePointManager.ServerCertificateValidationCallback = null;
         }
