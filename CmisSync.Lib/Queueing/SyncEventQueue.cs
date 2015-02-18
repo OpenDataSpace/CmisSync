@@ -226,8 +226,7 @@ namespace CmisSync.Lib.Queueing {
 
         private void Listen(BlockingCollection<ISyncEvent> queue, ISyncEventManager manager, WaitHandle waitHandle) {
             Logger.Debug("Starting to listen on SyncEventQueue");
-            while (!queue.IsCompleted)
-            {
+            while (!queue.IsCompleted) {
                 ISyncEvent syncEvent = null;
 
                 // Blocks if number.Count == 0
@@ -250,17 +249,18 @@ namespace CmisSync.Lib.Queueing {
                         }
 
                         manager.Handle(syncEvent);
-                        if (syncEvent is ICountableEvent) {
-                            string category = (syncEvent as ICountableEvent).Category;
-                            if (!string.IsNullOrEmpty(category)) {
-                                lock (this.subscriberLock) {
-                                    this.fullCounter.Decrease(syncEvent as ICountableEvent);
-                                    this.categoryCounter.Decrease(syncEvent as ICountableEvent);
-                                }
-                            }
-                        }
                     } catch(Exception e) {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
+                    }
+
+                    if (syncEvent is ICountableEvent) {
+                        string category = (syncEvent as ICountableEvent).Category;
+                        if (!string.IsNullOrEmpty(category)) {
+                            lock (this.subscriberLock) {
+                                this.fullCounter.Decrease(syncEvent as ICountableEvent);
+                                this.categoryCounter.Decrease(syncEvent as ICountableEvent);
+                            }
+                        }
                     }
                 }
             }
