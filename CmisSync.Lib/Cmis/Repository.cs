@@ -67,9 +67,9 @@ namespace CmisSync.Lib.Cmis {
         Suspend,
 
         /// <summary>
-        /// Connection is offline.
+        /// Connection is not established.
         /// </summary>
-        Offline,
+        Disconnected,
 
         /// <summary>
         /// Actually changes are synchronized.
@@ -85,7 +85,7 @@ namespace CmisSync.Lib.Cmis {
     /// <summary>
     /// Synchronized CMIS repository.
     /// </summary>
-    public class Repository : IDisposable, INotifyPropertyChanged {
+    public class Repository : IDisposable, INotifyPropertyChanged, IObserver<Tuple<string, int>> {
         /// <summary>
         /// Name of the synchronized folder, as found in the CmisSync XML configuration file.
         /// </summary>
@@ -174,6 +174,16 @@ namespace CmisSync.Lib.Cmis {
         private IFileSystemInfoFactory fileSystemFactory;
 
         private ActivityListenerAggregator activityListener;
+
+        private SyncStatus status = SyncStatus.Disconnected;
+
+        private int changesFound = 0;
+
+        private DateTime? lastFinishedSync;
+
+        private IDisposable unsubscriber;
+
+        object counterLock = new object();
 
         static Repository() {
             DBreezeInitializerSingleton.Init();
@@ -274,11 +284,6 @@ namespace CmisSync.Lib.Cmis {
             var localFetcher = new LocalObjectFetcher(this.storage.Matcher, this.fileSystemFactory);
             this.Queue.EventManager.AddEventHandler(localFetcher);
 
-            this.SyncStatusChanged += delegate(SyncStatus status)
-            {
-                this.Status = status;
-            };
-
             this.ignoredStorage = new IgnoredEntitiesStorage(new IgnoredEntitiesCollection(), this.storage);
 
             this.Queue.EventManager.AddEventHandler(new EventManagerInitializer(this.Queue, this.storage, this.fileTransmissionStorage, this.ignoredStorage, this.RepoInfo, this.filters, activityListener, this.fileSystemFactory));
@@ -288,6 +293,27 @@ namespace CmisSync.Lib.Cmis {
             this.connectionScheduler = new ConnectionScheduler(this.RepoInfo, this.Queue, this.sessionFactory, this.authProvider);
 
             this.Queue.EventManager.AddEventHandler(this.connectionScheduler);
+            this.Queue.EventManager.AddEventHandler(
+                new GenericSyncEventHandler<SuccessfulLoginEvent>(
+                10000,
+                delegate(ISyncEvent e) {
+                if (this.Status == SyncStatus.Disconnected || this.Status == SyncStatus.Warning) {
+                    this.Status = SyncStatus.Idle;
+                }
+
+                return false;
+            }));
+            this.Queue.EventManager.AddEventHandler(
+                new GenericSyncEventHandler<ConfigurationNeededEvent>(
+                10000,
+                delegate(ISyncEvent e) {
+                if (this.Status == SyncStatus.Disconnected) {
+                    this.Status = SyncStatus.Warning;
+                }
+
+                return false;
+            }));
+            this.unsubscriber = this.Queue.CategoryCounter.Subscribe(this);
         }
 
         /// <summary>
@@ -304,16 +330,55 @@ namespace CmisSync.Lib.Cmis {
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Gets or sets the sync status. Affect a new <c>SyncStatus</c> value.
-        /// </summary>
-        /// <value>The sync status changed.</value>
-        public Action<SyncStatus> SyncStatusChanged { get; set; }
-
-        /// <summary>
         /// Gets the current status of the synchronization (paused or not).
         /// </summary>
         /// <value>The status.</value>
-        public SyncStatus Status { get; private set; }
+        public SyncStatus Status {
+            get {
+                return this.status;
+            }
+
+            private set {
+                if (value != this.status) {
+                    this.status = value;
+                    this.NotifyPropertyChanged("Status");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the last time when a sync was finished without detected changes.
+        /// </summary>
+        /// <value>The last finished sync.</value>
+        public DateTime? LastFinishedSync {
+            get {
+                return this.lastFinishedSync;
+            }
+
+            private set {
+                if (value != this.lastFinishedSync) {
+                    this.lastFinishedSync = value;
+                    this.NotifyPropertyChanged("LastFinishedSync");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of changes which are actually found on queue.
+        /// </summary>
+        /// <value>The number of changes.</value>
+        public int NumberOfChanges {
+            get {
+                return this.changesFound;
+            }
+
+            private set {
+                if (value != this.changesFound) {
+                    this.changesFound = value;
+                    this.NotifyPropertyChanged("NumberOfChanges");
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the polling scheduler.
@@ -404,6 +469,33 @@ namespace CmisSync.Lib.Cmis {
             this.Scheduler.Start();
         }
 
+        public void OnCompleted() {
+        }
+
+        public void OnError(Exception e) {
+        }
+
+        public virtual void OnNext(Tuple<string, int> changeCounter) {
+            if (changeCounter.Item1 == "DetectedChange") {
+                if (changeCounter.Item2 > 0) {
+                    lock(this.counterLock) {
+                        this.NumberOfChanges = changeCounter.Item2;
+                    }
+                } else {
+                    lock(this.counterLock) {
+                        this.NumberOfChanges = 0;
+                        this.LastFinishedSync = this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing ? this.LastFinishedSync : DateTime.Now;
+                    }
+                }
+            } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
+                if (changeCounter.Item2 <= 0 && this.NumberOfChanges <= 0 && this.status != SyncStatus.Disconnected) {
+                    lock(this.counterLock) {
+                        this.LastFinishedSync = this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing ? this.LastFinishedSync : DateTime.Now;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Dispose the managed and unmanaged resources if disposing is <c>true</c>.
         /// </summary>
@@ -438,7 +530,7 @@ namespace CmisSync.Lib.Cmis {
 
                     int timeout = 5000;
                     if (!this.Queue.WaitForStopped(timeout)) {
-                        Logger.Debug(string.Format("Event Queue is of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
+                        Logger.Debug(string.Format("Event Queue of {0} has not been closed in {1} miliseconds", this.RemoteUrl.ToString(), timeout));
                     }
 
                     this.Queue.Dispose();
@@ -446,13 +538,17 @@ namespace CmisSync.Lib.Cmis {
                     if (this.db != null) {
                         this.db.Dispose();
                     }
+
+                    if (this.unsubscriber != null) {
+                        this.unsubscriber.Dispose();
+                    }
                 }
 
                 this.disposed = true;
             }
         }
 
-        private static ICountingQueue CreateQueue() {
+        protected static ICountingQueue CreateQueue() {
             var manager = new SyncEventManager();
             return new SyncEventQueue(manager);
         }

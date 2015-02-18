@@ -25,7 +25,8 @@ namespace CmisSync.Lib.Queueing
     /// I counting queue counts every countable event by its category if its added and substracts it if the event is handled and removed from queue.
     /// This queue also notifies listener about changes on categories or all countable events.
     /// </summary>
-    public interface ICountingQueue : IDisposableSyncEventQueue, IObservable<int>, IObservable<Tuple<string, int>>
-    {
+    public interface ICountingQueue : IDisposableSyncEventQueue {
+        IObservable<int> FullCounter { get; }
+        IObservable<Tuple<string, int>> CategoryCounter { get; }
     }
 }

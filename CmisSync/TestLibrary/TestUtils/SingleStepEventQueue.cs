@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary
-{
+namespace TestLibrary {
     using System;
     using System.Collections.Concurrent;
 
@@ -30,13 +29,20 @@ namespace TestLibrary
     /// </summary>
     /// Do not use this in production code.
     /// It contains public fields that could do a lot of harm
-    public class SingleStepEventQueue : ICountingQueue
-    {
+    public class SingleStepEventQueue : ICountingQueue {
+        private IEventCounter fullCounter;
+        private IEventCounter categoryCounter;
         public ISyncEventManager Manager;
         public ConcurrentQueue<ISyncEvent> Queue = new ConcurrentQueue<ISyncEvent>();
 
-        public SingleStepEventQueue(ISyncEventManager manager) {
+        public SingleStepEventQueue(
+            ISyncEventManager manager,
+            IEventCounter fullCounter = null,
+            IEventCounter categoryCounter = null)
+        {
             this.Manager = manager;
+            this.fullCounter = fullCounter ?? new QueuedEventsCounter();
+            this.categoryCounter = categoryCounter ?? new QueuedCategorizedEventsCounter();
         }
 
         public ISyncEventManager EventManager {
@@ -58,6 +64,11 @@ namespace TestLibrary
         public bool SwallowExceptions { get; set; }
 
         public void AddEvent(ISyncEvent e) {
+            if (e is ICountableEvent && !string.IsNullOrEmpty((e as ICountableEvent).Category)) {
+                this.fullCounter.Increase(e as ICountableEvent);
+                this.categoryCounter.Increase(e as ICountableEvent);
+            }
+
             this.Queue.Enqueue(e);
         }
 
@@ -72,6 +83,11 @@ namespace TestLibrary
                     } else {
                         Console.WriteLine(exp.ToString());
                     }
+                }
+
+                if (e is ICountableEvent && !string.IsNullOrEmpty((e as ICountableEvent).Category)) {
+                    this.fullCounter.Decrease(e as ICountableEvent);
+                    this.categoryCounter.Decrease(e as ICountableEvent);
                 }
             }
         }
@@ -89,6 +105,13 @@ namespace TestLibrary
         }
 
         public void Dispose() {
+            if (this.categoryCounter != null) {
+                this.categoryCounter.Dispose();
+            }
+
+            if (this.fullCounter != null) {
+                this.fullCounter.Dispose();
+            }
         }
 
         public bool WaitForStopped(int timeout) {
@@ -110,6 +133,18 @@ namespace TestLibrary
 
         public IDisposable Subscribe(IObserver<Tuple<string, int>> observer) {
             return null;
+        }
+
+        public IObservable<int> FullCounter {
+            get {
+                return (IObservable<int>)this.fullCounter;
+            }
+        }
+
+        public IObservable<Tuple<string, int>> CategoryCounter {
+            get {
+                return (IObservable<Tuple<string, int>>)this.categoryCounter;
+            }
         }
     }
 }

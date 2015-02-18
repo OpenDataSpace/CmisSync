@@ -241,6 +241,7 @@
     <Compile Include="UtilsTests\HttpProxyUtilsTest.cs" />
     <Compile Include="UtilsTests\ProcessDiagnosticsTest.cs" />
     <Compile Include="UtilsTests\X509StoreTest.cs" />
+    <Compile Include="CmisTests\RepositoryTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

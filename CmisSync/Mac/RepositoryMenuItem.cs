@@ -37,7 +37,7 @@ namespace CmisSync {
     using CmisSync.Lib.Config;
 
     [CLSCompliant(false)]
-    public class RepositoryMenuItem : NSMenuItem, IObserver<Tuple<string, int>>{
+    public class RepositoryMenuItem : NSMenuItem {
         private StatusIconController controller;
         private NSMenuItem openLocalFolderItem;
         private NSMenuItem removeFolderFromSyncItem;
@@ -60,7 +60,21 @@ namespace CmisSync {
             this.controller = controller;
             this.Image = this.folderImage;
             this.Image.Size = new SizeF(16, 16);
+            this.repository.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
+                if (e.PropertyName == "Status") {
+                    this.Status = this.repository.Status;
+                }
 
+                if (e.PropertyName == "LastFinishedSync") {
+                    this.changesFoundAt = this.repository.LastFinishedSync;
+                    this.UpdateStatusText();
+                }
+
+                if (e.PropertyName == "NumberOfChanges") {
+                    this.changesFound = this.repository.NumberOfChanges;
+                    this.UpdateStatusText();
+                }
+            };
             this.openLocalFolderItem = new NSMenuItem(Properties_Resources.OpenLocalFolder) {
                 Image = this.folderImage
             };
@@ -92,8 +106,6 @@ namespace CmisSync {
             subMenu.AddItem(NSMenuItem.SeparatorItem);
             subMenu.AddItem(this.removeFolderFromSyncItem);
             this.Submenu = subMenu;
-
-            this.repository.Queue.Subscribe(this);
         }
 
         private EventHandler RemoveFolderFromSyncDelegate() {
@@ -149,42 +161,6 @@ namespace CmisSync {
         }
 
         public string RepositoryName { get { return this.repository.Name; } }
-
-        public void OnCompleted() {
-        }
-
-        public void OnError(Exception e) {
-        }
-
-        public virtual void OnNext(Tuple<string, int> changeCounter) {
-            if (changeCounter.Item1 == "DetectedChange") {
-                if (changeCounter.Item2 > 0) {
-                    lock(this.counterLock) {
-                        this.changesFound = changeCounter.Item2;
-                    }
-                } else {
-                    lock(this.counterLock) {
-                        this.changesFound = 0;
-                        this.changesFoundAt = this.syncRequested ? this.changesFoundAt : DateTime.Now;
-                    }
-                }
-
-                this.UpdateStatusText();
-            } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
-                if (changeCounter.Item2 > 0) {
-                    lock(this.counterLock) {
-                        this.syncRequested = changeCounter.Item1 == "SyncRequested";
-                    }
-                } else {
-                    lock(this.counterLock) {
-                        this.syncRequested = false;
-                        this.changesFoundAt = this.syncRequested ? this.changesFoundAt : DateTime.Now;
-                    }
-                }
-
-                this.UpdateStatusText();
-            }
-        }
 
         private void UpdateStatusText() {
             string message;

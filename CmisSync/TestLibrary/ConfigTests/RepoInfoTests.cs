@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConfigTests
-{
+namespace TestLibrary.ConfigTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -30,15 +29,13 @@ namespace TestLibrary.ConfigTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class RepoInfoTests
-    {
+    public class RepoInfoTests {
         private readonly string cmissyncdir = ConfigManager.CurrentConfig.GetFoldersPath();
         private readonly string ignorePath = "/tmp/test";
         private RepoInfo info;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.info = new RepoInfo {
                 DisplayName = "name",
                 Address = new Uri("http://example.com"),
@@ -53,51 +50,44 @@ namespace TestLibrary.ConfigTests
         }
 
         [Test, Category("Fast")]
-        public void NonAddedPathResultsInEmptyArray()
-        {
+        public void NonAddedPathResultsInEmptyArray() {
             Assert.That(this.info.GetIgnoredPaths(), Is.Empty);
         }
 
         [Test, Category("Fast")]
-        public void AddIgnorePath()
-        {
+        public void AddIgnorePath() {
             this.info.AddIgnorePath(this.ignorePath);
             Assert.AreEqual(1, this.info.GetIgnoredPaths().Count);
             Assert.Contains(this.ignorePath, this.info.GetIgnoredPaths());
         }
 
         [Test, Category("Fast")]
-        public void ResetIgnorePaths()
-        {
+        public void ResetIgnorePaths() {
             this.info.AddIgnorePath(this.ignorePath);
             this.info.IgnoredFolders.Clear();
             Assert.AreEqual(0, this.info.GetIgnoredPaths().Count);
         }
 
         [Test, Category("Fast")]
-        public void IgnoresExactMatchingPath()
-        {
+        public void IgnoresExactMatchingPath() {
             this.info.AddIgnorePath(this.ignorePath);
             Assert.IsTrue(this.info.IsPathIgnored(this.ignorePath));
         }
 
         [Test, Category("Fast")]
-        public void IgnoreChildOfPath()
-        {
+        public void IgnoreChildOfPath() {
             this.info.AddIgnorePath(this.ignorePath);
             Assert.IsTrue(this.info.IsPathIgnored(this.ignorePath + "/child"), this.ignorePath + "/child");
         }
 
         [Test, Category("Fast")]
-        public void DoNotIgnorePathWithSameBeginningButNoChildOfIgnore()
-        {
+        public void DoNotIgnorePathWithSameBeginningButNoChildOfIgnore() {
             this.info.AddIgnorePath(this.ignorePath);
             Assert.IsFalse(this.info.IsPathIgnored(this.ignorePath + "stuff"), this.ignorePath + "stuff");
         }
 
         [Test, Category("Fast")]
-        public void DefaultAuthTypeIsBasicAuthentication()
-        {
+        public void DefaultAuthTypeIsBasicAuthentication() {
             Assert.That(this.info.AuthenticationType, Is.EqualTo(AuthenticationType.BASIC));
         }
 

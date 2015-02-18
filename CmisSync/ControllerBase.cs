@@ -642,10 +642,7 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                this.repoUnsubscriber.Add(repo.Queue.Subscribe((IObserver<Tuple<string, int>>)new CountingSubscriber(this.activityListenerAggregator)));
-                repo.SyncStatusChanged += delegate(SyncStatus status) {
-                    this.UpdateState();
-                };
+                this.repoUnsubscriber.Add(repo.Queue.CategoryCounter.Subscribe((IObserver<Tuple<string, int>>)new CountingSubscriber(this.activityListenerAggregator)));
                 repo.Queue.EventManager.AddEventHandler(
                     new GenericSyncEventHandler<FileTransmissionEvent>(
                     50,
@@ -837,13 +834,6 @@ namespace CmisSync {
 
             // Update UI.
             this.FolderListChanged();
-        }
-
-        /// <summary>
-        /// Fires events for the current syncing state.
-        /// </summary>
-        private void UpdateState() {
-            this.OnIdle();
         }
 
         /// <summary>
