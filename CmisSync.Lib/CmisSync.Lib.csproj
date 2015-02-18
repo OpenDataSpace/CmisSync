@@ -282,6 +282,7 @@
     <Compile Include="Queueing\QueuedCategorizedEventsCounter.cs" />
     <Compile Include="Queueing\Unsubscriber.cs" />
     <Compile Include="Queueing\IEventCounter.cs" />
+    <Compile Include="Events\CmisConnectionExceptionEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

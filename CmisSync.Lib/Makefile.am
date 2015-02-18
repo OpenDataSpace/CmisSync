@@ -77,6 +77,7 @@ SOURCES =  \
 	Events/AbstractFolderEvent.cs \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
+	Events/CmisConnectionExceptionEvent.cs \
 	Events/ConfigChangedEvent.cs \
 	Events/ConfigurationNeededEvent.cs \
 	Events/ContentChangeEvent.cs \
