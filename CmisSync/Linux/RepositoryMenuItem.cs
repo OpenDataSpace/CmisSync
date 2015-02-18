@@ -153,19 +153,21 @@ namespace CmisSync {
 
             set {
                 this.status = value;
-                switch (this.status)
-                {
-                case SyncStatus.Suspend:
-                    (this.suspendItem.Child as Label).Text = Properties_Resources.ResumeSync;
-                    this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-start", 12));
-                    this.suspendItem.Sensitive = true;
-                    break;
-                default:
-                    (this.suspendItem.Child as Label).Text = Properties_Resources.PauseSync;
-                    this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-pause", 12));
-                    this.suspendItem.Sensitive = true;
-                    break;
-                }
+                Application.Invoke(delegate {
+                    switch (this.status)
+                    {
+                    case SyncStatus.Suspend:
+                        (this.suspendItem.Child as Label).Text = Properties_Resources.ResumeSync;
+                        this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-start", 12));
+                        this.suspendItem.Sensitive = true;
+                        break;
+                    default:
+                        (this.suspendItem.Child as Label).Text = Properties_Resources.PauseSync;
+                        this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-pause", 12));
+                        this.suspendItem.Sensitive = true;
+                        break;
+                    }
+                });
             }
         }
 
