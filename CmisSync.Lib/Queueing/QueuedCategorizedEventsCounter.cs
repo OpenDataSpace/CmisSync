@@ -25,13 +25,13 @@ namespace CmisSync.Lib.Queueing {
 
     using CmisSync.Lib.Events;
 
-    public class QueuedCategorizedEventsCounter : IObservable<Tuple<string, int>>, IEventCounter {
-        private List<IObserver<Tuple<string, int>>> categoryCounterObservers;
-        private ConcurrentDictionary<string, int> categoryCounter;
+    public class QueuedCategorizedEventsCounter : IObservable<Tuple<EventCategory, int>>, IEventCounter {
+        private List<IObserver<Tuple<EventCategory, int>>> categoryCounterObservers;
+        private ConcurrentDictionary<EventCategory, int> categoryCounter;
         private bool disposed = false;
         public QueuedCategorizedEventsCounter() {
-            this.categoryCounterObservers = new List<IObserver<Tuple<string, int>>>();
-            this.categoryCounter = new ConcurrentDictionary<string, int>();
+            this.categoryCounterObservers = new List<IObserver<Tuple<EventCategory, int>>>();
+            this.categoryCounter = new ConcurrentDictionary<EventCategory, int>();
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Queueing {
         /// </summary>
         /// <param name="observer">Observer for categorized counter.</param>
         /// <returns>A reference to an interface that allows observers to stop receiving notifications before the provider has finished sending them.</returns>
-        public virtual IDisposable Subscribe(IObserver<Tuple<string, int>> observer) {
+        public virtual IDisposable Subscribe(IObserver<Tuple<EventCategory, int>> observer) {
             if (observer == null) {
                 throw new ArgumentNullException("Given observer is null");
             }
@@ -48,26 +48,26 @@ namespace CmisSync.Lib.Queueing {
                 this.categoryCounterObservers.Add(observer);
             }
 
-            return new Unsubscriber<Tuple<string, int>>(this.categoryCounterObservers, observer);
+            return new Unsubscriber<Tuple<EventCategory, int>>(this.categoryCounterObservers, observer);
         }
 
         public void Decrease(ICountableEvent e) {
             var category = e.Category;
-            var value = this.categoryCounter.AddOrUpdate(category, 0, delegate(string cat, int counter) {
+            var value = this.categoryCounter.AddOrUpdate(category, 0, delegate(EventCategory cat, int counter) {
                 return counter - 1;
             });
             foreach (var observer in this.categoryCounterObservers) {
-                observer.OnNext(new Tuple<string, int>(category, value));
+                observer.OnNext(new Tuple<EventCategory, int>(category, value));
             }
         }
 
         public void Increase(ICountableEvent e) {
-            string category = e.Category;
-            var value = this.categoryCounter.AddOrUpdate(category, 1, delegate(string cat, int counter) {
+            var category = e.Category;
+            var value = this.categoryCounter.AddOrUpdate(category, 1, delegate(EventCategory cat, int counter) {
                 return counter + 1;
             });
             foreach (var observer in this.categoryCounterObservers) {
-                observer.OnNext(new Tuple<string, int>(category, value));
+                observer.OnNext(new Tuple<EventCategory, int>(category, value));
             }
         }
 

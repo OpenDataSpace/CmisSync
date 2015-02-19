@@ -84,7 +84,7 @@ namespace CmisSync.Lib.Cmis {
     /// <summary>
     /// Synchronized CMIS repository.
     /// </summary>
-    public class Repository : IDisposable, INotifyPropertyChanged, IObserver<Tuple<string, int>> {
+    public class Repository : IDisposable, INotifyPropertyChanged, IObserver<Tuple<EventCategory, int>> {
         /// <summary>
         /// Name of the synchronized folder, as found in the CmisSync XML configuration file.
         /// </summary>
@@ -488,8 +488,8 @@ namespace CmisSync.Lib.Cmis {
         public void OnError(Exception e) {
         }
 
-        public virtual void OnNext(Tuple<string, int> changeCounter) {
-            if (changeCounter.Item1 == "DetectedChange") {
+        public virtual void OnNext(Tuple<EventCategory, int> changeCounter) {
+            if (changeCounter.Item1 == EventCategory.DetectedChange) {
                 if (changeCounter.Item2 > 0) {
                     lock(this.counterLock) {
                         this.NumberOfChanges = changeCounter.Item2;
@@ -500,9 +500,9 @@ namespace CmisSync.Lib.Cmis {
                         this.LastFinishedSync = this.status == SyncStatus.Idle ? DateTime.Now : this.LastFinishedSync;
                     }
                 }
-            } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
+            } else if (changeCounter.Item1 == EventCategory.SyncRequested || changeCounter.Item1 == EventCategory.PeriodicSync) {
                 lock(this.counterLock) {
-                    if (changeCounter.Item1 == "SyncRequested") {
+                    if (changeCounter.Item1 == EventCategory.SyncRequested) {
                         this.repoStatus.SyncRequested = changeCounter.Item2 > 0;
                         this.Status = this.repoStatus.Status;
                     }
@@ -511,7 +511,7 @@ namespace CmisSync.Lib.Cmis {
                         this.LastFinishedSync = DateTime.Now;
                     }
                 }
-            } else if (changeCounter.Item1 == "CmisConnectionException") {
+            } else if (changeCounter.Item1 == EventCategory.ConnectionException) {
                 lock(this.connectionExceptionCounterLock) {
                     if (changeCounter.Item2 > this.connectionExceptionsFound) {
                         this.repoStatus.Connected = false;

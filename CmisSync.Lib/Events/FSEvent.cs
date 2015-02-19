@@ -88,9 +88,9 @@ namespace CmisSync.Lib.Events {
         /// The returned value should never ever change its value after requesting it the first time.
         /// </summary>
         /// <value>The event category is "DetectedChange".</value>
-        public string Category {
+        public EventCategory Category {
             get {
-                return "DetectedChange";
+                return EventCategory.DetectedChange;
             }
         }
 

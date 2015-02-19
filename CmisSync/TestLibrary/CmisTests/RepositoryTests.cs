@@ -127,7 +127,7 @@ namespace TestLibrary.CmisTests {
 
             var underTest = new TestRepository(this.repoInfo, this.listener, this.queue);
 
-            underTest.Queue.AddEvent(Mock.Of<ICountableEvent>(e => e.Category == "DetectedChange"));
+            underTest.Queue.AddEvent(Mock.Of<ICountableEvent>(e => e.Category == EventCategory.DetectedChange));
             Assert.That(underTest.NumberOfChanges, Is.EqualTo(1));
             this.queue.Step();
             Assert.That(underTest.NumberOfChanges, Is.EqualTo(0));

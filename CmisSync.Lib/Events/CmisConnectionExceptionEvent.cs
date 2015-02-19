@@ -26,8 +26,6 @@ namespace CmisSync.Lib.Events {
     /// Cmis connection exception occured while handling event in SyncEventQueue and this event is added back to Queue to inform about this problem.
     /// </summary>
     public class CmisConnectionExceptionEvent : ExceptionEvent, ICountableEvent {
-        private readonly string category = "CmisConnectionException";
-
         /// <summary>
         /// Gets the time when the exception occured.
         /// </summary>
@@ -42,9 +40,9 @@ namespace CmisSync.Lib.Events {
         /// The returned value should never ever change its value after requesting it the first time.
         /// </summary>
         /// <value>The event category.</value>
-        public string Category {
+        public EventCategory Category {
             get {
-                return this.category;
+                return EventCategory.ConnectionException;
             }
         }
     }
