@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13E28" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6254" systemVersion="13F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6254"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="TransmissionWidgetController">
@@ -11,6 +11,7 @@
                 <outlet property="TableColumnProgress" destination="PL0-uQ-LEH" id="qq3-9v-1Jw"/>
                 <outlet property="TableColumnRepo" destination="RZH-JJ-57l" id="w4N-Pg-TaL"/>
                 <outlet property="TableColumnStatus" destination="kkT-ea-Amy" id="d0H-MF-n8T"/>
+                <outlet property="TableColumnUpdateTime" destination="Xe1-nb-Wdx" id="oFh-0E-SJm"/>
                 <outlet property="TableRowContextMenu" destination="osZ-6l-Trc" id="E4G-q9-M3T"/>
                 <outlet property="TableRowMenuOpen" destination="YqM-tE-2du" id="KBM-hl-WXR"/>
                 <outlet property="TableView" destination="c88-RI-CR0" id="Zs2-mT-DGo"/>
@@ -88,6 +89,19 @@
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                             </tableHeaderCell>
                                             <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="0Xk-1r-uAc">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                            <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                        </tableColumn>
+                                        <tableColumn identifier="UpdateTime" width="10" minWidth="10" maxWidth="3.4028234663852886e+38" id="Xe1-nb-Wdx">
+                                            <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="UpdateTime">
+                                                <font key="font" metaFont="smallSystem"/>
+                                                <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
+                                            </tableHeaderCell>
+                                            <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="2eU-V3-fRQ">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>

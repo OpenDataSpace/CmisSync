@@ -95,13 +95,15 @@ namespace CmisSync {
 
                 switch (tableColumn.Identifier) {
                 case "Repo":
-                    return new NSString(TransmissionItems [row].Repo);
+                    return new NSString(TransmissionItems[row].Repo);
                 case "Path":
-                    return new NSString(TransmissionItems [row].Path);
+                    return new NSString(TransmissionItems[row].Path);
                 case "Status":
-                    return new NSString(TransmissionItems [row].Status);
+                    return new NSString(TransmissionItems[row].Status);
                 case "Progress":
-                    return new NSString(TransmissionItems [row].Progress);
+                    return new NSString(TransmissionItems[row].Progress);
+                case "UpdateTime":
+                    return new NSString(TransmissionItems[row].UpdateTime.ToString());
                 default:
                     return new NSNull();
                 }
@@ -133,7 +135,7 @@ namespace CmisSync {
                 for (int i = 0; i < TransmissionItems.Count; ++i) {
                     if (TransmissionItems[i].FullPath == item.FullPath) {
                         BeginInvokeOnMainThread(delegate {
-                            tableView.ReloadData(new NSIndexSet(i), NSIndexSet.FromArray(new int[]{ 0, 1, 2, 3 }));
+                            tableView.ReloadData(new NSIndexSet(i), NSIndexSet.FromArray(new int[]{ 0, 1, 2, 3, 4}));
                         });
                         return;
                     }
@@ -191,9 +193,10 @@ namespace CmisSync {
             TableColumnPath.HeaderCell.Title = Properties_Resources.TransmissionTitlePath;
             TableColumnStatus.HeaderCell.Title = Properties_Resources.TransmissionTitleStatus;
             TableColumnProgress.HeaderCell.Title = Properties_Resources.TransmissionTitleProgress;
+            TableColumnUpdateTime.HeaderCell.Title = Properties_Resources.TransmissionTitleLastChange;
             FinishButton.Title = Properties_Resources.Close;
 
-            DataSource = new TransmissionDataSource (Controller);
+            DataSource = new TransmissionDataSource(Controller);
             TableView.DataSource = DataSource;
 
             TableView.ShouldSelectRow += delegate(NSTableView tableView, int row) {
@@ -207,12 +210,12 @@ namespace CmisSync {
             TableView.AllowsMultipleSelection = true;
 
             Controller.ShowTransmissionListEvent += delegate {
-                DataSource.UpdateTableView(TableView,null);
-                HandleSelectionDidChange(this,new EventArgs());
+                DataSource.UpdateTableView(TableView, null);
+                HandleSelectionDidChange(this, new EventArgs());
             };
             Controller.ShowTransmissionEvent += delegate (TransmissionItem item) {
-                DataSource.UpdateTableView(TableView,item);
-                HandleSelectionDidChange(this,new EventArgs());
+                DataSource.UpdateTableView(TableView, item);
+                HandleSelectionDidChange(this, new EventArgs());
             };
         }
 
