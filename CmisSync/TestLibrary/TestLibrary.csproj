@@ -241,6 +241,7 @@
     <Compile Include="UtilsTests\X509StoreTest.cs" />
     <Compile Include="CmisTests\RepositoryTests.cs" />
     <Compile Include="IntegrationTests\RepositoryStatusIT.cs" />
+    <Compile Include="UtilsTests\NameOfPropertyTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
