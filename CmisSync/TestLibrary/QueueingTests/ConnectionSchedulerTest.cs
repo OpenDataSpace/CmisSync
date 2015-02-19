@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.QueueingTests
-{
+namespace TestLibrary.QueueingTests {
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -39,8 +38,7 @@ namespace TestLibrary.QueueingTests
     using TestUtils;
 
     [TestFixture, Timeout(10000)]
-    public class ConnectionSchedulerTest : IsTestWithConfiguredLog4Net
-    {
+    public class ConnectionSchedulerTest : IsTestWithConfiguredLog4Net {
         private readonly int interval = 100;
         private readonly string username = "user";
         private readonly string password = "password";
@@ -80,36 +78,32 @@ namespace TestLibrary.QueueingTests
 
         [Test, Category("Fast")]
         public void ConstructorFailsIfRepoInfoIsNull() {
-            Assert.Throws<ArgumentNullException>(
-                () =>
-                { using (new ConnectionScheduler(null, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object)) {
+            Assert.Throws<ArgumentNullException>(() => {
+                using (new ConnectionScheduler(null, this.queue.Object, this.sessionFactory.Object, this.authProvider.Object)) {
                 }
             });
         }
 
         [Test, Category("Fast")]
         public void ConstructorFailsIfQueueIsNull() {
-            Assert.Throws<ArgumentNullException>(
-                () =>
-                { using (new ConnectionScheduler(this.repoInfo, null, this.sessionFactory.Object, this.authProvider.Object)) {
+            Assert.Throws<ArgumentNullException>(() => {
+                using (new ConnectionScheduler(this.repoInfo, null, this.sessionFactory.Object, this.authProvider.Object)) {
                 }
             });
         }
 
         [Test, Category("Fast")]
         public void ConstructorFailsIfSessionFactoryIsNull() {
-            Assert.Throws<ArgumentNullException>(
-                () =>
-                { using (new ConnectionScheduler(this.repoInfo, this.queue.Object, null, this.authProvider.Object)) {
+            Assert.Throws<ArgumentNullException>(() => {
+                using (new ConnectionScheduler(this.repoInfo, this.queue.Object, null, this.authProvider.Object)) {
                 }
             });
         }
 
         [Test, Category("Fast")]
         public void ConstructorFailsIfAuthProviderIsNull() {
-            Assert.Throws<ArgumentNullException>(
-                () =>
-                { using (new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, null)) {
+            Assert.Throws<ArgumentNullException>(() => {
+                using (new ConnectionScheduler(this.repoInfo, this.queue.Object, this.sessionFactory.Object, null)) {
                 }
             });
         }
@@ -415,7 +409,7 @@ namespace TestLibrary.QueueingTests
                     .Callback<IDictionary<string, string>, object, object, object>(
                         (d, x, y, z) => this.VerifyConnectionProperties(d)).Returns(this.session.Object);
                 Assert.That(waitHandle.WaitOne(5 * this.interval), Is.False);
-                Assert.That(waitHandle.WaitOne((int)seconds * 1000 + 1000), Is.True);
+                Assert.That(waitHandle.WaitOne(((int)seconds * 1000) + 1000), Is.True);
                 this.queue.Verify(q => q.AddEvent(It.Is<SuccessfulLoginEvent>(l => l.Session == this.session.Object)), Times.Once());
                 this.queue.Verify(q => q.AddEvent(It.IsAny<ISyncEvent>()), Times.Exactly(2));
             }
@@ -423,8 +417,7 @@ namespace TestLibrary.QueueingTests
             this.session.VerifySet(s => s.DefaultContext = It.IsNotNull<IOperationContext>(), Times.Once());
         }
 
-        private bool VerifyConnectionProperties(IDictionary<string, string> d)
-        {
+        private bool VerifyConnectionProperties(IDictionary<string, string> d) {
             Assert.That(d.ContainsKey(SessionParameter.User));
             Assert.That(d[SessionParameter.User], Is.EqualTo(this.username));
             Assert.That(d.ContainsKey(SessionParameter.Password));

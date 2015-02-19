@@ -178,11 +178,15 @@ namespace CmisSync.Lib.Cmis {
 
         private int changesFound = 0;
 
+        private int connectionExceptionsFound = 0;
+
         private DateTime? lastFinishedSync;
 
         private IDisposable unsubscriber;
 
-        object counterLock = new object();
+        private object counterLock = new object();
+
+        private object connectionExceptionCounterLock = new object();
 
         static Repository() {
             DBreezeInitializerSingleton.Init();
@@ -339,7 +343,7 @@ namespace CmisSync.Lib.Cmis {
             private set {
                 if (value != this.status) {
                     this.status = value;
-                    this.NotifyPropertyChanged("Status");
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Status));
                 }
             }
         }
@@ -356,7 +360,7 @@ namespace CmisSync.Lib.Cmis {
             private set {
                 if (value != this.lastFinishedSync) {
                     this.lastFinishedSync = value;
-                    this.NotifyPropertyChanged("LastFinishedSync");
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.LastFinishedSync));
                 }
             }
         }
@@ -373,7 +377,7 @@ namespace CmisSync.Lib.Cmis {
             private set {
                 if (value != this.changesFound) {
                     this.changesFound = value;
-                    this.NotifyPropertyChanged("NumberOfChanges");
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.NumberOfChanges));
                 }
             }
         }
@@ -490,6 +494,14 @@ namespace CmisSync.Lib.Cmis {
                     lock(this.counterLock) {
                         this.LastFinishedSync = (this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing) ? this.LastFinishedSync : DateTime.Now;
                     }
+                }
+            } else if (changeCounter.Item1 == "CmisConnectionException") {
+                lock(this.connectionExceptionCounterLock) {
+                    if (changeCounter.Item2 > this.connectionExceptionsFound) {
+                        this.Status = SyncStatus.Disconnected;
+                    }
+
+                    this.connectionExceptionsFound = changeCounter.Item2;
                 }
             }
         }
