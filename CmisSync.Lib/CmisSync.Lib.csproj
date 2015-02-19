@@ -284,6 +284,8 @@
     <Compile Include="Queueing\IEventCounter.cs" />
     <Compile Include="Events\CmisConnectionExceptionEvent.cs" />
     <Compile Include="Cmis\RepositoryStatus.cs" />
+    <Compile Include="Cmis\RepositoryStatusAggregator.cs" />
+    <Compile Include="Events\EventCategory.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

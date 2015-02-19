@@ -19,10 +19,23 @@
 
 namespace CmisSync.Lib.Cmis {
     using System;
+
+    /// <summary>
+    /// Repository status.
+    /// </summary>
     public class RepositoryStatus {
+        private bool connected;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Cmis.RepositoryStatus"/> class.
+        /// </summary>
         public RepositoryStatus() {
         }
-        private bool connected;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Cmis.RepositoryStatus"/> is connected.
+        /// </summary>
+        /// <value><c>true</c> if connected; otherwise, <c>false</c>.</value>
         public bool Connected {
             get {
                 return this.connected;
@@ -37,11 +50,34 @@ namespace CmisSync.Lib.Cmis {
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Cmis.RepositoryStatus"/> is paused.
+        /// </summary>
+        /// <value><c>true</c> if paused; otherwise, <c>false</c>.</value>
         public bool Paused { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Cmis.RepositoryStatus"/> is in warning state.
+        /// </summary>
+        /// <value><c>true</c> if warning; otherwise, <c>false</c>.</value>
         public bool Warning { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="CmisSync.Lib.Cmis.RepositoryStatus"/> is in sync requested state.
+        /// </summary>
+        /// <value><c>true</c> if sync requested; otherwise, <c>false</c>.</value>
         public bool SyncRequested { get; set; }
+
+        /// <summary>
+        /// Gets or sets the known changes.
+        /// </summary>
+        /// <value>The known changes.</value>
         public int KnownChanges { get; set; }
 
+        /// <summary>
+        /// Gets the status resulting on the other properties.
+        /// </summary>
+        /// <value>The status.</value>
         public SyncStatus Status {
             get {
                 if (this.Paused) {
