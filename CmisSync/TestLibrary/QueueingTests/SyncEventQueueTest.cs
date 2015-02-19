@@ -290,10 +290,14 @@ namespace TestLibrary.QueueingTests {
             var connectionException = new CmisConnectionException("unknown host");
             manager.Setup(m => m.Handle(connectionRequiredEvent)).Throws(connectionException);
             using (var underTest = new SyncEventQueue(manager.Object)) {
-                underTest.AddEvent(connectionRequiredEvent);
-                WaitFor(underTest, (q) => { return q.IsEmpty; });
-                underTest.StopListener();
-                Assert.That(underTest.WaitForStopped(10000), Is.True);
+                var observer = new Mock<IObserver<int>>();
+                observer.Setup(o => o.OnNext(It.Is<int>(i => i == 0))).Callback(() => {
+                    underTest.StopListener();
+                });
+                using (var unsubscriber = underTest.FullCounter.Subscribe(observer.Object)) {
+                    underTest.AddEvent(connectionRequiredEvent);
+                    Assert.That(underTest.WaitForStopped(10000), Is.True);
+                }
             }
 
             manager.Verify(m => m.Handle(It.Is<CmisConnectionExceptionEvent>(e => e.Exception == connectionException)), Times.Once());
