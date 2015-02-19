@@ -98,6 +98,7 @@ SOURCES =  \
 	IntegrationTests/HttpProxyConnectionTests.cs \
 	IntegrationTests/IntegrationTestUtils.cs \
 	IntegrationTests/NeedsLocalFileSystemFolder.cs \
+	IntegrationTests/RepositoryStatusIT.cs \
 	IntegrationTests/RepositoryUtilsTests.cs \
 	IntegrationTests/SelectiveIgnoreTests/CrudIT.cs \
 	IntegrationTests/SelectiveIgnoreTests/FileCrud.cs \
@@ -175,6 +176,7 @@ SOURCES =  \
 	UtilsTests/BackendTest.cs \
 	UtilsTests/EncodingTest.cs \
 	UtilsTests/HttpProxyUtilsTest.cs \
+	UtilsTests/NameOfPropertyTest.cs \
 	UtilsTests/ProcessDiagnosticsTest.cs \
 	UtilsTests/X509StoreTest.cs
 

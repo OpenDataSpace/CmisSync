@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ICountableEvent.cs" company="GRAU DATA AG">
+// <copyright file="CmisConnectionExceptionEvent.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -20,16 +20,30 @@
 namespace CmisSync.Lib.Events {
     using System;
 
+    using DotCMIS.Exceptions;
+
     /// <summary>
-    /// Instances of this event are able to be counted by categories.
-    /// Every event, which should be able to be tracked inside the SyncEventQueue must return a category.
+    /// Cmis connection exception occured while handling event in SyncEventQueue and this event is added back to Queue to inform about this problem.
     /// </summary>
-    public interface ICountableEvent : ISyncEvent {
+    public class CmisConnectionExceptionEvent : ExceptionEvent, ICountableEvent {
+        /// <summary>
+        /// Gets the time when the exception occured.
+        /// </summary>
+        /// <value>The occured at this timestamp.</value>
+        public DateTime OccuredAt { get; private set; }
+        public CmisConnectionExceptionEvent(CmisConnectionException connectionException) : base(connectionException) {
+            this.OccuredAt = DateTime.Now;
+        }
+
         /// <summary>
         /// Gets the category of the event. This can be used to differ between multiple event types.
         /// The returned value should never ever change its value after requesting it the first time.
         /// </summary>
         /// <value>The event category.</value>
-        EventCategory Category { get; }
+        public EventCategory Category {
+            get {
+                return EventCategory.ConnectionException;
+            }
+        }
     }
 }

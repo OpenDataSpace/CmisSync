@@ -571,6 +571,7 @@ namespace TestLibrary.IntegrationTests {
             folder.Refresh();
             folder.Move(source, target);
 
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 

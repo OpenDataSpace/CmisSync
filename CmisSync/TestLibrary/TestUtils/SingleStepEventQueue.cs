@@ -64,7 +64,7 @@ namespace TestLibrary {
         public bool SwallowExceptions { get; set; }
 
         public void AddEvent(ISyncEvent e) {
-            if (e is ICountableEvent && !string.IsNullOrEmpty((e as ICountableEvent).Category)) {
+            if (e is ICountableEvent && (e as ICountableEvent).Category != EventCategory.NoCategory) {
                 this.fullCounter.Increase(e as ICountableEvent);
                 this.categoryCounter.Increase(e as ICountableEvent);
             }
@@ -85,7 +85,7 @@ namespace TestLibrary {
                     }
                 }
 
-                if (e is ICountableEvent && !string.IsNullOrEmpty((e as ICountableEvent).Category)) {
+                if (e is ICountableEvent && (e as ICountableEvent).Category != EventCategory.NoCategory) {
                     this.fullCounter.Decrease(e as ICountableEvent);
                     this.categoryCounter.Decrease(e as ICountableEvent);
                 }
@@ -131,7 +131,7 @@ namespace TestLibrary {
             return null;
         }
 
-        public IDisposable Subscribe(IObserver<Tuple<string, int>> observer) {
+        public IDisposable Subscribe(IObserver<Tuple<EventCategory, int>> observer) {
             return null;
         }
 
@@ -141,9 +141,9 @@ namespace TestLibrary {
             }
         }
 
-        public IObservable<Tuple<string, int>> CategoryCounter {
+        public IObservable<Tuple<EventCategory, int>> CategoryCounter {
             get {
-                return (IObservable<Tuple<string, int>>)this.categoryCounter;
+                return (IObservable<Tuple<EventCategory, int>>)this.categoryCounter;
             }
         }
     }

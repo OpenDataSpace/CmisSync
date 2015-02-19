@@ -26,6 +26,8 @@ namespace TestLibrary.QueueingTests {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
+    using DotCMIS.Exceptions;
+
     using log4net;
     using log4net.Config;
 
@@ -145,7 +147,7 @@ namespace TestLibrary.QueueingTests {
         [Test, Category("Fast")]
         public void SubscribeForAllCategorizesCountableEvents() {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
-                using (var unsubscriber = queue.CategoryCounter.Subscribe(Mock.Of<IObserver<Tuple<string, int>>>())) {
+                using (var unsubscriber = queue.CategoryCounter.Subscribe(Mock.Of<IObserver<Tuple<EventCategory, int>>>())) {
                     Assert.That(unsubscriber, Is.Not.Null);
                 }
             }
@@ -167,7 +169,7 @@ namespace TestLibrary.QueueingTests {
             using (SyncEventQueue queue = new SyncEventQueue(Mock.Of<ISyncEventManager>())) {
                 Assert.Throws<ArgumentNullException>(
                     () => {
-                    using (var unsubscriber = queue.CategoryCounter.Subscribe((IObserver<Tuple<string, int>>)null)) {
+                    using (var unsubscriber = queue.CategoryCounter.Subscribe((IObserver<Tuple<EventCategory, int>>)null)) {
                     }
                 });
             }
@@ -175,7 +177,7 @@ namespace TestLibrary.QueueingTests {
 
         [Test, Category("Medium")]
         public void SubscribeForAllCountableEventsAndGetInformedOnAddEvent([Values(1, 5, 1000)]int events) {
-            string category = "test";
+            var category = EventCategory.PeriodicSync;
             int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();
             manager.Setup(m => m.Handle(It.IsAny<ICountableEvent>())).Callback(() => Thread.Sleep(10));
@@ -202,12 +204,12 @@ namespace TestLibrary.QueueingTests {
 
         [Test, Category("Medium")]
         public void SubscribeForCategoryCountableEventsAndGetInformedOnAddEvent([Values(1, 5, 1000)]int events) {
-            string category = "test";
+            var category = EventCategory.PeriodicSync;
             int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();
             manager.Setup(m => m.Handle(It.IsAny<ICountableEvent>())).Callback(() => Thread.Sleep(10));
-            var observer = new Mock<IObserver<Tuple<string, int>>>();
-            observer.Setup(o => o.OnNext(It.IsAny<Tuple<string, int>>())).Callback<Tuple<string, int>>(t => { lastCount = t.Item2; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
+            var observer = new Mock<IObserver<Tuple<EventCategory, int>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<Tuple<EventCategory, int>>())).Callback<Tuple<EventCategory, int>>(t => { lastCount = t.Item2; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
             using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
                 using (var unsubscriber = queue.CategoryCounter.Subscribe(observer.Object)) {
                     for (int i = 0; i < events; i++) {
@@ -219,7 +221,7 @@ namespace TestLibrary.QueueingTests {
                     queue.Dispose();
                 }
 
-                observer.Verify(o => o.OnNext(It.Is<Tuple<string, int>>(t => t.Item1 == category)), Times.Exactly(2 * events));
+                observer.Verify(o => o.OnNext(It.Is<Tuple<EventCategory, int>>(t => t.Item1 == category)), Times.Exactly(2 * events));
                 Assert.That(lastCount, Is.EqualTo(0));
             }
 
@@ -229,7 +231,7 @@ namespace TestLibrary.QueueingTests {
 
         [Test, Category("Medium")]
         public void ExceptionRaisingEventsDecreaseFullEventCounter([Values(1, 5, 10)]int events) {
-            string category = "test";
+            var category = EventCategory.PeriodicSync;
             int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();
             manager.Setup(m => m.Handle(It.IsAny<ICountableEvent>())).Callback(() => Thread.Sleep(10)).Throws(new Exception("Generic Exception"));
@@ -256,12 +258,12 @@ namespace TestLibrary.QueueingTests {
 
         [Test, Category("Medium")]
         public void ExceptionRaisingEventsDecreaseCategoryEventCounter([Values(1, 5, 10)]int events) {
-            string category = "test";
+            var category = EventCategory.PeriodicSync;
             int lastCount = -1;
             var manager = new Mock<ISyncEventManager>();
             manager.Setup(m => m.Handle(It.IsAny<ICountableEvent>())).Callback(() => Thread.Sleep(10)).Throws(new Exception("Generic Exception"));
-            var observer = new Mock<IObserver<Tuple<string, int>>>();
-            observer.Setup(o => o.OnNext(It.IsAny<Tuple<string, int>>())).Callback<Tuple<string, int>>(t => { lastCount = t.Item2; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
+            var observer = new Mock<IObserver<Tuple<EventCategory, int>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<Tuple<EventCategory, int>>())).Callback<Tuple<EventCategory, int>>(t => { lastCount = t.Item2; Assert.That(lastCount, Is.LessThanOrEqualTo(events).And.AtLeast(0));});
             using (SyncEventQueue queue = new SyncEventQueue(manager.Object)) {
                 using (var unsubscriber = queue.CategoryCounter.Subscribe(observer.Object)) {
                     for (int i = 0; i < events; i++) {
@@ -273,12 +275,32 @@ namespace TestLibrary.QueueingTests {
                     queue.Dispose();
                 }
 
-                observer.Verify(o => o.OnNext(It.Is<Tuple<string, int>>(t => t.Item1 == category)), Times.Exactly(2 * events));
+                observer.Verify(o => o.OnNext(It.Is<Tuple<EventCategory, int>>(t => t.Item1 == category)), Times.Exactly(2 * events));
                 Assert.That(lastCount, Is.EqualTo(0));
             }
 
             observer.Verify(o => o.OnCompleted(), Times.Once());
             manager.Verify(m => m.Handle(It.Is<ICountableEvent>(e => e.Category == category)), Times.Exactly(events));
+        }
+
+        [Test, Category("Fast")]
+        public void PutConnectionEventToQueueIfConnectionExceptionOccursOnHandling() {
+            var manager = new Mock<ISyncEventManager>();
+            var connectionRequiredEvent = Mock.Of<ISyncEvent>();
+            var connectionException = new CmisConnectionException("unknown host");
+            manager.Setup(m => m.Handle(connectionRequiredEvent)).Throws(connectionException);
+            using (var underTest = new SyncEventQueue(manager.Object)) {
+                var observer = new Mock<IObserver<int>>();
+                observer.Setup(o => o.OnNext(It.Is<int>(i => i == 0))).Callback(() => {
+                    underTest.StopListener();
+                });
+                using (var unsubscriber = underTest.FullCounter.Subscribe(observer.Object)) {
+                    underTest.AddEvent(connectionRequiredEvent);
+                    Assert.That(underTest.WaitForStopped(10000), Is.True);
+                }
+            }
+
+            manager.Verify(m => m.Handle(It.Is<CmisConnectionExceptionEvent>(e => e.Exception == connectionException)), Times.Once());
         }
 
         private static void WaitFor<T>(T obj, Func<T, bool> check, int timeout = 5000) {

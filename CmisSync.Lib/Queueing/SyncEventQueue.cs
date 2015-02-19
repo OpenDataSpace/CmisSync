@@ -26,6 +26,8 @@ namespace CmisSync.Lib.Queueing {
 
     using CmisSync.Lib.Events;
 
+    using DotCMIS.Exceptions;
+
     using log4net;
 
     /// <summary>
@@ -90,9 +92,9 @@ namespace CmisSync.Lib.Queueing {
             }
         }
 
-        public IObservable<Tuple<string, int>> CategoryCounter {
+        public IObservable<Tuple<EventCategory, int>> CategoryCounter {
             get {
-                return (IObservable<Tuple<string, int>>)this.categoryCounter;
+                return (IObservable<Tuple<EventCategory, int>>)this.categoryCounter;
             }
         }
 
@@ -114,8 +116,8 @@ namespace CmisSync.Lib.Queueing {
 
             try {
                 if (newEvent is ICountableEvent) {
-                    string category = (newEvent as ICountableEvent).Category;
-                    if (!string.IsNullOrEmpty(category)) {
+                    var category = (newEvent as ICountableEvent).Category;
+                    if (category != EventCategory.NoCategory) {
                         lock (this.subscriberLock) {
                             this.categoryCounter.Increase(newEvent as ICountableEvent);
                             this.fullCounter.Increase(newEvent as ICountableEvent);
@@ -249,13 +251,15 @@ namespace CmisSync.Lib.Queueing {
                         }
 
                         manager.Handle(syncEvent);
+                    } catch (CmisConnectionException connectionException) {
+                        this.AddEvent(new CmisConnectionExceptionEvent(connectionException));
                     } catch(Exception e) {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
                     }
 
                     if (syncEvent is ICountableEvent) {
-                        string category = (syncEvent as ICountableEvent).Category;
-                        if (!string.IsNullOrEmpty(category)) {
+                        var category = (syncEvent as ICountableEvent).Category;
+                        if (category != EventCategory.NoCategory) {
                             lock (this.subscriberLock) {
                                 this.fullCounter.Decrease(syncEvent as ICountableEvent);
                                 this.categoryCounter.Decrease(syncEvent as ICountableEvent);

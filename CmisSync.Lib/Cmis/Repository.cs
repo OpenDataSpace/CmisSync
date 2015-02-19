@@ -85,7 +85,7 @@ namespace CmisSync.Lib.Cmis {
     /// <summary>
     /// Synchronized CMIS repository.
     /// </summary>
-    public class Repository : IDisposable, INotifyPropertyChanged, IObserver<Tuple<string, int>> {
+    public class Repository : IDisposable, INotifyPropertyChanged, IObserver<Tuple<EventCategory, int>> {
         /// <summary>
         /// Name of the synchronized folder, as found in the CmisSync XML configuration file.
         /// </summary>
@@ -179,11 +179,17 @@ namespace CmisSync.Lib.Cmis {
 
         private int changesFound = 0;
 
+        private int connectionExceptionsFound = 0;
+
         private DateTime? lastFinishedSync;
 
         private IDisposable unsubscriber;
 
-        object counterLock = new object();
+        private object counterLock = new object();
+
+        private object connectionExceptionCounterLock = new object();
+
+        private RepositoryStatus repoStatus = new RepositoryStatus();
 
         static Repository() {
             DBreezeInitializerSingleton.Init();
@@ -205,6 +211,7 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="queue">Event Queue.</param>
         protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, ICountingQueue queue) {
+            this.Status = this.repoStatus.Status;
             if (repoInfo == null) {
                 throw new ArgumentNullException("Given repoInfo is null");
             }
@@ -297,9 +304,8 @@ namespace CmisSync.Lib.Cmis {
                 new GenericSyncEventHandler<SuccessfulLoginEvent>(
                 10000,
                 delegate(ISyncEvent e) {
-                if (this.Status == SyncStatus.Disconnected || this.Status == SyncStatus.Warning) {
-                    this.Status = SyncStatus.Idle;
-                }
+                this.repoStatus.Connected = true;
+                this.Status = this.repoStatus.Status;
 
                 return false;
             }));
@@ -307,9 +313,8 @@ namespace CmisSync.Lib.Cmis {
                 new GenericSyncEventHandler<ConfigurationNeededEvent>(
                 10000,
                 delegate(ISyncEvent e) {
-                if (this.Status == SyncStatus.Disconnected) {
-                    this.Status = SyncStatus.Warning;
-                }
+                this.repoStatus.Warning = true;
+                this.Status = this.repoStatus.Status;
 
                 return false;
             }));
@@ -341,7 +346,7 @@ namespace CmisSync.Lib.Cmis {
             private set {
                 if (value != this.status) {
                     this.status = value;
-                    this.NotifyPropertyChanged("Status");
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.Status));
                 }
             }
         }
@@ -358,7 +363,7 @@ namespace CmisSync.Lib.Cmis {
             private set {
                 if (value != this.lastFinishedSync) {
                     this.lastFinishedSync = value;
-                    this.NotifyPropertyChanged("LastFinishedSync");
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.LastFinishedSync));
                 }
             }
         }
@@ -374,8 +379,10 @@ namespace CmisSync.Lib.Cmis {
 
             private set {
                 if (value != this.changesFound) {
+                    this.repoStatus.KnownChanges = value;
                     this.changesFound = value;
-                    this.NotifyPropertyChanged("NumberOfChanges");
+                    this.NotifyPropertyChanged(Utils.NameOf(() => this.NumberOfChanges));
+                    this.Status = this.repoStatus.Status;
                 }
             }
         }
@@ -414,17 +421,21 @@ namespace CmisSync.Lib.Cmis {
         /// Stop syncing momentarily.
         /// </summary>
         public void Suspend() {
-            this.Status = SyncStatus.Suspend;
-            this.Scheduler.Stop();
-            this.Queue.Suspend();
-            foreach (var transmission in this.activityListener.TransmissionManager.ActiveTransmissionsAsList()) {
-                string localFolder = this.RepoInfo.LocalPath;
-                if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
-                    localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
-                }
+            if (!this.repoStatus.Paused) {
+                this.repoStatus.Paused = true;
+                this.Status = this.repoStatus.Status;
 
-                if (transmission.Path.StartsWith(localFolder)) {
-                    transmission.ReportProgress(new TransmissionProgressEventArgs { Paused = true });
+                this.Scheduler.Stop();
+                this.Queue.Suspend();
+                foreach (var transmission in this.activityListener.TransmissionManager.ActiveTransmissionsAsList()) {
+                    string localFolder = this.RepoInfo.LocalPath;
+                    if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
+                        localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
+                    }
+
+                    if (transmission.Path.StartsWith(localFolder)) {
+                        transmission.ReportProgress(new TransmissionProgressEventArgs { Paused = true });
+                    }
                 }
             }
         }
@@ -433,17 +444,21 @@ namespace CmisSync.Lib.Cmis {
         /// Restart syncing.
         /// </summary>
         public void Resume() {
-            this.Status = SyncStatus.Idle;
-            this.Queue.Continue();
-            this.Scheduler.Start();
-            foreach (var transmission in this.activityListener.TransmissionManager.ActiveTransmissionsAsList()) {
-                string localFolder = this.RepoInfo.LocalPath;
-                if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
-                    localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
-                }
+            if (this.repoStatus.Paused) {
+                this.repoStatus.Paused = false;
+                this.Status = this.repoStatus.Status;
 
-                if (transmission.Path.StartsWith(localFolder)) {
-                    transmission.ReportProgress(new TransmissionProgressEventArgs { Paused = false });
+                this.Queue.Continue();
+                this.Scheduler.Start();
+                foreach (var transmission in this.activityListener.TransmissionManager.ActiveTransmissionsAsList()) {
+                    string localFolder = this.RepoInfo.LocalPath;
+                    if (!localFolder.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString())) {
+                        localFolder = localFolder + System.IO.Path.DirectorySeparatorChar.ToString();
+                    }
+
+                    if (transmission.Path.StartsWith(localFolder)) {
+                        transmission.ReportProgress(new TransmissionProgressEventArgs { Paused = false });
+                    }
                 }
             }
         }
@@ -475,8 +490,8 @@ namespace CmisSync.Lib.Cmis {
         public void OnError(Exception e) {
         }
 
-        public virtual void OnNext(Tuple<string, int> changeCounter) {
-            if (changeCounter.Item1 == "DetectedChange") {
+        public virtual void OnNext(Tuple<EventCategory, int> changeCounter) {
+            if (changeCounter.Item1 == EventCategory.DetectedChange) {
                 if (changeCounter.Item2 > 0) {
                     lock(this.counterLock) {
                         this.NumberOfChanges = changeCounter.Item2;
@@ -484,14 +499,28 @@ namespace CmisSync.Lib.Cmis {
                 } else {
                     lock(this.counterLock) {
                         this.NumberOfChanges = 0;
-                        this.LastFinishedSync = this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing ? this.LastFinishedSync : DateTime.Now;
+                        this.LastFinishedSync = this.status == SyncStatus.Idle ? DateTime.Now : this.LastFinishedSync;
                     }
                 }
-            } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
-                if (changeCounter.Item2 <= 0 && this.NumberOfChanges <= 0 && this.status != SyncStatus.Disconnected) {
-                    lock(this.counterLock) {
-                        this.LastFinishedSync = this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing ? this.LastFinishedSync : DateTime.Now;
+            } else if (changeCounter.Item1 == EventCategory.SyncRequested || changeCounter.Item1 == EventCategory.PeriodicSync) {
+                lock(this.counterLock) {
+                    if (changeCounter.Item1 == EventCategory.SyncRequested) {
+                        this.repoStatus.SyncRequested = changeCounter.Item2 > 0;
+                        this.Status = this.repoStatus.Status;
                     }
+
+                    if (changeCounter.Item2 <= 0 && this.status == SyncStatus.Idle) {
+                        this.LastFinishedSync = DateTime.Now;
+                    }
+                }
+            } else if (changeCounter.Item1 == EventCategory.ConnectionException) {
+                lock(this.connectionExceptionCounterLock) {
+                    if (changeCounter.Item2 > this.connectionExceptionsFound) {
+                        this.repoStatus.Connected = false;
+                        this.Status = this.repoStatus.Status;
+                    }
+
+                    this.connectionExceptionsFound = changeCounter.Item2;
                 }
             }
         }

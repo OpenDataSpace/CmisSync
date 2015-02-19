@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib
-{
+namespace CmisSync.Lib {
     using System;
 
     using CmisSync.Lib.Accumulator;
@@ -44,8 +43,7 @@ namespace CmisSync.Lib
     /// Successful login handler. It handles the SuccessfulLoginEvent and registers
     /// the necessary handlers and registers the root folder to the MetaDataStorage.
     /// </summary>
-    public class EventManagerInitializer : ReportingSyncEventHandler
-    {
+    public class EventManagerInitializer : ReportingSyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(EventManagerInitializer));
 
         private ContentChangeEventAccumulator ccaccumulator;
@@ -65,14 +63,16 @@ namespace CmisSync.Lib
         private SelectiveIgnoreEventTransformer transformer;
         private SelectiveIgnoreFilter selectiveIgnoreFilter;
         private IgnoreFlagChangeDetection ignoreChangeDetector;
-  
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EventManagerInitializer"/> class.
         /// </summary>
         /// <param name='queue'>The SyncEventQueue.</param>
         /// <param name='storage'>Storage for Metadata.</param>
+        /// <param name='fileTransmissionStorage'>Storage for file transmissions.</param>
+        /// <param name='ignoredStorage'>Storage for ignored entities.</param>
         /// <param name='repoInfo'>Repo info.</param>
-        /// <param name="filter">Filter aggregation.</param>
+        /// <param name='filter'>Filter aggregation.</param>
         /// <param name='activityListner'>Listener for Sync activities.</param>
         /// <param name='fsFactory'>File system factory.</param>
         /// <exception cref='ArgumentNullException'>
@@ -92,13 +92,11 @@ namespace CmisSync.Lib
                 throw new ArgumentNullException("storage null");
             }
 
-            if (fileTransmissionStorage == null)
-            {
+            if (fileTransmissionStorage == null) {
                 throw new ArgumentNullException("fileTransmissionStorage null");
             }
 
-            if (repoInfo == null)
-            {
+            if (repoInfo == null) {
                 throw new ArgumentNullException("Repoinfo null");
             }
 

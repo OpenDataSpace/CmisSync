@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer
-{
+namespace CmisSync.Lib.Consumer {
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -36,8 +35,7 @@ namespace CmisSync.Lib.Consumer
     /// <summary>
     /// Sync mechanism.
     /// </summary>
-    public class SyncMechanism : ReportingSyncEventHandler
-    {
+    public class SyncMechanism : ReportingSyncEventHandler {
         /// <summary>
         /// All available solver.
         /// </summary>
@@ -128,8 +126,7 @@ namespace CmisSync.Lib.Consumer
         /// </summary>
         /// <param name="e">FileEvent or FolderEvent</param>
         /// <returns><c>true</c> if the Event has been handled, otherwise <c>false</c></returns>
-        public override bool Handle(ISyncEvent e)
-        {
+        public override bool Handle(ISyncEvent e) {
             if (e is AbstractFolderEvent) {
                 var folderEvent = e as AbstractFolderEvent;
 
@@ -141,6 +138,8 @@ namespace CmisSync.Lib.Consumer
                     this.Queue.AddEvent(folderEvent);
                 } catch (InteractionNeededException interaction) {
                     this.Queue.AddEvent(new InteractionNeededEvent(interaction));
+                } catch (DotCMIS.Exceptions.CmisConnectionException) {
+                    throw;
                 } catch (Exception ex) {
                     Logger.Debug("Exception in SyncMechanism, requesting FullSync and rethrowing", ex);
                     this.Queue.AddEvent(new StartNextSyncEvent(true));
@@ -153,8 +152,7 @@ namespace CmisSync.Lib.Consumer
             return false;
         }
 
-        private ISolver[,] CreateSolver()
-        {
+        private ISolver[,] CreateSolver() {
             int dim = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[dim, dim];
             var changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
@@ -197,8 +195,7 @@ namespace CmisSync.Lib.Consumer
             return solver;
         }
 
-        private void DoHandle(AbstractFolderEvent actualEvent)
-        {
+        private void DoHandle(AbstractFolderEvent actualEvent) {
             SituationType localSituation = this.LocalSituation.Analyse(this.storage, actualEvent);
             SituationType remoteSituation = this.RemoteSituation.Analyse(this.storage, actualEvent);
             ISolver solver = this.Solver[(int)localSituation, (int)remoteSituation];
@@ -213,8 +210,7 @@ namespace CmisSync.Lib.Consumer
             Logger.Debug(string.Format("Solver {0} took {1} ms", solver.GetType(), watch.ElapsedMilliseconds));
         }
 
-        private void Solve(ISolver s, AbstractFolderEvent e)
-        {
+        private void Solve(ISolver s, AbstractFolderEvent e) {
             using (var activity = new ActivityListenerResource(this.activityListener)) {
                 if (e is FolderEvent) {
                     s.Solve((e as FolderEvent).LocalFolder, (e as FolderEvent).RemoteFolder, ContentChangeType.NONE, ContentChangeType.NONE);

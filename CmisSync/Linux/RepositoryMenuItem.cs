@@ -50,16 +50,16 @@ namespace CmisSync {
             this.controller = controller;
             this.Image = new Image(UIHelpers.GetIcon("dataspacesync-folder", 16));
             this.repository.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
-                if (e.PropertyName == "Status") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.Status)) {
                     this.Status = this.repository.Status;
                 }
 
-                if (e.PropertyName == "LastFinishedSync") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.LastFinishedSync)) {
                     this.changesFoundAt = this.repository.LastFinishedSync;
                     this.UpdateStatusText();
                 }
 
-                if (e.PropertyName == "NumberOfChanges") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.NumberOfChanges)) {
                     this.changesFound = this.repository.NumberOfChanges;
                     this.UpdateStatusText();
                 }
@@ -153,19 +153,21 @@ namespace CmisSync {
 
             set {
                 this.status = value;
-                switch (this.status)
-                {
-                case SyncStatus.Suspend:
-                    (this.suspendItem.Child as Label).Text = Properties_Resources.ResumeSync;
-                    this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-start", 12));
-                    this.suspendItem.Sensitive = true;
-                    break;
-                default:
-                    (this.suspendItem.Child as Label).Text = Properties_Resources.PauseSync;
-                    this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-pause", 12));
-                    this.suspendItem.Sensitive = true;
-                    break;
-                }
+                Application.Invoke(delegate {
+                    switch (this.status)
+                    {
+                    case SyncStatus.Suspend:
+                        (this.suspendItem.Child as Label).Text = Properties_Resources.ResumeSync;
+                        this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-start", 12));
+                        this.suspendItem.Sensitive = true;
+                        break;
+                    default:
+                        (this.suspendItem.Child as Label).Text = Properties_Resources.PauseSync;
+                        this.suspendItem.Image = new Image(UIHelpers.GetIcon("dataspacesync-pause", 12));
+                        this.suspendItem.Sensitive = true;
+                        break;
+                    }
+                });
             }
         }
 

@@ -93,13 +93,6 @@ namespace CmisSync {
         private List<Repository> repositories = new List<Repository>();
 
         /// <summary>
-        /// A list of repositories sent to suspend because of a sleep event.
-        /// </summary>
-        private List<Repository> sleepingRepositories = new List<Repository>();
-
-        private List<IDisposable> repoUnsubscriber = new List<IDisposable>();
-
-        /// <summary>
         /// Dictionary of the edit folder diaglogs
         /// Key: synchronized folder name
         /// Value: <c>Edit</c>
@@ -115,6 +108,8 @@ namespace CmisSync {
         /// Is this controller disposed already?
         /// </summary>
         private bool disposed = false;
+
+        private RepositoryStatusAggregator statusAggregator = new RepositoryStatusAggregator();
 
         /// <summary>
         /// Gets a value indicating whether the reporsitories have finished loading.
@@ -195,6 +190,23 @@ namespace CmisSync {
                         SetupBrand();
                     }
                 }).Start();
+            };
+
+            this.statusAggregator.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
+                switch(this.statusAggregator.Status) {
+                case SyncStatus.Idle:
+                    this.OnIdle();
+                    break;
+                case SyncStatus.Synchronizing:
+                    this.OnSyncing();
+                    break;
+                case SyncStatus.Warning:
+                    this.OnError();
+                    break;
+                default:
+                    this.OnIdle();
+                    break;
+                }
             };
         }
 
@@ -371,7 +383,6 @@ namespace CmisSync {
                 foreach (var repo in this.Repositories) {
                     if (repo.Status != SyncStatus.Suspend) {
                         repo.Suspend();
-                        this.sleepingRepositories.Add(repo);
                     }
                 }
 
@@ -407,11 +418,9 @@ namespace CmisSync {
         /// </summary>
         public void StartAll() {
             lock (this.repoLock) {
-                foreach (var repo in this.sleepingRepositories) {
+                foreach (var repo in this.repositories) {
                     repo.Resume();
                 }
-
-                this.sleepingRepositories.Clear();
             }
         }
 
@@ -512,10 +521,6 @@ namespace CmisSync {
                 lock(this.repoLock) {
                     foreach (var repo in this.repositories) {
                         repo.Dispose();
-                    }
-
-                    foreach (var unsubscriber in this.repoUnsubscriber) {
-                        unsubscriber.Dispose();
                     }
                 }
             }
@@ -642,7 +647,6 @@ namespace CmisSync {
         private void AddRepository(RepoInfo repositoryInfo) {
             try {
                 Repository repo = new Repository(repositoryInfo, this.activityListenerAggregator);
-                this.repoUnsubscriber.Add(repo.Queue.CategoryCounter.Subscribe((IObserver<Tuple<string, int>>)new CountingSubscriber(this.activityListenerAggregator)));
                 repo.Queue.EventManager.AddEventHandler(
                     new GenericSyncEventHandler<FileTransmissionEvent>(
                     50,
@@ -709,6 +713,7 @@ namespace CmisSync {
                     return false;
                 }));
                 this.repositories.Add(repo);
+                this.statusAggregator.Add(repo);
                 repo.Initialize();
             } catch (ExtendedAttributeException extendedAttributeException) {
                 this.ShowException(
@@ -788,6 +793,7 @@ namespace CmisSync {
                 if (repo.LocalPath.Equals(folder.LocalPath)) {
                     repo.Dispose();
                     this.repositories.Remove(repo);
+                    this.statusAggregator.Remove(repo);
                     repo.Dispose();
                     break;
                 }
@@ -856,53 +862,6 @@ namespace CmisSync {
             foreach (string file in files) {
                 if (!CmisSync.Lib.Utils.IsSymlink(file)) {
                     File.SetAttributes(file, FileAttributes.Normal);
-                }
-            }
-        }
-
-        private class CountingSubscriber : IObserver<Tuple<string, int>> {
-            private ActivityListenerAggregator aggregator;
-            private object activeLock = new object();
-            private bool activeSync = false;
-            private bool changeDetected = false;
-
-            public CountingSubscriber(ActivityListenerAggregator aggregator) {
-                this.aggregator = aggregator;
-            }
-
-            public void OnCompleted() {
-            }
-
-            public void OnError(Exception e) {
-            }
-
-            public virtual void OnNext(Tuple<string, int> changeCounter) {
-                lock (this.activeLock) {
-                    if (changeCounter.Item1 == "DetectedChange") {
-                        if (changeCounter.Item2 > 0) {
-                            if (!this.changeDetected) {
-                                this.changeDetected = true;
-                                this.aggregator.ActivityStarted();
-                            }
-                        } else {
-                            if (this.changeDetected) {
-                                this.changeDetected = false;
-                                this.aggregator.ActivityStopped();
-                            }
-                        }
-                    } else if (changeCounter.Item1 == "SyncRequested") {
-                        if (changeCounter.Item2 > 0) {
-                            if (!this.activeSync) {
-                                this.activeSync = true;
-                                this.aggregator.ActivityStarted();
-                            }
-                        } else {
-                            if (this.activeSync) {
-                                this.activeSync = false;
-                                this.aggregator.ActivityStopped();
-                            }
-                        }
-                    }
                 }
             }
         }

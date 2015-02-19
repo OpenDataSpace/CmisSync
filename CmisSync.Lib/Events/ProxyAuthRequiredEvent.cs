@@ -17,23 +17,20 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
     /// Proxy auth required event.
     /// </summary>
-    public class ProxyAuthRequiredEvent : ExceptionEvent
-    {
+    public class ProxyAuthRequiredEvent : ExceptionEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.ProxyAuthRequiredEvent"/> class.
         /// </summary>
         /// <param name='e'>
         /// thrown CmisRuntimException indicating the proxy settings problem
         /// </param>
-        public ProxyAuthRequiredEvent(DotCMIS.Exceptions.CmisRuntimeException e) : base(e)
-        {
+        public ProxyAuthRequiredEvent(DotCMIS.Exceptions.CmisRuntimeException e) : base(e) {
         }
     }
 }
