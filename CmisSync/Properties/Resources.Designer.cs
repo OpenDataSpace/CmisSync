@@ -1006,6 +1006,15 @@ namespace CmisSync {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Last change.
+        /// </summary>
+        internal static string TransmissionTitleLastChange {
+            get {
+                return ResourceManager.GetString("TransmissionTitleLastChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Path.
         /// </summary>
         internal static string TransmissionTitlePath {
