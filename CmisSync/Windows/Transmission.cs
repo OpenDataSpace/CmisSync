@@ -114,6 +114,7 @@ namespace CmisSync {
                     changeHandler(this, new PropertyChangedEventArgs("Path"));
                     changeHandler(this, new PropertyChangedEventArgs("Status"));
                     changeHandler(this, new PropertyChangedEventArgs("Progress"));
+                    changeHandler(this, new PropertyChangedEventArgs("UpdateTime"));
                 }
             }
         }
