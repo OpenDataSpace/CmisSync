@@ -146,17 +146,19 @@ namespace CmisSync {
 
             set {
                 this.status = value;
-                switch (this.status)
-                {
-                    case SyncStatus.Idle:
-                        this.suspendItem.Title = Properties_Resources.PauseSync;
-                        this.suspendItem.Image = this.pauseImage;
-                        break;
-                    case SyncStatus.Suspend:
-                        this.suspendItem.Title = Properties_Resources.ResumeSync;
-                        this.suspendItem.Image = this.resumeImage;
-                        break;
-                }
+                InvokeOnMainThread(delegate {
+                    switch (this.status)
+                    {
+                        case SyncStatus.Idle:
+                            this.suspendItem.Title = Properties_Resources.PauseSync;
+                            this.suspendItem.Image = this.pauseImage;
+                            break;
+                        case SyncStatus.Suspend:
+                            this.suspendItem.Title = Properties_Resources.ResumeSync;
+                            this.suspendItem.Image = this.resumeImage;
+                            break;
+                    }
+                });
             }
         }
 

@@ -49,6 +49,7 @@ namespace CmisSync {
             this.controller = controller;
             this.parent = parent;
             this.Image = UIHelpers.GetBitmap("folder");
+            this.suspendItem = new ToolStripMenuItem(Properties_Resources.PauseSync, UIHelpers.GetBitmap("media_playback_pause"));
             this.repository.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
                 if (e.PropertyName == "Status") {
                     this.Status = this.repository.Status;
@@ -73,8 +74,6 @@ namespace CmisSync {
 
             this.editItem = new ToolStripMenuItem(Properties_Resources.Settings);
             this.editItem.Click += this.EditFolderDelegate();
-
-            this.suspendItem = new ToolStripMenuItem(Properties_Resources.PauseSync);
 
             this.Status = repo.Status;
 
@@ -136,16 +135,20 @@ namespace CmisSync {
 
             set {
                 this.status = value;
-                switch (this.status)
-                {
-                case SyncStatus.Suspend:
-                    this.suspendItem.Text = Properties_Resources.ResumeSync;
-                    this.suspendItem.Image = UIHelpers.GetBitmap("media_playback_start");
-                    break;
-                default:
-                    this.suspendItem.Text = Properties_Resources.PauseSync;
-                    this.suspendItem.Image = UIHelpers.GetBitmap("media_playback_pause");
-                    break;
+                try {
+                    this.parent.BeginInvoke((Action)delegate {
+                        switch (this.status) {
+                            case SyncStatus.Suspend:
+                                this.suspendItem.Text = Properties_Resources.ResumeSync;
+                                this.suspendItem.Image = UIHelpers.GetBitmap("media_playback_start");
+                                break;
+                            default:
+                                this.suspendItem.Text = Properties_Resources.PauseSync;
+                                this.suspendItem.Image = UIHelpers.GetBitmap("media_playback_pause");
+                                break;
+                        }
+                    });
+                } catch (InvalidOperationException e) {
                 }
             }
         }
