@@ -51,16 +51,16 @@ namespace CmisSync {
             this.Image = UIHelpers.GetBitmap("folder");
             this.suspendItem = new ToolStripMenuItem(Properties_Resources.PauseSync, UIHelpers.GetBitmap("media_playback_pause"));
             this.repository.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
-                if (e.PropertyName == "Status") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.Status)) {
                     this.Status = this.repository.Status;
                 }
 
-                if (e.PropertyName == "LastFinishedSync") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.LastFinishedSync)) {
                     this.changesFoundAt = this.repository.LastFinishedSync;
                     this.UpdateStatusText();
                 }
 
-                if (e.PropertyName == "NumberOfChanges") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.NumberOfChanges)) {
                     this.changesFound = this.repository.NumberOfChanges;
                     this.UpdateStatusText();
                 }
@@ -78,7 +78,7 @@ namespace CmisSync {
             this.Status = repo.Status;
 
             this.suspendItem.Click += this.SuspendSyncFolderDelegate();
-            this.statusItem = new ToolStripMenuItem("Searching for changes") {
+            this.statusItem = new ToolStripMenuItem(Properties_Resources.StatusSearchingForChanges) {
                 Enabled = false
             };
 
