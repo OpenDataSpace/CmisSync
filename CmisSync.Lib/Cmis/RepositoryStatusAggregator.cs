@@ -106,20 +106,23 @@ namespace CmisSync.Lib.Cmis {
             bool anyWarning = false;
             bool anySyncing = false;
             foreach(var repo in this.repos.Keys) {
-                if (repo.Status == SyncStatus.Warning) {
+                switch (repo.Status) {
+                case SyncStatus.Warning:
                     anyWarning = true;
-                }
-
-                if (repo.Status == SyncStatus.Synchronizing) {
+                    goto default;
+                case SyncStatus.Synchronizing:
                     anySyncing = true;
-                }
-
-                if (repo.Status != SyncStatus.Suspend) {
-                    allPaused = false;
-                }
-
-                if (repo.Status != SyncStatus.Disconnected) {
+                    goto default;
+                case SyncStatus.Suspend:
                     allDisconnected = false;
+                    break;
+                case SyncStatus.Disconnected:
+                    allPaused = false;
+                    break;
+                default:
+                    allPaused = false;
+                    allDisconnected = false;
+                    break;
                 }
             }
 
