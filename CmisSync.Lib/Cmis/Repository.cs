@@ -188,6 +188,8 @@ namespace CmisSync.Lib.Cmis {
 
         private object connectionExceptionCounterLock = new object();
 
+        private RepositoryStatus repoStatus = new RepositoryStatus();
+
         static Repository() {
             DBreezeInitializerSingleton.Init();
         }
@@ -208,6 +210,7 @@ namespace CmisSync.Lib.Cmis {
         /// <param name="inMemory">If set to <c>true</c> in memory.</param>
         /// <param name="queue">Event Queue.</param>
         protected Repository(RepoInfo repoInfo, ActivityListenerAggregator activityListener, bool inMemory, ICountingQueue queue) {
+            this.Status = this.repoStatus.Status;
             if (repoInfo == null) {
                 throw new ArgumentNullException("Given repoInfo is null");
             }
@@ -299,9 +302,8 @@ namespace CmisSync.Lib.Cmis {
                 new GenericSyncEventHandler<SuccessfulLoginEvent>(
                 10000,
                 delegate(ISyncEvent e) {
-                if (this.Status == SyncStatus.Disconnected || this.Status == SyncStatus.Warning) {
-                    this.Status = SyncStatus.Idle;
-                }
+                this.repoStatus.Connected = true;
+                this.Status = this.repoStatus.Status;
 
                 return false;
             }));
@@ -309,9 +311,8 @@ namespace CmisSync.Lib.Cmis {
                 new GenericSyncEventHandler<ConfigurationNeededEvent>(
                 10000,
                 delegate(ISyncEvent e) {
-                if (this.Status == SyncStatus.Disconnected) {
-                    this.Status = SyncStatus.Warning;
-                }
+                this.repoStatus.Warning = true;
+                this.Status = this.repoStatus.Status;
 
                 return false;
             }));
@@ -376,8 +377,10 @@ namespace CmisSync.Lib.Cmis {
 
             private set {
                 if (value != this.changesFound) {
+                    this.repoStatus.KnownChanges = value;
                     this.changesFound = value;
                     this.NotifyPropertyChanged(Utils.NameOf(() => this.NumberOfChanges));
+                    this.Status = this.repoStatus.Status;
                 }
             }
         }
@@ -416,7 +419,9 @@ namespace CmisSync.Lib.Cmis {
         /// Stop syncing momentarily.
         /// </summary>
         public void Suspend() {
-            this.Status = SyncStatus.Suspend;
+            this.repoStatus.Paused = true;
+            this.Status = this.repoStatus.Status;
+
             this.Scheduler.Stop();
             this.Queue.Suspend();
             foreach (var transmission in this.activityListener.TransmissionManager.ActiveTransmissionsAsList()) {
@@ -435,7 +440,9 @@ namespace CmisSync.Lib.Cmis {
         /// Restart syncing.
         /// </summary>
         public void Resume() {
-            this.Status = SyncStatus.Idle;
+            this.repoStatus.Paused = false;
+            this.Status = this.repoStatus.Status;
+
             this.Queue.Continue();
             this.Scheduler.Start();
             foreach (var transmission in this.activityListener.TransmissionManager.ActiveTransmissionsAsList()) {
@@ -486,19 +493,25 @@ namespace CmisSync.Lib.Cmis {
                 } else {
                     lock(this.counterLock) {
                         this.NumberOfChanges = 0;
-                        this.LastFinishedSync = (this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing) ? this.LastFinishedSync : DateTime.Now;
+                        this.LastFinishedSync = this.status == SyncStatus.Idle ? DateTime.Now : this.LastFinishedSync;
                     }
                 }
             } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
-                if (changeCounter.Item2 <= 0 && this.NumberOfChanges <= 0 && this.status != SyncStatus.Disconnected) {
-                    lock(this.counterLock) {
-                        this.LastFinishedSync = (this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing) ? this.LastFinishedSync : DateTime.Now;
+                lock(this.counterLock) {
+                    if (changeCounter.Item1 == "PeriodicSync") {
+                        this.repoStatus.SyncRequested = changeCounter.Item2 > 0;
+                        this.Status = this.repoStatus.Status;
+                    }
+
+                    if (changeCounter.Item2 <= 0 && this.status == SyncStatus.Idle) {
+                        this.LastFinishedSync = DateTime.Now;
                     }
                 }
             } else if (changeCounter.Item1 == "CmisConnectionException") {
                 lock(this.connectionExceptionCounterLock) {
                     if (changeCounter.Item2 > this.connectionExceptionsFound) {
-                        this.Status = SyncStatus.Disconnected;
+                        this.repoStatus.Connected = false;
+                        this.Status = this.repoStatus.Status;
                     }
 
                     this.connectionExceptionsFound = changeCounter.Item2;
