@@ -482,13 +482,13 @@ namespace CmisSync.Lib.Cmis {
                 } else {
                     lock(this.counterLock) {
                         this.NumberOfChanges = 0;
-                        this.LastFinishedSync = this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing ? this.LastFinishedSync : DateTime.Now;
+                        this.LastFinishedSync = (this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing) ? this.LastFinishedSync : DateTime.Now;
                     }
                 }
             } else if (changeCounter.Item1 == "SyncRequested" || changeCounter.Item1 == "PeriodicSync") {
                 if (changeCounter.Item2 <= 0 && this.NumberOfChanges <= 0 && this.status != SyncStatus.Disconnected) {
                     lock(this.counterLock) {
-                        this.LastFinishedSync = this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing ? this.LastFinishedSync : DateTime.Now;
+                        this.LastFinishedSync = (this.status != SyncStatus.Idle && this.status != SyncStatus.Synchronizing) ? this.LastFinishedSync : DateTime.Now;
                     }
                 }
             }
