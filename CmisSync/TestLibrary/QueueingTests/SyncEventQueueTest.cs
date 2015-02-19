@@ -26,6 +26,8 @@ namespace TestLibrary.QueueingTests {
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
+    using DotCMIS.Exceptions;
+
     using log4net;
     using log4net.Config;
 
@@ -279,6 +281,22 @@ namespace TestLibrary.QueueingTests {
 
             observer.Verify(o => o.OnCompleted(), Times.Once());
             manager.Verify(m => m.Handle(It.Is<ICountableEvent>(e => e.Category == category)), Times.Exactly(events));
+        }
+
+        [Test, Category("Fast")]
+        public void PutConnectionEventToQueueIfConnectionExceptionOccursOnHandling() {
+            var manager = new Mock<ISyncEventManager>();
+            var connectionRequiredEvent = Mock.Of<ISyncEvent>();
+            var connectionException = new CmisConnectionException("unknown host");
+            manager.Setup(m => m.Handle(connectionRequiredEvent)).Throws(connectionException);
+            using (var underTest = new SyncEventQueue(manager.Object)) {
+                underTest.AddEvent(connectionRequiredEvent);
+                WaitFor(underTest, (q) => { return q.IsEmpty; });
+                underTest.StopListener();
+                Assert.That(underTest.WaitForStopped(10000), Is.True);
+            }
+
+            manager.Verify(m => m.Handle(It.Is<CmisConnectionExceptionEvent>(e => e.Exception == connectionException)), Times.Once());
         }
 
         private static void WaitFor<T>(T obj, Func<T, bool> check, int timeout = 5000) {

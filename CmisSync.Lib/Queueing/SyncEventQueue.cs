@@ -26,6 +26,8 @@ namespace CmisSync.Lib.Queueing {
 
     using CmisSync.Lib.Events;
 
+    using DotCMIS.Exceptions;
+
     using log4net;
 
     /// <summary>
@@ -249,6 +251,8 @@ namespace CmisSync.Lib.Queueing {
                         }
 
                         manager.Handle(syncEvent);
+                    } catch (CmisConnectionException connectionException) {
+                        this.AddEvent(new CmisConnectionExceptionEvent(connectionException));
                     } catch(Exception e) {
                         Logger.Error(string.Format("Exception in EventHandler on Event {0}: ", syncEvent.ToString()), e);
                     }
