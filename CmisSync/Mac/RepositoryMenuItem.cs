@@ -61,16 +61,16 @@ namespace CmisSync {
             this.Image = this.folderImage;
             this.Image.Size = new SizeF(16, 16);
             this.repository.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) => {
-                if (e.PropertyName == "Status") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.Status)) {
                     this.Status = this.repository.Status;
                 }
 
-                if (e.PropertyName == "LastFinishedSync") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.LastFinishedSync)) {
                     this.changesFoundAt = this.repository.LastFinishedSync;
                     this.UpdateStatusText();
                 }
 
-                if (e.PropertyName == "NumberOfChanges") {
+                if (e.PropertyName == CmisSync.Lib.Utils.NameOf((Repository r) => r.NumberOfChanges)) {
                     this.changesFound = this.repository.NumberOfChanges;
                     this.UpdateStatusText();
                 }
