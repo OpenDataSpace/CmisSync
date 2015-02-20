@@ -220,8 +220,7 @@ namespace CmisSync {
             this.isHandleCreated = true;
         }
 
-        private void CreateAnimationFrames()
-        {
+        private void CreateAnimationFrames() {
             this.animationFrames = new Gdk.Pixbuf[] {
                 UIHelpers.GetIcon("dataspacesync-process-syncing-i", 24),
                 UIHelpers.GetIcon("dataspacesync-process-syncing-ii", 24),
