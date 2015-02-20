@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="TransmissionController.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -66,7 +66,7 @@ namespace CmisSync {
 
         public TransmissionItem(FileTransmissionEvent transmission) {
             Transmission = transmission;
-            UpdateTime = new DateTime(1970, 1, 1);
+            this.UpdateTime = new DateTime(1970, 1, 1);
 
             FullPath = transmission.Path;
             Repo = string.Empty;
@@ -153,13 +153,13 @@ namespace CmisSync {
             }
 
             if (oldState == State) {
-                TimeSpan diff = DateTime.Now - UpdateTime;
+                TimeSpan diff = DateTime.Now - this.UpdateTime;
                 if (diff.TotalSeconds < UpdateIntervalSeconds) {
                     return;
                 }
             }
 
-            UpdateTime = DateTime.Now;
+            this.UpdateTime = DateTime.Now;
 
             Status = State;
             long speed = status.BitsPerSecond.GetValueOrDefault();
@@ -263,7 +263,13 @@ namespace CmisSync {
             foreach (FileTransmissionEvent transmission in transmissions) {
                 string fullPath = transmission.Path;
                 if (FullPathList.Contains(fullPath)) {
-                    continue;
+                    TransmissionItem itemOld = TransmissionList.Find(t => t.FullPath == fullPath);
+                    if (!itemOld.Done) {
+                        continue;
+                    }
+                    DeleteTransmissionEvent(itemOld);
+                    TransmissionList.Remove(itemOld);
+                    FullPathList.Remove(fullPath);
                 }
 
                 FullPathList.Add(fullPath);

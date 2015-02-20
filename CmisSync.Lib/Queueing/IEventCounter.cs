@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ICountableEvent.cs" company="GRAU DATA AG">
+// <copyright file="IEventCounter.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,19 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events {
+namespace CmisSync.Lib.Queueing {
     using System;
 
-    /// <summary>
-    /// Instances of this event are able to be counted by categories.
-    /// Every event, which should be able to be tracked inside the SyncEventQueue must return a category.
-    /// </summary>
-    public interface ICountableEvent : ISyncEvent {
-        /// <summary>
-        /// Gets the category of the event. This can be used to differ between multiple event types.
-        /// The returned value should never ever change its value after requesting it the first time.
-        /// </summary>
-        /// <value>The event category.</value>
-        EventCategory Category { get; }
+    using CmisSync.Lib.Events;
+
+    public interface IEventCounter: IDisposable {
+        void Increase(ICountableEvent e);
+        void Decrease(ICountableEvent e);
     }
 }

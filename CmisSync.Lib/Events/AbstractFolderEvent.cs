@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events
-{
+namespace CmisSync.Lib.Events {
     using System;
     using System.IO;
 
@@ -29,13 +28,11 @@ namespace CmisSync.Lib.Events
     /// <summary>
     /// Abstract folder event.
     /// </summary>
-    public abstract class AbstractFolderEvent : ICountableEvent
-    {
+    public abstract class AbstractFolderEvent : ICountableEvent {
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.AbstractFolderEvent"/> class.
         /// </summary>
-        public AbstractFolderEvent()
-        {
+        public AbstractFolderEvent() {
             this.Local = MetaDataChangeType.NONE;
             this.Remote = MetaDataChangeType.NONE;
             this.RetryCount = 0;
@@ -74,9 +71,9 @@ namespace CmisSync.Lib.Events
         /// The returned value should never ever change its value after requesting it the first time.
         /// </summary>
         /// <value>The event category is "DetectedChange".</value>
-        public string Category {
+        public EventCategory Category {
             get {
-                return "DetectedChange";
+                return EventCategory.DetectedChange;
             }
         }
     }

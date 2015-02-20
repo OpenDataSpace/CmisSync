@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ICountableEvent.cs" company="GRAU DATA AG">
+// <copyright file="EventCategory.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -21,15 +21,32 @@ namespace CmisSync.Lib.Events {
     using System;
 
     /// <summary>
-    /// Instances of this event are able to be counted by categories.
-    /// Every event, which should be able to be tracked inside the SyncEventQueue must return a category.
+    /// Available event category for countable events.
     /// </summary>
-    public interface ICountableEvent : ISyncEvent {
+    public enum EventCategory {
         /// <summary>
-        /// Gets the category of the event. This can be used to differ between multiple event types.
-        /// The returned value should never ever change its value after requesting it the first time.
+        /// Ignore this event and do not count this.
         /// </summary>
-        /// <value>The event category.</value>
-        EventCategory Category { get; }
+        NoCategory,
+
+        /// <summary>
+        /// A change between local fs and remote server is detected.
+        /// </summary>
+        DetectedChange,
+
+        /// <summary>
+        /// The full synchronization is requested.
+        /// </summary>
+        SyncRequested,
+
+        /// <summary>
+        /// The periodic synchronization is requested.
+        /// </summary>
+        PeriodicSync,
+
+        /// <summary>
+        /// Any connection exception occured.
+        /// </summary>
+        ConnectionException
     }
 }

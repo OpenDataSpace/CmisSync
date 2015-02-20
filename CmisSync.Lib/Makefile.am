@@ -26,6 +26,8 @@ SOURCES =  \
 	Cmis/MimeType.cs \
 	Cmis/OperationContextFactory.cs \
 	Cmis/Repository.cs \
+	Cmis/RepositoryStatus.cs \
+	Cmis/RepositoryStatusAggregator.cs \
 	Cmis/UiUtils/CmisPermissionDeniedException.cs \
 	Cmis/UiUtils/CmisServerNotFoundException.cs \
 	Cmis/UiUtils/CmisUtils.cs \
@@ -77,12 +79,17 @@ SOURCES =  \
 	Events/AbstractFolderEvent.cs \
 	Events/BubbledEvent.cs \
 	Events/ChangeEnums.cs \
+	Events/CmisConnectionExceptionEvent.cs \
 	Events/ConfigChangedEvent.cs \
 	Events/ConfigurationNeededEvent.cs \
 	Events/ContentChangeEvent.cs \
 	Events/CrawlRequestEvent.cs \
 	Events/EncapsuledEvent.cs \
+	Events/EventCategory.cs \
+	Events/EventCategory.cs \
 	Events/ExceptionEvent.cs \
+	Events/FSEvent.cs \
+	Events/FSMovedEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileEvent.cs \
 	Events/FileMovedEvent.cs \
@@ -91,20 +98,18 @@ SOURCES =  \
 	Events/FileTransmissionEventArgs.cs \
 	Events/FolderEvent.cs \
 	Events/FolderMovedEvent.cs \
-	Events/FSEvent.cs \
-	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
 	Events/ICountableEvent.cs \
+	Events/IFSEvent.cs \
+	Events/IFSMovedEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
 	Events/IFilterableRemoteObjectEvent.cs \
 	Events/IFilterableRemotePathEvent.cs \
-	Events/IFSEvent.cs \
-	Events/IFSMovedEvent.cs \
-	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/PermissionDeniedEvent.cs \
 	Events/ProxyAuthRequiredEvent.cs \
 	Events/RecentChangedEvent.cs \
@@ -165,13 +170,17 @@ SOURCES =  \
 	Queueing/IConnectionScheduler.cs \
 	Queueing/ICountingQueue.cs \
 	Queueing/IDisposableSyncEventQueue.cs \
+	Queueing/IEventCounter.cs \
 	Queueing/ISyncEventManager.cs \
 	Queueing/ISyncEventQueue.cs \
+	Queueing/QueuedCategorizedEventsCounter.cs \
+	Queueing/QueuedEventsCounter.cs \
 	Queueing/ReportingSyncEventHandler.cs \
 	Queueing/SyncEventHandler.cs \
 	Queueing/SyncEventManager.cs \
 	Queueing/SyncEventQueue.cs \
 	Queueing/SyncScheduler.cs \
+	Queueing/Unsubscriber.cs \
 	SelectiveIgnore/CmisSelectiveIgnoreCapability.cs \
 	SelectiveIgnore/IgnoredEntitiesCollection.cs \
 	SelectiveIgnore/IgnoredEntitiesStorage.cs \

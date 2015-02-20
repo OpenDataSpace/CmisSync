@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ICountableEvent.cs" company="GRAU DATA AG">
+// <copyright file="Unsubscriber.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,19 +17,23 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Events {
+namespace CmisSync.Lib.Queueing {
     using System;
+    using System.Collections.Generic;
 
-    /// <summary>
-    /// Instances of this event are able to be counted by categories.
-    /// Every event, which should be able to be tracked inside the SyncEventQueue must return a category.
-    /// </summary>
-    public interface ICountableEvent : ISyncEvent {
-        /// <summary>
-        /// Gets the category of the event. This can be used to differ between multiple event types.
-        /// The returned value should never ever change its value after requesting it the first time.
-        /// </summary>
-        /// <value>The event category.</value>
-        EventCategory Category { get; }
+    public class Unsubscriber<T> : IDisposable {
+        private List<IObserver<T>> observers;
+        private IObserver<T> observer;
+
+        public Unsubscriber(List<IObserver<T>> observers, IObserver<T> observer) {
+            this.observers = observers;
+            this.observer = observer;
+        }
+
+        public void Dispose() {
+            if (this.observer != null && this.observers.Contains(this.observer)) {
+                this.observers.Remove(this.observer);
+            }
+        }
     }
 }

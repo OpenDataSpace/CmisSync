@@ -489,4 +489,7 @@ This could lead to a lot of conflict files!</value>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="TransmissionTitleLastChange" xml:space="preserve">
+    <value>Last change</value>
+  </data>
 </root>

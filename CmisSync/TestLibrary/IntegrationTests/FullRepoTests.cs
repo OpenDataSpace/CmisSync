@@ -361,6 +361,7 @@ namespace TestLibrary.IntegrationTests {
             var child = children.First();
             Assert.That(child, Is.InstanceOf(typeof(FileInfo)));
             Assert.That(child.Length, Is.EqualTo(0));
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
         // Timeout is set to 10 minutes for 100 x 1 MB file
@@ -570,6 +571,7 @@ namespace TestLibrary.IntegrationTests {
             folder.Refresh();
             folder.Move(source, target);
 
+            this.WaitForRemoteChanges();
             this.AddStartNextSyncEvent();
             this.repo.Run();
 
@@ -581,6 +583,7 @@ namespace TestLibrary.IntegrationTests {
             folder.Refresh();
             Assert.That(localFolder.Name, Is.EqualTo(folder.Name));
             Assert.That(folder.Name, Is.EqualTo(oldName));
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -782,6 +785,7 @@ namespace TestLibrary.IntegrationTests {
             doc.Refresh();
             Assert.That((this.localRootDir.GetFiles().First().LastWriteTimeUtc - (DateTime)doc.LastModificationDate).Seconds, Is.Not.GreaterThan(1));
             Assert.That(this.localRootDir.GetFiles().First().Length, Is.EqualTo(content.Length));
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -811,6 +815,7 @@ namespace TestLibrary.IntegrationTests {
             var doc = this.remoteRootDir.GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
             Assert.That(doc.Name, Is.EqualTo(newName));
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -851,6 +856,8 @@ namespace TestLibrary.IntegrationTests {
                     Assert.Fail("Child is neither folder nor document");
                 }
             }
+
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -881,6 +888,7 @@ namespace TestLibrary.IntegrationTests {
             var doc = (this.remoteRootDir.GetChildren().First() as IFolder).GetChildren().First() as IDocument;
             Assert.That(doc.ContentStreamLength, Is.EqualTo(content.Length));
             Assert.That(doc.Name, Is.EqualTo("doc"));
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
         [Test, Category("Slow"), Timeout(360000)]
@@ -923,6 +931,8 @@ namespace TestLibrary.IntegrationTests {
                     Assert.That(syncedFileInfo.Uuid, Is.Not.EqualTo(uuid));
                 }
             }
+
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
@@ -1188,6 +1198,7 @@ namespace TestLibrary.IntegrationTests {
 
             Assert.That(this.localRootDir.GetFiles()[0].Length, Is.EqualTo(content.Length));
             Assert.That((this.remoteRootDir.GetChildren().First() as IDocument).ContentStreamLength, Is.EqualTo(content.Length));
+            Assert.That(this.repo.NumberOfChanges, Is.EqualTo(0));
         }
 
         [Ignore("Mantis issue 4285")]
