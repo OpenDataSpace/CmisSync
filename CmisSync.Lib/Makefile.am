@@ -86,7 +86,10 @@ SOURCES =  \
 	Events/CrawlRequestEvent.cs \
 	Events/EncapsuledEvent.cs \
 	Events/EventCategory.cs \
+	Events/EventCategory.cs \
 	Events/ExceptionEvent.cs \
+	Events/FSEvent.cs \
+	Events/FSMovedEvent.cs \
 	Events/FileConflictEvent.cs \
 	Events/FileEvent.cs \
 	Events/FileMovedEvent.cs \
@@ -95,20 +98,18 @@ SOURCES =  \
 	Events/FileTransmissionEventArgs.cs \
 	Events/FolderEvent.cs \
 	Events/FolderMovedEvent.cs \
-	Events/FSEvent.cs \
-	Events/FSMovedEvent.cs \
 	Events/FullSyncCompletedEvent.cs \
 	Events/ICountableEvent.cs \
+	Events/IFSEvent.cs \
+	Events/IFSMovedEvent.cs \
 	Events/IFilterableEvent.cs \
 	Events/IFilterableLocalPathEvent.cs \
 	Events/IFilterableNameEvent.cs \
 	Events/IFilterableRemoteObjectEvent.cs \
 	Events/IFilterableRemotePathEvent.cs \
-	Events/IFSEvent.cs \
-	Events/IFSMovedEvent.cs \
-	Events/InteractionNeededEvent.cs \
 	Events/IRemoveFromLoggingEvent.cs \
 	Events/ISyncEvent.cs \
+	Events/InteractionNeededEvent.cs \
 	Events/PermissionDeniedEvent.cs \
 	Events/ProxyAuthRequiredEvent.cs \
 	Events/RecentChangedEvent.cs \
