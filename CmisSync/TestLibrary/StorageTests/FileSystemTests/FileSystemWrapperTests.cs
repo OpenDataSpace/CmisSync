@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.StorageTests.FileSystemTests
-{
+namespace TestLibrary.StorageTests.FileSystemTests {
     using System;
     using System.IO;
     using System.Threading;
@@ -36,6 +35,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
     public class FileSystemWrapperTests {
         private static readonly IFileSystemInfoFactory Factory = new FileSystemInfoFactory();
         private DirectoryInfo testFolder;
+        private DirectoryInfo testFolderOnOtherFS = null;
 
         [SetUp]
         public void Init() {
@@ -48,6 +48,14 @@ namespace TestLibrary.StorageTests.FileSystemTests
         [TearDown]
         public void Cleanup() {
             this.testFolder.Delete(true);
+            if (this.testFolderOnOtherFS != null) {
+                this.testFolderOnOtherFS.Refresh();
+                if (this.testFolderOnOtherFS.Exists) {
+                    this.testFolderOnOtherFS.Delete(true);
+                }
+
+                this.testFolderOnOtherFS = null;
+            }
         }
 
         [Test, Category("Medium")]
@@ -373,8 +381,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         } */
 
         [Test, Category("Fast")]
-        public void CreatesFirstConflictFile()
-        {
+        public void CreatesFirstConflictFile() {
             string fileName = "test1.txt";
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             var fileInfo = Factory.CreateFileInfo(fullPath);
@@ -597,8 +604,7 @@ namespace TestLibrary.StorageTests.FileSystemTests
         // Test is not implemented yet
         [Ignore]
         [Test, Category("Fast")]
-        public void CreateNextConflictFile()
-        {
+        public void CreateNextConflictFile() {
             Assert.Fail("TODO");
             /*
             for (int i = 0; i < 10; i++)
@@ -617,6 +623,41 @@ namespace TestLibrary.StorageTests.FileSystemTests
                 string conflictParent = Directory.GetParent(conflictFilePath).FullName;
                 Assert.AreEqual(originalParent, conflictParent, "The conflict file must exists in the same directory like the orignial file");
             } */
+        }
+
+        [Ignore("Windows only and needs second partition as target fs")]
+        [Test, Category("Medium")]
+        public void ReplaceFile([Values("E:\\\\")]string targetFS) {
+            this.testFolderOnOtherFS = new DirectoryInfo(Path.Combine(targetFS, Guid.NewGuid().ToString()));
+            if (!this.testFolderOnOtherFS.Exists) {
+                this.testFolderOnOtherFS.Create();
+            }
+
+            if (!new DirectoryInfoWrapper(this.testFolderOnOtherFS).IsExtendedAttributeAvailable()) {
+                Assert.Ignore();
+            }
+
+            string fileName = "testFile";
+            var sourceFile = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, fileName));
+            using (sourceFile.Open(FileMode.CreateNew));
+            var uuid = Guid.NewGuid();
+            sourceFile.Uuid = uuid;
+            var targetFile = Factory.CreateFileInfo(Path.Combine(this.testFolderOnOtherFS.FullName, fileName));
+            var backupFile = Factory.CreateFileInfo(targetFile.FullName + ".bak");
+            using (targetFile.Open(FileMode.CreateNew));
+
+            var resultFile = sourceFile.Replace(targetFile, backupFile, true);
+
+            sourceFile.Refresh();
+            targetFile.Refresh();
+            backupFile.Refresh();
+            Assert.That(resultFile.Uuid, Is.EqualTo(uuid));
+            Assert.That(targetFile.Uuid, Is.EqualTo(uuid));
+            Assert.That(backupFile.Uuid, Is.Null);
+            Assert.That(resultFile.FullName, Is.EqualTo(targetFile.FullName));
+            Assert.That(sourceFile.Exists, Is.False);
+            Assert.That(this.testFolderOnOtherFS.GetFileSystemInfos().Length, Is.EqualTo(2));
+            Assert.That(this.testFolder.GetFileSystemInfos().Length, Is.EqualTo(0));
         }
 
         private void SkipIfExtendedAttributesAreNotAvailable() {
