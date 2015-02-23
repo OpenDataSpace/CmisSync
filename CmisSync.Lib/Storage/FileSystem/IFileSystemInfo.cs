@@ -17,16 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
 
     /// <summary>
     /// Interface to enable mocking of FileSystemInfo
     /// </summary>
-    public interface IFileSystemInfo
-    {
+    public interface IFileSystemInfo {
         /// <summary>
         /// Gets the full name/path.
         /// </summary>

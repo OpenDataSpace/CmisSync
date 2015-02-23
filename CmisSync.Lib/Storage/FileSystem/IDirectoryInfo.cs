@@ -17,18 +17,22 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     /// <summary>
     /// Interface to enable mocking of DirectoryInfo
     /// </summary>
-    public interface IDirectoryInfo : IFileSystemInfo
-    {
+    public interface IDirectoryInfo : IFileSystemInfo {
         /// <summary>
         /// Gets the parent.
         /// </summary>
         /// <value>The parent.</value>
         IDirectoryInfo Parent { get; }
+
+        /// <summary>
+        /// Gets the root of the directory.
+        /// </summary>
+        /// <value>The root.</value>
+        IDirectoryInfo Root { get; }
 
         /// <summary>
         /// Creates a directory.

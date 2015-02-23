@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Cmis.UiUtils
-{
+namespace CmisSync.Lib.Cmis.UiUtils {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -40,8 +39,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
     /// <summary>
     /// Data object representing a CMIS server.
     /// </summary>
-    public class CmisServer
-    {
+    public class CmisServer {
         /// <summary>
         /// Gets the URL of the CMIS server.
         /// </summary>
@@ -59,8 +57,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         /// <summary>
         /// Constructor.
         /// </summary>
-        public CmisServer(Uri url, string binding, Dictionary<string, string> repositories)
-        {
+        public CmisServer(Uri url, string binding, Dictionary<string, string> repositories) {
             this.Url = url;
             this.Binding = binding;
             this.Repositories = repositories;
@@ -70,8 +67,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
     /// <summary>
     /// Useful CMIS methods.
     /// </summary>
-    public static class CmisUtils
-    {
+    public static class CmisUtils {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(CmisUtils));
 
         /// <summary>
@@ -79,8 +75,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         /// Users can provide the URL of the web interface, and we have to return the CMIS URL
         /// Returns the list of repositories as well.
         /// </summary>
-        static public Tuple<CmisServer, Exception> GetRepositoriesFuzzy(ServerCredentials credentials)
-        {
+        static public Tuple<CmisServer, Exception> GetRepositoriesFuzzy(ServerCredentials credentials) {
             Dictionary<string, string> repositories = null;
             Exception firstException = null;
 
@@ -94,34 +89,31 @@ namespace CmisSync.Lib.Cmis.UiUtils
                     BindingType.Browser
                 };
             }
+
             for (int i = 0; i < bindings.Length; ++i) {
-                credentials.Binding = bindings [i];
+                credentials.Binding = bindings[i];
+
                 // Try the given URL, maybe user directly entered the CMIS endpoint URL.
-                try
-                {
+                try {
                     repositories = GetRepositories(credentials);
-                }
-                catch (DotCMIS.Exceptions.CmisRuntimeException e)
-                {
+                } catch (DotCMIS.Exceptions.CmisRuntimeException e) {
                     if (e.Message == "ConnectFailure") {
                         return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, null), new CmisServerNotFoundException(e.Message, e));
                     }
 
                     firstException = e;
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     // Save first Exception and try other possibilities.
                     firstException = e;
                 }
 
-                if (repositories != null)
-                {
+                if (repositories != null) {
                     // Found!
                     return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, repositories), null);
                 }
             }
-            credentials.Binding = bindings [0];
+
+            credentials.Binding = bindings[0];
 
             // Extract protocol and server name or IP address
             string prefix = credentials.Address.GetLeftPart(UriPartial.Authority);
@@ -158,38 +150,29 @@ namespace CmisSync.Lib.Cmis.UiUtils
 
             string bestUrl = null;
             string bestBinding = null;
-            for (int i = 0; i < bindings.Length; ++i)
-            {
+            for (int i = 0; i < bindings.Length; ++i) {
                 // Try all suffixes
-                for (int j = 0; j < suffixes[i].Length; ++j)
-                {
+                for (int j = 0; j < suffixes[i].Length; ++j) {
                     string fuzzyUrl = prefix + suffixes[i][j];
                     Logger.Info("Sync | Trying with " + fuzzyUrl + " on " + bindings[i]);
-                    try
-                    {
-                        ServerCredentials cred = new ServerCredentials()
-                        {
+                    try {
+                        ServerCredentials cred = new ServerCredentials() {
                             UserName = credentials.UserName,
                             Password = credentials.Password.ToString(),
                             Binding = bindings[i],
                             Address = new Uri(fuzzyUrl)
                         };
                         repositories = GetRepositories(cred);
-                    }
-                    catch (DotCMIS.Exceptions.CmisPermissionDeniedException e)
-                    {
+                    } catch (DotCMIS.Exceptions.CmisPermissionDeniedException e) {
                         firstException = new CmisPermissionDeniedException(e.Message, e);
                         bestUrl = fuzzyUrl;
                         bestBinding = bindings[i];
-                    }
-                    catch (Exception e)
-                    {
+                    } catch (Exception e) {
                         // Do nothing, try other possibilities.
                         Logger.Debug(e.Message);
                     }
 
-                    if (repositories != null)
-                    {
+                    if (repositories != null) {
                         // Found!
                         return new Tuple<CmisServer, Exception>(new CmisServer(new Uri(fuzzyUrl), bindings[i], repositories), null);
                     }
@@ -200,8 +183,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
             return new Tuple<CmisServer, Exception>(new CmisServer(bestUrl == null ? credentials.Address : new Uri(bestUrl), bestBinding, null), firstException);
         }
 
-        static public Dictionary<string, string> GetCmisParameters(ServerCredentials credentials)
-        {
+        static public Dictionary<string, string> GetCmisParameters(ServerCredentials credentials) {
             Dictionary<string, string> cmisParameters = new Dictionary<string, string>();
             cmisParameters[SessionParameter.BindingType] = credentials.Binding;
             if (credentials.Binding == BindingType.AtomPub) {
@@ -216,8 +198,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
             return cmisParameters;
         }
 
-        static public Dictionary<string, string> GetCmisParameters(CmisRepoCredentials credentials)
-        {
+        static public Dictionary<string, string> GetCmisParameters(CmisRepoCredentials credentials) {
             Dictionary<string, string> cmisParameters = GetCmisParameters((ServerCredentials)credentials);
             cmisParameters[SessionParameter.RepositoryId] = credentials.RepoId;
             return cmisParameters;
@@ -228,16 +209,14 @@ namespace CmisSync.Lib.Cmis.UiUtils
         /// Each item contains id + 
         /// </summary>
         /// <returns>The list of repositories. Each item contains the identifier and the human-readable name of the repository.</returns>
-        static public Dictionary<string, string> GetRepositories(ServerCredentials credentials)
-        {
+        static public Dictionary<string, string> GetRepositories(ServerCredentials credentials) {
             Dictionary<string, string> result = new Dictionary<string, string>();
 
             // If no URL was provided, return empty result.
-            if (credentials.Address == null)
-            {
+            if (credentials.Address == null) {
                 return result;
             }
-            
+
             // Create session factory.
             SessionFactory factory = SessionFactory.NewInstance();
 
@@ -277,8 +256,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         /// Get the sub-folders of a particular CMIS folder.
         /// </summary>
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
-        static public string[] GetSubfolders(CmisRepoCredentials credentials, string path)
-        {
+        static public string[] GetSubfolders(CmisRepoCredentials credentials, string path) {
             List<string> result = new List<string>();
 
             // Connect to the CMIS repository.
@@ -311,22 +289,19 @@ namespace CmisSync.Lib.Cmis.UiUtils
             return result.ToArray();
         }
 
-        public class NodeTree
-        {
+        public class NodeTree {
             public List<NodeTree> Children = new List<NodeTree>();
             public string Path { get; set; }
             public string Name { get; set; }
             public bool Finished { get; set; }
 
-            public NodeTree(IList<ITree<IFileableCmisObject>> trees, IFolder folder, int depth)
-            {
+            public NodeTree(IList<ITree<IFileableCmisObject>> trees, IFolder folder, int depth) {
                 this.Path = folder.Path;
                 this.Name = folder.Name;
                 this.Finished = !(depth == 0);
 
-                if(trees != null) {
-                    foreach (ITree<IFileableCmisObject> tree in trees)
-                    {
+                if (trees != null) {
+                    foreach (ITree<IFileableCmisObject> tree in trees) {
                         Folder f = tree.Item as Folder;
                         if (f != null) {
                             this.Children.Add(new NodeTree(tree.Children, f, depth - 1));
@@ -340,8 +315,7 @@ namespace CmisSync.Lib.Cmis.UiUtils
         /// Get the sub-folders of a particular CMIS folder.
         /// </summary>
         /// <returns>Full path of each sub-folder, including leading slash.</returns>
-        static public NodeTree GetSubfolderTree(CmisRepoCredentials credentials, string path, int depth)
-        {
+        static public NodeTree GetSubfolderTree(CmisRepoCredentials credentials, string path, int depth) {
             // Connect to the CMIS repository.
             Dictionary<string, string> cmisParameters = GetCmisParameters(credentials);
             SessionFactory factory = SessionFactory.NewInstance();
@@ -349,12 +323,9 @@ namespace CmisSync.Lib.Cmis.UiUtils
 
             // Get the folder.
             IFolder folder;
-            try
-            {
+            try {
                 folder = (IFolder)session.GetObjectByPath(path);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Logger.Warn(string.Format("CmisUtils | exception when session GetObjectByPath for {0}: {1}", path, Utils.ToLogString(ex)));
                 throw;
             }
@@ -362,13 +333,10 @@ namespace CmisSync.Lib.Cmis.UiUtils
             // Debug the properties count, which allows to check whether a particular CMIS implementation is compliant or not.
             // For instance, IBM Connections is known to send an illegal count.
             Logger.Info("CmisUtils | folder.Properties.Count:" + folder.Properties.Count.ToString());
-            try
-            {
+            try {
                 IList<ITree<IFileableCmisObject>> trees = folder.GetFolderTree(depth);
                 return new NodeTree(trees, folder, depth);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Logger.Info("CmisUtils getSubFolderTree | Exception " + e.Message, e);
                 throw;
             }
