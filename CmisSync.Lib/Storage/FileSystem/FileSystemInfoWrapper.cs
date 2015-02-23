@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
     using System.Threading;
@@ -30,16 +29,14 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// <summary>
     /// Wrapper for DirectoryInfo
     /// </summary>
-    public abstract class FileSystemInfoWrapper : IFileSystemInfo
-    {
+    public abstract class FileSystemInfoWrapper : IFileSystemInfo {
         private static readonly string ExtendedAttributeKey = "DSS-UUID";
         private static IExtendedAttributeReader reader = null;
 
         private FileSystemInfo original;
         private FSType fsType;
 
-        static FileSystemInfoWrapper()
-        {
+        static FileSystemInfoWrapper() {
             switch (Environment.OSVersion.Platform)
             {
             case PlatformID.MacOSX:
@@ -57,8 +54,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Storage.FileSystem.FileSystemInfoWrapper"/> class.
         /// </summary>
         /// <param name="original">original internal instance.</param>
-        protected FileSystemInfoWrapper(FileSystemInfo original)
-        {
+        protected FileSystemInfoWrapper(FileSystemInfo original) {
             this.original = original;
 #if __MonoCS__
             this.fsType = FSTypeCreator.GetType(new UnixDriveInfo(Path.GetPathRoot(this.original.FullName)).DriveFormat);
@@ -72,13 +68,11 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <value>The last write time in UTC.</value>
         public DateTime LastWriteTimeUtc {
-            get
-            {
+            get {
                 return this.original.LastWriteTimeUtc;
             }
 
-            set
-            {
+            set {
                 var date = DateTimeToFileConverter.Convert(value, this.fsType);
                 this.original.LastWriteTimeUtc = date;
             }
@@ -126,6 +120,10 @@ namespace CmisSync.Lib.Storage.FileSystem
             get { return this.original.Attributes; }
         }
 
+        /// <summary>
+        /// Gets or sets the UUID by reading or writing extended attribute entries.
+        /// </summary>
+        /// <value>The UUID.</value>
         public Guid? Uuid {
             get {
                 int retries = 100;
@@ -156,7 +154,7 @@ namespace CmisSync.Lib.Storage.FileSystem
                     try {
                         this.SetExtendedAttribute(ExtendedAttributeKey, value == null ? null : value.ToString(), true);
                         break;
-                    } catch (ExtendedAttributeException) {
+                    } catch(ExtendedAttributeException) {
                         Thread.Sleep(50);
                         retries--;
                         if (retries <= 0) {
@@ -170,8 +168,7 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <summary>
         /// Refresh the loaded information of this instance.
         /// </summary>
-        public void Refresh()
-        {
+        public void Refresh() {
             this.original.Refresh();
         }
 
@@ -180,14 +177,10 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// </summary>
         /// <returns>The extended attribute value.</returns>
         /// <param name="key">Attribute name.</param>
-        public string GetExtendedAttribute(string key)
-        {
-            if(reader != null)
-            {
+        public string GetExtendedAttribute(string key) {
+            if (reader != null) {
                 return reader.GetExtendedAttribute(this.original.FullName, key);
-            }
-            else
-            {
+            } else {
                 throw new ExtendedAttributeException("Feature is not supported");
             }
         }
@@ -198,14 +191,10 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// <param name="key">Attribute name.</param>
         /// <param name="value">Attribute value.</param>
         /// <param name="restoreModificationDate">Restore the modification date of the file after setting ea.</param>
-        public void SetExtendedAttribute(string key, string value, bool restoreModificationDate = false)
-        {
-            if(reader != null)
-            {
+        public void SetExtendedAttribute(string key, string value, bool restoreModificationDate = false) {
+            if (reader != null) {
                 reader.SetExtendedAttribute(this.original.FullName, key, value, restoreModificationDate);
-            }
-            else
-            {
+            } else {
                 throw new ExtendedAttributeException("Feature is not supported");
             }
         }
@@ -214,13 +203,10 @@ namespace CmisSync.Lib.Storage.FileSystem
         /// Determines whether instance is able to save extended attributes.
         /// </summary>
         /// <returns><c>true</c> if extended attributes are available, otherwise<c>false</c></returns>
-        public bool IsExtendedAttributeAvailable()
-        {
+        public bool IsExtendedAttributeAvailable() {
             if (reader != null) {
                 return reader.IsFeatureAvailable(this.original.FullName);
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
