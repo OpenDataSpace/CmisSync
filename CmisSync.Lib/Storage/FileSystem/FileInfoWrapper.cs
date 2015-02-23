@@ -22,6 +22,9 @@ namespace CmisSync.Lib.Storage.FileSystem
     using System;
     using System.Collections.Generic;
     using System.IO;
+#if !__MONO_CS__
+    using System.Runtime.InteropServices;
+#endif
 
     /// <summary>
     /// Wrapper for FileInfo
@@ -133,9 +136,10 @@ namespace CmisSync.Lib.Storage.FileSystem
                     oldTargetEAs.Add(key, destinationFile.GetExtendedAttribute(key));
                 }
             }
+#else
+            try {
 #endif
-            var result = new FileInfoWrapper(this.original.Replace(destinationFile.FullName, destinationBackupFileName.FullName, ignoreMetadataErrors));
-
+                var result = new FileInfoWrapper(this.original.Replace(destinationFile.FullName, destinationBackupFileName.FullName, ignoreMetadataErrors));
 #if __MonoCS__
             foreach (var entry in oldSourceEAs) {
                 result.SetExtendedAttribute(entry.Key, entry.Value, true);
@@ -144,8 +148,33 @@ namespace CmisSync.Lib.Storage.FileSystem
             foreach (var entry in oldTargetEAs) {
                 destinationBackupFileName.SetExtendedAttribute(entry.Key, entry.Value, true);
             }
-#endif
+
             return result;
+#else
+                return result;
+            } catch (IOException ex) {
+                int error = Marshal.GetHRForException(ex) & 0xffff;
+                if (error == 1176) {
+                    string newName = destinationFile.FullName + Guid.NewGuid() + ".sync";
+                    IFileInfo newResult = null;
+                    try {
+                        var copy = this.original.CopyTo(newName, true);
+                        newResult = new FileInfoWrapper(copy.Replace(destinationFile.FullName, destinationBackupFileName.FullName, ignoreMetadataErrors));
+                        this.Delete();
+                        return newResult;
+                    } catch (Exception) {
+                    } finally {
+                        if (File.Exists(newName)) {
+                            File.Delete(newName);
+                        }
+                    }
+
+                    throw;
+                } else {
+                    throw;
+                }
+            }
+#endif
         }
     }
 }
