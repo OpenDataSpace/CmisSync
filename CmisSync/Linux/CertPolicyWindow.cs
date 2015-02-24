@@ -16,57 +16,61 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System;
-using System.Threading;
-using Gtk;
 
-using log4net;
+namespace CmisSync {
+    using System;
+    using System.Threading;
 
-namespace CmisSync
-{
-    class CertPolicyWindow
-    {
-        private static readonly ILog Logger = LogManager.GetLogger (typeof(CertPolicyWindow));
+    using Gtk;
+
+    using log4net;
+
+    /// <summary>
+    /// SSL Certification policy window.
+    /// </summary>
+    public class CertPolicyWindow {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(CertPolicyWindow));
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.CertPolicyWindow"/> class.
+        /// </summary>
+        /// <param name="handler">Cert policy handler.</param>
+        public CertPolicyWindow(CertPolicyHandler handler) {
+            this.Handler = handler;
+            this.Handler.ShowWindowEvent += this.ShowCertDialog;
+        }
 
         private CertPolicyHandler Handler { get; set; }
 
-        public CertPolicyWindow (CertPolicyHandler handler)
-        {
-            Handler = handler;
-            Handler.ShowWindowEvent += ShowCertDialog;
-        }
-
-        private void ShowCertDialog ()
-        {
-            Logger.Debug ("Showing Cert Dialog: " + Handler.UserMessage);
+        private void ShowCertDialog() {
+            Logger.Debug("Showing Cert Dialog: " + this.Handler.UserMessage);
             CertPolicyHandler.Response ret = CertPolicyHandler.Response.None;
             using (var handle = new AutoResetEvent(false)) {
-                Application.Invoke (delegate {
+                Application.Invoke(delegate {
                     try {
-                        using (MessageDialog md = new MessageDialog (null, DialogFlags.Modal,
-                        MessageType.Warning, ButtonsType.None, Handler.UserMessage +
-                        "\n\nDo you trust this certificate?") {
-                            Title = "Untrusted Certificate"})
-                        {
+                        using (MessageDialog md = new MessageDialog(
+                            null,
+                            DialogFlags.Modal,
+                            MessageType.Warning,
+                            ButtonsType.None,
+                            this.Handler.UserMessage + "\n\nDo you trust this certificate?") {
+                            Title = "Untrusted Certificate" }) {
                             using (var noButton = md.AddButton("No", (int)CertPolicyHandler.Response.CertDeny))
                             using (var justNowButton = md.AddButton("Just now", (int)CertPolicyHandler.Response.CertAcceptSession))
-                            using (var alwaysButton = md.AddButton("Always", (int)CertPolicyHandler.Response.CertAcceptAlways))
-                            {
-                                ret = (CertPolicyHandler.Response)md.Run ();
-                                md.Destroy ();
+                            using (var alwaysButton = md.AddButton("Always", (int)CertPolicyHandler.Response.CertAcceptAlways)) {
+                                ret = (CertPolicyHandler.Response)md.Run();
+                                md.Destroy();
                             }
                         }
                     } finally {
-                        handle.Set ();
+                        handle.Set();
                     }
-                }
-                );
-                handle.WaitOne ();
+                });
+                handle.WaitOne();
             }
-            Logger.Debug ("Cert Dialog return:" + ret.ToString ());
-            Handler.UserResponse = ret;
-        }
 
+            Logger.Debug("Cert Dialog return:" + ret.ToString());
+            this.Handler.UserResponse = ret;
+        }
     }
 }
-
