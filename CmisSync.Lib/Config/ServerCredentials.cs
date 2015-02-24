@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="Brand.cs" company="GRAU DATA AG">
+// <copyright file="ServerCredentials.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -20,43 +20,44 @@
 namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Xml.Serialization;
+    using System.Linq;
+    using System.Text;
+
+    using CmisSync.Lib.Cmis;
 
     /// <summary>
-    /// Client Brand Configuration
+    /// Server Login for a specific Uri
     /// </summary>
     [Serializable]
-    public class Brand {
+    public class ServerCredentials : UserCredentials {
         /// <summary>
-        /// Gets or sets the CMIS server that holds the client brand files
+        /// Atom pub binding string.
         /// </summary>
-        [XmlElement("server")]
-        public XmlUri Server { get; set; }
+        public static readonly string BindingAtomPub = DotCMIS.BindingType.AtomPub;
 
         /// <summary>
-        /// Gets or sets the client branding files
+        /// Browser binding string.
         /// </summary>
-        [XmlArray("files")]
-        [XmlArrayItem("file")]
-        public List<BrandFile> Files { get; set; }
-    }
+        public static readonly string BindingBrowser = DotCMIS.BindingType.Browser;
 
-    /// <summary>
-    /// Client Brand file configuration
-    /// </summary>
-    [Serializable]
-    public class BrandFile {
-        /// <summary>
-        /// pathname for the client brand file on CMIS repository
-        /// </summary>
-        [XmlElement("path")]
-        public string Path { get; set; }
+        private string binding = BindingAtomPub;
 
         /// <summary>
-        /// Last Modification Date for the client brand file on CMIS repository 
+        /// Gets or sets the server Address and Path
         /// </summary>
-        [XmlElement("date")]
-        public DateTime Date { get; set; }
+        public Uri Address { get; set; }
+
+        /// <summary>
+        /// Gets or sets the CMIS binding
+        /// </summary>
+        public string Binding {
+            get {
+                return this.binding;
+            }
+
+            set {
+                this.binding = value;
+            }
+        }
     }
 }
