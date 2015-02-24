@@ -20,7 +20,10 @@ namespace CmisSync.Lib.Config {
     using System;
     using System.Configuration;
 
+    using log4net;
+
     public class DefaultEntries {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(DefaultEntries));
         private static DefaultEntries defaults;
 
         /// <summary>
@@ -32,6 +35,21 @@ namespace CmisSync.Lib.Config {
         private DefaultEntries() {
             Configuration exeConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
             this.loadedDefaultConfig = exeConfig.AppSettings.Settings;
+            Logger.Debug(string.Format("Loading application settings from {0}", exeConfig.FilePath));
+            this.Url = "https://";
+            this.Name = Environment.UserName;
+            this.Binding = null;
+            if (this.loadedDefaultConfig["Url"] != null) {
+                this.Url = this.loadedDefaultConfig["Url"].Value ?? "https://";
+            }
+
+            if (this.loadedDefaultConfig["Name"] != null) {
+                this.Name = this.loadedDefaultConfig["Name"].Value ?? Environment.UserName;
+            }
+
+            if (this.loadedDefaultConfig["Binding"] != null) {
+                this.Binding = this.loadedDefaultConfig["Binding"].Value;
+            }
         }
 
         public static DefaultEntries Defaults {
@@ -50,5 +68,11 @@ namespace CmisSync.Lib.Config {
                 return defaults;
             }
         }
+
+        public string Url { get; private set; }
+
+        public string Name { get; private set; }
+
+        public string Binding { get; private set; }
     }
 }
