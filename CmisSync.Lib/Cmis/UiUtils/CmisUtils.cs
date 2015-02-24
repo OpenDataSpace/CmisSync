@@ -101,10 +101,14 @@ namespace CmisSync.Lib.Cmis.UiUtils {
                         return new Tuple<CmisServer, Exception>(new CmisServer(credentials.Address, credentials.Binding, null), new CmisServerNotFoundException(e.Message, e));
                     }
 
-                    firstException = e;
+                    if (firstException == null) {
+                        firstException = e;
+                    }
                 } catch (Exception e) {
                     // Save first Exception and try other possibilities.
-                    firstException = e;
+                    if (firstException == null) {
+                        firstException = e;
+                    }
                 }
 
                 if (repositories != null) {
@@ -122,20 +126,9 @@ namespace CmisSync.Lib.Cmis.UiUtils {
                 "/cmis/browser"
             };
 
-            // See https://github.com/nicolas-raoul/CmisSync/wiki/What-address for the list of ECM products prefixes
-            // Please send us requests to support more CMIS servers: https://github.com/nicolas-raoul/CmisSync/issues
+            // See https://github.com/nicolas-raoul/CmisSync/wiki/What-address for a list of ECM products prefixes
             string[] atompubSuffixes = {
                 "/cmis/atom11",
-                "/alfresco/cmisatom",
-                "/alfresco/service/cmis",
-                "/cmis/resources/",
-                "/emc-cmis-ea/resources/",
-                "/xcmis/rest/cmisatom",
-                "/files/basic/cmis/my/servicedoc",
-                "/p8cmis/resources/Service",
-                "/_vti_bin/cmis/rest?getRepositories",
-                "/Nemaki/atom/bedroom",
-                "/nuxeo/atom/cmis",
                 "/cmis/atom"
             };
 
