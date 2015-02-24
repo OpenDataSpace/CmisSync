@@ -20,8 +20,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Config
-{
+namespace CmisSync.Lib.Config {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -30,75 +29,11 @@ namespace CmisSync.Lib.Config
     using System.Xml.Serialization;
 
     /// <summary>
-    /// Authentication type.
-    /// </summary>
-    [Serializable]
-    public enum AuthenticationType
-    {
-        /// <summary>
-        /// The default auth mechanism is HTTP Basic Auth.
-        /// </summary>
-        BASIC,
-
-        /// <summary>
-        /// NTLM auth mechanism.
-        /// </summary>
-        NTLM,
-
-        /// <summary>
-        /// The Kerberos auth mechanism.
-        /// </summary>
-        KERBEROS,
-
-        /// <summary>
-        /// The OAuth mechanism. It is not implemented yet.
-        /// </summary>
-        OAUTH,
-
-        /// <summary>
-        /// The SHIBBOLETH auth mechanism. It is not implemented yet.
-        /// </summary>
-        SHIBBOLETH,
-
-        /// <summary>
-        /// The x501 auth mechanism. It is not implemented yet.
-        /// </summary>
-        X501,
-
-        /// <summary>
-        /// The PGP based auth mechanism. It is not implemented/specified/invented yet.
-        /// </summary>
-        PGP
-    }
-
-    /// <summary>
-    /// User informations.
-    /// </summary>
-    [Serializable]
-    public struct User
-    {
-        /// <summary>
-        /// Gets or sets the name.
-        /// </summary>
-        /// <value>The name.</value>
-        [XmlElement("name")]
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the E mail.
-        /// </summary>
-        /// <value>The E mail.</value>
-        [XmlElement("email")]
-        public string EMail { get; set; }
-    }
-
-    /// <summary>
     /// Configuration of a CmisSync synchronized folder.
     /// It can be found in the XML configuration file.
     /// </summary>
     [XmlRoot("CmisSync", Namespace = null)]
-    public class Config
-    {
+    public class Config {
         /// <summary>
         /// The default size of a chunk.
         /// </summary>
@@ -123,6 +58,7 @@ namespace CmisSync.Lib.Config
         private string configPath;
         private Guid deviceId;
         private bool notifications = true;
+        private int transmissionLimit = 100;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Config.Config"/> class.
@@ -132,8 +68,7 @@ namespace CmisSync.Lib.Config
         public Config() {
         }
 
-        private Config(string fullPath)
-        {
+        private Config(string fullPath) {
             this.fullpath = fullPath;
             this.configPath = Path.GetDirectoryName(this.fullpath);
         }
@@ -143,8 +78,7 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value><c>true</c> if notifications; otherwise, <c>false</c>.</value>
         [XmlElement("notifications")]
-        public bool Notifications
-        {
+        public bool Notifications {
             get {
                 return this.notifications;
             }
@@ -154,21 +88,17 @@ namespace CmisSync.Lib.Config
             }
         }
 
-        private int transmissionLimit = 100;
-
         /// <summary>
         /// Gets or sets a value for the transmission history list limit number
         /// </summary>
         [XmlElement("TransmissionLimit")]
-        public int TransmissionLimit
-        {
-            get
-            {
-                return transmissionLimit;
+        public int TransmissionLimit {
+            get {
+                return this.transmissionLimit;
             }
-            set
-            {
-                transmissionLimit = value;
+
+            set {
+                this.transmissionLimit = value;
             }
         }
 
@@ -207,8 +137,7 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <value>The device identifier.</value>
         [XmlElement("deviceId")]
-        public Guid DeviceId
-        {
+        public Guid DeviceId {
             get {
                 if (this.deviceId.Equals(Guid.Empty)) {
                     this.deviceId = Guid.NewGuid();
@@ -278,8 +207,7 @@ namespace CmisSync.Lib.Config
         /// <param name='fullPath'>
         /// Full path.
         /// </param>
-        public static Config CreateOrLoadByPath(string fullPath)
-        {
+        public static Config CreateOrLoadByPath(string fullPath) {
             string configPath = Path.GetDirectoryName(fullPath);
             Config config;
 
@@ -325,13 +253,11 @@ namespace CmisSync.Lib.Config
         /// Absolute full path to config file
         /// </param>
         /// <returns>the newly created config instance</returns>
-        public static Config CreateInitialConfig(string fullPath)
-        {
+        public static Config CreateInitialConfig(string fullPath) {
             // Get the user name.
             string userName = "Unknown";
             if (Backend.Platform == PlatformID.Unix ||
-                Backend.Platform == PlatformID.MacOSX)
-            {
+                Backend.Platform == PlatformID.MacOSX) {
                 userName = string.IsNullOrEmpty(Environment.UserName) ? string.Empty : Environment.UserName.TrimEnd(",".ToCharArray());
             } else {
                 userName = Environment.UserName;
@@ -341,11 +267,9 @@ namespace CmisSync.Lib.Config
                 userName = "Unknown";
             }
 
-            return new Config(fullPath)
-            {
+            return new Config(fullPath) {
                 Folders = new List<RepoInfo>(),
-                User = new User
-                {
+                User = new User {
                     EMail = "Unknown",
                     Name = userName
                 },
@@ -364,8 +288,7 @@ namespace CmisSync.Lib.Config
         /// Creates the initial list of globally ignored file names.
         /// </summary>
         /// <returns>The initial list of globally ignored file names.</returns>
-        public static List<string> CreateInitialListOfGloballyIgnoredFileNames()
-        {
+        public static List<string> CreateInitialListOfGloballyIgnoredFileNames() {
             List<string> list = new List<string>();
             list.Add(".*");
             list.Add("*~");
@@ -386,8 +309,7 @@ namespace CmisSync.Lib.Config
         /// Creates the initial list of globally ignored folder names.
         /// </summary>
         /// <returns>The initial list of globally ignored folder names.</returns>
-        public static List<string> CreateInitialListOfGloballyIgnoredFolderNames()
-        {
+        public static List<string> CreateInitialListOfGloballyIgnoredFolderNames() {
             List<string> list = new List<string>();
             list.Add(".*");
             return list;
@@ -397,8 +319,7 @@ namespace CmisSync.Lib.Config
         /// Creates the initial list of globally hidden repo names.
         /// </summary>
         /// <returns>The initial list of globally hidden repo names.</returns>
-        public static List<string> CreateInitialListOfGloballyHiddenRepoNames()
-        {
+        public static List<string> CreateInitialListOfGloballyHiddenRepoNames() {
             List<string> list = new List<string>();
             list.Add("config");
             return list;
@@ -409,8 +330,7 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <returns>The log file path.</returns>
         /// <param name="configPath">Config path.</param>
-        public static string GetLogFilePath(string configPath)
-        {
+        public static string GetLogFilePath(string configPath) {
             return Path.Combine(configPath, "debug_log.txt");
         }
 
@@ -419,8 +339,7 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <returns>The operations log file path.</returns>
         /// <param name="configPath">Config path.</param>
-        public static string GetOperationsLogFilePath(string configPath)
-        {
+        public static string GetOperationsLogFilePath(string configPath) {
             return Path.Combine(configPath, "operations_log.txt");
         }
 
@@ -430,8 +349,7 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// The full path.
         /// </returns>
-        public string GetFullPath()
-        {
+        public string GetFullPath() {
             return this.fullpath;
         }
 
@@ -440,8 +358,7 @@ namespace CmisSync.Lib.Config
         /// These files are in particular the XML configuration file, the database files, and the log file.
         /// </summary>
         /// <returns>Absolute path</returns>
-        public string GetConfigPath()
-        {
+        public string GetConfigPath() {
             return this.configPath;
         }
 
@@ -450,8 +367,7 @@ namespace CmisSync.Lib.Config
         /// </summary>
         /// <returns>The folder.</returns>
         /// <param name="displayName">The name of the repoInfo Name.</param>
-        public RepoInfo GetRepoInfo(string displayName)
-        {
+        public RepoInfo GetRepoInfo(string displayName) {
             foreach (RepoInfo repo in this.Folders) {
                 if (repo.DisplayName.Equals(displayName)) {
                     return repo;
@@ -467,8 +383,7 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// The path to the user's home folder
         /// </returns>
-        public string GetHomePath()
-        {
+        public string GetHomePath() {
             if (Backend.Platform == PlatformID.Win32NT) {
                 return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             } else {
@@ -482,8 +397,7 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// platform depending absolute path
         /// </returns>
-        public string GetFoldersPath()
-        {
+        public string GetFoldersPath() {
             return Path.Combine(this.GetHomePath(), "DataSpace");
         }
 
@@ -491,8 +405,7 @@ namespace CmisSync.Lib.Config
         /// Log4net configuration, as an XML tree readily usable by Log4net.
         /// </summary>
         /// <returns>the log4net xml section</returns>
-        public XmlElement GetLog4NetConfig()
-        {
+        public XmlElement GetLog4NetConfig() {
             return this.Log4Net as XmlElement;
         }
 
@@ -500,8 +413,7 @@ namespace CmisSync.Lib.Config
         /// Sets a new XmlNode as Log4NetConfig. Is useful for config migration
         /// </summary>
         /// <param name="node">log4net xml config section</param>
-        public void SetLog4NetConfig(XmlNode node)
-        {
+        public void SetLog4NetConfig(XmlNode node) {
             this.Log4Net = node;
         }
 
@@ -511,16 +423,14 @@ namespace CmisSync.Lib.Config
         /// <returns>
         /// The default path to the log file.
         /// </returns>
-        public string GetLogFilePath()
-        {
+        public string GetLogFilePath() {
             return GetLogFilePath(this.configPath);
         }
 
         /// <summary>
         /// Save the currently loaded (in memory) configuration back to the XML file.
         /// </summary>
-        public void Save()
-        {
+        public void Save() {
             XmlSerializer serializer = new XmlSerializer(typeof(Config));
             using (TextWriter textWriter = new StreamWriter(this.fullpath)) {
                 serializer.Serialize(textWriter, this);
@@ -529,8 +439,7 @@ namespace CmisSync.Lib.Config
             HttpProxyUtils.SetDefaultProxy(this.Proxy);
         }
 
-        private static Config Load(string fullPath)
-        {
+        private static Config Load(string fullPath) {
             XmlSerializer deserializer = new XmlSerializer(typeof(Config));
             Config config;
             using (TextReader textReader = new StreamReader(fullPath)) {
@@ -543,8 +452,7 @@ namespace CmisSync.Lib.Config
             return config;
         }
 
-        private static XmlElement CreateDefaultLog4NetElement(string logFilePath, string operationsLogFilePath)
-        {
+        private static XmlElement CreateDefaultLog4NetElement(string logFilePath, string operationsLogFilePath) {
             XmlSerializer deserializer = new XmlSerializer(typeof(XmlElement));
             using (TextReader textReader = new StringReader(@"
   <log4net>
@@ -588,8 +496,7 @@ namespace CmisSync.Lib.Config
     <logger name=""CmisSync.Lib.Cmis.DotCMISLogListener"">
       <level value=""OFF"" />
     </logger>
-  </log4net>"))
-            {
+  </log4net>")) {
                 XmlElement result = (XmlElement)deserializer.Deserialize(textReader);
                 return result;
             }
