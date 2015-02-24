@@ -118,13 +118,27 @@ namespace TestLibrary.IntegrationTests {
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(60000)]
         public void GetRepositoriesFuzzy(string url, string user, string password) {
+            var origUrl = new Uri(url);
+            string baseUrl = origUrl.Scheme + "://" + origUrl.Host + "/";
+            ServerCredentials credentials = new ServerCredentials() {
+                Address = new Uri(baseUrl),
+                UserName = user,
+                Password = password
+            };
+            Tuple<CmisServer, Exception> server = CmisUtils.GetRepositoriesFuzzy(credentials);
+            Assert.NotNull(server.Item1);
+        }
+
+        [Test, TestCaseSource(typeof(ITUtils), "TestServersFuzzy"), Category("Slow"), Timeout(60000)]
+        public void GetRepositoriesFuzzyReturnsNormalUrlIfCorrectUrlIsGiven(string url, string user, string password) {
             ServerCredentials credentials = new ServerCredentials() {
                 Address = new Uri(url),
                 UserName = user,
                 Password = password
             };
             Tuple<CmisServer, Exception> server = CmisUtils.GetRepositoriesFuzzy(credentials);
-            Assert.NotNull(server.Item1);
+            Assert.That(server.Item1.Url, Is.EqualTo(new Uri(url)));
+            Assert.That(server.Item2, Is.Null);
         }
     }
 }

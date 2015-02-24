@@ -1,5 +1,5 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="Brand.cs" company="GRAU DATA AG">
+//-----------------------------------------------------------------------
+// <copyright file="AuthenticationType.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -19,44 +19,45 @@
 
 namespace CmisSync.Lib.Config {
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Xml.Serialization;
 
     /// <summary>
-    /// Client Brand Configuration
+    /// Authentication type.
     /// </summary>
     [Serializable]
-    public class Brand {
+    public enum AuthenticationType {
         /// <summary>
-        /// Gets or sets the CMIS server that holds the client brand files
+        /// The default auth mechanism is HTTP Basic Auth.
         /// </summary>
-        [XmlElement("server")]
-        public XmlUri Server { get; set; }
+        BASIC,
 
         /// <summary>
-        /// Gets or sets the client branding files
+        /// NTLM auth mechanism.
         /// </summary>
-        [XmlArray("files")]
-        [XmlArrayItem("file")]
-        public List<BrandFile> Files { get; set; }
-    }
-
-    /// <summary>
-    /// Client Brand file configuration
-    /// </summary>
-    [Serializable]
-    public class BrandFile {
-        /// <summary>
-        /// pathname for the client brand file on CMIS repository
-        /// </summary>
-        [XmlElement("path")]
-        public string Path { get; set; }
+        NTLM,
 
         /// <summary>
-        /// Last Modification Date for the client brand file on CMIS repository 
+        /// The Kerberos auth mechanism.
         /// </summary>
-        [XmlElement("date")]
-        public DateTime Date { get; set; }
+        KERBEROS,
+
+        /// <summary>
+        /// The OAuth mechanism. It is not implemented yet.
+        /// </summary>
+        OAUTH,
+
+        /// <summary>
+        /// The SHIBBOLETH auth mechanism. It is not implemented yet.
+        /// </summary>
+        SHIBBOLETH,
+
+        /// <summary>
+        /// The x501 auth mechanism. It is not implemented yet.
+        /// </summary>
+        X501,
+
+        /// <summary>
+        /// The PGP based auth mechanism. It is not implemented/specified/invented yet.
+        /// </summary>
+        PGP
     }
 }
