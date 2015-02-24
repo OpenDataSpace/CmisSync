@@ -146,7 +146,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
             } catch (IOException ex) {
                 int error = Marshal.GetHRForException(ex) & 0xffff;
                 if (error == 1176) {
-                    string newName = destinationFile.FullName + Guid.NewGuid() + ".sync";
+                    string newName = destinationFile.FullName + Guid.NewGuid().ToString() + ".sync";
                     IFileInfo newResult = null;
                     try {
                         var copy = this.original.CopyTo(newName, true);
