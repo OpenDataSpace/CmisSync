@@ -22,6 +22,9 @@ namespace CmisSync.Lib.Config {
 
     using log4net;
 
+    /// <summary>
+    /// Default entries loaded from program.exe.config file.
+    /// </summary>
     public class DefaultEntries {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(DefaultEntries));
         private static DefaultEntries defaults;
@@ -52,6 +55,10 @@ namespace CmisSync.Lib.Config {
             }
         }
 
+        /// <summary>
+        /// Gets the defaults as singleton.
+        /// </summary>
+        /// <value>The defaults.</value>
         public static DefaultEntries Defaults {
             get {
                 if (defaults == null) {
@@ -69,10 +76,22 @@ namespace CmisSync.Lib.Config {
             }
         }
 
+        /// <summary>
+        /// Gets the default URL scheme for new connections.
+        /// </summary>
+        /// <value>The default URL.</value>
         public string Url { get; private set; }
 
+        /// <summary>
+        /// Gets the default user name for new connections.
+        /// </summary>
+        /// <value>The name.</value>
         public string Name { get; private set; }
 
+        /// <summary>
+        /// Gets the default binding for new connections.
+        /// </summary>
+        /// <value>The binding.</value>
         public string Binding { get; private set; }
     }
 }

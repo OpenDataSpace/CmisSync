@@ -69,8 +69,7 @@ namespace CmisSync {
             string user,
             string password);
 
-        private void ShowSetupPage()
-        {
+        private void ShowSetupPage() {
             this.Header = string.Format(Properties_Resources.Welcome, Properties_Resources.ApplicationName);
             this.Description = string.Format(Properties_Resources.Intro, Properties_Resources.ApplicationName);
 
@@ -81,8 +80,7 @@ namespace CmisSync {
                 this.controller.SetupPageCancelled();
             };
 
-            Button continue_button = new Button(this.continueText)
-            {
+            Button continue_button = new Button(this.continueText) {
                 Sensitive = false
             };
 
@@ -102,8 +100,7 @@ namespace CmisSync {
             this.controller.CheckSetupPage();
         }
 
-        private void ShowAdd1Page()
-        {
+        private void ShowAdd1Page() {
             this.Present();
             this.Header = Properties_Resources.Where;
 
@@ -115,8 +112,7 @@ namespace CmisSync {
             VBox layout_password   = new VBox(true, 0);
 
             // Address
-            Label address_label = new Label()
-            {
+            Label address_label = new Label() {
                 UseMarkup = true,
                 Xalign = 0,
                 Markup = "<b>" +
@@ -125,12 +121,11 @@ namespace CmisSync {
             };
 
             Entry address_entry = new Entry() {
-                Text = (this.controller.PreviousAddress == null || string.IsNullOrEmpty(this.controller.PreviousAddress.ToString())) ? "https://" : this.controller.PreviousAddress.ToString(),
+                Text = (this.controller.PreviousAddress == null || string.IsNullOrEmpty(this.controller.PreviousAddress.ToString())) ? DefaultEntries.Defaults.Url : this.controller.PreviousAddress.ToString(),
                 ActivatesDefault = false
             };
 
-            Label address_help_label = new Label()
-            {
+            Label address_help_label = new Label() {
                 Xalign = 0,
                 UseMarkup = true,
                 Markup = "<span foreground=\"#808080\" size=\"small\">" +
@@ -138,8 +133,7 @@ namespace CmisSync {
                 "</span>"
             };
             EventBox address_help_urlbox = new EventBox();
-            Label address_help_urllabel = new Label()
-            {
+            Label address_help_urllabel = new Label() {
                 Xalign = 0,
                 UseMarkup = true,
                 Markup = "<span foreground=\"blue\" underline=\"single\" size=\"small\">" +
@@ -157,8 +151,7 @@ namespace CmisSync {
                 address_help_urlbox.GdkWindow.Cursor = handCursor;
             };
 
-            Label address_error_label = new Label()
-            {
+            Label address_error_label = new Label() {
                 Xalign = 0,
                 UseMarkup = true,
                 Markup = string.Empty
@@ -172,7 +165,7 @@ namespace CmisSync {
             };
 
             if (string.IsNullOrEmpty(this.controller.saved_user)) {
-                user_entry.Text = Environment.UserName;
+                user_entry.Text = DefaultEntries.Defaults.Name;
             } else {
                 user_entry.Text = this.controller.saved_user;
             }
@@ -320,16 +313,14 @@ namespace CmisSync {
             address_entry.GrabFocus();
         }
 
-        private void ShowAdd2Page()
-        {
+        private void ShowAdd2Page() {
             CmisTreeStore cmisStore = new CmisTreeStore();
             Gtk.TreeView treeView = new Gtk.TreeView(cmisStore);
 
             bool firstRepo = true;
             List<RootFolder> repositories = new List<RootFolder>();
             Dictionary<string, AsyncNodeLoader> loader = new Dictionary<string, AsyncNodeLoader>();
-            foreach (KeyValuePair<string, string> repository in this.controller.repositories)
-            {
+            foreach (KeyValuePair<string, string> repository in this.controller.repositories) {
                 RootFolder root = new RootFolder() {
                     Name = repository.Value,
                     Id = repository.Key,
@@ -375,8 +366,7 @@ namespace CmisSync {
 
             continue_button.Clicked += delegate {
                 RootFolder root = repositories.Find(x => (x.Selected != false));
-                if (root != null)
-                {
+                if (root != null) {
                     foreach (AsyncNodeLoader task in loader.Values) {
                         task.Cancel();
                     }
@@ -482,8 +472,7 @@ namespace CmisSync {
             }
         }
 
-        private void ShowCustomizePage()
-        {
+        private void ShowCustomizePage() {
             this.Header = Properties_Resources.Customize;
             string localfoldername = this.controller.saved_address.Host.ToString();
             foreach (KeyValuePair<string, string> repository in this.controller.repositories) {
@@ -611,8 +600,7 @@ namespace CmisSync {
             localfolder_entry.SelectRegion(0, localfolder_entry.Text.Length);
         }
 
-        private void ShowSyncingPage()
-        {
+        private void ShowSyncingPage() {
             this.Header = Properties_Resources.AddingFolder
                 + " ‘" + this.controller.SyncingReponame + "’…";
             this.Description = Properties_Resources.MayTakeTime;
@@ -625,8 +613,7 @@ namespace CmisSync {
             this.AddButton(finish_button);
         }
 
-        private void ShowFinishedPage()
-        {
+        private void ShowFinishedPage() {
             this.UrgencyHint = true;
 
             this.Header = Properties_Resources.Ready;
@@ -652,8 +639,7 @@ namespace CmisSync {
             this.AddButton(finish_button);
         }
 
-        private void ShowTutorialPage()
-        {
+        private void ShowTutorialPage() {
             switch (this.controller.TutorialCurrentPage) {
             case 1:
             {
@@ -735,8 +721,7 @@ namespace CmisSync {
             }
         }
 
-        public Setup() : base()
-        {
+        public Setup() : base() {
             this.controller.HideWindowEvent += delegate {
                 Application.Invoke(delegate {
                     this.HideAll();
@@ -783,8 +768,7 @@ namespace CmisSync {
                     this.ShowAll();
                 });
             };
-            this.DeleteEvent += delegate
-            {
+            this.DeleteEvent += delegate {
                 this.controller.PageCancelled();
             };
         }
