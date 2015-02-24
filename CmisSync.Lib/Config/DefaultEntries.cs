@@ -42,6 +42,7 @@ namespace CmisSync.Lib.Config {
             this.Url = "https://";
             this.Name = Environment.UserName;
             this.Binding = null;
+            this.CanModifyUrl = true;
             if (this.loadedDefaultConfig["Url"] != null) {
                 this.Url = this.loadedDefaultConfig["Url"].Value ?? "https://";
             }
@@ -52,6 +53,13 @@ namespace CmisSync.Lib.Config {
 
             if (this.loadedDefaultConfig["Binding"] != null) {
                 this.Binding = this.loadedDefaultConfig["Binding"].Value;
+            }
+
+            if (this.loadedDefaultConfig["UrlModificationAllowed"] != null) {
+                bool canModify;
+                if (Boolean.TryParse(this.loadedDefaultConfig["UrlModificationAllowed"].Value, out canModify)) {
+                    this.CanModifyUrl = canModify;
+                }
             }
         }
 
@@ -93,5 +101,11 @@ namespace CmisSync.Lib.Config {
         /// </summary>
         /// <value>The binding.</value>
         public string Binding { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the Url instance can be modified.
+        /// </summary>
+        /// <value><c>true</c> if the user should be able to modify URL; otherwise, <c>false</c>.</value>
+        public bool CanModifyUrl { get; private set; }
     }
 }

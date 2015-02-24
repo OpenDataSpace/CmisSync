@@ -122,6 +122,7 @@ namespace CmisSync {
 
             Entry address_entry = new Entry() {
                 Text = (this.controller.PreviousAddress == null || string.IsNullOrEmpty(this.controller.PreviousAddress.ToString())) ? DefaultEntries.Defaults.Url : this.controller.PreviousAddress.ToString(),
+                IsEditable = DefaultEntries.Defaults.CanModifyUrl,
                 ActivatesDefault = false
             };
 
