@@ -180,25 +180,20 @@ namespace CmisSync {
             ContentCanvas.Children.Add(LoadXAML);
 
             // Actions.
-            Controller.UpdateSetupContinueButtonEvent += delegate(bool enabled)
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            Controller.UpdateSetupContinueButtonEvent += delegate(bool enabled) {
+                Dispatcher.BeginInvoke((Action)delegate {
                     continue_button.IsEnabled = enabled;
                 });
             };
 
-            cancel_button.Click += delegate
-            {
-                Dispatcher.BeginInvoke((Action)delegate
-                {
+            cancel_button.Click += delegate {
+                Dispatcher.BeginInvoke((Action)delegate {
                     Program.UI.StatusIcon.Dispose();
                     Controller.SetupPageCancelled();
                 });
             };
 
-            continue_button.Click += delegate
-            {
+            continue_button.Click += delegate {
                 Controller.SetupPageCompleted();
             };
 
@@ -208,10 +203,8 @@ namespace CmisSync {
         private WPF.Image slide_image;
         private CheckBox check_box;
 
-        private void LoadTutorialWFP()
-        {
-            switch (Controller.TutorialCurrentPage)
-            {
+        private void LoadTutorialWFP() {
+            switch (Controller.TutorialCurrentPage) {
                 // First page of the tutorial.
                 case 1:
                     {
@@ -229,13 +222,11 @@ namespace CmisSync {
                         ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
-                        cancel_button.Click += delegate
-                        {
+                        cancel_button.Click += delegate {
                             Controller.TutorialSkipped();
                         };
 
-                        continue_button.Click += delegate
-                        {
+                        continue_button.Click += delegate {
                             Controller.TutorialPageCompleted();
                         };
 
@@ -258,8 +249,7 @@ namespace CmisSync {
                         ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
-                        continue_button.Click += delegate
-                        {
+                        continue_button.Click += delegate {
                             Controller.TutorialPageCompleted();
                         };
 
@@ -284,8 +274,7 @@ namespace CmisSync {
                         ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
-                        continue_button.Click += delegate
-                        {
+                        continue_button.Click += delegate {
                             Controller.TutorialPageCompleted();
                         };
 
@@ -309,13 +298,11 @@ namespace CmisSync {
                         ContentCanvas.Children.Add(LoadXAML);
 
                         // Actions.
-                        check_box.Click += delegate
-                        {
+                        check_box.Click += delegate {
                             Controller.StartupItemChanged(check_box.IsChecked.Value);
                         };
 
-                        continue_button.Click += delegate
-                        {
+                        continue_button.Click += delegate {
                             Controller.TutorialPageCompleted();
                         };
 
@@ -324,51 +311,41 @@ namespace CmisSync {
             }
         }
 
-        private void ControllerChangeAddressAction(string text, string example_text)
-        {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
+        private void ControllerChangeAddressAction(string text, string example_text) {
+            Dispatcher.BeginInvoke((Action)delegate {
                 address_box.Text = text;
                 address_help_label.Text = example_text;
             });
         }
 
-        private void ControllerChangeUserAction(string text, string example_text)
-        {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
+        private void ControllerChangeUserAction(string text, string example_text) {
+            Dispatcher.BeginInvoke((Action)delegate {
                 user_box.Text = text;
                 user_help_label.Text = example_text;
             });
         }
 
-        private void ControllerChangePasswordAction(string text, string example_text)
-        {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
+        private void ControllerChangePasswordAction(string text, string example_text) {
+            Dispatcher.BeginInvoke((Action)delegate {
                 password_box.Password = text;
                 password_help_label.Text = example_text;
             });
         }
 
-        private void ControllerLoginAddProjectAction(bool button_enabled)
-        {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
+        private void ControllerLoginAddProjectAction(bool button_enabled) {
+            Dispatcher.BeginInvoke((Action)delegate {
                 continue_button.IsEnabled = button_enabled;
             });
         }
 
-        private void ControllerLoginInsertAction()
-        {
+        private void ControllerLoginInsertAction() {
             Controller.ChangeAddressFieldEvent += ControllerChangeAddressAction;
             Controller.ChangeUserFieldEvent += ControllerChangeUserAction;
             Controller.ChangePasswordFieldEvent += ControllerChangePasswordAction;
             Controller.UpdateAddProjectButtonEvent += ControllerLoginAddProjectAction;
         }
 
-        private void ControllerLoginRemoveAction()
-        {
+        private void ControllerLoginRemoveAction() {
             Controller.ChangeAddressFieldEvent -= ControllerChangeAddressAction;
             Controller.ChangeUserFieldEvent -= ControllerChangeUserAction;
             Controller.ChangePasswordFieldEvent -= ControllerChangePasswordAction;
@@ -388,8 +365,7 @@ namespace CmisSync {
         private TextBlock password_help_label;
         private TextBox address_error_label;
 
-        private void LoadAddLoginWPF()
-        {
+        private void LoadAddLoginWPF() {
             // define UI elements.
             Header = Properties_Resources.Where;
 
@@ -422,6 +398,12 @@ namespace CmisSync {
 
             TaskbarItemInfo.ProgressValue = 0.0;
             TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+            if (!DefaultEntries.Defaults.CanModifyUrl) {
+                address_box.IsEnabled = false;
+                address_box.Visibility = Visibility.Hidden;
+                address_help_label.Visibility = Visibility.Hidden;
+                address_label.Visibility = Visibility.Hidden;
+            }
 
             if (Controller.PreviousAddress == null || Controller.PreviousAddress.ToString() == String.Empty) {
                 address_box.Text = DefaultEntries.Defaults.Url;
