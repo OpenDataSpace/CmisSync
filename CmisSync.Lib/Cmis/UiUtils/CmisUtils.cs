@@ -75,7 +75,7 @@ namespace CmisSync.Lib.Cmis.UiUtils {
         /// Users can provide the URL of the web interface, and we have to return the CMIS URL
         /// Returns the list of repositories as well.
         /// </summary>
-        static public Tuple<CmisServer, Exception> GetRepositoriesFuzzy(ServerCredentials credentials) {
+        public static Tuple<CmisServer, Exception> GetRepositoriesFuzzy(ServerCredentials credentials) {
             Dictionary<string, string> repositories = null;
             Exception firstException = null;
 
