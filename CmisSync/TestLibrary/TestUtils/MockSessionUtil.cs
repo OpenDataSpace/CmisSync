@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -143,33 +142,26 @@ namespace TestLibrary.TestUtils
         public static void AddRemoteObject(this Mock<ISession> session, ICmisObject remoteObject) {
             session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteObject.Id))).Returns(remoteObject);
             HashSet<string> paths = new HashSet<string>();
-            if (remoteObject is IFolder)
-            {
+            if (remoteObject is IFolder) {
                 paths.Add((remoteObject as IFolder).Path);
-                if ((remoteObject as IFolder).Paths != null)
-                {
-                    foreach (string path in (remoteObject as IFolder).Paths)
-                    {
+                if ((remoteObject as IFolder).Paths != null) {
+                    foreach (string path in (remoteObject as IFolder).Paths) {
                         paths.Add(path);
                     }
                 }
-            }
-            else if (remoteObject is IDocument)
-            {
-                foreach (string path in (remoteObject as IDocument).Paths)
-                {
+            } else if (remoteObject is IDocument) {
+                foreach (string path in (remoteObject as IDocument).Paths) {
                     paths.Add(path);
                 }
             }
 
-            foreach (string path in paths)
-            {
+            foreach (string path in paths) {
                 session.Setup(s => s.GetObjectByPath(It.Is<string>(p => p == path))).Returns(remoteObject);
             }
         }
 
         public static void AddRemoteObjects(this Mock<ISession> session, params ICmisObject[] remoteObjects) {
-            foreach(var obj in remoteObjects) {
+            foreach (var obj in remoteObjects) {
                 session.AddRemoteObject(obj);
             }
         }
@@ -203,6 +195,20 @@ namespace TestLibrary.TestUtils
             return remoteFolder;
         }
 
+        public static void SetupPermissions(
+            this Mock<ISession> session,
+            SupportedPermissions supportedPermissions = SupportedPermissions.Basic)
+        {
+            var aclCapabilities = session.Object.RepositoryInfo.AclCapabilities ?? Mock.Of<IAclCapabilities>();
+            Mock.Get(aclCapabilities).Setup(a => a.SupportedPermissions).Returns(supportedPermissions);
+            var permissions = aclCapabilities.Permissions ?? new List<IPermissionDefinition>();
+            permissions.Add(Mock.Of<IPermissionDefinition>(d => d.Id == "cmis:read" && d.Description == "Read"));
+            permissions.Add(Mock.Of<IPermissionDefinition>(d => d.Id == "cmis:write" && d.Description == "Write"));
+            permissions.Add(Mock.Of<IPermissionDefinition>(d => d.Id == "cmis:all" && d.Description == "All"));
+            Mock.Get(aclCapabilities).Setup(a => a.Permissions).Returns(permissions);
+            session.Setup(s => s.RepositoryInfo.AclCapabilities).Returns(aclCapabilities);
+        }
+
         public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid", string folderName = "name", string path = "path", string parentId = "", string changetoken = "changetoken") {
             if (path.Contains("\\")) {
                 throw new ArgumentException("Given remote path: " + path + " contains \\");
@@ -212,7 +218,7 @@ namespace TestLibrary.TestUtils
             var newRemoteObject = MockOfIFolderUtil.CreateRemoteFolderMock(id, folderName, path, parentId, changetoken);
             session.Setup(s => s.GetObject(It.IsAny<string>())).Returns(newRemoteObject.Object);
             session.Setup(s => s.GetObject(It.IsAny<string>(), It.IsAny<IOperationContext>())).Returns(newRemoteObject.Object);
-         
+
             return session;
         }
 
@@ -253,8 +259,7 @@ namespace TestLibrary.TestUtils
             return session;
         }
 
-        public static void VerifyThatCachingIsDisabled(this Mock<ISession> session)
-        {
+        public static void VerifyThatCachingIsDisabled(this Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
                 It.IsAny<HashSet<string>>(),
