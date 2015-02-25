@@ -1,6 +1,8 @@
 
 namespace TestLibrary.StatusTests {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     using CmisSync.Lib.Status;
 
@@ -9,7 +11,13 @@ namespace TestLibrary.StatusTests {
     public class ServerTests {
         [Test, Category("Fast")]
         public void RunServer() {
-            new Server();
+            Task.Factory.StartNew(() => {
+                var server = new Server();
+                Thread.Sleep(1000);
+                server.Publish();
+            });
+            var sub = new Subscriber();
+            sub.Subscribe();
         }
     }
 }
