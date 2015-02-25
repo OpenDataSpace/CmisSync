@@ -1,5 +1,5 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="Credentials.cs" company="GRAU DATA AG">
+//-----------------------------------------------------------------------
+// <copyright file="Password.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -19,67 +19,6 @@
 
 namespace CmisSync.Lib.Config {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-
-    using CmisSync.Lib.Cmis;
-
-    /// <summary>
-    /// Typical user credantials used for generic logins
-    /// </summary>
-    [Serializable]
-    public class UserCredentials {
-        /// <summary>
-        /// Gets or sets the user name
-        /// </summary>
-        public string UserName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the password
-        /// </summary>
-        public Password Password { get; set; }
-    }
-
-    /// <summary>
-    /// Server Login for a specific Uri
-    /// </summary>
-    [Serializable]
-    public class ServerCredentials : UserCredentials {
-        /// <summary>
-        /// Gets or sets the server Address and Path
-        /// </summary>
-        public Uri Address { get; set; }
-
-        public static readonly string BindingAtomPub = DotCMIS.BindingType.AtomPub;
-        public static readonly string BindingBrowser = DotCMIS.BindingType.Browser;
-
-        private string binding = BindingAtomPub;
-
-        /// <summary>
-        /// Gets or sets the CMIS binding
-        /// </summary>
-        public string Binding {
-            get {
-                return binding;
-            }
-            set {
-                binding = value;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Credentials needed to create a Session for a specific CMIS repository
-    /// </summary>
-    [Serializable]
-    public class CmisRepoCredentials : ServerCredentials {
-        /// <summary>
-        /// Gets or sets the repository identifier.
-        /// </summary>
-        /// <value>The repository identifier.</value>
-        public string RepoId { get; set; }
-    }
 
     /// <summary>
     /// Password class stores the given password obfuscated

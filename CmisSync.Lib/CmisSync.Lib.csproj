@@ -121,7 +121,6 @@
     <Compile Include="FileTransmission\SimpleFileUploader.cs" />
     <Compile Include="FileTransmission\UploadFailedException.cs" />
     <Compile Include="FileTransmission\ContentTaskUtils.cs" />
-    <Compile Include="Config\Credentials.cs" />
     <Compile Include="Config\Crypto.cs" />
     <Compile Include="Cmis\Authentication\AuthProviderFactory.cs" />
     <Compile Include="Cmis\Authentication\IDisposableAuthProvider.cs" />
@@ -290,6 +289,12 @@
     <Compile Include="Cmis\RepositoryStatus.cs" />
     <Compile Include="Cmis\RepositoryStatusAggregator.cs" />
     <Compile Include="Events\EventCategory.cs" />
+    <Compile Include="Config\UserCredentials.cs" />
+    <Compile Include="Config\Password.cs" />
+    <Compile Include="Config\CmisRepoCredentials.cs" />
+    <Compile Include="Config\ServerCredentials.cs" />
+    <Compile Include="Config\User.cs" />
+    <Compile Include="Config\AuthenticationType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

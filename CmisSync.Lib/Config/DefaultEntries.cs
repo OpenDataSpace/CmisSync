@@ -20,7 +20,13 @@ namespace CmisSync.Lib.Config {
     using System;
     using System.Configuration;
 
+    using log4net;
+
+    /// <summary>
+    /// Default entries loaded from program.exe.config file.
+    /// </summary>
     public class DefaultEntries {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(DefaultEntries));
         private static DefaultEntries defaults;
 
         /// <summary>
@@ -32,8 +38,35 @@ namespace CmisSync.Lib.Config {
         private DefaultEntries() {
             Configuration exeConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
             this.loadedDefaultConfig = exeConfig.AppSettings.Settings;
+            Logger.Debug(string.Format("Loading application settings from {0}", exeConfig.FilePath));
+            this.Url = "https://";
+            this.Name = Environment.UserName;
+            this.Binding = null;
+            this.CanModifyUrl = true;
+            if (this.loadedDefaultConfig["Url"] != null) {
+                this.Url = this.loadedDefaultConfig["Url"].Value ?? "https://";
+            }
+
+            if (this.loadedDefaultConfig["Name"] != null) {
+                this.Name = this.loadedDefaultConfig["Name"].Value ?? Environment.UserName;
+            }
+
+            if (this.loadedDefaultConfig["Binding"] != null) {
+                this.Binding = this.loadedDefaultConfig["Binding"].Value;
+            }
+
+            if (this.loadedDefaultConfig["UrlModificationAllowed"] != null) {
+                bool canModify;
+                if (Boolean.TryParse(this.loadedDefaultConfig["UrlModificationAllowed"].Value, out canModify)) {
+                    this.CanModifyUrl = canModify;
+                }
+            }
         }
 
+        /// <summary>
+        /// Gets the defaults as singleton.
+        /// </summary>
+        /// <value>The defaults.</value>
         public static DefaultEntries Defaults {
             get {
                 if (defaults == null) {
@@ -50,5 +83,29 @@ namespace CmisSync.Lib.Config {
                 return defaults;
             }
         }
+
+        /// <summary>
+        /// Gets the default URL scheme for new connections.
+        /// </summary>
+        /// <value>The default URL.</value>
+        public string Url { get; private set; }
+
+        /// <summary>
+        /// Gets the default user name for new connections.
+        /// </summary>
+        /// <value>The name.</value>
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Gets the default binding for new connections.
+        /// </summary>
+        /// <value>The binding.</value>
+        public string Binding { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the Url instance can be modified.
+        /// </summary>
+        /// <value><c>true</c> if the user should be able to modify URL; otherwise, <c>false</c>.</value>
+        public bool CanModifyUrl { get; private set; }
     }
 }

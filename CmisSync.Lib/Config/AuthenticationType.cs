@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IDirectoryInfo.cs" company="GRAU DATA AG">
+// <copyright file="AuthenticationType.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,50 +17,47 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem {
+namespace CmisSync.Lib.Config {
+    using System;
+
     /// <summary>
-    /// Interface to enable mocking of DirectoryInfo
+    /// Authentication type.
     /// </summary>
-    public interface IDirectoryInfo : IFileSystemInfo {
+    [Serializable]
+    public enum AuthenticationType {
         /// <summary>
-        /// Gets the parent.
+        /// The default auth mechanism is HTTP Basic Auth.
         /// </summary>
-        /// <value>The parent.</value>
-        IDirectoryInfo Parent { get; }
+        BASIC,
 
         /// <summary>
-        /// Gets the root of the directory.
+        /// NTLM auth mechanism.
         /// </summary>
-        /// <value>The root.</value>
-        IDirectoryInfo Root { get; }
+        NTLM,
 
         /// <summary>
-        /// Creates a directory.
+        /// The Kerberos auth mechanism.
         /// </summary>
-        void Create();
+        KERBEROS,
 
         /// <summary>
-        /// Gets the child directories.
+        /// The OAuth mechanism. It is not implemented yet.
         /// </summary>
-        /// <returns>The directories.</returns>
-        IDirectoryInfo[] GetDirectories();
+        OAUTH,
 
         /// <summary>
-        /// Gets the containing files.
+        /// The SHIBBOLETH auth mechanism. It is not implemented yet.
         /// </summary>
-        /// <returns>The files.</returns>
-        IFileInfo[] GetFiles();
+        SHIBBOLETH,
 
         /// <summary>
-        /// Delete the specified directory recursive if <c>true</c>.
+        /// The x501 auth mechanism. It is not implemented yet.
         /// </summary>
-        /// <param name="recursive">Deletes recursive if set to <c>true</c>.</param>
-        void Delete(bool recursive);
+        X501,
 
         /// <summary>
-        /// Moves the directory to the destination directory path.
+        /// The PGP based auth mechanism. It is not implemented/specified/invented yet.
         /// </summary>
-        /// <param name="destDirName">Destination directory path.</param>
-        void MoveTo(string destDirName);
+        PGP
     }
 }

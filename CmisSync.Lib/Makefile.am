@@ -31,16 +31,21 @@ SOURCES =  \
 	Cmis/UiUtils/CmisPermissionDeniedException.cs \
 	Cmis/UiUtils/CmisServerNotFoundException.cs \
 	Cmis/UiUtils/CmisUtils.cs \
+	Config/AuthenticationType.cs \
 	Config/Brand.cs \
+	Config/CmisRepoCredentials.cs \
 	Config/Config.cs \
 	Config/ConfigManager.cs \
 	Config/ConfigMigration.cs \
-	Config/Credentials.cs \
 	Config/Crypto.cs \
 	Config/DefaultEntries.cs \
 	Config/Feature.cs \
+	Config/Password.cs \
 	Config/ProxySettings.cs \
 	Config/RepoInfo.cs \
+	Config/ServerCredentials.cs \
+	Config/User.cs \
+	Config/UserCredentials.cs \
 	Config/XmlUri.cs \
 	Consumer/InteractionNeededException.cs \
 	Consumer/ISituationDetection.cs \
