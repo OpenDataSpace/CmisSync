@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -31,8 +30,7 @@ namespace TestLibrary.TestUtils
 
     using NUnit.Framework;
 
-    public static class MockOfIDocumentUtil
-    {
+    public static class MockOfIDocumentUtil {
         public static Mock<IDocument> CreateRemoteDocumentMock(string documentContentStreamId, string id, string name, string parentId, long contentLength = 0, byte[] content = null, string changeToken = "changetoken") {
             var newParentMock = Mock.Of<IFolder>(p => p.Id == parentId);
             return CreateRemoteDocumentMock(documentContentStreamId, id, name, newParentMock, contentLength, content, changeToken);

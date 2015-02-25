@@ -21,6 +21,7 @@ SOURCES =  \
 	Cmis/Authentication/PersistentNtlmAuthenticationProvider.cs \
 	Cmis/Authentication/PersistentStandardAuthenticationProvider.cs \
 	Cmis/Authentication/StandardAuthenticationProviderWrapper.cs \
+	Cmis/ConvenienceExtenders/AllowableActionConvenienceExtenders.cs \
 	Cmis/ConvenienceExtenders/CmisConvenienceExtenders.cs \
 	Cmis/DotCMISLogListener.cs \
 	Cmis/MimeType.cs \
