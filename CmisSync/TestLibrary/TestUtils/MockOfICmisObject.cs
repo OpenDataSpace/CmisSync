@@ -28,7 +28,7 @@ namespace TestLibrary.TestUtils {
     using Moq;
 
     public static class MockOfICmisObject {
-        public static void SetupReadOnly(this Mock<ICmisObject> mock, bool ro = true) {
+        public static void SetupReadOnly(this Mock<ICmisObject> mock, bool readOnly = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
             actions.Add(Actions.CanGetAppliedPolicies);
@@ -41,7 +41,7 @@ namespace TestLibrary.TestUtils {
                 actions.Add(Actions.CanGetChildren);
             }
 
-            if (!ro) {
+            if (!readOnly) {
                 actions.Add(Actions.CanUpdateProperties);
                 actions.Add(Actions.CanMoveObject);
                 actions.Add(Actions.CanDeleteObject);
@@ -61,14 +61,14 @@ namespace TestLibrary.TestUtils {
             mock.SetupAllowableActions(actions.ToArray());
         }
 
-        public static void SetupReadOnly(this Mock<IDocument> doc, bool ro = true) {
+        public static void SetupReadOnly(this Mock<IDocument> doc, bool readOnly = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
             actions.Add(Actions.CanGetAppliedPolicies);
             actions.Add(Actions.CanGetAllVersions);
             actions.Add(Actions.CanGetContentStream);
 
-            if (!ro) {
+            if (!readOnly) {
                 actions.Add(Actions.CanUpdateProperties);
                 actions.Add(Actions.CanMoveObject);
                 actions.Add(Actions.CanDeleteObject);
@@ -80,13 +80,13 @@ namespace TestLibrary.TestUtils {
             doc.SetupAllowableActions(actions.ToArray());
         }
 
-        public static void SetupReadOnly(this Mock<IFolder> folder, bool ro = true) {
+        public static void SetupReadOnly(this Mock<IFolder> folder, bool readOnly = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
             actions.Add(Actions.CanGetAppliedPolicies);
             actions.Add(Actions.CanGetChildren);
 
-            if (!ro) {
+            if (!readOnly) {
                 actions.Add(Actions.CanUpdateProperties);
                 actions.Add(Actions.CanMoveObject);
                 actions.Add(Actions.CanDeleteObject);
