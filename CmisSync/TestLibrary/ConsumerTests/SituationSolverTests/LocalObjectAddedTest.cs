@@ -280,7 +280,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
         }
 
-        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        [Test, Category("Fast"), Category("Solver")]
         public void ParentFolderDoesNotExistsOnServerDueToMissingAllowedActions() {
             this.SetUpMocks(true);
 
@@ -298,9 +298,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(f => f.Length).Returns(0);
 
             var parentDirInfo = new Mock<IDirectoryInfo>();
+            var parentsParentDirInfo = new Mock<IDirectoryInfo>();
+            Guid parentsParentGuid = Guid.NewGuid();
+            string remoteParentsParentId = Guid.NewGuid().ToString();
+            parentsParentDirInfo.Setup(d => d.Uuid).Returns(parentsParentGuid);
+            parentDirInfo.Setup(d => d.Parent).Returns(parentsParentDirInfo.Object);
+            parentDirInfo.Setup(d => d.Exists).Returns(true);
+            parentsParentDirInfo.Setup(d => d.Exists).Returns(true);
+            var mappedFolder = Mock.Of<IMappedObject>(o => o.Guid == parentsParentGuid && o.RemoteObjectId == remoteParentsParentId);
+            var remoteParentsParentFolder = Mock.Of<IFolder>(f => f.Id == remoteParentsParentId);
+            Mock.Get(remoteParentsParentFolder).SetupReadOnly();
+            this.session.AddRemoteObject(remoteParentsParentFolder);
+            this.storage.Setup(s => s.GetObjectByLocalPath(parentsParentDirInfo.Object)).Returns(mappedFolder);
 
-            var parents = new List<IFolder>();
-            parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
             fileInfo.Setup(d => d.FullName).Returns(path);
             fileInfo.Setup(d => d.Name).Returns(this.localObjectName);
             fileInfo.Setup(d => d.Exists).Returns(true);
@@ -310,7 +320,38 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             var transmissionManager = new ActiveActivitiesManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
             solver.Solve(fileInfo.Object, null);
-            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+            this.storage.VerifyThatNoObjectIsManipulated();
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void ParentFolderDoesNotExistsOnServerDueToPastErrorThrowsException() {
+            this.SetUpMocks(true);
+
+            string path = Path.Combine(Path.GetTempPath(), this.localObjectName);
+            this.session.Setup(s => s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.localObjectName),
+                It.Is<IObjectId>(o => o.Id == this.parentId),
+                It.IsAny<IContentStream>(),
+                null,
+                null,
+                null,
+                null)).Throws(new CmisPermissionDeniedException());
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+
+            var parentDirInfo = new Mock<IDirectoryInfo>();
+
+            fileInfo.Setup(d => d.FullName).Returns(path);
+            fileInfo.Setup(d => d.Name).Returns(this.localObjectName);
+            fileInfo.Setup(d => d.Exists).Returns(true);
+            fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(this.withExtendedAttributes);
+
+            fileInfo.Setup(d => d.Directory).Returns(parentDirInfo.Object);
+            var transmissionManager = new ActiveActivitiesManager();
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
+            Assert.Throws<NullReferenceException>(() => solver.Solve(fileInfo.Object, null));
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         [Test, Category("Fast"), Category("Solver")]
