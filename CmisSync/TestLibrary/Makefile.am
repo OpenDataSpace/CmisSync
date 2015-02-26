@@ -163,6 +163,7 @@ SOURCES =  \
 	TestUtils/FolderTreeTest.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
+	TestUtils/MockOfICmisObject.cs \
 	TestUtils/MockOfIDocumentUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
 	TestUtils/MockOfIFilterAggregatorUtil.cs \

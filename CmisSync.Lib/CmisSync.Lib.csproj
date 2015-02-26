@@ -291,6 +291,7 @@
     <Compile Include="Config\ServerCredentials.cs" />
     <Compile Include="Config\User.cs" />
     <Compile Include="Config\AuthenticationType.cs" />
+    <Compile Include="Cmis\ConvenienceExtenders\AllowableActionConvenienceExtenders.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

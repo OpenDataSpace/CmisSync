@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.TestUtils
-{
+namespace TestLibrary.TestUtils {
     using System;
     using System.Collections.Generic;
 
@@ -31,8 +30,7 @@ namespace TestLibrary.TestUtils
 
     using NUnit.Framework;
 
-    public static class MockOfIFolderUtil
-    {
+    public static class MockOfIFolderUtil {
         /// <summary>
         /// Setups the descendants.
         /// </summary>
@@ -43,7 +41,7 @@ namespace TestLibrary.TestUtils
             foreach (var child in children) {
                 var tree = new Mock<ITree<IFileableCmisObject>>();
                 tree.Setup(t => t.Item).Returns(child);
-                tree.Setup(t => t.Children).Returns((child is IFolder ? (child as IFolder).GetDescendants(-1) : new List<ITree<IFileableCmisObject>>()));
+                tree.Setup(t => t.Children).Returns(child is IFolder ? (child as IFolder).GetDescendants(-1) : new List<ITree<IFileableCmisObject>>());
                 list.Add(tree.Object);
             }
 
@@ -115,7 +113,9 @@ namespace TestLibrary.TestUtils
                 values.Add("*");
                 ignoreEntry.Setup(i => i.Values).Returns(values);
                 properties.Add(ignoreEntry.Object);
-            } if(!ignored && folder.Object.AreAllChildrenIgnored()) {
+            }
+
+            if (!ignored && folder.Object.AreAllChildrenIgnored()) {
                 foreach (var prop in properties) {
                     if (prop.Id == "gds:ignoreDeviceIds") {
                         properties.Remove(prop);

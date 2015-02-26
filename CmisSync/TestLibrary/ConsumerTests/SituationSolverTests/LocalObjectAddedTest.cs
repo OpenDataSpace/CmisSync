@@ -69,30 +69,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void Local1ByteFileAddedWithoutExtAttr() {
-            this.SetUpMocks(false);
-            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
-            fileInfo.Setup(f => f.Length).Returns(1);
-            var fileContent = new byte[1];
-            var localFileStream = new MemoryStream(fileContent);
-            byte[] hash = SHA1Managed.Create().ComputeHash(fileContent);
-
-            fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(localFileStream);
-
-            Mock<IDocument> document;
-            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
-
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, Times.Exactly(2), this.withExtendedAttributes, null, null, hash, 1);
-            this.VerifyCreateDocument();
-            fileInfo.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
-            fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
-            document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void Local1ByteFileAddedWithExtAttr() {
-            this.SetUpMocks(true);
+        public void Local1ByteFileAdded([Values(true, false)]bool withExtendedAttributes) {
+            this.SetUpMocks(withExtendedAttributes);
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(1);
             var fileContent = new byte[1];
@@ -105,81 +83,52 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
                 this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, Times.Exactly(2), this.withExtendedAttributes, null, null, hash, 1);
                 this.VerifyCreateDocument();
-                fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
+                if (this.withExtendedAttributes) {
+                    fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
+                } else {
+                    fileInfo.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
+                }
+
                 fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
                 document.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), true, true), Times.Once());
                 document.VerifyUpdateLastModificationDate(fileInfo.Object.LastWriteTimeUtc, true);
             }
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void LocalEmptyFileAddedWithoutExtAttr() {
-            this.SetUpMocks(false);
-
-            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
-            fileInfo.Setup(f => f.Length).Returns(0);
-
-            Mock<IDocument> document;
-            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, this.withExtendedAttributes, checksum: this.emptyhash, contentSize: 0);
-            this.VerifyCreateDocument(isEmpty: true);
-            fileInfo.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
-            fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void LocalEmptyFileAddedWithExtAttr() {
-            this.SetUpMocks(true);
-
-            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
-            fileInfo.Setup(f => f.Length).Returns(0);
-
-            Mock<IDocument> document;
-            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, this.withExtendedAttributes, checksum: this.emptyhash, contentSize: 0);
-            this.VerifyCreateDocument(isEmpty: true);
-            fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
-            fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void LocalEmptyFileAddedWithExtAttrAndAlreadySetUUID() {
-            this.SetUpMocks(true);
+        [Test, Category("Fast"), Category("Solver"), TestCase(true, true), TestCase(true, false), TestCase(false, false)]
+        public void LocalEmptyFileAdded(bool withExtendedAttributes, bool withAlreadySetUuid) {
+            this.SetUpMocks(withExtendedAttributes);
             Guid uuid = Guid.NewGuid();
-
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(0);
-            fileInfo.SetupGuid(uuid);
+            if (withAlreadySetUuid) {
+                fileInfo.SetupGuid(uuid);
+            }
 
             Mock<IDocument> document;
+
             this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
+
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, this.withExtendedAttributes, checksum: this.emptyhash, contentSize: 0);
-            this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => o.Guid == uuid)));
-            this.VerifyCreateDocument(true);
-            fileInfo.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
+            if (withAlreadySetUuid) {
+                this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => o.Guid == uuid)));
+            }
+
+            this.VerifyCreateDocument(isEmpty: true);
+            if (this.withExtendedAttributes && !withAlreadySetUuid) {
+                fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(u => u != null), Times.Once());
+            } else {
+                fileInfo.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
+            }
+
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             document.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderAddedWithoutExtAttr() {
-            this.SetUpMocks();
-            bool extendedAttributes = false;
-            Mock<IFolder> futureFolder;
+        public void LocalFolderAdded([Values(true, false)]bool withExtendedAttributes) {
+            this.SetUpMocks(withExtendedAttributes);
 
-            var dirInfo = this.RunSolveFolder(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, extendedAttributes, out futureFolder);
-
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, extendedAttributes);
-            this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == this.parentId)), Times.Once());
-            dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderAddedWithExtendedAttributes() {
-            this.SetUpMocks(true);
             Mock<IFolder> futureFolder;
 
             var dirInfo = this.RunSolveFolder(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, out futureFolder);
@@ -187,7 +136,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, this.withExtendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == this.parentId)), Times.Once());
             dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => !uuid.Equals(Guid.Empty)), Times.Once());
+            if (this.withExtendedAttributes) {
+                dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => !uuid.Equals(Guid.Empty)), Times.Once());
+            } else {
+                dirInfo.VerifySet(d => d.Uuid = It.IsAny<Guid?>(), Times.Never());
+            }
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -321,6 +274,39 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(this.withExtendedAttributes);
 
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo);
+            var transmissionManager = new ActiveActivitiesManager();
+            var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
+            solver.Solve(fileInfo.Object, null);
+            this.storage.Verify(s => s.SaveMappedObject(It.IsAny<IMappedObject>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
+        public void ParentFolderDoesNotExistsOnServerDueToMissingAllowedActions() {
+            this.SetUpMocks(true);
+
+            string path = Path.Combine(Path.GetTempPath(), this.localObjectName);
+            this.session.Setup(s => s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.localObjectName),
+                It.Is<IObjectId>(o => o.Id == this.parentId),
+                It.IsAny<IContentStream>(),
+                null,
+                null,
+                null,
+                null)).Throws(new CmisPermissionDeniedException());
+
+            Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
+            fileInfo.Setup(f => f.Length).Returns(0);
+
+            var parentDirInfo = new Mock<IDirectoryInfo>();
+
+            var parents = new List<IFolder>();
+            parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
+            fileInfo.Setup(d => d.FullName).Returns(path);
+            fileInfo.Setup(d => d.Name).Returns(this.localObjectName);
+            fileInfo.Setup(d => d.Exists).Returns(true);
+            fileInfo.Setup(d => d.IsExtendedAttributeAvailable()).Returns(this.withExtendedAttributes);
+
+            fileInfo.Setup(d => d.Directory).Returns(parentDirInfo.Object);
             var transmissionManager = new ActiveActivitiesManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, transmissionManager);
             solver.Solve(fileInfo.Object, null);

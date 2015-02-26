@@ -243,8 +243,10 @@ namespace TestLibrary.IntegrationTests {
                     contentStream.Stream = memstream;
                     docCheckout.AppendContentStream(contentStream, i == 9);
                 }
+
                 Assert.That(docCheckout.ContentStreamLength, Is.EqualTo(content.Length * (i + 2)));
             }
+
             docCheckout.CheckIn(true, null, null, "checkin");
             docCheckout.Refresh();
             Assert.That(docCheckout.IsVersionSeriesCheckedOut, Is.False);
@@ -278,9 +280,7 @@ namespace TestLibrary.IntegrationTests {
             }
 
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
-
             IFolder subFolder = folder.CreateFolder(subFolderName);
-
             IFolder subFolderInstanceCopy = (IFolder)session.GetObject(subFolder.Id);
             subFolder.DeleteTree(true, null, true);
 
@@ -325,6 +325,47 @@ namespace TestLibrary.IntegrationTests {
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
             IFolder remoteFolder = (IFolder)session.GetObject(repositoryId);
             Assert.IsNotNull(remoteFolder);
+        }
+
+        /// <summary>
+        /// Gets the root folder of repository.
+        /// </summary>
+        /// <param name='canonical_name'>
+        /// Canonical_name.
+        /// </param>
+        /// <param name='localPath'>
+        /// Local path.
+        /// </param>
+        /// <param name='remoteFolderPath'>
+        /// Remote folder path.
+        /// </param>
+        /// <param name='url'>
+        /// URL.
+        /// </param>
+        /// <param name='user'>
+        /// User.
+        /// </param>
+        /// <param name='password'>
+        /// Password.
+        /// </param>
+        /// <param name='repositoryId'>
+        /// Repository identifier.
+        /// </param>
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
+        public void GetRootFolderAndAllowableActions(
+            string canonical_name,
+            string localPath,
+            string remoteFolderPath,
+            string url,
+            string user,
+            string password,
+            string repositoryId,
+            string binding)
+        {
+            ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            IFolder remoteFolder = (IFolder)session.GetObject(repositoryId);
+            Assert.That(remoteFolder.AllowableActions, Is.Not.Null);
+            Assert.That(remoteFolder.AllowableActions.Actions, Is.Not.Null.Or.Empty);
         }
 
         /// <summary>
@@ -388,10 +429,8 @@ namespace TestLibrary.IntegrationTests {
             var context = new OperationContext();
             IDocument requestedDoc = session.GetObject(emptyDoc, context) as IDocument;
             bool propertyFound = false;
-            foreach (var prop in requestedDoc.Properties)
-            {
-                if (prop.Id == "gds:ignoreDeviceIds")
-                {
+            foreach (var prop in requestedDoc.Properties) {
+                if (prop.Id == "gds:ignoreDeviceIds") {
                     propertyFound = true;
                     Assert.AreEqual("*", prop.FirstValue as string);
                 }
@@ -515,8 +554,7 @@ namespace TestLibrary.IntegrationTests {
                 if (doc != null) {
                     doc.Delete(true);
                 }
-            } catch (CmisObjectNotFoundException)
-            {
+            } catch (CmisObjectNotFoundException) {
             }
 
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
@@ -603,8 +641,7 @@ namespace TestLibrary.IntegrationTests {
                 if (doc != null) {
                     doc.Delete(true);
                 }
-            } catch (CmisObjectNotFoundException)
-            {
+            } catch (CmisObjectNotFoundException) {
             }
 
             DateTime creationDate = DateTime.UtcNow - TimeSpan.FromDays(1);
@@ -647,8 +684,7 @@ namespace TestLibrary.IntegrationTests {
                 if (doc != null) {
                     doc.Delete(true);
                 }
-            } catch (CmisObjectNotFoundException)
-            {
+            } catch (CmisObjectNotFoundException) {
             }
 
             IDocument emptyDoc = folder.CreateDocument(properties, null, null);
@@ -835,8 +871,7 @@ namespace TestLibrary.IntegrationTests {
     /// Dot CMIS session tests. Each log in process must be able to be executed in 60 seconds, otherwise the tests will fail.
     /// </summary>
     [TestFixture, Timeout(60000)]
-    public class DotCMISSessionTests
-    {
+    public class DotCMISSessionTests {
         /// <summary>
         /// Creates a cmis Atom Pub session with the given credentials.
         /// </summary>

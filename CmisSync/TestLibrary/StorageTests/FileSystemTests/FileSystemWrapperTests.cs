@@ -380,7 +380,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             uuid = fsObject.Uuid;
         } */
 
-        [Test, Category("Fast")]
+        [Test, Category("Medium")]
         public void CreatesFirstConflictFile() {
             string fileName = "test1.txt";
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
@@ -514,28 +514,25 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Fast")]
-        public void CreateDownloadCacheIfExtendedAttributesAreAvailable() {
-            Guid uuid = Guid.NewGuid();
-            var file = Mock.Of<IFileInfo>(
+        public void CreateDownloadCacheFileInfo([Values(true, false)]bool extendedAttributesAvailable) {
+            Guid? uuid = extendedAttributesAvailable ? (Guid?)Guid.NewGuid() : null;
+            string fileName = "file";
+            IFileInfo file = Mock.Of<IFileInfo>(
                 f =>
                 f.Uuid == uuid &&
-                f.Exists == true);
-            var cacheFile = Factory.CreateDownloadCacheFileInfo(file);
-            Assert.That(cacheFile.Name, Is.EqualTo(uuid.ToString() + ".sync"));
-
-            // Ensure that the path does not maps to temp path to avoid problems with extended attribute support
-            Assert.That(cacheFile.FullName.Contains(Path.GetTempPath()), Is.False);
-        }
-
-        [Test, Category("Fast")]
-        public void CreateDownloadCacheIfExtendedAttributesAreNotAvailable() {
-            var file = Mock.Of<IFileInfo>(
-                f => f.Name == "file" &&
                 f.Exists == true &&
-                f.FullName == Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), "file"));
+                f.FullName == Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), fileName) &&
+                f.Name == fileName);
+
             var cacheFile = Factory.CreateDownloadCacheFileInfo(file);
-            Assert.That(cacheFile.Name, Is.EqualTo(file.Name + ".sync"));
-            Assert.That(cacheFile.FullName, Is.EqualTo(file.FullName + ".sync"));
+            if (extendedAttributesAvailable) {
+                // Ensure that the path does not maps to temp path to avoid problems with extended attribute support
+                Assert.That(cacheFile.FullName.Contains(Path.GetTempPath()), Is.False);
+                Assert.That(cacheFile.Name, Is.EqualTo(uuid.ToString() + ".sync"));
+            } else {
+                Assert.That(cacheFile.FullName, Is.EqualTo(file.FullName + ".sync"));
+                Assert.That(cacheFile.Name, Is.EqualTo(file.Name + ".sync"));
+            }
         }
 
         [Test, Category("Fast")]
