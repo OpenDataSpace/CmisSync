@@ -17,12 +17,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
-    public abstract class IIgnoredEntity : IEquatable<IIgnoredEntity>
-    {
+    public abstract class IIgnoredEntity : IEquatable<IIgnoredEntity> {
         public string ObjectId { get; protected set; }
         public string LocalPath { get; protected set; }
 
