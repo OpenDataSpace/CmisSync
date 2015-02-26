@@ -24,6 +24,8 @@ namespace TestLibrary.TestUtils {
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data;
+    using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -94,6 +96,32 @@ namespace TestLibrary.TestUtils {
                 actions.Add(Actions.CanCreateDocument);
                 actions.Add(Actions.CanCreateFolder);
                 actions.Add(Actions.CanDeleteTree);
+            } else {
+                folder.Setup(f => f.UpdateProperties(It.IsAny<IDictionary<string, object>>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.UpdateProperties(It.IsAny<IDictionary<string, object>>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.CreateDocument(It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<VersioningState?>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.CreateDocument(
+                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<IContentStream>(),
+                    It.IsAny<VersioningState?>(),
+                    It.IsAny<IList<IPolicy>>(),
+                    It.IsAny<IList<IAce>>(),
+                    It.IsAny<IList<IAce>>(),
+                    It.IsAny<IOperationContext>())
+                ).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.CreateFolder(It.IsAny<IDictionary<string, object>>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.CreateFolder(
+                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<IList<IPolicy>>(),
+                    It.IsAny<IList<IAce>>(),
+                    It.IsAny<IList<IAce>>(),
+                    It.IsAny<IOperationContext>())
+                ).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.Delete(It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.Rename(It.IsAny<string>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.Rename(It.IsAny<string>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.AddAcl(It.IsAny<IList<IAce>>(), It.IsAny<AclPropagation?>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.DeleteTree(It.IsAny<bool>(), It.IsAny<UnfileObject?>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
             }
 
             folder.SetupAllowableActions(actions.ToArray());
