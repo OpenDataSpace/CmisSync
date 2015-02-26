@@ -243,6 +243,7 @@
     <Compile Include="IntegrationTests\RepositoryStatusIT.cs" />
     <Compile Include="UtilsTests\NameOfPropertyTest.cs" />
     <Compile Include="TestUtils\MockOfICmisObject.cs" />
+    <Compile Include="CmisTests\ConvenienceExtendersTests\AllowableActionExtendersTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

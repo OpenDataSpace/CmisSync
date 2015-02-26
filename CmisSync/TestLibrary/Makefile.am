@@ -23,6 +23,7 @@ SOURCES =  \
 	CmisTests/AuthenticationTests/AuthProviderFactoryTest.cs \
 	CmisTests/AuthenticationTests/KerberosAuthenticationProviderTest.cs \
 	CmisTests/AuthenticationTests/PersistentStandardAuthenticationProviderTest.cs \
+	CmisTests/ConvenienceExtendersTests/AllowableActionExtendersTest.cs \
 	CmisTests/ConvenienceExtendersTests/CmisConvenienceExtendersTest.cs \
 	CmisTests/OperationContextFactoryTest.cs \
 	CmisTests/RepositoryTests.cs \
