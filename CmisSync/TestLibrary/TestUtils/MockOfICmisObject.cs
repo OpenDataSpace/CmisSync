@@ -77,6 +77,17 @@ namespace TestLibrary.TestUtils {
                 actions.Add(Actions.CanApplyAcl);
                 actions.Add(Actions.CanSetContentStream);
                 actions.Add(Actions.CanDeleteContentStream);
+            } else {
+                doc.Setup(d => d.UpdateProperties(It.IsAny<IDictionary<string, object>>())).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.UpdateProperties(It.IsAny<IDictionary<string, object>>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.Delete(It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.Rename(It.IsAny<string>())).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.Rename(It.IsAny<string>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.AddAcl(It.IsAny<IList<IAce>>(), It.IsAny<AclPropagation?>())).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.DeleteContentStream()).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.DeleteContentStream(It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                doc.Setup(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
             }
 
             doc.SetupAllowableActions(actions.ToArray());
