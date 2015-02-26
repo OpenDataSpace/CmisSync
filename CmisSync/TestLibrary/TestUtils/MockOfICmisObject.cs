@@ -107,16 +107,14 @@ namespace TestLibrary.TestUtils {
                     It.IsAny<IList<IPolicy>>(),
                     It.IsAny<IList<IAce>>(),
                     It.IsAny<IList<IAce>>(),
-                    It.IsAny<IOperationContext>())
-                ).Throws(new CmisPermissionDeniedException());
+                    It.IsAny<IOperationContext>())).Throws(new CmisPermissionDeniedException());
                 folder.Setup(f => f.CreateFolder(It.IsAny<IDictionary<string, object>>())).Throws(new CmisPermissionDeniedException());
                 folder.Setup(f => f.CreateFolder(
                     It.IsAny<IDictionary<string, object>>(),
                     It.IsAny<IList<IPolicy>>(),
                     It.IsAny<IList<IAce>>(),
                     It.IsAny<IList<IAce>>(),
-                    It.IsAny<IOperationContext>())
-                ).Throws(new CmisPermissionDeniedException());
+                    It.IsAny<IOperationContext>())).Throws(new CmisPermissionDeniedException());
                 folder.Setup(f => f.Delete(It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
                 folder.Setup(f => f.Rename(It.IsAny<string>())).Throws(new CmisPermissionDeniedException());
                 folder.Setup(f => f.Rename(It.IsAny<string>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());

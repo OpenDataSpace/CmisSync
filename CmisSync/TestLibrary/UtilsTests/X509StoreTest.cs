@@ -16,22 +16,20 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-using System.Net;
 
-namespace TestLibrary.UtilsTests
-{
+namespace TestLibrary.UtilsTests {
     using System;
+    using System.Net;
     using System.Security.Cryptography.X509Certificates;
 
     using NUnit.Framework;
 
     [TestFixture, Category("Medium")]
-    public class X509StoreTest
-    {
+    public class X509StoreTest {
+        private readonly string url = "https://demo.deutsche-wolke.de";
         private X509Store underTest;
         private X509Certificate2 oldCert;
         private X509Certificate2 newCert;
-        private readonly string url = "https://demo.deutsche-wolke.de";
 
         [TestFixtureSetUp]
         public void SetUpCertificates() {
@@ -55,8 +53,7 @@ namespace TestLibrary.UtilsTests
         }
 
         [Test]
-        public void AddingCertsToStore()
-        {
+        public void AddingCertsToStore() {
             this.underTest.Add(this.oldCert);
             Assert.That(this.underTest.Certificates.Contains(this.oldCert));
             Assert.That(this.underTest.Certificates.Contains(this.newCert), Is.False);
@@ -67,9 +64,10 @@ namespace TestLibrary.UtilsTests
 
         [Test, Category("Slow"), Ignore("Should fail but doesn't")]
         public void HttpsWebRequest() {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(this.url);
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            using(response.GetResponseStream());
+            using (response.GetResponseStream()) {
+            }
         }
     }
 }
