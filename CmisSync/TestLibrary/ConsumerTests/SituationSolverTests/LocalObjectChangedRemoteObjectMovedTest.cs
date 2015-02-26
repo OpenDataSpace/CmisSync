@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
@@ -38,8 +37,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestUtils;
 
     [TestFixture]
-    public class LocalObjectChangedRemoteObjectMovedTest
-    {
+    public class LocalObjectChangedRemoteObjectMovedTest {
         private ActiveActivitiesManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -178,4 +176,3 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
     }
 }
-

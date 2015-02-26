@@ -80,8 +80,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(localFileStream);
 
                 Mock<IDocument> document;
-                this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
-                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, Times.Exactly(2), this.withExtendedAttributes, null, null, hash, 1);
+                this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
+                this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, this.lastChangeToken, Times.Exactly(2), this.withExtendedAttributes, null, null, hash, 1);
                 this.VerifyCreateDocument();
                 if (this.withExtendedAttributes) {
                     fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
@@ -107,9 +107,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             Mock<IDocument> document;
 
-            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
+            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, this.withExtendedAttributes, checksum: this.emptyhash, contentSize: 0);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, this.lastChangeToken, this.withExtendedAttributes, checksum: this.emptyhash, contentSize: 0);
             if (withAlreadySetUuid) {
                 this.storage.Verify(s => s.SaveMappedObject(It.Is<IMappedObject>(o => o.Guid == uuid)));
             }
@@ -131,9 +131,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             Mock<IFolder> futureFolder;
 
-            var dirInfo = this.RunSolveFolder(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, out futureFolder);
+            var dirInfo = this.RunSolveFolder(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, out futureFolder);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, this.withExtendedAttributes);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, this.localObjectName, this.parentId, this.lastChangeToken, this.withExtendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == this.parentId)), Times.Once());
             dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             if (this.withExtendedAttributes) {
@@ -151,7 +151,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.Name).Returns("dir");
-            var parentDirInfo = this.SetupParentFolder(parentId);
+            var parentDirInfo = this.SetupParentFolder(this.parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
             this.session.Setup(s => s.CreateFolder(It.IsAny<IDictionary<string, object>>(), It.IsAny<IObjectId>())).Throws(new CmisConstraintException("Conflict"));
             Assert.Throws<CmisConstraintException>(() => solver.Solve(dirInfo.Object, null));
@@ -170,7 +170,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Exists).Returns(true);
             dirInfo.Setup(d => d.Name).Returns(@"ä".Normalize(System.Text.NormalizationForm.FormD));
-            var parentDirInfo = this.SetupParentFolder(parentId);
+            var parentDirInfo = this.SetupParentFolder(this.parentId);
             dirInfo.Setup(d => d.Parent).Returns(parentDirInfo);
             this.session.Setup(s => s.CreateFolder(It.IsAny<IDictionary<string, object>>(), It.IsAny<IObjectId>())).Throws(new CmisConstraintException("Conflict"));
             Assert.Throws<InteractionNeededException>(() => solver.Solve(dirInfo.Object, null));
@@ -188,9 +188,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Guid guid = Guid.NewGuid();
             this.storage.AddLocalFile("unimportant", "unimportant", guid);
 
-            var dirInfo = this.RunSolveFolder(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, out futureFolder, guid);
+            var dirInfo = this.RunSolveFolder(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, out futureFolder, guid);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, this.withExtendedAttributes);
+            this.storage.VerifySavedMappedObject(MappedObjectType.Folder, this.remoteObjectId, this.localObjectName, this.parentId, this.lastChangeToken, this.withExtendedAttributes);
             this.session.Verify(s => s.CreateFolder(It.Is<IDictionary<string, object>>(p => p.ContainsKey("cmis:name")), It.Is<IObjectId>(o => o.Id == this.parentId)), Times.Once());
             dirInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             dirInfo.VerifySet(d => d.Uuid = It.Is<Guid?>(uuid => !uuid.Equals(guid)), Times.Once());
@@ -207,7 +207,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             try {
                 Mock<IDocument> document;
-                this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
+                this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, fileInfo, out document);
                 Assert.Fail();
             } catch (RetryException e) {
                 Assert.That(e.InnerException, Is.EqualTo(exception));
@@ -227,9 +227,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(new IOException("Alread in use by another process"));
 
             Mock<IDocument> document;
-            Assert.Throws<IOException>(() => this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, true, fileInfo, out document));
+            Assert.Throws<IOException>(() => this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, true, fileInfo, out document));
             fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, true, checksum: this.emptyhash, contentSize: 0);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, this.lastChangeToken, true, checksum: this.emptyhash, contentSize: 0);
             this.VerifyCreateDocument(isEmpty: false);
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
@@ -242,7 +242,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(f => f.Length).Returns(0);
 
             Mock<IDocument> document;
-            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document, false);
+            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, fileInfo, out document, false);
 
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
@@ -325,8 +325,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(localFileStream);
 
             Mock<IDocument> document;
-            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, lastChangeToken, this.withExtendedAttributes, fileInfo, out document, failsOnUploadContent: true);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, lastChangeToken, this.withExtendedAttributes, checksum: this.emptyhash, contentSize: 0);
+            this.RunSolveFile(this.localObjectName, this.remoteObjectId, this.parentId, this.lastChangeToken, this.withExtendedAttributes, fileInfo, out document, failsOnUploadContent: true);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.remoteObjectId, this.localObjectName, this.parentId, this.lastChangeToken, this.withExtendedAttributes, checksum: this.emptyhash, contentSize: 0);
             this.VerifyCreateDocument();
             fileInfo.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             fileInfo.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
