@@ -20,10 +20,29 @@
 namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
+    /// <summary>
+    /// IIgnored entity holds the ignored remote object id and the local path.
+    /// </summary>
     public abstract class IIgnoredEntity : IEquatable<IIgnoredEntity> {
+        /// <summary>
+        /// Gets or sets the remote object identifier of an ignored object.
+        /// </summary>
+        /// <value>The object identifier.</value>
         public string ObjectId { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets the corresponding local path of the ignored remote object.
+        /// </summary>
+        /// <value>The local path.</value>
         public string LocalPath { get; protected set; }
 
+        /// <summary>
+        /// Determines whether the specified <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/> is equal to the
+        /// current <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/>.
+        /// </summary>
+        /// <param name="other">The <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/> to compare with the current <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/>.</param>
+        /// <returns><c>true</c> if the specified <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/> is equal to the
+        /// current <see cref="CmisSync.Lib.SelectiveIgnore.IIgnoredEntity"/>; otherwise, <c>false</c>.</returns>
         public bool Equals(IIgnoredEntity other) {
             return this.ObjectId == other.ObjectId;
         }
