@@ -24,11 +24,13 @@ namespace TestLibrary.TestUtils {
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data;
+    using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
     public static class MockOfICmisObject {
-        public static void SetupReadOnly(this Mock<ICmisObject> mock, bool ro = true) {
+        public static void SetupReadOnly(this Mock<ICmisObject> mock, bool readOnly = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
             actions.Add(Actions.CanGetAppliedPolicies);
@@ -41,7 +43,7 @@ namespace TestLibrary.TestUtils {
                 actions.Add(Actions.CanGetChildren);
             }
 
-            if (!ro) {
+            if (!readOnly) {
                 actions.Add(Actions.CanUpdateProperties);
                 actions.Add(Actions.CanMoveObject);
                 actions.Add(Actions.CanDeleteObject);
@@ -61,10 +63,86 @@ namespace TestLibrary.TestUtils {
             mock.SetupAllowableActions(actions.ToArray());
         }
 
+        public static void SetupReadOnly(this Mock<IDocument> doc, bool readOnly = true) {
+            var actions = new List<string>();
+            actions.Add(Actions.CanGetAcl);
+            actions.Add(Actions.CanGetAppliedPolicies);
+            actions.Add(Actions.CanGetAllVersions);
+            actions.Add(Actions.CanGetContentStream);
+
+            if (!readOnly) {
+                actions.Add(Actions.CanUpdateProperties);
+                actions.Add(Actions.CanMoveObject);
+                actions.Add(Actions.CanDeleteObject);
+                actions.Add(Actions.CanApplyAcl);
+                actions.Add(Actions.CanSetContentStream);
+                actions.Add(Actions.CanDeleteContentStream);
+            }
+
+            doc.SetupAllowableActions(actions.ToArray());
+        }
+
+        public static void SetupReadOnly(this Mock<IFolder> folder, bool readOnly = true) {
+            var actions = new List<string>();
+            actions.Add(Actions.CanGetAcl);
+            actions.Add(Actions.CanGetAppliedPolicies);
+            actions.Add(Actions.CanGetChildren);
+
+            if (!readOnly) {
+                actions.Add(Actions.CanUpdateProperties);
+                actions.Add(Actions.CanMoveObject);
+                actions.Add(Actions.CanDeleteObject);
+                actions.Add(Actions.CanApplyAcl);
+                actions.Add(Actions.CanCreateDocument);
+                actions.Add(Actions.CanCreateFolder);
+                actions.Add(Actions.CanDeleteTree);
+            } else {
+                folder.Setup(f => f.UpdateProperties(It.IsAny<IDictionary<string, object>>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.UpdateProperties(It.IsAny<IDictionary<string, object>>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.CreateDocument(It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<VersioningState?>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.CreateDocument(
+                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<IContentStream>(),
+                    It.IsAny<VersioningState?>(),
+                    It.IsAny<IList<IPolicy>>(),
+                    It.IsAny<IList<IAce>>(),
+                    It.IsAny<IList<IAce>>(),
+                    It.IsAny<IOperationContext>())
+                ).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.CreateFolder(It.IsAny<IDictionary<string, object>>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.CreateFolder(
+                    It.IsAny<IDictionary<string, object>>(),
+                    It.IsAny<IList<IPolicy>>(),
+                    It.IsAny<IList<IAce>>(),
+                    It.IsAny<IList<IAce>>(),
+                    It.IsAny<IOperationContext>())
+                ).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.Delete(It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.Rename(It.IsAny<string>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.Rename(It.IsAny<string>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.AddAcl(It.IsAny<IList<IAce>>(), It.IsAny<AclPropagation?>())).Throws(new CmisPermissionDeniedException());
+                folder.Setup(f => f.DeleteTree(It.IsAny<bool>(), It.IsAny<UnfileObject?>(), It.IsAny<bool>())).Throws(new CmisPermissionDeniedException());
+            }
+
+            folder.SetupAllowableActions(actions.ToArray());
+        }
+
         public static void SetupAllowableActions(this Mock<ICmisObject> mock, params string[] actions) {
             var allowableActions = new HashSet<string>(actions);
             var allowableMock = Mock.Of<IAllowableActions>(o => o.Actions == allowableActions);
             mock.Setup(m => m.AllowableActions).Returns(allowableMock);
+        }
+
+        public static void SetupAllowableActions(this Mock<IDocument> doc, params string[] actions) {
+            var allowableActions = new HashSet<string>(actions);
+            var allowableMock = Mock.Of<IAllowableActions>(o => o.Actions == allowableActions);
+            doc.Setup(m => m.AllowableActions).Returns(allowableMock);
+        }
+
+        public static void SetupAllowableActions(this Mock<IFolder> folder, params string[] actions) {
+            var allowableActions = new HashSet<string>(actions);
+            var allowableMock = Mock.Of<IAllowableActions>(o => o.Actions == allowableActions);
+            folder.Setup(m => m.AllowableActions).Returns(allowableMock);
         }
     }
 }

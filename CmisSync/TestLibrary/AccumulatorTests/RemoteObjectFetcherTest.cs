@@ -17,17 +17,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.AccumulatorTests
-{
+namespace TestLibrary.AccumulatorTests {
     using System;
     using System.IO;
 
     using CmisSync.Lib.Accumulator;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
-    using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
@@ -40,8 +39,7 @@ namespace TestLibrary.AccumulatorTests
     using TestLibrary.UtilsTests;
 
     [TestFixture]
-    public class RemoteObjectFetcherTest
-    {
+    public class RemoteObjectFetcherTest {
         private static readonly string Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "path");
         private static readonly string Id = "myId";
         private static readonly Guid Uuid = Guid.NewGuid();
@@ -120,7 +118,7 @@ namespace TestLibrary.AccumulatorTests
 
             var fileInfoMock = new Mock<IFileInfo>();
             fileInfoMock.Setup(f => f.FullName).Returns(Path);
-            var fileEvent = new FileEvent(fileInfoMock.Object) {Local= MetaDataChangeType.DELETED};
+            var fileEvent = new FileEvent(fileInfoMock.Object) { Local = MetaDataChangeType.DELETED };
             var fetcher = new RemoteObjectFetcher(session.Object, storage.Object);
 
             Assert.That(fetcher.Handle(fileEvent), Is.False);
@@ -293,6 +291,5 @@ namespace TestLibrary.AccumulatorTests
             Assert.That(fetcher.Handle(folderEvent), Is.False);
             session.VerifyThatCachingIsDisabled();
         }
-        
     }
 }

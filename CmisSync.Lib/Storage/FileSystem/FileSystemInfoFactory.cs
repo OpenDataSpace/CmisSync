@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
 
@@ -27,8 +26,7 @@ namespace CmisSync.Lib.Storage.FileSystem
     /// <summary>
     /// Wrapps all interfaced methods and calls the Systems.IO classes
     /// </summary>
-    public class FileSystemInfoFactory : IFileSystemInfoFactory
-    {
+    public class FileSystemInfoFactory : IFileSystemInfoFactory {
         /// <summary>
         /// Creates the directory info.
         /// </summary>

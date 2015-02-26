@@ -222,8 +222,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.filters = new Mock<IFilterAggregator>();
             this.fileNameFilter = new IgnoredFileNamesFilter();
             this.folderNameFilter = new IgnoredFolderNameFilter();
-            this.filters.Setup(f => f.FileNamesFilter).Returns(fileNameFilter);
-            this.filters.Setup(f => f.FolderNamesFilter).Returns(folderNameFilter);
+            this.filters.Setup(f => f.FileNamesFilter).Returns(this.fileNameFilter);
+            this.filters.Setup(f => f.FolderNamesFilter).Returns(this.folderNameFilter);
             this.underTest = new RemoteObjectDeleted(this.session.Object, this.storage.Object, this.filters.Object);
         }
     }

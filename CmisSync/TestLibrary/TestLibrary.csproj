@@ -89,7 +89,6 @@
     <Compile Include="CmisTests\OperationContextFactoryTest.cs" />
     <Compile Include="CmisTests\UiUtilsTests\CmisUtilsTest.cs" />
     <Compile Include="ConfigTests\ConfigurationTest.cs" />
-    <Compile Include="ConfigTests\CredentialsTest.cs" />
     <Compile Include="ConfigTests\DefaultSettingsTests.cs" />
     <Compile Include="ConfigTests\RepoInfoTests.cs" />
     <Compile Include="ConsumerTests\LocalSituationDetectionTest.cs" />
@@ -123,7 +122,6 @@
     <Compile Include="EventsTests\ActivityListenerAggregatorTest.cs" />
     <Compile Include="EventsTests\EncapsuledEventTest.cs" />
     <Compile Include="EventsTests\EventHandlerPrioritiesTest.cs" />
-    <Compile Include="EventsTests\ExceptionEventTest.cs" />
     <Compile Include="EventsTests\FileEventTest.cs" />
     <Compile Include="EventsTests\FileOrFolderEventFactoryTest.cs" />
     <Compile Include="EventsTests\FileTransmissionEventTest.cs" />
@@ -245,6 +243,14 @@
     <Compile Include="IntegrationTests\RepositoryStatusIT.cs" />
     <Compile Include="UtilsTests\NameOfPropertyTest.cs" />
     <Compile Include="TestUtils\MockOfICmisObject.cs" />
+    <Compile Include="CmisTests\ConvenienceExtendersTests\AllowableActionExtendersTest.cs" />
+    <Compile Include="ConfigTests\PasswordTest.cs" />
+    <Compile Include="ConfigTests\UserCredentialsTest.cs" />
+    <Compile Include="ConfigTests\ServerCredentialsTest.cs" />
+    <Compile Include="ConfigTests\CryptoTest.cs" />
+    <Compile Include="ConfigTests\CmisRepoCredentialsTest.cs" />
+    <Compile Include="EventsTests\PermissionDeniedExceptionTest.cs" />
+    <Compile Include="EventsTests\BaseExceptionEventTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

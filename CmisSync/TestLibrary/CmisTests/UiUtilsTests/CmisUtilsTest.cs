@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="CmisSyncLibUtilsTest.cs" company="GRAU DATA AG">
+// <copyright file="CmisUtilsTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.CmisTests.UiUtilsTests
-{
+namespace TestLibrary.CmisTests.UiUtilsTests {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -31,29 +30,24 @@ namespace TestLibrary.CmisTests.UiUtilsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class CmisSyncLibUtilsTest
-    {
+    public class CmisUtilsTest {
         private static readonly string TestFolderParent = Directory.GetCurrentDirectory();
         private static readonly string TestFolder = Path.Combine(TestFolderParent, "conflicttest");
 
         [SetUp]
-        public void TestInit()
-        {
+        public void TestInit() {
             Directory.CreateDirectory(TestFolder);
         }
 
         [TearDown]
-        public void TestCleanup()
-        {
-            if (Directory.Exists(TestFolder))
-            {
+        public void TestCleanup() {
+            if (Directory.Exists(TestFolder)) {
                 Directory.Delete(TestFolder, true);
             }
         }
 
         [Test, Category("Fast")]
-        public void BandwidthTest()
-        {
+        public void BandwidthTest() {
             long bitPerSecond = 1;
             double bitPerSecondDouble = 1d;
             Assert.AreEqual(Utils.FormatBandwidth(bitPerSecond), Utils.FormatBandwidth(bitPerSecondDouble));
@@ -87,15 +81,13 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void FormatIntegerPercentTest()
-        {
+        public void FormatIntegerPercentTest() {
             int p = 5;
             Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',', '.'));
         }
 
         [Test, Category("Fast")]
-        public void FormatDoublePercentTest()
-        {
+        public void FormatDoublePercentTest() {
             double p = 5.03;
             Assert.AreEqual("5.0 %", Utils.FormatPercent(p).Replace(',', '.'));
             p = 5.06;
@@ -105,8 +97,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateUserAgent()
-        {
+        public void CreateUserAgent() {
             var useragent = Utils.CreateUserAgent();
             Assert.IsTrue(useragent.Contains(Backend.Version));
             Assert.IsTrue(useragent.Contains("hostname="));
@@ -114,8 +105,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateRegexFromIgnoreAllWildcard()
-        {
+        public void CreateRegexFromIgnoreAllWildcard() {
             var regex = Utils.IgnoreLineToRegex("*");
             Assert.That(regex.IsMatch(string.Empty));
             Assert.That(regex.IsMatch(" "));
@@ -124,8 +114,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateRegexFromIgnoreDotsAtTheBeginningWildcard()
-        {
+        public void CreateRegexFromIgnoreDotsAtTheBeginningWildcard() {
             var regex = Utils.IgnoreLineToRegex(".*");
             Assert.That(!regex.IsMatch(string.Empty));
             Assert.That(!regex.IsMatch("s."));
@@ -135,8 +124,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateRegexFromIgnoreTildeAtTheBeginningWildcard()
-        {
+        public void CreateRegexFromIgnoreTildeAtTheBeginningWildcard() {
             var regex = Utils.IgnoreLineToRegex("~*");
             Assert.That(regex.IsMatch("~test"));
             Assert.That(regex.IsMatch("~"));
@@ -145,8 +133,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void CreateRegexFromIgnoreTempFilesWildcard()
-        {
+        public void CreateRegexFromIgnoreTempFilesWildcard() {
             var regex = Utils.IgnoreLineToRegex("*.tmp");
             Assert.That(regex.IsMatch("~test.tmp"));
             Assert.That(regex.IsMatch(".tmp"));
@@ -155,8 +142,7 @@ namespace TestLibrary.CmisTests.UiUtilsTests
         }
 
         [Test, Category("Fast")]
-        public void IgnoreFolderByWildard()
-        {
+        public void IgnoreFolderByWildard() {
             var wildcards = new List<string>();
             wildcards.Add(".*");
             Assert.IsFalse(Utils.IsInvalidFolderName("test", wildcards), "test is a valid folder name");

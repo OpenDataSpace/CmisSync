@@ -161,7 +161,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             this.underTest.Solve(localFolder.Object, remoteFolder.Object);
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, remoteTargetFolder.Object), Times.Once());
-            storage.VerifyThatNoObjectIsManipulated();
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -185,7 +185,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
 
             remoteFolder.Verify(f => f.Move(this.remoteRootFolder.Object, targetFolder.Object), Times.Once());
             remoteFolder.Verify(f => f.Rename(newFolderName, true), Times.Once());
-            remoteFolder.Verify(f => f.UpdateProperties(It.IsAny<System.Collections.Generic.IDictionary<string,object>>()), Times.Never());
+            remoteFolder.Verify(f => f.UpdateProperties(It.IsAny<System.Collections.Generic.IDictionary<string, object>>()), Times.Never());
             this.storage.VerifyThatNoObjectIsManipulated();
         }
     }
