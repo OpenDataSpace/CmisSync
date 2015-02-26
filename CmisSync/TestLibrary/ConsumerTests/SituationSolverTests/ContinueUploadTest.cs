@@ -258,10 +258,31 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileChangedWhileChangeLocalBeforeContinue() {
-            Assert.Fail("TODO");
+            this.SetupFile();
+            this.SetupForLocalFileChanged();
+
+            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+
+            RunSolverToAbortUpload(solverChanged);
+
+            RunSolverToChangeLocalBeforeContinue(solverChanged);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHashChanged, this.fileLength);
+            this.session.Verify(
+                s =>
+                s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
+                It.Is<IObjectId>(o => o.Id == this.parentId),
+                It.Is<IContentStream>(st => st == null),
+                null,
+                null,
+                null,
+                null),
+                Times.Never());
+            this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Never());
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
         [Ignore("TODO")]
