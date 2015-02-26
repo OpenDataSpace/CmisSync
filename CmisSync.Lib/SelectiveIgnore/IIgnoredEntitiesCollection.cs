@@ -17,14 +17,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
     using DotCMIS.Client;
 
-    public interface IIgnoredEntitiesCollection
-    {
+    public interface IIgnoredEntitiesCollection {
         void Add(IIgnoredEntity ignore);
         void Remove(IIgnoredEntity ignore);
         void Remove(string objectId);

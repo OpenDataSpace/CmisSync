@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -30,12 +29,20 @@ namespace CmisSync.Lib.SelectiveIgnore
 
     using DotCMIS.Client;
 
-    public class IgnoreFlagChangeDetection : ReportingSyncEventHandler
-    {
+    /// <summary>
+    /// This class observes changes of the ignore state on remote objects.
+    /// </summary>
+    public class IgnoreFlagChangeDetection : ReportingSyncEventHandler {
         private IIgnoredEntitiesStorage ignores;
         private IPathMatcher matcher;
-        public IgnoreFlagChangeDetection(IIgnoredEntitiesStorage ignores, IPathMatcher matcher, ISyncEventQueue queue) : base(queue)
-        {
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.SelectiveIgnore.IgnoreFlagChangeDetection"/> class.
+        /// </summary>
+        /// <param name="ignores">Storage for ignores.</param>
+        /// <param name="matcher">Path matcher.</param>
+        /// <param name="queue">Sync Event Queue.</param>
+        public IgnoreFlagChangeDetection(IIgnoredEntitiesStorage ignores, IPathMatcher matcher, ISyncEventQueue queue) : base(queue) {
             if (ignores == null) {
                 throw new ArgumentNullException("Given ignores are null");
             }
@@ -48,8 +55,13 @@ namespace CmisSync.Lib.SelectiveIgnore
             this.matcher = matcher;
         }
 
-        public override bool Handle(ISyncEvent e)
-        {
+        /// <summary>
+        /// Observes content change events and if they effect exiting entries, updates to storage are executed.
+        /// If an existing entry is not ignored anymore a crawl sync is started.
+        /// </summary>
+        /// <param name="e">The content change events to be observed.</param>
+        /// <returns><c>false</c> on every event</returns>
+        public override bool Handle(ISyncEvent e) {
             if (e is ContentChangeEvent) {
                 var change = e as ContentChangeEvent;
                 if (change.Type == DotCMIS.Enums.ChangeType.Deleted) {

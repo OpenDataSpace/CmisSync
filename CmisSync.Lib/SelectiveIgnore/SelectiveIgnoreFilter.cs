@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
     using System.Collections.ObjectModel;
     using System.Linq;
@@ -34,10 +33,13 @@ namespace CmisSync.Lib.SelectiveIgnore
     /// Selective ignore filter.
     /// All file/folder events for affecting files/folders which are inside an ignored folder are filtered out.
     /// </summary>
-    public class SelectiveIgnoreFilter : SyncEventHandler
-    {
+    public class SelectiveIgnoreFilter : SyncEventHandler {
         private IIgnoredEntitiesStorage storage;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.SelectiveIgnore.SelectiveIgnoreFilter"/> class.
+        /// </summary>
+        /// <param name="storage">Ignored entities storage.</param>
         public SelectiveIgnoreFilter(IIgnoredEntitiesStorage storage) {
             if (storage == null) {
                 throw new ArgumentNullException("The given storage is null");
@@ -46,8 +48,12 @@ namespace CmisSync.Lib.SelectiveIgnore
             this.storage = storage;
         }
 
-        public override bool Handle(ISyncEvent e)
-        {
+        /// <summary>
+        /// Handles IFilterableRemoteObjectEvent or IFilterableLocalPathEvent if they affect an ignored folder.
+        /// </summary>
+        /// <param name="e">The event to handle.</param>
+        /// <returns>true if handled</returns>
+        public override bool Handle(ISyncEvent e) {
             if (e is IFilterableRemoteObjectEvent) {
                 var ev = e as IFilterableRemoteObjectEvent;
 
