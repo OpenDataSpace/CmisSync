@@ -140,6 +140,12 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         public string LastChangeTokenPWC { get; set; }
 
         /// <summary>
+        /// Gets or sets the last file content checksum for CMIS server remote object private working copy
+        /// </summary>
+        /// <value>The last file content checksum for local file</value>
+        public byte[] LastChecksumPWC { get; set; }
+        
+        /// <summary>
         /// Gets or sets the last remote write time in UTC
         /// </summary>
         /// <value>The last remote write time in UTC</value>

@@ -65,6 +65,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private byte[] fileContent;
         private byte[] fileHash;
         private long fileLength;
+        private byte[] fileContentChanged;
+        private byte[] fileHashChanged;
         private Mock<IFileInfo> localFile;
         private Mock<IDocument> remoteDocument;
         private Mock<IDocument> remotePWCDocument;
@@ -154,14 +156,23 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 length += stream.Stream.Read(buffer, 0, buffer.Length);
             });
             this.remotePWCDocument.Setup(d => d.ContentStreamLength).Returns(() => { return length; });
-            this.session.Setup(s=>s.GetObject(this.objectPWCId)).Returns(this.remotePWCDocument.Object);
+            this.remotePWCDocument.Setup(d => d.DeleteContentStream()).Callback(() => { length = 0; });
+            this.session.Setup(s => s.GetObject(this.objectPWCId)).Returns(this.remotePWCDocument.Object);
 
             this.remoteDocument.SetupCheckout(this.remotePWCDocument, this.changeTokenNew);
 
             this.fileLength = this.chunkCount * this.chunkSize;
-            this.fileContent = new byte[fileLength];
-            this.fileHash = SHA1Managed.Create().ComputeHash(fileContent);
-
+            this.fileContent = new byte[this.fileLength];
+            this.fileHash = SHA1Managed.Create().ComputeHash(this.fileContent);
+            this.fileContentChanged = new byte[fileLength];
+            Array.Copy(this.fileContent, this.fileContentChanged, this.fileLength);
+            //  change the first byte
+            if (this.fileContentChanged[0] == (byte)0) {
+                this.fileContentChanged[0] = (byte)1;
+            } else {
+                this.fileContentChanged[0] = (byte)0;
+            }
+            this.fileHashChanged = SHA1Managed.Create().ComputeHash(this.fileContentChanged);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -190,14 +201,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 Times.Once());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(this.chunkCount + 1));  //  plus 1 for one AppendContentStream is aborted
-            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, true);
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileChanged() {
             this.SetupFile();
-            this.SetupLocalFileChanged();
+            this.SetupForLocalFileChanged();
 
             var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
 
@@ -219,14 +228,34 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 Times.Never());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Never());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(this.chunkCount + 1));  //  plus 1 for one AppendContentStream is aborted
-            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, true);
         }
 
-        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileAddedWhileChangeLocalBeforeContinue() {
-            Assert.Fail("TODO");
+            this.SetupFile();
+
+            var solverAdded = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+
+            RunSolverToAbortUpload(solverAdded);
+
+            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+
+            RunSolverToChangeLocalBeforeContinue(solverChanged);
+
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHashChanged, this.fileLength);
+            this.session.Verify(
+                s =>
+                s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
+                It.Is<IObjectId>(o => o.Id == this.parentId),
+                It.Is<IContentStream>(st => st == null),
+                null,
+                null,
+                null,
+                null),
+                Times.Once());
+            this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
         [Ignore("TODO")]
@@ -259,7 +288,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.Fail("TODO");
         }
 
-        private void SetupLocalFileChanged() {
+        private void SetupForLocalFileChanged() {
             var mappedObject = new MappedObject(
                 this.objectName,
                 this.objectOldId,
@@ -322,6 +351,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 readLength += count;
                 return count;
             });
+            stream.Setup(f => f.Seek(It.IsAny<long>(), It.IsAny<SeekOrigin>())).Callback((long offset, SeekOrigin loc) => readLength = offset);
             stream.Setup(s => s.Position).Returns(() => { return readLength; });
 
             this.localFile.Setup(f => f.Length).Returns(this.fileLength);
@@ -329,6 +359,45 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             solver.Solve(this.localFile.Object, this.remoteDocument.Object, localContent, remoteContent);
             Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
+
+            this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(this.chunkCount + 1));  //  plus 1 for one AppendContentStream is aborted
+            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, true);
         }
+
+        private void RunSolverToChangeLocalBeforeContinue(
+            AbstractEnhancedSolver solver,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE) {
+            SetupToChangeLocal();
+
+            solver.Solve(this.localFile.Object, this.remoteDocument.Object, localContent, remoteContent);
+            Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
+
+            this.remotePWCDocument.Verify(d => d.DeleteContentStream(), Times.Exactly(2));
+            this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(this.chunkCount + 3));  //  plus 1 for one AppendContentStream is aborted, plus 2 for the last upload having two AppendContentStream
+            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, true);
+        }
+
+        private void SetupToChangeLocal() {
+            long readLength = 0;
+            var stream = new Mock<MemoryStream>();
+            stream.SetupAllProperties();
+            stream.Setup(s => s.CanRead).Returns(true);
+            stream.Setup(s => s.Length).Returns(this.fileLength);
+            stream.Setup(s => s.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => {
+                if (readLength + count > this.fileLength) {
+                    count = (int)(this.fileLength - readLength);
+                }
+                Array.Copy(this.fileContentChanged, readLength, buffer, offset, count);
+                readLength += count;
+                return count;
+            });
+            stream.Setup(f => f.Seek(It.IsAny<long>(), It.IsAny<SeekOrigin>())).Callback((long offset, SeekOrigin loc) => readLength = offset);
+            stream.Setup(s => s.Position).Returns(() => { return readLength; });
+
+            this.localFile.Setup(f => f.Length).Returns(this.fileLength);
+            this.localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream.Object);
+        }
+
     }
 }
