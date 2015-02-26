@@ -28,10 +28,14 @@ SOURCES =  \
 	CmisTests/OperationContextFactoryTest.cs \
 	CmisTests/RepositoryTests.cs \
 	CmisTests/UiUtilsTests/CmisUtilsTest.cs \
+	ConfigTests/CmisRepoCredentialsTest.cs \
 	ConfigTests/ConfigurationTest.cs \
-	ConfigTests/CredentialsTest.cs \
+	ConfigTests/CryptoTest.cs \
 	ConfigTests/DefaultSettingsTests.cs \
+	ConfigTests/PasswordTest.cs \
 	ConfigTests/RepoInfoTests.cs \
+	ConfigTests/ServerCredentialsTest.cs \
+	ConfigTests/UserCredentialsTest.cs \
 	ConsumerTests/LocalSituationDetectionTest.cs \
 	ConsumerTests/RemoteSituationDetectionTest.cs \
 	ConsumerTests/SituationSolverTests/AbstractEnhancedSolverTest.cs \
@@ -59,9 +63,9 @@ SOURCES =  \
 	ConsumerTests/SituationSolverTests/RemoteObjectRenamedTest.cs \
 	ConsumerTests/SyncMechanismTest.cs \
 	EventsTests/ActivityListenerAggregatorTest.cs \
+	EventsTests/BaseExceptionEventTest.cs \
 	EventsTests/EncapsuledEventTest.cs \
 	EventsTests/EventHandlerPrioritiesTest.cs \
-	EventsTests/ExceptionEventTest.cs \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileOrFolderEventFactoryTest.cs \
 	EventsTests/FileTransmissionEventTest.cs \
@@ -71,6 +75,7 @@ SOURCES =  \
 	EventsTests/GenericSyncEventHandlerTest.cs \
 	EventsTests/InteractionNeededInitializationTest.cs \
 	EventsTests/PermissionDeniedEventCalculatesBlockingUntilTest.cs \
+	EventsTests/PermissionDeniedExceptionTest.cs \
 	EventsTests/ProxyAuthRequiredEventTest.cs \
 	EventsTests/StartNextSyncEventTest.cs \
 	FileTransmissionTests/ChunkedDownloaderTest.cs \
