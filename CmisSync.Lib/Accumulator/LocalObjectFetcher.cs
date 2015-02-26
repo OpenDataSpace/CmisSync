@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-------------------
-namespace CmisSync.Lib.Accumulator
-{
+namespace CmisSync.Lib.Accumulator {
     using System;
 
     using CmisSync.Lib.Events;
@@ -34,8 +33,7 @@ namespace CmisSync.Lib.Accumulator
     /// <exception cref='ArgumentNullException'>
     /// Is thrown when an argument passed to a method is invalid because it is <see langword="null" /> .
     /// </exception>
-    public class LocalObjectFetcher : SyncEventHandler
-    {
+    public class LocalObjectFetcher : SyncEventHandler {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectFetcher));
 
         private IFileSystemInfoFactory fsFactory;

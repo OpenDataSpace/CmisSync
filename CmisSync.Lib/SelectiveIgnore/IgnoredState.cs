@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
     /// <summary>
     /// Ignored state of an object.
     /// </summary>
-    public enum IgnoredState
-    {
+    public enum IgnoredState {
         /// <summary>
         /// This object is not ignored.
         /// </summary>

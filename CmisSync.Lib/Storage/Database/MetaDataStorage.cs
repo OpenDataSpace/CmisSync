@@ -643,7 +643,7 @@ namespace CmisSync.Lib.Storage.Database {
 
             MappedObject entry = value.Get;
             pathSegments.Push(entry.Name);
-            while(entry.ParentId != null) {
+            while (entry.ParentId != null) {
                 id = entry.ParentId;
                 entry = tran.Select<string, DbCustomSerializer<MappedObject>>(MappedObjectsTable, id).Value.Get;
                 pathSegments.Push(entry.Name);

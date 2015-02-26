@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
 
     /// <summary>
     /// Interface for Creating IFileSystemInfo Implementations
     /// </summary>
-    public interface IFileSystemInfoFactory
-    {
+    public interface IFileSystemInfoFactory {
         /// <summary>
         /// Creates a directory info.
         /// </summary>

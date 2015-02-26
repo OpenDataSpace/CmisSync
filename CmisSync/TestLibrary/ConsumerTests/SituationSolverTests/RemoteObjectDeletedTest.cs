@@ -168,6 +168,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Mock<IMappedObject> folder = this.storage.AddLocalFolder(this.path, "id");
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Name).Returns(this.name);
+            dirInfo.Setup(d => d.FullName).Returns(this.path);
             var ignoredFileInfo = new Mock<IFileInfo>();
             ignoredFileInfo.Setup(f => f.Name).Returns(ignoredFile);
             var ignoredFolderInfo = new Mock<IDirectoryInfo>();
@@ -187,6 +188,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetUpTestMocks();
             var dirInfo = new Mock<IDirectoryInfo>();
             dirInfo.Setup(d => d.Name).Returns(this.name);
+            dirInfo.Setup(d => d.FullName).Returns(this.path);
             Mock<IMappedObject> folder = this.storage.AddLocalFolder(this.path, "id");
             folder.Setup(f => f.Ignored).Returns(true);
 
