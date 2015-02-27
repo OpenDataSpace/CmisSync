@@ -159,8 +159,6 @@ namespace CmisSync {
                 }
             }
 
-            this.UpdateTime = DateTime.Now;
-
             Status = State;
             long speed = status.BitsPerSecond.GetValueOrDefault();
             if (speed != 0) {
@@ -184,6 +182,8 @@ namespace CmisSync {
             if (oldStatus == Status && oldProgress == Progress) {
                 return;
             }
+
+            this.UpdateTime = DateTime.Now;
 
             lock (lockController) {
                 if (Controller != null) {
