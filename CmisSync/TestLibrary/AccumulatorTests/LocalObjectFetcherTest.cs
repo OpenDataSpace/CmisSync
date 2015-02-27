@@ -17,17 +17,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.AccumulatorTests
-{
+namespace TestLibrary.AccumulatorTests {
     using System;
     using System.IO;
 
     using CmisSync.Lib.Accumulator;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.PathMatcher;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
@@ -39,8 +38,7 @@ namespace TestLibrary.AccumulatorTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectFetcherTest 
-    {
+    public class LocalObjectFetcherTest {
         [Test, Category("Fast")]
         public void ConstructorTest() {
             var matcher = new Mock<IPathMatcher>();

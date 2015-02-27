@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IEventCounter.cs" company="GRAU DATA AG">
+// <copyright file="ServerCredentialsTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,26 +16,31 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
-namespace CmisSync.Lib.Queueing {
+﻿
+namespace TestLibrary {
     using System;
 
-    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Config;
 
-    /// <summary>
-    /// event counter interface.
-    /// </summary>
-    public interface IEventCounter : IDisposable {
-        /// <summary>
-        /// Increase the counter if event fits.
-        /// </summary>
-        /// <param name="e">Countable event.</param>
-        void Increase(ICountableEvent e);
+    using NUnit.Framework;
 
-        /// <summary>
-        /// Decrease the counter if event fits.
-        /// </summary>
-        /// <param name="e">Countable event.</param>
-        void Decrease(ICountableEvent e);
+    [TestFixture]
+    public class ServerCredentialsTest {
+        [Test, Category("Fast")]
+        public void DefaultConstructor() {
+            var cred = new ServerCredentials();
+            Assert.IsNull(cred.Address);
+            Assert.IsNull(cred.UserName);
+            Assert.IsNull(cred.Password);
+        }
+
+        [Test, Category("Fast")]
+        public void SetServerAddress() {
+            string url = "http://example.com/";
+            var cred = new ServerCredentials {
+                Address = new Uri(url)
+            };
+            Assert.AreEqual(url, cred.Address.ToString());
+        }
     }
 }

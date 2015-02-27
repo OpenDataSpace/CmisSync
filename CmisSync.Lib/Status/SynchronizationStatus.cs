@@ -17,12 +17,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Status
-{
-    using System;
-
-    public class SynchronizationStatus
-    {
-
+namespace CmisSync.Lib.Status {
+    /// <summary>
+    /// Synchronization status.
+    /// </summary>
+    public class SynchronizationStatus {
     }
 }

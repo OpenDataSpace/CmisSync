@@ -17,21 +17,19 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
 
-    using NUnit.Framework;
-
     using Moq;
 
+    using NUnit.Framework;
+
     [TestFixture]
-    public class ActivityListenerAggregatorTest
-    {
+    public class ActivityListenerAggregatorTest {
         [Test, Category("Fast")]
         public void ConstructorThrowsExceptionIfTransmissionManagerIsNull() {
             Assert.Throws<ArgumentNullException>(() => new ActivityListenerAggregator(Mock.Of<IActivityListener>(), null));

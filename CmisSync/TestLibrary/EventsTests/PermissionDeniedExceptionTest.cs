@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ExceptionEventTest.cs" company="GRAU DATA AG">
+// <copyright file="PermissionDeniedExceptionTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,9 +16,8 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
-namespace TestLibrary.EventsTests.ExceptionEventsTests
-{
+﻿
+namespace TestLibrary.EventsTests.ExceptionEventsTests {
     using System;
 
     using CmisSync.Lib.Events;
@@ -28,37 +27,9 @@ namespace TestLibrary.EventsTests.ExceptionEventsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class BaseExceptionEventTest
-    {
+    public class PermissionDeniedEventTest {
         [Test, Category("Fast")]
-        public void ConstructorFailsWithNullException()
-        {
-            Assert.Throws<ArgumentNullException>(() => new ExceptionEvent(null));
-        }
-
-        [Test, Category("Fast")]
-        public void ConstructorWithValidInput()
-        {
-            var exception = new Mock<Exception>().Object;
-            var ev = new ExceptionEvent(exception);
-            Assert.AreEqual(exception, ev.Exception);
-        }
-
-        [Test, Category("Fast")]
-        public void ToStringIsImplemented()
-        {
-            var exception = new Mock<Exception>(string.Empty) { CallBase = true }.Object;
-            var ev = new ExceptionEvent(exception);
-            Assert.IsNotNull(ev.ToString());
-        }
-    }
-
-    [TestFixture]
-    public class PermissionDeniedEventTest
-    {
-        [Test, Category("Fast")]
-        public void ConstructorWithValidInput()
-        {
+        public void ConstructorWithValidInput() {
             var exception = new Mock<DotCMIS.Exceptions.CmisPermissionDeniedException>().Object;
             var ev = new PermissionDeniedEvent(exception);
             Assert.AreEqual(exception, ev.Exception);

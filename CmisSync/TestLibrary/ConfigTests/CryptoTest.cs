@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="ConnectionStatus.cs" company="GRAU DATA AG">
+// <copyright file="CryptoTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,33 +16,29 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-
-namespace CmisSync.Lib.Status {
+﻿
+namespace TestLibrary.ConfigTests {
     using System;
 
-    public class ConnectionStatus {
-        private bool connected = false;
-        public bool IsConnected {
-            get {
-                return this.connected;
-            }
+    using CmisSync.Lib.Config;
 
-            set {
-                if (value != this.connected) {
-                    this.connected = value;
-                    if (this.connected) {
-                        this.ConnectedSince = DateTime.Now;
-                        this.DisconnectedSince = null;
-                    } else {
-                        this.ConnectedSince = null;
-                        this.DisconnectedSince = DateTime.Now;
-                    }
-                }
+    using NUnit.Framework;
+    [TestFixture]
+    public class CryptoTest {
+        [Test, Category("Fast")]
+        public void EncryptAndDecryptStrings() {
+            string[] test_pws = { string.Empty, "test", "Whatever", "Something to try" };
+            foreach (string pass in test_pws) {
+                string crypted = Crypto.Obfuscate(pass);
+                Assert.AreEqual(Crypto.Deobfuscate(crypted), pass);
             }
         }
 
-        public DateTime? ConnectedSince { get; private set; }
-
-        public DateTime? DisconnectedSince { get; private set; }
+        [Test, Category("Fast")]
+        public void EncryptedIsDifferentToPlaintext() {
+            string plain = "Testtesttest";
+            string encrypted = Crypto.Obfuscate(plain);
+            Assert.IsFalse(encrypted.Contains(plain));
+        }
     }
 }

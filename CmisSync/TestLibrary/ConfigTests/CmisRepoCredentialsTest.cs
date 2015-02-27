@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IEventCounter.cs" company="GRAU DATA AG">
+// <copyright file="CmisRepoCredentialsTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -17,25 +17,32 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Queueing {
+namespace TestLibrary.ConfigTests {
     using System;
 
-    using CmisSync.Lib.Events;
+    using CmisSync.Lib.Config;
 
-    /// <summary>
-    /// event counter interface.
-    /// </summary>
-    public interface IEventCounter : IDisposable {
-        /// <summary>
-        /// Increase the counter if event fits.
-        /// </summary>
-        /// <param name="e">Countable event.</param>
-        void Increase(ICountableEvent e);
+    using Moq;
 
-        /// <summary>
-        /// Decrease the counter if event fits.
-        /// </summary>
-        /// <param name="e">Countable event.</param>
-        void Decrease(ICountableEvent e);
+    using NUnit.Framework;
+    [TestFixture]
+    public class CmisRepoCredentialsTest {
+        [Test, Category("Fast")]
+        public void DefaultConstructor() {
+            var cred = new CmisRepoCredentials();
+            Assert.IsNull(cred.Address);
+            Assert.IsNull(cred.UserName);
+            Assert.IsNull(cred.Password);
+            Assert.IsNull(cred.RepoId);
+        }
+
+        [Test, Category("Fast")]
+        public void SetRepoId() {
+            string repoId = "RepoId";
+            var cred = new CmisRepoCredentials() {
+                RepoId = repoId
+            };
+            Assert.AreEqual(repoId, cred.RepoId);
+        }
     }
 }

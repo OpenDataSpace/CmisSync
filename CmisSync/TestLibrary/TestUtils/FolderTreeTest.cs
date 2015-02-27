@@ -62,7 +62,7 @@ namespace TestLibrary.TestUtils
 
         [Test, Category("Fast")]
         public void DifferentOrderingsWillProduceEqualOutput() {
-            string treeReorderd =@".
+            string treeReorderd = @".
 ├── B
 ├── A
 │   └── E
@@ -79,17 +79,17 @@ namespace TestLibrary.TestUtils
         [Test, Category("Fast")]
         public void ConstructFolderTreeByLocalDirectory() {
             var root = new Mock<IDirectoryInfo>();
-            var A = Mock.Of<IDirectoryInfo>(d => d.Name == "A");
-            var B = Mock.Of<IDirectoryInfo>(d => d.Name == "B");
-            var C = Mock.Of<IDirectoryInfo>(d => d.Name == "C");
-            var D = Mock.Of<IDirectoryInfo>(d => d.Name == "D");
-            var E = Mock.Of<IDirectoryInfo>(d => d.Name == "E");
-            var F = Mock.Of<IDirectoryInfo>(d => d.Name == "F");
-            var G = Mock.Of<IDirectoryInfo>(d => d.Name == "G");
-            Mock.Get(C).SetupDirectories(D);
-            Mock.Get(E).SetupDirectories(F, G);
-            Mock.Get(A).SetupDirectories(E);
-            root.SetupDirectories(A, C, B);
+            var a = Mock.Of<IDirectoryInfo>(dir => dir.Name == "A");
+            var b = Mock.Of<IDirectoryInfo>(dir => dir.Name == "B");
+            var c = Mock.Of<IDirectoryInfo>(dir => dir.Name == "C");
+            var d = Mock.Of<IDirectoryInfo>(dir => dir.Name == "D");
+            var e = Mock.Of<IDirectoryInfo>(dir => dir.Name == "E");
+            var f = Mock.Of<IDirectoryInfo>(dir => dir.Name == "F");
+            var g = Mock.Of<IDirectoryInfo>(dir => dir.Name == "G");
+            Mock.Get(c).SetupDirectories(d);
+            Mock.Get(e).SetupDirectories(f, g);
+            Mock.Get(a).SetupDirectories(e);
+            root.SetupDirectories(a, c, b);
 
             var underTest = new FolderTree(root.Object, ".");
 
@@ -99,21 +99,21 @@ namespace TestLibrary.TestUtils
         [Test, Category("Fast")]
         public void ConstructFolderTreeByRemoteFolder() {
             var root = new Mock<IFolder>();
-            var A = Mock.Of<IFolder>(d => d.Name == "A");
-            var B = Mock.Of<IFolder>(d => d.Name == "B");
-            var C = Mock.Of<IFolder>(d => d.Name == "C");
-            var D = Mock.Of<IFolder>(d => d.Name == "D");
-            var E = Mock.Of<IFolder>(d => d.Name == "E");
-            var F = Mock.Of<IFolder>(d => d.Name == "F");
-            var G = Mock.Of<IFolder>(d => d.Name == "G");
-            Mock.Get(A).SetupChildren(E);
-            Mock.Get(B).SetupChildren();
-            Mock.Get(C).SetupChildren(D);
-            Mock.Get(D).SetupChildren();
-            Mock.Get(E).SetupChildren(F, G);
-            Mock.Get(F).SetupChildren();
-            Mock.Get(G).SetupChildren();
-            root.SetupChildren(A, C, B);
+            var a = Mock.Of<IFolder>(dir => dir.Name == "A");
+            var b = Mock.Of<IFolder>(dir => dir.Name == "B");
+            var c = Mock.Of<IFolder>(dir => dir.Name == "C");
+            var d = Mock.Of<IFolder>(dir => dir.Name == "D");
+            var e = Mock.Of<IFolder>(dir => dir.Name == "E");
+            var f = Mock.Of<IFolder>(dir => dir.Name == "F");
+            var g = Mock.Of<IFolder>(dir => dir.Name == "G");
+            Mock.Get(a).SetupChildren(e);
+            Mock.Get(b).SetupChildren();
+            Mock.Get(c).SetupChildren(d);
+            Mock.Get(d).SetupChildren();
+            Mock.Get(e).SetupChildren(f, g);
+            Mock.Get(f).SetupChildren();
+            Mock.Get(g).SetupChildren();
+            root.SetupChildren(a, c, b);
 
             var underTest = new FolderTree(root.Object, ".");
 
@@ -123,19 +123,19 @@ namespace TestLibrary.TestUtils
         [Test, Category("Fast")]
         public void ConstructFolderTreeByRemoteFolderWithFiles() {
             var root = new Mock<IFolder>();
-            var A = Mock.Of<IFolder>(d => d.Name == "A");
-            var B = Mock.Of<IFolder>(d => d.Name == "B");
-            var C = Mock.Of<IFolder>(d => d.Name == "C");
-            var D = Mock.Of<IDocument>(d => d.Name == "D");
-            var E = Mock.Of<IFolder>(d => d.Name == "E");
-            var F = Mock.Of<IDocument>(d => d.Name == "F");
-            var G = Mock.Of<IFolder>(d => d.Name == "G");
-            Mock.Get(A).SetupChildren(E);
-            Mock.Get(B).SetupChildren();
-            Mock.Get(C).SetupChildren(D);
-            Mock.Get(E).SetupChildren(F, G);
-            Mock.Get(G).SetupChildren();
-            root.SetupChildren(A, C, B);
+            var a = Mock.Of<IFolder>(dir => dir.Name == "A");
+            var b = Mock.Of<IFolder>(dir => dir.Name == "B");
+            var c = Mock.Of<IFolder>(dir => dir.Name == "C");
+            var d = Mock.Of<IDocument>(doc => doc.Name == "D");
+            var e = Mock.Of<IFolder>(dir => dir.Name == "E");
+            var f = Mock.Of<IDocument>(doc => doc.Name == "F");
+            var g = Mock.Of<IFolder>(dir => dir.Name == "G");
+            Mock.Get(a).SetupChildren(e);
+            Mock.Get(b).SetupChildren();
+            Mock.Get(c).SetupChildren(d);
+            Mock.Get(e).SetupChildren(f, g);
+            Mock.Get(g).SetupChildren();
+            root.SetupChildren(a, c, b);
 
             var underTest = new FolderTree(root.Object, ".");
 
@@ -145,17 +145,17 @@ namespace TestLibrary.TestUtils
         [Test, Category("Fast")]
         public void ConstructDiffenrentFolderTreeByLocalDirectory() {
             var root = new Mock<IDirectoryInfo>();
-            var A = Mock.Of<IDirectoryInfo>(d => d.Name == "A");
-            var B = Mock.Of<IDirectoryInfo>(d => d.Name == "B");
-            var C = Mock.Of<IDirectoryInfo>(d => d.Name == "C");
-            var D = Mock.Of<IDirectoryInfo>(d => d.Name == "D");
-            var E = Mock.Of<IDirectoryInfo>(d => d.Name == "E");
-            var F = Mock.Of<IDirectoryInfo>(d => d.Name == "F");
-            var G = Mock.Of<IDirectoryInfo>(d => d.Name == "G");
-            Mock.Get(C).SetupDirectories(E);
-            Mock.Get(E).SetupDirectories(F, G);
-            Mock.Get(A).SetupDirectories(D);
-            root.SetupDirectories(A, C, B);
+            var a = Mock.Of<IDirectoryInfo>(dir => dir.Name == "A");
+            var b = Mock.Of<IDirectoryInfo>(dir => dir.Name == "B");
+            var c = Mock.Of<IDirectoryInfo>(dir => dir.Name == "C");
+            var d = Mock.Of<IDirectoryInfo>(dir => dir.Name == "D");
+            var e = Mock.Of<IDirectoryInfo>(dir => dir.Name == "E");
+            var f = Mock.Of<IDirectoryInfo>(dir => dir.Name == "F");
+            var g = Mock.Of<IDirectoryInfo>(dir => dir.Name == "G");
+            Mock.Get(c).SetupDirectories(e);
+            Mock.Get(e).SetupDirectories(f, g);
+            Mock.Get(a).SetupDirectories(d);
+            root.SetupDirectories(a, c, b);
 
             var underTest = new FolderTree(root.Object, ".");
 
@@ -165,18 +165,18 @@ namespace TestLibrary.TestUtils
         [Test, Category("Fast")]
         public void ConstructDiffenrentFolderTreeByLocalDirectoryWithFiles() {
             var root = new Mock<IDirectoryInfo>();
-            var A = Mock.Of<IDirectoryInfo>(d => d.Name == "A");
-            var B = Mock.Of<IDirectoryInfo>(d => d.Name == "B");
-            var C = Mock.Of<IDirectoryInfo>(d => d.Name == "C");
-            var D = Mock.Of<IFileInfo>(d => d.Name == "D");
-            var E = Mock.Of<IDirectoryInfo>(d => d.Name == "E");
-            var F = Mock.Of<IFileInfo>(d => d.Name == "F");
-            var G = Mock.Of<IDirectoryInfo>(d => d.Name == "G");
-            Mock.Get(C).SetupDirectories(E);
-            Mock.Get(E).SetupDirectories(G);
-            Mock.Get(E).SetupFiles(F);
-            Mock.Get(A).SetupFiles(D);
-            root.SetupDirectories(A, C, B);
+            var a = Mock.Of<IDirectoryInfo>(dir => dir.Name == "A");
+            var b = Mock.Of<IDirectoryInfo>(dir => dir.Name == "B");
+            var c = Mock.Of<IDirectoryInfo>(dir => dir.Name == "C");
+            var d = Mock.Of<IFileInfo>(doc => doc.Name == "D");
+            var e = Mock.Of<IDirectoryInfo>(dir => dir.Name == "E");
+            var f = Mock.Of<IFileInfo>(doc => doc.Name == "F");
+            var g = Mock.Of<IDirectoryInfo>(dir => dir.Name == "G");
+            Mock.Get(c).SetupDirectories(e);
+            Mock.Get(e).SetupDirectories(g);
+            Mock.Get(e).SetupFiles(f);
+            Mock.Get(a).SetupFiles(d);
+            root.SetupDirectories(a, c, b);
 
             var underTest = new FolderTree(root.Object, ".");
 
@@ -202,7 +202,7 @@ namespace TestLibrary.TestUtils
 
         [Test, Category("Fast")]
         public void NotEqualTrees() {
-            string differentTree =@".
+            string differentTree = @".
 ├── A
 │   └── K
 │       ├── F

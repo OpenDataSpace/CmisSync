@@ -93,7 +93,14 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw new FileNotFoundException(string.Format("Local file/folder {0} has been renamed/moved/deleted", localFileSystemInfo.FullName));
             }
 
-            string parentId = this.GetParentId(localFileSystemInfo, this.Storage);
+            string parentId = this.GetRemoteIdFromStorage(this.GetParent(localFileSystemInfo));
+            if (parentId == null) {
+                if (this.IsParentReadOnly(localFileSystemInfo)) {
+                    return;
+                } else {
+                    throw new NullReferenceException("ParentId is null => invoke crawl sync to create parent first");
+                }
+            }
 
             ICmisObject addedObject;
             try {
@@ -207,26 +214,28 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             return uuid;
         }
 
-        private string GetParentId(IFileSystemInfo fileInfo, IMetaDataStorage storage) {
-            IDirectoryInfo parent = null;
-            if (fileInfo is IDirectoryInfo) {
-                IDirectoryInfo localDirInfo = fileInfo as IDirectoryInfo;
-                parent = localDirInfo.Parent;
-            } else {
-                IFileInfo localFileInfo = fileInfo as IFileInfo;
-                parent = localFileInfo.Directory;
-            }
-
+        private string GetRemoteIdFromStorage(IDirectoryInfo dirInfo) {
             try {
-                Guid? uuid = parent.Uuid;
+                Guid? uuid = dirInfo.Uuid;
                 if (uuid != null) {
-                    return storage.GetObjectByGuid((Guid)uuid).RemoteObjectId;
+                    var mp = this.Storage.GetObjectByGuid((Guid)uuid);
+                    if (mp != null) {
+                        return mp.RemoteObjectId;
+                    }
                 }
             } catch (IOException) {
             }
 
-            IMappedObject mappedParent = storage.GetObjectByLocalPath(parent);
-            return mappedParent.RemoteObjectId;
+            var mappedParent = this.Storage.GetObjectByLocalPath(dirInfo);
+            if (mappedParent != null) {
+                return mappedParent.RemoteObjectId;
+            } else {
+                return null;
+            }
+        }
+
+        private IDirectoryInfo GetParent(IFileSystemInfo fileInfo) {
+            return fileInfo is IDirectoryInfo ? (fileInfo as IDirectoryInfo).Parent : (fileInfo as IFileInfo).Directory;
         }
 
         private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session) {
@@ -284,6 +293,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             contentStream.Length = 0;
             contentStream.Stream = emptyStream;
             return contentStream;
+        }
+
+        private bool IsParentReadOnly(IFileSystemInfo localFileSystemInfo) {
+            var parent = this.GetParent(localFileSystemInfo);
+            while (parent != null && parent.Exists) {
+                string parentId = this.GetRemoteIdFromStorage(parent);
+                if (parentId != null) {
+                    var remoteObject = this.Session.GetObject(parentId);
+                    if (remoteObject.CanCreateFolder() == false && remoteObject.CanCreateDocument() == false) {
+                        return true;
+                    }
+
+                    break;
+                }
+
+                parent = this.GetParent(parent);
+            }
+
+            return false;
         }
     }
 }

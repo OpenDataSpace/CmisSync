@@ -17,16 +17,15 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Consumer.SituationSolver;
 
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -40,15 +39,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectDeletedTest : IsTestWithConfiguredLog4Net
-    {
+    public class LocalObjectDeletedTest : IsTestWithConfiguredLog4Net {
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private LocalObjectDeleted underTest;
 
         [SetUp]
-        public void SetUp()
-        {
+        public void SetUp() {
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem();
             this.storage = new Mock<IMetaDataStorage>(MockBehavior.Strict);
@@ -56,14 +53,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void DefaultConstructorTest()
-        {
+        public void DefaultConstructorTest() {
             new LocalObjectDeleted(this.session.Object, this.storage.Object);
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileDeleted()
-        {
+        public void LocalFileDeleted() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
 
             string remoteDocumentId = "DocumentId";
@@ -83,8 +78,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFolderDeleted()
-        {
+        public void LocalFolderDeleted() {
             string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
 
             string remoteFolderId = "FolderId";
@@ -103,8 +97,26 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileDeletedWhileNetworkError()
-        {
+        public void LocalFolderDeletedButRemoteFolderIsReadOnly() {
+            string tempFolder = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+
+            string remoteFolderId = "FolderId";
+
+            var folder = new Mock<IFolder>();
+            folder.Setup(d => d.Id).Returns(remoteFolderId);
+            folder.SetupReadOnly();
+            this.session.AddRemoteObject(folder.Object);
+            this.storage.AddLocalFolder(tempFolder, remoteFolderId);
+            this.storage.Setup(s => s.RemoveObject(It.IsAny<IMappedObject>()));
+
+            this.underTest.Solve(new FileSystemInfoFactory().CreateDirectoryInfo(tempFolder), folder.Object);
+
+            this.storage.VerifyThatNoObjectIsManipulated();
+            folder.Verify(f => f.DeleteTree(false, UnfileObject.DeleteSinglefiled, true), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileDeletedWhileNetworkError() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
             this.SetupSessionExceptionOnDeletion(remoteDocumentId, new CmisConnectionException());
@@ -116,8 +128,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileDeletedWhileServerError()
-        {
+        public void LocalFileDeletedWhileServerError() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
             this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId && o.LastChangeToken == "changeToken"));
@@ -129,8 +140,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileDeletedWithoutPermissionToDeleteOnServer()
-        {
+        public void LocalFileDeletedWithoutPermissionToDeleteOnServer() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
             this.storage.AddMappedFile(Mock.Of<IMappedObject>(o => o.RemoteObjectId == remoteDocumentId && o.LastChangeToken == "changeToken"));
@@ -143,8 +153,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void AbortDeletionIfRemoteObjectHasBeenChanged()
-        {
+        public void AbortDeletionIfRemoteObjectHasBeenChanged() {
             string tempFile = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
             string remoteDocumentId = "DocumentId";
             var docId = new Mock<ICmisObject>(MockBehavior.Strict);

@@ -17,16 +17,22 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
     using CmisSync.Lib.PathMatcher;
 
     using DotCMIS.Client;
 
-    public class IgnoredEntity : IIgnoredEntity
-    {
+    /// <summary>
+    /// Ignored entity holds the ignored remote object id and the local path.
+    /// </summary>
+    public class IgnoredEntity : IIgnoredEntity {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.SelectiveIgnore.IgnoredEntity"/> class.
+        /// </summary>
+        /// <param name="folder">Ignored folder.</param>
+        /// <param name="matcher">Path matcher to create local path.</param>
         public IgnoredEntity(IFolder folder, IPathMatcher matcher) {
             if (folder == null) {
                 throw new ArgumentNullException("Given folder is null");
@@ -44,6 +50,11 @@ namespace CmisSync.Lib.SelectiveIgnore
             this.LocalPath = matcher.CreateLocalPath(folder);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.SelectiveIgnore.IgnoredEntity"/> class.
+        /// </summary>
+        /// <param name="doc">Ignored document.</param>
+        /// <param name="matcher">Path matcher to create local path.</param>
         public IgnoredEntity(IDocument doc, IPathMatcher matcher) {
             if (doc == null) {
                 throw new ArgumentNullException("Given doc is null");

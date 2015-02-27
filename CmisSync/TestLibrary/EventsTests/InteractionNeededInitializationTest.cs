@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.EventsTests
-{
+namespace TestLibrary.EventsTests {
     using System;
 
     using CmisSync.Lib.Consumer;
@@ -31,8 +30,7 @@ namespace TestLibrary.EventsTests
     using NUnit.Framework;
 
     [TestFixture]
-    public class InteractionNeededInitializationTest
-    {
+    public class InteractionNeededInitializationTest {
         [Test, Category("Fast")]
         public void InitializeWithException() {
             var ex = new InteractionNeededException();
@@ -75,7 +73,7 @@ namespace TestLibrary.EventsTests
             string desc = "desc";
             string message = "message";
 
-            var underTest = new InteractionNeededEvent(message) { Details = desc};
+            var underTest = new InteractionNeededEvent(message) { Details = desc };
 
             Assert.That(underTest.Description, Is.EqualTo(message));
             Assert.That(underTest.Details, Is.EqualTo(desc));
@@ -84,7 +82,7 @@ namespace TestLibrary.EventsTests
         [Test, Category("Fast")]
         public void InitializeActions() {
             int called = 0;
-            var action = new Action(delegate(){called++;});
+            var action = new Action(delegate() { called++; });
             var ex = new InteractionNeededException();
             ex.Actions.Add("invoke", action);
             var underTest = new InteractionNeededEvent(ex);
