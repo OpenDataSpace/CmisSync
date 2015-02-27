@@ -58,5 +58,13 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             underTest.SetupReadOnly(readOnly);
             Assert.That(underTest.Object.CanDeleteObject(), Is.EqualTo(!readOnly));
         }
+
+        [Test, Category("Fast")]
+        public void CanGetFolderTree([Values(true, false)]bool readOnly, [Values(true, false)]bool supportsDescendants) {
+            var underTest = new Mock<IFolder>();
+            underTest.SetupReadOnly(readOnly, supportsDescendants);
+            Assert.That(underTest.Object.CanGetDescendants(), Is.EqualTo(supportsDescendants));
+            Assert.That(underTest.Object.CanGetFolderTree(), Is.EqualTo(supportsDescendants));
+        }
     }
 }

@@ -405,6 +405,45 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         /// <summary>
+        /// Determines if multi filing is supported with the specified session.
+        /// </summary>
+        /// <returns><c>true</c> if multi filing supported with the specified session; otherwise, <c>false</c>.</returns>
+        /// <param name="session">Cmis session.</param>
+        public static bool IsMultiFilingSupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.IsMultifilingSupported == true;
+            } catch (NullReferenceException) {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines if unfiling is supported with the specified session.
+        /// </summary>
+        /// <returns><c>true</c> if is unfiling is supported with the specified session; otherwise, <c>false</c>.</returns>
+        /// <param name="session">Cmis session.</param>
+        public static bool IsUnFilingSupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.IsUnfilingSupported == true;
+            } catch (NullReferenceException) {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines if getDescendants calls are supported the specified session.
+        /// </summary>
+        /// <returns><c>true</c> if getDescendants calls supported the specified session; otherwise, <c>false</c>.</returns>
+        /// <param name="session">Cmis session.</param>
+        public static bool IsGetDescendantsSupported(this ISession session) {
+            try {
+                return session.RepositoryInfo.Capabilities.IsGetDescendantsSupported == true;
+            } catch (NullReferenceException) {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Hex string to byte array.
         /// </summary>
         /// <returns>The byte array.</returns>

@@ -93,11 +93,14 @@ namespace TestLibrary.TestUtils {
             doc.SetupAllowableActions(actions.ToArray());
         }
 
-        public static void SetupReadOnly(this Mock<IFolder> folder, bool readOnly = true) {
+        public static void SetupReadOnly(this Mock<IFolder> folder, bool readOnly = true, bool supportsDescendants = true) {
             var actions = new List<string>();
             actions.Add(Actions.CanGetAcl);
             actions.Add(Actions.CanGetAppliedPolicies);
             actions.Add(Actions.CanGetChildren);
+            if (supportsDescendants) {
+                actions.Add(Actions.CanGetDescendants);
+            }
 
             if (!readOnly) {
                 actions.Add(Actions.CanUpdateProperties);

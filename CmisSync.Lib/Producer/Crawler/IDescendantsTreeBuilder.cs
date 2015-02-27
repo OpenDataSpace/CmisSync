@@ -16,13 +16,11 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler
-{
+namespace CmisSync.Lib.Producer.Crawler {
     /// <summary>
     /// Interface for descendants tree builder.
     /// </summary>
-    public interface IDescendantsTreeBuilder
-    {
+    public interface IDescendantsTreeBuilder {
         /// <summary>
         /// Builds the trees asynchronously by crawling storage, FileSystem and Server.
         /// </summary>

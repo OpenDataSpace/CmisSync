@@ -251,6 +251,7 @@
     <Compile Include="ConfigTests\CmisRepoCredentialsTest.cs" />
     <Compile Include="EventsTests\PermissionDeniedExceptionTest.cs" />
     <Compile Include="EventsTests\BaseExceptionEventTest.cs" />
+    <Compile Include="IntegrationTests\AllowableActionsTests\ReadingActionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -281,5 +282,28 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="CmisTests\" />
+    <Folder Include="CmisTests\UiUtilsTests\" />
+    <Folder Include="AccumulatorTests\" />
+    <Folder Include="ConfigTests\" />
+    <Folder Include="ConsumerTests\" />
+    <Folder Include="StorageTests\DataBaseTests\" />
+    <Folder Include="StorageTests\FileSystemTests\" />
+    <Folder Include="StorageTests\DataBaseTests\EntitiesTests\" />
+    <Folder Include="PathMatcherTests\" />
+    <Folder Include="ProducerTests\" />
+    <Folder Include="ProducerTests\CrawlerTests\" />
+    <Folder Include="ProducerTests\WatcherTests\" />
+    <Folder Include="ProducerTests\ContentChangeTests\" />
+    <Folder Include="QueueingTests\" />
+    <Folder Include="FilterTests\" />
+    <Folder Include="CmisTests\ConvenienceExtendersTests\" />
+    <Folder Include="SelectiveIgnoreTests\" />
+    <Folder Include="MockedServer\" />
+    <Folder Include="AlgorithmsTests\" />
+    <Folder Include="AlgorithmsTests\CyclicDependencies\" />
+    <Folder Include="IntegrationTests\SelectiveIgnoreTests\" />
+    <Folder Include="IntegrationTests\AllowableActionsTests\" />
+  </ItemGroup>
 </Project>
