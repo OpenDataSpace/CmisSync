@@ -32,29 +32,28 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
-using System;
-using System.Drawing;
-using System.IO;
-using System.Collections.Generic;
-using System.Text;
-
-using Mono.Unix.Native;
-
-using log4net;
-
-using MonoMac.Foundation;
-using MonoMac.AppKit;
-using MonoMac.ObjCRuntime;
-
-using CmisSync.Lib.Events;
-using CmisSync.Lib.Cmis;
-using CmisSync.Lib.Config;
-
 namespace CmisSync {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+    using System.Text;
+
+    using CmisSync.Lib.Cmis;
+    using CmisSync.Lib.Config;
+    using CmisSync.Lib.Events;
+
+    using log4net;
+
+    using Mono.Unix.Native;
+
+    using MonoMac.AppKit;
+    using MonoMac.Foundation;
+    using MonoMac.ObjCRuntime;
+
     [CLSCompliant(false)]
     public class StatusIcon : NSObject {
-        public StatusIconController Controller = new StatusIconController ();
+        public StatusIconController Controller = new StatusIconController();
 
         private NSMenu menu;
 
@@ -75,7 +74,7 @@ namespace CmisSync {
 
         public StatusIcon() : base() {
             using (var a = new NSAutoreleasePool()) {
-                CreateAnimationFrames();
+                this.CreateAnimationFrames();
 
                 this.status_item = NSStatusBar.SystemStatusBar.CreateStatusItem(28);
                 this.status_item.HighlightMode = true;
@@ -86,37 +85,37 @@ namespace CmisSync {
                 this.status_item.AlternateImage      = this.animation_frames_active[0];
                 this.status_item.AlternateImage.Size = new SizeF(16, 16);
 
-                CreateMenu ();
+                this.CreateMenu();
             }
 
-            Controller.UpdateIconEvent += delegate (int icon_frame) {
+            this.Controller.UpdateIconEvent += delegate(int icon_frame) {
                 using (var a = new NSAutoreleasePool()) {
                     BeginInvokeOnMainThread(delegate {
                         if (icon_frame > -1) {
-                            this.status_item.Image               = this.animation_frames [icon_frame];
-                            this.status_item.Image.Size          = new SizeF (16, 16);
-                            this.status_item.AlternateImage      = this.animation_frames_active [icon_frame];
-                            this.status_item.AlternateImage.Size = new SizeF (16, 16);
+                            this.status_item.Image               = this.animation_frames[icon_frame];
+                            this.status_item.Image.Size          = new SizeF(16, 16);
+                            this.status_item.AlternateImage      = this.animation_frames_active[icon_frame];
+                            this.status_item.AlternateImage.Size = new SizeF(16, 16);
 
                         } else {
                             this.status_item.Image               = this.error_image;
                             this.status_item.AlternateImage      = this.error_image_active;
-                            this.status_item.Image.Size          = new SizeF (16, 16);
-                            this.status_item.AlternateImage.Size = new SizeF (16, 16);
+                            this.status_item.Image.Size          = new SizeF(16, 16);
+                            this.status_item.AlternateImage.Size = new SizeF(16, 16);
                         }
                     });
                 }
             };
 
-            Controller.UpdateMenuEvent += delegate {
+            this.Controller.UpdateMenuEvent += delegate {
                 using (var a = new NSAutoreleasePool()) {
-                    InvokeOnMainThread(() => CreateMenu());
+                    this.InvokeOnMainThread(() => this.CreateMenu());
                 }
             };
 
-            Controller.UpdateSuspendSyncFolderEvent += delegate(string reponame) {
+            this.Controller.UpdateSuspendSyncFolderEvent += delegate(string reponame) {
                 using (var a = new NSAutoreleasePool()){
-                    InvokeOnMainThread(delegate {
+                    this.InvokeOnMainThread(delegate {
                         foreach (var repoItem in this.repoItems) {
                             if (repoItem.RepositoryName == reponame) {
                                 foreach (var repo in Program.Controller.Repositories) {
@@ -140,13 +139,14 @@ namespace CmisSync {
                     return repo.Status;
                 }
             }
+
             return SyncStatus.Idle;
         }
 
-        public void CreateMenu () {
-            using (NSAutoreleasePool a = new NSAutoreleasePool ()) {
+        public void CreateMenu() {
+            using (NSAutoreleasePool a = new NSAutoreleasePool()) {
                 this.repoItems = new List<RepositoryMenuItem>();
-                this.menu = new NSMenu ();
+                this.menu = new NSMenu();
                 this.menu.AutoEnablesItems = false;
 
                 this.general_settings_item = new NSMenuItem() {
@@ -154,36 +154,36 @@ namespace CmisSync {
                 };
 
                 this.general_settings_item.Activated += delegate {
-                    Controller.SettingClicked();
+                    this.Controller.SettingClicked();
                 };
 
-                this.transmission_item = new NSMenuItem () {
+                this.transmission_item = new NSMenuItem() {
                     Title = Properties_Resources.Transmission
                 };
 
                 this.transmission_item.Activated += delegate {
-                    Controller.TransmissionClicked();
+                    this.Controller.TransmissionClicked();
                 };
 
-                this.log_item = new NSMenuItem () {
+                this.log_item = new NSMenuItem() {
                     Title = Properties_Resources.ViewLog
                 };
 
                 this.log_item.Activated += delegate {
-                    Controller.LogClicked();
+                    this.Controller.LogClicked();
                 };
 
-                this.add_item = new NSMenuItem () {
+                this.add_item = new NSMenuItem() {
                     Title   = Properties_Resources.AddARemoteFolder,
                     Enabled = true
                 };
 
                 this.add_item.Activated += delegate {
-                    Controller.AddRemoteFolderClicked ();
+                    this.Controller.AddRemoteFolderClicked();
                 };
 
-                this.about_item = new NSMenuItem () {
-                    Title   = String.Format(Properties_Resources.About, Properties_Resources.ApplicationName),
+                this.about_item = new NSMenuItem() {
+                    Title   = string.Format(Properties_Resources.About, Properties_Resources.ApplicationName),
                     Enabled = true
                 };
 
@@ -191,13 +191,13 @@ namespace CmisSync {
                     Controller.AboutClicked ();
                 };
 
-                this.quit_item = new NSMenuItem () {
+                this.quit_item = new NSMenuItem() {
                     Title   = Properties_Resources.Exit,
                     Enabled = true
                 };
 
                 this.quit_item.Activated += delegate {
-                    Controller.QuitClicked ();
+                    Controller.QuitClicked();
                 };
 
                 var repos = Program.Controller.Repositories;
@@ -207,19 +207,19 @@ namespace CmisSync {
                         this.repoItems.Add(repoItem);
                         this.menu.AddItem(repoItem);
                     };
-                    this.menu.AddItem (NSMenuItem.SeparatorItem);
+                    this.menu.AddItem(NSMenuItem.SeparatorItem);
                 }
 
-                this.menu.AddItem (this.add_item);
-                this.menu.AddItem (NSMenuItem.SeparatorItem);
-                this.menu.AddItem (this.general_settings_item);
-                this.menu.AddItem (this.transmission_item);
-                this.menu.AddItem (this.log_item);
-                this.menu.AddItem (this.about_item);
-                this.menu.AddItem (NSMenuItem.SeparatorItem);
-                this.menu.AddItem (this.quit_item);
+                this.menu.AddItem(this.add_item);
+                this.menu.AddItem(NSMenuItem.SeparatorItem);
+                this.menu.AddItem(this.general_settings_item);
+                this.menu.AddItem(this.transmission_item);
+                this.menu.AddItem(this.log_item);
+                this.menu.AddItem(this.about_item);
+                this.menu.AddItem(NSMenuItem.SeparatorItem);
+                this.menu.AddItem(this.quit_item);
 
-                this.menu.Delegate    = new StatusIconMenuDelegate ();
+                this.menu.Delegate = new StatusIconMenuDelegate();
                 this.status_item.Menu = this.menu;
             }
         }
@@ -233,7 +233,7 @@ namespace CmisSync {
                 new NSImage(UIHelpers.GetImagePathname("process-syncing-iiiii"))
             };
 
-            this.animation_frames_active = new NSImage [] {
+            this.animation_frames_active = new NSImage[] {
                 new NSImage(UIHelpers.GetImagePathname("process-syncing-i-active")),
                 new NSImage(UIHelpers.GetImagePathname("process-syncing-ii-active")),
                 new NSImage(UIHelpers.GetImagePathname("process-syncing-iii-active")),
