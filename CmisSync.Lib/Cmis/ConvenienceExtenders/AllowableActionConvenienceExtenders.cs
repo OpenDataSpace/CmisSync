@@ -67,7 +67,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         public static bool? CanGetFolderTree(this ICmisObject obj) {
-            return obj.IsActionAllowed(Actions.CanGetFolderTree);
+            if (obj.IsActionAllowed(Actions.CanGetDescendants) == true) {
+                return true;
+            } else {
+                return obj.IsActionAllowed(Actions.CanGetFolderTree);
+            }
         }
 
         public static bool? CanGetDescendants(this ICmisObject obj) {
