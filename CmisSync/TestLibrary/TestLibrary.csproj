@@ -249,6 +249,7 @@
     <Compile Include="ConfigTests\CmisRepoCredentialsTest.cs" />
     <Compile Include="EventsTests\PermissionDeniedExceptionTest.cs" />
     <Compile Include="EventsTests\BaseExceptionEventTest.cs" />
+    <Compile Include="IntegrationTests\AllowableActionsTests\ReadingActionsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -301,5 +302,6 @@
     <Folder Include="AlgorithmsTests\" />
     <Folder Include="AlgorithmsTests\CyclicDependencies\" />
     <Folder Include="IntegrationTests\SelectiveIgnoreTests\" />
+    <Folder Include="IntegrationTests\AllowableActionsTests\" />
   </ItemGroup>
 </Project>

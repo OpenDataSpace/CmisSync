@@ -93,6 +93,7 @@ SOURCES =  \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	FilterTests/ReportingFilterTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
+	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \
 	IntegrationTests/BaseFullRepoTest.cs \
 	IntegrationTests/ClientBrandTests.cs \
 	IntegrationTests/ContentChangeIT.cs \
