@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
-{
+namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests {
     using System;
     using System.IO;
     using System.Linq;
@@ -46,8 +45,7 @@ namespace TestLibrary.IntegrationTests.SelectiveIgnoreTests
 
     // Default timeout per test is 15 minutes
     [TestFixture, Timeout(900000), TestName("SelectiveIgnore")]
-    public class CrudIT : BaseFullRepoTest
-    {
+    public class CrudIT : BaseFullRepoTest {
         [Test, Category("Slow"), Category("SelectiveIgnore")]
         public void SelectiveIgnoreSupportTest() {
             this.session.SupportsSelectiveIgnore();
