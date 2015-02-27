@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler
-{
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -30,15 +29,13 @@ namespace CmisSync.Lib.Producer.Crawler
 
     using DotCMIS.Client;
 
-    public class CrawlEventGenerator
-    {
+    public class CrawlEventGenerator {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
         private LocalEventGenerator localEventGenerator;
         private RemoteEventGenerator remoteEventGenerator;
 
-        public CrawlEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
-        {
+        public CrawlEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
                 throw new ArgumentNullException("Given storage is null");
             }
@@ -81,7 +78,8 @@ namespace CmisSync.Lib.Producer.Crawler
         private void AddDeletedObjectsToMergableEvents(
             List<IMappedObject> storedObjectList,
             Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
-            bool areLocalEvents) {
+            bool areLocalEvents)
+        {
             foreach (var deleted in storedObjectList) {
                 string path = this.storage.GetLocalPath(deleted);
                 if (path == null) {
