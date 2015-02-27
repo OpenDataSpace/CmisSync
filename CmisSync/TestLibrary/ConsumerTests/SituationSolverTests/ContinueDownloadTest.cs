@@ -339,7 +339,18 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             AbstractEnhancedSolver solver,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE) {
-            SetupToChangeRemote();
+            Mock<MemoryStream> stream = new Mock<MemoryStream>();
+            stream.SetupAllProperties();
+            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
+            this.localFileLength = 0;
+            stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => this.localFileLength += count);
+            stream.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
+            stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => count);
+            this.cacheFile.Setup(f => f.Delete()).Callback(() => {
+                stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
+                this.cacheFile.Setup(f => f.Exists).Returns(false);
+            });
+            this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(stream.Object);
 
             string newLastChangeToken = this.changeToken + ".change";
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, newLastChangeToken);
@@ -423,21 +434,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.cacheFile.Setup(f => f.Delete()).Callback(() => {
                 stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
                 stream.Object.Position = 0;
-                this.cacheFile.Setup(f => f.Exists).Returns(false);
-            });
-            this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(stream.Object);
-        }
-
-        private void SetupToChangeRemote() {
-            Mock<MemoryStream> stream = new Mock<MemoryStream>();
-            stream.SetupAllProperties();
-            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
-            this.localFileLength = 0;
-            stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => this.localFileLength += count);
-            stream.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
-            stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns((byte[] buffer, int offset, int count) => count);
-            this.cacheFile.Setup(f => f.Delete()).Callback(() => {
-                stream.Setup(f => f.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Returns(0);
                 this.cacheFile.Setup(f => f.Exists).Returns(false);
             });
             this.cacheFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Returns(stream.Object);

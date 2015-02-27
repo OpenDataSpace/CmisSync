@@ -285,28 +285,63 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileAddedWhileChangeRemoteBeforeContinue() {
-            Assert.Fail("TODO");
+            this.SetupFile();
+
+            var solverAdded = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+
+            RunSolverToAbortUpload(solverAdded);
+
+            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+
+            RunSolverToChangeRemoteBeforeContinue(solverChanged);
+
+            //  only save the empty file, for changing the remote file will force a crawl sync
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectOldId, this.objectName, this.parentId, this.changeTokenOld, Times.Once(), true, null, null, this.emptyHash, 0);
+
+            this.session.Verify(
+                s =>
+                s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
+                It.Is<IObjectId>(o => o.Id == this.parentId),
+                It.Is<IContentStream>(st => st == null),
+                null,
+                null,
+                null,
+                null),
+                Times.Once());
+            this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
-        [Ignore("TODO")]
         [Test, Category("Fast"), Category("Solver")]
         public void LocalFileChangedWhileChangeRemoteBeforeContinue() {
-            Assert.Fail("TODO");
-        }
+            this.SetupFile();
+            this.SetupForLocalFileChanged();
 
-        [Ignore("TODO")]
-        [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileAddedWhileDeleteLocalBeforeContinue() {
-            Assert.Fail("TODO");
-        }
+            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
 
-        [Ignore("TODO")]
-        [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileChangedWhileDeleteLocalBeforeContinue() {
-            Assert.Fail("TODO");
+            RunSolverToAbortUpload(solverChanged);
+
+            RunSolverToChangeRemoteBeforeContinue(solverChanged);
+
+            //  no save, for changing the remote file will force a crawl sync
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectOldId, this.objectName, this.parentId, this.changeTokenNew, Times.Never(), true, null, null, this.fileHash, this.fileLength);
+
+            this.session.Verify(
+                s =>
+                s.CreateDocument(
+                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
+                It.Is<IObjectId>(o => o.Id == this.parentId),
+                It.Is<IContentStream>(st => st == null),
+                null,
+                null,
+                null,
+                null),
+                Times.Never());
+            this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Never());
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
         private void SetupForLocalFileChanged() {
@@ -399,6 +434,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, true);
         }
 
+        private void RunSolverToChangeRemoteBeforeContinue(
+            AbstractEnhancedSolver solver,
+            ContentChangeType localContent = ContentChangeType.NONE,
+            ContentChangeType remoteContent = ContentChangeType.NONE) {
+            this.remoteDocument.Setup(d => d.ChangeToken).Returns(this.changeTokenOld + ".change");
+
+            Assert.Throws<ArgumentException>(() => solver.Solve(this.localFile.Object, this.remoteDocument.Object, localContent, remoteContent));
+            Assert.That(transmissionManager.ActiveTransmissions, Is.Empty);
+
+            this.remotePWCDocument.Verify(d => d.DeleteContentStream(), Times.Exactly(1));
+            this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(3));  //  1 for one AppendContentStream is aborted, and 2 for the last upload having two AppendContentStream
+            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, Times.Never(), true);
+        }
+
         private void SetupToChangeLocal() {
             long readLength = 0;
             var stream = new Mock<MemoryStream>();
@@ -419,6 +468,5 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localFile.Setup(f => f.Length).Returns(this.fileLength);
             this.localFile.Setup(f => f.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)).Returns(stream.Object);
         }
-
     }
 }
