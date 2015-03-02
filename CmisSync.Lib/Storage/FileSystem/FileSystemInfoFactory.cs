@@ -66,13 +66,11 @@ namespace CmisSync.Lib.Storage.FileSystem {
             }
 
             int index = 1;
-            do
-            {
+            do {
                 filename = string.Format("{0}_{1}-version ({2}){3}", suffix, user, index.ToString(), extension);
                 conflictFile = this.CreateFileInfo(Path.Combine(file.Directory.FullName, filename));
                 index++;
-            }
-            while (conflictFile.Exists);
+            } while (conflictFile.Exists);
             return conflictFile;
         }
 

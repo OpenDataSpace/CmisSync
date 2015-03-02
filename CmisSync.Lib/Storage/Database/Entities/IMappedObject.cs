@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database.Entities
-{
+namespace CmisSync.Lib.Storage.Database.Entities {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     /// <summary>
     /// Interface for a mapped object. A mapped object is a metadata representation of a local file, corresponding to a remote file.
     /// </summary>
-    public interface IMappedObject
-    {
+    public interface IMappedObject {
         /// <summary>
         /// Gets or sets the CMIS remote object identifier.
         /// </summary>
@@ -113,5 +111,11 @@ namespace CmisSync.Lib.Storage.Database.Entities
         /// The last size of the file or folder content.
         /// </value>
         long LastContentSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is read only.
+        /// </summary>
+        /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
+        bool IsReadOnly { get; set; }
     }
 }

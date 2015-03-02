@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler
-{
+namespace CmisSync.Lib.Producer.Crawler {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -38,13 +37,11 @@ namespace CmisSync.Lib.Producer.Crawler
     /// <attribution license="cc4" from="Microsoft" modified="false" /><para>The exception that is thrown when a null
     /// reference (Nothing in Visual Basic) is passed to a method that does not accept it as a valid argument. </para>
     /// </exception>
-    public class LocalEventGenerator
-    {
+    public class LocalEventGenerator {
         private IMetaDataStorage storage;
         private IFileSystemInfoFactory fsFactory;
 
-        public LocalEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null)
-        {
+        public LocalEventGenerator(IMetaDataStorage storage, IFileSystemInfoFactory fsFactory = null) {
             if (storage == null) {
                 throw new ArgumentNullException("Given storage is null");
             }
@@ -118,7 +115,7 @@ namespace CmisSync.Lib.Producer.Crawler
 
                 creationEvents.AddRange(this.CreateEvents(storedObjects, child, eventMap));
 
-                if(removeStoredMappedChild) {
+                if (removeStoredMappedChild) {
                     storedObjects.Remove(storedMappedChild);
                 }
             }
@@ -126,7 +123,9 @@ namespace CmisSync.Lib.Producer.Crawler
             return creationEvents;
         }
 
-        private static AbstractFolderEvent GetCorrespondingRemoteEvent(Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap, IMappedObject storedMappedChild)
+        private static AbstractFolderEvent GetCorrespondingRemoteEvent(
+                Dictionary<string, Tuple<AbstractFolderEvent, AbstractFolderEvent>> eventMap,
+                IMappedObject storedMappedChild)
         {
             AbstractFolderEvent correspondingRemoteEvent = null;
             Tuple<AbstractFolderEvent, AbstractFolderEvent> tuple;

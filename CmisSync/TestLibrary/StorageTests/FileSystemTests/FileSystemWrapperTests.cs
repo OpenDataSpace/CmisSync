@@ -19,6 +19,7 @@
 
 namespace TestLibrary.StorageTests.FileSystemTests {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
@@ -337,49 +338,6 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(underTest.Uuid, Is.Null);
         }
 
-        /*
-        [Test, Category("Medium")]
-        public void GetUuidIsReadMultipleTimesBeforeInsteadOfFailing() {
-            this.SkipIfExtendedAttributesAreNotAvailable();
-            IFileInfo underTest = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
-            using (underTest.Open(FileMode.CreateNew)) {
-            }
-
-            Guid uuid = Guid.NewGuid();
-
-            using (var stream = underTest.Open(FileMode.Open, FileAccess.Write, FileShare.None)) {
-                TaskFactory.StartNew(() => SetUuid(underTest, uuid.ToString()));
-                Thread.Sleep(100);
-            }
-
-            Thread.Sleep(100);
-
-            Assert.That(underTest.Uuid, Is.EqualTo(uuid));
-            uuid = Guid.NewGuid();
-            underTest.Uuid = uuid;
-            Guid? readUuid = null;
-            using (var task = TaskFactory.StartNew(() => {
-                Thread.Sleep(100);
-                readUuid = underTest.Uuid;
-            }))
-            {
-                using (var stream = underTest.Open(FileMode.Open, FileAccess.Write, FileShare.None)) {
-                    Thread.Sleep(200);
-                }
-                task.Wait();
-            }
-
-            Assert.That(uuid, Is.EqualTo(readUuid));
-        }
-
-        private static void SetUuid(IFileSystemInfo fsObject, string uuid) {
-            fsObject.Uuid = Guid.Parse(uuid);
-        }
-
-        private static void GetUuid(IFileSystemInfo fsObject, out Guid? uuid) {
-            uuid = fsObject.Uuid;
-        } */
-
         [Test, Category("Medium")]
         public void CreatesFirstConflictFile() {
             string fileName = "test1.txt";
@@ -598,28 +556,26 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.Throws<ArgumentException>(() => Factory.CreateDownloadCacheFileInfo(Guid.Empty));
         }
 
-        // Test is not implemented yet
-        [Ignore]
-        [Test, Category("Fast")]
-        public void CreateNextConflictFile() {
-            Assert.Fail("TODO");
-            /*
-            for (int i = 0; i < 10; i++)
-            {
-                using (FileStream s = File.Create(conflictFilePath))
-                {
+        [Test, Category("Medium")]
+        public void CreateNextConflictFile([Values(10)]int conflictFiles) {
+            var filePaths = new HashSet<string>();
+            var fileName = "file.txt";
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, fileName));
+            filePaths.Add(file.FullName);
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            for (int i = 1; i <= conflictFiles; i++) {
+                var conflictFile = Factory.CreateConflictFileInfo(file);
+                Assert.That(filePaths.Contains(conflictFile.FullName), Is.False);
+                filePaths.Add(conflictFile.FullName);
+                using (conflictFile.Open(FileMode.CreateNew)) {
                 }
 
-                conflictFilePath = Utils.FindNextConflictFreeFilename(path, user);
-                Assert.AreNotEqual(path, conflictFilePath, "The conflict file must differ from original file");
-                Assert.True(conflictFilePath.Contains(user), "The username should be added to the conflict file name");
-                Assert.True(conflictFilePath.EndsWith(Path.GetExtension(path)), "The file extension must be kept the same as in the original file");
-                string filename = Path.GetFileName(conflictFilePath);
-                string originalFilename = Path.GetFileNameWithoutExtension(path);
-                Assert.True(filename.StartsWith(originalFilename), string.Format("The conflict file \"{0}\" must start with \"{1}\"", filename, originalFilename));
-                string conflictParent = Directory.GetParent(conflictFilePath).FullName;
-                Assert.AreEqual(originalParent, conflictParent, "The conflict file must exists in the same directory like the orignial file");
-            } */
+                Assert.That(filePaths.Count, Is.EqualTo(i + 1));
+            }
+
+            Assert.That(this.testFolder.GetFiles().Length, Is.EqualTo(conflictFiles + 1));
         }
 
         [Ignore("Windows only and needs second partition as target fs")]
