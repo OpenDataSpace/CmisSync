@@ -41,15 +41,20 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
         private readonly string localFilePath = Path.Combine("local", "test", "folder", "file.test");
 
         [Test, Category("Fast"), Category("MappedObjects")]
-        public void ConstructorTakesData([Values(true, false)]bool ignored) {
-            var data = new MappedObject("name", "remoteId", MappedObjectType.File, "parentId", "changeToken") {
+        public void ConstructorTakesData(
+            [Values(true, false)]bool ignored,
+            [Values(true, false)]bool readOnly,
+            [Values(MappedObjectType.File, MappedObjectType.Folder)]MappedObjectType type)
+        {
+            var data = new MappedObject("name", "remoteId", type, "parentId", "changeToken") {
                 LastChecksum = new byte[20],
                 Ignored = ignored,
                 Guid = Guid.NewGuid(),
                 LastLocalWriteTimeUtc = DateTime.Now,
                 LastRemoteWriteTimeUtc = DateTime.UtcNow,
                 Description = "desc",
-                LastContentSize = 2345
+                LastContentSize = type == MappedObjectType.File ? 2345 : 0,
+                IsReadOnly = readOnly
             };
 
             var file = new MappedObject(data);
@@ -69,6 +74,7 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
             Assert.That(file.Ignored, Is.False);
             Assert.That(file.ActualOperation, Is.EqualTo(OperationType.No));
             Assert.That(file.Retries, Is.Empty);
+            Assert.That(file.IsReadOnly, Is.False);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
@@ -160,6 +166,12 @@ namespace TestLibrary.StorageTests.DataBaseTests.EntitiesTests {
         public void IgnoredProperty() {
             var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { Ignored = true };
             Assert.That(obj.Ignored, Is.True);
+        }
+
+        [Test, Category("Fast"), Category("MappedObjects")]
+        public void ReadOnlyProperty() {
+            var obj = new MappedObject("name", "id", MappedObjectType.File, null, null) { IsReadOnly = true };
+            Assert.That(obj.IsReadOnly, Is.True);
         }
 
         [Test, Category("Fast"), Category("MappedObjects")]
