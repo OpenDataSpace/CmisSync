@@ -17,12 +17,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.SelectiveIgnore
-{
-    using System;
-
-    public interface IIgnoredEntitiesStorage : IIgnoredEntitiesCollection
-    {
+namespace CmisSync.Lib.SelectiveIgnore {
+    /// <summary>
+    /// Ignored entities storage.
+    /// </summary>
+    public interface IIgnoredEntitiesStorage : IIgnoredEntitiesCollection {
         /// <summary>
         /// Adds or update an entry and deletes all children from storage.
         /// </summary>

@@ -16,8 +16,7 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace TestLibrary
-{
+namespace TestLibrary {
     using System;
     using System.Collections.Generic;
     using System.Text;
@@ -30,25 +29,21 @@ namespace TestLibrary
     using NUnit.Framework;
 
     [TestFixture]
-    public class ActiveActivitiesManagerTest
-    {
+    public class ActiveActivitiesManagerTest {
         [Test, Category("Fast")]
-        public void DefaultConstructorDoesNotFail()
-        {
+        public void DefaultConstructorDoesNotFail() {
             new ActiveActivitiesManager();
         }
 
         [Test, Category("Fast")]
-        public void AddingNullAsTransmissionReturnsFalse()
-        {
+        public void AddingNullAsTransmissionReturnsFalse() {
             var manager = new ActiveActivitiesManager();
 
             Assert.Throws<ArgumentNullException>(() => manager.AddTransmission(null));
         }
 
         [Test, Category("Fast")]
-        public void AddSingleTransmissionIncreasesListCountByOne()
-        {
+        public void AddSingleTransmissionIncreasesListCountByOne() {
             var manager = new ActiveActivitiesManager();
 
             Assert.IsTrue(manager.AddTransmission(new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path")));
@@ -57,8 +52,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        public void ListedTransmissionIsEqualToAdded()
-        {
+        public void ListedTransmissionIsEqualToAdded() {
             var manager = new ActiveActivitiesManager();
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
 
@@ -69,8 +63,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        public void AFinishedTransmissionIsRemovedFromList()
-        {
+        public void AFinishedTransmissionIsRemovedFromList() {
             var manager = new ActiveActivitiesManager();
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
             manager.AddTransmission(trans);
@@ -81,8 +74,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        public void AddingTheSameInstanceASecondTimeReturnsFalseAndIsNotListed()
-        {
+        public void AddingTheSameInstanceASecondTimeReturnsFalseAndIsNotListed() {
             var manager = new ActiveActivitiesManager();
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
 
@@ -95,8 +87,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        public void AnAbortedTransmissionIsRemovedFromList()
-        {
+        public void AnAbortedTransmissionIsRemovedFromList() {
             var manager = new ActiveActivitiesManager();
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
             manager.AddTransmission(trans);
@@ -107,8 +98,7 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        public void AddingNonEqualTransmissionProducesNewEntryInList()
-        {
+        public void AddingNonEqualTransmissionProducesNewEntryInList() {
             var manager = new ActiveActivitiesManager();
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
             var trans2 = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path2");
@@ -120,14 +110,12 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        public void AddingATransmissionFiresEvent()
-        {
+        public void AddingATransmissionFiresEvent() {
             var manager = new ActiveActivitiesManager();
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
             int eventCounter = 0;
 
-            manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-            {
+            manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 eventCounter++;
                 Assert.That(e.NewItems.Count, Is.EqualTo(1));
                 Assert.That(e.NewItems[0], Is.EqualTo(trans));
@@ -138,15 +126,13 @@ namespace TestLibrary
         }
 
         [Test, Category("Fast")]
-        public void AFinishedTransmissionFiresEvent()
-        {
+        public void AFinishedTransmissionFiresEvent() {
             var manager = new ActiveActivitiesManager();
             var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
             int eventCounter = 0;
             manager.AddTransmission(trans);
 
-            manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-            {
+            manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 eventCounter++;
                 Assert.That(e.NewItems, Is.Null);
                 Assert.That(e.OldItems.Count, Is.EqualTo(1));

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.IO;
 
@@ -38,8 +37,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestUtils;
 
     [TestFixture]
-    public class LocalObjectRenamedRemoteObjectChangedTest
-    {
+    public class LocalObjectRenamedRemoteObjectChangedTest {
         private ActiveActivitiesManager manager;
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -90,7 +88,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             folder.Verify(f => f.Rename("newName", true), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.Folder, "remoteId", "newName", "parentId", "changeToken", ignored: childrenAreIgnored);
             this.changeSolver.Verify(s => s.Solve(dir, folder.Object, ContentChangeType.NONE, ContentChangeType.NONE));
-
         }
 
         private void SetUpMocks() {

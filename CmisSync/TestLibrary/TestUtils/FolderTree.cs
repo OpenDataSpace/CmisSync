@@ -19,8 +19,8 @@
 
 namespace TestLibrary.TestUtils {
     using System;
-    using System.IO;
     using System.Collections.Generic;
+    using System.IO;
     using System.Text;
 
     using CmisSync.Lib.Storage.FileSystem;
@@ -28,16 +28,16 @@ namespace TestLibrary.TestUtils {
     using DotCMIS.Client;
 
     public class FolderTree {
-        private List<FolderTree> Children = new List<FolderTree>();
-        public string Name { get; private set; }
+        private List<FolderTree> children = new List<FolderTree>();
+
         public FolderTree(string tree) {
-            string[] lines = tree.Split(new string[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = tree.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             string child = string.Empty;
             var childTree = new StringBuilder();
             foreach (var line in lines) {
                 if (line.StartsWith("├── ") || line.StartsWith("└── ")) {
                     if (child != string.Empty) {
-                        this.Children.Add(new FolderTree(childTree.ToString()));
+                        this.children.Add(new FolderTree(childTree.ToString()));
                     }
 
                     child = line.Substring(4);
@@ -51,73 +51,75 @@ namespace TestLibrary.TestUtils {
 
             string lastChild = childTree.ToString();
             if (!string.IsNullOrWhiteSpace(lastChild)) {
-                this.Children.Add(new FolderTree(lastChild));
+                this.children.Add(new FolderTree(lastChild));
             }
 
-            this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
+            this.children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
         }
 
         public FolderTree(IFolder folder, string name = null) {
             this.Name = name ?? folder.Name;
             foreach (var child in folder.GetChildren()) {
                 if (child is IFolder) {
-                    this.Children.Add(new FolderTree(child as IFolder));
+                    this.children.Add(new FolderTree(child as IFolder));
                 } else if (child is IDocument) {
-                    this.Children.Add(new FolderTree(child as IDocument));
+                    this.children.Add(new FolderTree(child as IDocument));
                 }
             }
 
-            this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
-        }
-
-        private FolderTree(IDocument doc) {
-            this.Name = doc.Name;
+            this.children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
         }
 
         public FolderTree(IDirectoryInfo dir, string name = null) {
             this.Name = name ?? dir.Name;
             foreach (var child in dir.GetDirectories()) {
-                this.Children.Add(new FolderTree(child));
+                this.children.Add(new FolderTree(child));
             }
 
-            this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
-        }
-
-        private FolderTree(IFileInfo file) {
-            this.Name = file.Name;
+            this.children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
         }
 
         public FolderTree(DirectoryInfo dir, string name = null) {
             this.Name = name ?? dir.Name;
             foreach (var child in dir.GetFileSystemInfos()) {
                 if (child is FileInfo) {
-                    this.Children.Add(new FolderTree(child as FileInfo));
+                    this.children.Add(new FolderTree(child as FileInfo));
                 } else if (child is DirectoryInfo) {
-                    this.Children.Add(new FolderTree(child as DirectoryInfo));
+                    this.children.Add(new FolderTree(child as DirectoryInfo));
                 }
             }
 
-            this.Children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
+            this.children.Sort((FolderTree x, FolderTree y) => x.Name.CompareTo(y.Name));
+        }
+
+        private FolderTree(IDocument doc) {
+            this.Name = doc.Name;
+        }
+
+        private FolderTree(IFileInfo file) {
+            this.Name = file.Name;
         }
 
         private FolderTree(FileInfo file) {
             this.Name = file.Name;
         }
 
+        public string Name { get; private set; }
+
         public override string ToString() {
             var tree = new StringBuilder();
             tree.AppendLine(this.Name);
-            int count = this.Children.Count;
-            foreach (var child in this.Children) {
+            int count = this.children.Count;
+            foreach (var child in this.children) {
                 string prefix = "│   ";
-                if (count <= 1 ) {
+                if (count <= 1) {
                     tree.Append("└── ");
                     prefix = "    ";
                 } else {
                     tree.Append("├── ");
                 }
 
-                string[] subTreeLines = child.ToString().Split(new string[] { Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
+                string[] subTreeLines = child.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                 bool firstLine = true;
                 foreach (var line in subTreeLines) {
                     if (firstLine) {
@@ -136,11 +138,9 @@ namespace TestLibrary.TestUtils {
         }
 
         public void CreateTreeIn(IDirectoryInfo rootFolder, bool deleteNonListed = true) {
-
         }
 
         public void CreateTreeIn(IFolder rootFolder, bool deleteNonListed = true) {
-
         }
 
         public override bool Equals(object obj) {

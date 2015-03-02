@@ -22,11 +22,38 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
 
     using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Enums;
 
     /// <summary>
     /// Allowable action convenience extenders of cmis objects
     /// </summary>
     public static class AllowableActionConvenienceExtenders {
+        /// <summary>
+        /// Ares the allowable actions available with this session and its default operation context.
+        /// </summary>
+        /// <returns><c>true</c>, if allowable actions are available, <c>false</c> otherwise.</returns>
+        /// <param name="session">Cmis session with its default context.</param>
+        public static bool AreAllowableActionsAvailable(this ISession session) {
+#region Workaround
+            // Workaround to detect minimum version of correct responding cmis gw (https://mantis.dataspace.cc/view.php?id=4463)
+            if (session.RepositoryInfo.ProductName == "GRAU DataSpace CMIS Gateway") {
+                try {
+                    var version = new Version(session.RepositoryInfo.ProductVersion);
+                    if (version < new Version(1, 5, 1120)) {
+                        return false;
+                    }
+                } catch (Exception) {
+                }
+            }
+#endregion
+
+            if (session.DefaultContext.IncludeAllowableActions) {
+                return true;
+            }
+
+            return session.DefaultContext.IncludeAcls && session.RepositoryInfo.Capabilities.AclCapability != CapabilityAcl.None;
+        }
+
         /// <summary>
         /// Determines if object can be deleted.
         /// </summary>
@@ -67,7 +94,11 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         }
 
         public static bool? CanGetFolderTree(this ICmisObject obj) {
-            return obj.IsActionAllowed(Actions.CanGetFolderTree);
+            if (obj.IsActionAllowed(Actions.CanGetDescendants) == true) {
+                return true;
+            } else {
+                return obj.IsActionAllowed(Actions.CanGetFolderTree);
+            }
         }
 
         public static bool? CanGetDescendants(this ICmisObject obj) {
@@ -158,6 +189,12 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             return obj.IsActionAllowed(Actions.CanApplyAcl);
         }
 
+        /// <summary>
+        /// Determines if the specified action is allowed on the cmis object.
+        /// </summary>
+        /// <returns><c>true</c> if action is allowed on the cmis object; otherwise, <c>false</c> or <c>null</c> if no information about actions is available.</returns>
+        /// <param name="obj">Cmis Object.</param>
+        /// <param name="action">Action name.</param>
         public static bool? IsActionAllowed(this ICmisObject obj, string action) {
             try {
                 return obj.AllowableActions.Actions.Contains(action);

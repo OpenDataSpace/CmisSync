@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -42,8 +41,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class LocalObjectChangedTest
-    {
+    public class LocalObjectChangedTest {
         private readonly string objectName = "name";
         private readonly string remoteId = "remoteId";
         private readonly string oldChangeToken = "oldChangeToken";
@@ -217,7 +215,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
                 var mappedObject = this.CreateMappedFile(this.modificationDate.AddMinutes(1), fileLength, new byte[20]);
                 this.storage.AddMappedFile(mappedObject);
                 var remoteFile = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.remoteId, this.objectName, this.parentId, fileLength, new byte[20], this.oldChangeToken);
-                remoteFile.Setup(r => r.SetContentStream(It.IsAny<IContentStream>(), true, true)).Throws(new CmisPermissionDeniedException());
+                remoteFile.SetupReadOnly();
 
                 this.underTest.Solve(localFile.Object, remoteFile.Object);
 

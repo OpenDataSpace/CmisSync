@@ -97,7 +97,8 @@ namespace CmisSync.Lib.Producer.Watcher
             try {
                 bool isDirectory = false;
                 if (e.ChangeType == WatcherChangeTypes.Deleted) {
-                    var obj = this.storage.GetObjectByLocalPath(this.fsFactory.CreateFileInfo(e.FullPath));
+                    var path = this.fsFactory.CreateFileInfo(e.FullPath);
+                    var obj = this.storage.GetObjectByLocalPath(path);
                     Guid guid = Guid.Empty;
                     if (obj != null) {
                         isDirectory = obj.Type == MappedObjectType.Folder;

@@ -17,9 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-
-namespace CmisSync.Lib.SelectiveIgnore
-{
+namespace CmisSync.Lib.SelectiveIgnore {
     using System;
 
     using CmisSync.Lib.Storage.Database;
@@ -29,11 +27,15 @@ namespace CmisSync.Lib.SelectiveIgnore
     /// <summary>
     /// Ignored entities storage.
     /// </summary>
-    public class IgnoredEntitiesStorage : IIgnoredEntitiesStorage
-    {
+    public class IgnoredEntitiesStorage : IIgnoredEntitiesStorage {
         private IIgnoredEntitiesCollection collection;
         private IMetaDataStorage storage;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.SelectiveIgnore.IgnoredEntitiesStorage"/> class.
+        /// </summary>
+        /// <param name="collection">Ignored entries collection.</param>
+        /// <param name="storage">Meta data storage.</param>
         public IgnoredEntitiesStorage(IIgnoredEntitiesCollection collection, IMetaDataStorage storage) {
             if (collection == null) {
                 throw new ArgumentNullException("Given collection is null");
@@ -88,18 +90,38 @@ namespace CmisSync.Lib.SelectiveIgnore
             this.collection.Remove(objectId);
         }
 
+        /// <summary>
+        /// Determines whether the given Document is ignored.
+        /// </summary>
+        /// <returns><c>true</c> if the given doc is ignored; otherwise <c>false</c></returns>
+        /// <param name="doc">Document to be checked.</param>
         public IgnoredState IsIgnored(IDocument doc) {
             return this.collection.IsIgnored(doc);
         }
 
+        /// <summary>
+        /// Determines whether the given folder is ignored.
+        /// </summary>
+        /// <returns><c>true</c> if the given folder is ignored; otherwise, <c>false</c>.</returns>
+        /// <param name="folder">Folder to be checked.</param>
         public IgnoredState IsIgnored(IFolder folder) {
             return this.collection.IsIgnored(folder);
         }
 
+        /// <summary>
+        /// Determines whether the object with the given objectId is ignored.
+        /// </summary>
+        /// <returns><c>true</c> if the object with the given objectId is ignored; otherwise, <c>false</c>.</returns>
+        /// <param name="objectId">Object identifier.</param>
         public IgnoredState IsIgnoredId(string objectId) {
             return this.collection.IsIgnoredId(objectId);
         }
 
+        /// <summary>
+        /// Determines whether this the ignored path is ignored.
+        /// </summary>
+        /// <returns><c>true</c> if the local path is ignored; otherwise, <c>false</c>.</returns>
+        /// <param name="localPath">Local path.</param>
         public IgnoredState IsIgnoredPath(string localPath) {
             return this.collection.IsIgnoredPath(localPath);
         }

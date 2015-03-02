@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IDescendantsTreeBuilder.cs" company="GRAU DATA AG">
+// <copyright file="CmisRepoCredentialsTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,17 +16,33 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler {
-    /// <summary>
-    /// Interface for descendants tree builder.
-    /// </summary>
-    public interface IDescendantsTreeBuilder {
-        /// <summary>
-        /// Builds the trees asynchronously by crawling storage, FileSystem and Server.
-        /// </summary>
-        /// <returns>
-        /// The trees as a struct.
-        /// </returns>
-        DescendantsTreeCollection BuildTrees();
+
+namespace TestLibrary.ConfigTests {
+    using System;
+
+    using CmisSync.Lib.Config;
+
+    using Moq;
+
+    using NUnit.Framework;
+    [TestFixture]
+    public class CmisRepoCredentialsTest {
+        [Test, Category("Fast")]
+        public void DefaultConstructor() {
+            var cred = new CmisRepoCredentials();
+            Assert.IsNull(cred.Address);
+            Assert.IsNull(cred.UserName);
+            Assert.IsNull(cred.Password);
+            Assert.IsNull(cred.RepoId);
+        }
+
+        [Test, Category("Fast")]
+        public void SetRepoId() {
+            string repoId = "RepoId";
+            var cred = new CmisRepoCredentials() {
+                RepoId = repoId
+            };
+            Assert.AreEqual(repoId, cred.RepoId);
+        }
     }
 }

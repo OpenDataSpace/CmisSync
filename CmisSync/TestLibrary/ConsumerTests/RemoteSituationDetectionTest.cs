@@ -17,17 +17,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests
-{
+namespace TestLibrary.ConsumerTests {
     using System;
     using System.Collections.Generic;
     using System.IO;
 
     using CmisSync.Lib.Consumer;
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Producer.Watcher;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
 
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
@@ -39,8 +38,7 @@ namespace TestLibrary.ConsumerTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class RemoteSituationDetectionTest
-    {
+    public class RemoteSituationDetectionTest {
         private readonly IObjectId objectId = Mock.Of<IObjectId>(ob => ob.Id == "objectId");
         private readonly string remotePath = "/object/path";
         private Mock<IMetaDataStorage> storage;
@@ -57,8 +55,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void NoChangeDetectionForFile()
-        {
+        public void NoChangeDetectionForFile() {
             var lastModificationDate = DateTime.Now;
             var remoteObject = new Mock<IDocument>();
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
@@ -70,8 +67,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void NoChangeDetectionForFileOnAddedEvent()
-        {
+        public void NoChangeDetectionForFileOnAddedEvent() {
             var lastModificationDate = DateTime.Now;
             var remoteObject = new Mock<IDocument>();
             var remotePaths = new List<string>();
@@ -94,8 +90,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void NoChangeDetectedForFolder()
-        {
+        public void NoChangeDetectedForFolder() {
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
             folderEvent.Remote = MetaDataChangeType.NONE;
@@ -106,8 +101,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FileAddedDetection()
-        {
+        public void FileAddedDetection() {
             var remoteObject = new Mock<IDocument>();
 
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
@@ -119,8 +113,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FolderAddedDetection()
-        {
+        public void FolderAddedDetection() {
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
             folderEvent.Remote = MetaDataChangeType.CREATED;
@@ -131,8 +124,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FileRemovedDetection()
-        {
+        public void FileRemovedDetection() {
             var remoteObject = new Mock<IDocument>();
 
             var fileEvent = new FileEvent(remoteFile: remoteObject.Object);
@@ -144,8 +136,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FolderRemovedDetection()
-        {
+        public void FolderRemovedDetection() {
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderEvent(remoteFolder: remoteObject.Object);
             folderEvent.Remote = MetaDataChangeType.DELETED;
@@ -156,8 +147,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FolderMovedDetectionOnFolderMovedEvent()
-        {
+        public void FolderMovedDetectionOnFolderMovedEvent() {
             var remoteObject = new Mock<IFolder>();
             var folderEvent = new FolderMovedEvent(null, null, null, remoteObject.Object) { Remote = MetaDataChangeType.MOVED };
 
@@ -167,8 +157,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FolderMovedDetectionOnChangeEvent()
-        {
+        public void FolderMovedDetectionOnChangeEvent() {
             string folderName = "old";
             string oldLocalPath = Path.Combine(Path.GetTempPath(), folderName);
             string remoteId = "remoteId";
@@ -193,8 +182,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FileMovedDetectionOnChangeEvent()
-        {
+        public void FileMovedDetectionOnChangeEvent() {
             string fileName = "old";
             string oldLocalPath = Path.Combine(Path.GetTempPath(), fileName);
             string remoteId = "remoteId";
@@ -219,8 +207,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FolderRenameDetectionOnChangeEvent()
-        {
+        public void FolderRenameDetectionOnChangeEvent() {
             string remoteId = "remoteId";
             string oldName = "old";
             string newName = "new";
@@ -240,8 +227,7 @@ namespace TestLibrary.ConsumerTests
         }
 
         [Test, Category("Fast"), Category("SituationDetection")]
-        public void FileRenameDetectionOnChangeEvent()
-        {
+        public void FileRenameDetectionOnChangeEvent() {
             string remoteId = "remoteId";
             string oldName = "old";
             string newName = "new";

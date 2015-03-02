@@ -209,6 +209,31 @@ namespace TestLibrary.TestUtils {
             session.Setup(s => s.RepositoryInfo.AclCapabilities).Returns(aclCapabilities);
         }
 
+        public static Mock<IRepositoryInfo> SetupRepositoryInfo(
+            this Mock<ISession> session,
+            string productName,
+            string productVersion,
+            string vendorName)
+        {
+            var repoInfo = session.Object.RepositoryInfo ?? Mock.Of<IRepositoryInfo>();
+            Mock.Get(repoInfo).Setup(r => r.ProductVersion).Returns(productVersion);
+            Mock.Get(repoInfo).Setup(r => r.ProductName).Returns(productName);
+            Mock.Get(repoInfo).Setup(r => r.VendorName).Returns(vendorName);
+            session.Setup(s => s.RepositoryInfo).Returns(repoInfo);
+            return Mock.Get(repoInfo);
+        }
+
+        public static void SetupDefaultOperationContext(
+            this Mock<ISession> session,
+            bool includeAcls,
+            bool includeActions)
+        {
+            var context = session.Object.DefaultContext ?? Mock.Of<IOperationContext>();
+            Mock.Get(context).Setup(c => c.IncludeAcls).Returns(includeAcls);
+            Mock.Get(context).Setup(c => c.IncludeAllowableActions).Returns(includeActions);
+            session.Setup(s => s.DefaultContext).Returns(context);
+        }
+
         public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid", string folderName = "name", string path = "path", string parentId = "", string changetoken = "changetoken") {
             if (path.Contains("\\")) {
                 throw new ArgumentException("Given remote path: " + path + " contains \\");

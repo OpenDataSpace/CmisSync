@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="IDescendantsTreeBuilder.cs" company="GRAU DATA AG">
+// <copyright file="ServerCredentialsTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -16,17 +16,31 @@
 //
 // </copyright>
 //-----------------------------------------------------------------------
-namespace CmisSync.Lib.Producer.Crawler {
-    /// <summary>
-    /// Interface for descendants tree builder.
-    /// </summary>
-    public interface IDescendantsTreeBuilder {
-        /// <summary>
-        /// Builds the trees asynchronously by crawling storage, FileSystem and Server.
-        /// </summary>
-        /// <returns>
-        /// The trees as a struct.
-        /// </returns>
-        DescendantsTreeCollection BuildTrees();
+﻿
+namespace TestLibrary {
+    using System;
+
+    using CmisSync.Lib.Config;
+
+    using NUnit.Framework;
+
+    [TestFixture]
+    public class ServerCredentialsTest {
+        [Test, Category("Fast")]
+        public void DefaultConstructor() {
+            var cred = new ServerCredentials();
+            Assert.IsNull(cred.Address);
+            Assert.IsNull(cred.UserName);
+            Assert.IsNull(cred.Password);
+        }
+
+        [Test, Category("Fast")]
+        public void SetServerAddress() {
+            string url = "http://example.com/";
+            var cred = new ServerCredentials {
+                Address = new Uri(url)
+            };
+            Assert.AreEqual(url, cred.Address.ToString());
+        }
     }
 }

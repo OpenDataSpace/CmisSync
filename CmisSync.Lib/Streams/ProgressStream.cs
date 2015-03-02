@@ -212,6 +212,7 @@ namespace CmisSync.Lib.Streams {
         public override void Close() {
             long? result = TransmissionProgressEventArgs.CalcBitsPerSecond(this.start, DateTime.Now.AddMilliseconds(1), this.bytesTransmittedSinceLastSecond);
             this.transmissionEvent.ReportProgress(new TransmissionProgressEventArgs() { BitsPerSecond = result });
+            this.blockingDetectionTimer.Stop();
             base.Close();
         }
 
