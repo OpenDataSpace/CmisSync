@@ -151,7 +151,9 @@ namespace CmisSync.Lib.Producer.Crawler {
                 #if __COCOA__
                 if (fsObject.Name.Normalize(NormalizationForm.FormD) == storedMappedChild.Name.Normalize(NormalizationForm.FormD) && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
                 #else
-                if (fsObject.Name == storedMappedChild.Name && fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc) {
+                if (fsObject.Name == storedMappedChild.Name &&
+                    fsObject.LastWriteTimeUtc == storedMappedChild.LastLocalWriteTimeUtc &&
+                    fsObject.ReadOnly == storedMappedChild.IsReadOnly) {
                 #endif
                     // Equal
                     createdEvent = null;
