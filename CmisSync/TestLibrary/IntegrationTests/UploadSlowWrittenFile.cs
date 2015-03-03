@@ -33,13 +33,17 @@ namespace TestLibrary.IntegrationTests {
     [TestFixture, Timeout(180000), TestName("UploadSlowlyWrittenFile")]
     public class UploadSlowWrittenFile : BaseFullRepoTest {
         [Test, Category("Slow")]
-        public void SlowFileWriting([Values(true, false)]bool contentChanges) {
+        public void SlowFileWriting(
+            [Values(true, false)]bool contentChanges,
+            [Values(FileAccess.Read, FileAccess.ReadWrite, FileAccess.Write)]FileAccess access,
+            [Values(FileShare.None, FileShare.ReadWrite, FileShare.Read, FileShare.Delete)]FileShare share)
+        {
             int length = 10;
             this.ContentChangesActive = contentChanges;
             this.InitializeAndRunRepo(swallowExceptions: true);
             var file = new FileInfo(Path.Combine(this.localRootDir.FullName, "file"));
             using (var task = Task.Factory.StartNew(() => {
-                using (var stream = file.Open(FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None)) {
+                using (var stream = file.Open(FileMode.CreateNew, access, share)) {
                     for (int i = 0; i < length; i++) {
                         Thread.Sleep(1000);
                         stream.WriteByte((byte)'0');
