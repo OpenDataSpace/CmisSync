@@ -49,7 +49,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
 
         [TearDown]
         public void Cleanup() {
-            this.testFolder.Attributes &= ~FileAttributes.ReadOnly;
+            this.RemoveReadOnlyFlagRecursive(this.testFolder);
             this.testFolder.Delete(true);
             if (this.testFolderOnOtherFS != null) {
                 this.testFolderOnOtherFS.Refresh();
@@ -609,7 +609,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             dir.Create();
             dir.ReadOnly = true;
             dir.Parent.ReadOnly = true;
-            Assert.Throws<UnauthorizedAccessException>(() => dir.MoveTo(Path.Combine(this.testFolder.FullName, "dog")));
+            Assert.Throws<UnauthorizedAccessException>(() => System.IO.Directory.Move(dir.FullName, Path.Combine(this.testFolder.FullName, "dog")));
             dir.Refresh();
             Assert.That(dir.Name, Is.EqualTo("cat"));
         }
@@ -665,6 +665,15 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         private void SkipIfExtendedAttributesAreNotAvailable() {
             if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
                 Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+        }
+
+        private void RemoveReadOnlyFlagRecursive(FileSystemInfo info) {
+            info.Attributes &= ~FileAttributes.ReadOnly;
+            if (info is DirectoryInfo) {
+                foreach (var child in (info as DirectoryInfo).GetFileSystemInfos()) {
+                    this.RemoveReadOnlyFlagRecursive(child);
+                }
             }
         }
     }
