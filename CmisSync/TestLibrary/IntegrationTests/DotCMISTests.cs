@@ -189,8 +189,14 @@ namespace TestLibrary.IntegrationTests {
             IObjectId checkoutId = doc.CheckOut();
             IDocument docCheckout = (IDocument)session.GetObject(checkoutId);
             Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
+            doc.Refresh();
+            Assert.IsTrue(doc.IsVersionSeriesCheckedOut.GetValueOrDefault());
+            Assert.AreEqual(checkoutId.Id, doc.VersionSeriesCheckedOutId);
 
             docCheckout.CancelCheckOut();
+            doc.Refresh();
+            Assert.IsFalse(doc.IsVersionSeriesCheckedOut.GetValueOrDefault());
+            Assert.IsNull(doc.VersionSeriesCheckedOutId);
         }
 
         [Ignore("Not yet implemented by CMIS GW")]
@@ -912,6 +918,8 @@ namespace TestLibrary.IntegrationTests {
             filters.Add(PropertyIds.Path);
             filters.Add(PropertyIds.ChangeToken);
             filters.Add(PropertyIds.SecondaryObjectTypeIds);
+            filters.Add(PropertyIds.IsVersionSeriesCheckedOut);
+            filters.Add(PropertyIds.VersionSeriesCheckedOutId);
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);
