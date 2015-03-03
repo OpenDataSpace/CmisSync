@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Producer.Watcher
-{
+namespace CmisSync.Lib.Producer.Watcher {
     using System;
     using System.IO;
 
@@ -30,8 +29,7 @@ namespace CmisSync.Lib.Producer.Watcher
     /// <summary>
     /// .Net file system watcher.
     /// </summary>
-    public class NetWatcher : IWatcherProducer
-    {
+    public class NetWatcher : IWatcherProducer {
         private readonly ISyncEventQueue queue;
 
         /// <summary>
@@ -119,8 +117,7 @@ namespace CmisSync.Lib.Producer.Watcher
         /// state. After calling <see cref="Dispose"/>, you must release all references to the
         /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> so the garbage collector can reclaim the memory that the
         /// <see cref="CmisSync.Lib.Sync.Strategy.WatcherConsumer"/> was occupying.</remarks>
-        public void Dispose()
-        {
+        public void Dispose() {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -129,12 +126,9 @@ namespace CmisSync.Lib.Producer.Watcher
         /// Dispose the .Net File System Watcher.
         /// </summary>
         /// <param name="disposing">If set to <c>true</c> disposing.</param>
-        protected void Dispose(bool disposing)
-        {
-            if (!this.disposed)
-            {
-                if (disposing)
-                {
+        protected void Dispose(bool disposing) {
+            if (!this.disposed) {
+                if (disposing) {
                     this.EnableEvents = false;
                     this.fileSystemWatcher.Dispose();
                     this.createChangeDeleteHandler.Dispose();

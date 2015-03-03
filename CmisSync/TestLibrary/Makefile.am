@@ -113,6 +113,7 @@ SOURCES =  \
 	IntegrationTests/SelectiveIgnoreTests/RenameIT.cs \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
+	IntegrationTests/UploadSlowWrittenFile.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfIRepository.cs \
 	MockedServer/MockOfISession.cs \

@@ -360,7 +360,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             fileInfo.Setup(d => d.Directory).Returns(parentDirInfo.Object);
             var transmissionManager = new ActiveActivitiesManager();
             var solver = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, transmissionManager);
-            Assert.Throws<NullReferenceException>(() => solver.Solve(fileInfo.Object, null));
+            Assert.Throws<ArgumentException>(() => solver.Solve(fileInfo.Object, null));
             this.storage.VerifyThatNoObjectIsManipulated();
         }
 

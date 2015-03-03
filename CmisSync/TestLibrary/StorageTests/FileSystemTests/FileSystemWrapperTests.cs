@@ -44,10 +44,12 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             var tempFolder = new DirectoryInfo(tempPath);
             Assert.That(tempFolder.Exists, Is.True);
             this.testFolder = tempFolder.CreateSubdirectory("DSSFileSystemWrapperTest");
+            this.testFolder.Attributes &= ~FileAttributes.ReadOnly;
         }
 
         [TearDown]
         public void Cleanup() {
+            this.RemoveReadOnlyFlagRecursive(this.testFolder);
             this.testFolder.Delete(true);
             if (this.testFolderOnOtherFS != null) {
                 this.testFolderOnOtherFS.Refresh();
@@ -578,6 +580,53 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(this.testFolder.GetFiles().Length, Is.EqualTo(conflictFiles + 1));
         }
 
+        [Test, Category("Medium")]
+        public void FileReadOnly() {
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "testfile.txt"));
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            Assert.That(file.ReadOnly, Is.False);
+            file.ReadOnly = true;
+            Assert.That(file.ReadOnly, Is.True);
+            file.ReadOnly = false;
+            Assert.That(file.ReadOnly, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void DirectoryReadOnly() {
+            var dir = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            Assert.That(dir.ReadOnly, Is.False);
+            dir.ReadOnly = true;
+            Assert.That(dir.ReadOnly, Is.True);
+            dir.ReadOnly = false;
+            Assert.That(dir.ReadOnly, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void RenameOfReadOnlyDirFails() {
+            var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            dir.Create();
+            dir.ReadOnly = true;
+            dir.Parent.ReadOnly = true;
+            Assert.Throws<UnauthorizedAccessException>(() => System.IO.Directory.Move(dir.FullName, Path.Combine(this.testFolder.FullName, "dog")));
+            dir.Refresh();
+            Assert.That(dir.Name, Is.EqualTo("cat"));
+        }
+
+        [Test, Category("Medium")]
+        public void ReadOnlyAttributeIsNotInheritedToChildDirectories() {
+            var subdir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            subdir.Create();
+            var underTest = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+
+            underTest.ReadOnly = true;
+
+            Assert.That(underTest.ReadOnly, Is.True);
+            subdir.Refresh();
+            Assert.That(subdir.ReadOnly, Is.False);
+        }
+
         [Ignore("Windows only and needs second partition as target fs")]
         [Test, Category("Medium")]
         public void ReplaceFile([Values("E:\\\\")]string targetFS) {
@@ -616,6 +665,15 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         private void SkipIfExtendedAttributesAreNotAvailable() {
             if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
                 Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+        }
+
+        private void RemoveReadOnlyFlagRecursive(FileSystemInfo info) {
+            info.Attributes &= ~FileAttributes.ReadOnly;
+            if (info is DirectoryInfo) {
+                foreach (var child in (info as DirectoryInfo).GetFileSystemInfos()) {
+                    this.RemoveReadOnlyFlagRecursive(child);
+                }
             }
         }
     }

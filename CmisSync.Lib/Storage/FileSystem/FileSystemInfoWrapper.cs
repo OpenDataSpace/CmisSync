@@ -121,6 +121,24 @@ namespace CmisSync.Lib.Storage.FileSystem {
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this
+        /// <see cref="CmisSync.Lib.Storage.FileSystem.FileSystemInfoWrapper"/> read only.
+        /// </summary>
+        /// <value><c>true</c> if read only; otherwise, <c>false</c>.</value>
+        public bool ReadOnly {
+            get { return (this.original.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly; }
+            set {
+                if (value != this.ReadOnly) {
+                    if (value) {
+                        this.original.Attributes |= FileAttributes.ReadOnly;
+                    } else {
+                        this.original.Attributes &= ~FileAttributes.ReadOnly;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the UUID by reading or writing extended attribute entries.
         /// </summary>
         /// <value>The UUID.</value>

@@ -98,7 +98,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 if (this.IsParentReadOnly(localFileSystemInfo)) {
                     return;
                 } else {
-                    throw new NullReferenceException("ParentId is null => invoke crawl sync to create parent first");
+                    throw new ArgumentException("ParentId is null => invoke crawl sync to create parent first");
                 }
             }
 
