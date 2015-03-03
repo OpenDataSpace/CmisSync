@@ -85,10 +85,12 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         public static IDocument CreateVersionedDocument(this IFolder folder, string name, string content) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
-            properties.Add(PropertyIds.ObjectTypeId, "VersionableType");
-
+            //  for opencmis cmis server, "VersionableType" should be used to support checkout
+            //properties.Add(PropertyIds.ObjectTypeId, "VersionableType");
+            //  for OpenDataSpace cmis gateway, "cmis:document" is ok to support checkout
+            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
             if (string.IsNullOrEmpty(content)) {
-                return folder.CreateDocument(properties, null, DotCMIS.Enums.VersioningState.Major);
+                return folder.CreateDocument(properties, null, null);
             }
 
             ContentStream contentStream = new ContentStream();
@@ -159,7 +161,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             properties.Add(PropertyIds.LastModificationDate, modificationDate);
             try {
                 return obj.UpdateProperties(properties, true);
-            } catch(CmisConstraintException e) {
+            } catch (CmisConstraintException e) {
                 var oldObject = obj.ToLogString();
                 obj.Refresh();
                 throw new CmisConstraintException(string.Format("Old object: {0}{1}New object: {2}", oldObject, Environment.NewLine, obj.ToLogString()), e);

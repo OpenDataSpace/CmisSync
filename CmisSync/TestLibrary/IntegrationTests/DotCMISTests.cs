@@ -156,7 +156,8 @@ namespace TestLibrary.IntegrationTests {
             doc.DeleteAllVersions();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Not yet implemented by CMIS GW")]
+        [Ignore("Not yet implemented by CMIS GW")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CheckoutTest(
             string canonical_name,
             string localPath,
@@ -185,19 +186,15 @@ namespace TestLibrary.IntegrationTests {
             IFolder subFolder = folder.CreateFolder(subFolderName);
 
             IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.Not.True);
-
             IObjectId checkoutId = doc.CheckOut();
-            doc.Refresh();
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.True);
-            Assert.That(doc.VersionSeriesCheckedOutId, Is.EqualTo(checkoutId.Id));
+            IDocument docCheckout = (IDocument)session.GetObject(checkoutId);
+            Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
 
-            doc.CancelCheckOut();
-            doc.Refresh();
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
+            docCheckout.CancelCheckOut();
         }
 
-        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow"), Ignore("Not yet implemented by CMIS GW")]
+        [Ignore("Not yet implemented by CMIS GW")]
+        [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CheckinTest(
             string canonical_name,
             string localPath,
@@ -226,13 +223,11 @@ namespace TestLibrary.IntegrationTests {
             IFolder subFolder = folder.CreateFolder(subFolderName);
 
             string content = "testContent";
-            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.Not.True);
 
+            IDocument doc = subFolder.CreateVersionedDocument(fileName, "testContent");
             IObjectId checkoutId = doc.CheckOut();
-            doc.Refresh();
             IDocument docCheckout = session.GetObject(checkoutId) as IDocument;
-            Assert.That(docCheckout, Is.Not.Null);
+            Assert.AreEqual(doc.ContentStreamLength, docCheckout.ContentStreamLength);
 
             ContentStream contentStream = new ContentStream();
             contentStream.FileName = fileName;
@@ -243,19 +238,12 @@ namespace TestLibrary.IntegrationTests {
                     contentStream.Stream = memstream;
                     docCheckout.AppendContentStream(contentStream, i == 9);
                 }
-
                 Assert.That(docCheckout.ContentStreamLength, Is.EqualTo(content.Length * (i + 2)));
             }
 
-            docCheckout.CheckIn(true, null, null, "checkin");
-            docCheckout.Refresh();
-            Assert.That(docCheckout.IsVersionSeriesCheckedOut, Is.False);
-
-            doc.Refresh();
-            Assert.That(doc.IsVersionSeriesCheckedOut, Is.False);
-
-            doc = session.GetObjectByPath(filePath) as IDocument;
-            Assert.That(doc.Id, Is.EqualTo(checkoutId.Id));
+            IObjectId checkinId = docCheckout.CheckIn(true, null, null, "checkin");
+            IDocument docCheckin = session.GetObject(checkinId) as IDocument;
+            Assert.That(docCheckin.ContentStreamLength, Is.EqualTo(content.Length * (9 + 2)));
         }
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
@@ -924,8 +912,6 @@ namespace TestLibrary.IntegrationTests {
             filters.Add(PropertyIds.Path);
             filters.Add(PropertyIds.ChangeToken);
             filters.Add(PropertyIds.SecondaryObjectTypeIds);
-            filters.Add(PropertyIds.IsVersionSeriesCheckedOut);
-            filters.Add(PropertyIds.VersionSeriesCheckedOutId);
             HashSet<string> renditions = new HashSet<string>();
             renditions.Add("cmis:none");
             session.DefaultContext = session.CreateOperationContext(filters, false, true, false, IncludeRelationshipsFlag.None, null, true, null, true, 100);
