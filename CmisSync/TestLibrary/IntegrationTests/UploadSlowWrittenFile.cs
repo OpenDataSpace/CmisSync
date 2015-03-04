@@ -32,7 +32,7 @@ namespace TestLibrary.IntegrationTests {
 
     [TestFixture, Timeout(180000), TestName("UploadSlowlyWrittenFile")]
     public class UploadSlowWrittenFile : BaseFullRepoTest {
-        [Test, Category("Slow")]
+        [Test, Category("Slow"), Ignore("Very slow: Include in nightly builds")]
         public void SlowFileWriting(
             [Values(true, false)]bool contentChanges,
             [Values(FileAccess.ReadWrite, FileAccess.Write)]FileAccess access,
