@@ -35,8 +35,8 @@
 namespace CmisSync {
     using System;
 
-    using Gtk;
     using GLib;
+    using Gtk;
 
     using log4net;
 
@@ -66,7 +66,7 @@ namespace CmisSync {
 
         // Runs the application
         public void Run() {
-            ExceptionManager.UnhandledException += delegate (UnhandledExceptionArgs args) {
+            ExceptionManager.UnhandledException += delegate(UnhandledExceptionArgs args) {
                 if (args.IsTerminating) {
                     Logger.Fatal("A UI element caused an exception", args.ExceptionObject as Exception);
                 } else {
