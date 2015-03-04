@@ -686,6 +686,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             var uuid = Guid.NewGuid();
             file.Uuid = uuid;
             Assert.That(file.Uuid, Is.EqualTo(uuid));
+            Assert.That(file.ReadOnly, Is.True);
         }
 
         [Test, Category("Medium")]
@@ -698,11 +699,12 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             dir.LastWriteTimeUtc = past;
 
             Assert.That(dir.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
+            Assert.That(dir.ReadOnly, Is.True);
         }
 
         [Test, Category("Medium")]
         public void SetModificationDateToReadOnlyFile() {
-            var past = DateTime.Now - TimeSpan.FromHours(1);
+            var past = DateTime.UtcNow - TimeSpan.FromHours(1);
             var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
             using (file.Open(FileMode.CreateNew)) { }
             file.ReadOnly = true;
@@ -710,6 +712,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             file.LastWriteTimeUtc = past;
 
             Assert.That(file.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
+            Assert.That(file.ReadOnly, Is.True);
         }
 
 #if !__MonoCS__

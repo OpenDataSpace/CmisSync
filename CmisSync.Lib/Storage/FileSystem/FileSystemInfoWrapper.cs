@@ -82,7 +82,11 @@ namespace CmisSync.Lib.Storage.FileSystem {
 
             set {
                 var date = DateTimeToFileConverter.Convert(value, this.fsType);
+                this.Refresh();
+                bool ro = this.ReadOnly;
+                this.ReadOnly = false;
                 this.original.LastWriteTimeUtc = date;
+                this.ReadOnly = ro;
             }
         }
 
@@ -181,6 +185,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
             }
 
             set {
+                this.Refresh();
+                bool ro = this.ReadOnly;
+                this.ReadOnly = false;
                 int retries = 100;
                 while (retries > 0) {
                     try {
@@ -190,10 +197,15 @@ namespace CmisSync.Lib.Storage.FileSystem {
                         Thread.Sleep(50);
                         retries--;
                         if (retries <= 0) {
+                            try {
+                                this.ReadOnly = ro;
+                            } catch (Exception) { }
                             throw;
                         }
                     }
                 }
+
+                this.ReadOnly = ro;
             }
         }
 
