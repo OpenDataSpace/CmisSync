@@ -95,10 +95,11 @@ M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::FullDownloadTest()
 M: System.Void TestLibrary.TasksTests.ChunkedDownloaderTest::ResumeDownloadTest()
 M: System.Void TestLibrary.TestUtils.IsTestWithConfiguredLog4Net::.cctor()
 
-#Ignore AvoidUnnecessarySpecializationRule for PermissionDeniedEvent and ProxyAuthRequiredEvent
+#Ignore AvoidUnnecessarySpecializationRule for PermissionDeniedEvent, CmisConnectionExceptionEvent and ProxyAuthRequiredEvent
 R: Gendarme.Rules.Maintainability.AvoidUnnecessarySpecializationRule
 T: CmisSync.Lib.Events.ProxyAuthRequiredEvent
 T: CmisSync.Lib.Events.PermissionDeniedEvent
+T: CmisSync.Lib.Events.CmisConnectionExceptionEvent
 
 #Ignore DoNotExposeNestedGenericSignaturesRule where DotCmis forces us
 R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
