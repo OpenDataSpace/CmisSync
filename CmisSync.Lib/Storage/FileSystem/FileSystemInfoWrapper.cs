@@ -24,6 +24,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
 
 #if __MonoCS__
     using Mono.Unix;
+#else
+    using System.Security.AccessControl;
+    using System.Security.Principal;
 #endif
 
     /// <summary>
@@ -32,7 +35,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
     public abstract class FileSystemInfoWrapper : IFileSystemInfo {
         private static readonly string ExtendedAttributeKey = "DSS-UUID";
         private static IExtendedAttributeReader reader = null;
-
+#if !__MonoCS__
+        private static SecurityIdentifier actualUser = null;
+#endif
         private FileSystemInfo original;
         private FSType fsType;
 
@@ -46,6 +51,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 break;
             case PlatformID.Win32NT:
                 reader = new ExtendedAttributeReaderDos();
+#if !__MonoCS__
+                actualUser = new NTAccount(Environment.UserName).Translate(typeof(SecurityIdentifier)) as SecurityIdentifier;
+#endif
                 break;
             }
         }
@@ -131,8 +139,30 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 if (value != this.ReadOnly) {
                     if (value) {
                         this.original.Attributes |= FileAttributes.ReadOnly;
+#if !__MonoCS__
+                        if (this.original is DirectoryInfo) {
+                            var dir = this.original as DirectoryInfo;
+                            var acls = dir.GetAccessControl();
+                            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateDirectories, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                            dir.SetAccessControl(acls);
+                        }
+#endif
                     } else {
                         this.original.Attributes &= ~FileAttributes.ReadOnly;
+#if !__MonoCS__
+                        if (this.original is DirectoryInfo) {
+                            var dir = this.original as DirectoryInfo;
+                            var acls = dir.GetAccessControl();
+                            acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                            acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateDirectories, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                            acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                            acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                            dir.SetAccessControl(acls);
+                        }
+#endif
                     }
                 }
             }

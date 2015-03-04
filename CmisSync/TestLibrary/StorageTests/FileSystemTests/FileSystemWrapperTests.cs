@@ -134,11 +134,11 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             IDirectoryInfo dirInfo = Factory.CreateDirectoryInfo(fullPath);
             dirInfo.Create();
-            Assert.That(dirInfo.Exists, Is.EqualTo(true));
+            Assert.That(dirInfo.Exists, Is.True);
         }
 
         [Test, Category("Medium")]
-        public void Directory() {
+        public void CreateDirectoryWrapper() {
             string fileName = "test1";
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             IFileInfo fileInfo = Factory.CreateFileInfo(fullPath);
@@ -609,9 +609,40 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             dir.Create();
             dir.ReadOnly = true;
             dir.Parent.ReadOnly = true;
-            Assert.Throws<UnauthorizedAccessException>(() => System.IO.Directory.Move(dir.FullName, Path.Combine(this.testFolder.FullName, "dog")));
+#if __MonoCS__
+            Assert.Throws<UnauthorizedAccessException>(() => Directory.Move(dir.FullName, Path.Combine(this.testFolder.FullName, "dog")));
+#else
+            Assert.Throws<IOException>(() => dir.MoveTo(Path.Combine(this.testFolder.FullName, "dog")));
+#endif
             dir.Refresh();
             Assert.That(dir.Name, Is.EqualTo("cat"));
+        }
+
+        [Test, Category("Medium")]
+        public void CreateFileInReadOnlyDirFails() {
+            var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            dir.Create();
+            var file = Factory.CreateFileInfo(Path.Combine(dir.FullName, "file.bin"));
+            dir.ReadOnly = true;
+            Assert.Throws<UnauthorizedAccessException>(() => {
+                using (file.Open(FileMode.CreateNew)) { }
+            });
+        }
+
+        [Test, Category("Medium")]
+        public void CreateFileInReadWriteSubFolderOfReadOnlyFolder() {
+            var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            dir.Create();
+            var parent = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            parent.ReadOnly = true;
+            var file = Factory.CreateFileInfo(Path.Combine(dir.FullName, "file.bin"));
+            using (file.Open(FileMode.CreateNew)) { }
+
+            dir.Refresh();
+            file.Refresh();
+            Assert.That(dir.ReadOnly, Is.False);
+            Assert.That(file.ReadOnly, Is.False);
+            Assert.That(parent.ReadOnly, Is.True);
         }
 
         [Test, Category("Medium")]
@@ -626,6 +657,17 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             subdir.Refresh();
             Assert.That(subdir.ReadOnly, Is.False);
         }
+
+#if !__MonoCS__
+        [Test, Category("Fast")]
+        public void AclUser() {
+            var account = new System.Security.Principal.NTAccount(Environment.UserName);
+            Assert.That(account.ToString().Contains(Environment.UserName));
+            Assert.That(account.IsValidTargetType(typeof(System.Security.Principal.SecurityIdentifier)));
+            var securityAccount = account.Translate(typeof(System.Security.Principal.SecurityIdentifier)) as System.Security.Principal.SecurityIdentifier;
+            Assert.That(securityAccount.IsAccountSid(), Is.True);
+        }
+#endif
 
         [Ignore("Windows only and needs second partition as target fs")]
         [Test, Category("Medium")]
@@ -669,8 +711,10 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         private void RemoveReadOnlyFlagRecursive(FileSystemInfo info) {
-            info.Attributes &= ~FileAttributes.ReadOnly;
-            if (info is DirectoryInfo) {
+            if (info is FileInfo) {
+                new FileInfoWrapper(info as FileInfo).ReadOnly = false;
+            } else if (info is DirectoryInfo) {
+                new DirectoryInfoWrapper(info as DirectoryInfo).ReadOnly = false;
                 foreach (var child in (info as DirectoryInfo).GetFileSystemInfos()) {
                     this.RemoveReadOnlyFlagRecursive(child);
                 }
