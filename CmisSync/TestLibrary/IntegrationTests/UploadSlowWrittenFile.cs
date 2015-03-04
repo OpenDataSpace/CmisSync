@@ -35,7 +35,7 @@ namespace TestLibrary.IntegrationTests {
         [Test, Category("Slow")]
         public void SlowFileWriting(
             [Values(true, false)]bool contentChanges,
-            [Values(FileAccess.Read, FileAccess.ReadWrite, FileAccess.Write)]FileAccess access,
+            [Values(FileAccess.ReadWrite, FileAccess.Write)]FileAccess access,
             [Values(FileShare.None, FileShare.ReadWrite, FileShare.Read, FileShare.Delete)]FileShare share)
         {
             int length = 10;
