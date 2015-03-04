@@ -253,8 +253,8 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
                 acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
                 dir.SetAccessControl(acls);
-            } else if (this.orginal is FileInfo) {
-                var file = this.original as IFileInfo;
+            } else if (this.original is FileInfo) {
+                var file = this.original as FileInfo;
                 var acls = file.GetAccessControl();
                 acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
                 acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.AppendData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
@@ -272,8 +272,8 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
                 acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
                 dir.SetAccessControl(acls);
-            } else if (this.orginal is FileInfo) {
-                var file = this.original as IFileInfo;
+            } else if (this.original is FileInfo) {
+                var file = this.original as FileInfo;
                 var acls = file.GetAccessControl();
                 acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
                 acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.AppendData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
