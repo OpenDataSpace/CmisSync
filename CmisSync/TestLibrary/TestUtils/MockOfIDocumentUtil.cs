@@ -113,8 +113,9 @@ namespace TestLibrary.TestUtils {
                 objectIdPWC.Setup(o => o.Id).Returns(docPWC.Object.Id);
                 return objectIdPWC.Object;
             });
-            docPWC.Setup(d => d.CheckIn(It.IsAny<bool>(),It.IsAny<IDictionary<string,object>>(),It.IsAny<IContentStream>(),It.IsAny<string>())).Callback(() => {
+            docPWC.Setup(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Returns(() => {
                 doc.Setup(d => d.ChangeToken).Returns(newChangeToken);
+                return Mock.Of<IObjectId>(o => o.Id == doc.Object.Id);
             });
         }
 

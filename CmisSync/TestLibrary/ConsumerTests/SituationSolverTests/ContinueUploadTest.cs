@@ -141,7 +141,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                     }
                 });
             this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o == docId), It.IsAny<IOperationContext>())).Returns(doc);
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
+                return doc;
+            });
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id))).Returns<IObjectId>((id) => {
+                return doc;
+            });
 
             var docPWC = Mock.Of<IDocument>(
                 d =>

@@ -249,6 +249,7 @@ namespace TestLibrary.IntegrationTests {
 
             IObjectId checkinId = docCheckout.CheckIn(true, null, null, "checkin");
             IDocument docCheckin = session.GetObject(checkinId) as IDocument;
+            docCheckin.Refresh();   //  refresh is required, or DotCMIS will re-use the cached properties if checinId is the same as doc.Id
             Assert.That(docCheckin.ContentStreamLength, Is.EqualTo(content.Length * (9 + 2)));
         }
 
