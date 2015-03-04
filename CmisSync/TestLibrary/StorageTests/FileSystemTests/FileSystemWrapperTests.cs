@@ -658,6 +658,60 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.That(subdir.ReadOnly, Is.False);
         }
 
+        [Test, Category("Medium")]
+        public void WritingToReadOnlyFileMustFail() {
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file.txt"));
+            using (file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.None)) { }
+            file.ReadOnly = true;
+
+            Assert.Throws<UnauthorizedAccessException>(() => {
+                using(file.Open(FileMode.Open, FileAccess.Write, FileShare.None)) { }
+            });
+        }
+
+        [Test, Category("Medium")]
+        public void ReadingFromReadOnlyFileMustWork() {
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file.txt"));
+            using (file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.None)) { }
+            file.ReadOnly = true;
+            using(file.Open(FileMode.Open, FileAccess.Read, FileShare.None)) { }
+        }
+
+        [Test, Category("Medium")]
+        public void SetUuidToReadOnlyFileShouldNotFail() {
+            this.SkipIfExtendedAttributesAreNotAvailable();
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file.txt"));
+            using (file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.None)) { }
+            file.ReadOnly = true;
+            var uuid = Guid.NewGuid();
+            file.Uuid = uuid;
+            Assert.That(file.Uuid, Is.EqualTo(uuid));
+        }
+
+        [Test, Category("Medium")]
+        public void SetModificationDateToReadOnlyDirectory() {
+            var past = DateTime.UtcNow - TimeSpan.FromHours(1);
+            var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            dir.Create();
+            dir.ReadOnly = true;
+
+            dir.LastWriteTimeUtc = past;
+
+            Assert.That(dir.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
+        }
+
+        [Test, Category("Medium")]
+        public void SetModificationDateToReadOnlyFile() {
+            var past = DateTime.Now - TimeSpan.FromHours(1);
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
+            using (file.Open(FileMode.CreateNew)) { }
+            file.ReadOnly = true;
+
+            file.LastWriteTimeUtc = past;
+
+            Assert.That(file.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
+        }
+
 #if !__MonoCS__
         [Test, Category("Fast")]
         public void AclUser() {
@@ -711,6 +765,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         private void RemoveReadOnlyFlagRecursive(FileSystemInfo info) {
+            info.Refresh();
             if (info is FileInfo) {
                 new FileInfoWrapper(info as FileInfo).ReadOnly = false;
             } else if (info is DirectoryInfo) {

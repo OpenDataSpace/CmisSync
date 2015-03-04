@@ -140,28 +140,12 @@ namespace CmisSync.Lib.Storage.FileSystem {
                     if (value) {
                         this.original.Attributes |= FileAttributes.ReadOnly;
 #if !__MonoCS__
-                        if (this.original is DirectoryInfo) {
-                            var dir = this.original as DirectoryInfo;
-                            var acls = dir.GetAccessControl();
-                            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-                            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateDirectories, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-                            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-                            acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-                            dir.SetAccessControl(acls);
-                        }
+                        this.AddReadOnlyAclsToOriginal();
 #endif
                     } else {
                         this.original.Attributes &= ~FileAttributes.ReadOnly;
 #if !__MonoCS__
-                        if (this.original is DirectoryInfo) {
-                            var dir = this.original as DirectoryInfo;
-                            var acls = dir.GetAccessControl();
-                            acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-                            acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateDirectories, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-                            acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-                            acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
-                            dir.SetAccessControl(acls);
-                        }
+                        this.RemoveReadOnlyAclsFromOriginal();
 #endif
                     }
                 }
@@ -258,5 +242,45 @@ namespace CmisSync.Lib.Storage.FileSystem {
                 return false;
             }
         }
+
+#if !__MonoCS__
+        private void AddReadOnlyAclsToOriginal() {
+            if (this.original is DirectoryInfo) {
+                var dir = this.original as DirectoryInfo;
+                var acls = dir.GetAccessControl();
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateDirectories, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                dir.SetAccessControl(acls);
+            } else if (this.orginal is FileInfo) {
+                var file = this.original as IFileInfo;
+                var acls = file.GetAccessControl();
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.AppendData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.AddAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                file.SetAccessControl(acls);
+            }
+        }
+
+        private void RemoveReadOnlyAclsFromOriginal() {
+            if (this.original is DirectoryInfo) {
+                var dir = this.original as DirectoryInfo;
+                var acls = dir.GetAccessControl();
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateDirectories, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.CreateFiles, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                dir.SetAccessControl(acls);
+            } else if (this.orginal is FileInfo) {
+                var file = this.original as IFileInfo;
+                var acls = file.GetAccessControl();
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.WriteData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.AppendData, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                acls.RemoveAccessRule(new FileSystemAccessRule(actualUser, FileSystemRights.Delete, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Deny));
+                file.SetAccessControl(acls);
+            }
+        }
+#endif
     }
 }
