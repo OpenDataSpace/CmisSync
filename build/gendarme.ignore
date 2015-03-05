@@ -124,10 +124,16 @@ T: CmisSync.CircularProgressBar
 R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
 M: System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>> CmisSync.Lib.Storage.Database.IObjectTree`1::get_Children()
 M: System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>> CmisSync.Lib.Storage.Database.ObjectTree`1::get_Children()
-M: System.Void CmisSync.Lib.Storage.Database.ObjectTree`1::set_Children(System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>>)
+M: System.Void CmisSync.Lib.Storage.Database.ObjectTree`1::set_Children
+(System.Collections.Generic.IList`1<CmisSync.Lib.Storage.Database.IObjectTree`1<T>>)
 M: CmisSync.Lib.Storage.Database.IObjectTree`1<DotCMIS.Client.IFileableCmisObject> CmisSync.Lib.Producer.Crawler.DescendantsCrawler::GetRemoteDirectoryTree(DotCMIS.Client.IFolder,System.Collections.Generic.IList`1<DotCMIS.Client.ITree`1<DotCMIS.Client.IFileableCmisObject>>,CmisSync.Lib.Filter.IFilterAggregator)
 M: System.IDisposable CmisSync.Lib.Queueing.SyncEventQueue::Subscribe(System.IObserver`1<System.Tuple`2<System.String,System.Int32>>)
 
 # TryParseRule should not give any warning in test library
 R: Gendarme.Rules.BadPractice.PreferTryParseRule
 A: TestLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+
+#Ignore DoNotExposeNestedGenericSignaturesRule where it is very helpful
+R: Gendarme.Rules.Design.Generic.DoNotExposeNestedGenericSignaturesRule
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`1<T>>)
+M: System.String CmisSync.Lib.Utils::NameOf(System.Linq.Expressions.Expression`1<System.Func`2<TModel,TProperty>>)
