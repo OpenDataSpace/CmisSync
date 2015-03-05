@@ -152,7 +152,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     watch.Start();
                     try {
                         IDocument doc = addedObject as IDocument;
-                        mapped.LastChecksum = UploadFile(localFile, ref doc, transmissionEvent);
+                        mapped.LastChecksum = UploadFile(localFile, ref doc, transmissionEvent, mapped);
                         mapped.ChecksumAlgorithmName = "SHA-1";
                         mapped.RemoteObjectId = doc.Id;
                         addedObject = doc;

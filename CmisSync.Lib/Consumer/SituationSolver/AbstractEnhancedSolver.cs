@@ -177,7 +177,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="localFile">Local file.</param>
         /// <param name="doc">Remote document.</param>
         /// <param name="transmissionManager">Transmission manager.</param>
-        protected byte[] UploadFile(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent) {
+        /// <param name="transmissionEvent">File Transmission event.</param>
+        /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
+        protected byte[] UploadFile(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent, IMappedObject mappedObject = null) {
             byte[] checksumPWC = null;
             IDocument docPWC = LoadRemotePWCDocument(doc, ref checksumPWC);
 
@@ -205,6 +207,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         }
                         file.Seek(0, SeekOrigin.Begin);
                     }
+                }
+
+                if (mappedObject != null && doc.ChangeToken != mappedObject.LastChangeToken) {
+                    mappedObject.LastChangeToken = doc.ChangeToken;
+                    Storage.SaveMappedObject(mappedObject);
                 }
 
                 byte[] hash = null;

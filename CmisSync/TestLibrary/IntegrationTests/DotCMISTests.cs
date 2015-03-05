@@ -156,7 +156,7 @@ namespace TestLibrary.IntegrationTests {
             doc.DeleteAllVersions();
         }
 
-        [Ignore("Not yet implemented by CMIS GW")]
+        //[Ignore("Not yet implemented by CMIS GW")]
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CheckoutTest(
             string canonical_name,
@@ -199,7 +199,7 @@ namespace TestLibrary.IntegrationTests {
             Assert.IsNull(doc.VersionSeriesCheckedOutId);
         }
 
-        [Ignore("Not yet implemented by CMIS GW")]
+        //[Ignore("Not yet implemented by CMIS GW")]
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CheckinTest(
             string canonical_name,
