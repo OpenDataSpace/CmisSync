@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.ConsumerTests.SituationSolverTests
-{
+namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
 
     using CmisSync.Lib.Consumer.SituationSolver;
@@ -36,8 +35,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class AbstractEnhancedSolverTest
-    {
+    public class AbstractEnhancedSolverTest {
         [Test, Category("Fast"), Category("Solver")]
         public void ConstructorThrowsExceptionIfSessionIsNull() {
             Assert.Throws<ArgumentNullException>(() => new SolverClass(null, Mock.Of<IMetaDataStorage>()));
@@ -115,7 +113,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests
             public byte[] Upload(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                 transmissionManager.AddTransmission(transmissionEvent);
-                return base.UploadFile(localFile, ref doc, transmissionEvent);
+                return this.UploadFile(localFile, ref doc, transmissionEvent);
             }
 
             public override void Solve(

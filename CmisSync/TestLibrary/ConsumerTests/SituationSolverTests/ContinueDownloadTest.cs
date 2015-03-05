@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="LocalObjectAddedTest.cs" company="GRAU DATA AG">
+// <copyright file="ContinueDownloadTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General private License as published by
@@ -20,16 +20,16 @@
 namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
     using System.Collections.Generic;
-    using System.Security.Cryptography;
     using System.IO;
+    using System.Security.Cryptography;
 
-    using CmisSync.Lib.Storage.FileSystem;
-    using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Storage.Database.Entities;
-    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
-    using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -46,6 +46,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private readonly string objectId = "objectId";
         private readonly string parentId = "parentId";
         private readonly string changeToken = "changeToken";
+        private readonly long chunkSize = 8 * 1024;
+        private readonly int chunkCount = 4;
+        private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
 
         private Mock<ISession> session;
         private Mock<IFileSystemInfoFactory> fsFactory;
@@ -55,9 +58,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
         private string parentPath;
         private string localPath;
-        private readonly long chunkSize = 8 * 1024;
-        private readonly int chunkCount = 4;
-        private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
         private byte[] fileContentOld;
         private byte[] fileHashOld;
         private byte[] fileContent;
@@ -87,10 +87,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localPath = Path.Combine(this.parentPath, this.objectName);
             this.fileContentOld = new byte[this.chunkCount * this.chunkSize];
             this.fileContentOld[0] = 0;
-            this.fileHashOld = SHA1.Create().ComputeHash(fileContentOld);
+            this.fileHashOld = SHA1.Create().ComputeHash(this.fileContentOld);
             this.fileContent = new byte[this.chunkCount * this.chunkSize];
             this.fileContent[0] = 1;
-            this.fileHash = SHA1.Create().ComputeHash(fileContent);
+            this.fileHash = SHA1.Create().ComputeHash(this.fileContent);
 
             var parentDir = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath));
             this.localFile = Mock.Get(Mock.Of<IFileInfo>(
@@ -115,23 +115,23 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFileAdded() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
-            RunSolverToAbortDownload(solver);
+            this.RunSolverToAbortDownload(solver);
 
-            RunSolverToContinueDownload(solver);
+            this.RunSolverToContinueDownload(solver);
             this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChanged() {
-            SetupRemoteFileChanged();
+            this.SetupRemoteFileChanged();
 
             var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
-            RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
+            this.RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
-            RunSolverToContinueDownload(solver, remoteContent: ContentChangeType.CHANGED);
-            this.cacheFile.Verify(c => c.Replace(localFile.Object, this.backupFile.Object, true), Times.Once());
+            this.RunSolverToContinueDownload(solver, remoteContent: ContentChangeType.CHANGED);
+            this.cacheFile.Verify(c => c.Replace(this.localFile.Object, this.backupFile.Object, true), Times.Once());
             this.backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
@@ -139,23 +139,23 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFileAddedWhileChangeLocalCacheBeforeContinue() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
-            RunSolverToAbortDownload(solver);
+            this.RunSolverToAbortDownload(solver);
 
-            RunSolverToChangeLocalCacheBeforeContinue(solver);
+            this.RunSolverToChangeLocalCacheBeforeContinue(solver);
             this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChangedWhileChangeLocalCacheBeforeContinue() {
-            SetupRemoteFileChanged();
+            this.SetupRemoteFileChanged();
 
             var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
-            RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
+            this.RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
-            RunSolverToChangeLocalCacheBeforeContinue(solver, remoteContent: ContentChangeType.CHANGED);
-            this.cacheFile.Verify(c => c.Replace(localFile.Object, this.backupFile.Object, true), Times.Once());
+            this.RunSolverToChangeLocalCacheBeforeContinue(solver, remoteContent: ContentChangeType.CHANGED);
+            this.cacheFile.Verify(c => c.Replace(this.localFile.Object, this.backupFile.Object, true), Times.Once());
             this.backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
@@ -163,23 +163,23 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFileAddedWhileChangeRemoteBeforeContinue() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
-            RunSolverToAbortDownload(solver);
+            this.RunSolverToAbortDownload(solver);
 
-            RunSolverToChangeRemoteBeforeContinue(solver);
+            this.RunSolverToChangeRemoteBeforeContinue(solver);
             this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChangedWhileChangeRemoteBeforeContinue() {
-            SetupRemoteFileChanged();
+            this.SetupRemoteFileChanged();
 
             var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
-            RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
+            this.RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
-            RunSolverToChangeRemoteBeforeContinue(solver, remoteContent: ContentChangeType.CHANGED);
-            this.cacheFile.Verify(c => c.Replace(localFile.Object, this.backupFile.Object, true), Times.Once());
+            this.RunSolverToChangeRemoteBeforeContinue(solver, remoteContent: ContentChangeType.CHANGED);
+            this.cacheFile.Verify(c => c.Replace(this.localFile.Object, this.backupFile.Object, true), Times.Once());
             this.backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
@@ -187,22 +187,22 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void RemoteFileAddedWhileDeleteLocalCacheBeforeContinue() {
             var solver = new RemoteObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
-            RunSolverToAbortDownload(solver);
-            RunSolverToDeleteLocalCacheBeforeContinue(solver);
+            this.RunSolverToAbortDownload(solver);
+            this.RunSolverToDeleteLocalCacheBeforeContinue(solver);
             this.cacheFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null && !uuid.Equals(Guid.Empty)), Times.Once());
             this.cacheFile.Verify(f => f.MoveTo(this.localPath), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void RemoteFileChangedWhileDeleteLocalCacheBeforeContinue() {
-            SetupRemoteFileChanged();
+            this.SetupRemoteFileChanged();
 
             var solver = new RemoteObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, this.fsFactory.Object);
 
-            RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
+            this.RunSolverToAbortDownload(solver, remoteContent: ContentChangeType.CHANGED);
 
-            RunSolverToDeleteLocalCacheBeforeContinue(solver, remoteContent: ContentChangeType.CHANGED);
-            this.cacheFile.Verify(c => c.Replace(localFile.Object, this.backupFile.Object, true), Times.Once());
+            this.RunSolverToDeleteLocalCacheBeforeContinue(solver, remoteContent: ContentChangeType.CHANGED);
+            this.cacheFile.Verify(c => c.Replace(this.localFile.Object, this.backupFile.Object, true), Times.Once());
             this.backupFile.Verify(b => b.Delete(), Times.Once());
         }
 
@@ -211,9 +211,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.backupFile = this.fsFactory.AddFile(Path.Combine(this.parentPath, this.objectName + ".bak.sync"), false);
             this.cacheFile.Setup(
                 c =>
-                c.Replace(this.localFile.Object, backupFile.Object, It.IsAny<bool>())).Returns(localFile.Object).Callback(
+                c.Replace(this.localFile.Object, this.backupFile.Object, It.IsAny<bool>())).Returns(this.localFile.Object).Callback(
                 () =>
-                backupFile.Setup(
+                this.backupFile.Setup(
                 b =>
                 b.Open(FileMode.Open, FileAccess.Read, FileShare.None)).Returns(new MemoryStream(this.fileContentOld)));
 
@@ -238,7 +238,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             ContentChangeType remoteContent = ContentChangeType.NONE) {
             var stream = new Mock<MemoryStream>();
             stream.SetupAllProperties();
-            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
+            stream.Setup(f => f.CanWrite).Returns(true); // required for System.Security.Cryptography.CryptoStream
 
             this.localFileLength = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => {
@@ -247,6 +247,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Aborting = true });
                     }
                 }
+
                 this.localFileLength += count;
             });
             stream.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
@@ -277,7 +278,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             ContentChangeType remoteContent = ContentChangeType.NONE) {
             Mock<MemoryStream> stream = new Mock<MemoryStream>();
             stream.SetupAllProperties();
-            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
+            stream.Setup(f => f.CanWrite).Returns(true); // required for System.Security.Cryptography.CryptoStream
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => this.localFileLength += count);
             stream.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
 
@@ -287,10 +288,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 if (lengthRead >= this.localFileLength) {
                     return 0;
                 }
+
                 int countRead = count;
                 if (countRead > (this.localFileLength - lengthRead)) {
                     countRead = (int)(this.localFileLength - lengthRead);
                 }
+
                 Array.Copy(this.fileContent, lengthRead, buffer, offset, countRead);
                 lengthRead += countRead;
                 stream.Object.Position = lengthRead;
@@ -306,7 +309,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             Assert.That(this.localFileLength, Is.EqualTo(this.fileContent.Length));
             stream.Verify(f => f.Seek(0, SeekOrigin.Begin), Times.Once());
-            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3));   //  first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
+            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3)); // first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
@@ -318,7 +321,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             AbstractEnhancedSolver solver,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE) {
-            SetupToChangeLocalCache();
+            this.SetupToChangeLocalCache();
 
             Mock<IDocument> remoteObject = MockOfIDocumentUtil.CreateRemoteDocumentMock(null, this.objectId, this.objectName, this.parentId, this.fileContent.Length, this.fileContent, this.changeToken);
             remoteObject.Setup(f => f.LastModificationDate).Returns((DateTime?)this.creationDate);
@@ -326,7 +329,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             solver.Solve(this.localFile.Object, remoteObject.Object, localContent, remoteContent);
 
             Assert.That(this.localFileLength, Is.EqualTo(this.fileContent.Length));
-            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3));   //  first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
+            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(3)); // first open in SetupToAbortThePreviousDownload, second open to validate checksum, third open to download
             this.cacheFile.Verify(f => f.Delete(), Times.Once());
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
@@ -341,7 +344,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             ContentChangeType remoteContent = ContentChangeType.NONE) {
             Mock<MemoryStream> stream = new Mock<MemoryStream>();
             stream.SetupAllProperties();
-            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
+            stream.Setup(f => f.CanWrite).Returns(true); // required for System.Security.Cryptography.CryptoStream
             this.localFileLength = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => this.localFileLength += count);
             stream.Setup(f => f.Length).Returns(() => { return this.localFileLength; });
@@ -360,9 +363,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             Assert.That(this.localFileLength, Is.EqualTo(this.fileContent.Length));
             this.cacheFile.Verify(f => f.Delete(), Times.Once());
-            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(2));   //  first open in SetupToAbortThePreviousDownload, second open to download
+            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(2)); // first open in SetupToAbortThePreviousDownload, second open to download
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, newLastChangeToken, true, this.creationDate, this.creationDate, fileHash, this.fileContent.Length);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, newLastChangeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
             this.transmissionStorage.Verify(f => f.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Once());
             this.transmissionStorage.Verify(f => f.RemoveObjectByRemoteObjectId(this.objectId), Times.Once());
@@ -376,7 +379,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             Mock<MemoryStream> stream = new Mock<MemoryStream>();
             stream.SetupAllProperties();
-            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
+            stream.Setup(f => f.CanWrite).Returns(true); // required for System.Security.Cryptography.CryptoStream
 
             this.localFileLength = 0;
             stream.Setup(f => f.Write(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>())).Callback((byte[] buffer, int offset, int count) => this.localFileLength += count);
@@ -392,7 +395,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             solver.Solve(this.localFile.Object, remoteObject.Object, localContent, remoteContent);
 
             Assert.That(this.localFileLength, Is.EqualTo(this.fileContent.Length));
-            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(2));   //  first open in SetupToAbortThePreviousDownload, second open to download
+            this.cacheFile.Verify(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>()), Times.Exactly(2));   // first open in SetupToAbortThePreviousDownload, second open to download
             this.localFile.VerifySet(d => d.LastWriteTimeUtc = It.Is<DateTime>(date => date.Equals(this.creationDate)), Times.Once());
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeToken, true, this.creationDate, this.creationDate, this.fileHash, this.fileContent.Length);
             this.transmissionStorage.Verify(f => f.GetObjectByRemoteObjectId(this.objectId), Times.Exactly(2));
@@ -403,7 +406,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private void SetupToChangeLocalCache() {
             Mock<MemoryStream> stream = new Mock<MemoryStream>();
             stream.SetupAllProperties();
-            stream.Setup(f => f.CanWrite).Returns(true);    //  required for System.Security.Cryptography.CryptoStream
+            stream.Setup(f => f.CanWrite).Returns(true);    // required for System.Security.Cryptography.CryptoStream
 
             long lengthRead = 0;
             stream.Setup(f => f.Seek(It.IsAny<long>(), It.IsAny<SeekOrigin>())).Callback((long offset, SeekOrigin loc) => lengthRead = offset);
@@ -411,17 +414,21 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 if (lengthRead >= this.localFileLength) {
                     return 0;
                 }
+
                 int countRead = count;
                 if (countRead > (this.localFileLength - lengthRead)) {
                     countRead = (int)(this.localFileLength - lengthRead);
                 }
+
                 Array.Copy(this.fileContent, lengthRead, buffer, 0, countRead);
-                //  change the first byte
+
+                // change the first byte
                 if (buffer[0] == (byte)0) {
                     buffer[0] = (byte)1;
                 } else {
                     buffer[0] = (byte)0;
                 }
+
                 lengthRead += countRead;
                 stream.Object.Position = lengthRead;
                 return countRead;
