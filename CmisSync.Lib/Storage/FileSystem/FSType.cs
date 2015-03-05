@@ -17,12 +17,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
 
-    public enum FSType
-    {
+    public enum FSType {
         Unkown,
         NTFS,
         FAT12,

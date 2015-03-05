@@ -20,13 +20,14 @@
 namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
+#if !__MonoCS__
+    using System.Security.AccessControl;
+    using System.Security.Principal;
+#endif
     using System.Threading;
 
 #if __MonoCS__
     using Mono.Unix;
-#else
-    using System.Security.AccessControl;
-    using System.Security.Principal;
 #endif
 
     /// <summary>
@@ -138,7 +139,10 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <value><c>true</c> if read only; otherwise, <c>false</c>.</value>
         public bool ReadOnly {
-            get { return (this.original.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly; }
+            get {
+                return (this.original.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly;
+            }
+
             set {
                 if (value != this.ReadOnly) {
                     if (value) {
@@ -199,7 +203,9 @@ namespace CmisSync.Lib.Storage.FileSystem {
                         if (retries <= 0) {
                             try {
                                 this.ReadOnly = ro;
-                            } catch (Exception) { }
+                            } catch (Exception) {
+                            }
+
                             throw;
                         }
                     }
