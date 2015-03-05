@@ -41,9 +41,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <value>The parent.</value>
         public IDirectoryInfo Parent {
-            get {
-                return new DirectoryInfoWrapper(this.original.Parent);
-            }
+            get { return new DirectoryInfoWrapper(this.original.Parent); }
         }
 
         /// <summary>
@@ -51,9 +49,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// </summary>
         /// <value>The root.</value>
         public IDirectoryInfo Root {
-            get {
-                return new DirectoryInfoWrapper(this.original.Root);
-            }
+            get { return new DirectoryInfoWrapper(this.original.Root); }
         }
 
         /// <summary>
@@ -67,7 +63,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// Passes the Delete call to the originial instance.
         /// </summary>
         /// <param name="recursive">If set to <c>true</c> recursive.</param>
-        public void Delete(bool recursive)  {
+        public void Delete(bool recursive) {
             this.original.Delete(true);
         }
 

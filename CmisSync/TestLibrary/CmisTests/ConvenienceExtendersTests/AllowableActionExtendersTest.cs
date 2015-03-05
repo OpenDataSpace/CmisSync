@@ -66,5 +66,39 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
             Assert.That(underTest.Object.CanGetDescendants(), Is.EqualTo(supportsDescendants));
             Assert.That(underTest.Object.CanGetFolderTree(), Is.EqualTo(supportsDescendants));
         }
+
+        [Test, Category("Fast")]
+        public void AreAllowableActionsAvailable(
+            [Values(true, false)]bool includeActions,
+            [Values(true, false)]bool includeAcls)
+        {
+            var underTest = new Mock<ISession>();
+            var productName = "Generic Cmis server";
+            var version = "1.0.0.0";
+            var vendor = "Generic vendor";
+            var repoInfo = underTest.SetupRepositoryInfo(productName, version, vendor);
+            underTest.SetupDefaultOperationContext(includeAcls, includeActions);
+            repoInfo.SetupCapabilities(acls: includeAcls ? DotCMIS.Enums.CapabilityAcl.Discover : DotCMIS.Enums.CapabilityAcl.None);
+
+            Assert.That(underTest.Object.AreAllowableActionsAvailable(), Is.EqualTo(includeAcls || includeActions));
+        }
+
+        [Test, Category("Fast")]
+        public void ImitateOldGdsCmisGw() {
+            var underTest = new Mock<ISession>();
+            underTest.SetupRepositoryInfo("GRAU DataSpace CMIS Gateway", "1.5.0", "GRAU DATA AG");
+            underTest.SetupDefaultOperationContext(false, true);
+
+            Assert.That(underTest.Object.AreAllowableActionsAvailable(), Is.False);
+        }
+
+        [Test, Category("Fast")]
+        public void ImitateNewGdsCmisGw() {
+            var underTest = new Mock<ISession>();
+            underTest.SetupRepositoryInfo("GRAU DataSpace CMIS Gateway", "1.5.1120", "GRAU DATA AG");
+            underTest.SetupDefaultOperationContext(false, true);
+
+            Assert.That(underTest.Object.AreAllowableActionsAvailable(), Is.True);
+        }
     }
 }

@@ -17,15 +17,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.FileSystem
-{
+namespace CmisSync.Lib.Storage.FileSystem {
     using System;
     using System.IO;
 
     /// <summary>
     /// Interface to enable mocking of FileSystemWatcher
     /// </summary>
-    public interface IFileSystemWatcher
-    {
+    public interface IFileSystemWatcher {
     }
 }

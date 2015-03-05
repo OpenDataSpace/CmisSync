@@ -113,6 +113,7 @@ SOURCES =  \
 	IntegrationTests/SelectiveIgnoreTests/RenameIT.cs \
 	IntegrationTests/TestNameAttribute.cs \
 	IntegrationTests/UploadFileIT.cs \
+	IntegrationTests/UploadSlowWrittenFile.cs \
 	MockedServer/MockOfIAclCapabilities.cs \
 	MockedServer/MockOfIRepository.cs \
 	MockedServer/MockOfISession.cs \
@@ -175,6 +176,7 @@ SOURCES =  \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
 	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockOfIFolderUtil.cs \
+	TestUtils/MockOfIRepositoryInfo.cs \
 	TestUtils/MockOfISyncEventQueue.cs \
 	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \

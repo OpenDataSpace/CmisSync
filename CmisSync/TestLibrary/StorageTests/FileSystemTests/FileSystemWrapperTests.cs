@@ -19,6 +19,7 @@
 
 namespace TestLibrary.StorageTests.FileSystemTests {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
@@ -43,10 +44,12 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             var tempFolder = new DirectoryInfo(tempPath);
             Assert.That(tempFolder.Exists, Is.True);
             this.testFolder = tempFolder.CreateSubdirectory("DSSFileSystemWrapperTest");
+            this.testFolder.Attributes &= ~FileAttributes.ReadOnly;
         }
 
         [TearDown]
         public void Cleanup() {
+            this.RemoveReadOnlyFlagRecursive(this.testFolder);
             this.testFolder.Delete(true);
             if (this.testFolderOnOtherFS != null) {
                 this.testFolderOnOtherFS.Refresh();
@@ -131,11 +134,11 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             IDirectoryInfo dirInfo = Factory.CreateDirectoryInfo(fullPath);
             dirInfo.Create();
-            Assert.That(dirInfo.Exists, Is.EqualTo(true));
+            Assert.That(dirInfo.Exists, Is.True);
         }
 
         [Test, Category("Medium")]
-        public void Directory() {
+        public void CreateDirectoryWrapper() {
             string fileName = "test1";
             string fullPath = Path.Combine(this.testFolder.FullName, fileName);
             IFileInfo fileInfo = Factory.CreateFileInfo(fullPath);
@@ -336,49 +339,6 @@ namespace TestLibrary.StorageTests.FileSystemTests {
 
             Assert.That(underTest.Uuid, Is.Null);
         }
-
-        /*
-        [Test, Category("Medium")]
-        public void GetUuidIsReadMultipleTimesBeforeInsteadOfFailing() {
-            this.SkipIfExtendedAttributesAreNotAvailable();
-            IFileInfo underTest = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
-            using (underTest.Open(FileMode.CreateNew)) {
-            }
-
-            Guid uuid = Guid.NewGuid();
-
-            using (var stream = underTest.Open(FileMode.Open, FileAccess.Write, FileShare.None)) {
-                TaskFactory.StartNew(() => SetUuid(underTest, uuid.ToString()));
-                Thread.Sleep(100);
-            }
-
-            Thread.Sleep(100);
-
-            Assert.That(underTest.Uuid, Is.EqualTo(uuid));
-            uuid = Guid.NewGuid();
-            underTest.Uuid = uuid;
-            Guid? readUuid = null;
-            using (var task = TaskFactory.StartNew(() => {
-                Thread.Sleep(100);
-                readUuid = underTest.Uuid;
-            }))
-            {
-                using (var stream = underTest.Open(FileMode.Open, FileAccess.Write, FileShare.None)) {
-                    Thread.Sleep(200);
-                }
-                task.Wait();
-            }
-
-            Assert.That(uuid, Is.EqualTo(readUuid));
-        }
-
-        private static void SetUuid(IFileSystemInfo fsObject, string uuid) {
-            fsObject.Uuid = Guid.Parse(uuid);
-        }
-
-        private static void GetUuid(IFileSystemInfo fsObject, out Guid? uuid) {
-            uuid = fsObject.Uuid;
-        } */
 
         [Test, Category("Medium")]
         public void CreatesFirstConflictFile() {
@@ -598,29 +558,173 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             Assert.Throws<ArgumentException>(() => Factory.CreateDownloadCacheFileInfo(Guid.Empty));
         }
 
-        // Test is not implemented yet
-        [Ignore]
-        [Test, Category("Fast")]
-        public void CreateNextConflictFile() {
-            Assert.Fail("TODO");
-            /*
-            for (int i = 0; i < 10; i++)
-            {
-                using (FileStream s = File.Create(conflictFilePath))
-                {
+        [Test, Category("Medium")]
+        public void CreateNextConflictFile([Values(10)]int conflictFiles) {
+            var filePaths = new HashSet<string>();
+            var fileName = "file.txt";
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, fileName));
+            filePaths.Add(file.FullName);
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            for (int i = 1; i <= conflictFiles; i++) {
+                var conflictFile = Factory.CreateConflictFileInfo(file);
+                Assert.That(filePaths.Contains(conflictFile.FullName), Is.False);
+                filePaths.Add(conflictFile.FullName);
+                using (conflictFile.Open(FileMode.CreateNew)) {
                 }
 
-                conflictFilePath = Utils.FindNextConflictFreeFilename(path, user);
-                Assert.AreNotEqual(path, conflictFilePath, "The conflict file must differ from original file");
-                Assert.True(conflictFilePath.Contains(user), "The username should be added to the conflict file name");
-                Assert.True(conflictFilePath.EndsWith(Path.GetExtension(path)), "The file extension must be kept the same as in the original file");
-                string filename = Path.GetFileName(conflictFilePath);
-                string originalFilename = Path.GetFileNameWithoutExtension(path);
-                Assert.True(filename.StartsWith(originalFilename), string.Format("The conflict file \"{0}\" must start with \"{1}\"", filename, originalFilename));
-                string conflictParent = Directory.GetParent(conflictFilePath).FullName;
-                Assert.AreEqual(originalParent, conflictParent, "The conflict file must exists in the same directory like the orignial file");
-            } */
+                Assert.That(filePaths.Count, Is.EqualTo(i + 1));
+            }
+
+            Assert.That(this.testFolder.GetFiles().Length, Is.EqualTo(conflictFiles + 1));
         }
+
+        [Test, Category("Medium")]
+        public void FileReadOnly() {
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "testfile.txt"));
+            using (file.Open(FileMode.CreateNew)) {
+            }
+
+            Assert.That(file.ReadOnly, Is.False);
+            file.ReadOnly = true;
+            Assert.That(file.ReadOnly, Is.True);
+            file.ReadOnly = false;
+            Assert.That(file.ReadOnly, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void DirectoryReadOnly() {
+            var dir = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            Assert.That(dir.ReadOnly, Is.False);
+            dir.ReadOnly = true;
+            Assert.That(dir.ReadOnly, Is.True);
+            dir.ReadOnly = false;
+            Assert.That(dir.ReadOnly, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void RenameOfReadOnlyDirFails() {
+            var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            dir.Create();
+            dir.ReadOnly = true;
+            dir.Parent.ReadOnly = true;
+#if __MonoCS__
+            Assert.Throws<UnauthorizedAccessException>(() => Directory.Move(dir.FullName, Path.Combine(this.testFolder.FullName, "dog")));
+#else
+            Assert.Throws<IOException>(() => dir.MoveTo(Path.Combine(this.testFolder.FullName, "dog")));
+#endif
+            dir.Refresh();
+            Assert.That(dir.Name, Is.EqualTo("cat"));
+        }
+
+        [Test, Category("Medium")]
+        public void CreateFileInReadOnlyDirFails() {
+            var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            dir.Create();
+            var file = Factory.CreateFileInfo(Path.Combine(dir.FullName, "file.bin"));
+            dir.ReadOnly = true;
+            Assert.Throws<UnauthorizedAccessException>(() => {
+                using (file.Open(FileMode.CreateNew)) { }
+            });
+        }
+
+        [Test, Category("Medium")]
+        public void CreateFileInReadWriteSubFolderOfReadOnlyFolder() {
+            var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            dir.Create();
+            var parent = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+            parent.ReadOnly = true;
+            var file = Factory.CreateFileInfo(Path.Combine(dir.FullName, "file.bin"));
+            using (file.Open(FileMode.CreateNew)) { }
+
+            dir.Refresh();
+            file.Refresh();
+            Assert.That(dir.ReadOnly, Is.False);
+            Assert.That(file.ReadOnly, Is.False);
+            Assert.That(parent.ReadOnly, Is.True);
+        }
+
+        [Test, Category("Medium")]
+        public void ReadOnlyAttributeIsNotInheritedToChildDirectories() {
+            var subdir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            subdir.Create();
+            var underTest = Factory.CreateDirectoryInfo(this.testFolder.FullName);
+
+            underTest.ReadOnly = true;
+
+            Assert.That(underTest.ReadOnly, Is.True);
+            subdir.Refresh();
+            Assert.That(subdir.ReadOnly, Is.False);
+        }
+
+        [Test, Category("Medium")]
+        public void WritingToReadOnlyFileMustFail() {
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file.txt"));
+            using (file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.None)) { }
+            file.ReadOnly = true;
+
+            Assert.Throws<UnauthorizedAccessException>(() => {
+                using(file.Open(FileMode.Open, FileAccess.Write, FileShare.None)) { }
+            });
+        }
+
+        [Test, Category("Medium")]
+        public void ReadingFromReadOnlyFileMustWork() {
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file.txt"));
+            using (file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.None)) { }
+            file.ReadOnly = true;
+            using(file.Open(FileMode.Open, FileAccess.Read, FileShare.None)) { }
+        }
+
+        [Test, Category("Medium")]
+        public void SetUuidToReadOnlyFileShouldNotFail() {
+            this.SkipIfExtendedAttributesAreNotAvailable();
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file.txt"));
+            using (file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.None)) { }
+            file.ReadOnly = true;
+            var uuid = Guid.NewGuid();
+            file.Uuid = uuid;
+            Assert.That(file.Uuid, Is.EqualTo(uuid));
+            Assert.That(file.ReadOnly, Is.True);
+        }
+
+        [Test, Category("Medium")]
+        public void SetModificationDateToReadOnlyDirectory() {
+            var past = DateTime.UtcNow - TimeSpan.FromHours(1);
+            var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
+            dir.Create();
+            dir.ReadOnly = true;
+
+            dir.LastWriteTimeUtc = past;
+
+            Assert.That(dir.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
+            Assert.That(dir.ReadOnly, Is.True);
+        }
+
+        [Test, Category("Medium")]
+        public void SetModificationDateToReadOnlyFile() {
+            var past = DateTime.UtcNow - TimeSpan.FromHours(1);
+            var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
+            using (file.Open(FileMode.CreateNew)) { }
+            file.ReadOnly = true;
+
+            file.LastWriteTimeUtc = past;
+
+            Assert.That(file.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
+            Assert.That(file.ReadOnly, Is.True);
+        }
+
+#if !__MonoCS__
+        [Test, Category("Fast")]
+        public void AclUser() {
+            var account = new System.Security.Principal.NTAccount(Environment.UserName);
+            Assert.That(account.ToString().Contains(Environment.UserName));
+            Assert.That(account.IsValidTargetType(typeof(System.Security.Principal.SecurityIdentifier)));
+            var securityAccount = account.Translate(typeof(System.Security.Principal.SecurityIdentifier)) as System.Security.Principal.SecurityIdentifier;
+            Assert.That(securityAccount.IsAccountSid(), Is.True);
+        }
+#endif
 
         [Ignore("Windows only and needs second partition as target fs")]
         [Test, Category("Medium")]
@@ -660,6 +764,18 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         private void SkipIfExtendedAttributesAreNotAvailable() {
             if (!Factory.CreateDirectoryInfo(this.testFolder.FullName).IsExtendedAttributeAvailable()) {
                 Assert.Ignore("Extended Attributes are not available => test skipped.");
+            }
+        }
+
+        private void RemoveReadOnlyFlagRecursive(FileSystemInfo info) {
+            info.Refresh();
+            if (info is FileInfo) {
+                new FileInfoWrapper(info as FileInfo).ReadOnly = false;
+            } else if (info is DirectoryInfo) {
+                new DirectoryInfoWrapper(info as DirectoryInfo).ReadOnly = false;
+                foreach (var child in (info as DirectoryInfo).GetFileSystemInfos()) {
+                    this.RemoveReadOnlyFlagRecursive(child);
+                }
             }
         }
     }
