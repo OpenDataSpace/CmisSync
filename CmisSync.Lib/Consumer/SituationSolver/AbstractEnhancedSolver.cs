@@ -83,13 +83,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <value>The storage.</value>
         protected IMetaDataStorage Storage { get; private set; }
 
-        private IFileTransmissionStorage TransmissionStorage { get; set; }
-
         /// <summary>
         /// Gets a value indicating whether this cmis server can modify date times.
         /// </summary>
         /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
         protected bool ServerCanModifyDateTimes { get; private set; }
+
+        private IFileTransmissionStorage TransmissionStorage { get; set; }
 
         /// <summary>
         /// Solve the specified situation by using localFile and remote object.
@@ -106,16 +106,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
         private IDocument CreateRemotePWCDocument(IDocument remoteDocument) {
             try {
-                if (TransmissionStorage != null) {
-                    TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+                if (this.TransmissionStorage != null) {
+                    this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                 }
+
                 if (!string.IsNullOrEmpty(remoteDocument.VersionSeriesCheckedOutId)) {
                     remoteDocument.CancelCheckOut();
                     remoteDocument.Refresh();
                 }
+
                 remoteDocument.CheckOut();
                 remoteDocument.Refresh();
-                IDocument remotePWCDocument = Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
+                IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
                 remotePWCDocument.DeleteContentStream();
                 return remotePWCDocument;
             } catch (Exception ex) {
@@ -124,38 +126,39 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         }
 
         private IDocument LoadRemotePWCDocument(IDocument remoteDocument, ref byte[] checksum) {
-            if (TransmissionStorage == null) {
-                return CreateRemotePWCDocument(remoteDocument);
+            if (this.TransmissionStorage == null) {
+                return this.CreateRemotePWCDocument(remoteDocument);
             }
 
-            IFileTransmissionObject obj = TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
+            IFileTransmissionObject obj = this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
             if (obj == null) {
-                return CreateRemotePWCDocument(remoteDocument);
+                return this.CreateRemotePWCDocument(remoteDocument);
             }
 
             if (obj.RemoteObjectPWCId != remoteDocument.VersionSeriesCheckedOutId) {
-                return CreateRemotePWCDocument(remoteDocument);
+                return this.CreateRemotePWCDocument(remoteDocument);
             }
 
-            IDocument remotePWCDocument = Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
+            IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
             if (remotePWCDocument == null) {
-                return CreateRemotePWCDocument(remoteDocument);
+                return this.CreateRemotePWCDocument(remoteDocument);
             }
 
             if (remotePWCDocument.ChangeToken != obj.LastChangeTokenPWC) {
-                return CreateRemotePWCDocument(remoteDocument);
+                return this.CreateRemotePWCDocument(remoteDocument);
             }
 
-            TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+            this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
 
             checksum = obj.LastChecksumPWC;
             return remotePWCDocument;
         }
 
         private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] checksum, FileTransmissionEvent transmissionEvent) {
-            if (TransmissionStorage == null) {
+            if (this.TransmissionStorage == null) {
                 return;
             }
+
             if (remotePWCDocument == null) {
                 return;
             }
@@ -167,7 +170,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             obj.LastChangeTokenPWC = remotePWCDocument.ChangeToken;
             obj.LastChecksumPWC = checksum;
 
-            TransmissionStorage.SaveObject(obj);
+            this.TransmissionStorage.SaveObject(obj);
         }
 
         /// <summary>
@@ -181,19 +184,20 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
         protected byte[] UploadFile(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent, IMappedObject mappedObject = null) {
             byte[] checksumPWC = null;
-            IDocument docPWC = LoadRemotePWCDocument(doc, ref checksumPWC);
+            IDocument docPWC = this.LoadRemotePWCDocument(doc, ref checksumPWC);
 
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                 if (docPWC != null && checksumPWC != null) {
-                    //  check PWC checksum for integration
+                    // check PWC checksum for integration
                     using (var hashAlg = new SHA1Managed()) {
                         int bufsize = 8 * 1024;
                         byte[] buffer = new byte[bufsize];
-                        for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault(); ) {
+                        for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
                             int readsize = bufsize;
                             if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
                                 readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
                             }
+
                             readsize = file.Read(buffer, 0, readsize);
                             hashAlg.TransformBlock(buffer, 0, readsize, buffer, 0);
                             offset += readsize;
@@ -201,23 +205,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                                 break;
                             }
                         }
+
                         hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                         if (!hashAlg.Hash.SequenceEqual(checksumPWC)) {
                             docPWC.DeleteContentStream();
                         }
+
                         file.Seek(0, SeekOrigin.Begin);
                     }
                 }
 
                 if (mappedObject != null && doc.ChangeToken != mappedObject.LastChangeToken) {
                     mappedObject.LastChangeToken = doc.ChangeToken;
-                    Storage.SaveMappedObject(mappedObject);
+                    this.Storage.SaveMappedObject(mappedObject);
                 }
 
                 byte[] hash = null;
                 IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
-                if (Session.ArePrivateWorkingCopySupported()) {
-                    uploader = FileTransmission.ContentTaskUtils.CreateUploader(TransmissionStorage.ChunkSize);
+                if (this.Session.ArePrivateWorkingCopySupported()) {
+                    uploader = FileTransmission.ContentTaskUtils.CreateUploader(this.TransmissionStorage.ChunkSize);
                 }
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
@@ -230,11 +236,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
                                 int bufsize = 8 * 1024;
                                 byte[] buffer = new byte[bufsize];
-                                for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault(); ) {
+                                for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
                                     int readsize = bufsize;
                                     if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
                                         readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
                                     }
+
                                     readsize = hashstream.Read(buffer, 0, readsize);
                                     offset += readsize;
                                     if (readsize == 0) {
@@ -242,12 +249,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                                     }
                                 }
                             }
+
                             uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false);
                             hash = hashAlg.Hash;
                         }
                     } catch (FileTransmission.AbortException ex) {
                         hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                        SaveRemotePWCDocument(localFile, doc, docPWC, hashAlg.Hash, transmissionEvent);
+                        this.SaveRemotePWCDocument(localFile, doc, docPWC, hashAlg.Hash, transmissionEvent);
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
                     } catch (Exception ex) {
@@ -255,17 +263,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         throw;
                     }
                 }
+
                 if (docPWC != null) {
-                    doc = Session.GetObject(docPWC.CheckIn(true, null, null, string.Empty)) as IDocument;
+                    doc = this.Session.GetObject(docPWC.CheckIn(true, null, null, string.Empty)) as IDocument;
                     doc.Refresh();
                 }
+
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 return hash;
             }
         }
 
         private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, FileTransmissionEvent transmissionEvent) {
-            if (TransmissionStorage == null) {
+            if (this.TransmissionStorage == null) {
                 return;
             }
 
@@ -273,15 +283,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             obj.ChecksumAlgorithmName = "SHA-1";
             obj.LastChecksum = hash;
 
-            TransmissionStorage.SaveObject(obj);
+            this.TransmissionStorage.SaveObject(obj);
         }
 
         private bool LoadCacheFile(IFileInfo target, IDocument remoteDocument, IFileSystemInfoFactory fsFactory) {
-            if (TransmissionStorage == null) {
+            if (this.TransmissionStorage == null) {
                 return false;
             }
 
-            IFileTransmissionObject obj = TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
+            IFileTransmissionObject obj = this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
             if (obj == null) {
                 return false;
             }
@@ -301,6 +311,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 using (var f = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.None)) {
                     localHash = SHA1Managed.Create().ComputeHash(f);
                 }
+
                 if (!localHash.SequenceEqual(obj.LastChecksum)) {
                     localFile.Delete();
                     return false;
@@ -328,7 +339,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         }
 
         protected byte[] DownloadCacheFile(IFileInfo target, IDocument remoteDocument, FileTransmissionEvent transmissionEvent, IFileSystemInfoFactory fsFactory) {
-            if (!LoadCacheFile(target, remoteDocument, fsFactory)) {
+            if (!this.LoadCacheFile(target, remoteDocument, fsFactory)) {
                 if (target.Exists) {
                     target.Delete();
                 }
@@ -339,12 +350,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 using (IFileDownloader download = ContentTaskUtils.CreateDownloader()) {
                     try {
                         download.DownloadFile(remoteDocument, filestream, transmissionEvent, hashAlg);
-                        if (TransmissionStorage != null) {
-                            TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
+                        if (this.TransmissionStorage != null) {
+                            this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                         }
                     } catch (FileTransmission.AbortException ex) {
                         target.Refresh();
-                        SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
+                        this.SaveCacheFile(target, remoteDocument, hashAlg.Hash, transmissionEvent);
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
                     } catch (Exception ex) {
@@ -365,7 +376,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
             var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
-            hash = DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent, fsFactory);
+            hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
 
             try {
