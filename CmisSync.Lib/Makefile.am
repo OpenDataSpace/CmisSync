@@ -231,6 +231,9 @@ SOURCES =  \
 	Storage/FileSystem/IFileSystemInfo.cs \
 	Storage/FileSystem/IFileSystemInfoFactory.cs \
 	Storage/FileSystem/IFileSystemWatcher.cs \
+	Storage/FileSystem/ReadOnlyIgnoringDirectoryInfoDecorator.cs \
+	Storage/FileSystem/ReadOnlyIgnoringFileInfoDecorator.cs \
+	Storage/FileSystem/ReadOnlyIgnoringFileSystemInfoDecorator.cs \
 	Storage/FileSystem/RestoreModificationDateException.cs \
 	Streams/BandwidthLimitedStream.cs \
 	Streams/ChunkedStream.cs \

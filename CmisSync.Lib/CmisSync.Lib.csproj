@@ -292,6 +292,9 @@
     <Compile Include="Config\User.cs" />
     <Compile Include="Config\AuthenticationType.cs" />
     <Compile Include="Cmis\ConvenienceExtenders\AllowableActionConvenienceExtenders.cs" />
+    <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileInfoDecorator.cs" />
+    <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileSystemInfoDecorator.cs" />
+    <Compile Include="Storage\FileSystem\ReadOnlyIgnoringDirectoryInfoDecorator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

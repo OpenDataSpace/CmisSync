@@ -35,10 +35,15 @@
 namespace CmisSync {
     using System;
 
+    using GLib;
     using Gtk;
+
+    using log4net;
 
     [CLSCompliant(false)]
     public class UI : IDisposable {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(UI));
+
         private bool disposed = false;
         public StatusIcon StatusIcon;
         public Setup Setup;
@@ -61,6 +66,13 @@ namespace CmisSync {
 
         // Runs the application
         public void Run() {
+            ExceptionManager.UnhandledException += delegate(UnhandledExceptionArgs args) {
+                if (args.IsTerminating) {
+                    Logger.Fatal("A UI element caused an exception", args.ExceptionObject as Exception);
+                } else {
+                    Logger.Error("A UI element caused an exception", args.ExceptionObject as Exception);
+                }
+            };
             Application.Run();
         }
 
