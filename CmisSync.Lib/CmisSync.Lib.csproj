@@ -295,6 +295,7 @@
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileSystemInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringDirectoryInfoDecorator.cs" />
+    <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectAdded.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -362,5 +363,6 @@
     <Folder Include="Algorithms\CyclicDependencies\" />
     <Folder Include="Algorithms\Tarjan\" />
     <Folder Include="Status\" />
+    <Folder Include="Consumer\SituationSolver\PrivateWorkingCopy\" />
   </ItemGroup>
 </Project>
