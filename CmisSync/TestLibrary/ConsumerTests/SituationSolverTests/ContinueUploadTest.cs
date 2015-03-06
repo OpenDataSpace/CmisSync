@@ -161,7 +161,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.RunSolverToChangeLocalBeforeContinue(solverChanged);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHashChanged, this.fileLength);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.emptyHash, this.fileLength);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHashChanged, this.fileLength);
             this.session.Verify(
                 s =>
                 s.CreateDocument(
