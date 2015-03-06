@@ -105,7 +105,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.RunSolverToContinueUpload(solverChanged);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHash, this.fileLength);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.emptyHash, this.fileLength);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHash, this.fileLength);
             this.session.Verify(
                 s =>
                 s.CreateDocument(
