@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// <summary>
     /// Local object added and the server is able to update PWC. If a folder is added => calls the given local folder added solver implementation
     /// </summary>
-    public class LocalObjectAdded : AbstractEnhancedSolver {
+    public class LocalObjectAddedWithPWC : AbstractEnhancedSolver {
         private ISolver folderAddedSolver;
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <param name="transmissionStorage">Transmission storage.</param>
         /// <param name="manager">Active activities manager.</param>
         /// <param name="localFolderAddedSolver">Local folder added solver.</param>
-        public LocalObjectAdded(
+        public LocalObjectAddedWithPWC(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,

@@ -254,6 +254,7 @@
     <Compile Include="IntegrationTests\AllowableActionsTests\ReadingActionsTests.cs" />
     <Compile Include="TestUtils\MockOfIRepositoryInfo.cs" />
     <Compile Include="IntegrationTests\UploadSlowWrittenFile.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectAddedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -307,5 +308,6 @@
     <Folder Include="AlgorithmsTests\CyclicDependencies\" />
     <Folder Include="IntegrationTests\SelectiveIgnoreTests\" />
     <Folder Include="IntegrationTests\AllowableActionsTests\" />
+    <Folder Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\" />
   </ItemGroup>
 </Project>

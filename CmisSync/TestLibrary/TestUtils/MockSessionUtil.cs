@@ -234,6 +234,10 @@ namespace TestLibrary.TestUtils {
             session.Setup(s => s.DefaultContext).Returns(context);
         }
 
+        public static void SetupPrivateWorkingCopyCapability(this Mock<ISession> session, bool isPwcUpdateable = true) {
+            session.Setup(f => f.RepositoryInfo.Capabilities.IsPwcUpdatableSupported).Returns(isPwcUpdateable);
+        }
+
         public static Mock<ISession> GetSessionMockReturningFolderChange(DotCMIS.Enums.ChangeType type, string id = "folderid", string folderName = "name", string path = "path", string parentId = "", string changetoken = "changetoken") {
             if (path.Contains("\\")) {
                 throw new ArgumentException("Given remote path: " + path + " contains \\");
