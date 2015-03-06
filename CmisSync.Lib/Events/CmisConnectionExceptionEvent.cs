@@ -27,13 +27,19 @@ namespace CmisSync.Lib.Events {
     /// </summary>
     public class CmisConnectionExceptionEvent : ExceptionEvent, ICountableEvent {
         /// <summary>
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Events.CmisConnectionExceptionEvent"/> class.
+        /// The OccuredAt property will be set automatically to the actual time when the constructor is called.
+        /// </summary>
+        /// <param name="connectionException">Connection exception.</param>
+        public CmisConnectionExceptionEvent(CmisConnectionException connectionException) : base(connectionException) {
+            this.OccuredAt = DateTime.Now;
+        }
+
+        /// <summary>
         /// Gets the time when the exception occured.
         /// </summary>
         /// <value>The occured at this timestamp.</value>
         public DateTime OccuredAt { get; private set; }
-        public CmisConnectionExceptionEvent(CmisConnectionException connectionException) : base(connectionException) {
-            this.OccuredAt = DateTime.Now;
-        }
 
         /// <summary>
         /// Gets the category of the event. This can be used to differ between multiple event types.
