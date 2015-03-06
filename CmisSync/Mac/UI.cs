@@ -32,116 +32,98 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#define ODS_NEW_GUI
-    
-using System;
-using System.Drawing;
-using System.IO;
-
-using MonoMac.Foundation;
-using MonoMac.AppKit;
-using MonoMac.ObjCRuntime;
-
-
 namespace CmisSync {
+    using System;
+    using System.Drawing;
+    using System.IO;
+
+    using MonoMac.AppKit;
+    using MonoMac.Foundation;
+    using MonoMac.ObjCRuntime;
 
     public class UI : AppDelegate {
-
         public StatusIcon StatusIcon;
         public SetupWizardController Setup;
         public About About;
         public GeneralSettingsController Settings;
         public TransmissionWidgetController Transmission;
 
-        public static NSFont Font = NSFontManager.SharedFontManager.FontWithFamily (
-            "Lucida Grande", NSFontTraitMask.Condensed, 0, 13);
-        
-        public static NSFont BoldFont = NSFontManager.SharedFontManager.FontWithFamily (
-            "Lucida Grande", NSFontTraitMask.Bold, 0, 13);
-        
+        public static NSFont Font = NSFontManager.SharedFontManager.FontWithFamily(
+            "Lucida Grande",
+            NSFontTraitMask.Condensed,
+            0,
+            13);
+        public static NSFont BoldFont = NSFontManager.SharedFontManager.FontWithFamily(
+            "Lucida Grande",
+            NSFontTraitMask.Bold,
+            0,
+            13);
 
-        public UI ()
-        {
-            using (var a = new NSAutoreleasePool ())
-            {
-                NSApplication.SharedApplication.ApplicationIconImage = NSImage.ImageNamed ("cmissync-app.icns");
+        public UI() {
+            using (var a = new NSAutoreleasePool()) {
+                NSApplication.SharedApplication.ApplicationIconImage = NSImage.ImageNamed("cmissync-app.icns");
 
-                SetFolderIcon ();
+                this.SetFolderIcon();
 
-                Setup      = new SetupWizardController ();
-                About      = new About ();
-                StatusIcon = new StatusIcon ();
-                Settings   = new GeneralSettingsController();
-                Transmission   = new TransmissionWidgetController ();
-                Transmission.LoadWindow ();
-                Transmission.Window.IsVisible = false;
+                this.Setup = new SetupWizardController();
+                this.About = new About();
+                this.StatusIcon = new StatusIcon();
+                this.Settings = new GeneralSettingsController();
+                this.Transmission = new TransmissionWidgetController();
+                this.Transmission.LoadWindow();
+                this.Transmission.Window.IsVisible = false;
 
-                Program.Controller.UIHasLoaded ();
-            }
-        }
-    
-
-        public void SetFolderIcon ()
-        {
-            using (var a = new NSAutoreleasePool ())
-            {
-                NSImage folder_icon = NSImage.ImageNamed ("cmissync-folder.icns");
-                NSWorkspace.SharedWorkspace.SetIconforFile (folder_icon, Program.Controller.FoldersPath, 0);
+                Program.Controller.UIHasLoaded();
             }
         }
 
-
-        public void Run ()
-        {
-            NSApplication.Main (new string [0]);
+        public void SetFolderIcon() {
+            using (var a = new NSAutoreleasePool()) {
+                NSImage folder_icon = NSImage.ImageNamed("cmissync-folder.icns");
+                NSWorkspace.SharedWorkspace.SetIconforFile(folder_icon, Program.Controller.FoldersPath, 0);
+            }
         }
 
+        public void Run() {
 
-        public void UpdateDockIconVisibility ()
-        {
-            if (Setup.IsWindowLoaded && Setup.Window.IsVisible) {
-                ShowDockIcon ();
-            } else if (About.IsVisible) {
-                ShowDockIcon ();
+            NSApplication.Main(new string[0]);
+        }
+
+        public void UpdateDockIconVisibility() {
+            if (this.Setup.IsWindowLoaded && this.Setup.Window.IsVisible) {
+                this.ShowDockIcon();
+            } else if (this.About.IsVisible) {
+                this.ShowDockIcon();
             } else if (Program.Controller.IsEditWindowVisible) {
-                ShowDockIcon ();
-            } else if (Settings.IsWindowLoaded && Settings.Window.IsVisible) {
-                ShowDockIcon ();
-            } else if (Transmission.IsWindowLoaded && Transmission.Window.IsVisible) {
-                ShowDockIcon ();
+                this.ShowDockIcon();
+            } else if (this.Settings.IsWindowLoaded && this.Settings.Window.IsVisible) {
+                this.ShowDockIcon();
+            } else if (this.Transmission.IsWindowLoaded && this.Transmission.Window.IsVisible) {
+                this.ShowDockIcon();
             } else {
-                HideDockIcon ();
+                this.HideDockIcon();
             }
         }
 
-
-        private void HideDockIcon ()
-        {
+        private void HideDockIcon() {
             NSApplication.SharedApplication.ActivationPolicy = NSApplicationActivationPolicy.Prohibited;
         }
 
-
-        private void ShowDockIcon ()
-        {
+        private void ShowDockIcon() {
             NSApplication.SharedApplication.ActivationPolicy = NSApplicationActivationPolicy.Regular;
         }
     }
 
-
     public partial class AppDelegate : NSApplicationDelegate {
-
-        public override void WillBecomeActive (NSNotification notification)
-        {
+        public override void WillBecomeActive(NSNotification notification) {
             if (NSApplication.SharedApplication.DockTile.BadgeLabel != null) {
-                //Program.Controller.ShowEventLogWindow ();
+                // Program.Controller.ShowEventLogWindow();
                 NSApplication.SharedApplication.DockTile.BadgeLabel = null;
             }
         }
 
-
-        public override void WillTerminate (NSNotification notification)
-        {
-            Program.Controller.Quit ();
+        public override void WillTerminate(NSNotification notification) {
+            Program.Controller.Quit();
         }
     }
 }
