@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -34,7 +35,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         private ISolver folderAddedSolver;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAdded"/> class.
+        /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
@@ -48,7 +49,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ActiveActivitiesManager manager,
             ISolver localFolderAddedSolver) : base(session, storage, transmissionStorage)
         {
-            throw new NotImplementedException();
+            if (localFolderAddedSolver == null) {
+                throw new ArgumentNullException("Given solver for locally added folders is null");
+            }
+
+            if (!session.ArePrivateWorkingCopySupported()) {
+                throw new ArgumentException("Given session doesn't support private working copies");
+            }
+
+            this.folderAddedSolver = localFolderAddedSolver;
         }
 
         /// <summary>
@@ -64,7 +73,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            throw new NotImplementedException();
+            if (localFileSystemInfo is IDirectoryInfo) {
+                this.folderAddedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+            } else {
+                throw new NotImplementedException();
+            }
         }
     }
 }
