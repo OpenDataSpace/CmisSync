@@ -77,5 +77,18 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
                 d.Properties == properties);
             Assert.That(doc.ContentStreamHash(), Is.Null);
         }
+
+        [Test, Category("Fast")]
+        public void PrivateWorkingCopyIsUpdateable([Values(true, false)]bool updateable) {
+            var session = new Mock<ISession>();
+            session.SetupPrivateWorkingCopyCapability(updateable);
+            Assert.That(session.Object.ArePrivateWorkingCopySupported(), Is.EqualTo(updateable));
+        }
+
+        [Test, Category("Fast")]
+        public void PrivateWorkingCopyIsUpdateableReturnsFalseOnException() {
+            var session = new Mock<ISession>();
+            Assert.That(session.Object.ArePrivateWorkingCopySupported(), Is.False);
+        }
     }
 }
