@@ -16,7 +16,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using TestUtils;
 
     [TestFixture]
-    public class LocalObjectAddedTest {
+    public class LocalObjectAddedWithPWCTest {
         private Mock<ISession> session;
 
         [Test, Category("Fast")]
