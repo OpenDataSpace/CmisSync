@@ -74,7 +74,7 @@ SOURCES =  \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectMoved.cs \
 	Consumer/SituationSolver/LocalObjectRenamedRemoteObjectRenamed.cs \
 	Consumer/SituationSolver/NothingToDoSolver.cs \
-	Consumer/SituationSolver/PrivateWorkingCopy/LocalObjectAdded.cs \
+	Consumer/SituationSolver/PrivateWorkingCopy/LocalObjectAddedWithPWC.cs \
 	Consumer/SituationSolver/RemoteObjectAdded.cs \
 	Consumer/SituationSolver/RemoteObjectChanged.cs \
 	Consumer/SituationSolver/RemoteObjectDeleted.cs \
