@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace TestLibrary.CmisTests.ConvenienceExtendersTests
-{
+namespace TestLibrary.CmisTests.ConvenienceExtendersTests {
     using System;
     using System.Collections.Generic;
 
@@ -33,8 +32,7 @@ namespace TestLibrary.CmisTests.ConvenienceExtendersTests
     using TestLibrary.TestUtils;
 
     [TestFixture]
-    public class CmisConvenienceExtendersTest
-    {
+    public class CmisConvenienceExtendersTest {
         [Test, Category("Fast")]
         public void ContentStreamHashReturnNullIfNoHashIsAvailable() {
             var doc = Mock.Of<IDocument>(
