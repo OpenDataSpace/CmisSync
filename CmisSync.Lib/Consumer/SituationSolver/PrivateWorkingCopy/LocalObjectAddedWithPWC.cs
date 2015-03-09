@@ -19,6 +19,8 @@
 
 namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System;
+    using System.Diagnostics;
+    using System.IO;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
@@ -28,10 +30,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using DotCMIS.Client;
 
+    using log4net;
+
     /// <summary>
     /// Local object added and the server is able to update PWC. If a folder is added => calls the given local folder added solver implementation
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolver {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAddedWithPWC));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -65,11 +70,21 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if (localFileSystemInfo is IDirectoryInfo) {
+            IFileInfo localFile = localFileSystemInfo as IFileInfo;
+            if (localFile == null) {
                 throw new NotSupportedException();
-            } else {
-                throw new NotImplementedException();
             }
+
+            Stopwatch completewatch = new Stopwatch();
+            completewatch.Start();
+            Logger.Debug("Starting LocalObjectAddedWithPWC");
+
+            localFile.Refresh();
+            if (!localFile.Exists) {
+                throw new FileNotFoundException(string.Format("Local file {0} has been renamed/moved/deleted", localFile.FullName));
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

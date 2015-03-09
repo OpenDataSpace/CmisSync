@@ -19,6 +19,7 @@
 
 namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests {
     using System;
+    using System.IO;
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
@@ -41,8 +42,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
         private Mock<ActiveActivitiesManager> manager;
-        [Test, Category("Fast")]
-        public void ConstructorWithGivenFolderAddedSolverAndTransmissionManager() {
+        [Test, Category("Fast"), Category("Solver")]
+        public void Constructor() {
             this.SetUpMocks();
             new LocalObjectAddedWithPWC(
                 this.session.Object,
@@ -51,7 +52,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.manager.Object);
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfSessionIsNotAbleToWorkWithPrivateWorkingCopies() {
             this.SetUpMocks(isPwcUpdateable: false);
             Assert.Throws<ArgumentException>(
@@ -63,8 +64,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.manager.Object));
         }
 
-        [Test, Category("Fast")]
-        public void NewDirectoriesCallsArePassedToTheGivenSolver() {
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverFailsIfDirectory() {
             this.SetUpMocks();
             var undertest = new LocalObjectAddedWithPWC(
                 this.session.Object,
@@ -74,6 +75,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             var localFolder = new Mock<IDirectoryInfo>();
 
             Assert.Throws<NotSupportedException>(() => undertest.Solve(localFolder.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE));
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverFailsIfFileIsDeleted() {
+            this.SetUpMocks();
+            var undertest = new LocalObjectAddedWithPWC(
+                this.session.Object,
+                this.storage.Object,
+                this.transmissionStorage.Object,
+                this.manager.Object);
+            var localFile = Mock.Of<IFileInfo>(f => f.Exists == false);
+
+            Assert.Throws<FileNotFoundException>(() => undertest.Solve(localFile, null, ContentChangeType.CREATED, ContentChangeType.NONE));
         }
 
         private void SetUpMocks(bool isPwcUpdateable = true) {
