@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectAddedWithPWC.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// Local object added and the server is able to update PWC. If a folder is added => calls the given local folder added solver implementation
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolver {
-        private ISolver folderAddedSolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -46,18 +45,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager manager,
-            ISolver localFolderAddedSolver) : base(session, storage, transmissionStorage)
+            ActiveActivitiesManager manager) : base(session, storage, transmissionStorage)
         {
-            if (localFolderAddedSolver == null) {
-                throw new ArgumentNullException("Given solver for locally added folders is null");
-            }
-
             if (!session.ArePrivateWorkingCopySupported()) {
                 throw new ArgumentException("Given session doesn't support private working copies");
             }
-
-            this.folderAddedSolver = localFolderAddedSolver;
         }
 
         /// <summary>
@@ -74,7 +66,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             if (localFileSystemInfo is IDirectoryInfo) {
-                this.folderAddedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                throw new NotSupportedException();
             } else {
                 throw new NotImplementedException();
             }

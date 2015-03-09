@@ -34,6 +34,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Consumer.SituationSolver.PWC;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -51,6 +52,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     public class LocalObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
         private ActiveActivitiesManager transmissionManager;
+        private LocalObjectAddedWithPWC solverWithPWC;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
@@ -70,6 +72,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
 
             this.transmissionManager = manager;
+
+            if(Session.ArePrivateWorkingCopySupported()){
+                solverWithPWC = new LocalObjectAddedWithPWC(Session, this.Storage, transmissionStorage, this.transmissionManager);
+            }
         }
 
         /// <summary>
@@ -100,6 +106,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 } else {
                     throw new ArgumentException("ParentId is null => invoke crawl sync to create parent first");
                 }
+            }
+
+            if (localFileSystemInfo is IFileInfo && solverWithPWC != null) {
+                solverWithPWC.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                return;
             }
 
             ICmisObject addedObject;

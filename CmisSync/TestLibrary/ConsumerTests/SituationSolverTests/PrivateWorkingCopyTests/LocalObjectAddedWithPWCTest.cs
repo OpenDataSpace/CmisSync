@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectAddedWithPWCTest.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -48,8 +48,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
-                Mock.Of<ISolver>());
+                this.manager.Object);
         }
 
         [Test, Category("Fast")]
@@ -61,38 +60,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
-                Mock.Of<ISolver>()));
-        }
-
-        [Test, Category("Fast")]
-        public void ConstructorFailsIfGivenSolverIsNull() {
-            this.SetUpMocks();
-            Assert.Throws<ArgumentNullException>(
-                () =>
-                new LocalObjectAddedWithPWC(
-                this.session.Object,
-                this.storage.Object,
-                this.transmissionStorage.Object,
-                this.manager.Object,
-                null));
+                this.manager.Object));
         }
 
         [Test, Category("Fast")]
         public void NewDirectoriesCallsArePassedToTheGivenSolver() {
             this.SetUpMocks();
-            var folderSolver = new Mock<ISolver>();
             var undertest = new LocalObjectAddedWithPWC(
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object,
-                folderSolver.Object);
+                this.manager.Object);
             var localFolder = new Mock<IDirectoryInfo>();
 
-            undertest.Solve(localFolder.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE);
-
-            folderSolver.Verify(s => s.Solve(localFolder.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE), Times.Once());
+            Assert.Throws<NotSupportedException>(() => undertest.Solve(localFolder.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE));
         }
 
         private void SetUpMocks(bool isPwcUpdateable = true) {
