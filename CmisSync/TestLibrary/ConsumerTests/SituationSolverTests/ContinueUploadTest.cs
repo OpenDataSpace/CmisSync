@@ -98,15 +98,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetupFile();
 
             var solverAdded = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
-
             this.RunSolverToAbortUpload(solverAdded);
 
-            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectOldId, this.objectName, this.parentId, this.changeTokenOld, Times.Once(), true, null, null, this.emptyHash, 0);
 
+            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
             this.RunSolverToContinueUpload(solverChanged);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.emptyHash, this.fileLength);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHash, this.fileLength);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHash, this.fileLength);
+
             this.session.Verify(
                 s =>
                 s.CreateDocument(
@@ -154,15 +154,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetupFile();
 
             var solverAdded = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
-
             this.RunSolverToAbortUpload(solverAdded);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectOldId, this.objectName, this.parentId, this.changeTokenOld, Times.Once(), true, null, null, this.emptyHash, 0);
 
             var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
-
             this.RunSolverToChangeLocalBeforeContinue(solverChanged);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHashChanged, this.fileLength);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.emptyHash, this.fileLength);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHashChanged, this.fileLength);
             this.session.Verify(
                 s =>
                 s.CreateDocument(
@@ -454,7 +452,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 d.Id == this.objectPWCId &&
                 d.ChangeToken == this.changeTokenPWC);
             this.remotePWCDocument = Mock.Get(docPWC);
-            this.remotePWCDocument.SetupAllProperties();
             long length = 0;
             this.remotePWCDocument.Setup(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>())).Callback<IContentStream, bool, bool>((stream, last, refresh) => {
                 byte[] buffer = new byte[stream.Length.GetValueOrDefault()];
