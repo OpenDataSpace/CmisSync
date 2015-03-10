@@ -25,23 +25,97 @@ namespace CmisSync.Lib.HashAlgorithm {
 
     //  Reference: http://blog.csdn.net/dingwood/article/details/7506620
     public class SHA1Reuse : HashAlgorithm, HashAlgorithmReuse {
+        private UInt32[] Digests = new UInt32[5];
+        private const int BufferLength = 64;
+        private byte[] Buffer = new byte[BufferLength];
+        private int BufferOffset = 0;
+        private long Length = 0;
+
+        public SHA1Reuse() {
+            Initialize();
+        }
+
+        public SHA1Reuse(SHA1Reuse from) {
+            for (int i = 0; i < Digests.Length; ++i) {
+                Digests[i] = from.Digests[i];
+            }
+            for (int i = 0; i < BufferLength; ++i) {
+                Buffer[i] = from.Buffer[i];
+            }
+            BufferOffset = from.BufferOffset;
+            Length = from.Length;
+        }
+
         public HashAlgorithm GetHashAlgorithm() {
-            throw new NotImplementedException();
+            return new SHA1Reuse(this);
         }
 
         protected override void HashCore(byte[] array, int ibStart, int cbSize) {
+            for (int i = 0; i < cbSize; ++i) {
+                Buffer[BufferOffset] = array[ibStart + i];
+                ++BufferOffset;
+                ++Length;
+                if (BufferOffset >= BufferLength) {
+                    SHA1_TransformBuffer();
+                    BufferOffset = 0;
+                }
+            }
         }
 
         protected override byte[] HashFinal() {
-            return null;
+            long zeros = 0;
+            long ones = 1;
+            long size = 0;
+            long m = Length % 64;
+            if (m < 56) {
+                zeros = 55 - m;
+                size = Length - m + 64;
+            } else if (m == 56) {
+                zeros = 63;
+                ones = 1;
+                size = Length + 8 + 64;
+            } else {
+                zeros = 63 - m + 56;
+                size = Length + 64 - m + 64;
+            }
+
+            if (ones == 1) {
+                Buffer[BufferOffset] = (byte)0x80;
+                BufferOffset++;
+            }
+
+            for (int i = 0; i < zeros; i++) {
+                Buffer[BufferOffset] = (byte)0;
+                BufferOffset++;
+            }
+            UInt64 N = (UInt64)Length * 8;
+            Buffer[BufferOffset] = (byte)(N >> 56);
+            BufferOffset++;
+            Buffer[BufferOffset] = (byte)((N >> 48) & 0xFF);
+            BufferOffset++;
+            Buffer[BufferOffset] = (byte)((N >> 40) & 0xFF);
+            BufferOffset++;
+            Buffer[BufferOffset] = (byte)((N >> 32) & 0xFF);
+            BufferOffset++;
+            Buffer[BufferOffset] = (byte)((N >> 24) & 0xFF);
+            BufferOffset++;
+            Buffer[BufferOffset] = (byte)((N >> 16) & 0xFF);
+            BufferOffset++;
+            Buffer[BufferOffset] = (byte)((N >> 8) & 0xFF);
+            BufferOffset++;
+            Buffer[BufferOffset] = (byte)(N & 0xFF);
+            BufferOffset++;
+
+            SHA1_TransformBuffer();
+
+            return SHA1_Result;
         }
 
         public override void Initialize() {
+            Length = 0;
+            BufferOffset = 0;
+            SHA1_Init();
         }
-
-        private UInt32[] Digests = new UInt32[5];
-
-        private byte[] buffer = new byte[64];
 
         private static UInt32 SHA1CircularShift(int bits, UInt32 word) {
             return ((word << bits) & 0xFFFFFFFF) | (word) >> (32 - (bits));
@@ -55,7 +129,7 @@ namespace CmisSync.Lib.HashAlgorithm {
             Digests[4] = 0xC3D2E1F0;
         }
 
-        private byte[] SHA1_Append(byte[] input) {
+        private byte[] SHA1_Pack(byte[] input) {
             int zeros = 0;
             int ones = 1;
             int size = 0;
@@ -100,24 +174,30 @@ namespace CmisSync.Lib.HashAlgorithm {
             return (byte[])bs.ToArray(typeof(byte));
         }
 
+        private byte[] SHA1_Result {
+            get {
+                byte[] result = new byte[20];
+                for (int i = 0; i < 5; ++i) {
+                    for (int j = 0; j < 4; ++j) {
+                        result[i * 4 + j] = (byte)((Digests[i] >> (8 * (3 - j))) & 0xFF);
+                    }
+                }
+                return result;
+            }
+        }
+
         private byte[] SHA1_Transform(byte[] input) {
             SHA1_Init();
 
-            byte[] output = SHA1_Append(input);
-            for (int i = 0; i < output.Length; i += 64) {
-                for (int j = 0; j < 64; ++j) {
-                    buffer[j] = output[i + j];
+            byte[] output = SHA1_Pack(input);
+            for (int i = 0; i < output.Length; i += BufferLength) {
+                for (int j = 0; j < BufferLength; ++j) {
+                    Buffer[j] = output[i + j];
                 }
                 SHA1_TransformBuffer();
             }
 
-            byte[] result = new byte[20];
-            for (int i = 0; i < 5; ++i) {
-                for (int j = 0; j < 4; ++j) {
-                    result[i * 4 + j] = (byte)((Digests[i] >> (8 * (3 - j))) & 0xFF);
-                }
-            }
-            return result;
+            return SHA1_Result;
         }
 
         private void SHA1_TransformBuffer() {
@@ -132,12 +212,12 @@ namespace CmisSync.Lib.HashAlgorithm {
             UInt32[] W = new UInt32[80];
             UInt32 A, B, C, D, E;
 
-            for (int i = 0, j = 0; i < buffer.Length; j++, i += 4) {
+            for (int i = 0, j = 0; i < BufferLength; j++, i += 4) {
                 temp = 0;
-                temp = temp | (((UInt32)buffer[i]) << 24);
-                temp = temp | (((UInt32)buffer[i + 1]) << 16);
-                temp = temp | (((UInt32)buffer[i + 2]) << 8);
-                temp = temp | (((UInt32)buffer[i + 3]));
+                temp = temp | (((UInt32)Buffer[i]) << 24);
+                temp = temp | (((UInt32)Buffer[i + 1]) << 16);
+                temp = temp | (((UInt32)Buffer[i + 2]) << 8);
+                temp = temp | (((UInt32)Buffer[i + 3]));
                 W[j] = temp;
             }
 

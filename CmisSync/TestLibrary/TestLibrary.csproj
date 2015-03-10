@@ -147,7 +147,7 @@
     <Compile Include="FilterTests\IgnoredFoldersFilterTest.cs" />
     <Compile Include="FilterTests\InvalidFolderNameFilterTest.cs" />
     <Compile Include="FilterTests\ReportingFilterTest.cs" />
-    <Compile Include="HashAlgorithmTests\SHA1ManagedReuseTest.cs" />
+    <Compile Include="HashAlgorithmTests\SHA1ReuseTest.cs" />
     <Compile Include="IntegrationTests\AllHandlersIT.cs" />
     <Compile Include="IntegrationTests\BaseFullRepoTest.cs" />
     <Compile Include="IntegrationTests\ClientBrandTests.cs" />

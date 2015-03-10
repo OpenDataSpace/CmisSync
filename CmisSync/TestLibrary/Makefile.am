@@ -93,7 +93,7 @@ SOURCES =  \
 	FilterTests/IgnoredFoldersFilterTest.cs \
 	FilterTests/InvalidFolderNameFilterTest.cs \
 	FilterTests/ReportingFilterTest.cs \
-	HashAlgorithmTests/SHA1ManagedReuseTest.cs \
+	HashAlgorithmTests/SHA1ReuseTest.cs \
 	IntegrationTests/AllHandlersIT.cs \
 	IntegrationTests/AllowableActionsTests/ReadingActionsTests.cs \
 	IntegrationTests/BaseFullRepoTest.cs \
