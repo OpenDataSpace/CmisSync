@@ -64,6 +64,8 @@
     <Compile Include="Cmis\MimeType.cs" />
     <Compile Include="Config\Brand.cs" />
     <Compile Include="Defines.cs" />
+    <Compile Include="HashAlgorithm\HashAlgorithmReuse.cs" />
+    <Compile Include="HashAlgorithm\SHA1Reuse.cs" />
     <Compile Include="Storage\Database\Entities\FileTransmissionObject.cs" />
     <Compile Include="Storage\Database\Entities\IFileTransmissionObject.cs" />
     <Compile Include="Storage\Database\FileTransmissionStorage.cs" />
@@ -349,20 +351,5 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Config\" />
-    <Folder Include="Storage\FileSystem\" />
-    <Folder Include="Storage\Database\" />
-    <Folder Include="Storage\Database\Entities\" />
-    <Folder Include="Cmis\Authentication\" />
-    <Folder Include="Cmis\UiUtils\" />
-    <Folder Include="Producer\ContentChange\" />
-    <Folder Include="Cmis\ConvenienceExtenders\" />
-    <Folder Include="SelectiveIgnore\" />
-    <Folder Include="Algorithms\" />
-    <Folder Include="Algorithms\CyclicDependencies\" />
-    <Folder Include="Algorithms\Tarjan\" />
-    <Folder Include="Status\" />
-    <Folder Include="Consumer\SituationSolver\PrivateWorkingCopy\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>
