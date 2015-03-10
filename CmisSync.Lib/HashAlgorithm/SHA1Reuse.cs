@@ -41,6 +41,8 @@ namespace CmisSync.Lib.HashAlgorithm {
 
         private UInt32[] Digests = new UInt32[5];
 
+        private byte[] buffer = new byte[64];
+
         private static UInt32 SHA1CircularShift(int bits, UInt32 word) {
             return ((word << bits) & 0xFFFFFFFF) | (word) >> (32 - (bits));
         }
@@ -53,7 +55,7 @@ namespace CmisSync.Lib.HashAlgorithm {
             Digests[4] = 0xC3D2E1F0;
         }
 
-        private UInt32[] SHA1_Append(byte[] input) {
+        private byte[] SHA1_Append(byte[] input) {
             int zeros = 0;
             int ones = 1;
             int size = 0;
@@ -95,96 +97,18 @@ namespace CmisSync.Lib.HashAlgorithm {
             bs.Add(h6);
             bs.Add(h7);
             bs.Add(h8);
-            byte[] ts = (byte[])bs.ToArray(typeof(byte));
-            /* Decodes input (byte[]) into output (UInt32[]). Assumes len is 
-             * a multiple of 4. 
-             */
-            UInt32[] output = new UInt32[size / 4];
-            for (Int64 i = 0, j = 0; i < size; j++, i += 4) {
-                UInt32 temp = 0;
-                temp = temp | (((UInt32)ts[i]) << 24);
-                temp = temp | (((UInt32)ts[i + 1]) << 16);
-                temp = temp | (((UInt32)ts[i + 2]) << 8);
-                temp = temp | (((UInt32)ts[i + 3]));
-                output[j] = temp;
-            }
-            return output;
+            return (byte[])bs.ToArray(typeof(byte));
         }
 
-        private byte[] SHA1_Transform(UInt32[] x) {
+        private byte[] SHA1_Transform(byte[] input) {
             SHA1_Init();
 
-            UInt32[] K = {
-                             0x5A827999,
-                             0x6ED9EBA1,
-                             0x8F1BBCDC,
-                             0xCA62C1D6
-                         };
-            int t;
-            UInt32 temp;
-            UInt32[] W = new UInt32[80];
-            UInt32 A, B, C, D, E;
-
-            for (int k = 0; k < x.Length; k += 16) {
-                for (t = 0; t < 16; t++) {
-                    W[t] = x[t + k];
+            byte[] output = SHA1_Append(input);
+            for (int i = 0; i < output.Length; i += 64) {
+                for (int j = 0; j < 64; ++j) {
+                    buffer[j] = output[i + j];
                 }
-
-                for (t = 16; t < 80; t++) {
-                    W[t] = SHA1CircularShift(1, W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16]);
-                }
-
-                A = Digests[0];
-                B = Digests[1];
-                C = Digests[2];
-                D = Digests[3];
-                E = Digests[4];
-                for (t = 0; t < 20; t++) {
-                    temp = SHA1CircularShift(5, A) +
-                        ((B & C) | ((~B) & D)) + E + W[t] + K[0];
-                    temp &= 0xFFFFFFFF;
-                    E = D;
-                    D = C;
-                    C = SHA1CircularShift(30, B);
-                    B = A;
-                    A = temp;
-                }
-
-                for (t = 20; t < 40; t++) {
-                    temp = SHA1CircularShift(5, A) + (B ^ C ^ D) + E + W[t] + K[1];
-                    temp &= 0xFFFFFFFF;
-                    E = D;
-                    D = C;
-                    C = SHA1CircularShift(30, B);
-                    B = A;
-                    A = temp;
-                }
-                for (t = 40; t < 60; t++) {
-                    temp = SHA1CircularShift(5, A) +
-                        ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];
-                    temp &= 0xFFFFFFFF;
-                    E = D;
-                    D = C;
-                    C = SHA1CircularShift(30, B);
-                    B = A;
-                    A = temp;
-                }
-
-                for (t = 60; t < 80; t++) {
-                    temp = SHA1CircularShift(5, A) + (B ^ C ^ D) + E + W[t] + K[3];
-                    temp &= 0xFFFFFFFF;
-                    E = D;
-                    D = C;
-                    C = SHA1CircularShift(30, B);
-                    B = A;
-                    A = temp;
-                }
-
-                Digests[0] = (Digests[0] + A) & 0xFFFFFFFF;
-                Digests[1] = (Digests[1] + B) & 0xFFFFFFFF;
-                Digests[2] = (Digests[2] + C) & 0xFFFFFFFF;
-                Digests[3] = (Digests[3] + D) & 0xFFFFFFFF;
-                Digests[4] = (Digests[4] + E) & 0xFFFFFFFF;
+                SHA1_TransformBuffer();
             }
 
             byte[] result = new byte[20];
@@ -196,9 +120,86 @@ namespace CmisSync.Lib.HashAlgorithm {
             return result;
         }
 
+        private void SHA1_TransformBuffer() {
+            UInt32[] K = {
+                             0x5A827999,
+                             0x6ED9EBA1,
+                             0x8F1BBCDC,
+                             0xCA62C1D6
+                         };
+            int t;
+            UInt32 temp;
+            UInt32[] W = new UInt32[80];
+            UInt32 A, B, C, D, E;
+
+            for (int i = 0, j = 0; i < buffer.Length; j++, i += 4) {
+                temp = 0;
+                temp = temp | (((UInt32)buffer[i]) << 24);
+                temp = temp | (((UInt32)buffer[i + 1]) << 16);
+                temp = temp | (((UInt32)buffer[i + 2]) << 8);
+                temp = temp | (((UInt32)buffer[i + 3]));
+                W[j] = temp;
+            }
+
+            for (t = 16; t < 80; t++) {
+                W[t] = SHA1CircularShift(1, W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16]);
+            }
+
+            A = Digests[0];
+            B = Digests[1];
+            C = Digests[2];
+            D = Digests[3];
+            E = Digests[4];
+            for (t = 0; t < 20; t++) {
+                temp = SHA1CircularShift(5, A) +
+                    ((B & C) | ((~B) & D)) + E + W[t] + K[0];
+                temp &= 0xFFFFFFFF;
+                E = D;
+                D = C;
+                C = SHA1CircularShift(30, B);
+                B = A;
+                A = temp;
+            }
+
+            for (t = 20; t < 40; t++) {
+                temp = SHA1CircularShift(5, A) + (B ^ C ^ D) + E + W[t] + K[1];
+                temp &= 0xFFFFFFFF;
+                E = D;
+                D = C;
+                C = SHA1CircularShift(30, B);
+                B = A;
+                A = temp;
+            }
+            for (t = 40; t < 60; t++) {
+                temp = SHA1CircularShift(5, A) +
+                    ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];
+                temp &= 0xFFFFFFFF;
+                E = D;
+                D = C;
+                C = SHA1CircularShift(30, B);
+                B = A;
+                A = temp;
+            }
+
+            for (t = 60; t < 80; t++) {
+                temp = SHA1CircularShift(5, A) + (B ^ C ^ D) + E + W[t] + K[3];
+                temp &= 0xFFFFFFFF;
+                E = D;
+                D = C;
+                C = SHA1CircularShift(30, B);
+                B = A;
+                A = temp;
+            }
+
+            Digests[0] = (Digests[0] + A) & 0xFFFFFFFF;
+            Digests[1] = (Digests[1] + B) & 0xFFFFFFFF;
+            Digests[2] = (Digests[2] + C) & 0xFFFFFFFF;
+            Digests[3] = (Digests[3] + D) & 0xFFFFFFFF;
+            Digests[4] = (Digests[4] + E) & 0xFFFFFFFF;
+        }
+
         public byte[] Compute(byte[] input) {
-            UInt32[] output = SHA1_Append(input);
-            return SHA1_Transform(output);
+            return SHA1_Transform(input);
         }
 
         public byte[] Compute(string message) {
