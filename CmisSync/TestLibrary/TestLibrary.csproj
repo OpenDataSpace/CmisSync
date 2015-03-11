@@ -256,6 +256,7 @@
     <Compile Include="TestUtils\MockOfIRepositoryInfo.cs" />
     <Compile Include="IntegrationTests\UploadSlowWrittenFile.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectAddedWithPWCTest.cs" />
+    <Compile Include="IntegrationTests\PrivateWorkingCopyTests\CreateDocumentTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
@@ -287,4 +288,7 @@
   </Target>
   -->
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="IntegrationTests\PrivateWorkingCopyTests\" />
+  </ItemGroup>
 </Project>

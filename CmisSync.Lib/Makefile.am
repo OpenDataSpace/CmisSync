@@ -144,9 +144,9 @@ SOURCES =  \
 	Filter/IgnoredFoldersFilter.cs \
 	Filter/InvalidFolderNameFilter.cs \
 	Filter/ReportingFilter.cs \
-	HttpProxyUtils.cs \
 	HashAlgorithm/HashAlgorithmReuse.cs \
 	HashAlgorithm/SHA1Reuse.cs \
+	HttpProxyUtils.cs \
 	IActivityListener.cs \
 	PathMatcher/IPathMatcher.cs \
 	PathMatcher/PathMatcher.cs \

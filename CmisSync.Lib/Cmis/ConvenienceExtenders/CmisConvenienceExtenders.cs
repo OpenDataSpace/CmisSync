@@ -56,13 +56,13 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="folder">Parent folder.</param>
         /// <param name="name">Name of the document.</param>
         /// <param name="content">If content is not null, a content stream containing the given content will be added.</param>
-        public static IDocument CreateDocument(this IFolder folder, string name, string content) {
+        public static IDocument CreateDocument(this IFolder folder, string name, string content, bool checkedOut = false) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
 
             if (string.IsNullOrEmpty(content)) {
-                return folder.CreateDocument(properties, null, null);
+                return folder.CreateDocument(properties, null, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
             }
 
             ContentStream contentStream = new ContentStream();
@@ -71,7 +71,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             contentStream.Length = content.Length;
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                 contentStream.Stream = stream;
-                return folder.CreateDocument(properties, contentStream, null);
+                return folder.CreateDocument(properties, contentStream, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
             }
         }
 
