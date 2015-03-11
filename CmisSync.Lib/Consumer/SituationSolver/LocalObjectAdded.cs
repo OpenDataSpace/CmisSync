@@ -52,7 +52,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     public class LocalObjectAdded : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAdded));
         private ActiveActivitiesManager transmissionManager;
-        //private LocalObjectAddedWithPWC solverWithPWC;
+        private LocalObjectAddedWithPWC solverWithPWC;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectAdded"/> class.
@@ -73,9 +73,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             this.transmissionManager = manager;
 
-            //if(Session.ArePrivateWorkingCopySupported()){
-            //    solverWithPWC = new LocalObjectAddedWithPWC(Session, this.Storage, transmissionStorage, this.transmissionManager);
-            //}
+            if (Session.ArePrivateWorkingCopySupported()) {
+                solverWithPWC = new LocalObjectAddedWithPWC(Session, this.Storage, transmissionStorage, this.transmissionManager);
+            }
         }
 
         /// <summary>
@@ -108,10 +108,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
             }
 
-            //if (localFileSystemInfo is IFileInfo && solverWithPWC != null) {
-            //    solverWithPWC.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
-            //    return;
-            //}
+            if (localFileSystemInfo is IFileInfo && solverWithPWC != null) {
+                solverWithPWC.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+                return;
+            }
 
             ICmisObject addedObject;
             try {
