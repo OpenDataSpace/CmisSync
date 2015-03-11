@@ -162,11 +162,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                     watch.Start();
                     try {
-                        IDocument doc = addedObject as IDocument;
-                        mapped.LastChecksum = UploadFile(localFile, ref doc, transmissionEvent, mapped);
+                        mapped.LastChecksum = UploadFile(localFile, addedObject as IDocument, transmissionEvent);
                         mapped.ChecksumAlgorithmName = "SHA-1";
-                        mapped.RemoteObjectId = doc.Id;
-                        addedObject = doc;
                     } catch (Exception ex) {
                         if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
                             OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
@@ -186,10 +183,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     mapped.LastChangeToken = addedObject.ChangeToken;
                     mapped.LastRemoteWriteTimeUtc = addedObject.LastModificationDate;
                     mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
-                    if (mapped.RemoteObjectId != addedObject.Id) {
-                        this.Storage.RemoveObject(mapped);
-                        mapped.RemoteObjectId = addedObject.Id;
-                    }
 
                     this.Storage.SaveMappedObject(mapped);
                     OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));

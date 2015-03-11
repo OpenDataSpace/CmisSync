@@ -174,6 +174,34 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             this.TransmissionStorage.SaveObject(obj);
         }
 
+        
+        /// <summary>
+        /// Uploads the file content to the remote document.
+        /// </summary>
+        /// <returns>The SHA-1 hash of the uploaded file content.</returns>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="doc">Remote document.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
+        /// <param name="transmissionEvent">File Transmission event.</param>
+        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, FileTransmissionEvent transmissionEvent) {
+            using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                byte[] hash = null;
+                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
+                using (var hashAlg = new SHA1Managed()) {
+                    try {
+                            uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                            hash = hashAlg.Hash;
+                    } catch (Exception ex) {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        throw;
+                    }
+                }
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                return hash;
+            }
+        }
+        
         /// <summary>
         /// Uploads the file content to the remote document.
         /// </summary>
@@ -183,7 +211,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="transmissionManager">Transmission manager.</param>
         /// <param name="transmissionEvent">File Transmission event.</param>
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
-        protected byte[] UploadFile(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent, IMappedObject mappedObject = null) {
+        protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent, IMappedObject mappedObject = null) {
             byte[] checksumPWC = null;
             IDocument docPWC = this.LoadRemotePWCDocument(doc, ref checksumPWC);
 

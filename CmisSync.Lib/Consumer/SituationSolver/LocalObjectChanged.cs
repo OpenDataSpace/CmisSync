@@ -112,9 +112,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 try {
                     FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                     this.transmissionManager.AddTransmission(transmissionEvent);
-                    mappedObject.LastChecksum = UploadFile(localFile, ref doc, transmissionEvent, mappedObject);
-                    mappedObject.RemoteObjectId = doc.Id;
-                    remoteId = doc;
+                    mappedObject.LastChecksum = UploadFile(localFile, doc, transmissionEvent);
                 } catch(Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));
