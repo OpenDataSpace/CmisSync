@@ -25,6 +25,7 @@ namespace CmisSync.Lib.FileTransmission
 
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Streams;
+    using CmisSync.Lib.HashAlgorithm;
 
     using DotCMIS.Client;
     using DotCMIS.Data.Impl;
@@ -80,7 +81,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">
         /// Contains the last successful remote document state. This is needed for continue a failed upload.
         /// </exception>
-        public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true) {
+        public override IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
             IDocument result = remoteDocument;
             for (long offset = localFileStream.Position; offset < localFileStream.Length; offset += this.ChunkSize) {
                 bool isFirstChunk = offset == 0;
@@ -109,7 +110,14 @@ namespace CmisSync.Lib.FileTransmission
                         }
 
                         result.AppendContentStream(contentStream, isLastChunk, true);
-                    } catch(Exception e) {
+                        HashAlgorithmReuse reuse = hashAlg as HashAlgorithmReuse;
+                        if (reuse != null && update != null) {
+                            using (HashAlgorithm hash = reuse.GetHashAlgorithm()) {
+                                hash.TransformFinalBlock(new byte[0], 0, 0);
+                                update(hash.Hash);
+                            }
+                        }
+                    } catch (Exception e) {
                         if (e is FileTransmission.AbortException) {
                             throw;
                         }

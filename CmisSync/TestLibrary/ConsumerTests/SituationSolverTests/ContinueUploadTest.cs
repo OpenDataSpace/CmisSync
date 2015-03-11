@@ -107,6 +107,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHash, this.fileLength);
 
+            this.transmissionStorage.Verify(s => s.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Exactly(this.chunkCount + 1));    //  plus 1 to save state for abort
             this.session.Verify(
                 s =>
                 s.CreateDocument(
@@ -134,6 +135,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.RunSolverToContinueUpload(solverChanged);
 
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHash, this.fileLength);
+            this.transmissionStorage.Verify(s => s.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Exactly(this.chunkCount + 1));    //  plus 1 to save state for abort
             this.session.Verify(
                 s =>
                 s.CreateDocument(
@@ -161,6 +163,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.RunSolverToChangeLocalBeforeContinue(solverChanged);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHashChanged, this.fileLength);
 
+            this.transmissionStorage.Verify(s => s.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeast(this.chunkCount + 1));    //  plus 1 to save state for abort
             this.session.Verify(
                 s =>
                 s.CreateDocument(
@@ -187,6 +190,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.RunSolverToChangeLocalBeforeContinue(solverChanged);
 
+            this.transmissionStorage.Verify(s => s.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeast(this.chunkCount + 1));    //  plus 1 to save state for abort
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHashChanged, this.fileLength);
             this.session.Verify(
                 s =>

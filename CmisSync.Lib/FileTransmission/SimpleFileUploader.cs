@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SimpleFileUploader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -61,7 +61,7 @@ namespace CmisSync.Lib.FileTransmission
         ///  If true, the local content will overwrite the existing content.
         /// </param>
         /// <exception cref="CmisSync.Lib.Tasks.UploadFailedException">If upload fails</exception>
-        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true) {
+        public virtual IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null) {
             if (remoteDocument == null) {
                 throw new ArgumentException("remoteDocument can not be null");
             }

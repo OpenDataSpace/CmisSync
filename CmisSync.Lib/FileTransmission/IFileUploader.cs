@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="IFileUploader.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -27,6 +27,8 @@ namespace CmisSync.Lib.FileTransmission
 
     using DotCMIS.Client;
 
+    public delegate void UpdateChecksum(byte[] checksum);
+
     /// <summary>
     /// I file Upload Module must implement this interface.
     /// </summary>
@@ -53,7 +55,7 @@ namespace CmisSync.Lib.FileTransmission
         /// <param name='overwrite'>
         /// If true, the local content will overwrite the existing content.
         /// </param>
-        IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true);
+        IDocument UploadFile(IDocument remoteDocument, Stream localFileStream, FileTransmissionEvent status, HashAlgorithm hashAlg, bool overwrite = true, UpdateChecksum update = null);
 
         /// <summary>
         /// Appends the localFileStream to the remoteDocument.

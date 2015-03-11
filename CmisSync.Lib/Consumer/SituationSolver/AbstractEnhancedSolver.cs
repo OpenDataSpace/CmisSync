@@ -31,6 +31,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Streams;
+    using CmisSync.Lib.HashAlgorithm;
 
     using DotCMIS.Client;
 
@@ -227,7 +228,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 }
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
-                using (var hashAlg = new SHA1Managed()) {
+                using (var hashAlg = new SHA1Reuse()) {
                     try {
                         if (docPWC == null) {
                             uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
@@ -250,7 +251,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                                 }
                             }
 
-                            uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false);
+                            IDocument remoteDocument = doc;
+                            uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false, (byte[] checksum) => this.SaveRemotePWCDocument(localFile, remoteDocument, docPWC, checksum, transmissionEvent));
                             hash = hashAlg.Hash;
                         }
                     } catch (FileTransmission.AbortException ex) {
