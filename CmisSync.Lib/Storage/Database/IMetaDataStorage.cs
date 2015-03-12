@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="IMetaDataStorage.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -144,5 +144,27 @@ namespace CmisSync.Lib.Storage.Database
         /// </summary>
         /// <returns>The object tree.</returns>
         IObjectTree<IMappedObject> GetObjectTree();
+    }
+
+    public static class IMetaDataStorageExtenders {
+        public static string GetRemoteIdFromStorage(this IMetaDataStorage storage, IDirectoryInfo dirInfo) {
+            try {
+                Guid? uuid = dirInfo.Uuid;
+                if (uuid != null) {
+                    var mp = storage.GetObjectByGuid((Guid)uuid);
+                    if (mp != null) {
+                        return mp.RemoteObjectId;
+                    }
+                }
+            } catch (IOException) {
+            }
+
+            var mappedParent = storage.GetObjectByLocalPath(dirInfo);
+            if (mappedParent != null) {
+                return mappedParent.RemoteObjectId;
+            } else {
+                return null;
+            }
+        }
     }
 }

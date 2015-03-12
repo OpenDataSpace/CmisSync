@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw new FileNotFoundException(string.Format("Local file/folder {0} has been renamed/moved/deleted", localFileSystemInfo.FullName));
             }
 
-            string parentId = this.GetRemoteIdFromStorage(this.GetParent(localFileSystemInfo));
+            string parentId = Storage.GetRemoteIdFromStorage(this.GetParent(localFileSystemInfo));
             if (parentId == null) {
                 if (this.IsParentReadOnly(localFileSystemInfo)) {
                     return;
@@ -218,26 +218,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             return uuid;
         }
 
-        private string GetRemoteIdFromStorage(IDirectoryInfo dirInfo) {
-            try {
-                Guid? uuid = dirInfo.Uuid;
-                if (uuid != null) {
-                    var mp = this.Storage.GetObjectByGuid((Guid)uuid);
-                    if (mp != null) {
-                        return mp.RemoteObjectId;
-                    }
-                }
-            } catch (IOException) {
-            }
-
-            var mappedParent = this.Storage.GetObjectByLocalPath(dirInfo);
-            if (mappedParent != null) {
-                return mappedParent.RemoteObjectId;
-            } else {
-                return null;
-            }
-        }
-
         private IDirectoryInfo GetParent(IFileSystemInfo fileInfo) {
             return fileInfo is IDirectoryInfo ? (fileInfo as IDirectoryInfo).Parent : (fileInfo as IFileInfo).Directory;
         }
@@ -302,7 +282,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         private bool IsParentReadOnly(IFileSystemInfo localFileSystemInfo) {
             var parent = this.GetParent(localFileSystemInfo);
             while (parent != null && parent.Exists) {
-                string parentId = this.GetRemoteIdFromStorage(parent);
+                string parentId = Storage.GetRemoteIdFromStorage(parent);
                 if (parentId != null) {
                     var remoteObject = this.Session.GetObject(parentId);
                     if (remoteObject.CanCreateFolder() == false && remoteObject.CanCreateDocument() == false) {

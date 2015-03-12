@@ -19,6 +19,7 @@
 
 namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
 
@@ -28,7 +29,10 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Client.Impl;
+    using DotCMIS.Data.Impl;
 
     using log4net;
 
@@ -84,7 +88,26 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 throw new FileNotFoundException(string.Format("Local file {0} has been renamed/moved/deleted", localFile.FullName));
             }
 
-            throw new NotImplementedException();
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties.Add(PropertyIds.Name, localFile.Name);
+
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            var objId = Session.CreateDocument(
+                properties,
+                new ObjectId(Storage.GetRemoteIdFromStorage(localFile.Directory)),
+                null,
+                null,
+                null,
+                null,
+                null);
+            watch.Stop();
+            Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
+
+            watch.Restart();
+            IDocument remoteDocument = Session.GetObject(objId) as IDocument;
+            watch.Stop();
+            Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
         }
     }
 }

@@ -21,6 +21,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Security.Cryptography;
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
@@ -30,6 +31,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database.Entities;
 
+    using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data;
 
@@ -49,13 +51,16 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private readonly string parentId = "parentId";
         private readonly string objectName = "objectName";
         private readonly string objectId = "objectId";
-        private readonly string changeToken = "changeToken";
+        private readonly string changeTokenOld = "changeTokenOld";
+        private readonly string changeTokenNew = "changeTokenNew";
+        private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
 
         private string parentPath;
         private string localPath;
         private byte[] fileContent;
         private byte[] fileHash;
         private long fileLength;
+        private bool serverCanModifyDateTimes;
 
         private Mock<IFileInfo> localFile;
         private Mock<IDocument> remoteDocument;
@@ -98,24 +103,63 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         [Test, Category("Fast"), Category("Solver")]
         public void SolverFailsIfFileIsDeleted() {
             this.SetUpMocks();
-            var undertest = new LocalObjectAddedWithPWC(
-                this.session.Object,
-                this.storage.Object,
-                this.transmissionStorage.Object,
-                this.manager.Object);
-            var localFile = Mock.Of<IFileInfo>(f => f.Exists == false);
 
-            Assert.Throws<FileNotFoundException>(() => undertest.Solve(localFile, null, ContentChangeType.CREATED, ContentChangeType.NONE));
+            this.SetupFile();
+            this.localFile.Setup(f => f.Exists).Returns(false);
+
+            var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
+
+            Assert.Throws<FileNotFoundException>(() => undertest.Solve(this.localFile.Object, null));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void LocalEmptyFileAdded() {
-            Assert.Fail("TODO");
+        [Test, Category("Fast"), Category("Solver"), TestCase(true, true), TestCase(false, false)]
+        public void LocalEmptyFileAdded(bool withAlreadySetUuid, bool canModifyDateTimes) {
+            this.SetUpMocks();
+
+            this.SetupFile();
+            this.localFile.SetupStream(new byte[0]);
+
+            var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
+            undertest.Solve(this.localFile.Object, null);
+
+            this.session.Verify(
+                s => s.CreateDocument(
+                    It.Is<IDictionary<string, object>>(p => p.ContainsKey(PropertyIds.CreationDate) == canModifyDateTimes && p.ContainsKey(PropertyIds.LastModificationDate) == canModifyDateTimes),
+                    It.IsAny<IObjectId>(),
+                    It.Is<IContentStream>(cs => cs.Length == 0),
+                    null,
+                    null,
+                    null,
+                    null),
+                Times.Once());
+
+            if (withAlreadySetUuid) {
+                this.localFile.VerifySet(f => f.Uuid = It.IsAny<Guid>(), Times.Once());
+            } else {
+                this.localFile.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
+            }
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeTokenOld, checksum: this.emptyHash, contentSize: 0, times: Times.Once());
+            this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
+            this.remoteDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test, Category("Fast"), Category("Solver")]
         public void Local1ByteFileAdded() {
-            Assert.Fail("TODO");
+            this.SetUpMocks();
+
+            this.SetupFile();
+            byte[] content = new byte[1];
+            byte[] hash = SHA1.Create().ComputeHash(content);
+            this.localFile.SetupStream(content);
+
+            var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
+            undertest.Solve(this.localFile.Object, null);
+
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeTokenNew, checksum: hash, contentSize: 1, times: Times.Exactly(2));
+            this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
+            this.remoteDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -123,16 +167,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.SetUpMocks();
 
             this.SetupFile();
-            this.localFile.Setup(f => f.Length).Returns(0);
+            //this.localFile.Setup(f => f.Length).Returns(0);
             this.localFile.Setup(f => f.Open(It.IsAny<FileMode>())).Throws(new IOException("Alread in use by another process"));
             this.localFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Throws(new IOException("Alread in use by another process"));
             this.localFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(new IOException("Alread in use by another process"));
 
-            Assert.Fail("TODO");
+            var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
+            Assert.Throws<IOException>(() => undertest.Solve(this.localFile.Object, null));
         }
 
         private void SetupFile() {
-            this.localFile = new Mock<IFileInfo>();
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.Exists == true);
+            this.localFile = Mock.Get(file);
 
             this.parentPath = Path.GetTempPath();
             this.localPath = Path.Combine(this.parentPath, this.objectName);
@@ -140,45 +188,46 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath));
             this.storage.Setup(f => f.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == this.parentPath))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == this.parentId));
 
-            var parents = new List<IFolder>();
-            parents.Add(Mock.Of<IFolder>(f => f.Id == parentId));
+            //var file = Mock.Of<IFileInfo>(
+            //    f =>
+            //    f.FullName == this.localPath &&
+            //    f.Name == this.objectName &&
+            //    f.Exists == true &&
+            //    f.IsExtendedAttributeAvailable() == true &&
+            //    f.Directory == parentDirInfo);
+            //this.localFile = Mock.Get(file);
 
-            var file = Mock.Of<IFileInfo>(
-                f =>
-                f.FullName == this.localPath &&
-                f.Name == this.objectName &&
-                f.Exists == true &&
-                f.IsExtendedAttributeAvailable() == true &&
-                f.Directory == parentDirInfo);
-            this.localFile = Mock.Get(file);
+            //var parents = new List<IFolder>();
+            //parents.Add(Mock.Of<IFolder>(f => f.Id == parentId));
 
-            var docId = Mock.Of<IObjectId>(
-                o =>
-                o.Id == this.objectId);
+            //var doc = Mock.Of<IDocument>(
+            //    d =>
+            //    d.Name == this.objectName &&
+            //    d.Id == this.objectId &&
+            //    d.Parents == parents &&
+            //    d.ChangeToken == this.changeToken);
+            //this.remoteDocument = Mock.Get(doc);
 
-            var doc = Mock.Of<IDocument>(
-                d =>
-                d.Name == this.objectName &&
-                d.Id == this.objectId &&
-                d.Parents == parents &&
-                d.ChangeToken == this.changeToken);
-            this.remoteDocument = Mock.Get(doc);
+            //var docId = Mock.Of<IObjectId>(
+            //    o =>
+            //    o.Id == this.objectId);
 
-            this.session.Setup(s => s.CreateDocument(
-                It.IsAny<IDictionary<string, object>>(),
-                It.IsAny<IObjectId>(),
-                It.IsAny<IContentStream>(),
-                null,
-                null,
-                null,
-                null)).Returns(docId);
-            this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
-                return doc;
-            });
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id))).Returns<IObjectId>((id) => {
-                return doc;
-            });
+            //this.session.Setup(s => s.CreateDocument(
+            //    It.IsAny<IDictionary<string, object>>(),
+            //    It.IsAny<IObjectId>(),
+            //    It.IsAny<IContentStream>(),
+            //    null,
+            //    null,
+            //    null,
+            //    null)).Returns(docId);
+
+            //this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
+            //this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
+            //    return doc;
+            //});
+            //this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id))).Returns<IObjectId>((id) => {
+            //    return doc;
+            //});
         }
 
         private void SetUpMocks(bool isPwcUpdateable = true) {
@@ -188,6 +237,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.manager = new Mock<ActiveActivitiesManager>();
+            this.serverCanModifyDateTimes = true;
         }
     }
 }
