@@ -19,9 +19,9 @@
 
 namespace TestLibrary.HashAlgorithmTests {
     using System;
+    using System.IO;
     using System.Linq;
     using System.Security.Cryptography;
-    using System.IO;
 
     using CmisSync.Lib.HashAlgorithm;
 
@@ -35,12 +35,12 @@ namespace TestLibrary.HashAlgorithmTests {
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash((data))));
+                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash(data)));
             }
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash((data))));
+                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash(data)));
             }
         }
 
@@ -50,12 +50,12 @@ namespace TestLibrary.HashAlgorithmTests {
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash((data))));
+                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash(data)));
             }
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash((data))));
+                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash(data)));
             }
         }
 
@@ -65,12 +65,12 @@ namespace TestLibrary.HashAlgorithmTests {
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash((data))));
+                Assert.IsTrue(reuse.Compute(data).SequenceEqual(sha1.ComputeHash(data)));
             }
 
             using (SHA1Managed sha1 = new SHA1Managed())
             using (SHA1Reuse reuse = new SHA1Reuse()) {
-                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash((data))));
+                Assert.IsTrue(reuse.ComputeHash(data).SequenceEqual(sha1.ComputeHash(data)));
             }
         }
 
@@ -85,6 +85,7 @@ namespace TestLibrary.HashAlgorithmTests {
                     sha1.TransformBlock(data, 0, dataLength, data, 0);
                     reuse.TransformBlock(data, 0, dataLength, data, 0);
                 }
+
                 sha1.TransformFinalBlock(data, dataLength, 0);
                 reuse.TransformFinalBlock(data, dataLength, 0);
                 Assert.IsTrue(sha1.Hash.SequenceEqual(reuse.Hash));
@@ -102,6 +103,7 @@ namespace TestLibrary.HashAlgorithmTests {
                     sha1.TransformBlock(data, 0, dataLength, data, 0);
                     reuse.TransformBlock(data, 0, dataLength, data, 0);
                 }
+
                 sha1.TransformFinalBlock(data, dataLength, 0);
                 reuse.TransformFinalBlock(data, dataLength, 0);
                 Assert.IsTrue(sha1.Hash.SequenceEqual(reuse.Hash));
@@ -119,6 +121,7 @@ namespace TestLibrary.HashAlgorithmTests {
                     sha1.TransformBlock(data, 0, dataLength, data, 0);
                     reuse.TransformBlock(data, 0, dataLength, data, 0);
                 }
+
                 sha1.TransformFinalBlock(data, dataLength, 0);
                 reuse.TransformFinalBlock(data, dataLength, 0);
                 Assert.IsTrue(sha1.Hash.SequenceEqual(reuse.Hash));
