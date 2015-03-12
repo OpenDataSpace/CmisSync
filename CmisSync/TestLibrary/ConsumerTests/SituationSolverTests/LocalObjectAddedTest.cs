@@ -228,9 +228,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetUpMocks();
             Mock<IFileInfo> fileInfo = new Mock<IFileInfo>();
             fileInfo.Setup(f => f.Length).Returns(10);
-            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>())).Throws(new IOException("Alread in use by another process"));
-            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Throws(new IOException("Alread in use by another process"));
-            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(new IOException("Alread in use by another process"));
+            fileInfo.SetupOpenThrows(new IOException("Already in use by another process"));
 
             Mock<IDocument> document;
             Assert.Throws<IOException>(() => {
