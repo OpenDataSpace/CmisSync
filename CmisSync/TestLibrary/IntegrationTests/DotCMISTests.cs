@@ -134,7 +134,7 @@ namespace TestLibrary.IntegrationTests {
                 contentStream.Length = content.Length;
                 using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                     contentStream.Stream = memstream;
-                    doc.AppendContentStream(contentStream, i == 9, true);
+                    doc = doc.AppendContentStream(contentStream, i == 9) ?? doc;
                 }
 
                 Assert.AreEqual(content.Length * (i + 2), doc.ContentStreamLength);
