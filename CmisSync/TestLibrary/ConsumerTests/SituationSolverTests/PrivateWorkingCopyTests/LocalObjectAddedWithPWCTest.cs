@@ -29,8 +29,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
     using DotCMIS.Client;
@@ -44,17 +44,18 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
     [TestFixture]
     public class LocalObjectAddedWithPWCTest {
-        private Mock<ISession> session;
-        private Mock<IMetaDataStorage> storage;
-        private Mock<IFileTransmissionStorage> transmissionStorage;
-        private Mock<ActiveActivitiesManager> manager;
-
         private readonly string parentId = "parentId";
         private readonly string objectName = "objectName";
         private readonly string objectId = "objectId";
         private readonly string changeTokenOld = "changeTokenOld";
         private readonly string changeTokenNew = "changeTokenNew";
         private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
+
+        private Mock<ISession> session;
+        private Mock<IMetaDataStorage> storage;
+        private Mock<IFileTransmissionStorage> transmissionStorage;
+        private Mock<ActiveActivitiesManager> manager;
+        private Mock<ISolver> folderAddedSolver;
 
         private string parentPath;
         private string localPath;
@@ -72,7 +73,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object);
+                this.manager.Object,
+                Mock.Of<ISolver>());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -84,20 +86,38 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object));
+                this.manager.Object,
+                Mock.Of<ISolver>()));
         }
 
-        [Test, Category("Fast"), Category("Solver")]
-        public void SolverFailsIfDirectory() {
+        [Test, Category("Fast")]
+        public void ConstructorFailsIfGivenSolverIsNull() {
             this.SetUpMocks();
+            Assert.Throws<ArgumentNullException>(
+                () =>
+                new LocalObjectAddedWithPWC(
+                this.session.Object,
+                this.storage.Object,
+                this.transmissionStorage.Object,
+                this.manager.Object,
+                null));
+        }
+
+        [Test, Category("Fast")]
+        public void NewDirectoriesCallsArePassedToTheGivenSolver() {
+            this.SetUpMocks();
+            var folderSolver = new Mock<ISolver>();
             var undertest = new LocalObjectAddedWithPWC(
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager.Object);
+                this.manager.Object,
+                folderSolver.Object);
             var localFolder = new Mock<IDirectoryInfo>();
 
-            Assert.Throws<NotSupportedException>(() => undertest.Solve(localFolder.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE));
+            undertest.Solve(localFolder.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE);
+
+            folderSolver.Verify(s => s.Solve(localFolder.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -107,7 +127,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.SetupFile();
             this.localFile.Setup(f => f.Exists).Returns(false);
 
-            var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
+            var undertest = this.CreateSolver();
 
             Assert.Throws<FileNotFoundException>(() => undertest.Solve(this.localFile.Object, null));
         }
@@ -122,7 +142,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.localFile.SetupGuid(Guid.NewGuid());
             }
 
-            var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
+            var undertest = this.CreateSolver();
             undertest.Solve(this.localFile.Object, null);
 
             this.session.Verify(
@@ -140,6 +160,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             } else {
                 this.localFile.VerifySet(f => f.Uuid = It.IsAny<Guid>(), Times.Once());
             }
+
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeTokenOld, checksum: this.emptyHash, contentSize: 0, times: Times.Once());
             this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
@@ -147,19 +168,19 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void Local1ByteFileAdded() {
+        public void LocalFileAdded([Values(1, 1024, 123456)]int fileSize) {
             this.SetUpMocks();
 
             this.SetupFile();
-            byte[] content = new byte[1];
+            byte[] content = new byte[fileSize];
             byte[] hash = SHA1.Create().ComputeHash(content);
             this.localFile.SetupStream(content);
 
-            var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
+            var undertest = this.CreateSolver();
             undertest.Solve(this.localFile.Object, null);
 
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeTokenNew, checksum: hash, contentSize: 1, times: Times.Exactly(2));
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeTokenNew, checksum: hash, contentSize: fileSize, times: Times.Once());
             this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
             this.remoteDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Once());
         }
@@ -174,7 +195,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.localFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Throws(new IOException("Alread in use by another process"));
             this.localFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(new IOException("Alread in use by another process"));
 
-            var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
+            var undertest = this.CreateSolver();
             Assert.Throws<IOException>(() => undertest.Solve(this.localFile.Object, null));
         }
 
@@ -195,7 +216,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.localFile = Mock.Get(file);
 
             var parents = new List<IFolder>();
-            parents.Add(Mock.Of<IFolder>(f => f.Id == parentId));
+            parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
 
             var doc = Mock.Of<IDocument>(
                 d =>
@@ -227,6 +248,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             //});
         }
 
+        private LocalObjectAddedWithPWC CreateSolver() {
+            return new LocalObjectAddedWithPWC(
+                this.session.Object,
+                this.storage.Object,
+                this.transmissionStorage.Object,
+                this.manager.Object,
+                this.folderAddedSolver.Object);
+        }
+
         private void SetUpMocks(bool isPwcUpdateable = true, bool isServerCanModifyDateTimes = true) {
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem(isServerCanModifyDateTimes);
@@ -234,6 +264,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.manager = new Mock<ActiveActivitiesManager>();
+            this.folderAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
     }
 }

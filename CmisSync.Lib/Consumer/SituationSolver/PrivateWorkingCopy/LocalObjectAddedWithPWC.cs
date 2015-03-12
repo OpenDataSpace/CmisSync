@@ -41,6 +41,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAddedWithPWC));
+        private ISolver folderAddedSolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -54,11 +55,18 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            ActiveActivitiesManager manager) : base(session, storage, transmissionStorage)
+            ActiveActivitiesManager manager,
+            ISolver localFolderAddedSolver) : base(session, storage, transmissionStorage)
         {
+            if (localFolderAddedSolver == null) {
+                throw new ArgumentNullException("Given solver for locally added folders is null");
+            }
+
             if (!session.ArePrivateWorkingCopySupported()) {
                 throw new ArgumentException("Given session doesn't support private working copies");
             }
+
+            this.folderAddedSolver = localFolderAddedSolver;
         }
 
         /// <summary>
@@ -74,46 +82,50 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            IFileInfo localFile = localFileSystemInfo as IFileInfo;
-            if (localFile == null) {
-                throw new NotSupportedException();
+            if (localFileSystemInfo is IDirectoryInfo) {
+                this.folderAddedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+            } else {
+                IFileInfo localFile = localFileSystemInfo as IFileInfo;
+                if (localFile == null) {
+                    throw new NotSupportedException();
+                }
+
+                Stopwatch completewatch = new Stopwatch();
+                completewatch.Start();
+                Logger.Debug("Starting LocalObjectAddedWithPWC");
+
+                localFile.Refresh();
+                if (!localFile.Exists) {
+                    throw new FileNotFoundException(string.Format("Local file {0} has been renamed/moved/deleted", localFile.FullName));
+                }
+
+                Dictionary<string, object> properties = new Dictionary<string, object>();
+                properties.Add(PropertyIds.Name, localFile.Name);
+                if (this.ServerCanModifyDateTimes) {
+                    properties.Add(PropertyIds.CreationDate, localFile.CreationTimeUtc);
+                    properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
+                }
+
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
+                var objId = Session.CreateDocument(
+                    properties,
+                    new ObjectId(Storage.GetRemoteId(localFile.Directory)),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
+                watch.Stop();
+                Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
+
+                watch.Restart();
+                IDocument remoteDocument = Session.GetObject(objId) as IDocument;
+                watch.Stop();
+                Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
+
+                Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
             }
-
-            Stopwatch completewatch = new Stopwatch();
-            completewatch.Start();
-            Logger.Debug("Starting LocalObjectAddedWithPWC");
-
-            localFile.Refresh();
-            if (!localFile.Exists) {
-                throw new FileNotFoundException(string.Format("Local file {0} has been renamed/moved/deleted", localFile.FullName));
-            }
-
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties.Add(PropertyIds.Name, localFile.Name);
-            if (this.ServerCanModifyDateTimes) {
-                properties.Add(PropertyIds.CreationDate, localFile.CreationTimeUtc);
-                properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
-            }
-
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            var objId = Session.CreateDocument(
-                properties,
-                new ObjectId(Storage.GetRemoteId(localFile.Directory)),
-                null,
-                null,
-                null,
-                null,
-                null);
-            watch.Stop();
-            Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
-
-            watch.Restart();
-            IDocument remoteDocument = Session.GetObject(objId) as IDocument;
-            watch.Stop();
-            Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
-
-            Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
-        }
+       }
     }
 }
