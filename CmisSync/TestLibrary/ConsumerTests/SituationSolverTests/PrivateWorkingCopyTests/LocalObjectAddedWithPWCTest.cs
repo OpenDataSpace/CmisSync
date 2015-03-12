@@ -35,6 +35,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using DotCMIS;
     using DotCMIS.Client;
     using DotCMIS.Data;
+    using DotCMIS.Enums;
 
     using Moq;
 
@@ -49,6 +50,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private readonly string objectId = "objectId";
         private readonly string changeTokenOld = "changeTokenOld";
         private readonly string changeTokenNew = "changeTokenNew";
+        private readonly string newObjectId = "newObjectId";
 
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -148,7 +150,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileAdded([Values(1, 1024, 123456)]int fileSize) {
+        public void LocalFileAddedWithFileSize([Values(1, 1024, 123456)]int fileSize) {
             this.SetUpMocks();
 
             this.SetupFile();
@@ -170,7 +172,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.SetUpMocks();
 
             this.SetupFile();
-            //this.localFile.Setup(f => f.Length).Returns(0);
+            this.localFile.Setup(f => f.Length).Returns(10);
             this.localFile.SetupOpenThrows(new IOException("Already in use by another process"));
 
             var undertest = this.CreateSolver();
@@ -203,6 +205,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 d.Parents == parents &&
                 d.ChangeToken == this.changeTokenOld);
             this.remoteDocument = Mock.Get(doc);
+            this.remoteDocument.Setup(
+                d =>
+                d.CheckIn(true, It.IsAny<IDictionary<string, object>>(), null, null)).Callback(
+                () => this.remoteDocument.Setup(newDoc => newDoc.Id).Returns(this.newObjectId)).Returns(doc);
 
             var docId = Mock.Of<IObjectId>(
                 o =>
@@ -210,12 +216,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             this.session.Setup(s => s.CreateDocument(
                 It.IsAny<IDictionary<string, object>>(),
-                It.IsAny<IObjectId>(),
-                It.IsAny<IContentStream>(),
+                It.Is<IObjectId>(p => p.Id == this.parentId),
                 null,
-                null,
-                null,
-                null)).Returns(docId);
+                VersioningState.CheckedOut)).Returns(docId);
 
             //this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
             //this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
