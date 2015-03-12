@@ -298,6 +298,7 @@
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringFileSystemInfoDecorator.cs" />
     <Compile Include="Storage\FileSystem\ReadOnlyIgnoringDirectoryInfoDecorator.cs" />
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectAddedWithPWC.cs" />
+    <Compile Include="Storage\Database\IMetaDataStorageConvenienceExtender.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

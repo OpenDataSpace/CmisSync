@@ -215,6 +215,7 @@ SOURCES =  \
 	Storage/Database/ICookieStorage.cs \
 	Storage/Database/IFileTransmissionStorage.cs \
 	Storage/Database/IMetaDataStorage.cs \
+	Storage/Database/IMetaDataStorageConvenienceExtender.cs \
 	Storage/Database/IObjectTree.cs \
 	Storage/Database/MetaDataStorage.cs \
 	Storage/Database/ObjectTree.cs \

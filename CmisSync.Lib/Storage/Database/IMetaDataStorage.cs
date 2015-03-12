@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Storage.Database
     /// <summary>
     /// I meta data storage.
     /// </summary>
-    public interface IMetaDataStorage
-    {
+    public interface IMetaDataStorage {
         /// <summary>
         /// Gets the matcher.
         /// </summary>
@@ -144,27 +142,5 @@ namespace CmisSync.Lib.Storage.Database
         /// </summary>
         /// <returns>The object tree.</returns>
         IObjectTree<IMappedObject> GetObjectTree();
-    }
-
-    public static class IMetaDataStorageExtenders {
-        public static string GetRemoteId(this IMetaDataStorage storage, IDirectoryInfo dirInfo) {
-            try {
-                Guid? uuid = dirInfo.Uuid;
-                if (uuid != null) {
-                    var mp = storage.GetObjectByGuid((Guid)uuid);
-                    if (mp != null) {
-                        return mp.RemoteObjectId;
-                    }
-                }
-            } catch (IOException) {
-            }
-
-            var mappedParent = storage.GetObjectByLocalPath(dirInfo);
-            if (mappedParent != null) {
-                return mappedParent.RemoteObjectId;
-            } else {
-                return null;
-            }
-        }
     }
 }
