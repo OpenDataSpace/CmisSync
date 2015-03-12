@@ -49,13 +49,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private readonly string objectId = "objectId";
         private readonly string changeTokenOld = "changeTokenOld";
         private readonly string changeTokenNew = "changeTokenNew";
-        private readonly byte[] emptyHash = SHA1.Create().ComputeHash(new byte[0]);
 
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
         private Mock<ActiveActivitiesManager> manager;
-        private Mock<ISolver> folderAddedSolver;
+        private Mock<ISolver> folderOrEmptyFileAddedSolver;
 
         private string parentPath;
         private string localPath;
@@ -132,39 +131,20 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             Assert.Throws<FileNotFoundException>(() => undertest.Solve(this.localFile.Object, null));
         }
 
-        [Test, Category("Fast"), Category("Solver"), TestCase(true, true), TestCase(false, false)]
-        public void LocalEmptyFileAdded(bool withAlreadySetUuid, bool canModifyDateTimes) {
-            this.SetUpMocks(true, canModifyDateTimes);
-
+        [Test, Category("Fast"), Category("Solver")]
+        public void LocalEmptyFileAddedIsPassedToGivenSolver() {
+            this.SetUpMocks();
             this.SetupFile();
             this.localFile.SetupStream(new byte[0]);
-            if (withAlreadySetUuid) {
-                this.localFile.SetupGuid(Guid.NewGuid());
-            }
 
             var undertest = this.CreateSolver();
-            undertest.Solve(this.localFile.Object, null);
+            this.folderOrEmptyFileAddedSolver.Setup(s => s.Solve(this.localFile.Object, null, It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()));
 
-            this.session.Verify(
-                s => s.CreateDocument(
-                    It.Is<IDictionary<string, object>>(p => p.ContainsKey(PropertyIds.CreationDate) == canModifyDateTimes && p.ContainsKey(PropertyIds.LastModificationDate) == canModifyDateTimes),
-                    It.IsAny<IObjectId>(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null),
-                Times.Once());
-            if (withAlreadySetUuid) {
-                this.localFile.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
-            } else {
-                this.localFile.VerifySet(f => f.Uuid = It.IsAny<Guid>(), Times.Once());
-            }
+            undertest.Solve(this.localFile.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE);
 
+            this.folderOrEmptyFileAddedSolver.Verify(s => s.Solve(this.localFile.Object, null, ContentChangeType.CREATED, ContentChangeType.NONE), Times.Once());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeTokenOld, checksum: this.emptyHash, contentSize: 0, times: Times.Once());
-            this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
-            this.remoteDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
+            this.storage.VerifyThatNoObjectIsManipulated();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -191,9 +171,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             this.SetupFile();
             //this.localFile.Setup(f => f.Length).Returns(0);
-            this.localFile.Setup(f => f.Open(It.IsAny<FileMode>())).Throws(new IOException("Alread in use by another process"));
-            this.localFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Throws(new IOException("Alread in use by another process"));
-            this.localFile.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(new IOException("Alread in use by another process"));
+            this.localFile.SetupOpenThrows(new IOException("Already in use by another process"));
 
             var undertest = this.CreateSolver();
             Assert.Throws<IOException>(() => undertest.Solve(this.localFile.Object, null));
@@ -254,17 +232,17 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.storage.Object,
                 this.transmissionStorage.Object,
                 this.manager.Object,
-                this.folderAddedSolver.Object);
+                this.folderOrEmptyFileAddedSolver.Object);
         }
 
-        private void SetUpMocks(bool isPwcUpdateable = true, bool isServerCanModifyDateTimes = true) {
+        private void SetUpMocks(bool isPwcUpdateable = true, bool serverCanModifyLastModificationDate = true) {
             this.session = new Mock<ISession>();
-            this.session.SetupTypeSystem(isServerCanModifyDateTimes);
+            this.session.SetupTypeSystem(serverCanModifyLastModificationDate: serverCanModifyLastModificationDate);
             this.session.SetupPrivateWorkingCopyCapability(isPwcUpdateable: isPwcUpdateable);
             this.storage = new Mock<IMetaDataStorage>();
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.manager = new Mock<ActiveActivitiesManager>();
-            this.folderAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
+            this.folderOrEmptyFileAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
     }
 }

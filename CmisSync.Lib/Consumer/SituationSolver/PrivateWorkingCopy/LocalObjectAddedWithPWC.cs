@@ -41,7 +41,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAddedWithPWC));
-        private ISolver folderAddedSolver;
+        private ISolver folderOrEmptyFileAddedSolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -50,15 +50,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <param name="storage">Meta data storage.</param>
         /// <param name="transmissionStorage">Transmission storage.</param>
         /// <param name="manager">Active activities manager.</param>
-        /// <param name="localFolderAddedSolver">Local folder added solver.</param>
+        /// <param name="localFolderAddedSolver">Local folder or empty file added solver.</param>
         public LocalObjectAddedWithPWC(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
             ActiveActivitiesManager manager,
-            ISolver localFolderAddedSolver) : base(session, storage, transmissionStorage)
+            ISolver localFolderOrEmptyFileAddedSolver) : base(session, storage, transmissionStorage)
         {
-            if (localFolderAddedSolver == null) {
+            if (localFolderOrEmptyFileAddedSolver == null) {
                 throw new ArgumentNullException("Given solver for locally added folders is null");
             }
 
@@ -66,7 +66,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 throw new ArgumentException("Given session doesn't support private working copies");
             }
 
-            this.folderAddedSolver = localFolderAddedSolver;
+            this.folderOrEmptyFileAddedSolver = localFolderOrEmptyFileAddedSolver;
         }
 
         /// <summary>
@@ -83,20 +83,17 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
             if (localFileSystemInfo is IDirectoryInfo) {
-                this.folderAddedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
-            } else {
+                this.folderOrEmptyFileAddedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+            } else if (localFileSystemInfo is IFileInfo) {
                 IFileInfo localFile = localFileSystemInfo as IFileInfo;
-                if (localFile == null) {
-                    throw new NotSupportedException();
-                }
-
-                Stopwatch completewatch = new Stopwatch();
-                completewatch.Start();
-                Logger.Debug("Starting LocalObjectAddedWithPWC");
-
                 localFile.Refresh();
                 if (!localFile.Exists) {
                     throw new FileNotFoundException(string.Format("Local file {0} has been renamed/moved/deleted", localFile.FullName));
+                }
+
+                if (localFile.Length == 0) {
+                    this.folderOrEmptyFileAddedSolver.Solve(localFileSystemInfo, null, localContent, remoteContent);
+                    return;
                 }
 
                 Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -106,8 +103,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
                 }
 
-                Stopwatch watch = new Stopwatch();
-                watch.Start();
                 var objId = Session.CreateDocument(
                     properties,
                     new ObjectId(Storage.GetRemoteId(localFile.Directory)),
@@ -116,15 +111,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     null,
                     null,
                     null);
-                watch.Stop();
-                Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
 
-                watch.Restart();
                 IDocument remoteDocument = Session.GetObject(objId) as IDocument;
-                watch.Stop();
-                Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
-
                 Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
+            } else {
+                throw new NotSupportedException();
             }
        }
     }
