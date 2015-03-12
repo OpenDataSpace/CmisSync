@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -39,7 +40,15 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             IFileTransmissionStorage transmissionStorage,
             ActiveActivitiesManager manager,
             ISolver folderOrFileContentUnchangedSolver) : base(session, storage, transmissionStorage) {
-            throw new NotImplementedException();
+            if (folderOrFileContentUnchangedSolver == null) {
+                throw new ArgumentNullException("Given solver for folder or unchanged file content situations is null");
+            }
+
+            if (!session.ArePrivateWorkingCopySupported()) {
+                throw new ArgumentException("The given session does not support private working copies");
+            }
+
+            this.folderOrFileContentUnchangedSolver = folderOrFileContentUnchangedSolver;
         }
 
         public override void Solve(
