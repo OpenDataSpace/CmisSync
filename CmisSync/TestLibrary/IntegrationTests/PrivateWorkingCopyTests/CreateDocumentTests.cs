@@ -19,10 +19,12 @@
 
 namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
 
+    using DotCMIS;
     using DotCMIS.Client;
 
     using NUnit.Framework;
@@ -35,13 +37,20 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
         private readonly string content = "content";
 
         [Test, Category("Slow"), MaxTime(180000)]
-        public void CreateCheckedOutDocument() {
+        public void CreateCheckedOutDocument([Values(true, false)]bool withPropertiesOnCheckIn) {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
 
             var doc = this.remoteRootDir.CreateDocument(this.fileName, (string)null, checkedOut: true);
             this.remoteRootDir.Refresh();
             doc.SetContent(this.content);
-            var newObjectId = doc.CheckIn(true, null, null, string.Empty);
+            Dictionary<string, object> properties = null;
+            if (withPropertiesOnCheckIn) {
+                properties = new Dictionary<string, object>();
+                properties.Add(PropertyIds.Name, this.fileName);
+                properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            }
+
+            var newObjectId = doc.CheckIn(true, properties, null, string.Empty);
             var newDocument = this.session.GetObject(newObjectId) as IDocument;
 
             this.remoteRootDir.Refresh();
