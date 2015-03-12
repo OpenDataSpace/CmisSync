@@ -370,5 +370,26 @@ namespace TestLibrary.StreamsTests {
                 task.Wait();
             }
         }
+
+        [Test, Category("Fast"), Category("Streams")]
+        public void BandwidthAfterCloseIsZero([Values(1024, 4096, 1234, 123456)]int length) {
+            long? bandwidth = null;
+            byte[] content = new byte[length];
+            var transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
+            transmission.TransmissionStatus += (object sender, TransmissionProgressEventArgs e) => {
+                bandwidth = e.BitsPerSecond ?? bandwidth;
+            };
+            using (var stream = new MemoryStream(content))
+                using (var progressStream = new ProgressStream(stream, transmission)) {
+                var task = Task.Factory.StartNew(() => {
+                    using (var targetStream = new MemoryStream()) {
+                        progressStream.CopyTo(targetStream);
+                    }
+                });
+                task.Wait();
+            }
+
+            Assert.That(bandwidth, Is.EqualTo(0));
+        }
     }
 }

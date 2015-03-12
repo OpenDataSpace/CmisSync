@@ -22,11 +22,11 @@ namespace TestLibrary.TestUtils {
     using System.Collections.Generic;
     using System.IO;
 
-    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.SelectiveIgnore;
+    using CmisSync.Lib.Storage.Database.Entities;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Binding;
     using DotCMIS.Binding.Services;
@@ -307,13 +307,14 @@ namespace TestLibrary.TestUtils {
         public static void VerifyThatAllDefaultValuesAreSet(this Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   set.Contains("cmis:name") &&
-                                   set.Contains("cmis:parentId") &&
-                                   set.Contains("cmis:objectId") &&
-                                   set.Contains("cmis:changeToken") &&
-                                   set.Contains("cmis:contentStreamFileName") &&
-                                   set.Contains("cmis:lastModificationDate")),
+                It.Is<HashSet<string>>(
+                set =>
+                set.Contains("cmis:name") &&
+                set.Contains("cmis:parentId") &&
+                set.Contains("cmis:objectId") &&
+                set.Contains("cmis:changeToken") &&
+                set.Contains("cmis:contentStreamFileName") &&
+                set.Contains("cmis:lastModificationDate")),
                 It.Is<bool>(acls => acls == false),
                 It.Is<bool>(includeAllowableActions => includeAllowableActions == true),
                 It.Is<bool>(includePolicies => includePolicies == false),
@@ -329,8 +330,9 @@ namespace TestLibrary.TestUtils {
         public static void VerifyThatCrawlValuesAreSet(this Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   !set.Contains("cmis:path")),
+                It.Is<HashSet<string>>(
+                set =>
+                !set.Contains("cmis:path")),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
@@ -346,8 +348,9 @@ namespace TestLibrary.TestUtils {
         public static void VerifyThatFilterContainsPath(this Mock<ISession> session) {
             session.Verify(
                 s => s.CreateOperationContext(
-                It.Is<HashSet<string>>(set =>
-                                   set.Contains("cmis:path")),
+                It.Is<HashSet<string>>(
+                set =>
+                set.Contains("cmis:path")),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),

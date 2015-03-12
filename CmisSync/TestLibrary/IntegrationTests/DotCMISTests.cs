@@ -399,6 +399,7 @@ namespace TestLibrary.IntegrationTests {
             string binding)
         {
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            session.EnsureSelectiveIgnoreSupportIsAvailable();
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
             string filename = "testfile.txt";
             try {
