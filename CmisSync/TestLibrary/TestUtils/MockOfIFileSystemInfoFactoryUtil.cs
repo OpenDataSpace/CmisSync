@@ -195,6 +195,12 @@ namespace TestLibrary.TestUtils {
             dirInfo.Setup(f => f.Uuid).Returns(uuid);
         }
 
+        public static void SetupOpenThrows<TException>(this Mock<IFileInfo> fileInfo, TException exception = default(TException)) where TException : System.Exception {
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>())).Throws(exception);
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>())).Throws(exception);
+            fileInfo.Setup(f => f.Open(It.IsAny<FileMode>(), It.IsAny<FileAccess>(), It.IsAny<FileShare>())).Throws(exception);
+        }
+
         public static void VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified(this Mock<IFileSystemInfo> fsInfo) {
             fsInfo.VerifySet(o => o.LastWriteTimeUtc = It.IsAny<DateTime>(), Times.Never());
         }
