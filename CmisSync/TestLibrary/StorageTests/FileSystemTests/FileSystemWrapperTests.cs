@@ -688,7 +688,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             try {
                 file.Uuid = Guid.NewGuid();
                 Assert.Fail("Setting a Uuid to a read only file must fail, but didn't");
-            } catch (Exception) {
+            } catch (IOException) {
             }
 
             Assert.That(file.Uuid, Is.EqualTo(uuid));
@@ -696,15 +696,19 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Medium")]
-        public void SetModificationDateToReadOnlyDirectory() {
+        public void SetModificationDateToReadOnlyDirectoryCanFail() {
             var past = DateTime.UtcNow - TimeSpan.FromHours(1);
             var dir = Factory.CreateDirectoryInfo(Path.Combine(this.testFolder.FullName, "cat"));
             dir.Create();
-            dir.ReadOnly = true;
-
             dir.LastWriteTimeUtc = past;
+            dir.ReadOnly = true;
+            try {
+                dir.LastWriteTimeUtc = DateTime.UtcNow;
+                Assert.That(dir.LastWriteTimeUtc, Is.EqualTo(DateTime.UtcNow).Within(1).Seconds);
+            } catch (UnauthorizedAccessException) {
+                Assert.That(dir.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
+            }
 
-            Assert.That(dir.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
             Assert.That(dir.ReadOnly, Is.True);
         }
 
@@ -718,7 +722,7 @@ namespace TestLibrary.StorageTests.FileSystemTests {
             try {
                 file.LastWriteTimeUtc = DateTime.UtcNow;
                 Assert.Fail("Setting last write time utc must fail on a read only file, but didn't");
-            } catch (Exception) {
+            } catch (UnauthorizedAccessException) {
             }
 
             Assert.That(file.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
