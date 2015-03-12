@@ -41,6 +41,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     /// Abstract enhanced solver.
     /// </summary>
     public abstract class AbstractEnhancedSolver : ISolver {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractEnhancedSolver));
+
         /// <summary>
         /// The file operations logger.
         /// </summary>
@@ -445,6 +447,29 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             return hash;
+        }
+
+        protected Guid WriteOrUseUuidIfSupported(IFileSystemInfo info) {
+            Guid uuid = Guid.Empty;
+            if (info.IsExtendedAttributeAvailable()) {
+                try {
+                    Guid? localUuid = info.Uuid;
+                    if (localUuid == null || this.Storage.GetObjectByGuid((Guid)localUuid) != null) {
+                        uuid = Guid.NewGuid();
+                        try {
+                            info.Uuid = uuid;
+                        } catch (RestoreModificationDateException restoreException) {
+                            Logger.Debug("Could not retore the last modification date of " + info.FullName, restoreException);
+                        }
+                    } else {
+                        uuid = localUuid ?? Guid.NewGuid();
+                    }
+                } catch (ExtendedAttributeException ex) {
+                    throw new RetryException(ex.Message, ex);
+                }
+            }
+
+            return uuid;
         }
     }
 }

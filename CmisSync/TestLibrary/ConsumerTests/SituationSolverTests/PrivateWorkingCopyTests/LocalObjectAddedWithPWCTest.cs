@@ -118,6 +118,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             this.SetupFile();
             this.localFile.SetupStream(new byte[0]);
+            if (withAlreadySetUuid) {
+                this.localFile.SetupGuid(Guid.NewGuid());
+            }
 
             var undertest = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.manager.Object);
             undertest.Solve(this.localFile.Object, null);
@@ -132,11 +135,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                     null,
                     null),
                 Times.Once());
-
             if (withAlreadySetUuid) {
-                this.localFile.VerifySet(f => f.Uuid = It.IsAny<Guid>(), Times.Once());
-            } else {
                 this.localFile.VerifySet(f => f.Uuid = It.IsAny<Guid?>(), Times.Never());
+            } else {
+                this.localFile.VerifySet(f => f.Uuid = It.IsAny<Guid>(), Times.Once());
             }
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeTokenOld, checksum: this.emptyHash, contentSize: 0, times: Times.Once());

@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             watch.Start();
             var objId = Session.CreateDocument(
                 properties,
-                new ObjectId(Storage.GetRemoteIdFromStorage(localFile.Directory)),
+                new ObjectId(Storage.GetRemoteId(localFile.Directory)),
                 null,
                 null,
                 null,
@@ -112,6 +112,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             IDocument remoteDocument = Session.GetObject(objId) as IDocument;
             watch.Stop();
             Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));
+
+            Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
         }
     }
 }

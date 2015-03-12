@@ -147,7 +147,7 @@ namespace CmisSync.Lib.Storage.Database
     }
 
     public static class IMetaDataStorageExtenders {
-        public static string GetRemoteIdFromStorage(this IMetaDataStorage storage, IDirectoryInfo dirInfo) {
+        public static string GetRemoteId(this IMetaDataStorage storage, IDirectoryInfo dirInfo) {
             try {
                 Guid? uuid = dirInfo.Uuid;
                 if (uuid != null) {

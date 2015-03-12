@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 throw new FileNotFoundException(string.Format("Local file/folder {0} has been renamed/moved/deleted", localFileSystemInfo.FullName));
             }
 
-            string parentId = Storage.GetRemoteIdFromStorage(this.GetParent(localFileSystemInfo));
+            string parentId = Storage.GetRemoteId(this.GetParent(localFileSystemInfo));
             if (parentId == null) {
                 if (this.IsParentReadOnly(localFileSystemInfo)) {
                     return;
@@ -195,29 +195,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             Logger.Debug(string.Format("Finished LocalObjectAdded after [{0} msec]", completewatch.ElapsedMilliseconds));
         }
 
-        private Guid WriteOrUseUuidIfSupported(IFileSystemInfo localFile) {
-            Guid uuid = Guid.Empty;
-            if (localFile.IsExtendedAttributeAvailable()) {
-                try {
-                    Guid? localUuid = localFile.Uuid;
-                    if (localUuid == null || this.Storage.GetObjectByGuid((Guid)localUuid) != null) {
-                        uuid = Guid.NewGuid();
-                        try {
-                            localFile.Uuid = uuid;
-                        } catch (RestoreModificationDateException restoreException) {
-                            Logger.Debug("Could not retore the last modification date of " + localFile.FullName, restoreException);
-                        }
-                    } else {
-                        uuid = localUuid ?? Guid.NewGuid();
-                    }
-                } catch (ExtendedAttributeException ex) {
-                    throw new RetryException(ex.Message, ex);
-                }
-            }
-
-            return uuid;
-        }
-
         private IDirectoryInfo GetParent(IFileSystemInfo fileInfo) {
             return fileInfo is IDirectoryInfo ? (fileInfo as IDirectoryInfo).Parent : (fileInfo as IFileInfo).Directory;
         }
@@ -282,7 +259,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         private bool IsParentReadOnly(IFileSystemInfo localFileSystemInfo) {
             var parent = this.GetParent(localFileSystemInfo);
             while (parent != null && parent.Exists) {
-                string parentId = Storage.GetRemoteIdFromStorage(parent);
+                string parentId = Storage.GetRemoteId(parent);
                 if (parentId != null) {
                     var remoteObject = this.Session.GetObject(parentId);
                     if (remoteObject.CanCreateFolder() == false && remoteObject.CanCreateDocument() == false) {
