@@ -70,7 +70,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <value>The last write time in UTC.</value>
         public DateTime LastWriteTimeUtc {
             get { return this.fileSystemInfo.LastWriteTimeUtc; }
-            set { this.fileSystemInfo.LastWriteTimeUtc = value; }
+            set { this.DisableAndEnableReadOnlyForOperation(() => this.fileSystemInfo.LastWriteTimeUtc = value); }
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <value>The UUID.</value>
         public Guid? Uuid {
             get { return this.fileSystemInfo.Uuid; }
-            set { this.fileSystemInfo.Uuid = value; }
+            set { this.DisableAndEnableReadOnlyForOperation(() => this.fileSystemInfo.Uuid = value); }
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <param name="value">Attribute value.</param>
         /// <param name="restoreModificationDate">If set to <c>true</c>, the last modification date of the file will be restored after setting the attribute. If <c>false</c> it could have been changed by the file system.</param>
         public void SetExtendedAttribute(string key, string value, bool restoreModificationDate) {
-            this.fileSystemInfo.SetExtendedAttribute(key, value, restoreModificationDate);
+            this.DisableAndEnableReadOnlyForOperation(() => this.fileSystemInfo.SetExtendedAttribute(key, value, restoreModificationDate));
         }
 
         /// <summary>
@@ -140,6 +140,26 @@ namespace CmisSync.Lib.Storage.FileSystem {
         /// <returns><c>true</c> if this instance is able to save extended attributes; otherwise, <c>false</c>.</returns>
         public bool IsExtendedAttributeAvailable() {
             return this.fileSystemInfo.IsExtendedAttributeAvailable();
+        }
+
+        /// <summary>
+        /// Disables read only before executing action end reenables read only after it.
+        /// </summary>
+        /// <param name="writeOperation">Write operation.</param>
+        protected void DisableAndEnableReadOnlyForOperation(Action writeOperation) {
+            this.Refresh();
+            bool readOnly = this.ReadOnly;
+            if (readOnly) {
+                this.ReadOnly = false;
+            }
+
+            try {
+                writeOperation();
+            } finally {
+                if (readOnly) {
+                    this.ReadOnly = true;
+                }
+            }
         }
     }
 }

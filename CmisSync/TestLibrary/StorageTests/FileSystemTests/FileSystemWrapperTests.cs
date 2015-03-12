@@ -678,13 +678,19 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Medium")]
-        public void SetUuidToReadOnlyFileShouldNotFail() {
+        public void SetUuidToReadOnlyFileShouldFail() {
             this.SkipIfExtendedAttributesAreNotAvailable();
             var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file.txt"));
             using (file.Open(FileMode.CreateNew, FileAccess.Write, FileShare.None)) { }
-            file.ReadOnly = true;
             var uuid = Guid.NewGuid();
             file.Uuid = uuid;
+            file.ReadOnly = true;
+            try {
+                file.Uuid = Guid.NewGuid();
+                Assert.Fail("Setting a Uuid to a read only file must fail, but didn't");
+            } catch (Exception) {
+            }
+
             Assert.That(file.Uuid, Is.EqualTo(uuid));
             Assert.That(file.ReadOnly, Is.True);
         }
@@ -703,13 +709,17 @@ namespace TestLibrary.StorageTests.FileSystemTests {
         }
 
         [Test, Category("Medium")]
-        public void SetModificationDateToReadOnlyFile() {
+        public void SetModificationDateToReadOnlyFileMustFail() {
             var past = DateTime.UtcNow - TimeSpan.FromHours(1);
             var file = Factory.CreateFileInfo(Path.Combine(this.testFolder.FullName, "file"));
             using (file.Open(FileMode.CreateNew)) { }
-            file.ReadOnly = true;
-
             file.LastWriteTimeUtc = past;
+            file.ReadOnly = true;
+            try {
+                file.LastWriteTimeUtc = DateTime.UtcNow;
+                Assert.Fail("Setting last write time utc must fail on a read only file, but didn't");
+            } catch (Exception) {
+            }
 
             Assert.That(file.LastWriteTimeUtc, Is.EqualTo(past).Within(1).Seconds);
             Assert.That(file.ReadOnly, Is.True);

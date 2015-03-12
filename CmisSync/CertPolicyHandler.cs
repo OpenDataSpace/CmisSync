@@ -19,8 +19,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync
-{
+namespace CmisSync {
     using System;
     using System.Collections.Generic;
     using System.Net;
@@ -31,8 +30,7 @@ namespace CmisSync
     /// This handler gets invoked when an untrusted certificate is encountered while connecting via https.
     /// It Presents the user with a dialog, asking if the cert should be trusted.
     /// </summary>
-    public class CertPolicyHandler : ICertificatePolicy
-    {
+    public class CertPolicyHandler : ICertificatePolicy {
         private object storeLock = new object();
 
         private enum CertificateProblem : long {
@@ -54,14 +52,13 @@ namespace CmisSync
             CertUNTRUSTEDCA               = 0x800B0112
         }
 
-        public CertPolicyHandler()
-        {
+        public CertPolicyHandler() {
             this.Window = new CertPolicyWindow(this);
         }
 
         private CertPolicyWindow Window { get; set; }
 
-        //===== Actions =====
+        // ===== Actions =====
         /// <summary>
         /// Show User Interaction Action
         /// </summary>
@@ -70,8 +67,7 @@ namespace CmisSync
         /// <summary>
         /// Show User Interaction Window
         /// </summary>
-        public void ShowWindow()
-        {
+        public void ShowWindow() {
             this.ShowWindowEvent();
         }
 
@@ -114,8 +110,11 @@ namespace CmisSync
          * Verification callback.
          * Return true to accept a certificate.
          */
-        public bool CheckValidationResult(ServicePoint sp, X509Certificate certificate,
-                WebRequest request, int error)
+        public bool CheckValidationResult(
+            ServicePoint sp,
+            X509Certificate certificate,
+            WebRequest request,
+            int error)
         {
             if (0 == error) {
                 return true;
@@ -169,8 +168,7 @@ namespace CmisSync
             return false;
         }
 
-        private string GetProblemMessage(CertificateProblem problem)
-        {
+        private string GetProblemMessage(CertificateProblem problem) {
             string problemMessage = string.Empty;
             CertificateProblem problemList = new CertificateProblem();
             string problemCodeName = Enum.GetName(problemList.GetType(), problem);
