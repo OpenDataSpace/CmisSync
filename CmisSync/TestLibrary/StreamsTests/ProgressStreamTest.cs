@@ -287,7 +287,13 @@ namespace TestLibrary.StreamsTests {
         [Test, Category("Fast"), Category("Streams")]
         public void EnsureBandwidthIsReportedIfProgressIsShorterThanOneSecond() {
             byte[] inputContent = new byte[1024];
+            bool isMoreThanZeroReported = false;
             FileTransmissionEvent transmission = new FileTransmissionEvent(this.transmissionType, this.filename);
+            transmission.TransmissionStatus += (object sender, TransmissionProgressEventArgs e) => {
+                if (e.BitsPerSecond > 0) {
+                    isMoreThanZeroReported = true;
+                }
+            };
             using (var inputStream = new MemoryStream(inputContent))
             using (var outputStream = new MemoryStream())
             using (var progressStream = new ProgressStream(inputStream, transmission)) {
@@ -295,7 +301,8 @@ namespace TestLibrary.StreamsTests {
                 Assert.That(outputStream.Length == inputContent.Length);
             }
 
-            Assert.Greater(transmission.Status.BitsPerSecond, 0);
+            Assert.That(isMoreThanZeroReported, Is.True);
+            Assert.That(transmission.Status.BitsPerSecond, Is.EqualTo(0));
         }
 
         [Test, Category("Fast"), Category("Streams")]
