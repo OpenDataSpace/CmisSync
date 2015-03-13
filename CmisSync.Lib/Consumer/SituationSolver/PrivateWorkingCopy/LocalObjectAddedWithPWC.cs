@@ -113,6 +113,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 string parentId = this.Storage.GetRemoteId(localFile.Directory);
 
                 IDocument remoteDocument;
+
+                //IFileTransmissionObject transmissionObject = this.TransmissionStorage.GetObjectByLocalPath(localFile.FullName);
+                //if (transmissionObject == null) {
+                //}
+
                 try {
                     var objId = this.Session.CreateDocument(
                         properties,
@@ -159,6 +164,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                 watch.Start();
                 try {
+                    remoteDocument.CheckOut();
                     mapped.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
                     mapped.ChecksumAlgorithmName = "SHA-1";
                     mapped.RemoteObjectId = remoteDocument.Id;
@@ -170,7 +176,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                     throw;
                 }
-
                 watch.Stop();
 
                 if (this.ServerCanModifyDateTimes) {

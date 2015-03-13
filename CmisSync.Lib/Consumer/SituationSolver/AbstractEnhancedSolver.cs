@@ -92,7 +92,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <value><c>true</c> if server can modify date times; otherwise, <c>false</c>.</value>
         protected bool ServerCanModifyDateTimes { get; private set; }
 
-        private IFileTransmissionStorage TransmissionStorage { get; set; }
+        protected IFileTransmissionStorage TransmissionStorage { get; set; }
 
         /// <summary>
         /// Solve the specified situation by using localFile and remote object.
@@ -214,92 +214,75 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// <param name="transmissionEvent">File Transmission event.</param>
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
         protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent, IMappedObject mappedObject = null) {
-            byte[] checksumPWC = null;
-            IDocument docPWC = this.LoadRemotePWCDocument(doc, ref checksumPWC);
+            IDocument docPWC = this.Session.GetObject(doc.VersionSeriesCheckedOutId) as IDocument;
+            //IFileTransmissionObject transmissionObject = this.TransmissionStorage.GetObjectByRemoteObjectId(doc.Id);
 
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
-                if (docPWC != null && checksumPWC != null) {
-                    // check PWC checksum for integration
-                    using (var hashAlg = new SHA1Managed()) {
-                        int bufsize = 8 * 1024;
-                        byte[] buffer = new byte[bufsize];
-                        for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
-                            int readsize = bufsize;
-                            if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
-                                readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
-                            }
+                //if (transmissionObject != null) {
+                //    // check PWC checksum for integration
+                //    using (var hashAlg = new SHA1Managed()) {
+                //        int bufsize = 8 * 1024;
+                //        byte[] buffer = new byte[bufsize];
+                //        for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
+                //            int readsize = bufsize;
+                //            if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
+                //                readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
+                //            }
 
-                            readsize = file.Read(buffer, 0, readsize);
-                            hashAlg.TransformBlock(buffer, 0, readsize, buffer, 0);
-                            offset += readsize;
-                            if (readsize == 0) {
-                                break;
-                            }
-                        }
+                //            readsize = file.Read(buffer, 0, readsize);
+                //            hashAlg.TransformBlock(buffer, 0, readsize, buffer, 0);
+                //            offset += readsize;
+                //            if (readsize == 0) {
+                //                break;
+                //            }
+                //        }
 
-                        hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                        if (!hashAlg.Hash.SequenceEqual(checksumPWC)) {
-                            docPWC.DeleteContentStream();
-                        }
+                //        hashAlg.TransformFinalBlock(new byte[0], 0, 0);
+                //        if (!hashAlg.Hash.SequenceEqual(transmissionObject.LastChecksumPWC)) {
+                //            docPWC.DeleteContentStream();
+                //        }
 
-                        file.Seek(0, SeekOrigin.Begin);
-                    }
-                }
-
-                if (mappedObject != null && doc.ChangeToken != mappedObject.LastChangeToken) {
-                    mappedObject.LastChangeToken = doc.ChangeToken;
-                    this.Storage.SaveMappedObject(mappedObject);
-                }
+                //        file.Seek(0, SeekOrigin.Begin);
+                //    }
+                //}
 
                 byte[] hash = null;
-                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
-                if (this.Session.ArePrivateWorkingCopySupported()) {
-                    uploader = FileTransmission.ContentTaskUtils.CreateUploader(this.TransmissionStorage.ChunkSize);
-                }
-
+                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader(this.TransmissionStorage.ChunkSize);
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
                 using (var hashAlg = new SHA1Reuse()) {
                     try {
-                        if (docPWC == null) {
-                            uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
-                            hash = hashAlg.Hash;
-                        } else {
-                            using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
-                                int bufsize = 8 * 1024;
-                                byte[] buffer = new byte[bufsize];
-                                for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
-                                    int readsize = bufsize;
-                                    if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
-                                        readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
-                                    }
+                        //using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
+                        //    int bufsize = 8 * 1024;
+                        //    byte[] buffer = new byte[bufsize];
+                        //    for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault(); ) {
+                        //        int readsize = bufsize;
+                        //        if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
+                        //            readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
+                        //        }
 
-                                    readsize = hashstream.Read(buffer, 0, readsize);
-                                    offset += readsize;
-                                    if (readsize == 0) {
-                                        break;
-                                    }
-                                }
-                            }
-
-                            IDocument remoteDocument = doc;
-                            uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false, (byte[] checksum) => this.SaveRemotePWCDocument(localFile, remoteDocument, docPWC, checksum, transmissionEvent));
-                            hash = hashAlg.Hash;
-                        }
-                    } catch (FileTransmission.AbortException ex) {
-                        hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                        this.SaveRemotePWCDocument(localFile, doc, docPWC, hashAlg.Hash, transmissionEvent);
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        throw;
+                        //        readsize = hashstream.Read(buffer, 0, readsize);
+                        //        offset += readsize;
+                        //        if (readsize == 0) {
+                        //            break;
+                        //        }
+                        //    }
+                        //uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false, (byte[] checksum) => this.SaveRemotePWCDocument(localFile, doc, docPWC, checksum, transmissionEvent));
+                        uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false);
+                        hash = hashAlg.Hash;
+                        //}
+                    //} catch (FileTransmission.AbortException ex) {
+                    //    hashAlg.TransformFinalBlock(new byte[0], 0, 0);
+                    //    this.SaveRemotePWCDocument(localFile, doc, docPWC, hashAlg.Hash, transmissionEvent);
+                    //    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                    //    throw;
                     } catch (Exception ex) {
                         transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
                         throw;
                     }
                 }
 
-                if (docPWC != null) {
-                    doc = this.Session.GetObject(docPWC.CheckIn(true, null, null, string.Empty)) as IDocument;
-                    doc.Refresh();
-                }
+                doc = this.Session.GetObject(docPWC.CheckIn(true, null, null, string.Empty)) as IDocument;
+                //doc.Refresh();
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 return hash;

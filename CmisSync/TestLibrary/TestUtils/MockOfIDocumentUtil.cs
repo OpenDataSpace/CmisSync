@@ -109,11 +109,11 @@ namespace TestLibrary.TestUtils {
             doc.Setup(d => d.CheckOut()).Returns(() => {
                 doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
                 doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(docPWC.Object.Id);
-                Mock<IObjectId> objectIdPWC = new Mock<IObjectId>();
-                objectIdPWC.Setup(o => o.Id).Returns(docPWC.Object.Id);
-                return objectIdPWC.Object;
+                return Mock.Of<IObjectId>(o => o.Id == docPWC.Object.Id);
             });
             docPWC.Setup(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Returns(() => {
+                doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(false);
+                doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(() => { return null; });
                 doc.Setup(d => d.ChangeToken).Returns(newChangeToken);
                 return Mock.Of<IObjectId>(o => o.Id == doc.Object.Id);
             });

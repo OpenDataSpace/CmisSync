@@ -47,10 +47,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     public class LocalObjectAddedWithPWCTest {
         private readonly string parentId = "parentId";
         private readonly string objectName = "objectName";
-        private readonly string objectId = "objectId";
+        private readonly string objectIdOld = "objectIdOld";
+        private readonly string objectIdPWC = "objectIdPWC";
+        private readonly string objectIdNew = "objectIdNew";
         private readonly string changeTokenOld = "changeTokenOld";
+        private readonly string changeTokenPWC = "changeTokenPWC";
         private readonly string changeTokenNew = "changeTokenNew";
-        private readonly string newObjectId = "newObjectId";
 
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
@@ -63,9 +65,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private byte[] fileContent;
         private byte[] fileHash;
         private long fileLength;
+        private long chunkSize;
 
         private Mock<IFileInfo> localFile;
         private Mock<IDocument> remoteDocument;
+        private Mock<IDocument> remoteDocumentPWC;
 
         [Test, Category("Fast"), Category("Solver")]
         public void Constructor() {
@@ -162,7 +166,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             undertest.Solve(this.localFile.Object, null);
 
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectId, this.objectName, this.parentId, this.changeTokenNew, checksum: hash, contentSize: fileSize, times: Times.Once());
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.objectName, this.parentId, this.changeTokenNew, checksum: hash, contentSize: fileSize, times: Times.Once());
             this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
             this.remoteDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Once());
         }
@@ -198,21 +202,9 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             var parents = new List<IFolder>();
             parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
 
-            var doc = Mock.Of<IDocument>(
-                d =>
-                d.Name == this.objectName &&
-                d.Id == this.objectId &&
-                d.Parents == parents &&
-                d.ChangeToken == this.changeTokenOld);
-            this.remoteDocument = Mock.Get(doc);
-            this.remoteDocument.Setup(
-                d =>
-                d.CheckIn(true, It.IsAny<IDictionary<string, object>>(), null, null)).Callback(
-                () => this.remoteDocument.Setup(newDoc => newDoc.Id).Returns(this.newObjectId)).Returns(doc);
-
             var docId = Mock.Of<IObjectId>(
                 o =>
-                o.Id == this.objectId);
+                o.Id == this.objectIdOld);
 
             this.session.Setup(s => s.CreateDocument(
                 It.IsAny<IDictionary<string, object>>(),
@@ -220,11 +212,50 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 null,
                 VersioningState.CheckedOut)).Returns(docId);
 
+            var doc = Mock.Of<IDocument>(
+                d =>
+                d.Name == this.objectName &&
+                d.Parents == parents &&
+                d.Id == this.objectIdOld &&
+                d.ChangeToken == this.changeTokenOld);
+            this.remoteDocument = Mock.Get(doc);
+
+            var docPWC = Mock.Of<IDocument>(
+                d =>
+                d.Name == this.objectName &&
+                d.Id == this.objectIdPWC &&
+                d.ChangeToken == this.changeTokenPWC
+                );
+            this.remoteDocumentPWC = Mock.Get(docPWC);
+
+            this.remoteDocument.Setup(d=>d.CheckOut()).Returns(()=>{
+                this.remoteDocument.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
+                this.remoteDocument.Setup(d => d.VersionSeriesCheckedOutId).Returns(this.objectIdPWC);
+                this.session.Setup(s => s.GetObject(this.objectIdPWC)).Returns(docPWC);
+                return Mock.Of<IObjectId>(o => o.Id == this.objectIdPWC);
+            });
+            this.remoteDocumentPWC.Setup(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Returns(() => {
+                this.remoteDocument.Setup(d => d.Id).Returns(this.objectIdNew);
+                this.remoteDocument.Setup(d => d.ChangeToken).Returns(this.changeTokenNew);
+                return Mock.Of<IObjectId>(o => o.Id == this.objectIdNew);
+            });
+
             //this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
+
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == this.objectIdOld), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
+                Assert.AreEqual(id.Id, doc.Id);
                 return doc;
             });
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id))).Returns<IObjectId>((id) => {
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == this.objectIdOld))).Returns<IObjectId>((id) => {
+                Assert.AreEqual(id.Id, doc.Id);
+                return doc;
+            });
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == this.objectIdNew), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
+                Assert.AreEqual(id.Id, doc.Id);
+                return doc;
+            });
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == this.objectIdNew))).Returns<IObjectId>((id) => {
+                Assert.AreEqual(id.Id, doc.Id);
                 return doc;
             });
         }
@@ -242,9 +273,15 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.session = new Mock<ISession>();
             this.session.SetupTypeSystem(serverCanModifyLastModificationDate: serverCanModifyLastModificationDate);
             this.session.SetupPrivateWorkingCopyCapability(isPwcUpdateable: isPwcUpdateable);
+
             this.storage = new Mock<IMetaDataStorage>();
+
+            this.chunkSize = 4096;
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
+            this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
+
             this.manager = new Mock<ActiveActivitiesManager>();
+
             this.folderOrEmptyFileAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
     }
