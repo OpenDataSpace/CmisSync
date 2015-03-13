@@ -65,8 +65,8 @@ namespace TestLibrary.TestUtils {
         public static void SetupLastModificationDate(this Mock<IFolder> folder, DateTime? modificationDate) {
             folder.Setup(f => f.LastModificationDate).Returns(modificationDate);
             folder.Setup(f => f.UpdateProperties(It.IsAny<IDictionary<string, object>>(), true)).Callback<IDictionary<string, object>, bool>((d, b) => {
-                if (d.ContainsKey("cmis:lastModificationDate")) {
-                    folder.SetupLastModificationDate((DateTime?)d["cmis:lastModificationDate"]);
+                if (d.ContainsKey(PropertyIds.LastModificationDate)) {
+                    folder.SetupLastModificationDate((DateTime?)d[PropertyIds.LastModificationDate]);
                 }
             });
         }

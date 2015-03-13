@@ -105,6 +105,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 Dictionary<string, object> properties = new Dictionary<string, object>();
                 properties.Add(PropertyIds.Name, localFile.Name);
+                properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument);
                 if (this.ServerCanModifyDateTimes) {
                     properties.Add(PropertyIds.CreationDate, localFile.CreationTimeUtc);
                     properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);

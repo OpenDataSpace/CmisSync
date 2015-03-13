@@ -208,7 +208,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 o.Id == this.objectIdOld);
 
             this.session.Setup(s => s.CreateDocument(
-                It.IsAny<IDictionary<string, object>>(),
+                It.Is<IDictionary<string, object>>(
+                d => d.Contains(new KeyValuePair<string, object>(PropertyIds.Name, this.objectName)) && d.Contains(new KeyValuePair<string, object>(PropertyIds.ObjectTypeId, "cmis:document"))),
                 It.Is<IObjectId>(p => p.Id == this.parentId),
                 null,
                 VersioningState.CheckedOut)).Returns(docId);

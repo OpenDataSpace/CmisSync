@@ -206,7 +206,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 watch.Stop();
                 Logger.Debug(string.Format("CreatedFolder in [{0} msec]", watch.ElapsedMilliseconds));
                 watch.Restart();
-                var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken");
+                var operationContext = OperationContextFactory.CreateContext(session, true, false, PropertyIds.Name, PropertyIds.LastModificationDate, PropertyIds.ChangeToken);
                 result = session.GetObject(objId, operationContext);
                 watch.Stop();
                 Logger.Debug(string.Format("GetFolder in [{0} msec]", watch.ElapsedMilliseconds));
@@ -226,7 +226,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     watch.Stop();
                     Logger.Debug(string.Format("CreatedDocument in [{0} msec]", watch.ElapsedMilliseconds));
                     watch.Restart();
-                    var operationContext = OperationContextFactory.CreateContext(session, true, false, "cmis:name", "cmis:lastModificationDate", "cmis:changeToken", "cmis:contentStreamLength");
+                    var operationContext = OperationContextFactory.CreateContext(session, true, false, PropertyIds.Name, PropertyIds.LastModificationDate, PropertyIds.ChangeToken, PropertyIds.ContentStreamLength);
                     result = session.GetObject(objId, operationContext);
                     watch.Stop();
                     Logger.Debug(string.Format("GetDocument in [{0} msec]", watch.ElapsedMilliseconds));

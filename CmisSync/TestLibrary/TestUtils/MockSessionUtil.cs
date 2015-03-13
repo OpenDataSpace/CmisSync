@@ -28,6 +28,7 @@ namespace TestLibrary.TestUtils {
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using DotCMIS;
     using DotCMIS.Binding;
     using DotCMIS.Binding.Services;
     using DotCMIS.Client;
@@ -88,9 +89,9 @@ namespace TestLibrary.TestUtils {
             string repoId = "repoId";
             IList<IPropertyDefinition> props = new List<IPropertyDefinition>();
             if (serverCanModifyLastModificationDate) {
-                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "cmis:lastModificationDate" && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
+                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
             } else {
-                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "cmis:lastModificationDate" && p.Updatability == DotCMIS.Enums.Updatability.ReadOnly));
+                props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadOnly));
             }
 
             var docType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
@@ -102,8 +103,8 @@ namespace TestLibrary.TestUtils {
                 repositoryService = Mock.Get(session.Object.Binding.GetRepositoryService());
             }
 
-            repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:document", null)).Returns(docType);
-            repositoryService.Setup(s => s.GetTypeDefinition(repoId, "cmis:folder", null)).Returns(folderType);
+            repositoryService.Setup(s => s.GetTypeDefinition(repoId, BaseTypeId.CmisDocument, null)).Returns(docType);
+            repositoryService.Setup(s => s.GetTypeDefinition(repoId, BaseTypeId.CmisFolder, null)).Returns(folderType);
             if (supportsSelectiveIgnore) {
                 IList<IPropertyDefinition> syncProps = new List<IPropertyDefinition>();
                 syncProps.Add(Mock.Of<IPropertyDefinition>(p => p.Id == "gds:ignoreDeviceIds"));
@@ -309,12 +310,12 @@ namespace TestLibrary.TestUtils {
                 s => s.CreateOperationContext(
                 It.Is<HashSet<string>>(
                 set =>
-                set.Contains("cmis:name") &&
-                set.Contains("cmis:parentId") &&
-                set.Contains("cmis:objectId") &&
-                set.Contains("cmis:changeToken") &&
-                set.Contains("cmis:contentStreamFileName") &&
-                set.Contains("cmis:lastModificationDate")),
+                set.Contains(PropertyIds.Name) &&
+                set.Contains(PropertyIds.ParentId) &&
+                set.Contains(PropertyIds.ObjectId) &&
+                set.Contains(PropertyIds.ChangeToken) &&
+                set.Contains(PropertyIds.ContentStreamFileName) &&
+                set.Contains(PropertyIds.LastModificationDate)),
                 It.Is<bool>(acls => acls == false),
                 It.Is<bool>(includeAllowableActions => includeAllowableActions == true),
                 It.Is<bool>(includePolicies => includePolicies == false),
@@ -332,7 +333,7 @@ namespace TestLibrary.TestUtils {
                 s => s.CreateOperationContext(
                 It.Is<HashSet<string>>(
                 set =>
-                !set.Contains("cmis:path")),
+                !set.Contains(PropertyIds.Path)),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
@@ -350,7 +351,7 @@ namespace TestLibrary.TestUtils {
                 s => s.CreateOperationContext(
                 It.Is<HashSet<string>>(
                 set =>
-                set.Contains("cmis:path")),
+                set.Contains(PropertyIds.Path)),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),

@@ -44,7 +44,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         public static IFolder CreateFolder(this IFolder folder, string name) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisFolder);
 
             return folder.CreateFolder(properties);
         }
@@ -59,7 +59,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         public static IDocument CreateDocument(this IFolder folder, string name, string content, bool checkedOut = false) {
             Dictionary<string, object> properties = new Dictionary<string, object>();
             properties.Add(PropertyIds.Name, name);
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument);
 
             if (string.IsNullOrEmpty(content)) {
                 return folder.CreateDocument(properties, null, checkedOut ? (VersioningState?)VersioningState.CheckedOut : (VersioningState?)null);
@@ -88,7 +88,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             //  for opencmis cmis server, "VersionableType" should be used to support checkout
             //properties.Add(PropertyIds.ObjectTypeId, "VersionableType");
             //  for OpenDataSpace cmis gateway, "cmis:document" is ok to support checkout
-            properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+            properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument);
             if (string.IsNullOrEmpty(content)) {
                 return folder.CreateDocument(properties, null, VersioningState.CheckedOut);
             }
@@ -366,18 +366,18 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
         /// <param name="session">Cmis session.</param>
         public static bool IsServerAbleToUpdateModificationDate(this ISession session) {
             bool result = false;
-            var docType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, "cmis:document", null);
+            var docType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, BaseTypeId.CmisDocument, null);
             foreach (var prop in docType.PropertyDefinitions) {
-                if (prop.Id == "cmis:lastModificationDate" && prop.Updatability == DotCMIS.Enums.Updatability.ReadWrite) {
+                if (prop.Id == PropertyIds.LastModificationDate && prop.Updatability == DotCMIS.Enums.Updatability.ReadWrite) {
                     result = true;
                     break;
                 }
             }
 
             if (result) {
-                var folderType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, "cmis:folder", null);
+                var folderType = session.Binding.GetRepositoryService().GetTypeDefinition(session.RepositoryInfo.Id, BaseTypeId.CmisFolder, null);
                 foreach (var prop in folderType.PropertyDefinitions) {
-                    if (prop.Id == "cmis:lastModificationDate" && prop.Updatability != DotCMIS.Enums.Updatability.ReadWrite) {
+                    if (prop.Id == PropertyIds.LastModificationDate && prop.Updatability != DotCMIS.Enums.Updatability.ReadWrite) {
                         result = false;
                         break;
                     }
