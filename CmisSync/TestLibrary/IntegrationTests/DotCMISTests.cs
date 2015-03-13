@@ -124,23 +124,23 @@ namespace TestLibrary.IntegrationTests {
             }
 
             string content = "test";
-            string createdRemoteContent = string.Empty;
+            string expectedContent = string.Empty;
             doc = folder.CreateDocument(filename, content);
-            createdRemoteContent = content;
+            expectedContent = content;
             Assert.That(doc.ContentStreamLength == content.Length, "returned document should have got content");
             for (int i = 0; i < 10; i++) {
                 doc = doc.AppendContent(content, i == 9) ?? doc;
-                createdRemoteContent += content;
-                Assert.AreEqual(createdRemoteContent.Length, doc.ContentStreamLength);
+                expectedContent += content;
+                Assert.AreEqual(expectedContent.Length, doc.ContentStreamLength);
             }
 
-            doc.AssertThatIfContentHashExistsItIsEqualTo(createdRemoteContent);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(expectedContent);
 
             for (int i = 0; i < 10; i++) {
                 doc = doc.AppendContent(content) ?? doc;
-                createdRemoteContent += content;
-                Assert.AreEqual(createdRemoteContent.Length, doc.ContentStreamLength);
-                doc.AssertThatIfContentHashExistsItIsEqualTo(createdRemoteContent);
+                expectedContent += content;
+                Assert.AreEqual(expectedContent.Length, doc.ContentStreamLength);
+                doc.AssertThatIfContentHashExistsItIsEqualTo(expectedContent);
             }
 
             doc.DeleteAllVersions();
