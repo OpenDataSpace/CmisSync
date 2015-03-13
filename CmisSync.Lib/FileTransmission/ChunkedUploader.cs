@@ -17,15 +17,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.FileTransmission
-{
+namespace CmisSync.Lib.FileTransmission {
     using System;
     using System.IO;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Streams;
     using CmisSync.Lib.HashAlgorithm;
+    using CmisSync.Lib.Streams;
 
     using DotCMIS.Client;
     using DotCMIS.Data.Impl;
@@ -34,8 +33,7 @@ namespace CmisSync.Lib.FileTransmission
     /// Chunked uploader takes a file and splits the upload into chunks.
     /// Resuming a failed upload is possible.
     /// </summary>
-    public class ChunkedUploader : SimpleFileUploader
-    {
+    public class ChunkedUploader : SimpleFileUploader {
         /// <summary>
         /// Initializes a new instance of the <see cref="ChunkedUploader"/> class.
         /// </summary>
@@ -121,9 +119,11 @@ namespace CmisSync.Lib.FileTransmission
                         if (e is FileTransmission.AbortException) {
                             throw;
                         }
+
                         if (e.InnerException is FileTransmission.AbortException) {
                             throw e.InnerException;
                         }
+
                         throw new UploadFailedException(e, result);
                     }
                 }
