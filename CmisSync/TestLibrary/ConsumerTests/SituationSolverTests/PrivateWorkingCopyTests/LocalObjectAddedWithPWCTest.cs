@@ -209,7 +209,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             this.session.Setup(s => s.CreateDocument(
                 It.Is<IDictionary<string, object>>(
-                d => d.Contains(new KeyValuePair<string, object>(PropertyIds.Name, this.objectName)) && d.Contains(new KeyValuePair<string, object>(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.ToString()))),
+                d => d.Contains(new KeyValuePair<string, object>(PropertyIds.Name, this.objectName)) && d.Contains(new KeyValuePair<string, object>(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue()))),
                 It.Is<IObjectId>(p => p.Id == this.parentId),
                 null,
                 VersioningState.CheckedOut)).Returns(docId);
