@@ -60,6 +60,14 @@ namespace CmisSync.Lib.Storage.Database
         IFileTransmissionObject GetObjectByRemoteObjectId(string remoteObjectId);
 
         /// <summary>
+        /// Get the saved <c>IFileTransmissionObject</c> that has the <c>IFileTransmissionObject.LocalPath</c> with <paramref name="localPath"/>
+        /// </summary>
+        /// <param name="localPath">
+        /// <c>IFileTransmissionObject.LocalPath</c> value
+        /// </param>
+        IFileTransmissionObject GetObjectByLocalPath(string localPath);
+
+        /// <summary>
         /// Remove any saved <c>IFileTransmissionObject</c> that has the <c>IFileTransmissionObject.RemoteObjectId</c> with <paramref name="remoteObjectId"/>
         /// </summary>
         /// <param name="remoteObjectId">

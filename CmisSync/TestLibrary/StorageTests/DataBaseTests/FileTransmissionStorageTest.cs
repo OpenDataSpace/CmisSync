@@ -240,6 +240,16 @@ namespace TestLibrary.StorageTests.DataBaseTests {
             }
         }
 
+        [Test, Category("Fast"), Category("FileTransmissionStorage")]
+        public void GetObjectByLocalPath() {
+            var storage = new FileTransmissionStorage(this.engine);
+            this.remoteFile.Setup(m => m.Id).Returns("RemoteObjectId");
+            var obj = new FileTransmissionObject(CmisSync.Lib.Events.FileTransmissionType.UPLOAD_NEW_FILE, this.localFile.Object, this.remoteFile.Object);
+            Assert.DoesNotThrow(() => storage.SaveObject(obj));
+            Assert.That(storage.GetObjectByLocalPath(this.localFile.Object.FullName).RemoteObjectId, Is.EqualTo("RemoteObjectId"));
+            Assert.That(storage.GetObjectByLocalPath(this.localFile.Object.FullName + ".temp"), Is.Null);
+        }
+
         #region boilerplatecode
         public void Dispose() {
             if (this.engine != null) {

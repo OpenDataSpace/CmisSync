@@ -108,6 +108,26 @@ namespace CmisSync.Lib.Storage.Database {
             }
         }
 
+        public IFileTransmissionObject GetObjectByLocalPath(string localPath) {
+            using (var tran = this.Engine.GetTransaction()) {
+                foreach (var row in tran.SelectForward<string, DbCustomSerializer<FileTransmissionObject>>(FileTransmissionObjectsTable)) {
+                    var value = row.Value;
+                    if (value == null) {
+                        continue;
+                    }
+
+                    var data = value.Get;
+                    if (data == null) {
+                        continue;
+                    }
+                    if (data.LocalPath == localPath) {
+                        return data;
+                    }
+                }
+            }
+            return null;
+        }
+
         public void RemoveObjectByRemoteObjectId(string remoteObjectId) {
             if (remoteObjectId == null) {
                 throw new ArgumentNullException("remoteObjectId");
