@@ -128,35 +128,18 @@ namespace TestLibrary.IntegrationTests {
             doc = folder.CreateDocument(filename, content);
             Assert.That(doc.ContentStreamLength == content.Length, "returned document should have got content");
             for (int i = 0; i < 10; i++) {
-                ContentStream contentStream = new ContentStream();
-                contentStream.FileName = filename;
-                contentStream.MimeType = MimeType.GetMIMEType(filename);
-                contentStream.Length = content.Length;
-                using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
-                    contentStream.Stream = memstream;
-                    doc = doc.AppendContentStream(contentStream, i == 9) ?? doc;
-                }
-
+                doc = doc.AppendContent(content, i == 9) ?? doc;
                 Assert.AreEqual(content.Length * (i + 2), doc.ContentStreamLength);
             }
 
             for (int i = 0; i < 10; i++) {
-                ContentStream contentStream = new ContentStream();
-                contentStream.FileName = filename;
-                contentStream.MimeType = MimeType.GetMIMEType(filename);
-                contentStream.Length = content.Length;
-                using (var memstream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
-                    contentStream.Stream = memstream;
-                    doc.AppendContentStream(contentStream, true, true);
-                }
-
+                doc = doc.AppendContent(content) ?? doc;
                 Assert.AreEqual(content.Length * (i + 2 + 10), doc.ContentStreamLength);
             }
 
             doc.DeleteAllVersions();
         }
 
-        //[Ignore("Not yet implemented by CMIS GW")]
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CheckoutTest(
             string canonical_name,
@@ -174,6 +157,10 @@ namespace TestLibrary.IntegrationTests {
             string filePath = subFolderPath + "/" + fileName;
 
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            if (!session.ArePrivateWorkingCopySupported()) {
+                Assert.Ignore("PWCs are not supported");
+            }
+
             try {
                 IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
                 if (dir != null) {
@@ -199,7 +186,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.IsNull(doc.VersionSeriesCheckedOutId);
         }
 
-        //[Ignore("Not yet implemented by CMIS GW")]
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void CheckinTest(
             string canonical_name,
@@ -217,6 +203,10 @@ namespace TestLibrary.IntegrationTests {
             string filePath = subFolderPath + "/" + fileName;
 
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
+            if (!session.ArePrivateWorkingCopySupported()) {
+                Assert.Ignore("PWCs are not supported");
+            }
+
             try {
                 IFolder dir = session.GetObjectByPath(remoteFolderPath.TrimEnd('/') + "/" + subFolderName) as IFolder;
                 if (dir != null) {
@@ -435,18 +425,6 @@ namespace TestLibrary.IntegrationTests {
             Assert.IsTrue(propertyFound);
             emptyDoc.DeleteAllVersions();
         }
-
-        /*
-        [Ignore]
-        [Test, Category("Fast")]
-        public void RegexTestForRemoteHashProperty() {
-            Regex entryRegex = new Regex(@"^\{.+\}[0-9a-fA-F]+$");
-            Assert.That(entryRegex.IsMatch("{sha-1}2fd4e1c67a2d28fced849ee1bb76e7391b93eb1233f80f8a"), Is.True);
-            Assert.That(entryRegex.IsMatch("{sha-256}e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"), Is.True);
-            Assert.That(entryRegex.IsMatch("{}1234567"), Is.False);
-            Assert.That(entryRegex.IsMatch("sha-1}1234567"), Is.False);
-            Assert.That(entryRegex.IsMatch("{sadf24er35}"), Is.False);
-        } */
 
         [Test, TestCaseSource(typeof(ITUtils), "TestServers"), Category("Slow")]
         public void GetContentStreamHash(
