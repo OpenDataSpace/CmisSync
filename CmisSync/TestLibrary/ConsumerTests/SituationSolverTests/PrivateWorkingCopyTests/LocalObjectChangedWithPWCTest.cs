@@ -4,8 +4,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
+    using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
 
@@ -58,6 +60,31 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.transmissionStorage.Object,
                 this.manager.Object,
                 Mock.Of<ISolver>()));
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolveCallIsPassedToGivenSolverIfNoMatchingSituationIsFound() {
+            this.SetUpMocks();
+            var underTest = this.CreateSolver();
+            this.folderOrFileContentUnchangedAddedSolver.Setup(
+                s =>
+                s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()));
+            var folder = Mock.Of<IDirectoryInfo>();
+            var remoteId = Mock.Of<IFolder>();
+
+            underTest.Solve(folder, remoteId, localContent: ContentChangeType.NONE, remoteContent: ContentChangeType.NONE);
+
+            this.folderOrFileContentUnchangedAddedSolver.Verify(
+                s => s.Solve(folder, remoteId, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+        }
+
+        private LocalObjectChangedWithPWC CreateSolver() {
+            return new LocalObjectChangedWithPWC(
+                this.session.Object,
+                this.storage.Object,
+                this.transmissionStorage.Object,
+                this.manager.Object,
+                this.folderOrFileContentUnchangedAddedSolver.Object);
         }
 
         private void SetUpMocks(bool isPwcUpdateable = true, bool serverCanModifyLastModificationDate = true) {
