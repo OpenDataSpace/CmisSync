@@ -174,6 +174,7 @@ SOURCES =  \
 	StreamsTests/ProgressStreamTest.cs \
 	TestUtils/FolderTree.cs \
 	TestUtils/FolderTreeTest.cs \
+	TestUtils/IDocumentAssertUtils.cs \
 	TestUtils/IsTestWithConfiguredLog4Net.cs \
 	TestUtils/MockMetaDataStorageUtil.cs \
 	TestUtils/MockOfICmisObject.cs \

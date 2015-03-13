@@ -52,26 +52,26 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             Assert.That(this.remoteRootDir.GetChildren().First().Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.Name, Is.EqualTo(this.fileName));
             Assert.That(newDocument.ContentStreamLength, Is.EqualTo(this.content.Length));
-            this.AssertThatHashesAreEqualIfExists(content, newDocument);
+            newDocument.AssertThatIfContentHashExistsItIsEqualTo(content);
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
         public void CheckOutDocumentWithContentAndAppendContent() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, this.content);
-            this.AssertThatHashesAreEqualIfExists(content, doc);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content);
 
             var newId = doc.CheckOut();
             doc = newId == null ? doc : this.session.GetObject(newId) as IDocument;
             doc = doc.AppendContent(content) ?? doc;
-            this.AssertThatHashesAreEqualIfExists(this.content + this.content, doc);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content + this.content);
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
         public void CheckOutDocumentWithContentAndAppendContentAndCheckIn() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, this.content);
-            this.AssertThatHashesAreEqualIfExists(content, doc);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content);
 
             var newId = doc.CheckOut();
             doc = newId == null ? doc : this.session.GetObject(newId) as IDocument;
@@ -81,14 +81,14 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             doc = this.session.GetObject(newObjectId) as IDocument;
             doc.Refresh();
 
-            this.AssertThatHashesAreEqualIfExists(this.content + this.content, doc);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content + this.content);
         }
 
         [Test, Category("Slow"), MaxTime(180000)]
         public void CheckOutDocumentWithContentAndAppendContentAndCancelCheckout() {
             this.EnsureThatPrivateWorkingCopySupportIsAvailable();
             var doc = this.remoteRootDir.CreateDocument(this.fileName, this.content);
-            this.AssertThatHashesAreEqualIfExists(content, doc);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content);
 
             var newId = doc.CheckOut();
             doc = newId == null ? doc : this.session.GetObject(newId) as IDocument;
@@ -96,7 +96,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             doc.CancelCheckOut();
 
             doc = this.remoteRootDir.GetChildren().First() as IDocument;
-            this.AssertThatHashesAreEqualIfExists(content, doc);
+            doc.AssertThatIfContentHashExistsItIsEqualTo(this.content);
         }
     }
 }

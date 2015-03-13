@@ -108,7 +108,6 @@ namespace TestLibrary.IntegrationTests {
             string binding)
         {
             ISession session = DotCMISSessionTests.CreateSession(user, password, url, repositoryId, binding);
-
             IFolder folder = (IFolder)session.GetObjectByPath(remoteFolderPath);
 
             string filename = "testfile.txt";
@@ -125,16 +124,20 @@ namespace TestLibrary.IntegrationTests {
             }
 
             string content = "test";
+            string createdRemoteContent = string.Empty;
             doc = folder.CreateDocument(filename, content);
+            createdRemoteContent = content;
             Assert.That(doc.ContentStreamLength == content.Length, "returned document should have got content");
             for (int i = 0; i < 10; i++) {
                 doc = doc.AppendContent(content, i == 9) ?? doc;
-                Assert.AreEqual(content.Length * (i + 2), doc.ContentStreamLength);
+                createdRemoteContent += content;
+                Assert.AreEqual(createdRemoteContent.Length, doc.ContentStreamLength);
             }
 
             for (int i = 0; i < 10; i++) {
                 doc = doc.AppendContent(content) ?? doc;
-                Assert.AreEqual(content.Length * (i + 2 + 10), doc.ContentStreamLength);
+                createdRemoteContent += content;
+                Assert.AreEqual(createdRemoteContent.Length, doc.ContentStreamLength);
             }
 
             doc.DeleteAllVersions();

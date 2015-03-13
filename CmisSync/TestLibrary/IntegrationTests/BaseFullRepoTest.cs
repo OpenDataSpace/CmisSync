@@ -228,17 +228,6 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
-        protected void AssertThatHashesAreEqualIfExists(string givenContent, IDocument remoteDoc) {
-            this.AssertThatHashesAreEqualIfExists(Encoding.UTF8.GetBytes(givenContent), remoteDoc);
-        }
-
-        protected void AssertThatHashesAreEqualIfExists(byte[] givenContent, IDocument remoteDoc) {
-            byte[] remoteHash = remoteDoc.ContentStreamHash();
-            if (remoteHash != null) {
-                Assert.That(remoteHash, Is.EqualTo(SHA1.Create().ComputeHash(givenContent)));
-            }
-        }
-
         protected void InitializeAndRunRepo(bool swallowExceptions = false) {
             this.repo.Initialize();
             this.repo.SingleStepQueue.SwallowExceptions = swallowExceptions;
