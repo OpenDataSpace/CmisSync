@@ -134,10 +134,13 @@ namespace TestLibrary.IntegrationTests {
                 Assert.AreEqual(createdRemoteContent.Length, doc.ContentStreamLength);
             }
 
+            doc.AssertThatIfContentHashExistsItIsEqualTo(createdRemoteContent);
+
             for (int i = 0; i < 10; i++) {
                 doc = doc.AppendContent(content) ?? doc;
                 createdRemoteContent += content;
                 Assert.AreEqual(createdRemoteContent.Length, doc.ContentStreamLength);
+                doc.AssertThatIfContentHashExistsItIsEqualTo(createdRemoteContent);
             }
 
             doc.DeleteAllVersions();
