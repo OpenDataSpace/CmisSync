@@ -81,11 +81,5 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
         }
-
-        private void EnsureThatPrivateWorkingCopySupportIsAvailable() {
-            if (!this.session.ArePrivateWorkingCopySupported()) {
-                Assert.Ignore("This session does not support updates on private working copies");
-            }
-        }
     }
 }

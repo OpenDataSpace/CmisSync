@@ -22,6 +22,7 @@ namespace TestLibrary.IntegrationTests {
     using System.Collections.Generic;
     using System.IO;
     using System.Net;
+    using System.Security.Cryptography;
     using System.Text;
     using System.Threading;
 
@@ -213,11 +214,28 @@ namespace TestLibrary.IntegrationTests {
             }
         }
 
+        protected void EnsureThatPrivateWorkingCopySupportIsAvailable() {
+            if (!this.session.ArePrivateWorkingCopySupported()) {
+                Assert.Ignore("This session does not support updates on private working copies");
+            }
+        }
+
         protected void AssertThatDatesAreEqual(DateTime? expected, DateTime? actual, string msg = null) {
             if (msg != null) {
                 Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds, msg);
             } else {
                 Assert.That((DateTime)actual, Is.EqualTo((DateTime)expected).Within(1).Seconds);
+            }
+        }
+
+        protected void AssertThatHashesAreEqualIfExists(string givenContent, IDocument remoteDoc) {
+            this.AssertThatHashesAreEqualIfExists(Encoding.UTF8.GetBytes(givenContent), remoteDoc);
+        }
+
+        protected void AssertThatHashesAreEqualIfExists(byte[] givenContent, IDocument remoteDoc) {
+            byte[] remoteHash = remoteDoc.ContentStreamHash();
+            if (remoteHash != null) {
+                Assert.That(remoteHash, Is.EqualTo(SHA1.Create().ComputeHash(givenContent)));
             }
         }
 

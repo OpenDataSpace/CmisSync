@@ -150,6 +150,18 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             }
         }
 
+        public static IDocument AppendContent(this IDocument doc, string content, bool lastChunk = true) {
+            ContentStream contentStream = new ContentStream();
+            contentStream.FileName = doc.Name;
+            contentStream.MimeType = MimeType.GetMIMEType(doc.Name);
+            byte[] c = Encoding.UTF8.GetBytes(content);
+            contentStream.Length = c.LongLength;
+            using (var stream = new MemoryStream(c)) {
+                contentStream.Stream = stream;
+                return doc.AppendContentStream(contentStream, lastChunk);
+            }
+        }
+
         /// <summary>
         /// Updates the last write time in UTC via UpdateProperties
         /// </summary>

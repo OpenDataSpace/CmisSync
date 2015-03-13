@@ -258,6 +258,7 @@
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectAddedWithPWCTest.cs" />
     <Compile Include="IntegrationTests\PrivateWorkingCopyTests\CreateDocumentTests.cs" />
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectChangedWithPWCTest.cs" />
+    <Compile Include="IntegrationTests\PrivateWorkingCopyTests\AppendContentStreamTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">
