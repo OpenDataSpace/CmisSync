@@ -26,12 +26,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
+    using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Streams;
-    using CmisSync.Lib.HashAlgorithm;
 
     using DotCMIS.Client;
 
@@ -41,12 +41,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     /// Abstract enhanced solver.
     /// </summary>
     public abstract class AbstractEnhancedSolver : ISolver {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractEnhancedSolver));
-
         /// <summary>
         /// The file operations logger.
         /// </summary>
         protected static readonly ILog OperationsLogger = LogManager.GetLogger("OperationsLogger");
+
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(AbstractEnhancedSolver));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.AbstractEnhancedSolver"/> class.
@@ -106,188 +106,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             IObjectId remoteId,
             ContentChangeType localContent,
             ContentChangeType remoteContent);
-
-        private IDocument CreateRemotePWCDocument(IDocument remoteDocument) {
-            try {
-                if (this.TransmissionStorage != null) {
-                    this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
-                }
-
-                if (!string.IsNullOrEmpty(remoteDocument.VersionSeriesCheckedOutId)) {
-                    remoteDocument.CancelCheckOut();
-                    remoteDocument.Refresh();
-                }
-
-                remoteDocument.CheckOut();
-                remoteDocument.Refresh();
-                IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
-                remotePWCDocument.DeleteContentStream();
-                return remotePWCDocument;
-            } catch (Exception ex) {
-                return null;
-            }
-        }
-
-        private IDocument LoadRemotePWCDocument(IDocument remoteDocument, ref byte[] checksum) {
-            if (this.TransmissionStorage == null) {
-                return this.CreateRemotePWCDocument(remoteDocument);
-            }
-
-            IFileTransmissionObject obj = this.TransmissionStorage.GetObjectByRemoteObjectId(remoteDocument.Id);
-            if (obj == null) {
-                return this.CreateRemotePWCDocument(remoteDocument);
-            }
-
-            if (obj.RemoteObjectPWCId != remoteDocument.VersionSeriesCheckedOutId) {
-                return this.CreateRemotePWCDocument(remoteDocument);
-            }
-
-            IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
-            if (remotePWCDocument == null) {
-                return this.CreateRemotePWCDocument(remoteDocument);
-            }
-
-            if (remotePWCDocument.ChangeToken != obj.LastChangeTokenPWC) {
-                return this.CreateRemotePWCDocument(remoteDocument);
-            }
-
-            this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
-
-            checksum = obj.LastChecksumPWC;
-            return remotePWCDocument;
-        }
-
-        private void SaveRemotePWCDocument(IFileInfo localFile, IDocument remoteDocument, IDocument remotePWCDocument, byte[] checksum, FileTransmissionEvent transmissionEvent) {
-            if (this.TransmissionStorage == null) {
-                return;
-            }
-
-            if (remotePWCDocument == null) {
-                return;
-            }
-
-            FileTransmissionObject obj = new FileTransmissionObject(transmissionEvent.Type, localFile, remoteDocument);
-            obj.ChecksumAlgorithmName = "SHA-1";
-            obj.RemoteObjectPWCId = remotePWCDocument.Id;
-            remotePWCDocument.Refresh();
-            obj.LastChangeTokenPWC = remotePWCDocument.ChangeToken;
-            obj.LastChecksumPWC = checksum;
-
-            this.TransmissionStorage.SaveObject(obj);
-        }
-
-        
-        /// <summary>
-        /// Uploads the file content to the remote document.
-        /// </summary>
-        /// <returns>The SHA-1 hash of the uploaded file content.</returns>
-        /// <param name="localFile">Local file.</param>
-        /// <param name="doc">Remote document.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="transmissionEvent">File Transmission event.</param>
-        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, FileTransmissionEvent transmissionEvent) {
-            using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
-                byte[] hash = null;
-                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
-                using (var hashAlg = new SHA1Managed()) {
-                    try {
-                            uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
-                            hash = hashAlg.Hash;
-                    } catch (Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        throw;
-                    }
-                }
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
-                return hash;
-            }
-        }
-        
-        /// <summary>
-        /// Uploads the file content to the remote document.
-        /// </summary>
-        /// <returns>The SHA-1 hash of the uploaded file content.</returns>
-        /// <param name="localFile">Local file.</param>
-        /// <param name="doc">Remote document.</param>
-        /// <param name="transmissionManager">Transmission manager.</param>
-        /// <param name="transmissionEvent">File Transmission event.</param>
-        /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
-        protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent, IMappedObject mappedObject = null) {
-            IDocument docPWC = this.Session.GetObject(doc.VersionSeriesCheckedOutId) as IDocument;
-            //IFileTransmissionObject transmissionObject = this.TransmissionStorage.GetObjectByRemoteObjectId(doc.Id);
-
-            using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
-                //if (transmissionObject != null) {
-                //    // check PWC checksum for integration
-                //    using (var hashAlg = new SHA1Managed()) {
-                //        int bufsize = 8 * 1024;
-                //        byte[] buffer = new byte[bufsize];
-                //        for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
-                //            int readsize = bufsize;
-                //            if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
-                //                readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
-                //            }
-
-                //            readsize = file.Read(buffer, 0, readsize);
-                //            hashAlg.TransformBlock(buffer, 0, readsize, buffer, 0);
-                //            offset += readsize;
-                //            if (readsize == 0) {
-                //                break;
-                //            }
-                //        }
-
-                //        hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                //        if (!hashAlg.Hash.SequenceEqual(transmissionObject.LastChecksumPWC)) {
-                //            docPWC.DeleteContentStream();
-                //        }
-
-                //        file.Seek(0, SeekOrigin.Begin);
-                //    }
-                //}
-
-                byte[] hash = null;
-                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader(this.TransmissionStorage.ChunkSize);
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
-                using (var hashAlg = new SHA1Reuse()) {
-                    try {
-                        //using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
-                        //    int bufsize = 8 * 1024;
-                        //    byte[] buffer = new byte[bufsize];
-                        //    for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault(); ) {
-                        //        int readsize = bufsize;
-                        //        if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
-                        //            readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
-                        //        }
-
-                        //        readsize = hashstream.Read(buffer, 0, readsize);
-                        //        offset += readsize;
-                        //        if (readsize == 0) {
-                        //            break;
-                        //        }
-                        //    }
-                        //uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false, (byte[] checksum) => this.SaveRemotePWCDocument(localFile, doc, docPWC, checksum, transmissionEvent));
-                        uploader.UploadFile(docPWC, file, transmissionEvent, hashAlg, false);
-                        hash = hashAlg.Hash;
-                        //}
-                    //} catch (FileTransmission.AbortException ex) {
-                    //    hashAlg.TransformFinalBlock(new byte[0], 0, 0);
-                    //    this.SaveRemotePWCDocument(localFile, doc, docPWC, hashAlg.Hash, transmissionEvent);
-                    //    transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                    //    throw;
-                    } catch (Exception ex) {
-                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
-                        throw;
-                    }
-                }
-
-                doc = this.Session.GetObject(docPWC.CheckIn(true, null, null, string.Empty)) as IDocument;
-                //doc.Refresh();
-
-                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
-                return hash;
-            }
-        }
 
         private void SaveCacheFile(IFileInfo target, IDocument remoteDocument, byte[] hash, FileTransmissionEvent transmissionEvent) {
             if (this.TransmissionStorage == null) {
@@ -430,6 +248,34 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
             return hash;
+        }
+
+        /// <summary>
+        /// Uploads the file content to the remote document.
+        /// </summary>
+        /// <returns>The SHA-1 hash of the uploaded file content.</returns>
+        /// <param name="localFile">Local file.</param>
+        /// <param name="doc">Remote document.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
+        /// <param name="transmissionEvent">File Transmission event.</param>
+        protected byte[] UploadFile(IFileInfo localFile, IDocument doc, FileTransmissionEvent transmissionEvent) {
+            using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
+                byte[] hash = null;
+                IFileUploader uploader = FileTransmission.ContentTaskUtils.CreateUploader();
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Started = true });
+                using (var hashAlg = new SHA1Managed()) {
+                    try {
+                        uploader.UploadFile(doc, file, transmissionEvent, hashAlg);
+                        hash = hashAlg.Hash;
+                    } catch (Exception ex) {
+                        transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { FailedException = ex });
+                        throw;
+                    }
+                }
+
+                transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
+                return hash;
+            }
         }
 
         protected Guid WriteOrUseUuidIfSupported(IFileSystemInfo info) {

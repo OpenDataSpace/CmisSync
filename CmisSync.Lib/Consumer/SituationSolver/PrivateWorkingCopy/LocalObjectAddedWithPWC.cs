@@ -26,25 +26,25 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.FileTransmission;
+    using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
-    using DotCMIS.Enums;
-    using DotCMIS.Exceptions;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
     using DotCMIS.Data.Impl;
+    using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
     /// <summary>
     /// Local object added and the server is able to update PWC. If a folder is added => calls the given local folder added solver implementation
     /// </summary>
-    public class LocalObjectAddedWithPWC : AbstractEnhancedSolver {
+    public class LocalObjectAddedWithPWC : AbstractEnhancedSolverWithPWC {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAddedWithPWC));
         private ISolver folderOrEmptyFileAddedSolver;
         private ActiveActivitiesManager transmissionManager;
@@ -176,6 +176,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                     throw;
                 }
+
                 watch.Stop();
 
                 if (this.ServerCanModifyDateTimes) {
