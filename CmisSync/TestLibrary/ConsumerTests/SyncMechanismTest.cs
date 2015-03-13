@@ -24,6 +24,7 @@ namespace TestLibrary.ConsumerTests {
     using CmisSync.Lib;
     using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Filter;
     using CmisSync.Lib.Producer.Watcher;
@@ -299,6 +300,16 @@ namespace TestLibrary.ConsumerTests {
             Assert.Throws<CmisConnectionException>(() => mechanism.Handle(folderEvent));
 
             this.queue.VerifyThatNoEventIsAdded();
+        }
+
+        [Test, Category("Fast")]
+        public void DecorateDefaultSolverBySpecializedPWCSolverIfSessionSupportsPWC() {
+            this.session.SetupPrivateWorkingCopyCapability();
+
+            var underTest = this.CreateMechanism(Mock.Of<ISituationDetection<AbstractFolderEvent>>(), Mock.Of<ISituationDetection<AbstractFolderEvent>>());
+
+            Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAddedWithPWC);
+            Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChangedWithPWC);
         }
 
         private void TriggerNonExistingSolver() {

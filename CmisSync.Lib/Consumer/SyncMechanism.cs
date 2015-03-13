@@ -22,9 +22,11 @@ namespace CmisSync.Lib.Consumer {
     using System.Diagnostics;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Consumer.SituationSolver;
-    using CmisSync.Lib.Filter;
+    using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.Filter;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
 
@@ -57,9 +59,10 @@ namespace CmisSync.Lib.Consumer {
         /// <param name="queue">Sync event queue.</param>
         /// <param name="session">CMIS Session.</param>
         /// <param name="storage">Meta data storage.</param>
+        /// <param name="transmissionStorage">File transmission storage.</param>
         /// <param name="activityListener">Active sync progress listener.</param>
+        /// <param name="filters">Ignore filter.</param>
         /// <param name="solver">Solver for custom solver matrix.</param>
-        /// <param name="isServerAbleToUpdateModificationDate">Enables the modification date sync feature.</param>
         public SyncMechanism(
             ISituationDetection<AbstractFolderEvent> localSituation,
             ISituationDetection<AbstractFolderEvent> remoteSituation,
@@ -127,7 +130,6 @@ namespace CmisSync.Lib.Consumer {
         public override bool Handle(ISyncEvent e) {
             if (e is AbstractFolderEvent) {
                 var folderEvent = e as AbstractFolderEvent;
-
                 try {
                     this.DoHandle(folderEvent);
                 } catch (RetryException retry) {
@@ -156,10 +158,16 @@ namespace CmisSync.Lib.Consumer {
             var changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
             var renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
             var renameChangeSolver = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, changeChangeSolver);
+            ISolver addedNochangeSolver = new LocalObjectAdded(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            ISolver changedNoChangeSolver = new LocalObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            if (this.session.ArePrivateWorkingCopySupported()) {
+                addedNochangeSolver = new LocalObjectAddedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, addedNochangeSolver);
+                changedNoChangeSolver = new LocalObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, changedNoChangeSolver);
+            }
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = new NothingToDoSolver();
-            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = new LocalObjectAdded(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
-            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = new LocalObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
+            solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = addedNochangeSolver;
+            solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] = changedNoChangeSolver;
             solver[(int)SituationType.MOVED, (int)SituationType.NOCHANGE] = new LocalObjectMoved(this.session, this.storage);
             solver[(int)SituationType.RENAMED, (int)SituationType.NOCHANGE] = new LocalObjectRenamed(this.session, this.storage);
             solver[(int)SituationType.REMOVED, (int)SituationType.NOCHANGE] = new LocalObjectDeleted(this.session, this.storage);
