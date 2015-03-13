@@ -90,7 +90,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             //  for OpenDataSpace cmis gateway, "cmis:document" is ok to support checkout
             properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
             if (string.IsNullOrEmpty(content)) {
-                return folder.CreateDocument(properties, null, null);
+                return folder.CreateDocument(properties, null, VersioningState.CheckedOut);
             }
 
             ContentStream contentStream = new ContentStream();
@@ -99,7 +99,7 @@ namespace CmisSync.Lib.Cmis.ConvenienceExtenders {
             contentStream.Length = content.Length;
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content))) {
                 contentStream.Stream = stream;
-                return folder.CreateDocument(properties, contentStream, null);
+                return folder.CreateDocument(properties, contentStream, VersioningState.CheckedOut);
             }
         }
 

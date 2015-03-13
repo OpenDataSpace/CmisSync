@@ -22,14 +22,19 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Security.Cryptography;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS;
+    using DotCMIS.Enums;
+    using DotCMIS.Exceptions;
     using DotCMIS.Client;
     using DotCMIS.Client.Impl;
     using DotCMIS.Data.Impl;
@@ -42,6 +47,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAddedWithPWC));
         private ISolver folderOrEmptyFileAddedSolver;
+        private ActiveActivitiesManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.
@@ -67,6 +73,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             }
 
             this.folderOrEmptyFileAddedSolver = localFolderOrEmptyFileAddedSolver;
+            this.transmissionManager = manager;
         }
 
         /// <summary>
@@ -103,17 +110,80 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
                 }
 
-                var objId = Session.CreateDocument(
-                    properties,
-                    new ObjectId(Storage.GetRemoteId(localFile.Directory)),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
+                string parentId = this.Storage.GetRemoteId(localFile.Directory);
 
-                IDocument remoteDocument = Session.GetObject(objId) as IDocument;
+                IDocument remoteDocument;
+                try {
+                    var objId = this.Session.CreateDocument(
+                        properties,
+                        new ObjectId(parentId),
+                        null,
+                        VersioningState.CheckedOut);
+                    remoteDocument = this.Session.GetObject(objId) as IDocument;
+                } catch (CmisConstraintException e) {
+                    if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
+                        OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.Name), e);
+                        throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFileSystemInfo.Name), e) {
+                            Title = string.Format("Server denied creation of {0}", localFileSystemInfo.Name),
+                            Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.FullName)
+                        };
+                    }
+                    throw;
+                } catch (CmisPermissionDeniedException e) {
+                    OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
+                    return;
+                }
+                OperationsLogger.Info(string.Format("Created remote document {0} for {1}", remoteDocument.Id, localFile.FullName));
+
                 Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
+
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                this.transmissionManager.AddTransmission(transmissionEvent);
+
+                MappedObject mapped = new MappedObject(
+                    localFile.Name,
+                    remoteDocument.Id,
+                    MappedObjectType.File,
+                    parentId,
+                    remoteDocument.ChangeToken) {
+                        Guid = uuid,
+                        LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate,
+                        LastLocalWriteTimeUtc = (DateTime?)localFileSystemInfo.LastWriteTimeUtc,
+                        LastChangeToken = remoteDocument.ChangeToken,
+                        LastContentSize = 0,
+                        ChecksumAlgorithmName = "SHA-1",
+                        LastChecksum = SHA1.Create().ComputeHash(new byte[0])
+                    };
+
+                Stopwatch watch = new Stopwatch();
+                OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
+                watch.Start();
+                try {
+                    mapped.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
+                    mapped.ChecksumAlgorithmName = "SHA-1";
+                    mapped.RemoteObjectId = remoteDocument.Id;
+                } catch (Exception ex) {
+                    if (ex is UploadFailedException && (ex as UploadFailedException).InnerException is CmisStorageException) {
+                        OperationsLogger.Warn(string.Format("Could not upload file content of {0}:", localFile.FullName), (ex as UploadFailedException).InnerException);
+                        return;
+                    }
+
+                    throw;
+                }
+
+                watch.Stop();
+
+                if (this.ServerCanModifyDateTimes) {
+                    remoteDocument.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
+                }
+
+                mapped.LastContentSize = localFile.Length;
+                mapped.LastChangeToken = remoteDocument.ChangeToken;
+                mapped.LastRemoteWriteTimeUtc = remoteDocument.LastModificationDate;
+                mapped.LastLocalWriteTimeUtc = localFileSystemInfo.LastWriteTimeUtc;
+
+                this.Storage.SaveMappedObject(mapped);
+                OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
             } else {
                 throw new NotSupportedException();
             }

@@ -221,12 +221,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 VersioningState.CheckedOut)).Returns(docId);
 
             //this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
-            //this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
-            //    return doc;
-            //});
-            //this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id))).Returns<IObjectId>((id) => {
-            //    return doc;
-            //});
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
+                return doc;
+            });
+            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id))).Returns<IObjectId>((id) => {
+                return doc;
+            });
         }
 
         private LocalObjectAddedWithPWC CreateSolver() {
