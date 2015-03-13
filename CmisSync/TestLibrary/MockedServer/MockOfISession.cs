@@ -42,8 +42,8 @@ namespace TestLibrary.MockedServer {
             props.Add(Mock.Of<IPropertyDefinition>(p => p.Id == PropertyIds.LastModificationDate && p.Updatability == DotCMIS.Enums.Updatability.ReadWrite));
             var docType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
             var folderType = Mock.Of<IObjectType>(d => d.PropertyDefinitions == props);
-            this.repoService.Setup(s => s.GetTypeDefinition(repo.Object.Id, BaseTypeId.CmisDocument, null)).Returns(docType);
-            this.repoService.Setup(s => s.GetTypeDefinition(repo.Object.Id, BaseTypeId.CmisFolder, null)).Returns(folderType);
+            this.repoService.Setup(s => s.GetTypeDefinition(repo.Object.Id, BaseTypeId.CmisDocument.ToString(), null)).Returns(docType);
+            this.repoService.Setup(s => s.GetTypeDefinition(repo.Object.Id, BaseTypeId.CmisFolder.ToString(), null)).Returns(folderType);
 
             this.repoService.Setup(s => s.GetRepositoryInfos(It.IsAny<IExtensionsData>())).Returns((IList<IRepositoryInfo>)null);
             this.binding.Setup(b => b.GetRepositoryService()).Returns(this.repoService.Object);
