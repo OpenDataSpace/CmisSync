@@ -168,7 +168,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.objectName, this.parentId, this.changeTokenNew, checksum: hash, contentSize: fileSize, times: Times.Once());
             this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
-            this.remoteDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Once());
+            int counts = (int)((fileSize + this.chunkSize - 1) / this.chunkSize);
+            this.remoteDocumentPWC.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(counts));
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -238,6 +239,12 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.remoteDocument.Setup(d => d.Id).Returns(this.objectIdNew);
                 this.remoteDocument.Setup(d => d.ChangeToken).Returns(this.changeTokenNew);
                 return Mock.Of<IObjectId>(o => o.Id == this.objectIdNew);
+            });
+            this.remoteDocumentPWC.Setup(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>())).Returns<IContentStream, bool, bool>((cs, last, refresh) => {
+                using (var temp = new MemoryStream()) {
+                    cs.Stream.CopyTo(temp);
+                }
+                return remoteDocumentPWC.Object;
             });
 
             //this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
