@@ -79,13 +79,11 @@ namespace CmisSync.Lib.Consumer {
                 throw new ArgumentNullException("Given storage is null");
             }
 
-            if (transmissionStorage == null)
-            {
+            if (transmissionStorage == null) {
                 throw new ArgumentNullException("Given fileTransmissionStorage is null");
             }
 
-            if (localSituation == null)
-            {
+            if (localSituation == null) {
                 throw new ArgumentNullException("Given local situation detection is null");
             }
 
