@@ -303,13 +303,18 @@ namespace TestLibrary.ConsumerTests {
         }
 
         [Test, Category("Fast")]
-        public void DecorateDefaultSolverBySpecializedPWCSolverIfSessionSupportsPWC() {
-            this.session.SetupPrivateWorkingCopyCapability();
+        public void DecorateDefaultSolverBySpecializedPWCSolverIfSessionSupportsPWC([Values(true, false)]bool pwcUpdateable) {
+            this.session.SetupPrivateWorkingCopyCapability(pwcUpdateable);
 
             var underTest = this.CreateMechanism(Mock.Of<ISituationDetection<AbstractFolderEvent>>(), Mock.Of<ISituationDetection<AbstractFolderEvent>>());
 
-            Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAddedWithPWC);
-            Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChangedWithPWC);
+            if (pwcUpdateable) {
+                Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAddedWithPWC);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChangedWithPWC);
+            } else {
+                Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAdded);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChanged);
+            }
         }
 
         private void TriggerNonExistingSolver() {
