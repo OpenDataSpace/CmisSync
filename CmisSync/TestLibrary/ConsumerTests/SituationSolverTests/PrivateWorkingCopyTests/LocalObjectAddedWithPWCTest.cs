@@ -209,7 +209,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             this.session.Setup(s => s.CreateDocument(
                 It.Is<IDictionary<string, object>>(
-                d => d.Contains(new KeyValuePair<string, object>(PropertyIds.Name, this.objectName)) && d.Contains(new KeyValuePair<string, object>(PropertyIds.ObjectTypeId, "cmis:document"))),
+                d => d.Contains(new KeyValuePair<string, object>(PropertyIds.Name, this.objectName)) && d.Contains(new KeyValuePair<string, object>(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.ToString()))),
                 It.Is<IObjectId>(p => p.Id == this.parentId),
                 null,
                 VersioningState.CheckedOut)).Returns(docId);
@@ -226,11 +226,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 d =>
                 d.Name == this.objectName &&
                 d.Id == this.objectIdPWC &&
-                d.ChangeToken == this.changeTokenPWC
-                );
+                d.ChangeToken == this.changeTokenPWC);
             this.remoteDocumentPWC = Mock.Get(docPWC);
 
-            this.remoteDocument.Setup(d=>d.CheckOut()).Returns(()=>{
+            this.remoteDocument.Setup(d => d.CheckOut()).Returns(() => {
                 this.remoteDocument.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
                 this.remoteDocument.Setup(d => d.VersionSeriesCheckedOutId).Returns(this.objectIdPWC);
                 this.session.Setup(s => s.GetObject(this.objectIdPWC)).Returns(docPWC);
@@ -245,6 +244,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 using (var temp = new MemoryStream()) {
                     cs.Stream.CopyTo(temp);
                 }
+
                 return remoteDocumentPWC.Object;
             });
 

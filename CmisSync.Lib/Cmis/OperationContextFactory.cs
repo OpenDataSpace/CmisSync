@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Cmis
         /// <returns>The content change event context.</returns>
         /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateContentChangeEventContext(ISession session) {
-            return CreateContext(session: session, cacheEnabled: true, includePathSegments: true, elements: "cmis:path");
+            return CreateContext(session: session, cacheEnabled: true, includePathSegments: true, elements: PropertyIds.Path);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace CmisSync.Lib.Cmis
         /// <returns>The default context.</returns>
         /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateDefaultContext(ISession session) {
-            return CreateContext(session: session, cacheEnabled: true, includePathSegments: true, elements: "cmis:path");
+            return CreateContext(session: session, cacheEnabled: true, includePathSegments: true, elements: PropertyIds.Path);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace CmisSync.Lib.Cmis
         /// <returns>The non caching and path including context.</returns>
         /// <param name="session">Cmis session.</param>
         public static IOperationContext CreateNonCachingPathIncludingContext(ISession session) {
-            return CreateContext(session: session, cacheEnabled: false, includePathSegments: true, elements: "cmis:path");
+            return CreateContext(session: session, cacheEnabled: false, includePathSegments: true, elements: PropertyIds.Path);
         }
 
         /// <summary>
