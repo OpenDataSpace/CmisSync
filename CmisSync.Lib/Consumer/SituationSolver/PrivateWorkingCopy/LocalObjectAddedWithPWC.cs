@@ -46,8 +46,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolverWithPWC {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAddedWithPWC));
-        private ISolver folderOrEmptyFileAddedSolver;
-        private ActiveActivitiesManager transmissionManager;
+        private readonly ISolver folderOrEmptyFileAddedSolver;
+        private readonly ActiveActivitiesManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectAddedWithPWC"/> class.

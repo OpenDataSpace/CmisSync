@@ -311,9 +311,11 @@ namespace TestLibrary.ConsumerTests {
             if (pwcUpdateable) {
                 Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAddedWithPWC);
                 Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChangedWithPWC);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] is LocalObjectChangedRemoteObjectChangedWithPWC);
             } else {
                 Assert.That(underTest.Solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] is LocalObjectAdded);
                 Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.NOCHANGE] is LocalObjectChanged);
+                Assert.That(underTest.Solver[(int)SituationType.CHANGED, (int)SituationType.CHANGED] is LocalObjectChangedRemoteObjectChanged);
             }
         }
 

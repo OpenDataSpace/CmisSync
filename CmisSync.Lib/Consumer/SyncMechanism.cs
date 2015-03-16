@@ -155,15 +155,17 @@ namespace CmisSync.Lib.Consumer {
         private ISolver[,] CreateSolver() {
             int dim = Enum.GetNames(typeof(SituationType)).Length;
             ISolver[,] solver = new ISolver[dim, dim];
-            var changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
-            var renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
-            var renameChangeSolver = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, changeChangeSolver);
+            ISolver changeChangeSolver = new LocalObjectChangedRemoteObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
             ISolver addedNochangeSolver = new LocalObjectAdded(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
             ISolver changedNoChangeSolver = new LocalObjectChanged(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager);
             if (this.session.ArePrivateWorkingCopySupported()) {
                 addedNochangeSolver = new LocalObjectAddedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, addedNochangeSolver);
                 changedNoChangeSolver = new LocalObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, changedNoChangeSolver);
+                changeChangeSolver = new LocalObjectChangedRemoteObjectChangedWithPWC(this.session, this.storage, this.transmissionStorage, this.activityListener.TransmissionManager, changeChangeSolver);
             }
+
+            ISolver renameRenameSolver = new LocalObjectRenamedRemoteObjectRenamed(this.session, this.storage, changeChangeSolver);
+            ISolver renameChangeSolver = new LocalObjectRenamedRemoteObjectChanged(this.session, this.storage, changeChangeSolver);
 
             solver[(int)SituationType.NOCHANGE, (int)SituationType.NOCHANGE] = new NothingToDoSolver();
             solver[(int)SituationType.ADDED, (int)SituationType.NOCHANGE] = addedNochangeSolver;

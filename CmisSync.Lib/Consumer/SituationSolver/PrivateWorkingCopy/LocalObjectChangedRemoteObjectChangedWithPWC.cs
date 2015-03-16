@@ -20,6 +20,7 @@
 namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
@@ -31,6 +32,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// Local object changed remote object changed situations are decorated if only the local content has been changed. Otherwise the given fallback will solve the situation.
     /// </summary>
     public class LocalObjectChangedRemoteObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
+        private readonly ISolver fallbackSolver;
+        private readonly ActiveActivitiesManager transmissionManager;
+
         /// <summary>
         /// Initializes a new instance of the
         /// <see cref="CmisSync.Lib.Consumer.SituationSolver.PWC.LocalObjectChangedRemoteObjectChangedWithPWC"/> class.
@@ -47,7 +51,16 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ActiveActivitiesManager manager,
             ISolver localObjectChangedRemoteObjectChangedFallbackSolver) : base(session, storage, transmissionStorage)
         {
-            throw new NotImplementedException();
+            if (localObjectChangedRemoteObjectChangedFallbackSolver == null) {
+                throw new ArgumentNullException("Given fallback solver is null");
+            }
+
+            if (!session.ArePrivateWorkingCopySupported()) {
+                throw new ArgumentException("Given session does not support pwc updates");
+            }
+
+            this.fallbackSolver = localObjectChangedRemoteObjectChangedFallbackSolver;
+            this.transmissionManager = manager;
         }
 
         /// <summary>
@@ -63,7 +76,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent,
             ContentChangeType remoteContent)
         {
-            throw new NotImplementedException();
+            if (localFileSystemInfo is IFileInfo && remoteContent == ContentChangeType.NONE) {
+                this.fallbackSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+            } else {
+                this.fallbackSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+            }
         }
     }
 }

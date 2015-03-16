@@ -260,6 +260,7 @@
     <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectChangedWithPWCTest.cs" />
     <Compile Include="IntegrationTests\PrivateWorkingCopyTests\AppendContentStreamTests.cs" />
     <Compile Include="TestUtils\IDocumentAssertUtils.cs" />
+    <Compile Include="ConsumerTests\SituationSolverTests\PrivateWorkingCopyTests\LocalObjectChangedRemoteObjectChangedWithPWCTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
@@ -32,9 +31,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object changed remote object moved situation solver.
     /// </summary>
-    public class LocalObjectChangedRemoteObjectMoved : AbstractEnhancedSolver
-    {
-        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+    public class LocalObjectChangedRemoteObjectMoved : AbstractEnhancedSolver {
+        private readonly ISolver changeChangeSolver;
 
         /// <summary>
         /// Initializes a new instance of the
@@ -46,13 +44,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
         public LocalObjectChangedRemoteObjectMoved(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage)
+            ISolver changeChangeSolver) : base(session, storage)
         {
-            if (changeSolver == null) {
+            if (changeChangeSolver == null) {
                 throw new ArgumentNullException("Given solver for the conflict situation of local and remote change is null");
             }
 
-            this.changeChangeSolver = changeSolver;
+            this.changeChangeSolver = changeChangeSolver;
         }
 
         public override void Solve(
