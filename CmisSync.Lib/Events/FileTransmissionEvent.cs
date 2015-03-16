@@ -20,7 +20,10 @@
 namespace CmisSync.Lib.Events {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Text;
+
+    using CmisSync.Lib;
 
     /// <summary>
     /// File transmission types.
@@ -52,7 +55,7 @@ namespace CmisSync.Lib.Events {
     /// This event should be queued only once. The progress will not be reported on the queue.
     /// Interested entities should add themselfs as TransmissionEventHandler on the event TransmissionStatus to get informed about the progress.
     /// </summary>
-    public class FileTransmissionEvent : ISyncEvent {
+    public class FileTransmissionEvent : INotifyPropertyChanged {
         private TransmissionProgressEventArgs status;
 
         /// <summary>
@@ -84,6 +87,8 @@ namespace CmisSync.Lib.Events {
         /// Occurs when transmission status changes.
         /// </summary>
         public event TransmissionEventHandler TransmissionStatus = delegate { };
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Gets the type of the transmission.
@@ -117,7 +122,9 @@ namespace CmisSync.Lib.Events {
         /// </value>
         public TransmissionProgressEventArgs Status {
             get { return this.status; }
-            private set { this.status = value; }
+            private set { this.status = value;
+                this.NotifyPropertyChanged(Utils.NameOf(() => this.Status));
+            }
         }
 
         /// <summary>
@@ -149,6 +156,21 @@ namespace CmisSync.Lib.Events {
             this.Status.Paused = (status.Paused != null) ? status.Paused : this.Status.Paused;
             if (this.TransmissionStatus != null) {
                 this.TransmissionStatus(this, this.Status);
+            }
+        }
+
+        /// <summary>
+        /// This method is called by the Set accessor of each property.
+        /// </summary>
+        /// <param name="propertyName">Property name.</param>
+        private void NotifyPropertyChanged(string propertyName) {
+            if (string.IsNullOrEmpty(propertyName)) {
+                throw new ArgumentNullException("Given property name is null");
+            }
+
+            var handler = this.PropertyChanged;
+            if (handler != null) {
+                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
