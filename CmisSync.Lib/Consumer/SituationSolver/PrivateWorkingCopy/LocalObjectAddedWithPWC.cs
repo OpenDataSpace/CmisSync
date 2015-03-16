@@ -194,6 +194,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             } else {
                 throw new NotSupportedException();
             }
-       }
+        }
     }
 }

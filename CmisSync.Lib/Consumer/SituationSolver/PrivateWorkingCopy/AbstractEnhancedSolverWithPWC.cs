@@ -56,13 +56,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     this.TransmissionStorage.RemoveObjectByRemoteObjectId(remoteDocument.Id);
                 }
 
-                if (!string.IsNullOrEmpty(remoteDocument.VersionSeriesCheckedOutId)) {
-                    remoteDocument.CancelCheckOut();
+                if (string.IsNullOrEmpty(remoteDocument.VersionSeriesCheckedOutId)) {
+                    remoteDocument.CheckOut();
                     remoteDocument.Refresh();
                 }
 
-                remoteDocument.CheckOut();
-                remoteDocument.Refresh();
                 IDocument remotePWCDocument = this.Session.GetObject(remoteDocument.VersionSeriesCheckedOutId) as IDocument;
                 remotePWCDocument.DeleteContentStream();
                 return remotePWCDocument;

@@ -115,6 +115,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 null,
                 VersioningState.CheckedOut),
                 Times.Once());
+            this.remoteDocument.Verify(d => d.CheckOut(), Times.Once());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
@@ -153,11 +154,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
             this.RunSolverToAbortUpload(solverAdded);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectOldId, this.objectName, this.parentId, this.changeTokenOld, Times.Once(), true, null, null, this.emptyHash, 0);
-
-            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
-            this.RunSolverToChangeLocalBeforeContinue(solverChanged);
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHashChanged, this.fileLength);
+            this.RunSolverToChangeLocalBeforeContinue(solverAdded);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHashChanged, this.fileLength);
 
             this.transmissionStorage.Verify(s => s.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.AtLeast(this.chunkCount + 1));    //  plus 1 to save state for abort
             this.session.Verify(
@@ -165,11 +163,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
                 It.Is<IObjectId>(o => o.Id == this.parentId),
-                It.Is<IContentStream>(st => st == null),
                 null,
-                null,
-                null,
-                null),
+                VersioningState.CheckedOut),
                 Times.Once());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
@@ -200,36 +195,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 null),
                 Times.Never());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Never());
-            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
-        }
-
-        [Test, Category("Fast"), Category("Solver")]
-        public void LocalFileAddedWhileChangeRemoteBeforeContinue() {
-            this.SetupFile();
-
-            var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
-
-            this.RunSolverToAbortUpload(solverAdded);
-
-            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
-
-            this.RunSolverToChangeRemoteBeforeContinue(solverChanged);
-
-            // only save the empty file, for changing the remote file will force a crawl sync
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectOldId, this.objectName, this.parentId, this.changeTokenOld, Times.Once(), true, null, null, this.emptyHash, 0);
-
-            this.session.Verify(
-                s =>
-                s.CreateDocument(
-                It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
-                It.Is<IObjectId>(o => o.Id == this.parentId),
-                It.Is<IContentStream>(st => st == null),
-                null,
-                null,
-                null,
-                null),
-                Times.Once());
-            this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
         }
 
