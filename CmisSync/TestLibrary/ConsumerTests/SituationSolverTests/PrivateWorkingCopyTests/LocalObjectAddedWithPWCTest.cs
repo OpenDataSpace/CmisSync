@@ -90,7 +90,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 Mock.Of<ISolver>()));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Solver")]
         public void ConstructorFailsIfGivenSolverIsNull() {
             this.SetUpMocks();
             Assert.Throws<ArgumentNullException>(
@@ -103,7 +103,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 null));
         }
 
-        [Test, Category("Fast")]
+        [Test, Category("Fast"), Category("Solver")]
         public void NewDirectoriesCallsArePassedToTheGivenSolver() {
             this.SetUpMocks();
             var folderSolver = new Mock<ISolver>();

@@ -81,23 +81,23 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         public void FallbackIsCalledForDirectories() {
             this.SetUpMocks();
             var underTest = this.CreateSolver();
-            var dir = new Mock<IDirectoryInfo>(MockBehavior.Strict);
-            var remoteDir = new Mock<IObjectId>(MockBehavior.Strict);
-            this.fallbackSolver.Setup(s => s.Solve(dir.Object, remoteDir.Object, ContentChangeType.NONE, ContentChangeType.NONE));
+            var dir = new Mock<IDirectoryInfo>(MockBehavior.Strict).Object;
+            var remoteDir = new Mock<IObjectId>(MockBehavior.Strict).Object;
+            this.fallbackSolver.Setup(s => s.Solve(dir, remoteDir, ContentChangeType.NONE, ContentChangeType.NONE));
 
-            underTest.Solve(dir.Object, remoteDir.Object, ContentChangeType.NONE, ContentChangeType.NONE);
+            underTest.Solve(dir, remoteDir, ContentChangeType.NONE, ContentChangeType.NONE);
 
-            this.fallbackSolver.Verify(s => s.Solve(dir.Object, remoteDir.Object, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+            this.fallbackSolver.Verify(s => s.Solve(dir, remoteDir, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
         }
 
         [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
         public void FallbackIsNotUsedIfOnlyLocalContentHasBeenChanged() {
             this.SetUpMocks();
             var underTest = this.CreateSolver();
-            var file = new Mock<IFileInfo>(MockBehavior.Strict);
-            var remoteDoc = new Mock<IDocument>(MockBehavior.Strict);
+            var file = new Mock<IFileInfo>(MockBehavior.Strict).Object;
+            var remoteDoc = new Mock<IDocument>(MockBehavior.Strict).Object;
 
-            underTest.Solve(file.Object, remoteDoc.Object, ContentChangeType.CHANGED, ContentChangeType.NONE);
+            underTest.Solve(file, remoteDoc, ContentChangeType.CHANGED, ContentChangeType.NONE);
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -106,13 +106,13 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             [Values(ContentChangeType.APPENDED, ContentChangeType.CHANGED, ContentChangeType.CREATED, ContentChangeType.DELETED)]ContentChangeType remoteChange) {
             this.SetUpMocks();
             var underTest = this.CreateSolver();
-            var file = new Mock<IFileInfo>(MockBehavior.Strict);
-            var remoteDoc = Mock.Of<IDocument>();
-            this.fallbackSolver.Setup(s => s.Solve(file.Object, remoteDoc, localChange, remoteChange));
+            var file = new Mock<IFileInfo>(MockBehavior.Strict).Object;
+            var remoteDoc = new Mock<IDocument>(MockBehavior.Strict).Object;
+            this.fallbackSolver.Setup(s => s.Solve(file, remoteDoc, localChange, remoteChange));
 
-            underTest.Solve(file.Object, remoteDoc, localChange, remoteChange);
+            underTest.Solve(file, remoteDoc, localChange, remoteChange);
 
-            this.fallbackSolver.Verify(s => s.Solve(file.Object, remoteDoc, localChange, remoteChange), Times.Once());
+            this.fallbackSolver.Verify(s => s.Solve(file, remoteDoc, localChange, remoteChange), Times.Once());
         }
 
         private LocalObjectChangedRemoteObjectChangedWithPWC CreateSolver() {
