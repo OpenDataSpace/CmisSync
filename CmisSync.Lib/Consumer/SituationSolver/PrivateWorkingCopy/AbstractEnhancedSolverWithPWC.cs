@@ -19,17 +19,17 @@
 
 namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System;
-    using System.Linq;
     using System.IO;
+    using System.Linq;
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Events;
-    using CmisSync.Lib.Streams;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.HashAlgorithm;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
+    using CmisSync.Lib.Streams;
 
     using DotCMIS.Client;
 
@@ -128,7 +128,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <param name="mappedObject">Mapped object saved in <c>Storage</c></param>
         protected byte[] UploadFileWithPWC(IFileInfo localFile, ref IDocument doc, FileTransmissionEvent transmissionEvent, IMappedObject mappedObject = null) {
             byte[] checksum = null;
-            IDocument docPWC = LoadRemotePWCDocument(doc, ref checksum);
+            IDocument docPWC = this.LoadRemotePWCDocument(doc, ref checksum);
 
             using (var file = localFile.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) {
                 if (checksum != null) {
@@ -149,6 +149,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                                 break;
                             }
                         }
+
                         hashAlg.TransformFinalBlock(new byte[0], 0, 0);
                         if (!hashAlg.Hash.SequenceEqual(checksum)) {
                             docPWC.DeleteContentStream();
@@ -166,7 +167,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                         using (NonClosingHashStream hashstream = new NonClosingHashStream(file, hashAlg, CryptoStreamMode.Read)) {
                             int bufsize = 8 * 1024;
                             byte[] buffer = new byte[bufsize];
-                            for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault(); ) {
+                            for (long offset = 0; offset < docPWC.ContentStreamLength.GetValueOrDefault();) {
                                 int readsize = bufsize;
                                 if (readsize + offset > docPWC.ContentStreamLength.GetValueOrDefault()) {
                                     readsize = (int)(docPWC.ContentStreamLength.GetValueOrDefault() - offset);
@@ -195,7 +196,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 }
 
                 doc = this.Session.GetObject(docPWC.CheckIn(true, null, null, string.Empty)) as IDocument;
-                doc.Refresh();   //  Refresh is required, or DotCMIS will use cached one only
+                doc.Refresh();   // Refresh is required, or DotCMIS will use cached one only
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
                 return hash;
