@@ -34,6 +34,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     using CmisSync.Lib.Streams;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using log4net;
 
@@ -322,6 +323,23 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Ensures the that local file name contains legal characters.
+        /// If the given file contains UTF-8 only character and the given exception has been returned from the server on creating a file/folder,
+        /// an interaction exception is thrown with a hint about the problem. Otherwise nothing happens.
+        /// </summary>
+        /// <param name="localFile">Local file which produces a CmisConstraintException on the server.</param>
+        /// <param name="e">The returned CmisConstraintException returned by the server.</param>
+        protected void EnsureThatLocalFileNameContainsLegalCharacters(IFileSystemInfo localFile, CmisConstraintException e) {
+            if (!Utils.IsValidISO885915(localFile.Name)) {
+                OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFile.Name), e);
+                throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFile.Name), e) {
+                    Title = string.Format("Server denied creation of {0}", localFile.Name),
+                    Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFile.FullName)
+                };
+            }
         }
     }
 }

@@ -20,6 +20,7 @@
 namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -27,6 +28,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -59,21 +61,34 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorSetsServerPropertyCorrectly() {
+        public void ConstructorSetsServerPropertyCorrectly([Values(true, false)]bool serverCanModifyLastModificationDate) {
             var session = new Mock<ISession>();
-            session.SetupTypeSystem(true);
-
+            session.SetupTypeSystem(serverCanModifyLastModificationDate);
             var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
 
-            Assert.That(underTest.GetModification(), Is.True);
+            Assert.That(underTest.GetModification(), Is.EqualTo(serverCanModifyLastModificationDate));
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorSetsModificationPossibilityToFalse() {
+        public void EnsureLegalCharactersThrowsExceptionIfFilenameContainsUtf8Character() {
             var session = new Mock<ISession>();
-            session.SetupTypeSystem(false);
+            session.SetupTypeSystem();
             var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
-            Assert.That(underTest.GetModification(), Is.False);
+            var exception = new CmisConstraintException();
+            var fileInfo = Mock.Of<IFileSystemInfo>(f => f.Name == @"ä" && f.FullName == @"ä");
+
+            Assert.Throws<InteractionNeededException>(() => underTest.EnsureThatLocalFileNameContainsLegalCharacters(fileInfo, exception));
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void EnsureLegalCharactersIfFilenameIsValid() {
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
+            var exception = new CmisConstraintException();
+            var fileInfo = Mock.Of<IFileSystemInfo>(f => f.Name == "foo");
+
+            underTest.EnsureThatLocalFileNameContainsLegalCharacters(fileInfo, exception);
         }
 
         [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
@@ -123,6 +138,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 ContentChangeType remoteContent)
             {
                 throw new NotImplementedException();
+            }
+
+            public void EnsureThatLocalFileNameContainsLegalCharacters(IFileSystemInfo fileInfo, CmisConstraintException e) {
+                base.EnsureThatLocalFileNameContainsLegalCharacters(fileInfo, e);
             }
         }
     }
