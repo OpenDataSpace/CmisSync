@@ -50,7 +50,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
         /// </summary>
         /// <param name="session">Cmis session.</param>
         /// <param name="storage">Meta data storage.</param>
-        /// <param name="serverCanModifyCreationAndModificationDate">If set to <c>true</c> server can modify creation and modification date.</param>
+        /// <param name="transmissionStorage">Transmission storage.</param>
+        /// <param name="transmissionManager">Transmission manager.</param>
+        /// <param name="fsFactory">File system factory.</param>
         public LocalObjectChangedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
@@ -97,7 +99,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         try {
                             FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
                             this.transmissionManager.AddTransmission(transmissionEvent);
-                            obj.LastChecksum = UploadFile(fileInfo, doc, transmissionEvent);
+                            obj.LastChecksum = this.UploadFile(fileInfo, doc, transmissionEvent);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
                         } catch(Exception ex) {
                             if (ex.InnerException is CmisPermissionDeniedException) {
@@ -141,13 +143,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                             // Both are different => Check modification dates
                             // Download remote version and create conflict file
                             updateLocalDate = true;
-                            obj.LastChecksum = DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
+                            obj.LastChecksum = this.DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
                             obj.LastContentSize = doc.ContentStreamLength ?? 0;
                         }
                     } else {
                         // Download remote content
                         updateLocalDate = true;
-                        obj.LastChecksum = DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
+                        obj.LastChecksum = this.DownloadChanges(fileInfo, doc, obj, this.fsFactory, this.transmissionManager, Logger);
                         obj.LastContentSize = doc.ContentStreamLength ?? 0;
                     }
                 }
