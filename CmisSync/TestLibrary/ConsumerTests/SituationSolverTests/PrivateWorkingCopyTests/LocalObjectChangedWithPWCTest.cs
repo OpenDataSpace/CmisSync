@@ -25,6 +25,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
+    using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
@@ -37,6 +38,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
     [TestFixture]
     public class LocalObjectChangedWithPWCTest : IsTestWithConfiguredLog4Net {
+        private readonly string fileName = "file.bin";
+
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
@@ -89,6 +92,63 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             this.folderOrFileContentUnchangedAddedSolver.Verify(
                 s => s.Solve(folder, remoteId, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverUploadsFileContentByCreatingNewPWC() {
+            Assert.Ignore("TODO");
+            this.SetUpMocks();
+            var underTest = this.CreateSolver();
+            var uuid = Guid.NewGuid();
+            DateTime lastWriteTime = DateTime.UtcNow;
+            var file = Mock.Of<IFileInfo>(
+                f =>
+                f.Name == this.fileName &&
+                f.Exists == true &&
+                f.LastWriteTimeUtc == lastWriteTime &&
+                f.Uuid == uuid);
+            var remoteDoc = new Mock<IDocument>();
+            var remotePwcDoc = new Mock<IDocument>();
+            remoteDoc.SetupCheckout(remotePwcDoc, Guid.NewGuid().ToString());
+            var mappedFile = this.storage.AddLocalFile(file, remoteDoc.Object.Id);
+            underTest.Solve(file, Mock.Of<IDocument>(), ContentChangeType.CHANGED);
+
+            // this.storage.VerifySavedMappedObject(MappedObjectType.File, newMasterDocumentId, this.fileName, this.parentId, newMasterDocumentChangeToken, contentSize: file.Object.Length, checksum: fileCheckSum);
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverUploadsFileContentWithNewPWCAndGetsInterrupted() {
+            this.SetUpMocks();
+            var underTest = this.CreateSolver();
+            Assert.Ignore("TODO");
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverContinesUploadFileContentWithStoredInformations() {
+            this.SetUpMocks();
+            var underTest = this.CreateSolver();
+            Assert.Ignore("TODO");
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverContinesUploadFileContentWithStoredInformationsAndGetsInterruptedAgain() {
+            this.SetUpMocks();
+            var underTest = this.CreateSolver();
+            Assert.Ignore("TODO");
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverUploadsFileContentByCreatingNewPwcIfPwcWasCanceled() {
+            this.SetUpMocks();
+            var underTest = this.CreateSolver();
+            Assert.Ignore("TODO");
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void SolverUploadsFileContentByCreatingNewPwcIfObjectNotFoundOnServer() {
+            this.SetUpMocks();
+            var underTest = this.CreateSolver();
+            Assert.Ignore("TODO");
         }
 
         private LocalObjectChangedWithPWC CreateSolver() {
