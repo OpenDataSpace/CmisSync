@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
@@ -30,14 +29,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     using DotCMIS.Client;
     using DotCMIS.Exceptions;
 
-    public class LocalObjectRenamedRemoteObjectChanged : AbstractEnhancedSolver
-    {
-        private LocalObjectChangedRemoteObjectChanged changeChangeSolver;
+    public class LocalObjectRenamedRemoteObjectChanged : AbstractEnhancedSolver {
+        private readonly ISolver changeChangeSolver;
 
         public LocalObjectRenamedRemoteObjectChanged(
             ISession session,
             IMetaDataStorage storage,
-            LocalObjectChangedRemoteObjectChanged changeSolver) : base(session, storage) {
+            ISolver changeSolver) : base(session, storage) {
             if (changeSolver == null) {
                 throw new ArgumentNullException("Given situation solver for local and remote changes is null");
             }

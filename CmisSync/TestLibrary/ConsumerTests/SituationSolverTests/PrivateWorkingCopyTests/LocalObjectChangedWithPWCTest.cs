@@ -46,12 +46,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         [Test, Category("Fast"), Category("Solver")]
         public void Constructor() {
             this.SetUpMocks();
-            new LocalObjectChangedWithPWC(
-                this.session.Object,
-                this.storage.Object,
-                this.transmissionStorage.Object,
-                this.manager.Object,
-                Mock.Of<ISolver>());
+            this.CreateSolver();
         }
 
         [Test, Category("Fast"), Category("Solver")]

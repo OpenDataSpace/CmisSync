@@ -30,9 +30,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using log4net;
 
+    /// <summary>
+    /// Local object changed and file content should be uploaded via PWC. Otherwise the fallback solver is called.
+    /// </summary>
     public class LocalObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedWithPWC));
-        private ISolver folderOrFileContentUnchangedSolver;
+        private readonly ISolver folderOrFileContentUnchangedSolver;
 
         public LocalObjectChangedWithPWC(
             ISession session,

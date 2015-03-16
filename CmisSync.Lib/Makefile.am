@@ -76,6 +76,7 @@ SOURCES =  \
 	Consumer/SituationSolver/NothingToDoSolver.cs \
 	Consumer/SituationSolver/PrivateWorkingCopy/AbstractEnhancedSolverWithPWC.cs \
 	Consumer/SituationSolver/PrivateWorkingCopy/LocalObjectAddedWithPWC.cs \
+	Consumer/SituationSolver/PrivateWorkingCopy/LocalObjectChangedRemoteObjectChangedWithPWC.cs \
 	Consumer/SituationSolver/PrivateWorkingCopy/LocalObjectChangedWithPWC.cs \
 	Consumer/SituationSolver/RemoteObjectAdded.cs \
 	Consumer/SituationSolver/RemoteObjectChanged.cs \
