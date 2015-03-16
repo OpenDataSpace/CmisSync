@@ -301,6 +301,7 @@
     <Compile Include="Storage\Database\IMetaDataStorageConvenienceExtender.cs" />
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedWithPWC.cs" />
     <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\AbstractEnhancedSolverWithPWC.cs" />
+    <Compile Include="Consumer\SituationSolver\PrivateWorkingCopy\LocalObjectChangedRemoteObjectChangedWithPWC.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
