@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Consumer.SituationSolver
-{
+namespace CmisSync.Lib.Consumer.SituationSolver {
     using System;
     using System.IO;
     using System.Linq;
@@ -39,8 +38,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
     /// <summary>
     /// Local object changed and remote object changed.
     /// </summary>
-    public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver
-    {
+    public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedRemoteObjectChanged));
 
         private ActiveActivitiesManager transmissionManager;
