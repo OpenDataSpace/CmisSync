@@ -191,11 +191,9 @@ ignored
         }
 
         [Test, Category("Slow"), Category("SelectiveIgnore")]
-        public void SetIgnorePropertyAndChangeModificationDate() {
+        public void SetIgnorePropertyChangesModificationDate() {
             this.session.EnsureSelectiveIgnoreSupportIsAvailable();
-            if (!this.session.IsServerAbleToUpdateModificationDate()) {
-                Assert.Ignore("Server does not support the modification of last modified date => skip");
-            }
+            this.session.EnsureServerCanUpdateModificationDate();
 
             var folder = this.remoteRootDir.CreateFolder("folder");
             var past = DateTime.UtcNow - TimeSpan.FromDays(7);

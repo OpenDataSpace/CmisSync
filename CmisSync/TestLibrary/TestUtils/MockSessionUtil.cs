@@ -22,6 +22,7 @@ namespace TestLibrary.TestUtils {
     using System.Collections.Generic;
     using System.IO;
 
+    using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Producer.Watcher;
     using CmisSync.Lib.SelectiveIgnore;
@@ -371,6 +372,12 @@ namespace TestLibrary.TestUtils {
         public static void EnsureSelectiveIgnoreSupportIsAvailable(this ISession session) {
             if (!session.SupportsSelectiveIgnore()) {
                 Assert.Ignore("Selective Ignore is not available on server");
+            }
+        }
+
+        public static void EnsureServerCanUpdateModificationDate(this ISession session) {
+            if (!session.IsServerAbleToUpdateModificationDate()) {
+                Assert.Ignore("Server does not support the modification of last modified date => skip");
             }
         }
 
