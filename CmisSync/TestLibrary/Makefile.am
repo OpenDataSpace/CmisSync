@@ -181,6 +181,7 @@ SOURCES =  \
 	TestUtils/MockOfICmisObject.cs \
 	TestUtils/MockOfIDocumentUtil.cs \
 	TestUtils/MockOfIFileSystemInfoFactoryUtil.cs \
+	TestUtils/MockOfIFileTransmissionStorageUtil.cs \
 	TestUtils/MockOfIFilterAggregatorUtil.cs \
 	TestUtils/MockOfIFolderUtil.cs \
 	TestUtils/MockOfIRepositoryInfo.cs \
