@@ -138,11 +138,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
                 It.Is<IObjectId>(o => o.Id == this.parentId),
-                It.Is<IContentStream>(st => st == null),
                 null,
-                null,
-                null,
-                null),
+                VersioningState.CheckedOut),
                 Times.Never());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Never());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
@@ -188,11 +185,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
                 It.Is<IObjectId>(o => o.Id == this.parentId),
-                It.Is<IContentStream>(st => st == null),
                 null,
-                null,
-                null,
-                null),
+                VersioningState.CheckedOut),
                 Times.Never());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Never());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
@@ -217,11 +211,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
                 It.Is<IObjectId>(o => o.Id == this.parentId),
-                It.Is<IContentStream>(st => st == null),
                 null,
-                null,
-                null,
-                null),
+                VersioningState.CheckedOut),
                 Times.Never());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Never());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
