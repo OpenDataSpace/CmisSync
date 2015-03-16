@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="MockSessionUtil.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -142,6 +142,8 @@ namespace TestLibrary.TestUtils {
 
         public static void AddRemoteObject(this Mock<ISession> session, ICmisObject remoteObject) {
             session.Setup(s => s.GetObject(It.Is<string>(id => id == remoteObject.Id))).Returns(remoteObject);
+            session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == remoteObject.Id))).Returns(remoteObject);
+            session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == remoteObject.Id), It.IsAny<IOperationContext>())).Returns(remoteObject);
             HashSet<string> paths = new HashSet<string>();
             if (remoteObject is IFolder) {
                 paths.Add((remoteObject as IFolder).Path);
@@ -151,8 +153,10 @@ namespace TestLibrary.TestUtils {
                     }
                 }
             } else if (remoteObject is IDocument) {
-                foreach (string path in (remoteObject as IDocument).Paths) {
-                    paths.Add(path);
+                if ((remoteObject as IDocument).Paths != null) {
+                    foreach (string path in (remoteObject as IDocument).Paths) {
+                        paths.Add(path);
+                    }
                 }
             }
 

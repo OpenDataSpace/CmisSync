@@ -24,6 +24,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System.Security.Cryptography;
 
     using CmisSync.Lib.Consumer.SituationSolver;
+    using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
@@ -31,6 +32,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using DotCMIS.Enums;
     using DotCMIS.Client;
     using DotCMIS.Data;
 
@@ -85,6 +87,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
             this.transmissionStorage.Setup(f => f.SaveObject(It.IsAny<IFileTransmissionObject>())).Callback<IFileTransmissionObject>((o) => {
                 this.transmissionStorage.Setup(f => f.GetObjectByRemoteObjectId(o.RemoteObjectId)).Returns(o);
+                this.transmissionStorage.Setup(f => f.GetObjectByLocalPath(o.LocalPath)).Returns(o);
             });
 
             this.session.Setup(f => f.RepositoryInfo.Capabilities.IsPwcUpdatableSupported).Returns(true);
@@ -97,15 +100,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void LocalFileAdded() {
             this.SetupFile();
 
-            var solverAdded = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
             this.RunSolverToAbortUpload(solverAdded);
+            this.RunSolverToContinueUpload(solverAdded);
 
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectOldId, this.objectName, this.parentId, this.changeTokenOld, Times.Once(), true, null, null, this.emptyHash, 0);
-
-            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
-            this.RunSolverToContinueUpload(solverChanged);
-
-            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHash, this.fileLength);
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Once(), true, null, null, this.fileHash, this.fileLength);
 
             this.transmissionStorage.Verify(s => s.SaveObject(It.IsAny<IFileTransmissionObject>()), Times.Exactly(this.chunkCount + 1));    //  plus 1 to save state for abort
             this.session.Verify(
@@ -113,11 +112,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 s.CreateDocument(
                 It.Is<IDictionary<string, object>>(p => (string)p["cmis:name"] == this.objectName),
                 It.Is<IObjectId>(o => o.Id == this.parentId),
-                It.Is<IContentStream>(st => st == null),
                 null,
-                null,
-                null,
-                null),
+                VersioningState.CheckedOut),
                 Times.Once());
             this.localFile.VerifySet(f => f.Uuid = It.Is<Guid?>(uuid => uuid != null), Times.Once());
             this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
@@ -128,7 +124,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetupFile();
             this.SetupForLocalFileChanged();
 
-            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
 
             this.RunSolverToAbortUpload(solverChanged);
 
@@ -155,11 +151,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void LocalFileAddedWhileChangeLocalBeforeContinue() {
             this.SetupFile();
 
-            var solverAdded = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
             this.RunSolverToAbortUpload(solverAdded);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectOldId, this.objectName, this.parentId, this.changeTokenOld, Times.Once(), true, null, null, this.emptyHash, 0);
 
-            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
             this.RunSolverToChangeLocalBeforeContinue(solverChanged);
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectNewId, this.objectName, this.parentId, this.changeTokenNew, Times.Exactly(2), true, null, null, this.fileHashChanged, this.fileLength);
 
@@ -184,7 +180,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetupFile();
             this.SetupForLocalFileChanged();
 
-            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
 
             this.RunSolverToAbortUpload(solverChanged);
 
@@ -211,11 +207,11 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         public void LocalFileAddedWhileChangeRemoteBeforeContinue() {
             this.SetupFile();
 
-            var solverAdded = new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            var solverAdded = new LocalObjectAddedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
 
             this.RunSolverToAbortUpload(solverAdded);
 
-            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
 
             this.RunSolverToChangeRemoteBeforeContinue(solverChanged);
 
@@ -242,7 +238,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.SetupFile();
             this.SetupForLocalFileChanged();
 
-            var solverChanged = new LocalObjectChanged(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager);
+            var solverChanged = new LocalObjectChangedWithPWC(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager, new LocalObjectAdded(this.session.Object, this.storage.Object, this.transmissionStorage.Object, this.transmissionManager));
 
             this.RunSolverToAbortUpload(solverChanged);
 
@@ -282,7 +278,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         private void RunSolverToAbortUpload(
-            AbstractEnhancedSolver solver,
+            AbstractEnhancedSolverWithPWC solver,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE) {
             var stream = new Mock<MemoryStream>();
@@ -315,7 +311,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         private void RunSolverToContinueUpload(
-            AbstractEnhancedSolver solver,
+            AbstractEnhancedSolverWithPWC solver,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE) {
             long readLength = 0;
@@ -346,7 +342,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         private void RunSolverToChangeLocalBeforeContinue(
-            AbstractEnhancedSolver solver,
+            AbstractEnhancedSolverWithPWC solver,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE) {
             this.SetupToChangeLocal();
@@ -360,7 +356,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         private void RunSolverToChangeRemoteBeforeContinue(
-            AbstractEnhancedSolver solver,
+            AbstractEnhancedSolverWithPWC solver,
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE) {
             this.remoteDocument.Setup(d => d.ChangeToken).Returns(this.changeTokenOld + ".change");
@@ -429,11 +425,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.session.Setup(s => s.CreateDocument(
                 It.IsAny<IDictionary<string, object>>(),
                 It.IsAny<IObjectId>(),
-                It.IsAny<IContentStream>(),
                 null,
-                null,
-                null,
-                null)).Returns(docId);
+                VersioningState.CheckedOut)).Returns(docId);
             this.remoteDocument.Setup(
                 d =>
                 d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()))
@@ -443,12 +436,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                     }
                 });
             this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
-                return doc;
-            });
-            this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == docId.Id))).Returns<IObjectId>((id) => {
-                return doc;
-            });
+            this.session.AddRemoteObject(this.remoteDocument.Object);
 
             var docPWC = Mock.Of<IDocument>(
                 d =>
@@ -463,7 +451,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             });
             this.remotePWCDocument.Setup(d => d.ContentStreamLength).Returns(() => { return length; });
             this.remotePWCDocument.Setup(d => d.DeleteContentStream()).Callback(() => { length = 0; });
-            this.session.Setup(s => s.GetObject(this.objectPWCId)).Returns(this.remotePWCDocument.Object);
+            this.session.AddRemoteObject(this.remotePWCDocument.Object);
 
             this.remoteDocument.SetupCheckout(this.remotePWCDocument, this.changeTokenNew);
 

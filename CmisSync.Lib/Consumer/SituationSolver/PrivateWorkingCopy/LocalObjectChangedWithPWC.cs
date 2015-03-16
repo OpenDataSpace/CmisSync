@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="LocalObjectChangedWithPWC.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using log4net;
 
-    public class LocalObjectChangedWithPWC : AbstractEnhancedSolver {
+    public class LocalObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedWithPWC));
         private ISolver folderOrFileContentUnchangedSolver;
 

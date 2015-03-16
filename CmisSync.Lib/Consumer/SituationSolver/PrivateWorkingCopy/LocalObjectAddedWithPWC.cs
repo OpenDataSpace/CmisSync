@@ -115,33 +115,34 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 IDocument remoteDocument;
 
-                //IFileTransmissionObject transmissionObject = this.TransmissionStorage.GetObjectByLocalPath(localFile.FullName);
-                //if (transmissionObject == null) {
-                //}
-
-                try {
-                    var objId = this.Session.CreateDocument(
-                        properties,
-                        new ObjectId(parentId),
-                        null,
-                        VersioningState.CheckedOut);
-                    remoteDocument = this.Session.GetObject(objId) as IDocument;
-                } catch (CmisConstraintException e) {
-                    if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
-                        OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.Name), e);
-                        throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFileSystemInfo.Name), e) {
-                            Title = string.Format("Server denied creation of {0}", localFileSystemInfo.Name),
-                            Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.FullName)
-                        };
+                IFileTransmissionObject transmissionObject = this.TransmissionStorage.GetObjectByLocalPath(localFile.FullName);
+                if (transmissionObject == null) {
+                    try {
+                        var objId = this.Session.CreateDocument(
+                            properties,
+                            new ObjectId(parentId),
+                            null,
+                            VersioningState.CheckedOut);
+                        remoteDocument = this.Session.GetObject(objId) as IDocument;
+                    } catch (CmisConstraintException e) {
+                        if (!Utils.IsValidISO885915(localFileSystemInfo.Name)) {
+                            OperationsLogger.Warn(string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.Name), e);
+                            throw new InteractionNeededException(string.Format("Server denied creation of {0}", localFileSystemInfo.Name), e) {
+                                Title = string.Format("Server denied creation of {0}", localFileSystemInfo.Name),
+                                Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.FullName)
+                            };
+                        }
+                        throw;
+                    } catch (CmisPermissionDeniedException e) {
+                        OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
+                        return;
                     }
-                    throw;
-                } catch (CmisPermissionDeniedException e) {
-                    OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
-                    return;
+                    OperationsLogger.Info(string.Format("Created remote document {0} for {1}", remoteDocument.Id, localFile.FullName));
+                } else {
+                    remoteDocument = this.Session.GetObject(transmissionObject.RemoteObjectId) as IDocument;
                 }
-                OperationsLogger.Info(string.Format("Created remote document {0} for {1}", remoteDocument.Id, localFile.FullName));
 
-                Guid uuid = this.WriteOrUseUuidIfSupported(localFileSystemInfo);
+                Guid uuid = this.WriteOrUseUuidIfSupported(localFile);
 
                 FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 this.transmissionManager.AddTransmission(transmissionEvent);
@@ -165,7 +166,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                 watch.Start();
                 try {
-                    remoteDocument.CheckOut();
                     mapped.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
                     mapped.ChecksumAlgorithmName = "SHA-1";
                     mapped.RemoteObjectId = remoteDocument.Id;
