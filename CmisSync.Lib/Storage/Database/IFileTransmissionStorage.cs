@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database
-{
+namespace CmisSync.Lib.Storage.Database {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -32,8 +31,7 @@ namespace CmisSync.Lib.Storage.Database
     /// <remarks>
     /// The <c>IFileTransmissionObject.RemoteObjectId</c> is the primary key for the saved <code>IFileTransmissionObject</code> list.
     /// </remarks>
-    public interface IFileTransmissionStorage
-    {
+    public interface IFileTransmissionStorage {
         /// <summary>
         /// Get the saved <c>IFileTransmissionObject</c> list
         /// </summary>
