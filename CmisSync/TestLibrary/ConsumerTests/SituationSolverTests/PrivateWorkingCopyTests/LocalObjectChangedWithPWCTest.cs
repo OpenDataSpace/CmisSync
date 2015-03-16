@@ -82,8 +82,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.folderOrFileContentUnchangedAddedSolver.Setup(
                 s =>
                 s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()));
-            var folder = Mock.Of<IDirectoryInfo>();
-            var remoteId = Mock.Of<IFolder>();
+            var folder = new Mock<IDirectoryInfo>(MockBehavior.Strict).Object;
+            var remoteId = new Mock<IFolder>(MockBehavior.Strict).Object;
 
             underTest.Solve(folder, remoteId, localContent: ContentChangeType.NONE, remoteContent: ContentChangeType.NONE);
 
