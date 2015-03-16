@@ -45,7 +45,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     /// Local object added and the server is able to update PWC. If a folder is added => calls the given local folder added solver implementation
     /// </summary>
     public class LocalObjectAddedWithPWC : AbstractEnhancedSolverWithPWC {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectAddedWithPWC));
         private readonly ISolver folderOrEmptyFileAddedSolver;
         private readonly ActiveActivitiesManager transmissionManager;
 
@@ -56,7 +55,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
         /// <param name="storage">Meta data storage.</param>
         /// <param name="transmissionStorage">Transmission storage.</param>
         /// <param name="manager">Active activities manager.</param>
-        /// <param name="localFolderAddedSolver">Local folder or empty file added solver.</param>
+        /// <param name="localFolderOrEmptyFileAddedSolver">Local folder or empty file added solver.</param>
         public LocalObjectAddedWithPWC(
             ISession session,
             IMetaDataStorage storage,
@@ -89,9 +88,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            if (localFileSystemInfo is IDirectoryInfo) {
-                this.folderOrEmptyFileAddedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
-            } else if (localFileSystemInfo is IFileInfo) {
+            if (localFileSystemInfo is IFileInfo) {
                 IFileInfo localFile = localFileSystemInfo as IFileInfo;
                 localFile.Refresh();
                 if (!localFile.Exists) {
@@ -139,11 +136,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                                 Description = string.Format("Server denied creation of {0}, perhaps because it contains a UTF-8 character", localFileSystemInfo.FullName)
                             };
                         }
+
                         throw;
                     } catch (CmisPermissionDeniedException e) {
                         OperationsLogger.Warn(string.Format("Permission denied while trying to Create the locally added object {0} on the server ({1}).", localFileSystemInfo.FullName, e.Message));
                         return;
                     }
+
                     OperationsLogger.Info(string.Format("Created remote document {0} for {1}", remoteDocument.Id, localFile.FullName));
                 } else {
                     remoteDocument = this.Session.GetObject(transmissionObject.RemoteObjectId) as IDocument;
@@ -199,7 +198,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 this.Storage.SaveMappedObject(mapped);
                 OperationsLogger.Info(string.Format("Uploaded file content of {0} in [{1} msec]", localFile.FullName, watch.ElapsedMilliseconds));
             } else {
-                throw new NotSupportedException();
+                this.folderOrEmptyFileAddedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
             }
         }
     }

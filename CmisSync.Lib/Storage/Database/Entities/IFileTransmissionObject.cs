@@ -17,8 +17,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace CmisSync.Lib.Storage.Database.Entities
-{
+namespace CmisSync.Lib.Storage.Database.Entities {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -29,8 +28,7 @@ namespace CmisSync.Lib.Storage.Database.Entities
     /// <summary>
     /// Interface for a file transmission object. A file transmission object is a record for a upload/download file transmission.
     /// </summary>
-    public interface IFileTransmissionObject
-    {
+    public interface IFileTransmissionObject {
         /// <summary>
         /// Gets the type
         /// </summary>
