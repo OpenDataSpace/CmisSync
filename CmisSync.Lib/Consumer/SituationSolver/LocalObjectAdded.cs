@@ -184,10 +184,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             Logger.Debug(string.Format("Finished LocalObjectAdded after [{0} msec]", completewatch.ElapsedMilliseconds));
         }
 
-        private IDirectoryInfo GetParent(IFileSystemInfo fileInfo) {
-            return fileInfo is IDirectoryInfo ? (fileInfo as IDirectoryInfo).Parent : (fileInfo as IFileInfo).Directory;
-        }
-
         private ICmisObject AddCmisObject(IFileSystemInfo localFile, string parentId, ISession session) {
             string name = localFile.Name;
             Dictionary<string, object> properties = new Dictionary<string, object>();
@@ -243,25 +239,6 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             contentStream.Length = 0;
             contentStream.Stream = emptyStream;
             return contentStream;
-        }
-
-        private bool IsParentReadOnly(IFileSystemInfo localFileSystemInfo) {
-            var parent = this.GetParent(localFileSystemInfo);
-            while (parent != null && parent.Exists) {
-                string parentId = Storage.GetRemoteId(parent);
-                if (parentId != null) {
-                    var remoteObject = this.Session.GetObject(parentId);
-                    if (remoteObject.CanCreateFolder() == false && remoteObject.CanCreateDocument() == false) {
-                        return true;
-                    }
-
-                    break;
-                }
-
-                parent = this.GetParent(parent);
-            }
-
-            return false;
         }
     }
 }

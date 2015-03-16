@@ -112,6 +112,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 }
 
                 string parentId = this.Storage.GetRemoteId(localFile.Directory);
+                if (parentId == null) {
+                    if (this.IsParentReadOnly(localFile)) {
+                        return;
+                    } else {
+                        throw new ArgumentException("ParentId is null => invoke crawl sync to create parent first");
+                    }
+                }
 
                 IDocument remoteDocument;
 

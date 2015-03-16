@@ -173,6 +173,35 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void LocalFileAddedWithReadOnlyRemoteFolder([Values(1)]int fileSize) {
+            this.SetUpMocks();
+
+            this.SetupFile();
+
+            string parentParentId = "parentParentId";
+            var parentParentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == Path.GetDirectoryName(this.parentPath) && d.Exists == true);
+            var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Exists == true && d.Parent == parentParentDirInfo);
+            this.localFile.Setup(f => f.Directory).Returns(parentDirInfo);
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == this.parentPath))).Returns(() => { return null; });
+            this.storage.Setup(s => s.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == parentParentDirInfo.FullName))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == parentParentId));
+            var parentParentDir = new Mock<IFolder>();
+            this.session.Setup(s => s.GetObject(parentParentId)).Returns(Mock.Of<IFolder>(o => o.AllowableActions.Actions == new HashSet<string>()));
+
+            byte[] content = new byte[fileSize];
+            byte[] hash = SHA1.Create().ComputeHash(content);
+            this.localFile.SetupStream(content);
+
+            var undertest = this.CreateSolver();
+            undertest.Solve(this.localFile.Object, null);
+
+            this.localFile.VerifyThatLocalFileObjectLastWriteTimeUtcIsNeverModified();
+            this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.objectName, this.parentId, this.changeTokenNew, checksum: hash, contentSize: fileSize, times: Times.Never());
+            this.remoteDocument.Verify(d => d.SetContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>()), Times.Never());
+            int counts = (int)((fileSize + this.chunkSize - 1) / this.chunkSize);
+            this.remoteDocumentPWC.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void LocalFileIsUsedByAnotherProcessOnOpenFile() {
             this.SetUpMocks();
 
@@ -188,7 +217,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.parentPath = Path.GetTempPath();
             this.localPath = Path.Combine(this.parentPath, this.objectName);
 
-            var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath));
+            var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath) && d.Exists == true);
             this.storage.Setup(f => f.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == this.parentPath))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == this.parentId));
 
             var file = Mock.Of<IFileInfo>(

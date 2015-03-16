@@ -300,5 +300,28 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
 
             return uuid;
         }
+
+        protected IDirectoryInfo GetParent(IFileSystemInfo fileInfo) {
+            return fileInfo is IDirectoryInfo ? (fileInfo as IDirectoryInfo).Parent : (fileInfo as IFileInfo).Directory;
+        }
+
+        protected bool IsParentReadOnly(IFileSystemInfo localFileSystemInfo) {
+            var parent = this.GetParent(localFileSystemInfo);
+            while (parent != null && parent.Exists) {
+                string parentId = Storage.GetRemoteId(parent);
+                if (parentId != null) {
+                    var remoteObject = this.Session.GetObject(parentId);
+                    if (remoteObject.CanCreateFolder() == false && remoteObject.CanCreateDocument() == false) {
+                        return true;
+                    }
+
+                    break;
+                }
+
+                parent = this.GetParent(parent);
+            }
+
+            return false;
+        }
     }
 }
