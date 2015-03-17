@@ -253,17 +253,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 d.ChangeToken == this.changeTokenPWC);
             this.remoteDocumentPWC = Mock.Get(docPWC);
 
-            this.remoteDocument.Setup(d => d.CheckOut()).Returns(() => {
-                this.remoteDocument.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
-                this.remoteDocument.Setup(d => d.VersionSeriesCheckedOutId).Returns(this.objectIdPWC);
-                this.session.Setup(s => s.GetObject(this.objectIdPWC)).Returns(docPWC);
-                return Mock.Of<IObjectId>(o => o.Id == this.objectIdPWC);
-            });
-            this.remoteDocumentPWC.Setup(d => d.CheckIn(It.IsAny<bool>(), It.IsAny<IDictionary<string, object>>(), It.IsAny<IContentStream>(), It.IsAny<string>())).Returns(() => {
-                this.remoteDocument.Setup(d => d.Id).Returns(this.objectIdNew);
-                this.remoteDocument.Setup(d => d.ChangeToken).Returns(this.changeTokenNew);
-                return Mock.Of<IObjectId>(o => o.Id == this.objectIdNew);
-            });
+            this.remoteDocument.SetupCheckout(this.remoteDocumentPWC, this.changeTokenNew, this.objectIdNew);
+            this.session.AddRemoteObject(this.remoteDocumentPWC.Object);
             this.remoteDocumentPWC.Setup(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>())).Returns<IContentStream, bool, bool>((cs, last, refresh) => {
                 using (var temp = new MemoryStream()) {
                     cs.Stream.CopyTo(temp);
@@ -271,8 +262,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
                 return remoteDocumentPWC.Object;
             });
-
-            //this.remoteDocument.Setup(d => d.LastModificationDate).Returns(new DateTime());
 
             this.session.Setup(s => s.GetObject(It.Is<IObjectId>(o => o.Id == this.objectIdOld), It.IsAny<IOperationContext>())).Returns<IObjectId, IOperationContext>((id, context) => {
                 Assert.AreEqual(id.Id, doc.Id);

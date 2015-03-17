@@ -105,7 +105,7 @@ namespace TestLibrary.TestUtils {
                 .Returns(doc.Object);
         }
 
-        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC, string newChangeToken) {
+        public static void SetupCheckout(this Mock<IDocument> doc, Mock<IDocument> docPWC, string newChangeToken, string newObjectId = null) {
             doc.Setup(d => d.CheckOut()).Returns(() => {
                 doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(true);
                 doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(docPWC.Object.Id);
@@ -115,7 +115,12 @@ namespace TestLibrary.TestUtils {
                 doc.Setup(d => d.IsVersionSeriesCheckedOut).Returns(false);
                 doc.Setup(d => d.VersionSeriesCheckedOutId).Returns(() => { return null; });
                 doc.Setup(d => d.ChangeToken).Returns(newChangeToken);
-                return Mock.Of<IObjectId>(o => o.Id == doc.Object.Id);
+                if (!string.IsNullOrEmpty(newObjectId)) {
+                    doc.Setup(d => d.Id).Returns(newObjectId);
+                    return Mock.Of<IObjectId>(o => o.Id == newObjectId);
+                } else {
+                    return Mock.Of<IObjectId>(o => o.Id == doc.Object.Id);
+                }
             });
         }
 
