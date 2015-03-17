@@ -62,9 +62,6 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
         private string parentPath;
         private string localPath;
-        private byte[] fileContent;
-        private byte[] fileHash;
-        private long fileLength;
         private long chunkSize;
 
         private Mock<IFileInfo> localFile;
