@@ -60,7 +60,12 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
             ContentChangeType localContent = ContentChangeType.NONE,
             ContentChangeType remoteContent = ContentChangeType.NONE)
         {
-            this.folderOrFileContentUnchangedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+            if (localFileSystemInfo is IFileInfo) {
+                var localFile = localFileSystemInfo as IFileInfo;
+            } else {
+                this.folderOrFileContentUnchangedSolver.Solve(localFileSystemInfo, remoteId, localContent, remoteContent);
+            }
+            return;
         }
     }
 }

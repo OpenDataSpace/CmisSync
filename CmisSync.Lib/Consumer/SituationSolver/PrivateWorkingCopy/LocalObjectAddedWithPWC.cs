@@ -152,12 +152,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                     throw;
                 }
-
                 watch.Stop();
-
-                if (this.ServerCanModifyDateTimes) {
-                    remoteDocument.UpdateLastWriteTimeUtc(localFile.LastWriteTimeUtc);
-                }
 
                 mapped.LastContentSize = localFile.Length;
                 mapped.LastChangeToken = remoteDocument.ChangeToken;
