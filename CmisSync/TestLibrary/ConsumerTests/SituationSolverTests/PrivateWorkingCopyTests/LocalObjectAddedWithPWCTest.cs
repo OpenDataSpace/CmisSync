@@ -203,6 +203,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
 
             var undertest = this.CreateSolver();
             Assert.Throws<IOException>(() => undertest.Solve(this.localFile.Object, null));
+            this.storage.VerifyThatNoObjectIsManipulated();
+            this.transmissionStorage.VerifyThatNoObjectIsAddedChangedOrDeleted();
         }
 
         private void SetupFile() {
