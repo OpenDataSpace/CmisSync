@@ -83,19 +83,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
 
             // Match local changes to remote changes and updated them remotely
-            IMappedObject mappedObject = null;
-            try {
-                Guid? guid = localFileSystemInfo.Uuid;
-                if (guid != null) {
-                    mappedObject = this.Storage.GetObjectByGuid((Guid)guid);
-                }
-            } catch(Exception) {
-            }
-
-            if (mappedObject == null) {
-                mappedObject = this.Storage.GetObjectByLocalPath(localFileSystemInfo);
-            }
-
+            IMappedObject mappedObject = this.Storage.GetObject(localFileSystemInfo);
             if (mappedObject == null) {
                 throw new ArgumentException(string.Format("Could not find db entry for {0} => invoke crawl sync", localFileSystemInfo.FullName));
             }

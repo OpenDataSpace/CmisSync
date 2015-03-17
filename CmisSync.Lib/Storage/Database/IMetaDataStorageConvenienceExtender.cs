@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="IMetaDataStorageConvenienceExtender.cs" company="GRAU DATA AG">
 //
 //   This program is free software: you can redistribute it and/or modify
@@ -34,26 +34,31 @@ namespace CmisSync.Lib.Storage.Database {
         /// </summary>
         /// <returns>The stored remote identifier, or null if there is no entry found.</returns>
         /// <param name="storage">Meta data storage instance.</param>
-        /// <param name="dirInfo">Directory info.</param>
-        public static string GetRemoteId(this IMetaDataStorage storage, IDirectoryInfo dirInfo) {
-            IMappedObject mappedObject;
-            try {
-                Guid? uuid = dirInfo.Uuid;
-                if (uuid != null) {
-                    mappedObject = storage.GetObjectByGuid((Guid)uuid);
-                    if (mappedObject != null) {
-                        return mappedObject.RemoteObjectId;
-                    }
-                }
-            } catch (IOException) {
-            }
-
-            mappedObject = storage.GetObjectByLocalPath(dirInfo);
+        /// <param name="info">File system item info.</param>
+        public static string GetRemoteId(this IMetaDataStorage storage, IFileSystemInfo info) {
+            IMappedObject mappedObject = storage.GetObject(info);
             if (mappedObject != null) {
                 return mappedObject.RemoteObjectId;
             } else {
                 return null;
             }
+        }
+
+        public static IMappedObject GetObject(this IMetaDataStorage storage, IFileSystemInfo info) {
+            IMappedObject mappedObject = null;
+            try {
+                Guid? guid = info.Uuid;
+                if (guid != null) {
+                    mappedObject = storage.GetObjectByGuid((Guid)guid);
+                }
+            } catch (Exception) {
+            }
+
+            if (mappedObject == null) {
+                mappedObject = storage.GetObjectByLocalPath(info);
+            }
+
+            return mappedObject;
         }
     }
 }
