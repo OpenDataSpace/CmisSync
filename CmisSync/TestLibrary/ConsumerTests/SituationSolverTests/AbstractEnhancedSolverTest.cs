@@ -20,6 +20,7 @@
 namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using System;
 
+    using CmisSync.Lib.Consumer;
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Events;
     using CmisSync.Lib.Queueing;
@@ -27,6 +28,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Storage.FileSystem;
 
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using Moq;
 
@@ -47,33 +49,47 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorSetsPropertiesCorrectly() {
+        public void ConstructorSetsPropertiesCorrectly([Values(true, false)]bool withGivenTransmissionStorage) {
             var session = new Mock<ISession>();
             session.SetupTypeSystem();
             var storage = Mock.Of<IMetaDataStorage>();
-
-            var underTest = new SolverClass(session.Object, storage);
+            var transmissionStorage = withGivenTransmissionStorage ? Mock.Of<IFileTransmissionStorage>() : null;
+            var underTest = new SolverClass(session.Object, storage, transmissionStorage);
 
             Assert.That(underTest.GetSession(), Is.EqualTo(session.Object));
             Assert.That(underTest.GetStorage(), Is.EqualTo(storage));
+            Assert.That(underTest.GetTransmissionStorage(), Is.EqualTo(transmissionStorage));
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorSetsServerPropertyCorrectly() {
+        public void ConstructorSetsServerPropertyCorrectly([Values(true, false)]bool serverCanModifyLastModificationDate) {
             var session = new Mock<ISession>();
-            session.SetupTypeSystem(true);
-
+            session.SetupTypeSystem(serverCanModifyLastModificationDate);
             var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
 
-            Assert.That(underTest.GetModification(), Is.True);
+            Assert.That(underTest.GetModification(), Is.EqualTo(serverCanModifyLastModificationDate));
         }
 
         [Test, Category("Fast"), Category("Solver")]
-        public void ConstructorSetsModificationPossibilityToFalse() {
+        public void EnsureLegalCharactersThrowsExceptionIfFilenameContainsUtf8Character() {
             var session = new Mock<ISession>();
-            session.SetupTypeSystem(false);
+            session.SetupTypeSystem();
             var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
-            Assert.That(underTest.GetModification(), Is.False);
+            var exception = new CmisConstraintException();
+            var fileInfo = Mock.Of<IFileSystemInfo>(f => f.Name == @"ä" && f.FullName == @"ä");
+
+            Assert.Throws<InteractionNeededException>(() => underTest.CallEnsureThatLocalFileNameContainsLegalCharacters(fileInfo, exception));
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
+        public void EnsureLegalCharactersIfFilenameIsValid() {
+            var session = new Mock<ISession>();
+            session.SetupTypeSystem();
+            var underTest = new SolverClass(session.Object, Mock.Of<IMetaDataStorage>());
+            var exception = new CmisConstraintException();
+            var fileInfo = Mock.Of<IFileSystemInfo>(f => f.Name == "foo");
+
+            underTest.CallEnsureThatLocalFileNameContainsLegalCharacters(fileInfo, exception);
         }
 
         [Test, Category("Fast"), Category("Solver"), Ignore("TODO")]
@@ -95,7 +111,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
         private class SolverClass : AbstractEnhancedSolver {
             public SolverClass(
                 ISession session,
-                IMetaDataStorage storage) : base(session, storage) {
+                IMetaDataStorage storage,
+                IFileTransmissionStorage transmissionStorage = null) : base(session, storage, transmissionStorage) {
             }
 
             public ISession GetSession() {
@@ -108,6 +125,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             public bool GetModification() {
                 return this.ServerCanModifyDateTimes;
+            }
+
+            public IFileTransmissionStorage GetTransmissionStorage() {
+                return this.TransmissionStorage;
             }
 
             public byte[] Upload(IFileInfo localFile, IDocument doc, ActiveActivitiesManager transmissionManager) {
@@ -123,6 +144,10 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
                 ContentChangeType remoteContent)
             {
                 throw new NotImplementedException();
+            }
+
+            public void CallEnsureThatLocalFileNameContainsLegalCharacters(IFileSystemInfo fileInfo, CmisConstraintException e) {
+                this.EnsureThatLocalFileNameContainsLegalCharacters(fileInfo, e);
             }
         }
     }

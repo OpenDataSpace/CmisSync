@@ -19,6 +19,7 @@
 
 namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Security.Cryptography;
@@ -31,6 +32,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     using CmisSync.Lib.Storage.FileSystem;
     using CmisSync.Lib.Streams;
 
+    using DotCMIS;
     using DotCMIS.Client;
 
     using log4net;
@@ -195,7 +197,9 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     }
                 }
 
-                doc = this.Session.GetObject(docPWC.CheckIn(true, null, null, string.Empty)) as IDocument;
+                Dictionary<string, object> properties = new Dictionary<string, object>();
+                properties.Add(PropertyIds.LastModificationDate, localFile.LastWriteTimeUtc);
+                doc = this.Session.GetObject(docPWC.CheckIn(true, properties, null, string.Empty)) as IDocument;
                 doc.Refresh();   // Refresh is required, or DotCMIS will use cached one only
 
                 transmissionEvent.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
