@@ -26,6 +26,7 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
 
     using DotCMIS;
     using DotCMIS.Client;
+    using DotCMIS.Exceptions;
 
     using NUnit.Framework;
 
@@ -80,6 +81,14 @@ namespace TestLibrary.IntegrationTests.PrivateWorkingCopyTests {
             this.remoteRootDir.CreateDocument(this.fileName, (string)null, checkedOut: true);
             this.remoteRootDir.Refresh();
             Assert.That(this.remoteRootDir.GetChildren().TotalNumItems, Is.EqualTo(0));
+        }
+
+        [Test, Category("Slow"), MaxTime(180000)]
+        public void CreateCheckedOutDocumentMustFailIfDocumentAlreadyExists() {
+            this.EnsureThatPrivateWorkingCopySupportIsAvailable();
+            string fileName = "file.bin";
+            this.remoteRootDir.CreateDocument(fileName, "content");
+            Assert.Throws<CmisNameConstraintViolationException>(() => this.remoteRootDir.CreateDocument(fileName, "other content", true));
         }
     }
 }
