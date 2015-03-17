@@ -289,19 +289,19 @@ namespace CmisSync {
             this.Type = e.Type;
             this.typeString = this.Type.ToString();
             switch(this.Type) {
-            case FileTransmissionType.DOWNLOAD_NEW_FILE:
+            case TransmissionType.DOWNLOAD_NEW_FILE:
                 this.Image = new Image(UIHelpers.GetIcon("dataspacesync-downloading", 16));
                 this.typeString = Properties_Resources.NotificationFileDownload;
                 break;
-            case FileTransmissionType.UPLOAD_NEW_FILE:
+            case TransmissionType.UPLOAD_NEW_FILE:
                 this.Image = new Image(UIHelpers.GetIcon("dataspacesync-uploading", 16));
                 this.typeString = Properties_Resources.NotificationFileUpload;
                 break;
-            case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
+            case TransmissionType.DOWNLOAD_MODIFIED_FILE:
                 this.typeString = Properties_Resources.NotificationFileUpdateLocal;
                 this.Image = new Image(UIHelpers.GetIcon("dataspacesync-updating", 16));
                 break;
-            case FileTransmissionType.UPLOAD_MODIFIED_FILE:
+            case TransmissionType.UPLOAD_MODIFIED_FILE:
                 this.typeString = Properties_Resources.NotificationFileUpdateRemote;
                 this.Image = new Image(UIHelpers.GetIcon("dataspacesync-updating", 16));
                 break;
@@ -344,7 +344,7 @@ namespace CmisSync {
             this.Sensitive = true;
         }
 
-        public FileTransmissionType Type { get; private set; }
+        public TransmissionType Type { get; private set; }
 
         public string Path { get; private set; }
     }

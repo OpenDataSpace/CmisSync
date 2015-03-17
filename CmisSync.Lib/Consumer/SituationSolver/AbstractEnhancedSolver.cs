@@ -208,7 +208,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
-            var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
+            var transmissionEvent = new FileTransmissionEvent(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
             transmissonManager.AddTransmission(transmissionEvent);
             hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";

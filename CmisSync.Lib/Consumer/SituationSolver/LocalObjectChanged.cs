@@ -98,7 +98,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                 var doc = remoteId as IDocument;
                 try {
-                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
                     this.transmissionManager.AddTransmission(transmissionEvent);
                     mappedObject.LastChecksum = UploadFile(localFile, doc, transmissionEvent);
                 } catch(Exception ex) {

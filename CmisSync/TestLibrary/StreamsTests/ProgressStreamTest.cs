@@ -33,7 +33,7 @@ namespace TestLibrary.StreamsTests {
     [TestFixture]
     public class ProgressStreamTest {
         private readonly string filename = "filename";
-        private readonly FileTransmissionType transmissionType = FileTransmissionType.DOWNLOAD_NEW_FILE;
+        private readonly TransmissionType transmissionType = TransmissionType.DOWNLOAD_NEW_FILE;
 
         private int lengthCalls;
         private int positionCalls;
@@ -52,8 +52,8 @@ namespace TestLibrary.StreamsTests {
 
         [Test, Category("Fast"), Category("Streams")]
         public void ConstructorWorksWithNonNullParams() {
-            Array values = Enum.GetValues(typeof(FileTransmissionType));
-            foreach (FileTransmissionType val in values) {
+            Array values = Enum.GetValues(typeof(TransmissionType));
+            foreach (TransmissionType val in values) {
                 using (new ProgressStream(new Mock<Stream>().Object, new Mock<FileTransmissionEvent>(val, this.filename, null).Object)) {
                 }
             }

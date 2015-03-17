@@ -64,7 +64,7 @@ namespace TestLibrary.IntegrationTests
             var finalLength = chunks * chunkSize;
             var file = new FileInfo(Path.Combine(this.LocalTestDir.FullName, fileName));
             var mockedDocument = new Mock<IDocument>();
-            var transmissionStatus = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, fileName);
+            var transmissionStatus = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, fileName);
             mockedDocument.Setup(doc => doc.Name).Returns(fileName);
             using (var remoteStream = new MemoryStream()) {
                 mockedDocument.Setup(doc => doc.SetContentStream(It.IsAny<IContentStream>(), It.Is<bool>(b => b == true), It.Is<bool>(b => b == true)))

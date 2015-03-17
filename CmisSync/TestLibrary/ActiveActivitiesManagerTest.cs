@@ -46,7 +46,7 @@ namespace TestLibrary {
         public void AddSingleTransmissionIncreasesListCountByOne() {
             var manager = new ActiveActivitiesManager();
 
-            Assert.IsTrue(manager.AddTransmission(new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path")));
+            Assert.IsTrue(manager.AddTransmission(new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path")));
 
             Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(1));
         }
@@ -54,7 +54,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void ListedTransmissionIsEqualToAdded() {
             var manager = new ActiveActivitiesManager();
-            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path");
 
             Assert.That(manager.AddTransmission(trans), Is.True);
 
@@ -65,7 +65,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AFinishedTransmissionIsRemovedFromList() {
             var manager = new ActiveActivitiesManager();
-            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             manager.AddTransmission(trans);
 
             trans.ReportProgress(new TransmissionProgressEventArgs { Completed = true });
@@ -76,7 +76,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AddingTheSameInstanceASecondTimeReturnsFalseAndIsNotListed() {
             var manager = new ActiveActivitiesManager();
-            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path");
 
             Assert.That(manager.AddTransmission(trans), Is.True);
 
@@ -89,7 +89,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AnAbortedTransmissionIsRemovedFromList() {
             var manager = new ActiveActivitiesManager();
-            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             manager.AddTransmission(trans);
 
             trans.ReportProgress(new TransmissionProgressEventArgs { Aborted = true });
@@ -100,8 +100,8 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AddingNonEqualTransmissionProducesNewEntryInList() {
             var manager = new ActiveActivitiesManager();
-            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
-            var trans2 = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path2");
+            var trans = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans2 = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path2");
 
             Assert.That(manager.AddTransmission(trans), Is.True);
             Assert.That(manager.AddTransmission(trans2), Is.True);
@@ -112,7 +112,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AddingATransmissionFiresEvent() {
             var manager = new ActiveActivitiesManager();
-            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             int eventCounter = 0;
 
             manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
@@ -128,7 +128,7 @@ namespace TestLibrary {
         [Test, Category("Fast")]
         public void AFinishedTransmissionFiresEvent() {
             var manager = new ActiveActivitiesManager();
-            var trans = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var trans = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             int eventCounter = 0;
             manager.AddTransmission(trans);
 

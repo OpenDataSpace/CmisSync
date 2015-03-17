@@ -54,7 +54,7 @@ namespace TestLibrary.FileTransmissionTests
         [SetUp]
         public void SetUp()
         {
-            this.transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, "testfile");
+            this.transmissionEvent = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, "testfile");
             if (this.localFileStream != null) {
                 this.localFileStream.Dispose();
             }

@@ -143,7 +143,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver
                 var cacheFile = this.fsFactory.CreateDownloadCacheFileInfo(guid);
 
                 IDocument remoteDoc = remoteId as IDocument;
-                var transmissionEvent = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
+                var transmissionEvent = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, localFile.FullName, cacheFile.FullName);
                 this.manager.AddTransmission(transmissionEvent);
                 byte[] hash = DownloadCacheFile(cacheFile, remoteDoc, transmissionEvent, this.fsFactory);
 

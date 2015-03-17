@@ -39,7 +39,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// <param name="type">Type of transmission.</param>
         /// <param name="localFile">Local file.</param>
         /// <param name="remoteFile">Remote file.</param>
-        public FileTransmissionObject(FileTransmissionType type, IFileInfo localFile, IDocument remoteFile) {
+        public FileTransmissionObject(TransmissionType type, IFileInfo localFile, IDocument remoteFile) {
             if (localFile == null) {
                 throw new ArgumentNullException("localFile");
             }
@@ -84,7 +84,7 @@ namespace CmisSync.Lib.Storage.Database.Entities {
         /// Gets or sets the type
         /// </summary>
         /// <value>The type.</value>
-        public FileTransmissionType Type { get; set; }
+        public TransmissionType Type { get; set; }
 
         /// <summary>
         /// Gets or sets the local file path

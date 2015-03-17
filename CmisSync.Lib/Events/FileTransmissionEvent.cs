@@ -28,7 +28,7 @@ namespace CmisSync.Lib.Events {
     /// <summary>
     /// File transmission types.
     /// </summary>
-    public enum FileTransmissionType {
+    public enum TransmissionType {
         /// <summary>
         /// A new file is uploaded
         /// </summary>
@@ -70,7 +70,7 @@ namespace CmisSync.Lib.Events {
         /// <param name='cachePath'>
         /// If a download runs and a cache file is used, this should be the path to the cache file
         /// </param>
-        public FileTransmissionEvent(FileTransmissionType type, string path, string cachePath = null) {
+        public FileTransmissionEvent(TransmissionType type, string path, string cachePath = null) {
             if (path == null) {
                 throw new ArgumentNullException("Argument null in FSEvent Constructor", "path");
             }
@@ -96,7 +96,7 @@ namespace CmisSync.Lib.Events {
         /// <value>
         /// The type of the transmission.
         /// </value>
-        public FileTransmissionType Type { get; private set; }
+        public TransmissionType Type { get; private set; }
 
         /// <summary>
         /// Gets the path to the file, which is transmitted.

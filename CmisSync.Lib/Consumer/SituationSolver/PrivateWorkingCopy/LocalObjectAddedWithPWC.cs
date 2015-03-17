@@ -119,7 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 Guid uuid = this.WriteOrUseUuidIfSupported(localFile);
 
-                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
+                FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 this.transmissionManager.AddTransmission(transmissionEvent);
 
                 MappedObject mapped = new MappedObject(

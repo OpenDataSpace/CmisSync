@@ -43,7 +43,7 @@ namespace TestLibrary.EventsTests
         public void ReportProgressTest()
         {
             string filename = "test.txt";
-            FileTransmissionEvent transmission = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, filename);
+            FileTransmissionEvent transmission = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, filename);
             transmission.TransmissionStatus += this.TransmissionEventHandler;
             this.expectedArgs = new TransmissionProgressEventArgs()
             {
@@ -121,7 +121,7 @@ namespace TestLibrary.EventsTests
         public void PercentTest()
         {
             string filename = "test.txt";
-            FileTransmissionEvent transmission = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, filename);
+            FileTransmissionEvent transmission = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, filename);
             double? percent = null;
             transmission.TransmissionStatus += delegate(object sender, TransmissionProgressEventArgs e)
             {
@@ -151,26 +151,26 @@ namespace TestLibrary.EventsTests
         public void ConstructorAndPropertiesTest()
         {
             string path = "file";
-            FileTransmissionEvent e = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, path);
+            FileTransmissionEvent e = new FileTransmissionEvent(TransmissionType.DOWNLOAD_MODIFIED_FILE, path);
             Assert.AreEqual(path, e.Path);
-            Assert.AreEqual(FileTransmissionType.DOWNLOAD_MODIFIED_FILE, e.Type);
+            Assert.AreEqual(TransmissionType.DOWNLOAD_MODIFIED_FILE, e.Type);
             Assert.IsNull(e.CachePath);
-            e = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, path);
+            e = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, path);
             Assert.AreEqual(path, e.Path);
-            Assert.AreEqual(FileTransmissionType.DOWNLOAD_NEW_FILE, e.Type);
+            Assert.AreEqual(TransmissionType.DOWNLOAD_NEW_FILE, e.Type);
             Assert.IsNull(e.CachePath);
-            e = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, path);
+            e = new FileTransmissionEvent(TransmissionType.UPLOAD_MODIFIED_FILE, path);
             Assert.AreEqual(path, e.Path);
-            Assert.AreEqual(FileTransmissionType.UPLOAD_MODIFIED_FILE, e.Type);
+            Assert.AreEqual(TransmissionType.UPLOAD_MODIFIED_FILE, e.Type);
             Assert.IsNull(e.CachePath);
-            e = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, path);
+            e = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, path);
             Assert.AreEqual(path, e.Path);
-            Assert.AreEqual(FileTransmissionType.UPLOAD_NEW_FILE, e.Type);
+            Assert.AreEqual(TransmissionType.UPLOAD_NEW_FILE, e.Type);
             Assert.IsNull(e.CachePath);
             string cachepath = "file.sync";
-            e = new FileTransmissionEvent(FileTransmissionType.DOWNLOAD_NEW_FILE, path, cachepath);
+            e = new FileTransmissionEvent(TransmissionType.DOWNLOAD_NEW_FILE, path, cachepath);
             Assert.AreEqual(path, e.Path);
-            Assert.AreEqual(FileTransmissionType.DOWNLOAD_NEW_FILE, e.Type);
+            Assert.AreEqual(TransmissionType.DOWNLOAD_NEW_FILE, e.Type);
             Assert.AreEqual(cachepath, e.CachePath);
         }
 

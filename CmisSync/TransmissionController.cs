@@ -43,7 +43,7 @@ namespace CmisSync {
 
         private FileTransmissionEvent Transmission;
 
-        private FileTransmissionType Type;
+        private TransmissionType Type;
         private string State;
 
         private bool Disposed = false;
@@ -113,16 +113,16 @@ namespace CmisSync {
             State = string.Empty;
             switch (Type)
             {
-                case FileTransmissionType.DOWNLOAD_NEW_FILE:
+                case TransmissionType.DOWNLOAD_NEW_FILE:
                     State = "Download";
                     break;
-                case FileTransmissionType.DOWNLOAD_MODIFIED_FILE:
-                    goto case FileTransmissionType.DOWNLOAD_NEW_FILE;
-                case FileTransmissionType.UPLOAD_NEW_FILE:
+                case TransmissionType.DOWNLOAD_MODIFIED_FILE:
+                    goto case TransmissionType.DOWNLOAD_NEW_FILE;
+                case TransmissionType.UPLOAD_NEW_FILE:
                     State = "Upload";
                     break;
-                case FileTransmissionType.UPLOAD_MODIFIED_FILE:
-                    goto case FileTransmissionType.UPLOAD_NEW_FILE;
+                case TransmissionType.UPLOAD_MODIFIED_FILE:
+                    goto case TransmissionType.UPLOAD_NEW_FILE;
                 default:
                     break;
             }

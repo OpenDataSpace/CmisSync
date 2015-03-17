@@ -56,7 +56,7 @@ namespace TestLibrary.FileTransmissionTests
         [SetUp]
         public void SetUp()
         {
-            this.transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_NEW_FILE, "testfile");
+            this.transmissionEvent = new FileTransmissionEvent(TransmissionType.UPLOAD_NEW_FILE, "testfile");
             this.lastChunk = 0;
             this.localContent = new byte[this.fileLength];
             if (this.localFileStream != null) {
