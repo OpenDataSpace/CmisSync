@@ -210,7 +210,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.localPath = Path.Combine(this.parentPath, this.objectName);
 
             var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath) && d.Exists == true);
-            this.storage.Setup(f => f.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == this.parentPath))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == this.parentId));
+            this.storage.AddLocalFolder(parentDirInfo, this.parentId);
 
             var file = Mock.Of<IFileInfo>(
                 f =>

@@ -114,6 +114,29 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         }
 
         [Test, Category("Fast"), Category("Solver")]
+        public void SolveCallIsDeniedIfRemoteFileIsChanged([Values(123456)]long fileSize) {
+            Assert.Ignore("TODO");
+            this.SetUpMocks();
+
+            this.SetupFile();
+            byte[] content = new byte[fileSize];
+            var hash = SHA1.Create().ComputeHash(content);
+            this.localFile.SetupStream(content);
+
+            var underTest = this.CreateSolver();
+            this.folderOrFileContentUnchangedAddedSolver.Setup(
+                s =>
+                s.Solve(It.IsAny<IFileSystemInfo>(), It.IsAny<IObjectId>(), It.IsAny<ContentChangeType>(), It.IsAny<ContentChangeType>()));
+            var folder = new Mock<IDirectoryInfo>(MockBehavior.Strict).Object;
+            var remoteId = new Mock<IFolder>(MockBehavior.Strict).Object;
+
+            underTest.Solve(folder, remoteId, localContent: ContentChangeType.NONE, remoteContent: ContentChangeType.NONE);
+
+            this.folderOrFileContentUnchangedAddedSolver.Verify(
+                s => s.Solve(folder, remoteId, ContentChangeType.NONE, ContentChangeType.NONE), Times.Once());
+        }
+
+        [Test, Category("Fast"), Category("Solver")]
         public void SolverUploadsFileContentByCreatingNewPWC([Values(123456)]long fileSize) {
             this.SetUpMocks();
 
@@ -190,7 +213,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.localPath = Path.Combine(this.parentPath, this.fileName);
 
             var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath) && d.Exists == true);
-            this.storage.Setup(f => f.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == this.parentPath))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == this.parentId));
+            this.storage.AddLocalFolder(parentDirInfo, this.parentId);
 
             var file = Mock.Of<IFileInfo>(
                 f =>

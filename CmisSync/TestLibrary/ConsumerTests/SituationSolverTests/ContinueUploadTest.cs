@@ -32,6 +32,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
     using CmisSync.Lib.Storage.Database.Entities;
     using CmisSync.Lib.Storage.FileSystem;
 
+    using DotCMIS;
     using DotCMIS.Enums;
     using DotCMIS.Client;
     using DotCMIS.Data;
@@ -294,7 +295,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             Assert.That(this.transmissionManager.ActiveTransmissions, Is.Empty);
 
             this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(this.chunkCount + 1)); // plus 1 for one AppendContentStream is aborted
-            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, true);
+            this.remotePWCDocument.Verify(d => d.CheckIn(It.IsAny<bool>(), It.Is<IDictionary<string, object>>(p => p.ContainsKey(PropertyIds.LastModificationDate)), null, It.IsAny<string>()), Times.Once());
         }
 
         private void RunSolverToChangeLocalBeforeContinue(
@@ -308,7 +309,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.remotePWCDocument.Verify(d => d.DeleteContentStream(), Times.Exactly(2));
             this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(this.chunkCount + 3)); // plus 1 for one AppendContentStream is aborted, plus 2 for the last upload having two AppendContentStream
-            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, true);
+            this.remotePWCDocument.Verify(d => d.CheckIn(It.IsAny<bool>(), It.Is<IDictionary<string, object>>(p => p.ContainsKey(PropertyIds.LastModificationDate)), null, It.IsAny<string>()), Times.Once());
         }
 
         private void RunSolverToChangeRemoteBeforeContinue(
@@ -322,7 +323,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
 
             this.remotePWCDocument.Verify(d => d.DeleteContentStream(), Times.Exactly(1));
             this.remotePWCDocument.Verify(d => d.AppendContentStream(It.IsAny<IContentStream>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Exactly(3)); // 1 for one AppendContentStream is aborted, and 2 for the last upload having two AppendContentStream
-            this.remoteDocument.VerifyUpdateLastModificationDate(this.localFile.Object.LastWriteTimeUtc, Times.Never(), true);
+            this.remotePWCDocument.Verify(d => d.CheckIn(It.IsAny<bool>(), It.Is<IDictionary<string, object>>(p => p.ContainsKey(PropertyIds.LastModificationDate)), null, It.IsAny<string>()), Times.Once());
         }
 
         private void SetupToChangeLocal() {
@@ -352,7 +353,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             this.localPath = Path.Combine(this.parentPath, this.objectName);
 
             var parentDirInfo = Mock.Of<IDirectoryInfo>(d => d.FullName == this.parentPath && d.Name == Path.GetFileName(this.parentPath));
-            this.storage.Setup(f => f.GetObjectByLocalPath(It.Is<IDirectoryInfo>(d => d.FullName == this.parentPath))).Returns(Mock.Of<IMappedObject>(o => o.RemoteObjectId == this.parentId));
+            this.storage.AddLocalFolder(parentDirInfo, this.parentId);
 
             var parents = new List<IFolder>();
             parents.Add(Mock.Of<IFolder>(f => f.Id == this.parentId));
