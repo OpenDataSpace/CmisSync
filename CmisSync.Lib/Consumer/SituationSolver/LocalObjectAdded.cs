@@ -189,7 +189,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             Stopwatch watch = new Stopwatch();
             ICmisObject result;
             if (localFile is IDirectoryInfo) {
-                properties.Add(PropertyIds.ObjectTypeId, "cmis:folder");
+                properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisFolder.GetCmisValue());
                 watch.Start();
                 var objId = session.CreateFolder(properties, new ObjectId(parentId));
                 watch.Stop();
@@ -201,7 +201,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 Logger.Debug(string.Format("GetFolder in [{0} msec]", watch.ElapsedMilliseconds));
             } else {
                 bool emptyFile = (localFile as IFileInfo).Length == 0;
-                properties.Add(PropertyIds.ObjectTypeId, "cmis:document");
+                properties.Add(PropertyIds.ObjectTypeId, BaseTypeId.CmisDocument.GetCmisValue());
                 watch.Start();
                 using (var emptyStream = new MemoryStream(new byte[0])) {
                     var objId = session.CreateDocument(
