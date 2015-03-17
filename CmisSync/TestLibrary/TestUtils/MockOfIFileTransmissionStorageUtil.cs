@@ -20,6 +20,9 @@ namespace TestLibrary.TestUtils {
 
         public static void SetUpClearList(this Mock<IFileTransmissionStorage> storage) {
             storage.Setup(s => s.ClearObjectList()).Callback(() => storage.Setup(st => st.GetObjectList()).Returns(new List<IFileTransmissionObject>()));
+            storage.Setup(s => s.GetObjectByLocalPath(It.IsAny<string>())).Returns((IFileTransmissionObject)null);
+            storage.Setup(s => s.GetObjectByRemoteObjectId(It.IsAny<string>())).Returns((IFileTransmissionObject)null);
+            storage.Setup(s => s.GetObjectList()).Returns(new List<IFileTransmissionObject>());
         }
 
         public static void SetUpChunkSize(this Mock<IFileTransmissionStorage> storage, long chunkSize) {
