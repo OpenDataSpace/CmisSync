@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     public class LocalObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChanged));
 
-        private TransmissionManager transmissionManager;
+        private ITransmissionManager transmissionManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CmisSync.Lib.Consumer.SituationSolver.LocalObjectChanged"/> class.
@@ -54,7 +54,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager transmissionManager) : base(session, storage, transmissionStorage)
+            ITransmissionManager transmissionManager) : base(session, storage, transmissionStorage)
         {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
@@ -98,9 +98,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                 OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                 var doc = remoteId as IDocument;
                 try {
-                    Transmission transmissionEvent = new Transmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                    this.transmissionManager.AddTransmission(transmissionEvent);
-                    mappedObject.LastChecksum = UploadFile(localFile, doc, transmissionEvent);
+                    var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                    mappedObject.LastChecksum = UploadFile(localFile, doc, transmission);
                 } catch(Exception ex) {
                     if (ex.InnerException is CmisPermissionDeniedException) {
                         OperationsLogger.Warn(string.Format("Local changed file \"{0}\" has not been uploaded: PermissionDenied", localFile.FullName));

@@ -137,8 +137,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             var localFile = localFileSystemInfo as IFileInfo;
 
             if (localFile != null) {
-                Transmission transmission = new Transmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
-                this.transmissionManager.AddTransmission(transmission);
+                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
                 if (localFile.Length > 0) {
                     Stopwatch watch = new Stopwatch();
                     OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));

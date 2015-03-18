@@ -133,9 +133,8 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests {
             }
 
             public byte[] Upload(IFileInfo localFile, IDocument doc, TransmissionManager transmissionManager) {
-                Transmission transmissionEvent = new Transmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                transmissionManager.AddTransmission(transmissionEvent);
-                return this.UploadFile(localFile, doc, transmissionEvent);
+                var transmission = transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                return this.UploadFile(localFile, doc, transmission);
             }
 
             public override void Solve(

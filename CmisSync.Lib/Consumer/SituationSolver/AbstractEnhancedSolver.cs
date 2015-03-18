@@ -203,14 +203,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             }
         }
 
-        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, TransmissionManager transmissonManager, ILog logger) {
+        protected byte[] DownloadChanges(IFileInfo target, IDocument remoteDocument, IMappedObject obj, IFileSystemInfoFactory fsFactory, ITransmissionManager transmissionManager, ILog logger) {
             // Download changes
             byte[] hash = null;
 
             var cacheFile = fsFactory.CreateDownloadCacheFileInfo(target);
-            var transmissionEvent = new Transmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
-            transmissonManager.AddTransmission(transmissionEvent);
-            hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmissionEvent, fsFactory);
+            var transmission = transmissionManager.CreateTransmission(TransmissionType.DOWNLOAD_MODIFIED_FILE, target.FullName, cacheFile.FullName);
+            hash = this.DownloadCacheFile(cacheFile, remoteDocument, transmission, fsFactory);
             obj.ChecksumAlgorithmName = "SHA-1";
 
             try {
@@ -243,11 +242,11 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                     OperationsLogger.Info(string.Format("Updated local content of \"{0}\" with content of remote document {1}", target.FullName, remoteDocument.Id));
                 }
             } catch(Exception ex) {
-                transmissionEvent.FailedException = ex;
+                transmission.FailedException = ex;
                 throw;
             }
 
-            transmissionEvent.Status = TransmissionStatus.FINISHED;
+            transmission.Status = TransmissionStatus.FINISHED;
             return hash;
         }
 

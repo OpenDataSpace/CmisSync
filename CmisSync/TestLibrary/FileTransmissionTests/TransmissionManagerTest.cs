@@ -38,103 +38,77 @@ namespace TestLibrary {
         }
 
         [Test, Category("Fast")]
-        public void AddingNullAsTransmissionReturnsFalse() {
-            var manager = new TransmissionManager();
+        public void CreatingASingleTransmissionIncreasesListCountByOne() {
+            var underTest = new TransmissionManager();
 
-            Assert.Throws<ArgumentNullException>(() => manager.AddTransmission(null));
-        }
+            underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
 
-        [Test, Category("Fast")]
-        public void AddSingleTransmissionIncreasesListCountByOne() {
-            var manager = new TransmissionManager();
-
-            Assert.IsTrue(manager.AddTransmission(new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path")));
-
-            Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(1));
+            Assert.That(underTest.ActiveTransmissions.Count, Is.EqualTo(1));
         }
 
         [Test, Category("Fast")]
         public void ListedTransmissionIsEqualToAdded() {
-            var manager = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var underTest = new TransmissionManager();
+            var trans = underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
 
-            Assert.That(manager.AddTransmission(trans), Is.True);
-
-            Assert.That(manager.ActiveTransmissions[0], Is.EqualTo(trans));
-            Assert.That(manager.ActiveTransmissionsAsList()[0], Is.EqualTo(trans));
+            Assert.That(underTest.ActiveTransmissions[0], Is.EqualTo(trans));
+            Assert.That(underTest.ActiveTransmissionsAsList()[0], Is.EqualTo(trans));
         }
 
         [Test, Category("Fast")]
         public void AFinishedTransmissionIsRemovedFromList() {
-            var manager = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
-            manager.AddTransmission(trans);
+            var underTest = new TransmissionManager();
+            var trans = underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
 
             trans.Status = TransmissionStatus.FINISHED;
 
-            Assert.That(manager.ActiveTransmissions, Is.Empty);
-        }
-
-        [Test, Category("Fast")]
-        public void AddingTheSameInstanceASecondTimeReturnsFalseAndIsNotListed() {
-            var manager = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
-
-            Assert.That(manager.AddTransmission(trans), Is.True);
-
-            Assert.That(manager.AddTransmission(trans), Is.False);
-
-            Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(1));
-            Assert.That(manager.ActiveTransmissions[0], Is.EqualTo(trans));
+            Assert.That(underTest.ActiveTransmissions, Is.Empty);
         }
 
         [Test, Category("Fast")]
         public void AnAbortedTransmissionIsRemovedFromList() {
-            var manager = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
-            manager.AddTransmission(trans);
+            var underTest = new TransmissionManager();
+            var trans = underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
 
             trans.Status = TransmissionStatus.ABORTED;
 
-            Assert.That(manager.ActiveTransmissions, Is.Empty);
+            Assert.That(underTest.ActiveTransmissions, Is.Empty);
         }
 
         [Test, Category("Fast")]
-        public void AddingNonEqualTransmissionProducesNewEntryInList() {
-            var manager = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
-            var trans2 = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path2");
+        public void CreatingTwoTransmissionProducesTwoEntriesInList() {
+            var underTest = new TransmissionManager();
+            underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path2");
 
-            Assert.That(manager.AddTransmission(trans), Is.True);
-            Assert.That(manager.AddTransmission(trans2), Is.True);
-
-            Assert.That(manager.ActiveTransmissions.Count, Is.EqualTo(2));
+            Assert.That(underTest.ActiveTransmissions.Count, Is.EqualTo(2));
         }
 
         [Test, Category("Fast")]
-        public void AddingATransmissionFiresEvent() {
-            var manager = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+        public void CreatingATransmissionFiresEvent() {
+            var underTest = new TransmissionManager();
+
             int eventCounter = 0;
-
-            manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            string path = "path";
+            underTest.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 eventCounter++;
                 Assert.That(e.NewItems.Count, Is.EqualTo(1));
-                Assert.That(e.NewItems[0], Is.EqualTo(trans));
+                Assert.That((e.NewItems[0] as Transmission).Type, Is.EqualTo(TransmissionType.DOWNLOAD_NEW_FILE));
+                Assert.That((e.NewItems[0] as Transmission).Path, Is.EqualTo(path));
             };
-            manager.AddTransmission(trans);
+
+            underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, path);
 
             Assert.That(eventCounter, Is.EqualTo(1));
         }
 
         [Test, Category("Fast")]
         public void AFinishedTransmissionFiresEvent() {
-            var manager = new TransmissionManager();
-            var trans = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
+            var underTest = new TransmissionManager();
+            var trans = underTest.CreateTransmission(TransmissionType.DOWNLOAD_NEW_FILE, "path");
             int eventCounter = 0;
-            manager.AddTransmission(trans);
 
-            manager.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            underTest.ActiveTransmissions.CollectionChanged += delegate(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
                 eventCounter++;
                 Assert.That(e.NewItems, Is.Null);
                 Assert.That(e.OldItems.Count, Is.EqualTo(1));

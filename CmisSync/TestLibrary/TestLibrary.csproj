@@ -262,6 +262,7 @@
     <Compile Include="TestUtils\MockOfIFileTransmissionStorageUtil.cs" />
     <Compile Include="FileTransmissionTests\TransmissionTest.cs" />
     <Compile Include="FileTransmissionTests\TransmissionManagerTest.cs" />
+    <Compile Include="TestUtils\MockOfITransmissionManagerUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CmisSync.Lib\CmisSync.Lib.csproj">

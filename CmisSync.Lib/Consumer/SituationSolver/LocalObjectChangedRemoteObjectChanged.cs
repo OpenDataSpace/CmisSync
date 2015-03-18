@@ -42,7 +42,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
     public class LocalObjectChangedRemoteObjectChanged : AbstractEnhancedSolver {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedRemoteObjectChanged));
 
-        private TransmissionManager transmissionManager;
+        private ITransmissionManager transmissionManager;
         private IFileSystemInfoFactory fsFactory;
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager transmissionManager,
+            ITransmissionManager transmissionManager,
             IFileSystemInfoFactory fsFactory = null) : base(session, storage, transmissionStorage) {
             if (transmissionManager == null) {
                 throw new ArgumentNullException("Given transmission manager is null");
@@ -98,8 +98,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver {
                         // Upload local content
                         updateRemoteDate = true;
                         try {
-                            var transmission = new Transmission(TransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
-                            this.transmissionManager.AddTransmission(transmission);
+                            var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, fileInfo.FullName);
                             obj.LastChecksum = this.UploadFile(fileInfo, doc, transmission);
                             obj.LastContentSize = doc.ContentStreamLength ?? fileInfo.Length;
                         } catch(Exception ex) {

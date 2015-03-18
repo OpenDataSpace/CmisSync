@@ -65,27 +65,13 @@ namespace CmisSync.Lib.Queueing {
         }
 
         /// <summary>
-        /// Add a new Transmission to the active transmission manager
+        /// Creates a new the transmission object and adds it to the manager. The manager decides when to and how the
+        /// transmission gets removed from it.
         /// </summary>
-        /// <param name="transmission">transmission which should be added</param>
-        /// <returns>true if added</returns>
-        public virtual bool AddTransmission(Transmission transmission) {
-            if (transmission == null) {
-                throw new ArgumentNullException();
-            }
-
-            lock (this.collectionLock) {
-                if (this.activeTransmissions.Contains(transmission)) {
-                    return false;
-                }
-
-                transmission.PropertyChanged += this.TransmissionFinished;
-                this.activeTransmissions.Add(transmission);
-            }
-
-            return true;
-        }
-
+        /// <returns>The transmission.</returns>
+        /// <param name="type">Transmission type.</param>
+        /// <param name="path">Full path.</param>
+        /// <param name="cachePath">Cache path.</param>
         public Transmission CreateTransmission(TransmissionType type, string path, string cachePath = null) {
             var transmission = new Transmission(type, path, cachePath);
             transmission.PropertyChanged += this.TransmissionFinished;

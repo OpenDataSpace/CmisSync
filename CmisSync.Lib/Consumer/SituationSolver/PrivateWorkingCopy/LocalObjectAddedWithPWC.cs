@@ -119,8 +119,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
                 Guid uuid = this.WriteOrUseUuidIfSupported(localFile);
 
-                Transmission transmissionEvent = new Transmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
-                this.transmissionManager.AddTransmission(transmissionEvent);
+                var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_NEW_FILE, localFile.FullName);
 
                 MappedObject mapped = new MappedObject(
                     localFile.Name,
@@ -141,7 +140,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                 OperationsLogger.Debug(string.Format("Uploading file content of {0}", localFile.FullName));
                 watch.Start();
                 try {
-                    mapped.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
+                    mapped.LastChecksum = this.UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                     mapped.ChecksumAlgorithmName = "SHA-1";
                     mapped.RemoteObjectId = remoteDocument.Id;
                 } catch (Exception ex) {

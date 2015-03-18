@@ -14,7 +14,6 @@ SOURCES =  \
 	AccumulatorTests/LocalObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectFetcherTest.cs \
 	AccumulatorTests/RemoteObjectMovedOrRenamedAccumulatorTest.cs \
-	ActiveActivitiesManagerTest.cs \
 	AlgorithmsTests/CyclicDependencies/NoCycleDetectionTests.cs \
 	AlgorithmsTests/CyclicDependencies/SimpleCycleDetectionTests.cs \
 	AlgorithmsTests/StringTarjanNode.cs \
@@ -71,7 +70,6 @@ SOURCES =  \
 	EventsTests/EventHandlerPrioritiesTest.cs \
 	EventsTests/FileEventTest.cs \
 	EventsTests/FileOrFolderEventFactoryTest.cs \
-	EventsTests/FileTransmissionEventTest.cs \
 	EventsTests/FolderEventTest.cs \
 	EventsTests/FsEventTest.cs \
 	EventsTests/FullSyncCompletedEventTest.cs \
@@ -86,6 +84,8 @@ SOURCES =  \
 	FileTransmissionTests/ContentTaskUtilsTest.cs \
 	FileTransmissionTests/SimpleFileDownloaderTest.cs \
 	FileTransmissionTests/SimpleFileUploaderTest.cs \
+	FileTransmissionTests/TransmissionManagerTest.cs \
+	FileTransmissionTests/TransmissionTest.cs \
 	FilterTests/FilterAggregatorTest.cs \
 	FilterTests/GenericHandleDublicatedEventsFilterTest.cs \
 	FilterTests/IgnoreAlreadyHandledContentChangeEventsFilterTest.cs \
@@ -186,6 +186,7 @@ SOURCES =  \
 	TestUtils/MockOfIFolderUtil.cs \
 	TestUtils/MockOfIRepositoryInfo.cs \
 	TestUtils/MockOfISyncEventQueue.cs \
+	TestUtils/MockOfITransmissionManagerUtil.cs \
 	TestUtils/MockSessionUtil.cs \
 	TestUtils/ObservableHandler.cs \
 	TestUtils/ObservableHandlerTest.cs \
