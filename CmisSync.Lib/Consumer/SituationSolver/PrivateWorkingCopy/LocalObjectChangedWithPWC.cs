@@ -22,6 +22,7 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
 
     using CmisSync.Lib.Cmis.ConvenienceExtenders;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -38,13 +39,13 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
     public class LocalObjectChangedWithPWC : AbstractEnhancedSolverWithPWC {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LocalObjectChangedWithPWC));
         private readonly ISolver folderOrFileContentUnchangedSolver;
-        private ActiveActivitiesManager transmissionManager;
+        private ITransmissionManager transmissionManager;
 
         public LocalObjectChangedWithPWC(
             ISession session,
             IMetaDataStorage storage,
             IFileTransmissionStorage transmissionStorage,
-            TransmissionManager manager,
+            ITransmissionManager manager,
             ISolver folderOrFileContentUnchangedSolver) : base(session, storage, transmissionStorage) {
             if (folderOrFileContentUnchangedSolver == null) {
                 throw new ArgumentNullException("Given solver for folder or unchanged file content situations is null");
@@ -80,9 +81,8 @@ namespace CmisSync.Lib.Consumer.SituationSolver.PWC {
                     Logger.Debug(string.Format("\"{0}\" is different from {1}", localFile.FullName, mappedObject.ToString()));
                     OperationsLogger.Debug(string.Format("Local file \"{0}\" has been changed", localFile.FullName));
                     try {
-                        FileTransmissionEvent transmissionEvent = new FileTransmissionEvent(FileTransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
-                        this.transmissionManager.AddTransmission(transmissionEvent);
-                        mappedObject.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmissionEvent);
+                        var transmission = this.transmissionManager.CreateTransmission(TransmissionType.UPLOAD_MODIFIED_FILE, localFile.FullName);
+                        mappedObject.LastChecksum = UploadFileWithPWC(localFile, ref remoteDocument, transmission);
                         if (remoteDocument.Id != mappedObject.RemoteObjectId) {
                             this.TransmissionStorage.RemoveObjectByRemoteObjectId(mappedObject.RemoteObjectId);
                             mappedObject.RemoteObjectId = remoteDocument.Id;

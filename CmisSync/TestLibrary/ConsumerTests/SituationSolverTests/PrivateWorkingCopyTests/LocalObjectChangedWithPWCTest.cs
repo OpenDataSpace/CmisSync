@@ -26,6 +26,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
     using CmisSync.Lib.Consumer.SituationSolver;
     using CmisSync.Lib.Consumer.SituationSolver.PWC;
     using CmisSync.Lib.Events;
+    using CmisSync.Lib.FileTransmission;
     using CmisSync.Lib.Queueing;
     using CmisSync.Lib.Storage.Database;
     using CmisSync.Lib.Storage.Database.Entities;
@@ -54,7 +55,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         private Mock<ISession> session;
         private Mock<IMetaDataStorage> storage;
         private Mock<IFileTransmissionStorage> transmissionStorage;
-        private Mock<TransmissionManager> manager;
+        private Mock<ITransmissionManager> manager;
         private Mock<ISolver> folderOrFileContentUnchangedAddedSolver;
 
         private string parentPath;
@@ -80,7 +81,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager,
+                this.manager.Object,
                 null));
         }
 
@@ -93,7 +94,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager,
+                this.manager.Object,
                 Mock.Of<ISolver>()));
         }
 
@@ -127,7 +128,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
         [Test, Category("Fast"), Category("Solver")]
         public void SolverUploadsFileContentByCreatingNewPWC([Values(123456)]long fileSize) {
             this.SetUpMocks();
-
+            this.manager.SetupCreateTransmissionOnce(TransmissionType.UPLOAD_MODIFIED_FILE, this.localPath);
             this.SetupFile();
             byte[] content = new byte[fileSize];
             var hash = SHA1.Create().ComputeHash(content);
@@ -139,6 +140,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             underTest.Solve(this.localFile.Object, this.remoteDocument.Object, ContentChangeType.CHANGED);
 
             this.storage.VerifySavedMappedObject(MappedObjectType.File, this.objectIdNew, this.fileName, this.parentId, this.changeTokenNew, contentSize: fileSize, checksum: hash);
+            this.manager.VerifyThatTransmissionWasCreatedOnce();
         }
 
         [Test, Category("Fast"), Category("Solver")]
@@ -181,7 +183,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
                 this.session.Object,
                 this.storage.Object,
                 this.transmissionStorage.Object,
-                this.manager,
+                this.manager.Object,
                 this.folderOrFileContentUnchangedAddedSolver.Object);
         }
 
@@ -192,7 +194,7 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             this.storage = new Mock<IMetaDataStorage>();
             this.chunkSize = 4096;
             this.transmissionStorage = new Mock<IFileTransmissionStorage>();
-            this.manager = new Mock<TransmissionManager>();
+            this.manager = new Mock<ITransmissionManager>();
             this.transmissionStorage.Setup(f => f.ChunkSize).Returns(this.chunkSize);
             this.folderOrFileContentUnchangedAddedSolver = new Mock<ISolver>(MockBehavior.Strict);
         }
@@ -249,7 +251,5 @@ namespace TestLibrary.ConsumerTests.SituationSolverTests.PrivateWorkingCopyTests
             mapped.Setup(o => o.LastChangeToken).Returns(this.changeTokenOld);
             mapped.Setup(o => o.ParentId).Returns(this.parentId);
         }
-
-
     }
 }
