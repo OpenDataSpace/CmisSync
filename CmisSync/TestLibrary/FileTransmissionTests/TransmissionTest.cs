@@ -85,8 +85,7 @@ namespace TestLibrary.FileTransmissionTests {
         }
 
         [Test, Category("Fast")]
-        public void CalcBitsPerSecondWithOneSecondDifference()
-        {
+        public void CalcBitsPerSecondWithOneSecondDifference() {
             DateTime start = DateTime.Now;
             DateTime end = start.AddSeconds(1);
             long? bitsPerSecond = Transmission.CalcBitsPerSecond(start, end, 1);
@@ -137,6 +136,38 @@ namespace TestLibrary.FileTransmissionTests {
             underTest.Position = 1000;
             underTest.Length = 2000;
             Assert.That(percent, Is.EqualTo(50));
+        }
+
+        [Test, Category("Fast")]
+        public void Pause() {
+            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            underTest.Pause();
+            Assert.That(underTest.Status == TransmissionStatus.PAUSED);
+        }
+
+        [Test, Category("Fast")]
+        public void PauseAbortedTransmissionDoesNotChangeTheStatus([Values(TransmissionStatus.ABORTING, TransmissionStatus.ABORTED)]TransmissionStatus status) {
+            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            underTest.Status = status;
+            underTest.Pause();
+            Assert.That(underTest.Status, Is.EqualTo(status));
+        }
+
+        [Test, Category("Fast")]
+        public void Resume() {
+            var underTest = new Transmission(TransmissionType.DOWNLOAD_NEW_FILE, this.path);
+            underTest.Resume();
+            Assert.That(underTest.Status == TransmissionStatus.TRANSMITTING);
+            underTest.Pause();
+            underTest.Resume();
+            Assert.That(underTest.Status == TransmissionStatus.TRANSMITTING);
+
+            underTest.Abort();
+            underTest.Resume();
+            Assert.That(underTest.Status == TransmissionStatus.ABORTING);
+            underTest.Status = TransmissionStatus.ABORTED;
+            underTest.Resume();
+            Assert.That(underTest.Status == TransmissionStatus.ABORTED);
         }
 
         public Array GetAllTypes(){
