@@ -116,41 +116,31 @@ namespace CmisSync {
             foreach (var transmission in transmissions) {
                 string fullPath = transmission.Path;
                 if (FullPathList.Contains(fullPath)) {
-                    TransmissionItem itemOld = TransmissionList.Find(t => t.FullPath == fullPath);
-                    if (!itemOld.Done) {
+                    var oldTransmission = TransmissionList.Find(t => t.Path == fullPath);
+                    if (!oldTransmission.Done()) {
                         continue;
                     }
-                    DeleteTransmissionEvent(itemOld);
-                    TransmissionList.Remove(itemOld);
+                    DeleteTransmissionEvent(oldTransmission);
+                    TransmissionList.Remove(oldTransmission);
                     FullPathList.Remove(fullPath);
                 }
 
                 FullPathList.Add(fullPath);
-                TransmissionItem item = new TransmissionItem(transmission);
-                TransmissionList.Insert(0, item);
-                InsertTransmissionEvent(item);
-
-                //  register TransmissionController.UpdateTransmissionEvent
-                item.Controller = this;
+                TransmissionList.Insert(0, transmission);
+                InsertTransmissionEvent(transmission);
             }
 
             if (FullPathList.Count > transmissionLimit) {
                 TransmissionList.Sort(new TransmissionCompare());
                 for (int i = FullPathList.Count - 1; i >= 0 && TransmissionList.Count > transmissionLimit; --i) {
-                    TransmissionItem item = TransmissionList[i];
-                    if (!item.Done) {
+                    var transmission = TransmissionList[i];
+                    if (!transmission.Done()) {
                         break;
                     }
 
-                    //  un-register TransmissionController.UpdateTransmissionEvent
-                    item.Controller = null;
-
-                    DeleteTransmissionEvent(item);
+                    DeleteTransmissionEvent(transmission);
                     TransmissionList.RemoveAt(i);
-                    FullPathList.Remove(item.FullPath);
-
-                    //  un-register FileTransmissionEvent.TransmissionStatus
-                    item.Dispose();
+                    FullPathList.Remove(transmission.Path);
                 }
             }
 
